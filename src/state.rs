@@ -1,4 +1,4 @@
-use super::arith;
+use super::secret;
 
 pub enum State {
     None,
@@ -12,7 +12,7 @@ pub enum State {
 
 pub struct Bin {
     name: String,
-    shares: Vec<arith::Share>,
+    shares: Vec<secret::Share>,
     complete: bool,
     result: Option<u128>,
 }
@@ -38,7 +38,7 @@ pub struct ProgramModel {
     bins: Vec<Bin>,
     participants: Vec<Participant>,
     saved: bool,
-    share_generator: arith::SharingType,
+    share_generator: secret::SharingType,
 }
 
 impl ProgramModel {
@@ -49,7 +49,7 @@ impl ProgramModel {
             bins: Vec::new(),
             participants: Vec::new(),
             saved: false,
-            share_generator: arith::SharingType::None,
+            share_generator: secret::SharingType::None,
         }
     }
 
@@ -76,9 +76,9 @@ impl ProgramModel {
     }
     pub fn set_bin_value(& mut self, bin: usize, value: u128) {
         let shares = match &self.share_generator {
-            arith::SharingType::ArithmeticSharing(i) => i.share(value),
-            arith::SharingType::ShamirsSharing(i) => i.share(value as i64),
-            arith::SharingType::None => panic!("This should never be reached!")
+            secret::SharingType::ArithmeticSharing(i) => i.share(value),
+            secret::SharingType::ShamirsSharing(i) => i.share(value as i64),
+            secret::SharingType::None => panic!("This should never be reached!")
         };
         match self.bins.get_mut(bin) {
             Some(i) => i.shares = shares,
