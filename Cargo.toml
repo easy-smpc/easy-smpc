@@ -1,0 +1,18 @@
+[package]
+name = "email_smpc"
+version = "0.1.0"
+authors = ["Tobias Kussel <kussel@cbs.tu-darmstadt.de>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+#gtk = { version = "0.2", features = ["v3_22"]}
+#toml = "0.5"
+#serde = "1.0"
+#serde_derive = "1.0"
+threshold-secret-sharing = "0.2"
+openssl = {version = "0.10", features = ["vendored"]}
+num-bigint = "0.2.6"
+num-traits = "0.2.6"
+
