@@ -8,22 +8,21 @@ use num_bigint::*;
 use num_traits::*;
 use openssl::rand::rand_bytes;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum Share {
     Arithmetic(u128),
     Shamirs(i64),
 }
-#[derive(Debug)]
-pub enum ValueType{
+#[derive(Debug, Copy, Clone)]
+pub enum ValueType {
     ArithmeticValue(u128),
     ShamirValue(i64),
 }
 pub enum SharingType {
     ArithmeticSharing(ArithmeticSharing),
     ShamirsSharing(ShamirsSharing),
-    None
+    None,
 }
-
 
 #[derive(Debug)]
 pub struct ShamirsSharing {
@@ -46,12 +45,16 @@ impl ShamirsSharing {
         }
     }
 
-    pub fn share(&self, secret: i64) -> Vec<Share> {
-        let s = self.generator.share(secret);
-        s.iter().map(|s| Share::Shamirs(*s)).collect()
+    pub fn share(&self, secret: ValueType) -> Vec<Share> {
+        if let ValueType::ShamirValue(i) = secret {
+            let s = self.generator.share(i);
+            s.iter().map(|s| Share::Shamirs(*s)).collect()
+        } else {
+            panic!("Wrong value type. Should be Shamir's Value (i64)")
+        }
     }
 
-    pub fn reconstruct(&self, shares: &[Share]) -> i64 {
+    pub fn reconstruct(&self, shares: &[Share]) -> ValueType {
         let s: Vec<i64> = shares
             .iter()
             .filter_map(|s| match s {
@@ -60,7 +63,7 @@ impl ShamirsSharing {
             })
             .collect();
         let indices: Vec<usize> = (0..shares.len()).collect();
-        self.generator.reconstruct(&indices, &s)
+        ValueType::ShamirValue(self.generator.reconstruct(&indices, &s))
     }
 }
 
@@ -95,22 +98,26 @@ impl ArithmeticSharing {
         }
         BigUint::from_bytes_le(&result.1)
     }
-    pub fn share(&self, secret: u128) -> Vec<Share> {
-        assert!(secret < self.prime);
-        let mut random: Vec<Share> = Vec::new();
-        let mut secret = BigUint::from_u128(secret).unwrap();
-        for _ in 0..self.parties {
-            let blind = self.get_blind();
-            secret = secret
-                .checked_sub(&blind)
-                .unwrap_or(self.prime - &blind + &secret);
-            random.push(Share::Arithmetic(blind.to_u128().unwrap()));
+    pub fn share(&self, secret: ValueType) -> Vec<Share> {
+        if let ValueType::ArithmeticValue(i) = secret {
+            assert!(i < self.prime);
+            let mut shares: Vec<Share> = Vec::new();
+            let mut secret = BigUint::from_u128(i).unwrap();
+            for _ in 0..self.parties {
+                let blind = self.get_blind();
+                secret = secret
+                    .checked_sub(&blind)
+                    .unwrap_or(self.prime - &blind + &secret);
+                shares.push(Share::Arithmetic(blind.to_u128().unwrap()));
+            }
+            shares.push(Share::Arithmetic(secret.to_u128().unwrap()));
+            shares
+        } else {
+            panic!("Wrong value type. Should be Arithmetic Value (u128)")
         }
-        random.push(Share::Arithmetic(secret.to_u128().unwrap()));
-        random
     }
 
-    pub fn reconstruct(&self, shares: &[Share]) -> u128 {
+    pub fn reconstruct(&self, shares: &[Share]) -> ValueType {
         let mut reconstructed: BigUint = num_traits::Zero::zero();
         for i in shares {
             match i {
@@ -124,6 +131,6 @@ impl ArithmeticSharing {
             }
         }
         reconstructed = reconstructed % BigUint::from_u128(self.prime).unwrap();
-        reconstructed.to_u128().unwrap()
+        ValueType::ArithmeticValue(reconstructed.to_u128().unwrap())
     }
 }

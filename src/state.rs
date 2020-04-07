@@ -74,10 +74,10 @@ impl ProgramModel {
     pub fn get_num_participants(&self) -> usize {
         self.participants.len()
     }
-    pub fn set_bin_value(& mut self, bin: usize, value: u128) {
+    pub fn set_bin_value(& mut self, bin: usize, value: secret::ValueType) {
         let shares = match &self.share_generator {
             secret::SharingType::ArithmeticSharing(i) => i.share(value),
-            secret::SharingType::ShamirsSharing(i) => i.share(value as i64),
+            secret::SharingType::ShamirsSharing(i) => i.share(value),
             secret::SharingType::None => panic!("This should never be reached!")
         };
         match self.bins.get_mut(bin) {
