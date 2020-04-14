@@ -28,9 +28,11 @@ impl Bin {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Participant {
     name: String,
     email: String,
+    unsent_messages: Vec<String>,
 }
 pub struct ProgramModel {
     state: State,
@@ -60,6 +62,7 @@ impl ProgramModel {
         self.participants.push(Participant {
             name: name.to_string(),
             email: email.to_string(),
+            unsent_messages: Vec::new(),
         });
     }
     pub fn get_participant(&self, id: usize) -> &Participant {
