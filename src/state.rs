@@ -14,7 +14,7 @@ pub struct Bin {
     name: String,
     shares: Vec<secret::Share>,
     complete: bool,
-    result: Option<u128>,
+    result: Option<secret::ValueType>,
 }
 
 impl Bin {
