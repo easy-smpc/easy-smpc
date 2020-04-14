@@ -37,16 +37,7 @@ public class ArithmeticSharing {
     public static BigInteger reconstruct(ArithmeticShare[] shares) throws IllegalArgumentException {
         BigInteger reconstruction = BigInteger.ZERO;
         BigInteger first_prime = shares[0].prime;
-        BigInteger first_sharingId = BigInteger.ZERO;
-        if(System.getProperty("DebugSecretshare") != null && "true".equalsIgnoreCase(System.getProperty("DebugSecretshare"))) {
-          first_sharingId = shares[0].sharingId;
-        }
         for (int i = 0; i != shares.length; i++) {
-            if(System.getProperty("DebugSecretshare") != null && "true".equalsIgnoreCase(System.getProperty("DebugSecretshare"))) {
-              if (shares[i].sharingId != first_sharingId) {
-                throw new IllegalArgumentException("Debug: Attempt to recombine unrelated shares!");
-              }
-            }
             if (shares[i].prime != first_prime) {
                 throw new IllegalArgumentException("Incompatible primes found!");
             }
