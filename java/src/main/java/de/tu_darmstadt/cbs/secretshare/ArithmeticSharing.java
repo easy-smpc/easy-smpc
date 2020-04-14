@@ -20,7 +20,8 @@ public class ArithmeticSharing {
         BigInteger[] shares = new BigInteger[num_parties];
         shares[num_parties - 1] = secret;
         BigInteger sharingId = BigInteger.ZERO;
-        if(System.getProperty("DebugSecretshare") != null && "true".equalsIgnoreCase(System.getProperty("DebugSecretshare"))) {
+        if (System.getProperty("DebugSecretshare") != null
+                && "true".equalsIgnoreCase(System.getProperty("DebugSecretshare"))) {
             sharingId = new BigInteger(127, random_generator);
         }
         for (int i = 0; i != num_parties - 1; i++) {
