@@ -1,1 +1,5 @@
-/target
+# Rust ignores
+# Build artifacts
+/rust/target
+# Rustfmt backup files
+**/*.rs.bk
