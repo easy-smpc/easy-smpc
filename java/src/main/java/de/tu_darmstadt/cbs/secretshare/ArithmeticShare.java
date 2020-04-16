@@ -67,6 +67,17 @@ public class ArithmeticShare {
         sharingId = other.sharingId;
     }
 
+    public ArithmeticShare add(ArithmeticShare other) throws IllegalArgumentException {
+        if (this.prime != other.prime)
+            throw new IllegalArgumentException("Incompatible primes for addition");
+        if (other.value == BigInteger.ZERO)
+            return this;
+        if (this.value == BigInteger.ZERO)
+            return other;
+        BigInteger sum = this.value.add(other.value).mod(this.prime);
+        return new ArithmeticShare(sum, prime, this.sharingId.add(other.sharingId));
+    }
+
     /// Disallow uninitialized or incomplete instance
     private ArithmeticShare() {
         value = BigInteger.ZERO;
