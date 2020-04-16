@@ -118,4 +118,15 @@ public class AppModel {
         }
 
     }
+
+    public Message getInitialMessage(int recipientId) {
+        InitialMessage data = new InitialMessage(this, recipientId);
+        Message msg = new Message();
+        Participant recipient = this.participants[recipientId];
+        msg.recipientName = recipient.name;
+        msg.recipientEmailAddress = recipient.emailAddress;
+        msg.data = data.getMessage();
+        return msg;
+    }
+
 }
