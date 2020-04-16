@@ -119,7 +119,7 @@ public class AppModel {
 
     }
 
-    public Message getInitialMessage(int recipientId) {
+    public Message getInitialMessage(int recipientId) throws IOException{
         InitialMessage data = new InitialMessage(this, recipientId);
         Message msg = new Message();
         Participant recipient = this.participants[recipientId];
