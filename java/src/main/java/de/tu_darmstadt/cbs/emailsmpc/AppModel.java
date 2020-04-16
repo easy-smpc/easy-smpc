@@ -35,6 +35,7 @@ public class AppModel {
         if (state == AppState.NONE)
             state = AppState.STARTING;
     }
+
     /**
      * Legal State Transitions:
      * +-----------------+     +------------------+
@@ -78,4 +79,43 @@ public class AppModel {
      *                         +------------------+
      */
 
+    public void advanceState(AppState newState) throws IllegalStateException {
+        if (state == AppState.NONE) {
+            if (!(newState == AppState.STARTING || newState == AppState.PARTICIPATING))
+                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+        }
+        switch (state) {
+        case AppState.STARTING:
+            if (!(newState == AppState.INITIAL_SENDING))
+                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            break;
+        case AppState.PARTICIPATING:
+            if (newState != AppState.SENDING_SHARE)
+                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            break;
+        case AppState.INITIAL_SENDING:
+            if (newState != AppState.RECIEVING_SHARE)
+                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            break;
+        case AppState.SENDING_SHARE:
+            if (newState != AppState.RECIEVING_SHARE)
+                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            break;
+        case AppState.RECIEVING_SHARE:
+            if (newState != AppState.SENDING_RESULT)
+                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            break;
+        case AppState.SENDING_RESULT:
+            if (newState != AppState.RECIEVING_RESULT)
+                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            break;
+        case AppState.RECIEVING_RESULT:
+            if (newState != AppState.FINISHED)
+                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            break;
+        case AppState.FINISHED:
+            throw new IllegalStateException("Illegal state transition: Already finished");
+        }
+
+    }
 }
