@@ -18,7 +18,7 @@ public class Participant {
 
     @Override
     public String toString() {
-        return name + ". " + emailAddress;
+        return name + ": " + emailAddress;
     }
 
     @Override
