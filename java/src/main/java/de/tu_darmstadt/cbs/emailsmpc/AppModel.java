@@ -2,8 +2,9 @@ package de.tu_darmstadt.cbs.emailsmpc;
 
 public class AppModel {
     public int numParticipants;
+    public int ownId;
     public AppState state;
-    private Bin[] bins;
+    public Bin[] bins;
     public Participant[] participants;
     public String name;
     public String[] unsentMessages;
@@ -11,6 +12,7 @@ public class AppModel {
     public AppModel() {
         name = null;
         numParticipants = 0;
+        ownId = 0;
         state = AppState.NONE;
         bins = null;
         participants = null;
@@ -28,6 +30,7 @@ public class AppModel {
             bin.initialize(numParticipants);
         }
         this.bins = bins;
+        this.ownId = 0; // unneeded but for verbosity...
         this.participants = participants;
         if (state == AppState.NONE)
             state = AppState.STARTING;
