@@ -85,35 +85,35 @@ public class AppModel {
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
         }
         switch (state) {
-        case AppState.STARTING:
+        case STARTING:
             if (!(newState == AppState.INITIAL_SENDING))
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             break;
-        case AppState.PARTICIPATING:
+        case PARTICIPATING:
             if (newState != AppState.SENDING_SHARE)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             break;
-        case AppState.INITIAL_SENDING:
+        case INITIAL_SENDING:
             if (newState != AppState.RECIEVING_SHARE)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             break;
-        case AppState.SENDING_SHARE:
+        case SENDING_SHARE:
             if (newState != AppState.RECIEVING_SHARE)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             break;
-        case AppState.RECIEVING_SHARE:
+        case RECIEVING_SHARE:
             if (newState != AppState.SENDING_RESULT)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             break;
-        case AppState.SENDING_RESULT:
+        case SENDING_RESULT:
             if (newState != AppState.RECIEVING_RESULT)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             break;
-        case AppState.RECIEVING_RESULT:
+        case RECIEVING_RESULT:
             if (newState != AppState.FINISHED)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             break;
-        case AppState.FINISHED:
+        case FINISHED:
             throw new IllegalStateException("Illegal state transition: Already finished");
         }
 
