@@ -1,16 +1,17 @@
 package de.tu_darmstadt.cbs.secretshare;
 
 import java.math.BigInteger;
+import java.io.Serializable;
 
 class DebugSecretsharing {
     public static boolean state = (System.getProperty("DebugSecretshare") != null
             && "true".equalsIgnoreCase(System.getProperty("DebugSecretshare")));
 }
 
-public class ArithmeticShare {
+public class ArithmeticShare implements Serializable {
     final public BigInteger value;
     final public BigInteger prime;
-    final public BigInteger sharingId;
+    final public transient BigInteger sharingId;
 
     public ArithmeticShare(BigInteger value, BigInteger prime) {
         this.value = value;

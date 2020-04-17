@@ -1,13 +1,16 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
-public class AppModel {
+import java.io.Serializable;
+import java.io.IOException;
+
+public class AppModel implements Serializable {
     public int numParticipants;
     public int ownId;
     public AppState state;
     public Bin[] bins;
     public Participant[] participants;
     public String name;
-    public String[] unsentMessages;
+    public Message[] unsentMessages;
 
     public AppModel() {
         name = null;
@@ -119,14 +122,40 @@ public class AppModel {
 
     }
 
-    public Message getInitialMessage(int recipientId) throws IOException{
+    public Message getInitialMessage(int recipientId) throws IOException, IllegalStateException {
+        if (state != AppState.STARTING)
+            throw new IllegalStateException("Forbidden action (getInitialMessage) at current state " + state);
         InitialMessage data = new InitialMessage(this, recipientId);
-        Message msg = new Message();
         Participant recipient = this.participants[recipientId];
-        msg.recipientName = recipient.name;
-        msg.recipientEmailAddress = recipient.emailAddress;
-        msg.data = data.getMessage();
-        return msg;
+        return new Message(recipient, data.getMessage());
     }
 
+    public Message getShareMessage(int recipientId) throws IOException, IllegalStateException {
+        if (state != AppState.SENDING_SHARE)
+            throw new IllegalStateException("Forbidden action (getShareMessage) at current state " + state);
+        ShareMessage data = new ShareMessage(this, recipientId);
+        Participant recipient = this.participants[recipientId];
+        return new Message(recipient, data.getMessage());
+    }
+
+    public void setModelFromMessage(Message msg)
+            throws IllegalStateException, IllegalArgumentException, ClassNotFoundException, IOException {
+        if (state != AppState.PARTICIPATING)
+            throw new IllegalStateException("Seting the Model from a Message is not allowed at state " + state);
+        String[] parts = msg.data.split("@");
+        if (parts.length != 2)
+            throw new IllegalArgumentException("Invalid Message");
+        AppModel model = InitialMessage.getAppModel(InitialMessage.decodeMessage(parts[0]));
+        model.state = AppState.PARTICIPATING;
+        setModel(model);
+    }
+
+    private void setModel(AppModel model) {
+        numParticipants = model.numParticipants;
+        ownId = model.ownId;
+        bins = model.bins;
+        participants = model.participants;
+        name = model.name;
+        state = model.state;
+    }
 }
