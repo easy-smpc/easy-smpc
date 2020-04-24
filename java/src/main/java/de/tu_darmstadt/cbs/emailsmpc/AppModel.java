@@ -84,11 +84,11 @@ public class AppModel implements Serializable {
      */
 
     public void advanceState(AppState newState) throws IllegalStateException {
-        if (state == AppState.NONE) {
+        switch (state) {
+        case NONE:
             if (!(newState == AppState.STARTING || newState == AppState.PARTICIPATING))
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
-        }
-        switch (state) {
+            break;
         case STARTING:
             if (!(newState == AppState.INITIAL_SENDING))
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
