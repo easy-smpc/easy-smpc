@@ -11,6 +11,7 @@ public class AppModel implements Serializable {
     public Participant[] participants;
     public String name;
     public Message[] unsentMessages;
+    private static final long serialVersionUID = 67394185932574354L;
 
     public AppModel() {
         name = null;

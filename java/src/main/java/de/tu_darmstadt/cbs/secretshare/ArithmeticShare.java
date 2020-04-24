@@ -12,6 +12,7 @@ public class ArithmeticShare implements Serializable {
     final public BigInteger value;
     final public BigInteger prime;
     final public transient BigInteger sharingId;
+    private static final long serialVersionUID = 5017971477461756174L;
 
     public ArithmeticShare(BigInteger value, BigInteger prime) {
         this.value = value;
