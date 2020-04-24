@@ -124,12 +124,18 @@ public class AppModel implements Serializable {
 
     }
 
-    public Message getInitialMessage(int recipientId) throws IOException, IllegalStateException {
-        if (state != AppState.STARTING)
-            throw new IllegalStateException("Forbidden action (getInitialMessage) at current state " + state);
+    private Message getInitialMessage(int recipientId) throws IOException {
         InitialMessage data = new InitialMessage(this, recipientId);
         Participant recipient = this.participants[recipientId];
         return new Message(recipient, data.getMessage());
+    }
+
+    public void populateInitialMessages() throws IOException, IllegalStateException {
+        if (state != AppState.STARTING)
+            throw new IllegalStateException("Forbidden action (getInitialMessage) at current state " + state);
+        for (int i = 0; i < numParticipants; i++) {
+            unsentMessages[i] = getInitialMessage(i);
+        }
     }
 
     public Message getShareMessage(int recipientId) throws IOException, IllegalStateException {
