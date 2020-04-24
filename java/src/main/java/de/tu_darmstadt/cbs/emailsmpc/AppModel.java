@@ -194,6 +194,12 @@ public class AppModel implements Serializable {
         state = model.state;
     }
 
+    public void markMessageSent(int recipientId) throws IllegalArgumentException {
+        if (unsentMessages[recipientId] == null)
+            throw new IllegalArgumentException("Message " + recipientId + " nonexistent");
+        unsentMessages[recipientId] = null;
+    }
+
     public void populateResultMessages() throws IOException, IllegalStateException {
         if (state != AppState.SENDING_RESULT)
             throw new IllegalStateException("Forbidden action (populateResultMessage) at current state " + state);
