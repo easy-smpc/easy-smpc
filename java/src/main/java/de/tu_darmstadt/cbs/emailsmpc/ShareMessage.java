@@ -40,7 +40,7 @@ public class ShareMessage implements Serializable {
         ObjectInputStream ois = new ObjectInputStream(stream);
         Object o = ois.readObject();
         if (!(o instanceof ShareMessage))
-            throw new IllegalArgumentException("Message not of type ShareMessage");
+            throw new IllegalArgumentException("Message invalid");
         return (ShareMessage) o;
     }
 
