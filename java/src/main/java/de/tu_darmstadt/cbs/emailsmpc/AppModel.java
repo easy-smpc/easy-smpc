@@ -151,6 +151,14 @@ public class AppModel implements Serializable {
             unsentMessages[i] = getShareMessage(i);
         }
     }
+
+    public int getParticipantId(Participant p) throws IllegalArgumentException {
+        for (int i = 0; i < participants.length; i++) {
+            if (participants[i].equals(p))
+                return i;
+        }
+        throw new IllegalArgumentException("Unknown participant " + p);
+    }
     public void setModelFromMessage(Message msg)
             throws IllegalStateException, IllegalArgumentException, ClassNotFoundException, IOException {
         if (state != AppState.PARTICIPATING)
