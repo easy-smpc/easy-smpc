@@ -2,6 +2,7 @@ package de.tu_darmstadt.cbs.emailsmpc;
 
 import java.io.Serializable;
 import java.io.IOException;
+import java.math.BigInteger;
 
 public class AppModel implements Serializable {
     public int numParticipants;
@@ -191,5 +192,31 @@ public class AppModel implements Serializable {
         participants = model.participants;
         name = model.name;
         state = model.state;
+    }
+
+    public void populateResultMessages() throws IOException, IllegalStateException {
+        if (state != AppState.SENDING_RESULT)
+            throw new IllegalStateException("Forbidden action (populateResultMessage) at current state " + state);
+        ResultMessage data = new ResultMessage(this);
+        for (int i = 0; i < numParticipants; i++) {
+            Participant recipient = this.participants[i];
+            unsentMessages[i] = new Message(recipient, data.getMessage());
+        }
+    }
+
+    public BinResult getBinResult(int binId) throws IllegalStateException {
+        if (state != AppState.FINISHED)
+            throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
+        return new BinResult(bins[binId].name, bins[binId].reconstructBin());
+    }
+
+    public BinResult[] getAllResults() throws IllegalStateException {
+        if (state != AppState.FINISHED)
+            throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
+        BinResult[] result = new BinResult[bins.length];
+        for (int i = 0; i < bins.length; i++) {
+            result[i] = getBinResult(i);
+        }
+        return result;
     }
 }
