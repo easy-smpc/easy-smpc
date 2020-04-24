@@ -142,11 +142,8 @@ public class AppModel implements Serializable {
     public void setModelFromMessage(Message msg)
             throws IllegalStateException, IllegalArgumentException, ClassNotFoundException, IOException {
         if (state != AppState.PARTICIPATING)
-            throw new IllegalStateException("Seting the Model from a Message is not allowed at state " + state);
-        String[] parts = msg.data.split("@");
-        if (parts.length != 2)
-            throw new IllegalArgumentException("Invalid Message");
-        AppModel model = InitialMessage.getAppModel(InitialMessage.decodeMessage(parts[0]));
+            throw new IllegalStateException("Setting the Model from a Message is not allowed at state " + state);
+        AppModel model = InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(msg)));
         model.state = AppState.PARTICIPATING;
         setModel(model);
     }

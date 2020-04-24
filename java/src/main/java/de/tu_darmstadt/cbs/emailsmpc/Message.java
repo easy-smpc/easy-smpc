@@ -57,4 +57,13 @@ public class Message {
         }
         return false;
     }
+
+    public static String getMessageData(Message msg) throws IllegalArgumentException {
+        if (!(msg.data.contains("@")))
+            throw new IllegalArgumentException("Message invalid");
+        String[] parts = msg.data.split("@");
+        if (parts.length != 2)
+            throw new IllegalArgumentException("Message invalid");
+        return parts[0];
+    }
 }
