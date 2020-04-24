@@ -28,6 +28,7 @@ public class AppModel implements Serializable {
             throw new IllegalStateException("Unable to initialize study at state" + state);
         this.name = name;
         numParticipants = participants.length;
+        unsentMessages = new Message[numParticipants];
         for (Bin bin : bins) {
             if (!(bin.isInitialized()))
                 throw new IllegalStateException("Unable to initialize bin " + bin.name);
