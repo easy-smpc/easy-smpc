@@ -94,6 +94,12 @@ public class AppModel implements Serializable {
         case STARTING:
             if (!(newState == AppState.INITIAL_SENDING))
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            try {
+                setModel(createInitialStudy());
+                populateShareMessages();
+            } catch (Exception e) {
+                System.out.println("Something went wrong during creation of study: " + e);
+            }
             break;
         case PARTICIPATING:
             if (newState != AppState.SENDING_SHARE)
@@ -223,6 +229,14 @@ public class AppModel implements Serializable {
         for (int i = 0; i < bins.length; i++) {
             result[i] = getBinResult(i);
         }
+        return result;
+    }
+
+    private AppModel createInitialStudy() {
+        AppModel result = new AppModel();
+        result.state = AppState.STARTING;
+        // Get Stuff from GUI
+        // reult.initializeStudy(name, participants, bins);
         return result;
     }
 }
