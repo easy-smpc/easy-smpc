@@ -12,6 +12,11 @@ public class MessageBin implements Serializable {
         this.share = bin.getOutShare(recipientId);
     }
 
+    public MessageBin(String name, ArithmeticShare share) {
+        this.name = name;
+        this.share = share;
+    }
+
     public static Bin getBin(MessageBin mb, int numParticipants) {
         Bin bin = new Bin(mb.name, numParticipants);
         bin.setInShare(mb.share, 0);
