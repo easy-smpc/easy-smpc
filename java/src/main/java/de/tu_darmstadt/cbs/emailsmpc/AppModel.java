@@ -159,6 +159,22 @@ public class AppModel implements Serializable {
         }
         throw new IllegalArgumentException("Unknown participant " + p);
     }
+
+    public void setShareFromMessage(Message msg, Participant sender)
+            throws IllegalStateException, IllegalArgumentException, ClassNotFoundException, IOException {
+        if (state != AppState.RECIEVING_SHARE)
+            throw new IllegalStateException("Setting a share from a Message is not allowed at state " + state);
+        if (Message.validateData(participants[ownId], msg.data)) {
+            ShareMessage sm = ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
+            int senderId = getParticipantId(sender);
+            for (int i = 0; i < bins.length; i++) {
+                bins[i].setInShare(sm.bins[i].share, senderId);
+            }
+        } else
+            throw new IllegalArgumentException("Message invalid");
+
+    }
+
     public void setModelFromMessage(Message msg)
             throws IllegalStateException, IllegalArgumentException, ClassNotFoundException, IOException {
         if (state != AppState.PARTICIPATING)
