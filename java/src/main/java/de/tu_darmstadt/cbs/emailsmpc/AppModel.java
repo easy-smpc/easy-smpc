@@ -138,14 +138,19 @@ public class AppModel implements Serializable {
         }
     }
 
-    public Message getShareMessage(int recipientId) throws IOException, IllegalStateException {
-        if (state != AppState.SENDING_SHARE)
-            throw new IllegalStateException("Forbidden action (getShareMessage) at current state " + state);
+    private Message getShareMessage(int recipientId) throws IOException {
         ShareMessage data = new ShareMessage(this, recipientId);
         Participant recipient = this.participants[recipientId];
         return new Message(recipient, data.getMessage());
     }
 
+    public void populateShareMessages() throws IOException, IllegalStateException {
+        if (state != AppState.SENDING_SHARE)
+            throw new IllegalStateException("Forbidden action (populateShareMessage) at current state " + state);
+        for (int i = 0; i < numParticipants; i++) {
+            unsentMessages[i] = getShareMessage(i);
+        }
+    }
     public void setModelFromMessage(Message msg)
             throws IllegalStateException, IllegalArgumentException, ClassNotFoundException, IOException {
         if (state != AppState.PARTICIPATING)
