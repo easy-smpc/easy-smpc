@@ -1,6 +1,7 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
 import de.tu_darmstadt.cbs.secretshare.*;
+import java.math.BigInteger;
 
 public class Bin {
     public final String name;
@@ -43,5 +44,25 @@ public class Bin {
 
     public void setInShare(ArithmeticShare share, int participant) {
         inShares[participant] = share;
+    }
+
+    public ArithmeticShare getSumShare() throws IllegalStateException {
+        ArithmeticShare sum = inShares[0];
+        for (int i = 0; i < inShares.length; i++) {
+            if (inShares[i] == null)
+                throw new IllegalStateException("Can not create sum with incomplete shares");
+            if (i != 0) { // sum is already initialized as share 0
+                sum = sum.add(inShares[i]);
+            }
+        }
+        return sum;
+    }
+
+    public BigInteger reconstructBin() throws IllegalStateException {
+        for (ArithmeticShare b : inShares) {
+            if (b == null)
+                throw new IllegalStateException("Can not reconstruct incomplete shares");
+        }
+        return ArithmeticSharing.reconstruct(inShares);
     }
 }
