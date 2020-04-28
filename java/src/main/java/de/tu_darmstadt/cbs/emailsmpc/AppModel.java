@@ -141,7 +141,13 @@ public class AppModel implements Serializable {
         if (state != AppState.STARTING)
             throw new IllegalStateException("Forbidden action (getInitialMessage) at current state " + state);
         for (int i = 0; i < numParticipants; i++) {
-            unsentMessages[i] = getInitialMessage(i);
+            if (i != ownId)
+                unsentMessages[i] = getInitialMessage(i);
+            else {
+                for (Bin b : bins) {
+                    b.transferSharesOutIn(ownId);
+                }
+            }
         }
     }
 
@@ -155,7 +161,13 @@ public class AppModel implements Serializable {
         if (state != AppState.SENDING_SHARE)
             throw new IllegalStateException("Forbidden action (populateShareMessage) at current state " + state);
         for (int i = 0; i < numParticipants; i++) {
-            unsentMessages[i] = getShareMessage(i);
+            if (i != ownId)
+                unsentMessages[i] = getShareMessage(i);
+            else {
+                for (Bin b : bins) {
+                    b.transferSharesOutIn(ownId);
+                }
+            }
         }
     }
 
@@ -211,8 +223,14 @@ public class AppModel implements Serializable {
             throw new IllegalStateException("Forbidden action (populateResultMessage) at current state " + state);
         ResultMessage data = new ResultMessage(this);
         for (int i = 0; i < numParticipants; i++) {
-            Participant recipient = this.participants[i];
-            unsentMessages[i] = new Message(recipient, data.getMessage());
+            if (i != ownId) {
+                Participant recipient = this.participants[i];
+                unsentMessages[i] = new Message(recipient, data.getMessage());
+            } else {
+                for (Bin b : bins) {
+                    b.setInShare(b.getSumShare(), ownId);
+                }
+            }
         }
     }
 

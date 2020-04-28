@@ -46,6 +46,10 @@ public class Bin {
         inShares[participant] = share;
     }
 
+    public void transferSharesOutIn(int ownId) {
+        inShares[ownId] = outShares[ownId];
+        outShares[ownId] = null;
+    }
     public ArithmeticShare getSumShare() throws IllegalStateException {
         ArithmeticShare sum = inShares[0];
         for (int i = 0; i < inShares.length; i++) {
