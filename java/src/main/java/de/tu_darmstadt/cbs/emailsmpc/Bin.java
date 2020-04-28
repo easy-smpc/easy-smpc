@@ -28,7 +28,7 @@ public class Bin {
     }
 
     public boolean isInitialized() {
-        return inShares == null;
+        return inShares != null;
     }
 
     public ArithmeticShare getOutShare(int participant) {
