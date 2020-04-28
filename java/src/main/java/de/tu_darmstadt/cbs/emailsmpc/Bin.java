@@ -60,9 +60,9 @@ public class Bin {
 
     public ArithmeticShare getSumShare() throws IllegalStateException {
         ArithmeticShare sum = inShares[0];
+        if (!isComplete())
+                throw new IllegalStateException("Can not reconstruct incomplete shares");
         for (int i = 0; i < inShares.length; i++) {
-            if (inShares[i] == null)
-                throw new IllegalStateException("Can not create sum with incomplete shares");
             if (i != 0) { // sum is already initialized as share 0
                 sum = sum.add(inShares[i]);
             }
@@ -70,11 +70,17 @@ public class Bin {
         return sum;
     }
 
-    public BigInteger reconstructBin() throws IllegalStateException {
+    public boolean isComplete() {
         for (ArithmeticShare b : inShares) {
             if (b == null)
-                throw new IllegalStateException("Can not reconstruct incomplete shares");
+                return false;
         }
+        return true;
+    }
+
+    public BigInteger reconstructBin() throws IllegalStateException {
+        if (!isComplete())
+                throw new IllegalStateException("Can not reconstruct incomplete shares");
         return ArithmeticSharing.reconstruct(inShares);
     }
 }
