@@ -31,6 +31,13 @@ public class Bin {
         return inShares != null;
     }
 
+    public void shareValue(BigInteger value) throws IllegalStateException {
+        if (!isInitialized())
+            throw new IllegalStateException("Unable to share value in unititialized bin");
+        ArithmeticSharing as = new ArithmeticSharing(outShares.length);
+        outShares = as.share(value);
+    }
+
     public ArithmeticShare getOutShare(int participant) {
         return outShares[participant];
     }
@@ -50,6 +57,7 @@ public class Bin {
         inShares[ownId] = outShares[ownId];
         outShares[ownId] = null;
     }
+
     public ArithmeticShare getSumShare() throws IllegalStateException {
         ArithmeticShare sum = inShares[0];
         for (int i = 0; i < inShares.length; i++) {
