@@ -253,8 +253,11 @@ public class AppModel implements Serializable {
     private AppModel createInitialStudy() {
         AppModel result = new AppModel();
         result.state = AppState.STARTING;
-        // Get Stuff from GUI
-        // reult.initializeStudy(name, participants, bins);
+        // From GUI:
+        // Get Study Name
+        // Get Participants
+        // Get Bins
+        // result.initializeStudy(name, participants, bins);
         return result;
     }
 }
