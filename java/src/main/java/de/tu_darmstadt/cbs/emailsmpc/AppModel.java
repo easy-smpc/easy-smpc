@@ -102,7 +102,7 @@ public class AppModel implements Serializable {
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             try {
                 setModel(createInitialStudy());
-                populateShareMessages();
+                populateInitialMessages();
             } catch (Exception e) {
                 System.out.println("Something went wrong during creation of study: " + e);
             }
@@ -266,7 +266,8 @@ public class AppModel implements Serializable {
         // From GUI:
         // Get Study Name
         // Get Participants
-        // Get Bins
+        // Get Bins, initialize bins w/ #participants
+        // Secret-share entered values
         // result.initializeStudy(name, participants, bins);
         return result;
     }
