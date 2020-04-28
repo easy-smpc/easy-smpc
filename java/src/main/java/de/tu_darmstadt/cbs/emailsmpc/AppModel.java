@@ -57,6 +57,12 @@ public class AppModel implements Serializable {
      *   |                       |
      *   |                       v
      *   |                     +------------------+
+     *   |                     |  Entering_Values |
+     *   |                     +------------------+
+     *   |                       |
+     *   |                       |
+     *   |                       v
+     *   |                     +------------------+
      *   |                     |  Sending_Share   |
      *   |                     +------------------+
      *   |                       |
@@ -102,6 +108,10 @@ public class AppModel implements Serializable {
             }
             break;
         case PARTICIPATING:
+            if (newState != AppState.ENTERING_VALUES)
+                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            break;
+        case ENTERING_VALUES:
             if (newState != AppState.SENDING_SHARE)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             break;
