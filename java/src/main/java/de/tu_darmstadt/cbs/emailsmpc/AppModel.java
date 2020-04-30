@@ -25,15 +25,16 @@ public class AppModel implements Serializable {
     }
 
     public void initializeStudy(String name, Participant[] participants, Bin[] bins) throws IllegalStateException {
-        if (state != AppState.NONE || state != AppState.STARTING)
+        if (!(state == AppState.NONE || state == AppState.STARTING))
             throw new IllegalStateException("Unable to initialize study at state" + state);
         this.name = name;
         numParticipants = participants.length;
         unsentMessages = new Message[numParticipants];
         for (Bin bin : bins) {
-            if (!(bin.isInitialized()))
-                throw new IllegalStateException("Unable to initialize bin " + bin.name);
-            bin.initialize(numParticipants);
+            if (!(bin.isInitialized())) {
+                // throw new IllegalStateException("Unable to initialize bin " + bin.name);
+                bin.initialize(numParticipants);
+            }
         }
         this.bins = bins;
         this.ownId = 0; // unneeded but for verbosity...
@@ -96,13 +97,22 @@ public class AppModel implements Serializable {
         case NONE:
             if (!(newState == AppState.STARTING || newState == AppState.PARTICIPATING))
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            // Change GUI Window
+            state = newState;
             break;
         case STARTING:
             if (!(newState == AppState.INITIAL_SENDING))
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             try {
-                setModel(createInitialStudy());
+                // From GUI:
+                // Get Study Name
+                // Get Participants
+                // Get Bins, initialize bins w/ #participants
+                // initializeStudy(name, participants, bins);
+                // Secret-share entered values
                 populateInitialMessages();
+                // Change GUI Window
+                state = newState;
             } catch (Exception e) {
                 System.out.println("Something went wrong during creation of study: " + e);
             }
@@ -110,14 +120,28 @@ public class AppModel implements Serializable {
         case PARTICIPATING:
             if (newState != AppState.ENTERING_VALUES)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            // Get Initial Message string from gui
+            // setModelFromMessage(String initialMsg)
+            // Change GUI Window
+            state = newState;
             break;
         case ENTERING_VALUES:
             if (newState != AppState.SENDING_SHARE)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            // Secretshare Bin Values from GUI
+            try {
+                populateShareMessages();
+                // Change GUI Window
+                state = newState;
+            } catch (IOException e) {
+                System.out.println("Something went wrong during creation of secret shares: " + e);
+            }
             break;
         case INITIAL_SENDING:
             if (newState != AppState.RECIEVING_SHARE)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            if (messagesUnsent())
+                throw new IllegalStateException("Still unsent messages left");
             break;
         case SENDING_SHARE:
             if (newState != AppState.RECIEVING_SHARE)
@@ -260,15 +284,14 @@ public class AppModel implements Serializable {
         return result;
     }
 
-    private AppModel createInitialStudy() {
-        AppModel result = new AppModel();
-        result.state = AppState.STARTING;
-        // From GUI:
-        // Get Study Name
-        // Get Participants
-        // Get Bins, initialize bins w/ #participants
-        // Secret-share entered values
-        // result.initializeStudy(name, participants, bins);
+    public boolean messagesUnsent() {
+        for (Message m : unsentMessages) {
+            if (m != null)
+                return true;
+        }
+        return false;
+    }
+
         return result;
     }
 }
