@@ -72,4 +72,28 @@ public class Message implements Serializable {
             throw new IllegalArgumentException("Message invalid");
         return parts[0];
     }
+
+    @Override
+    public String toString() {
+        return recipientName + "<" + recipientEmailAddress + ">:\n" + data;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof Message))
+            return false;
+        Message m = (Message) o;
+        return m.recipientName.equals(recipientName) && m.recipientEmailAddress.equals(recipientEmailAddress)
+                && m.data.equals(data);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = recipientName.hashCode();
+        result = 31 * result + recipientEmailAddress.hashCode();
+        result = 31 * result + data.hashCode();
+        return result;
+    }
 }

@@ -292,6 +292,68 @@ public class AppModel implements Serializable {
         return false;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof AppModel))
+            return false;
+        AppModel m = (AppModel) o;
+        boolean result = (m.numParticipants == numParticipants);
+        result = result && (m.ownId == ownId);
+        result = result && (m.state.equals(state));
+        result = result && (m.name.equals(name));
+        result = result && (m.filename.equals(filename));
+        result = result && (m.bins.length == bins.length);
+        result = result && (m.participants.length == participants.length);
+        result = result && (m.unsentMessages.length == unsentMessages.length);
+        for (int i = 0; i < bins.length; i++) {
+            if (m.bins[i] != null)
+                result = result && m.bins[i].equals(bins[i]);
+            else
+                result = result && (bins[i] == null);
+        }
+        for (int i = 0; i < participants.length; i++) {
+            if (m.participants[i] != null)
+                result = result && m.participants[i].equals(participants[i]);
+            else
+                result = result && (participants[i] == null);
+        }
+        for (int i = 0; i < unsentMessages.length; i++) {
+            if (m.unsentMessages[i] != null)
+                result = result && m.unsentMessages[i].equals(unsentMessages[i]);
+            else
+                result = result && (unsentMessages[i] == null);
+        }
         return result;
     }
+
+    @Override
+    public int hashCode() {
+        int result = numParticipants;
+        result = 31 * result + ownId;
+        result = 31 * result + state.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + filename.hashCode();
+        for (Bin b : bins) {
+            if (b != null)
+                result = 31 * result + b.hashCode();
+            else
+                result = 31 * result;
+        }
+        for (Participant p : participants) {
+            if (p != null)
+                result = 31 * result + p.hashCode();
+            else
+                result = 31 * result;
+        }
+        for (Message m : unsentMessages) {
+            if (m != null)
+                result = 31 * result + m.hashCode();
+            else
+                result = 31 * result;
+        }
+        return result;
+    }
+
 }

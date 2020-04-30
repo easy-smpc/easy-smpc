@@ -85,4 +85,61 @@ public class Bin implements Serializable {
                 throw new IllegalStateException("Can not reconstruct incomplete shares");
         return ArithmeticSharing.reconstruct(inShares);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+        if (!(o instanceof Bin))
+            return false;
+        Bin b = (Bin) o;
+        boolean result = b.name.equals(name);
+        result = result && (inShares.length == b.inShares.length);
+        result = result && (outShares.length == b.outShares.length);
+        for (int i = 0; i < inShares.length; i++) {
+            if (b.inShares[i] != null)
+                result = result && b.inShares[i].equals(inShares[i]);
+            else
+                result = result && (inShares[i] == null);
+        }
+        for (int i = 0; i < outShares.length; i++) {
+            if (b.outShares[i] != null)
+                result = result && b.outShares[i].equals(outShares[i]);
+            else
+                result = result && (outShares[i] == null);
+        }
+        return result;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        for (ArithmeticShare as : inShares) {
+            if (as != null)
+                result = 31 * result + as.hashCode();
+            else
+                result = 31 * result;
+        }
+        for (ArithmeticShare as : outShares) {
+            if (as != null)
+                result = 31 * result + as.hashCode();
+            else
+                result = 31 * result;
+        }
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        String result = name + "\nInShares:\n";
+        for (ArithmeticShare as : inShares) {
+            result = result + as + "\n";
+        }
+        result = result + "\nOutShares:\n";
+        for (ArithmeticShare as : outShares) {
+            result = result + as + "\n";
+        }
+        return result;
+
+    }
 }
