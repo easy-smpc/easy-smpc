@@ -3,6 +3,11 @@ package de.tu_darmstadt.cbs.emailsmpc;
 import java.io.Serializable;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.File;
 
 public class AppModel implements Serializable {
     public int numParticipants;
@@ -12,6 +17,7 @@ public class AppModel implements Serializable {
     public Participant[] participants;
     public String name;
     public Message[] unsentMessages;
+    public File filename;
     private static final long serialVersionUID = 67394185932574354L;
 
     public AppModel() {
@@ -22,6 +28,7 @@ public class AppModel implements Serializable {
         bins = null;
         participants = null;
         unsentMessages = null;
+        filename = null;
     }
 
     public void initializeStudy(String name, Participant[] participants, Bin[] bins) throws IllegalStateException {
@@ -290,6 +297,37 @@ public class AppModel implements Serializable {
                 return true;
         }
         return false;
+    }
+
+    public void saveProgramAs() throws IOException {
+        // Get Filename fom GUI Filepicker
+        File fn = new File("filename.tmp");
+        filename = fn;
+        saveModel(filename);
+    }
+
+    public void saveProgram() throws IOException {
+        if (filename == null) {
+            saveProgramAs();
+        } else {
+            saveModel(filename);
+        }
+    }
+
+    private void saveModel(File filename) throws IOException {
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename));
+        oos.writeObject(this);
+        oos.close();
+    }
+
+    public static AppModel loadModel(File filename)
+            throws IOException, ClassNotFoundException, IllegalArgumentException {
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename));
+        Object o = ois.readObject();
+        ois.close();
+        if (!(o instanceof AppModel))
+            throw new IllegalArgumentException("Invalid Save file");
+        return (AppModel) o;
     }
 
     @Override
