@@ -33,7 +33,7 @@ public class Message implements Serializable {
 
     private String getHashedData(String data) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA256");
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] digest = md.digest((this.recipientName + this.recipientEmailAddress + data).getBytes());
             Encoder be = Base64.getEncoder();
             return data + "@" + be.encodeToString(digest);
@@ -50,7 +50,7 @@ public class Message implements Serializable {
         if (parts.length != 2)
             return false;
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA256");
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] digest = md.digest((recipient.name + recipient.emailAddress + parts[0]).getBytes());
             Encoder be = Base64.getEncoder();
             return parts[1] == be.encodeToString(digest);
