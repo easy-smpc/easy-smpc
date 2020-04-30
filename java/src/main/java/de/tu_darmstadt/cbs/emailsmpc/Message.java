@@ -61,9 +61,13 @@ public class Message implements Serializable {
     }
 
     public static String getMessageData(Message msg) throws IllegalArgumentException {
-        if (!(msg.data.contains("@")))
+        return getMessageData(msg.data);
+    }
+
+    public static String getMessageData(String msg) throws IllegalArgumentException {
+        if (!(msg.contains("@")))
             throw new IllegalArgumentException("Message invalid");
-        String[] parts = msg.data.split("@");
+        String[] parts = msg.split("@");
         if (parts.length != 2)
             throw new IllegalArgumentException("Message invalid");
         return parts[0];
