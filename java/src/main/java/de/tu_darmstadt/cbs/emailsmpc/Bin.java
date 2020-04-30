@@ -2,11 +2,13 @@ package de.tu_darmstadt.cbs.emailsmpc;
 
 import de.tu_darmstadt.cbs.secretshare.*;
 import java.math.BigInteger;
+import java.io.Serializable;
 
-public class Bin {
+public class Bin implements Serializable {
     public final String name;
     private ArithmeticShare[] inShares;
     private ArithmeticShare[] outShares;
+    private static final long serialVersionUID = -8804264711786268229L;
 
     public Bin(String name, int numParties) {
         this.name = name;

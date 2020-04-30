@@ -2,10 +2,12 @@ package de.tu_darmstadt.cbs.emailsmpc;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.io.Serializable;
 
-public class Participant {
+public class Participant implements Serializable {
     public final String name;
     public final String emailAddress;
+    private static final long serialVersionUID = 5370286651195899392L;
     static private Pattern regex = Pattern
             .compile("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$");
 

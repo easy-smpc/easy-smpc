@@ -4,11 +4,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64.*;
 import java.util.Base64;
+import java.io.Serializable;
 
-public class Message {
+public class Message implements Serializable {
     public final String recipientName;
     public final String recipientEmailAddress;
     public final String data;
+    private static final long serialVersionUID = -3994038144373807054L;
 
     public Message(Participant recipient, String data) {
         this.recipientName = recipient.name;

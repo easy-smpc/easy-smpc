@@ -16,6 +16,7 @@ public class InitialMessage implements Serializable {
     public Participant[] participants;
     public MessageBin[] bins;
     public int recipientId;
+    private static final long serialVersionUID = 1631395617989735129L;
 
     public InitialMessage(AppModel model, int recipientId) {
         this.name = model.name;
