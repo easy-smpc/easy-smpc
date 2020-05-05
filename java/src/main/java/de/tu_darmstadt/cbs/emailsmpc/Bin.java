@@ -3,6 +3,7 @@ package de.tu_darmstadt.cbs.emailsmpc;
 import de.tu_darmstadt.cbs.secretshare.*;
 import java.math.BigInteger;
 import java.io.Serializable;
+import java.util.Arrays;
 
 public class Bin implements Serializable {
     public final String name;
@@ -33,6 +34,26 @@ public class Bin implements Serializable {
         return inShares != null;
     }
 
+    public int[] getFilledOutShareIndices() throws IllegalArgumentException {
+        return getFilledArrayIndices(outShares);
+    }
+
+    public int[] getFilledInShareIndices() throws IllegalArgumentException {
+        return getFilledArrayIndices(inShares);
+    }
+
+    private int[] getFilledArrayIndices(ArithmeticShare[] array) throws IllegalArgumentException {
+        if (array == null)
+            throw new IllegalArgumentException("Not a valid array");
+        int[] result = new int[0]; // How is Data locality of lists in Java?
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != null) {
+                result = Arrays.copyOf(result, result.length + 1);
+                result[result.length - 1] = i;
+            }
+        }
+        return result;
+    }
 
     public void clearOutSharesExceptId(int id) {
         for (int i = 0; i < outShares.length; i++) {
