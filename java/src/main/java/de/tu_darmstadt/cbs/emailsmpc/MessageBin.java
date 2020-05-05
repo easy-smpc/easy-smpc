@@ -38,4 +38,9 @@ public class MessageBin implements Serializable {
         int result = name.hashCode();
         return 31 * result + share.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return name + ": " + share;
+    }
 }

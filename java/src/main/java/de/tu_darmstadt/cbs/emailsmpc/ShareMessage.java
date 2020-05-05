@@ -86,4 +86,14 @@ public class ShareMessage implements Serializable {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        String result = "Recipient: " + recipient.toString() + "\nSender: " + sender.toString();
+        result = result + "\nData:\n";
+        for (MessageBin b : bins) {
+            result = result + b.toString() + "\n";
+        }
+        return result;
+    }
 }

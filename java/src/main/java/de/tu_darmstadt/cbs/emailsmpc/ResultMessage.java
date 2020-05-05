@@ -15,6 +15,14 @@ public class ResultMessage implements Serializable {
     public MessageBin[] bins;
     public Participant sender;
 
+    @Override
+    public String toString() {
+        String result = "Sender: " + sender + "\n";
+        for (MessageBin b : bins) {
+            result = result + b.toString() + "\n";
+        }
+        return result;
+    }
     public ResultMessage(AppModel model) {
         this.sender = model.participants[model.ownId];
         this.bins = new MessageBin[model.bins.length];
