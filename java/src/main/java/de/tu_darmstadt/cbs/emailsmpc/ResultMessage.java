@@ -23,11 +23,12 @@ public class ResultMessage implements Serializable {
         }
         return result;
     }
+
     public ResultMessage(AppModel model) {
-        this.sender = model.participants[model.ownId];
-        this.bins = new MessageBin[model.bins.length];
+        sender = model.participants[model.ownId];
+        bins = new MessageBin[model.bins.length];
         for (int i = 0; i < model.bins.length; i++) {
-            this.bins[i] = new MessageBin(model.bins[i].name, model.bins[i].getSumShare());
+            bins[i] = new MessageBin(model.bins[i].name, model.bins[i].getSumShare());
         }
     }
 
@@ -52,9 +53,9 @@ public class ResultMessage implements Serializable {
 
     public static ResultMessage decodeAndVerify(String msg, Participant sender, AppModel model)
             throws IOException, ClassNotFoundException {
-        ResultMessage sm = decodeMessage(msg);
-        if (verify(sm, sender, model))
-            return sm;
+        ResultMessage rm = decodeMessage(msg);
+        if (verify(rm, sender, model))
+            return rm;
         else
             throw new IllegalArgumentException("Message invalid");
     }

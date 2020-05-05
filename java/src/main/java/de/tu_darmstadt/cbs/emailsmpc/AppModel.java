@@ -205,9 +205,9 @@ public class AppModel implements Serializable {
         if (state != AppState.SENDING_SHARE)
             throw new IllegalStateException("Forbidden action (populateShareMessage) at current state " + state);
         for (int i = 0; i < numParticipants; i++) {
-            if (i != ownId)
+            if (i != ownId) {
                 unsentMessages[i] = getShareMessage(i);
-            else {
+            } else {
                 for (Bin b : bins) {
                     b.transferSharesOutIn(ownId);
                 }
