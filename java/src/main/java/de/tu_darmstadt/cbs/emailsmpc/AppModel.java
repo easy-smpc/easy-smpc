@@ -179,7 +179,7 @@ public class AppModel implements Serializable {
     }
 
     public void populateInitialMessages() throws IOException, IllegalStateException {
-        if (state != AppState.STARTING)
+        if (state != AppState.INITIAL_SENDING)
             throw new IllegalStateException("Forbidden action (getInitialMessage) at current state " + state);
         for (int i = 0; i < numParticipants; i++) {
             if (i != ownId)
