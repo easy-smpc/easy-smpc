@@ -34,7 +34,7 @@ public class ArithmeticSharing {
         BigInteger reconstruction = BigInteger.ZERO;
         BigInteger first_prime = shares[0].prime;
         for (int i = 0; i != shares.length; i++) {
-            if (shares[i].prime != first_prime) {
+            if (!(shares[i].prime.equals(first_prime))) {
                 throw new IllegalArgumentException("Incompatible primes found!");
             }
             reconstruction = reconstruction.add(shares[i].value).mod(shares[i].prime);

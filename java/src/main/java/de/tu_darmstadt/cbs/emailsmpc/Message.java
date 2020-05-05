@@ -53,7 +53,7 @@ public class Message implements Serializable {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] digest = md.digest((recipient.name + recipient.emailAddress + parts[0]).getBytes());
             Encoder be = Base64.getEncoder();
-            return parts[1] == be.encodeToString(digest);
+            return parts[1].equals(be.encodeToString(digest));
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }

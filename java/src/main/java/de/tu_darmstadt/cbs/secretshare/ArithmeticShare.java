@@ -41,7 +41,7 @@ public class ArithmeticShare implements Serializable {
     }
 
     public ArithmeticShare add(ArithmeticShare other) throws IllegalArgumentException {
-        if (this.prime != other.prime)
+        if (!this.prime.equals(other.prime))
             throw new IllegalArgumentException("Incompatible primes for addition");
         if (other.value == BigInteger.ZERO)
             return this;

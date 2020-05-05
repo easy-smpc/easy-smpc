@@ -54,7 +54,7 @@ public class ShareMessage implements Serializable {
     }
 
     public static boolean verify(ShareMessage msg, Participant sender, AppModel model) {
-        return msg.sender.equals(sender) && msg.recipient == model.participants[model.ownId]
+        return msg.sender.equals(sender) && msg.recipient.equals(model.participants[model.ownId])
                 && msg.bins.length == model.bins.length;
     }
 
