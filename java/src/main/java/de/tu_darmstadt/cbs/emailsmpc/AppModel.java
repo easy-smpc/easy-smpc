@@ -229,13 +229,21 @@ public class AppModel implements Serializable {
 
     public void setShareFromMessage(Message msg, Participant sender)
             throws IllegalStateException, IllegalArgumentException, ClassNotFoundException, IOException {
-        if (state != AppState.RECIEVING_SHARE)
+        if (!(state == AppState.RECIEVING_SHARE || state == AppState.RECIEVING_RESULT))
             throw new IllegalStateException("Setting a share from a Message is not allowed at state " + state);
         if (Message.validateData(participants[ownId], msg.data)) {
-            ShareMessage sm = ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
-            int senderId = getParticipantId(sender);
-            for (int i = 0; i < bins.length; i++) {
-                bins[i].setInShare(sm.bins[i].share, senderId);
+            if (state == AppState.RECIEVING_SHARE) {
+                ShareMessage sm = ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
+                int senderId = getParticipantId(sender);
+                for (int i = 0; i < bins.length; i++) {
+                    bins[i].setInShare(sm.bins[i].share, senderId);
+                }
+            } else {
+                ResultMessage rm = ResultMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
+                int senderId = getParticipantId(sender);
+                for (int i = 0; i < bins.length; i++) {
+                    bins[i].setInShare(rm.bins[i].share, senderId);
+                }
             }
         } else
             throw new IllegalArgumentException("Message invalid");
