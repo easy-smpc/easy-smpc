@@ -74,4 +74,81 @@ public class AppModelTest {
             throw e;
         }
     }
+
+    @Test
+    public void TestWithThree() throws IOException, ClassNotFoundException {
+        BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
+                BigInteger.valueOf(4) };
+        AppModel model0 = AppModelTest.getInitializedModel(3, 4, secrets0);
+        AppModel model1 = new AppModel();
+        AppModel model2 = new AppModel();
+        model1.toParticipating();
+        model2.toParticipating();
+        Message initialMessage1 = model0.getUnsentMessageFor(1);
+        Message initialMessage2 = model0.getUnsentMessageFor(2);
+        model0.markMessageSent(1);
+        model0.markMessageSent(2);
+        model1.toEnteringValues(initialMessage1.data);
+        model2.toEnteringValues(initialMessage2.data);
+        BigInteger[] secrets1 = { BigInteger.valueOf(7 * 1), BigInteger.valueOf(7 * 2), BigInteger.valueOf(7 * 3),
+                BigInteger.valueOf(7 * 4) };
+        BigInteger[] secrets2 = { BigInteger.valueOf(11 * 1), BigInteger.valueOf(11 * 2), BigInteger.valueOf(11 * 3),
+                BigInteger.valueOf(0) };
+        model1.toSendingShares(secrets1);
+        model2.toSendingShares(secrets2);
+        Message share10 = model1.getUnsentMessageFor(0);
+        Message share12 = model1.getUnsentMessageFor(2);
+        Message share20 = model2.getUnsentMessageFor(0);
+        Message share21 = model2.getUnsentMessageFor(1);
+        model1.markMessageSent(0);
+        model1.markMessageSent(2);
+        model2.markMessageSent(0);
+        model2.markMessageSent(1);
+        model0.toRecievingShares();
+        model1.toRecievingShares();
+        model2.toRecievingShares();
+        model0.setShareFromMessage(share10, model0.getParticipantFromId(1));
+        model0.setShareFromMessage(share20, model0.getParticipantFromId(2));
+        model1.setShareFromMessage(share21, model1.getParticipantFromId(2));
+        model2.setShareFromMessage(share12, model2.getParticipantFromId(1));
+        model0.toSendingResult();
+        model1.toSendingResult();
+        model2.toSendingResult();
+        Message result01 = model0.getUnsentMessageFor(1);
+        Message result02 = model0.getUnsentMessageFor(2);
+        Message result10 = model1.getUnsentMessageFor(0);
+        Message result12 = model1.getUnsentMessageFor(2);
+        Message result20 = model2.getUnsentMessageFor(0);
+        Message result21 = model2.getUnsentMessageFor(1);
+        model0.markMessageSent(1);
+        model0.markMessageSent(2);
+        model1.markMessageSent(0);
+        model1.markMessageSent(2);
+        model2.markMessageSent(0);
+        model2.markMessageSent(1);
+        model0.toRecievingResult();
+        model1.toRecievingResult();
+        model2.toRecievingResult();
+        model0.setShareFromMessage(result10, model0.getParticipantFromId(1));
+        model0.setShareFromMessage(result20, model0.getParticipantFromId(2));
+        model1.setShareFromMessage(result01, model1.getParticipantFromId(0));
+        model1.setShareFromMessage(result21, model1.getParticipantFromId(2));
+        model2.setShareFromMessage(result02, model2.getParticipantFromId(0));
+        model2.setShareFromMessage(result12, model2.getParticipantFromId(1));
+        model0.toFinished();
+        model1.toFinished();
+        model2.toFinished();
+        BinResult[] sum0 = model0.getAllResults();
+        BinResult[] sum1 = model1.getAllResults();
+        BinResult[] sum2 = model2.getAllResults();
+        assertTrue(sum0.length == sum1.length);
+        assertTrue(sum0.length == sum2.length);
+        BigInteger[] sum = { BigInteger.valueOf(1 + 7 * 1 + 11 * 1), BigInteger.valueOf(2 + 7 * 2 + 11 * 2),
+                BigInteger.valueOf(3 + 7 * 3 + 11 * 3), BigInteger.valueOf(4 + 7 * 4 + 0), };
+        for (int i = 0; i < sum0.length; i++) {
+            assertTrue(sum0[i].equals(sum1[i]));
+            assertTrue(sum0[i].equals(sum2[i]));
+            assertTrue(sum0[i].value.equals(sum[i]));
+        }
+    }
 }
