@@ -19,18 +19,13 @@ public class ArithmeticSharing {
     public ArithmeticShare[] share(BigInteger secret) {
         BigInteger[] shares = new BigInteger[num_parties];
         shares[num_parties - 1] = secret;
-        BigInteger sharingId = BigInteger.ZERO;
-        if (System.getProperty("DebugSecretshare") != null
-                && "true".equalsIgnoreCase(System.getProperty("DebugSecretshare"))) {
-            sharingId = new BigInteger(127, random_generator);
-        }
         for (int i = 0; i != num_parties - 1; i++) {
             shares[i] = new BigInteger(127, random_generator);
             shares[num_parties - 1] = shares[num_parties - 1].subtract(shares[i]).mod(prime);
         }
         ArithmeticShare[] result = new ArithmeticShare[num_parties];
         for (int i = 0; i != num_parties; i++) {
-            result[i] = new ArithmeticShare(shares[i], prime, sharingId);
+            result[i] = new ArithmeticShare(shares[i], prime);
         }
         return result;
     }
