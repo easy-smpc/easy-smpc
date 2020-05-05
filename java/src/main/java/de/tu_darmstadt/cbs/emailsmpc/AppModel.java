@@ -190,6 +190,9 @@ public class AppModel implements Serializable {
                 }
             }
         }
+        for (Bin b : bins) {
+            b.clearOutSharesExceptId(ownId);
+        }
     }
 
     private Message getShareMessage(int recipientId) throws IOException {
@@ -210,6 +213,10 @@ public class AppModel implements Serializable {
                 }
             }
         }
+        for (Bin b : bins) {
+            b.clearOutSharesExceptId(ownId);
+        }
+
     }
 
     public int getParticipantId(Participant p) throws IllegalArgumentException {
@@ -272,6 +279,9 @@ public class AppModel implements Serializable {
                     b.setInShare(b.getSumShare(), ownId);
                 }
             }
+        }
+        for (Bin b : bins) {
+            b.clearInSharesExceptId(ownId);
         }
     }
 
