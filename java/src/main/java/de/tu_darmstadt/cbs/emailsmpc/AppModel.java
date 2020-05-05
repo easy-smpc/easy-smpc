@@ -16,7 +16,7 @@ public class AppModel implements Serializable {
     public Bin[] bins;
     public Participant[] participants;
     public String name;
-    public Message[] unsentMessages;
+    private Message[] unsentMessages;
     public File filename;
     private static final long serialVersionUID = 67394185932574354L;
 
@@ -297,6 +297,10 @@ public class AppModel implements Serializable {
                 return true;
         }
         return false;
+    }
+
+    public Message getUnsentMessageFor(int recipientId) {
+        return unsentMessages[recipientId];
     }
 
     public void saveProgramAs() throws IOException {
