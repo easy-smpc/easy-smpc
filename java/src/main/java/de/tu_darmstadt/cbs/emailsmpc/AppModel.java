@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.File;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 public class AppModel implements Serializable {
@@ -399,6 +400,12 @@ public class AppModel implements Serializable {
         }
     }
 
+    public void clearBins() {
+        for (Bin b : this.bins) {
+            b.clearShares();
+        }
+    }
+
     public BinResult getBinResult(int binId) throws IllegalStateException {
         if (state != AppState.FINISHED)
             throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
@@ -425,6 +432,14 @@ public class AppModel implements Serializable {
 
     public Message getUnsentMessageFor(int recipientId) {
         return unsentMessages[recipientId];
+    }
+
+    public boolean isResultComputable() {
+        boolean ready = true;
+        for (Bin b : bins) {
+            ready &= b.isComplete();
+        }
+        return ready;
     }
 
     public void saveProgramAs() throws IOException {
@@ -500,7 +515,8 @@ public class AppModel implements Serializable {
         result = 31 * result + ownId;
         result = 31 * result + state.hashCode();
         result = 31 * result + name.hashCode();
-        result = 31 * result + filename.hashCode();
+        if (filename != null)
+            result = 31 * result + filename.hashCode();
         for (Bin b : bins) {
             if (b != null)
                 result = 31 * result + b.hashCode();
@@ -522,4 +538,10 @@ public class AppModel implements Serializable {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "AppModel [numParticipants=" + numParticipants + ", ownId=" + ownId + ", state=" + state + ", bins="
+                + Arrays.toString(bins) + ", participants=" + Arrays.toString(participants) + ", name=" + name
+                + ", unsentMessages=" + Arrays.toString(unsentMessages) + ", filename=" + filename + "]";
+    }
 }
