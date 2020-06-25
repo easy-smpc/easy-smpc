@@ -205,7 +205,7 @@ public class AppModel implements Serializable {
             // Change GUI Window
             break;
         case SENDING_SHARE:
-            // Special Case for two parties? Must go to sending result share then
+            // Forbid two parties
             if (newState != AppState.RECIEVING_SHARE)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             if (messagesUnsent())
