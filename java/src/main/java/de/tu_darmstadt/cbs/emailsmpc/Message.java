@@ -4,6 +4,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64.*;
 import java.util.Base64;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public class Message implements Serializable {
@@ -71,6 +76,22 @@ public class Message implements Serializable {
         if (parts.length != 2)
             throw new IllegalArgumentException("Message invalid");
         return parts[0];
+    }
+
+    public static String serializeMessage(Message msg) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(msg);
+        oos.close();
+        return Base64.getEncoder().encodeToString(bos.toByteArray());
+    }
+
+    public static Message deserializeMessage(String msg) throws IOException, ClassNotFoundException {
+        byte[] data = Base64.getDecoder().decode(msg);
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
+        Message message = (Message) ois.readObject();
+        ois.close();
+        return message;
     }
 
     @Override
