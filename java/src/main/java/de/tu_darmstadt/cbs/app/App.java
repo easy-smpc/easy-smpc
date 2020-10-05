@@ -17,61 +17,71 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  * Main UI of the app
+ * 
  * @author Fabian Prasser
  */
 public class App extends JFrame {
 
-    /** SVUID*/
+    /** SVUID */
     private static final long serialVersionUID = 8047583915796168387L;
 
-    /** Main entry point
-     * @throws UnsupportedLookAndFeelException 
-     * @throws IllegalAccessException 
-     * @throws InstantiationException 
-     * @throws ClassNotFoundException 
-     * @throws IOException */
-    public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException, IOException {
-        
+    /**
+     * Main entry point
+     * 
+     * @throws UnsupportedLookAndFeelException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws ClassNotFoundException
+     * @throws IOException
+     */
+    public static void main(String[] args) throws ClassNotFoundException,
+                                           InstantiationException,
+                                           IllegalAccessException,
+                                           UnsupportedLookAndFeelException,
+                                           IOException {
+
         // Configure look and feel
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        
+
         // Start App
         new App();
     }
-    /** Cards*/
-    private JPanel cards;
-    /** Menu*/
-    private JMenu actionMenu;
-    /** List of perspectives*/
+
+    /** Cards */
+    private JPanel            cards;
+    /** Menu */
+    private JMenu             actionMenu;
+    /** List of perspectives */
     private List<Perspective> perspectives = new ArrayList<Perspective>();
-    
+
     /**
      * Creates a new instance
-     * @throws IOException 
+     * 
+     * @throws IOException
      */
     public App() throws IOException {
-        
+
         // Title
         super(Messages.getString("App.0")); //$NON-NLS-1$
-        
+
         // Settings
         this.setSize(800, 600);
         this.setLocationRelativeTo(null);
         this.setIconImage(Messages.getIcon());
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // -----------------
         // Panels
         // -----------------
         this.cards = new JPanel(new CardLayout());
         this.add(this.cards);
-        
+
         // -----------------
         // Menu
         // ------------------
         JMenuBar jmb = new JMenuBar();
         this.setJMenuBar(jmb);
-        
+
         // Action menu
         actionMenu = new JMenu(Messages.getString("App.1")); //$NON-NLS-1$
         jmb.add(actionMenu);
@@ -88,7 +98,7 @@ public class App extends JFrame {
         });
         // Help menu
         JMenu jmHelp = new JMenu(Messages.getString("App.2")); //$NON-NLS-1$
-        
+
         // About menu
         JMenuItem jmiAbout = new JMenuItem(Messages.getString("App.3"), Messages.getMenuItem()); //$NON-NLS-1$
         jmHelp.add(jmiAbout);
@@ -99,30 +109,33 @@ public class App extends JFrame {
                 showAboutDialog();
             }
         });
-        
+
         // Add perspectives
         addPerspective(new PerspectiveFinalize(this));
         addPerspective(new PerspectiveContinue(this));
         addPerspective(new PerspectiveCreate(this));
         addPerspective(new PerspectiveStart(this));
-        
+
         // Show the first perspective
         showPerspective(0);
-        
+
         // Finally, make the frame visible
         this.setVisible(true);
+
+        SMPCServices.getServicesSMPC().setApp(this);
     }
 
     /**
      * Adds a new perspective
+     * 
      * @param perspective
-     * @throws IOException 
+     * @throws IOException
      */
     private void addPerspective(Perspective perspective) throws IOException {
-        
+
         perspectives.add(0, perspective);
         cards.add(perspective.getPanel(), perspective.getTitle());
-        
+
         JMenuItem jmiPerspective = new JMenuItem(perspective.getTitle(), Messages.getMenuItem());
         actionMenu.add(jmiPerspective, 0);
         jmiPerspective.addActionListener(new ActionListener() {
@@ -135,15 +148,17 @@ public class App extends JFrame {
 
     /**
      * Shows a certain perspective
+     * 
      * @param perspective
      */
     protected void showPerspective(Perspective perspective) {
-        CardLayout cl = (CardLayout)(cards.getLayout());
+        CardLayout cl = (CardLayout) (cards.getLayout());
         cl.show(cards, perspective.getTitle());
     }
-    
+
     /**
      * Shows the perspective with the given index
+     * 
      * @param index
      */
     protected void showPerspective(int index) {
@@ -166,6 +181,7 @@ public class App extends JFrame {
 
     /**
      * Shows a perspective
+     * 
      * @param clazz
      */
     protected void showPerspective(Class<?> clazz) {
@@ -176,5 +192,22 @@ public class App extends JFrame {
             }
             index++;
         }
+    }
+
+    /**
+     * Returns a perspective
+     * 
+     * @param clazz
+     * @return Found perspective - null if not found!
+     */
+    protected Perspective getPerspective(Class<?> clazz) {
+        Perspective returnPerspective = null;
+        for (Perspective p : perspectives) {
+            if (p.getClass().equals(clazz)) {
+                returnPerspective = p;
+                break;
+            }
+        }
+        return returnPerspective;
     }
 }

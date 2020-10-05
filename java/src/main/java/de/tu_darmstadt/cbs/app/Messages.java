@@ -11,14 +11,15 @@ import javax.swing.ImageIcon;
 
 /**
  * Accessor class for messages used by the UI
+ * 
  * @author Fabian Prasser
  */
 public class Messages {
-    
-    /** Bundle name*/
+
+    /** Bundle name */
     private static final String         BUNDLE_NAME     = "de.tu_darmstadt.cbs.app.messages";   //$NON-NLS-1$
 
-    /** Bundle*/
+    /** Bundle */
     private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
     /**
@@ -30,6 +31,7 @@ public class Messages {
 
     /**
      * Returns a message
+     * 
      * @param key
      * @return
      */
@@ -40,9 +42,10 @@ public class Messages {
             return '!' + key + '!';
         }
     }
-    
+
     /**
      * Icon
+     * 
      * @return
      * @throws IOException
      */
@@ -53,8 +56,9 @@ public class Messages {
 
     /**
      * Menu item
+     * 
      * @return
-     * @throws IOException 
+     * @throws IOException
      */
     public static ImageIcon getMenuItem() throws IOException {
         InputStream stream = Messages.class.getResourceAsStream("icon.png");
