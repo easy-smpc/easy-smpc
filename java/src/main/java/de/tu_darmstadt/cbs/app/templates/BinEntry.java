@@ -27,6 +27,9 @@ public class BinEntry extends JPanel {
     @Getter
     private JTextField binValueField;
 
+    /**
+     * Creates a new instance
+     */
     public BinEntry() {
         this.setLayout(new GridLayout(0, 5, 0, 0));
         this.setMaximumSize(new Dimension(950, 30));
@@ -47,6 +50,11 @@ public class BinEntry extends JPanel {
         this.add(binValueField);
     }
 
+    /**
+     * Creates a new instance
+     * @param name
+     * @param enabled
+     */
     public BinEntry(String name, boolean enabled) {
         this();
         this.binNameTextField.setText(name);
