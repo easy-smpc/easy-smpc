@@ -33,7 +33,7 @@ public class NameEmailParticipantEntry extends JPanel {
     public NameEmailParticipantEntry() {
         this.setLayout(new GridLayout(0, 6, 0, 0));
         this.setMaximumSize(new Dimension(Integer.MAX_VALUE, Resources.ROW_HEIGHT));
-        JLabel participantLabel = new JLabel("Name of participant");
+        JLabel participantLabel = new JLabel(Resources.getString("Participant.0")); //$NON-NLS-1$
         this.add(participantLabel);
         participantTextField = new JTextField();
         this.add(participantTextField);
@@ -41,13 +41,13 @@ public class NameEmailParticipantEntry extends JPanel {
         JPanel emptyPanel = new JPanel();
         this.add(emptyPanel);
 
-        JLabel emailLabel = new JLabel("E-Mail of participant");
+        JLabel emailLabel = new JLabel(Resources.getString("Participant.1")); //$NON-NLS-1$
         this.add(emailLabel);
 
         this.emailTextField = new JTextField();
         this.add(emailTextField);
 
-        this.isCurrentParticipantRadioButton = new JRadioButton("", false);
+        this.isCurrentParticipantRadioButton = new JRadioButton("", false); //$NON-NLS-1$
         this.add(isCurrentParticipantRadioButton);
         this.isCurrentParticipantRadioButton.addActionListener(new ActionListener() {
             @Override
@@ -62,13 +62,13 @@ public class NameEmailParticipantEntry extends JPanel {
                                                                                                                                           .getComponent(i);
                         if (currentNameEmailParticipant.equals(NameEmailParticipantEntry.this)) {
                             NameEmailParticipantEntry.this.isCurrentParticipantRadioButton.setSelected(true);
-                            NameEmailParticipantEntry.this.isCurrentParticipantRadioButton.setText("my participation");
+                            NameEmailParticipantEntry.this.isCurrentParticipantRadioButton.setText(Resources.getString("Participant.3")); //$NON-NLS-1$
                             SMPCServices.getServicesSMPC().getAppModel().numberOwnPartcipation = i;
                         } else {
                             currentNameEmailParticipant.getIsCurrentParticipantRadioButton()
                                                        .setSelected(false);
                             currentNameEmailParticipant.getIsCurrentParticipantRadioButton()
-                                                       .setText("");
+                                                       .setText(""); //$NON-NLS-1$
                         }
                     }
 
