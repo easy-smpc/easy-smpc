@@ -15,8 +15,11 @@ import javax.swing.ImageIcon;
  * @author Fabian Prasser
  */
 public class Resources {
+
+    /** Row gap*/
+    public static int                   ROW_GAP         = 5;
     
-    /** Default row height*/
+    /** Row height*/
     public static final int             ROW_HEIGHT      = 20;
 
     /** Bundle name */

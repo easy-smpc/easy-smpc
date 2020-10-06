@@ -4,6 +4,7 @@
 //TODO: GPL licence
 package de.tu_darmstadt.cbs.app.templates;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 
@@ -32,23 +33,32 @@ public class BinEntry extends JPanel {
      */
     public BinEntry() {
         
-        this.setLayout(new GridLayout(0, 3, 0, 0));
+        this.setLayout(new GridLayout(0, 2, Resources.ROW_GAP, Resources.ROW_GAP));
         this.setMaximumSize(new Dimension(Integer.MAX_VALUE, Resources.ROW_HEIGHT));
+        
+        // Left
+        JPanel left = new JPanel();
+        left.setLayout(new BorderLayout());
+        this.add(left);
+        
         JLabel binNameLabel = new JLabel(Resources.getString("BinEntry.0")); //$NON-NLS-1$
-        this.add(binNameLabel);
         binNameTextField = new JTextField();
-        this.add(binNameTextField);
         binNameTextField.setColumns(10);
+        
+        left.add(binNameLabel, BorderLayout.WEST);
+        left.add(binNameTextField, BorderLayout.CENTER);
 
-        JPanel emptyPanel = new JPanel();
-        this.add(emptyPanel);
-
+        // Right
+        JPanel right = new JPanel();
+        right.setLayout(new BorderLayout());
+        this.add(right);
+        
         JLabel binValueLabel = new JLabel(Resources.getString("BinEntry.1")); //$NON-NLS-1$
-        this.add(binValueLabel);
-
         this.binValueField = new JTextField();
         binValueField.setColumns(10);
-        this.add(binValueField);
+        
+        right.add(binValueLabel, BorderLayout.WEST);
+        right.add(binValueField, BorderLayout.CENTER);
     }
 
     /**
