@@ -19,6 +19,9 @@ import lombok.Getter;
  *
  */
 public class BinEntry extends JPanel {
+    /** SVUID */
+    private static final long serialVersionUID = 7347360570010162977L;
+    
     @Getter
     private JTextField binNameTextField;
     @Getter
