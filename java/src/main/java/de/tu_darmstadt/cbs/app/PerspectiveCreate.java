@@ -57,7 +57,7 @@ public class PerspectiveCreate extends Perspective {
     private JButton    saveButton;
 
     protected PerspectiveCreate(App app) {
-        super(app, Messages.getString("PerspectiveCreate.0")); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveCreate.0")); //$NON-NLS-1$
     }
 
     @Override

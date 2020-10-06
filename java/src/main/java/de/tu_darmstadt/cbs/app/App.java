@@ -62,12 +62,12 @@ public class App extends JFrame {
     public App() throws IOException {
 
         // Title
-        super(Messages.getString("App.0")); //$NON-NLS-1$
+        super(Resources.getString("App.0")); //$NON-NLS-1$
 
         // Settings
         this.setSize(800, 600);
         this.setLocationRelativeTo(null);
-        this.setIconImage(Messages.getIcon());
+        this.setIconImage(Resources.getIcon());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // -----------------
@@ -83,11 +83,11 @@ public class App extends JFrame {
         this.setJMenuBar(jmb);
 
         // Action menu
-        actionMenu = new JMenu(Messages.getString("App.1")); //$NON-NLS-1$
+        actionMenu = new JMenu(Resources.getString("App.1")); //$NON-NLS-1$
         jmb.add(actionMenu);
 
         // Exit menu
-        JMenuItem jmiExit = new JMenuItem(Messages.getString("App.4"), Messages.getMenuItem()); //$NON-NLS-1$
+        JMenuItem jmiExit = new JMenuItem(Resources.getString("App.4"), Resources.getMenuItem()); //$NON-NLS-1$
         actionMenu.add(jmiExit);
         jmb.add(actionMenu);
         jmiExit.addActionListener(new ActionListener() {
@@ -97,10 +97,10 @@ public class App extends JFrame {
             }
         });
         // Help menu
-        JMenu jmHelp = new JMenu(Messages.getString("App.2")); //$NON-NLS-1$
+        JMenu jmHelp = new JMenu(Resources.getString("App.2")); //$NON-NLS-1$
 
         // About menu
-        JMenuItem jmiAbout = new JMenuItem(Messages.getString("App.3"), Messages.getMenuItem()); //$NON-NLS-1$
+        JMenuItem jmiAbout = new JMenuItem(Resources.getString("App.3"), Resources.getMenuItem()); //$NON-NLS-1$
         jmHelp.add(jmiAbout);
         jmb.add(jmHelp);
         jmiAbout.addActionListener(new ActionListener() {
@@ -136,7 +136,7 @@ public class App extends JFrame {
         perspectives.add(0, perspective);
         cards.add(perspective.getPanel(), perspective.getTitle());
 
-        JMenuItem jmiPerspective = new JMenuItem(perspective.getTitle(), Messages.getMenuItem());
+        JMenuItem jmiPerspective = new JMenuItem(perspective.getTitle(), Resources.getMenuItem());
         actionMenu.add(jmiPerspective, 0);
         jmiPerspective.addActionListener(new ActionListener() {
             @Override

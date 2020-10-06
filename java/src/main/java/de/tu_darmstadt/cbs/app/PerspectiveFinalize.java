@@ -16,7 +16,7 @@ public class PerspectiveFinalize extends Perspective {
     private JLabel myResult;
 
     protected PerspectiveFinalize(App app) {
-        super(app, Messages.getString("PerspectiveFinalize.0")); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveFinalize.0")); //$NON-NLS-1$
     }
 
     @Override

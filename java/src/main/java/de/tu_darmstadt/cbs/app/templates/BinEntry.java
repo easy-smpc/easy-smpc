@@ -11,7 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import de.tu_darmstadt.cbs.app.Messages;
+import de.tu_darmstadt.cbs.app.Resources;
 import lombok.Getter;
 
 /**
@@ -31,9 +31,10 @@ public class BinEntry extends JPanel {
      * Creates a new instance
      */
     public BinEntry() {
-        this.setLayout(new GridLayout(0, 5, 0, 0));
-        this.setMaximumSize(new Dimension(950, 30));
-        JLabel binNameLabel = new JLabel(Messages.getString("BinEntry.0")); //$NON-NLS-1$
+        
+        this.setLayout(new GridLayout(0, 3, 0, 0));
+        this.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        JLabel binNameLabel = new JLabel(Resources.getString("BinEntry.0")); //$NON-NLS-1$
         this.add(binNameLabel);
         binNameTextField = new JTextField();
         this.add(binNameTextField);
@@ -42,7 +43,7 @@ public class BinEntry extends JPanel {
         JPanel emptyPanel = new JPanel();
         this.add(emptyPanel);
 
-        JLabel binValueLabel = new JLabel(Messages.getString("BinEntry.1")); //$NON-NLS-1$
+        JLabel binValueLabel = new JLabel(Resources.getString("BinEntry.1")); //$NON-NLS-1$
         this.add(binValueLabel);
 
         this.binValueField = new JTextField();

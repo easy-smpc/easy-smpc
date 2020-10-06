@@ -14,7 +14,7 @@ import javax.swing.ImageIcon;
  * 
  * @author Fabian Prasser
  */
-public class Messages {
+public class Resources {
 
     /** Bundle name */
     private static final String         BUNDLE_NAME     = "de.tu_darmstadt.cbs.app.messages";   //$NON-NLS-1$
@@ -25,7 +25,7 @@ public class Messages {
     /**
      * No instantiation
      */
-    private Messages() {
+    private Resources() {
         // Empty by design
     }
 
@@ -50,7 +50,7 @@ public class Messages {
      * @throws IOException
      */
     public static Image getIcon() throws IOException {
-        InputStream stream = Messages.class.getResourceAsStream("icon.png");
+        InputStream stream = Resources.class.getResourceAsStream("icon.png");
         return ImageIO.read(stream);
     }
 
@@ -61,7 +61,7 @@ public class Messages {
      * @throws IOException
      */
     public static ImageIcon getMenuItem() throws IOException {
-        InputStream stream = Messages.class.getResourceAsStream("icon.png");
+        InputStream stream = Resources.class.getResourceAsStream("icon.png");
         return new ImageIcon(ImageIO.read(stream).getScaledInstance(16, 16, Image.SCALE_DEFAULT));
     }
 }

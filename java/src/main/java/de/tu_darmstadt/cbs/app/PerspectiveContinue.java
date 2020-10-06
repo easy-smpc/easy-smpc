@@ -35,7 +35,7 @@ public class PerspectiveContinue extends Perspective {
      * @param app
      */
     protected PerspectiveContinue(App app) {
-        super(app, Messages.getString("PerspectiveContinue.0")); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveContinue.0")); //$NON-NLS-1$
     }
 
     /**
