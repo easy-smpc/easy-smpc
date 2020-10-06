@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import de.tu_darmstadt.cbs.app.Messages;
 import lombok.Getter;
 
 /**
@@ -26,7 +27,7 @@ public class BinEntry extends JPanel {
     public BinEntry() {
         this.setLayout(new GridLayout(0, 5, 0, 0));
         this.setMaximumSize(new Dimension(950, 30));
-        JLabel binNameLabel = new JLabel("Name of bin");
+        JLabel binNameLabel = new JLabel(Messages.getString("BinEntry.0")); //$NON-NLS-1$
         this.add(binNameLabel);
         binNameTextField = new JTextField();
         this.add(binNameTextField);
@@ -35,7 +36,7 @@ public class BinEntry extends JPanel {
         JPanel emptyPanel = new JPanel();
         this.add(emptyPanel);
 
-        JLabel binValueLabel = new JLabel("Your frequency");
+        JLabel binValueLabel = new JLabel(Messages.getString("BinEntry.1")); //$NON-NLS-1$
         this.add(binValueLabel);
 
         this.binValueField = new JTextField();
