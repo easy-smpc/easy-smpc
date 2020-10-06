@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import de.tu_darmstadt.cbs.app.Resources;
 import de.tu_darmstadt.cbs.app.SMPCServices;
 import lombok.Getter;
 
@@ -31,7 +32,7 @@ public class NameEmailParticipantEntry extends JPanel {
 
     public NameEmailParticipantEntry() {
         this.setLayout(new GridLayout(0, 6, 0, 0));
-        this.setMaximumSize(new Dimension(950, 30));
+        this.setMaximumSize(new Dimension(Integer.MAX_VALUE, Resources.ROW_HEIGHT));
         JLabel participantLabel = new JLabel("Name of participant");
         this.add(participantLabel);
         participantTextField = new JTextField();

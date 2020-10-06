@@ -15,6 +15,9 @@ import javax.swing.ImageIcon;
  * @author Fabian Prasser
  */
 public class Resources {
+    
+    /** Default row height*/
+    public static final int             ROW_HEIGHT      = 20;
 
     /** Bundle name */
     private static final String         BUNDLE_NAME     = "de.tu_darmstadt.cbs.app.messages";   //$NON-NLS-1$

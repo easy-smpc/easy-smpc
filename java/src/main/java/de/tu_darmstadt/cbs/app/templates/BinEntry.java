@@ -33,7 +33,7 @@ public class BinEntry extends JPanel {
     public BinEntry() {
         
         this.setLayout(new GridLayout(0, 3, 0, 0));
-        this.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        this.setMaximumSize(new Dimension(Integer.MAX_VALUE, Resources.ROW_HEIGHT));
         JLabel binNameLabel = new JLabel(Resources.getString("BinEntry.0")); //$NON-NLS-1$
         this.add(binNameLabel);
         binNameTextField = new JTextField();
