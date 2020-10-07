@@ -1,5 +1,15 @@
-/**
+/* 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package de.tu_darmstadt.cbs.app;
 
@@ -17,27 +27,51 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Singleton object of this class is the Controller in a MVC pattern
+ * Singleton object of this class is the controller in a MVC pattern
  * 
  * @author Felix Wirth
  *
  */
 
 public class SMPCServices {
+    /** Singleton of this class */
     private static SMPCServices singleSMPC;
-    @Getter
-    private AppModel            appModel;
+    /** The object containing the secure multi-party computing API */
     /**
-     * GUI state deviates sligthly from state in the API, thus a second state
-     * variable
+     * Returns appModel
+     * @return
      */
     @Getter
+    private AppModel            appModel;
+    /** GUI state deviates slightly from state in the API, thus a second state variable */
+    /**
+     * Returns workflowState
+     * @return
+     */
+    @Getter
+    /**
+     * Gets workflowState
+     * @param workflowState
+     */
     @Setter
     private AppState            workflowState;
+    /** The app constructing the GUI */
+    /**
+     * Gets the app
+     * @return
+     */
     @Getter
+    /**
+     * Sets the app
+     * @param app
+     */
     @Setter
     private App                 app;
 
+    /**
+     * Get the object of this class as a singleton
+     * @return
+     */
     public static SMPCServices getServicesSMPC() {
         if (singleSMPC == null) {
             singleSMPC = new SMPCServices();
@@ -47,7 +81,6 @@ public class SMPCServices {
 
     /**
      * Method which controls the program flow/the construction of perspective
-     * 
      */
     public void commandAndControl() {
         switch (this.workflowState) {
@@ -101,7 +134,7 @@ public class SMPCServices {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     int resultConfirmDialog = JOptionPane.showConfirmDialog(null,
-                                                                            "Please confirm, that you want to proceed. No changes to the data can be done afterwards",
+                                                                            Resources.getString("SMPCServices.confirmProceed"),
                                                                             "",
                                                                             JOptionPane.OK_CANCEL_OPTION);
                     if (resultConfirmDialog == 0) {
@@ -110,7 +143,6 @@ public class SMPCServices {
                         SMPCServices.getServicesSMPC().setWorkflowState(AppState.SENDING_RESULT);
                         SMPCServices.getServicesSMPC().getAppModel().toSendingResult();
                         try {
-                            // TODO: Possibility of "save as"
                             SMPCServices.getServicesSMPC().getAppModel().saveProgram();
                         } catch (IOException e1) {
                             // TODO Auto-generated catch block
@@ -161,7 +193,10 @@ public class SMPCServices {
                                                                                       .setText(binResult[0].value.toString());
             ;
             break;
+        default:
+            JOptionPane.showMessageDialog(null, Resources.getString("SMPCServices.wrongWorkflowState"));
         }
+        
     }
 
     /**
@@ -176,6 +211,9 @@ public class SMPCServices {
         }
     }
 
+    /**
+     * Initializes APIs state as new study creation
+     */
     public void initalizeAsNewStudyCreation() {
         this.appModel = new AppModel();
         this.appModel.toStarting();
@@ -194,7 +232,7 @@ public class SMPCServices {
     }
 
     /**
-     * Load a file to reinstate API state
+     * Loads a file to reinstate API state
      * 
      * @param selectedFile
      * @throws IOException
@@ -207,6 +245,5 @@ public class SMPCServices {
         appModel = AppModel.loadModel(selectedFile);
         appModel.filename = selectedFile;
         this.workflowState = this.appModel.state;
-        // TODO Password protect read and write
     }
 }

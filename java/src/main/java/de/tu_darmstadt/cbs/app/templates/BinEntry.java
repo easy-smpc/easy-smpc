@@ -1,7 +1,16 @@
-/**
+/* 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-//TODO: GPL licence
 package de.tu_darmstadt.cbs.app.templates;
 
 import java.awt.BorderLayout;
@@ -23,8 +32,18 @@ public class BinEntry extends JPanel {
     /** SVUID */
     private static final long serialVersionUID = 7347360570010162977L;
     
+    /** Text field containing the name of the bin */
+    /**
+     * Returns binNameTextField
+     * @return
+     */
     @Getter
     private JTextField binNameTextField;
+    /**  Text field containing the data/value of the bin */
+    /**
+     * returns binValueField
+     * @return
+     */
     @Getter
     private JTextField binValueField;
 
@@ -43,7 +62,7 @@ public class BinEntry extends JPanel {
         
         JLabel binNameLabel = new JLabel(Resources.getString("BinEntry.0")); //$NON-NLS-1$
         binNameTextField = new JTextField();
-        binNameTextField.setColumns(10);
+        binNameTextField.setColumns(Resources.DEFAULT_COLUMN_SIZE);
         
         left.add(binNameLabel, BorderLayout.WEST);
         left.add(binNameTextField, BorderLayout.CENTER);
@@ -55,7 +74,7 @@ public class BinEntry extends JPanel {
         
         JLabel binValueLabel = new JLabel(Resources.getString("BinEntry.1")); //$NON-NLS-1$
         this.binValueField = new JTextField();
-        binValueField.setColumns(10);
+        binValueField.setColumns(Resources.DEFAULT_COLUMN_SIZE);
         
         right.add(binValueLabel, BorderLayout.WEST);
         right.add(binValueField, BorderLayout.CENTER);
@@ -63,8 +82,8 @@ public class BinEntry extends JPanel {
 
     /**
      * Creates a new instance
-     * @param name
-     * @param enabled
+     * @param name Name of the bin
+     * @param enabled Indicates whether the bin can be edited or not
      */
     public BinEntry(String name, boolean enabled) {
         this();

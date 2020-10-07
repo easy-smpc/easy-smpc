@@ -1,3 +1,16 @@
+/* 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.tu_darmstadt.cbs.app;
 
 import java.awt.Component;
@@ -20,12 +33,20 @@ import de.tu_darmstadt.cbs.emailsmpc.AppState;
  * 
  * @author Fabian Prasser
  */
+
 public class PerspectiveStart extends Perspective {
 
+    /**
+     * Creates the perspective
+     * @param app
+     */
     protected PerspectiveStart(App app) {
         super(app, Resources.getString("PerspectiveStart.0")); //$NON-NLS-1$
     }
 
+    /**
+     * Creates and adds UI elements
+     */
     @Override
     protected void createContents(JPanel panel) {
 
@@ -70,7 +91,7 @@ public class PerspectiveStart extends Perspective {
                         SMPCServices.getServicesSMPC().commandAndControl();
                     } catch (ClassNotFoundException | IllegalArgumentException | IOException e1) {
                         // TODO Auto-generated catch block
-                        JOptionPane.showMessageDialog(null, "Loading of file not possible");
+                        JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveStart.errorLoading"));
                     }
                 }
             }

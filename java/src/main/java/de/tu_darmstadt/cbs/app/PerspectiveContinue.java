@@ -1,3 +1,16 @@
+/* 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.tu_darmstadt.cbs.app;
 
 import java.awt.event.ActionListener;
@@ -14,23 +27,19 @@ import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
- * A perspective
+ * A perspective containing the strings a user sends manually and enter manually
  * 
  * @author Fabian Prasser
  */
 
 public class PerspectiveContinue extends Perspective {
-    /**
-     * Button to proceed
-     */
+    /** Button to proceed */
     private JButton proceedButton;
-    /**
-     * Panel to be filled dynamically
-     */
+    /** Panel to be filled dynamically */
     private JPanel  dataToSharePanel;
-
+    
     /**
-     * Creates new perspective
+     * Creates the perspective
      * 
      * @param app
      */
@@ -56,17 +65,16 @@ public class PerspectiveContinue extends Perspective {
 
         // ------
         // Data box with data to share (either to display or to enter)
-        // TODO: copy button
         // ------
         this.dataToSharePanel = new JPanel();
         this.dataToSharePanel.setLayout(new BoxLayout(dataToSharePanel, BoxLayout.Y_AXIS));
         workingpanel.add(dataToSharePanel);
 
         // ------
-        // Button box TODO: All mails at once
+        // Button box
         // ------
         Box buttonBox = Box.createHorizontalBox();
-        this.proceedButton = new JButton("Proceed");
+        this.proceedButton = new JButton(Resources.getString("PerspectiveContinue.proceedButton"));
         buttonBox.add(this.proceedButton);
         workingpanel.add(buttonBox);
     }
@@ -75,7 +83,6 @@ public class PerspectiveContinue extends Perspective {
      * Fills the dataToSharePanel with one entry per participant to display data
      */
     public void setDataDisplay() {
-        // TODO: Better explanation what user should do (F1!)
         dataToSharePanel.removeAll();
         for (int i = 0; i < SMPCServices.getServicesSMPC().getAppModel().numParticipants; i++) {
             if (i != SMPCServices.getServicesSMPC().getAppModel().numberOwnPartcipation) {
@@ -98,7 +105,7 @@ public class PerspectiveContinue extends Perspective {
                                                                              .getAppModel().participants[i].name,
                                                                  SMPCServices.getServicesSMPC()
                                                                              .getAppModel().participants[i].emailAddress,
-                                                                 "This is your data - no action needed",
+                                                                             Resources.getString("PerspectiveContinue.noActionNecessary"),
                                                                  false,
                                                                  false));
             }
@@ -114,7 +121,6 @@ public class PerspectiveContinue extends Perspective {
     public void setDataEntry() {
         dataToSharePanel.removeAll();
         for (int i = 0; i < SMPCServices.getServicesSMPC().getAppModel().numParticipants; i++) {
-            // TODO- Validation mit Ampel
             if (i != SMPCServices.getServicesSMPC().getAppModel().numberOwnPartcipation) {
                 this.dataToSharePanel.add(new DataSharingDisplayEntry(SMPCServices.getServicesSMPC()
                                                                                   .getAppModel().participants[i].name,
@@ -142,7 +148,6 @@ public class PerspectiveContinue extends Perspective {
      * appModel instance
      */
     public void digestDataEntry() {
-
         for (int i = 0; i < this.dataToSharePanel.getComponentCount(); i++) {
             if (i != SMPCServices.getServicesSMPC().getAppModel().numberOwnPartcipation) {
                 DataSharingDisplayEntry currentDataSharingDisplayEntry = (DataSharingDisplayEntry) this.dataToSharePanel.getComponent(i);
@@ -171,9 +176,7 @@ public class PerspectiveContinue extends Perspective {
 
     /**
      * Convenience method to change behavior of proceed button
-     * 
-     * @param new
-     *            ActionListener for Button
+     * @param new ActionListener for Button        
      */
     public void setActionListener(ActionListener newActionListener) {
         // remove only action listener and add new one

@@ -1,3 +1,16 @@
+/* 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package de.tu_darmstadt.cbs.app;
 
 import java.awt.Component;
@@ -36,30 +49,78 @@ import lombok.Setter;
  * 
  * @author Fabian Prasser
  */
+
 public class PerspectiveCreate extends Perspective {
+    
+    /** Swing box containing participantsEntry (Name and E-Mail) */
+    /**
+     * Returns participantsBox
+     * @return
+     */
     @Getter
-    private Box        boxParticipants;
+    private Box        participantsBox;
+    /** Swing box containing binsEntry (Name and Data/Value for bin) */
+    /**
+     * Returns binsBox
+     * @return
+     */
     @Getter
-    private Box        boxBins;
+    private Box        binsBox;
+    /** Text field containing title of study */
+    /**
+     * Return studyTitle
+     * @return
+     */
     @Getter
     private JTextField studyTitle;
+    /** Text field containing data entered by a participant (which was received by user) */
+    /**
+     * Returns participantDumpedData
+     * @return
+     */
     @Getter
     private JTextArea  participantDumpedData;
+    /** Swing box for participantDumpedData */
+    /**
+     * Return boxParticipantDumpedData
+     * @return
+     */
     @Getter
     private Box        boxParticipantDumpedData;
+    /** Button to add a participant entry line */
     private JButton    buttonPlusParticipant;
+    /** Button to remove a participant entry line */
     private JButton    buttonMinusParticipant;
+    /** Button to add a bin entry line */
     private JButton    buttonPlusBin;
+    /** Button to remove a bin entry line */
     private JButton    buttonMinusBin;
+    /** Boolean indicating whether perspective is currently for study creators or study participants */
+    /**
+     * Gets isParticipating
+     * @return
+     */
     @Getter
+    /**
+     * Sets isParticipating
+     * @param isParticipating
+     */
     @Setter
     boolean            isParticipating;
+    /** Button to save study creation/participation */
     private JButton    saveButton;
 
+    /**
+     * Creates the perspective
+     * @param app
+     */
     protected PerspectiveCreate(App app) {
         super(app, Resources.getString("PerspectiveCreate.0")); //$NON-NLS-1$
     }
 
+    /**
+     *Creates and adds UI elements
+     */
     @Override
     protected void createContents(JPanel panel) {
 
@@ -77,16 +138,18 @@ public class PerspectiveCreate extends Perspective {
         // Participant data box (only shown when study participation is created
         // -------
         this.boxParticipantDumpedData = Box.createHorizontalBox();
-        boxParticipantDumpedData.add(new JLabel("Data recieved by study creator:"));
+         
+        boxParticipantDumpedData.add(new JLabel(Resources.getString("PerspectiveCreate.dataReceived")));
         this.participantDumpedData = new JTextArea();
+        this.participantDumpedData.setMaximumSize(new Dimension(Resources.SIZE_TEXTAREA_X,Resources.SIZE_TEXTAREA_Y));
         this.participantDumpedData.setLineWrap(true);
         // react to to changes in data box
         this.participantDumpedData.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void removeUpdate(DocumentEvent e) {
                 if (participantDumpedData.getText().isEmpty()) {
-                    boxParticipants.removeAll();
-                    boxBins.removeAll();
+                    participantsBox.removeAll();
+                    binsBox.removeAll();
                     saveButton.setEnabled(false);
                     addParticipanLine(false);
                     addBinLine(false);
@@ -114,19 +177,18 @@ public class PerspectiveCreate extends Perspective {
         // Name of study
         // -------
         Box box1 = Box.createHorizontalBox();
-        box1.add(new JLabel("Name of study:")); // TODO: All Strings in message
+        box1.add(new JLabel(Resources.getString("PerspectiveCreate.studyTitle"))); 
         this.studyTitle = new JTextField();
-        this.studyTitle.setMaximumSize(new Dimension(500, 30)); // TODO: Wie
-                                                                // das besser
-                                                                // machen?
+        this.studyTitle.setMaximumSize(new Dimension(Resources.MAX_SIZE_TEXTFIELD_X, Resources.ROW_HEIGHT)); 
+        // TODO: Wie ohne fixed length auskommen? Oder zumindest die Arten Längen festzulegen harmonisieren                                                       
         box1.add(studyTitle);
         workingpanel.add(box1);
 
         // ------
         // Participants
         // ------
-        this.boxParticipants = Box.createVerticalBox();
-        workingpanel.add(boxParticipants);
+        this.participantsBox = Box.createVerticalBox();
+        workingpanel.add(participantsBox);
 
         // Buttons to add and remove lines for participants
         Box boxControlsParticipantLines = Box.createHorizontalBox();
@@ -152,8 +214,8 @@ public class PerspectiveCreate extends Perspective {
         // Bins
         // ------
 
-        this.boxBins = Box.createVerticalBox();
-        workingpanel.add(boxBins);
+        this.binsBox = Box.createVerticalBox();
+        workingpanel.add(binsBox);
 
         // Buttons to add and remove lines for bins
         Box boxControlsBinLines = Box.createHorizontalBox();
@@ -181,61 +243,25 @@ public class PerspectiveCreate extends Perspective {
         // ------
 
         Box saveButtonBox = Box.createHorizontalBox();
-        this.saveButton = new JButton("Save");
+        this.saveButton = new JButton(Resources.getString("PerspectiveCreate.save"));
         saveButton.setHorizontalAlignment(SwingConstants.RIGHT);
         saveButtonBox.add(saveButton);
         workingpanel.add(saveButtonBox);
     }
 
-    protected void setDataForParticipant() {
-        boolean firstParticipant = true;
-        try {
-            SMPCServices.getServicesSMPC()
-                        .initalizeAsNewStudyParticipation(participantDumpedData.getText());
-            boxParticipants.removeAll();
-            boxBins.removeAll();
-            this.studyTitle.setText(SMPCServices.getServicesSMPC().getAppModel().name);
-            this.studyTitle.setEnabled(false);
-            for (Participant currentParticipant : SMPCServices.getServicesSMPC()
-                                                              .getAppModel().participants) {
-                NameEmailParticipantEntry newNameEmailParticipantEntry = new NameEmailParticipantEntry(currentParticipant.name,
-                                                                                                       currentParticipant.emailAddress,
-                                                                                                       false);
-                // First participant(=Initator) can not be selected as a
-                // participant
-                if (firstParticipant == true) {
-                    newNameEmailParticipantEntry.getIsCurrentParticipantRadioButton()
-                                                .setSelected(false);
-                    newNameEmailParticipantEntry.getIsCurrentParticipantRadioButton()
-                                                .setEnabled(false);
-                    firstParticipant = false;
-                }
-                boxParticipants.add(newNameEmailParticipantEntry);
+ 
 
-            }
-            for (Bin currentBin : SMPCServices.getServicesSMPC().getAppModel().bins) {
-                boxBins.add(new BinEntry(currentBin.name, false));
-            }
-            this.saveButton.setEnabled(true);
-            boxParticipants.revalidate();
-            boxParticipants.repaint();
-            boxBins.revalidate();
-            boxBins.repaint();
-        } catch (IllegalArgumentException e) {
-            System.out.println("message invalid");
-            this.saveButton.setEnabled(false);
-            // TODO: Validation mit Ampel
-        }
-    }
-
+    /**
+     *  Reads the entered data and processes it accordingly to create a study
+     */
     public void digestDataAsNewStudyCreation() {
         ArrayList<Participant> participants = new ArrayList<>();
         ArrayList<Bin> bins = new ArrayList<>();
         SMPCServices.getServicesSMPC().initalizeAsNewStudyCreation();
 
         // Unmarshall participants
-        for (int i = 0; i < boxParticipants.getComponentCount(); i++) {
-            NameEmailParticipantEntry currentNameEmailParticipant = (NameEmailParticipantEntry) boxParticipants.getComponent(i);
+        for (int i = 0; i < participantsBox.getComponentCount(); i++) {
+            NameEmailParticipantEntry currentNameEmailParticipant = (NameEmailParticipantEntry) participantsBox.getComponent(i);
             Participant participant = new Participant(currentNameEmailParticipant.getParticipantTextField()
                                                                                  .getText(),
                                                       currentNameEmailParticipant.getEmailTextField()
@@ -244,9 +270,9 @@ public class PerspectiveCreate extends Perspective {
         }
 
         // Unmarshall bins
-        for (int i = 0; i < boxBins.getComponentCount(); i++) {
+        for (int i = 0; i < binsBox.getComponentCount(); i++) {
 
-            BinEntry currentBinEntry = (BinEntry) boxBins.getComponent(i);
+            BinEntry currentBinEntry = (BinEntry) binsBox.getComponent(i);
 
             Bin bin = new Bin(currentBinEntry.getBinNameTextField().getText());
             bin.initialize(participants.size());
@@ -264,31 +290,80 @@ public class PerspectiveCreate extends Perspective {
                                       participants.toArray(new Participant[participants.size()]),
                                       bins.toArray(new Bin[bins.size()]));
     }
-
+    
     /**
-     * Add bins with values of a participant
+     * Sets data for a participant derived from the string entered
+     */
+    protected void setDataForParticipant() {
+        boolean firstParticipant = true;
+        try {
+            SMPCServices.getServicesSMPC()
+                        .initalizeAsNewStudyParticipation(participantDumpedData.getText());
+            participantsBox.removeAll();
+            binsBox.removeAll();
+            this.studyTitle.setText(SMPCServices.getServicesSMPC().getAppModel().name);
+            this.studyTitle.setEnabled(false);
+            for (Participant currentParticipant : SMPCServices.getServicesSMPC()
+                                                              .getAppModel().participants) {
+                NameEmailParticipantEntry newNameEmailParticipantEntry = new NameEmailParticipantEntry(currentParticipant.name,
+                                                                                                       currentParticipant.emailAddress,
+                                                                                                       false);
+                // First participant(=Initator) can not be selected as a
+                // participant
+                if (firstParticipant == true) {
+                    newNameEmailParticipantEntry.getIsCurrentParticipantRadioButton()
+                                                .setSelected(false);
+                    newNameEmailParticipantEntry.getIsCurrentParticipantRadioButton()
+                                                .setEnabled(false);
+                    firstParticipant = false;
+                }
+                participantsBox.add(newNameEmailParticipantEntry);
+
+            }
+            for (Bin currentBin : SMPCServices.getServicesSMPC().getAppModel().bins) {
+                binsBox.add(new BinEntry(currentBin.name, false));
+            }
+            this.saveButton.setEnabled(true);
+            participantsBox.revalidate();
+            participantsBox.repaint();
+            binsBox.revalidate();
+            binsBox.repaint();
+        } catch (IllegalArgumentException e) {
+            System.out.println("message invalid");
+            this.saveButton.setEnabled(false);
+        }
+    }
+    
+    /**
+     * Reads the entered data and processes it accordingly to participate in a study
      * 
      * @param boxBins
      * @param selectedFile
+     */
+    /**
+     * 
      */
     public void digestDataAsStudyParticipation() {
         BigInteger[] secretValuesofParticipant = new BigInteger[SMPCServices.getServicesSMPC()
                                                                             .getAppModel().bins.length];
 
-        for (int i = 0; i < this.boxBins.getComponentCount(); i++) {
-            secretValuesofParticipant[i] = new BigInteger(((BinEntry) boxBins.getComponent(i)).getBinValueField()
+        for (int i = 0; i < this.binsBox.getComponentCount(); i++) {
+            secretValuesofParticipant[i] = new BigInteger(((BinEntry) binsBox.getComponent(i)).getBinValueField()
                                                                                               .getText());
         }
         SMPCServices.getServicesSMPC().getAppModel().toSendingShares(secretValuesofParticipant);
     }
-
+    
+    /**
+     * Prepare perspective for study creation
+     */
     public void setStudyCreation() {
         this.setParticipating(false);
         this.boxParticipantDumpedData.setVisible(false);
         this.studyTitle.setText("");
         this.studyTitle.setEnabled(true);
-        this.boxParticipants.removeAll();
-        this.boxBins.removeAll();
+        this.participantsBox.removeAll();
+        this.binsBox.removeAll();
         this.buttonPlusParticipant.setEnabled(true);
         this.buttonMinusParticipant.setEnabled(true);
         this.buttonPlusBin.setEnabled(true);
@@ -300,6 +375,9 @@ public class PerspectiveCreate extends Perspective {
 
     }
 
+    /**
+     * Prepare perspective for study participation
+     */
     public void setStudyParticipation() {
         this.setParticipating(true);
         this.boxParticipantDumpedData.setVisible(true);
@@ -308,8 +386,8 @@ public class PerspectiveCreate extends Perspective {
         this.buttonMinusParticipant.setEnabled(false);
         this.buttonPlusBin.setEnabled(false);
         this.buttonMinusBin.setEnabled(false);
-        this.boxParticipants.removeAll();
-        this.boxBins.removeAll();
+        this.participantsBox.removeAll();
+        this.binsBox.removeAll();
         this.addParticipanLine(false);
         this.addBinLine(false);
         this.saveButton.setEnabled(false);
@@ -317,50 +395,66 @@ public class PerspectiveCreate extends Perspective {
         this.boxParticipantDumpedData.repaint();
     }
 
+    /**
+     * Adds a new line for participant entry
+     * @param enabled Indicates whether the new line can be edited or not
+     */
     public void addParticipanLine(boolean enabled) {
-        this.boxParticipants.add(new NameEmailParticipantEntry("", "", enabled));
-        this.boxParticipants.revalidate();
-        this.boxParticipants.repaint();
-    }
-
-    public void removeParticipanLine() {
-
-        int currentComponentCount = this.boxParticipants.getComponentCount();
-        if (currentComponentCount > 1) this.boxParticipants.remove(this.boxParticipants.getComponentCount() -
-                                                                   1);
-        this.boxParticipants.revalidate();
-        this.boxParticipants.repaint();
-    }
-
-    public void addBinLine(boolean enabled) {
-        // TODO: dynamische Texte für Felder (global)
-        this.boxBins.add(new BinEntry("", enabled));
-        this.boxParticipants.revalidate();
-        this.boxParticipants.repaint();
-    }
-
-    public void removeBinLine() {
-
-        int currentBinCount = this.boxBins.getComponentCount();
-        if (currentBinCount > 1) this.boxBins.remove(this.boxBins.getComponentCount() - 1);
-        this.boxParticipants.revalidate();
-        this.boxParticipants.repaint();
+        this.participantsBox.add(new NameEmailParticipantEntry("", "", enabled));
+        this.participantsBox.revalidate();
+        this.participantsBox.repaint();
     }
 
     /**
-     * @param Convenience
-     *            method to change behavior of save button
+     * Removes a line for participant entry
+     */
+    public void removeParticipanLine() {
+
+        int currentComponentCount = this.participantsBox.getComponentCount();
+        if (currentComponentCount > 1) this.participantsBox.remove(this.participantsBox.getComponentCount() -
+                                                                   1);
+        this.participantsBox.revalidate();
+        this.participantsBox.repaint();
+    }
+
+    /**
+     * Adds a new line for bin entry
+     * @param enabled Indicates whether the new line can be changed or not
+     */
+    public void addBinLine(boolean enabled) {
+        // TODO: dynamische Texte für Felder (global)
+        this.binsBox.add(new BinEntry("", enabled));
+        this.participantsBox.revalidate();
+        this.participantsBox.repaint();
+    }
+
+    /**
+     * Removes a line for bin entry
+     */
+    public void removeBinLine() {
+
+        int currentBinCount = this.binsBox.getComponentCount();
+        if (currentBinCount > 1) this.binsBox.remove(this.binsBox.getComponentCount() - 1);
+        this.participantsBox.revalidate();
+        this.participantsBox.repaint();
+    }
+
+    /**
+     * Convenience method to change behavior of save button
+     * @param newActionListener new behavior
      */
     public void setActionListener(ActionListener newActionListener) {
-        // remove only action listener and add new one
         if (this.saveButton.getActionListeners().length > 0) this.saveButton.removeActionListener(this.saveButton.getActionListeners()[0]);
         this.saveButton.addActionListener(newActionListener);
     }
 
     /**
-     * Opens a save dialog
+     * Opens a save dialog and sets the status accordingly
      * 
      * @return Saving actually performed?
+     */
+    /**
+     * @return
      */
     public boolean openSaveDialog() {
         boolean saved = false;
@@ -383,7 +477,7 @@ public class PerspectiveCreate extends Perspective {
                 SMPCServices.getServicesSMPC().getAppModel().state = tmpAppModelState;
                 SMPCServices.getServicesSMPC().setWorkflowState(tmpWorkflowState);
                 // TODO Improve error message
-                JOptionPane.showMessageDialog(null, "Saving not possible");
+                JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError"));
             }
         }
         return saved;

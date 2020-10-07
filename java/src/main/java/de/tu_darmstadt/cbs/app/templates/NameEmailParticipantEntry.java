@@ -1,7 +1,16 @@
-/**
+/* 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
-//TODO: GPL licence
 package de.tu_darmstadt.cbs.app.templates;
 
 import java.awt.Dimension;
@@ -22,14 +31,34 @@ import lombok.Getter;
  * @author Felix Wirth
  *
  */
+
 public class NameEmailParticipantEntry extends JPanel {
+    /** SVUID */
+    private static final long serialVersionUID = -6907197312982454382L;
+    /** Text field to enter the participant's name */
+    /**
+     * Returns participantTextField
+     * @return
+     */
     @Getter
     private JTextField   participantTextField;
+    /** Text field to enter the participant's e-mail */
+    /** Get emailTextField
+     * @return
+     */
     @Getter
     private JTextField   emailTextField;
+    /** Radio button indicating which participants number the current user has (no relevance for study creator */
+    /**
+     * Returns isCurrentParticipantRadioButton
+     * @return
+     */
     @Getter
     private JRadioButton isCurrentParticipantRadioButton;
 
+    /**
+     * Creates a new instances
+     */
     public NameEmailParticipantEntry() {
         this.setLayout(new GridLayout(0, 6, 0, 0));
         this.setMaximumSize(new Dimension(Integer.MAX_VALUE, Resources.ROW_HEIGHT));
@@ -77,6 +106,12 @@ public class NameEmailParticipantEntry extends JPanel {
         });
     }
 
+    /**
+     * Creates a new instances with pre-filled values
+     * @param name Pre-filled name of participant
+     * @param email Pre-filled e-mail of participant
+     * @param enabled Indicates whether name and e-mail are editable 
+     */
     public NameEmailParticipantEntry(String name, String email, boolean enabled) {
         this();
         this.participantTextField.setText(name);
