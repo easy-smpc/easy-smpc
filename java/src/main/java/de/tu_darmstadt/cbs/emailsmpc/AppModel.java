@@ -227,10 +227,8 @@ public class AppModel implements Serializable {
         case RECIEVING_SHARE:
             if (newState != AppState.SENDING_RESULT)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
-            for (Bin b : bins) {
-                if (!b.isComplete())
-                    throw new IllegalStateException("Not all shares collected");
-            }
+            if (!isResultComputable())
+                throw new IllegalStateException("Not all shares collected");
             state = newState;
             try {
                 populateResultMessages();
@@ -259,10 +257,8 @@ public class AppModel implements Serializable {
         case RECIEVING_RESULT:
             if (newState != AppState.FINISHED)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
-            for (Bin b : bins) {
-                if (!b.isComplete())
-                    throw new IllegalStateException("Not all shares collected");
-            }
+            if (!isResultComputable())
+                throw new IllegalStateException("Not all shares collected");
             state = newState;
             // Change GUI WIndow and display result
             break;
