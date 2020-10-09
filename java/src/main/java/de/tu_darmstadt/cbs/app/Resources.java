@@ -28,7 +28,10 @@ import javax.swing.ImageIcon;
  * @author Fabian Prasser
  */
 public class Resources {
-
+    
+    /** Count of minimal participants (including study creator) allowed. Set to at least 3 for productive usage*/
+    public static int                   MINIMAL_PARTICIPANTSCOUNT         = 1;
+    
     /** Row gap*/
     public static int                   ROW_GAP         = 5;
     

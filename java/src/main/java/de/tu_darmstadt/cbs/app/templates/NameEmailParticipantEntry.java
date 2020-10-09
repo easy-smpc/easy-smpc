@@ -13,18 +13,23 @@
  */
 package de.tu_darmstadt.cbs.app.templates;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import de.tu_darmstadt.cbs.app.Resources;
 import de.tu_darmstadt.cbs.app.SMPCServices;
+import de.tu_darmstadt.cbs.emailsmpc.Participant;
 import lombok.Getter;
 
 /**
@@ -48,13 +53,30 @@ public class NameEmailParticipantEntry extends JPanel {
      */
     @Getter
     private JTextField   emailTextField;
-    /** Radio button indicating which participants number the current user has (no relevance for study creator */
+    /** Radio button indicating which participants number the current user has (no relevance for study creator) */
     /**
      * Returns isCurrentParticipantRadioButton
      * @return
      */
     @Getter
     private JRadioButton isCurrentParticipantRadioButton;
+    /** Listener to check for changes in the text fields for validation*/
+    DocumentListener textfieldsChangeDocumentListener = new DocumentListener() {
+        
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            validateEnteredData();
+        }
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            validateEnteredData();
+        }
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            validateEnteredData();
+        }
+    };
+      
 
     /**
      * Creates a new instances
@@ -65,17 +87,15 @@ public class NameEmailParticipantEntry extends JPanel {
         JLabel participantLabel = new JLabel(Resources.getString("Participant.0")); //$NON-NLS-1$
         this.add(participantLabel);
         participantTextField = new JTextField();
+        this.getParticipantTextField().getDocument().addDocumentListener(textfieldsChangeDocumentListener);
         this.add(participantTextField);
-
         JPanel emptyPanel = new JPanel();
         this.add(emptyPanel);
-
-        JLabel emailLabel = new JLabel(Resources.getString("Participant.1")); //$NON-NLS-1$
+        JLabel emailLabel = new JLabel(Resources.getString("Participant.1")); //$NON-NLS-1$  
         this.add(emailLabel);
-
         this.emailTextField = new JTextField();
+        this.getEmailTextField().getDocument().addDocumentListener(textfieldsChangeDocumentListener);
         this.add(emailTextField);
-
         this.isCurrentParticipantRadioButton = new JRadioButton("", false); //$NON-NLS-1$
         this.add(isCurrentParticipantRadioButton);
         this.isCurrentParticipantRadioButton.addActionListener(new ActionListener() {
@@ -91,7 +111,7 @@ public class NameEmailParticipantEntry extends JPanel {
                                                                                                                                           .getComponent(i);
                         if (currentNameEmailParticipant.equals(NameEmailParticipantEntry.this)) {
                             NameEmailParticipantEntry.this.isCurrentParticipantRadioButton.setSelected(true);
-                            NameEmailParticipantEntry.this.isCurrentParticipantRadioButton.setText(Resources.getString("Participant.3")); //$NON-NLS-1$
+                            NameEmailParticipantEntry.this.isCurrentParticipantRadioButton.setText(Resources.getString("Participant.2")); //$NON-NLS-1$
                             SMPCServices.getServicesSMPC().getAppModel().numberOwnPartcipation = i;
                         } else {
                             currentNameEmailParticipant.getIsCurrentParticipantRadioButton()
@@ -120,6 +140,36 @@ public class NameEmailParticipantEntry extends JPanel {
         this.emailTextField.setEnabled(enabled);
         // Set isCurrentParticipantRadioButton only when the rest is disabled
         this.isCurrentParticipantRadioButton.setVisible(!enabled);
-
+    }
+   
+    
+    /**
+     * Validates entered data
+     * @return
+     */
+    public boolean validateEnteredData() {
+        boolean dataValid = true;
+        //validate E-Mail
+        if (!Participant.validEmail(this.getEmailTextField().getText()))
+        {
+            dataValid = false;
+            this.getEmailTextField().setBorder(BorderFactory.createLineBorder(Color.RED));
+        }
+        else {
+            this.getEmailTextField().setBorder(BorderFactory.createEmptyBorder());
+        }
+        //validate Name
+        if (this.getParticipantTextField().getText().isBlank() || this.getParticipantTextField().getText().isEmpty() )
+        {
+            dataValid = false;
+            this.getParticipantTextField().setBorder(BorderFactory.createLineBorder(Color.RED));
+        }
+        else
+        {
+            this.getParticipantTextField().setBorder(BorderFactory.createEmptyBorder());
+        }
+        this.revalidate();
+        this.repaint();
+        return dataValid;
     }
 }

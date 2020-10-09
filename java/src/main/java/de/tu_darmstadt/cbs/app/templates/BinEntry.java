@@ -14,12 +14,17 @@
 package de.tu_darmstadt.cbs.app.templates;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.math.BigInteger;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import de.tu_darmstadt.cbs.app.Resources;
 import lombok.Getter;
@@ -46,7 +51,22 @@ public class BinEntry extends JPanel {
      */
     @Getter
     private JTextField binValueField;
-
+    /** Listener to check for changes in the text fields for validation*/
+    DocumentListener textfieldsChangeDocumentListener = new DocumentListener() {
+        
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            validateEnteredData();
+        }
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            validateEnteredData();
+        }
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+            validateEnteredData();
+        }
+    };
     /**
      * Creates a new instance
      */
@@ -63,6 +83,7 @@ public class BinEntry extends JPanel {
         JLabel binNameLabel = new JLabel(Resources.getString("BinEntry.0")); //$NON-NLS-1$
         binNameTextField = new JTextField();
         binNameTextField.setColumns(Resources.DEFAULT_COLUMN_SIZE);
+        binNameTextField.getDocument().addDocumentListener(this.textfieldsChangeDocumentListener);
         
         left.add(binNameLabel, BorderLayout.WEST);
         left.add(binNameTextField, BorderLayout.CENTER);
@@ -74,10 +95,10 @@ public class BinEntry extends JPanel {
         
         JLabel binValueLabel = new JLabel(Resources.getString("BinEntry.1")); //$NON-NLS-1$
         this.binValueField = new JTextField();
-        binValueField.setColumns(Resources.DEFAULT_COLUMN_SIZE);
-        
-        right.add(binValueLabel, BorderLayout.WEST);
-        right.add(binValueField, BorderLayout.CENTER);
+        this.binValueField.setColumns(Resources.DEFAULT_COLUMN_SIZE);
+        this.binValueField.getDocument().addDocumentListener(this.textfieldsChangeDocumentListener);
+        right.add(this.binValueField, BorderLayout.WEST);
+        right.add(this.binValueField, BorderLayout.CENTER);
     }
 
     /**
@@ -89,5 +110,32 @@ public class BinEntry extends JPanel {
         this();
         this.binNameTextField.setText(name);
         this.binNameTextField.setEnabled(enabled);
+    }
+    
+    /**
+     * Validates entered data
+     * @return
+     */
+    public boolean validateEnteredData() {
+        boolean dataValid = true;
+      //validate Name
+        if (this.getBinNameTextField().getText().isBlank() || this.getBinNameTextField().getText().isEmpty() )
+        {
+            dataValid = false;
+            this.getBinNameTextField().setBorder(BorderFactory.createLineBorder(Color.RED));
+        }
+        else this.getBinNameTextField().setBorder(BorderFactory.createEmptyBorder());
+        //validate Value
+        try {
+            new BigInteger(this.getBinValueField().getText());
+            this.getBinValueField().setBorder(BorderFactory.createEmptyBorder());
+        }
+        catch(NumberFormatException e){
+            dataValid = false;
+            this.getBinValueField().setBorder(BorderFactory.createLineBorder(Color.RED));
+        }
+        this.revalidate();
+        this.repaint();
+        return dataValid;
     }
 }

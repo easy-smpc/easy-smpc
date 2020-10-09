@@ -88,14 +88,16 @@ public class SMPCServices {
         case INITIAL_SENDING:
             this.app.showPerspective(PerspectiveCreate.class);
             ((PerspectiveCreate) this.app.getPerspective(PerspectiveCreate.class)).setStudyCreation();
+            // Set behavior of save button
             ((PerspectiveCreate) this.app.getPerspective(PerspectiveCreate.class)).setActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    if( ((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).validateAllData() ) {
                     ((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).digestDataAsNewStudyCreation();
                     if (((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).openSaveDialog()) {
                         SMPCServices.getServicesSMPC().commandAndControl();
-                        // TODO: Aufruf in neuem Thread/als Callback?
                     }
+                  }
                 }
             });
             break;
@@ -105,14 +107,16 @@ public class SMPCServices {
             ((PerspectiveCreate) this.app.getPerspective(PerspectiveCreate.class)).setActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    if( ((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).validateAllData() ) {
                     ((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).digestDataAsStudyParticipation();
+                    SMPCServices.getServicesSMPC().getAppModel().state = AppState.SENDING_SHARE;
+                    SMPCServices.getServicesSMPC().setWorkflowState(AppState.SENDING_SHARE);
                     if (((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).openSaveDialog()) {
-                        SMPCServices.getServicesSMPC().getAppModel().state = AppState.SENDING_SHARE;
-                        SMPCServices.getServicesSMPC().setWorkflowState(AppState.SENDING_SHARE);
                         SMPCServices.getServicesSMPC().commandAndControl();
-                        // TODO: Aufruf in neuem Thread/als Callback?
                     }
+                    //TODO How to deal with a problem while saving
                 }
+              }
             });
             break;
         case SENDING_SHARE:

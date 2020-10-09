@@ -13,6 +13,7 @@
  */
 package de.tu_darmstadt.cbs.app;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -38,7 +40,6 @@ import javax.swing.event.DocumentListener;
 
 import de.tu_darmstadt.cbs.app.templates.BinEntry;
 import de.tu_darmstadt.cbs.app.templates.NameEmailParticipantEntry;
-import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 import lombok.Getter;
@@ -260,27 +261,18 @@ public class PerspectiveCreate extends Perspective {
         SMPCServices.getServicesSMPC().initalizeAsNewStudyCreation();
 
         // Unmarshall participants
-        for (int i = 0; i < participantsBox.getComponentCount(); i++) {
-            NameEmailParticipantEntry currentNameEmailParticipant = (NameEmailParticipantEntry) participantsBox.getComponent(i);
-            Participant participant = new Participant(currentNameEmailParticipant.getParticipantTextField()
+        for (NameEmailParticipantEntry currentNameEmailParticipantEntry:this.getNameEmailParticipantEntries()) {
+            Participant participant = new Participant(currentNameEmailParticipantEntry.getParticipantTextField()
                                                                                  .getText(),
-                                                      currentNameEmailParticipant.getEmailTextField()
+                                                                                 currentNameEmailParticipantEntry.getEmailTextField()
                                                                                  .getText());
             participants.add(participant);
         }
-
         // Unmarshall bins
-        for (int i = 0; i < binsBox.getComponentCount(); i++) {
-
-            BinEntry currentBinEntry = (BinEntry) binsBox.getComponent(i);
-
+        for (BinEntry currentBinEntry: this.getBinEntries()) {
             Bin bin = new Bin(currentBinEntry.getBinNameTextField().getText());
             bin.initialize(participants.size());
             bin.shareValue(new BigInteger(currentBinEntry.getBinValueField().getText()));
-            // TODO VORHER
-            // bigint
-            // Validation & und andere Validierungen (z.B. mindestens 3
-            // participants)
             bins.add(bin);
         }
 
@@ -295,31 +287,27 @@ public class PerspectiveCreate extends Perspective {
      * Sets data for a participant derived from the string entered
      */
     protected void setDataForParticipant() {
-        boolean firstParticipant = true;
         try {
             SMPCServices.getServicesSMPC()
-                        .initalizeAsNewStudyParticipation(participantDumpedData.getText());
+                        .initalizeAsNewStudyParticipation(this.participantDumpedData.getText());
             participantsBox.removeAll();
             binsBox.removeAll();
             this.studyTitle.setText(SMPCServices.getServicesSMPC().getAppModel().name);
-            this.studyTitle.setEnabled(false);
+            this.participantDumpedData.setBorder(BorderFactory.createEmptyBorder());
             for (Participant currentParticipant : SMPCServices.getServicesSMPC()
                                                               .getAppModel().participants) {
                 NameEmailParticipantEntry newNameEmailParticipantEntry = new NameEmailParticipantEntry(currentParticipant.name,
                                                                                                        currentParticipant.emailAddress,
                                                                                                        false);
-                // First participant(=Initator) can not be selected as a
-                // participant
-                if (firstParticipant == true) {
-                    newNameEmailParticipantEntry.getIsCurrentParticipantRadioButton()
-                                                .setSelected(false);
-                    newNameEmailParticipantEntry.getIsCurrentParticipantRadioButton()
-                                                .setEnabled(false);
-                    firstParticipant = false;
-                }
                 participantsBox.add(newNameEmailParticipantEntry);
 
             }
+            //Set default for radio button isCurrentParticipant
+            ((NameEmailParticipantEntry) participantsBox.getComponent(0)).getIsCurrentParticipantRadioButton().setSelected(false);
+            ((NameEmailParticipantEntry) participantsBox.getComponent(0)).getIsCurrentParticipantRadioButton().setEnabled(false);
+            ((NameEmailParticipantEntry) participantsBox.getComponent(1)).getIsCurrentParticipantRadioButton().setSelected(true);
+            ((NameEmailParticipantEntry) participantsBox.getComponent(1)).getIsCurrentParticipantRadioButton().setText(Resources.getString("Participant.2"));
+            SMPCServices.getServicesSMPC().getAppModel().numberOwnPartcipation = 1;
             for (Bin currentBin : SMPCServices.getServicesSMPC().getAppModel().bins) {
                 binsBox.add(new BinEntry(currentBin.name, false));
             }
@@ -329,8 +317,10 @@ public class PerspectiveCreate extends Perspective {
             binsBox.revalidate();
             binsBox.repaint();
         } catch (IllegalArgumentException e) {
-            System.out.println("message invalid");
-            this.saveButton.setEnabled(false);
+            this.participantDumpedData.setBorder(BorderFactory.createLineBorder(Color.RED));
+            this.participantDumpedData.revalidate();
+            this.participantDumpedData.repaint();
+            this.saveButton.setEnabled(false);   
         }
     }
     
@@ -345,12 +335,14 @@ public class PerspectiveCreate extends Perspective {
      */
     public void digestDataAsStudyParticipation() {
         BigInteger[] secretValuesofParticipant = new BigInteger[SMPCServices.getServicesSMPC()
-                                                                            .getAppModel().bins.length];
-
-        for (int i = 0; i < this.binsBox.getComponentCount(); i++) {
-            secretValuesofParticipant[i] = new BigInteger(((BinEntry) binsBox.getComponent(i)).getBinValueField()
-                                                                                              .getText());
+                                                                           .getAppModel().bins.length];
+        Integer i = 0;
+        for(BinEntry currentBinEntry:getBinEntries())
+        {
+            secretValuesofParticipant[i] = new BigInteger( currentBinEntry.getBinValueField().getText() );
+            i++;
         }
+
         SMPCServices.getServicesSMPC().getAppModel().toSendingShares(secretValuesofParticipant);
     }
     
@@ -368,11 +360,11 @@ public class PerspectiveCreate extends Perspective {
         this.buttonMinusParticipant.setEnabled(true);
         this.buttonPlusBin.setEnabled(true);
         this.buttonMinusBin.setEnabled(true);
+        this.saveButton.setEnabled(true);
         this.addParticipanLine(true);
         this.addBinLine(true);
         this.boxParticipantDumpedData.revalidate();
         this.boxParticipantDumpedData.repaint();
-
     }
 
     /**
@@ -390,7 +382,8 @@ public class PerspectiveCreate extends Perspective {
         this.binsBox.removeAll();
         this.addParticipanLine(false);
         this.addBinLine(false);
-        this.saveButton.setEnabled(false);
+        ((NameEmailParticipantEntry) participantsBox.getComponent(0)).getIsCurrentParticipantRadioButton().setSelected(false);
+        ((NameEmailParticipantEntry) participantsBox.getComponent(0)).getIsCurrentParticipantRadioButton().setEnabled(false);                                           
         this.boxParticipantDumpedData.revalidate();
         this.boxParticipantDumpedData.repaint();
     }
@@ -462,24 +455,74 @@ public class PerspectiveCreate extends Perspective {
         int returnFileChooser;
         returnFileChooser = fileChooser.showSaveDialog((Component) null);
         if (returnFileChooser == JFileChooser.APPROVE_OPTION) {
-            // Saves appStates to reset if saving fails
-            AppState tmpAppModelState = SMPCServices.getServicesSMPC().getAppModel().state;
-            AppState tmpWorkflowState = SMPCServices.getServicesSMPC().getWorkflowState();
             try {
                 SMPCServices.getServicesSMPC()
                             .getAppModel().filename = fileChooser.getSelectedFile();
-                SMPCServices.getServicesSMPC().getAppModel().state = AppState.SENDING_SHARE;
-                SMPCServices.getServicesSMPC().setWorkflowState(AppState.SENDING_SHARE);
                 SMPCServices.getServicesSMPC().getAppModel().saveProgram();
                 saved = true;
             } catch (IOException currentException) {
-                saved = false;
-                SMPCServices.getServicesSMPC().getAppModel().state = tmpAppModelState;
-                SMPCServices.getServicesSMPC().setWorkflowState(tmpWorkflowState);
                 // TODO Improve error message
                 JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError"));
             }
         }
         return saved;
+    }
+    
+    /**
+     * Convenience method to return all Entries of Bin
+     * @return
+     */
+    private ArrayList<NameEmailParticipantEntry> getNameEmailParticipantEntries()
+    {
+        ArrayList<NameEmailParticipantEntry> arrayList = new ArrayList<>();
+        for (int i = 0; i < participantsBox.getComponentCount(); i++) {
+            arrayList.add((NameEmailParticipantEntry) participantsBox.getComponent(i));
+        }
+        return arrayList;
+    }
+    
+    /**
+     * Convenience method to return all Entries of Bin
+     * @return
+     */
+    private ArrayList<BinEntry> getBinEntries()
+    {
+        ArrayList<BinEntry> arrayList = new ArrayList<>();
+        for (int i = 0; i < binsBox.getComponentCount(); i++) {
+            arrayList.add((BinEntry) binsBox.getComponent(i));
+        }
+        return arrayList;
+    }
+    
+    /**
+     * Validates all entered data
+     * @return
+     */
+    public boolean validateAllData()
+    {
+        boolean dataValid = true;
+        for (NameEmailParticipantEntry currentNameEmailParticipantEntry:this.getNameEmailParticipantEntries()) {
+            if(!currentNameEmailParticipantEntry.validateEnteredData())
+            {
+                JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.errorValidateParticipants"));
+                dataValid = false;
+                break;
+            }
+        }
+        for (BinEntry currentBinEntry: this.getBinEntries()) {
+            if(!currentBinEntry.validateEnteredData())
+            {
+                JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.errorValidateBins"));
+                dataValid = false;
+                break;
+            }
+        }
+        if (participantsBox.getComponentCount() < Resources.MINIMAL_PARTICIPANTSCOUNT)
+        {
+            JOptionPane.showMessageDialog(null, String.format(Resources.getString("PerspectiveCreate.errorMinimalParticipants"),
+                                                              Resources.MINIMAL_PARTICIPANTSCOUNT));
+            dataValid = false;
+        }
+        return dataValid;
     }
 }
