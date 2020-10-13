@@ -13,6 +13,7 @@
  */
 package de.tu_darmstadt.cbs.app;
 
+import java.awt.Color;
 import java.awt.Image;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,49 +21,55 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
 
 /**
- * Accessor class for messages used by the UI
+ * Accessor class for messages and settings used by the UI
  * 
  * @author Fabian Prasser
  */
 public class Resources {
-    
-    /** Count of minimal participants (including study creator) allowed. Set to at least 3 for productive usage*/
-    public static int                   MINIMAL_PARTICIPANTSCOUNT         = 1;
-    
-    /** Row gap*/
-    public static int                   ROW_GAP         = 5;
-    
-    /** Row height*/
-    public static final int             ROW_HEIGHT      = 20;
-    
-    /** Row height for a text area*/
-    public static final int             COLOUMNS_TEXTAREA      = 80;
-    
-    
-    /** Maximal x-size of a text field*/
-    public static int                   MAX_SIZE_TEXTFIELD_X         = 500;
-    
-    /** Maximal y-size of a text field*/
-    public static int                   MAX_SIZE_TEXTFIELD_Y         = 30;
-    
-    /** Min x-size of a text area*/
-    public static int                   SIZE_TEXTAREA_X         = 400;
-    
-    /** Min y-size of a text area*/
-    public static int                   SIZE_TEXTAREA_Y         = 100;
 
-    
-    /** Default column size for a text field*/
-    public static int                   DEFAULT_COLUMN_SIZE         = 10;
-    
+    /** Invalid border */
+    public static final Border          INVALID_BORDER            = BorderFactory.createLineBorder(new Color(255,69,0));
+
+    /** Default border */
+    public static final Border          DEFAULT_BORDER            = UIManager.getLookAndFeel()
+                                                                             .getDefaults()
+                                                                             .getBorder("TextField.border");
+
+    /** Row gap */
+    public static int                   ROW_GAP                   = 2;
+
+    /** Row height */
+    public static final int             ROW_HEIGHT                = 20;
+
+    /** Row height for a text area */
+    public static final int             COLOUMNS_TEXTAREA         = 80;
+
+    /** Maximal x-size of a text field */
+    public static int                   MAX_SIZE_TEXTFIELD_X      = 500;
+
+    /** Maximal y-size of a text field */
+    public static int                   MAX_SIZE_TEXTFIELD_Y      = 30;
+
+    /** Min x-size of a text area */
+    public static int                   SIZE_TEXTAREA_X           = 400;
+
+    /** Min y-size of a text area */
+    public static int                   SIZE_TEXTAREA_Y           = 100;
+
+    /** Default column size for a text field */
+    public static int                   DEFAULT_COLUMN_SIZE       = 10;
+
     /** Bundle name */
-    private static final String         BUNDLE_NAME     = "de.tu_darmstadt.cbs.app.messages";   //$NON-NLS-1$
+    private static final String         BUNDLE_NAME               = "de.tu_darmstadt.cbs.app.messages";       //$NON-NLS-1$
 
     /** Bundle */
-    private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
+    private static final ResourceBundle RESOURCE_BUNDLE           = ResourceBundle.getBundle(BUNDLE_NAME);
 
     /**
      * No instantiation

@@ -84,41 +84,27 @@ public class SMPCServices {
      */
     public void commandAndControl() {
         switch (this.workflowState) {
-
         case INITIAL_SENDING:
             this.app.showPerspective(PerspectiveCreate.class);
-            ((PerspectiveCreate) this.app.getPerspective(PerspectiveCreate.class)).setStudyCreation();
-            // Set behavior of save button
-            ((PerspectiveCreate) this.app.getPerspective(PerspectiveCreate.class)).setActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if( ((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).validateAllData() ) {
-                    ((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).digestDataAsNewStudyCreation();
-                    if (((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).openSaveDialog()) {
-                        SMPCServices.getServicesSMPC().commandAndControl();
-                    }
-                  }
-                }
-            });
             break;
         case PARTICIPATING:
-            this.app.showPerspective(PerspectiveCreate.class);
-            ((PerspectiveCreate) getApp().getPerspective(PerspectiveCreate.class)).setStudyParticipation();
-            ((PerspectiveCreate) this.app.getPerspective(PerspectiveCreate.class)).setActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if( ((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).validateAllData() ) {
-                    ((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).digestDataAsStudyParticipation();
-                    SMPCServices.getServicesSMPC().getAppModel().state = AppState.SENDING_SHARE;
-                    SMPCServices.getServicesSMPC().setWorkflowState(AppState.SENDING_SHARE);
-                    if (((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).openSaveDialog()) {
-                        SMPCServices.getServicesSMPC().commandAndControl();
-                    }
-                    //TODO How to deal with a problem while saving
-                }
-              }
-            });
-            break;
+//            this.app.showPerspective(PerspectiveCreate.class);
+//            ((PerspectiveCreate) getApp().getPerspective(PerspectiveCreate.class)).setStudyParticipation();
+//            ((PerspectiveCreate) this.app.getPerspective(PerspectiveCreate.class)).setActionListener(new ActionListener() {
+//                @Override
+//                public void actionPerformed(ActionEvent e) {
+//                    if( ((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).validateAllData() ) {
+//                    ((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).digestDataAsStudyParticipation();
+//                    SMPCServices.getServicesSMPC().getAppModel().state = AppState.SENDING_SHARE;
+//                    SMPCServices.getServicesSMPC().setWorkflowState(AppState.SENDING_SHARE);
+//                    if (((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).openSaveDialog()) {
+//                        SMPCServices.getServicesSMPC().commandAndControl();
+//                    }
+//                    //TODO How to deal with a problem while saving
+//                }
+//              }
+//            });
+//            break;
         case SENDING_SHARE:
             this.app.showPerspective(PerspectiveContinue.class);
             ((PerspectiveContinue) this.app.getPerspective(PerspectiveContinue.class)).setDataDisplay();
@@ -209,7 +195,7 @@ public class SMPCServices {
     protected void markMessagesSent() {
 
         for (int i = 0; i < SMPCServices.getServicesSMPC().getAppModel().numParticipants; i++) {
-            if (i != SMPCServices.getServicesSMPC().getAppModel().numberOwnPartcipation) {
+            if (i != SMPCServices.getServicesSMPC().getAppModel().ownId) {
                 SMPCServices.getServicesSMPC().getAppModel().markMessageSent(i);
             }
         }

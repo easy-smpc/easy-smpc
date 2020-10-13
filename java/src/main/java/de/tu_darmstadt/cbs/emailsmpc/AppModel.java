@@ -13,8 +13,6 @@ import java.util.stream.IntStream;
 public class AppModel implements Serializable {
     public int                numParticipants;
     public int                ownId;
-    // FW: Feld temporär eingefügt bis geklärt
-    public int                numberOwnPartcipation = 0;
     public AppState           state;
     public Bin[]              bins;
     public Participant[]      participants;

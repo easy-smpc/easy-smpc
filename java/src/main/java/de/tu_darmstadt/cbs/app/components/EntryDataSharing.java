@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.tu_darmstadt.cbs.app.templates;
+package de.tu_darmstadt.cbs.app.components;
 
 import java.awt.Desktop;
 import java.awt.GridBagConstraints;
@@ -32,10 +32,12 @@ import de.tu_darmstadt.cbs.app.Resources;
 import lombok.Getter;
 
 /**
+ * Entry for data
+ * 
  * @author Felix Wirth
- *
+ * @author Fabian Prasser
  */
-public class DataSharingDisplayEntry extends JPanel {
+public class EntryDataSharing extends JPanel {
 
     /** SVUID */
     private static final long serialVersionUID = -8114494722419799605L;
@@ -66,7 +68,7 @@ public class DataSharingDisplayEntry extends JPanel {
     /**
      * Creates a new instance
      */
-    public DataSharingDisplayEntry() {
+    public EntryDataSharing() {
         this.setLayout(new GridBagLayout());
         this.participantNameLabel = new JLabel(Resources.getString("Participant.0"));
         GridBagConstraints gbc_participantLabel = new GridBagConstraints();
@@ -106,7 +108,7 @@ public class DataSharingDisplayEntry extends JPanel {
      * @param enabled Indicates whether is dataToShareTextArea enabled? 
      * @param showButton Indicates whether the button to send emails (sendMailButton) is displayed
      */
-    public DataSharingDisplayEntry(String participantName,
+    public EntryDataSharing(String participantName,
                                    String participantEmail,
                                    String dataToShare,
                                    boolean enabled,

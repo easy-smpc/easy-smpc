@@ -13,7 +13,7 @@ public class Participant implements Serializable {
 
     public Participant(String name, String emailAddress) throws IllegalArgumentException {
         if (!Participant.validEmail(emailAddress))
-            throw new IllegalArgumentException("Invalid Email Address " + emailAddress);
+            throw new IllegalArgumentException("Invalid Email Address: " + emailAddress);
         this.name = name;
         this.emailAddress = emailAddress;
     }
