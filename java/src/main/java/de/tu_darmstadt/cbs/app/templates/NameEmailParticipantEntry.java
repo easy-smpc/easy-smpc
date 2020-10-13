@@ -36,8 +36,8 @@ import lombok.Getter;
  * @author Felix Wirth
  *
  */
-
 public class NameEmailParticipantEntry extends JPanel {
+    
     /** SVUID */
     private static final long serialVersionUID = -6907197312982454382L;
     /** Text field to enter the participant's name */
@@ -159,7 +159,7 @@ public class NameEmailParticipantEntry extends JPanel {
             this.getEmailTextField().setBorder(BorderFactory.createEmptyBorder());
         }
         //validate Name
-        if (this.getParticipantTextField().getText().isBlank() || this.getParticipantTextField().getText().isEmpty() )
+        if (this.getParticipantTextField().getText().replace(" ", "").isEmpty())
         {
             dataValid = false;
             this.getParticipantTextField().setBorder(BorderFactory.createLineBorder(Color.RED));

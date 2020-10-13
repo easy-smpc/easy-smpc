@@ -119,7 +119,7 @@ public class BinEntry extends JPanel {
     public boolean validateEnteredData() {
         boolean dataValid = true;
       //validate Name
-        if (this.getBinNameTextField().getText().isBlank() || this.getBinNameTextField().getText().isEmpty() )
+        if (this.getBinNameTextField().getText().replace(" ", "").isEmpty())
         {
             dataValid = false;
             this.getBinNameTextField().setBorder(BorderFactory.createLineBorder(Color.RED));
