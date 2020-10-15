@@ -116,7 +116,7 @@ public abstract class ComponentEntry extends JPanel {
 
         // Value
         if (rightValue != null) {
-            fieldRight.setText(leftValue);
+            fieldRight.setText(rightValue);
         }
         
         // Status
@@ -163,6 +163,13 @@ public abstract class ComponentEntry extends JPanel {
      */
     public boolean areValuesValid() {
         return this.fieldLeft.isValueValid() && this.fieldRight.isValueValid();
+    }
+    
+    /**
+     * Returns whether the right field is valid
+     */
+    public boolean isFieldRightValueValid() {
+        return this.fieldRight.isValueValid();
     }
     
     /**

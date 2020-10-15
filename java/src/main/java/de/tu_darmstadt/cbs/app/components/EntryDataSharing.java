@@ -120,10 +120,11 @@ public class EntryDataSharing extends JPanel {
         this.dataToShareTextArea.setEditable(enabled);
         this.sendMailButton.setVisible(showButton);
         if (showButton) {
-            URI mailToURI = URI.create(String.format(Resources.getString("DataSharingDisplayEntry.mailToString"),
-                                                     participantEmail,
-                                                     participantName,
-                                                     dataToShare));
+//            URI mailToURI = URI.create(String.format(Resources.getString("DataSharingDisplayEntry.mailToString"),
+//                                                     participantEmail,
+//                                                     participantName,
+//                                                     dataToShare));
+            URI mailToURI = URI.create("mailto:dummy@dummy.com?subject=Dataexchange");
             this.sendMailButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {

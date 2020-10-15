@@ -73,4 +73,37 @@ public class EntryBin extends ComponentEntry {
                },
              enabled);
     }
+    
+    /**
+     * Creates a new instance
+     * @param name
+     * @param enabled
+     */
+    public EntryBin(String name, boolean leftEnabled, boolean rightEnabled, boolean removeEnabled) {
+        super(Resources.getString("BinEntry.0"), //$NON-NLS-1$
+             name,
+             leftEnabled,
+             new ComponentTextFieldValidator() {
+               @Override
+               public boolean validate(String text) {
+                   // TODO: Must ensure that no two bins have the same name
+                   return !text.trim().isEmpty();
+               }
+             },
+             Resources.getString("BinEntry.1"), //$NON-NLS-1$
+             String.valueOf(0),
+             rightEnabled,
+             new ComponentTextFieldValidator() {
+                 @Override
+                 public boolean validate(String text) {
+                     try {
+                         Integer.valueOf(text);
+                         return true;
+                     } catch (Exception e) {
+                         return false;
+                     }
+                 }
+               },
+             removeEnabled);
+    }
 }

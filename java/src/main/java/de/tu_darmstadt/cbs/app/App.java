@@ -126,8 +126,10 @@ public class App extends JFrame {
         // Add perspectives
         addPerspective(new PerspectiveFinalize(this));
         addPerspective(new PerspectiveContinue(this));
+        addPerspective(new PerspectiveParticipate(this));
         addPerspective(new PerspectiveCreate(this));
         addPerspective(new PerspectiveStart(this));
+        
 
         // Show the first perspective
         showPerspective(0);

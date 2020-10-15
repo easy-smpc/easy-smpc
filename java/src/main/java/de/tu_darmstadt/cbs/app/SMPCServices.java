@@ -88,23 +88,22 @@ public class SMPCServices {
             this.app.showPerspective(PerspectiveCreate.class);
             break;
         case PARTICIPATING:
-//            this.app.showPerspective(PerspectiveCreate.class);
-//            ((PerspectiveCreate) getApp().getPerspective(PerspectiveCreate.class)).setStudyParticipation();
-//            ((PerspectiveCreate) this.app.getPerspective(PerspectiveCreate.class)).setActionListener(new ActionListener() {
+            this.app.showPerspective(PerspectiveParticipate.class);
+//            ((PerspectiveCreate) this.app.getPerspective(PerspectiveParticipate.class)).setActionListener(new ActionListener() {
 //                @Override
 //                public void actionPerformed(ActionEvent e) {
-//                    if( ((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).validateAllData() ) {
-//                    ((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).digestDataAsStudyParticipation();
+//                    if( ((PerspectiveCreate) app.getPerspective(PerspectiveParticipate.class)).validateAllData() ) {
+//                    ((PerspectiveCreate) app.getPerspective(PerspectiveParticipate.class)).digestDataAsStudyParticipation();
 //                    SMPCServices.getServicesSMPC().getAppModel().state = AppState.SENDING_SHARE;
 //                    SMPCServices.getServicesSMPC().setWorkflowState(AppState.SENDING_SHARE);
-//                    if (((PerspectiveCreate) app.getPerspective(PerspectiveCreate.class)).openSaveDialog()) {
+//                    if (((PerspectiveCreate) app.getPerspective(PerspectiveParticipate.class)).openSaveDialog()) {
 //                        SMPCServices.getServicesSMPC().commandAndControl();
 //                    }
 //                    //TODO How to deal with a problem while saving
 //                }
 //              }
 //            });
-//            break;
+            break;
         case SENDING_SHARE:
             this.app.showPerspective(PerspectiveContinue.class);
             ((PerspectiveContinue) this.app.getPerspective(PerspectiveContinue.class)).setDataDisplay();
