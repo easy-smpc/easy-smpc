@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.junit.Test;
 
@@ -58,6 +60,15 @@ public class AppModelTest {
     public void AddingParticipants() {
         AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
         assertTrue(testmodel.participants.length == 3);
+    }
+    @Test
+    public void NonCollidingUID(){
+      Set<String> ids = new HashSet<String>();
+      for (int i = 0; i < 1000; i++ ) {
+        AppModel model = new AppModel();
+        assertTrue(!ids.contains(model.studyUID));
+        ids.add(model.studyUID);
+      }
     }
 
     @Test

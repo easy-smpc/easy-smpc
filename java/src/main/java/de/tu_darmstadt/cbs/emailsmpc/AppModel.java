@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.util.stream.IntStream;
 
 public class AppModel implements Serializable {
+    public final String       studyUID = UIDGenerator.generateShortUID(8);
     public int                numParticipants;
     public int                ownId;
     public AppState           state;
