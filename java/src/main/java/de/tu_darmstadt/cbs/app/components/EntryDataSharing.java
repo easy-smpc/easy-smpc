@@ -24,6 +24,7 @@ import java.net.URI;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
@@ -92,7 +93,7 @@ public class EntryDataSharing extends JPanel {
         this.dataToShareTextArea.setLineWrap(true);
         this.add(this.dataToShareTextArea, gbc_dumpedDataToSendTextArea);
 
-        this.sendMailButton = new JButton(Resources.getString("DataSharingDisplayEntry.sendEmailButtion"));
+        this.sendMailButton = new JButton(Resources.getString("DataSharingDisplayEntry.sendEmailButton"));
         GridBagConstraints gbc_sendMailButton = new GridBagConstraints();
         gbc_sendMailButton.gridx = 2;
         gbc_sendMailButton.gridy = 1;
@@ -120,19 +121,22 @@ public class EntryDataSharing extends JPanel {
         this.dataToShareTextArea.setEditable(enabled);
         this.sendMailButton.setVisible(showButton);
         if (showButton) {
-//            URI mailToURI = URI.create(String.format(Resources.getString("DataSharingDisplayEntry.mailToString"),
-//                                                     participantEmail,
-//                                                     participantName,
-//                                                     dataToShare));
-            URI mailToURI = URI.create("mailto:dummy@dummy.com?subject=Dataexchange");
+            URI mailToURI = URI.create(String.format(Resources.mailToString,
+                                                     participantEmail, //E-mail address
+                                                     String.format(Resources.getString("DataSharingDisplayEntry.mailSubject"),//Generate subject //TODO: add Project name 
+                                                                   ""),                                                                 
+                                                     String.format(Resources.getString("DataSharingDisplayEntry.mailBody") //Generate body
+                                                                   ,participantName
+                                                                   ,dataToShare)
+                                                     ).replace(" ", "%20"));
+
             this.sendMailButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
                         Desktop.getDesktop().mail(mailToURI);
                     } catch (IOException e1) {
-                        // TODO Add error log
-                        e1.printStackTrace();
+                        JOptionPane.showInputDialog(null, "", Resources.getString("DataSharingDisplayEntry.sendEMailError"), JOptionPane.ERROR_MESSAGE);
                     }
                 }
             });

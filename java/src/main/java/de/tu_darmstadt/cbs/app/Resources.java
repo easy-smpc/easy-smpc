@@ -64,6 +64,8 @@ public class Resources {
 
     /** Default column size for a text field */
     public static int                   DEFAULT_COLUMN_SIZE       = 10;
+    
+    public static String mailToString = "mailto:%s?subject=%s&body=%s";
 
     /** Bundle name */
     private static final String         BUNDLE_NAME               = "de.tu_darmstadt.cbs.app.messages";       //$NON-NLS-1$
