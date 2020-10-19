@@ -76,6 +76,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
     /**
      * Reacts on all changes in any components
      */
+    @Override
     public void stateChanged(ChangeEvent e) {
         this.save.setEnabled(this.areValuesValid());
     }
@@ -83,7 +84,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
     /**
      * Sets data for a participant derived from the string entered
      */
-    protected void setDataForParticipant() {
+    private void setDataForParticipant() {
         try {
             SMPCServices.getServicesSMPC()
                         .initalizeAsNewStudyParticipation(this.participantDumpedData.getText());
