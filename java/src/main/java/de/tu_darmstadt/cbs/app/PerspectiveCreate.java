@@ -209,6 +209,12 @@ public class PerspectiveCreate extends Perspective implements ChangeListener {
      * @return Saving actually performed?
      */
     private void save() {
+        
+        // Check whether at least three participants
+        if (this.participants.getComponents().length < 3) {
+            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.notEnoughParticipants"));
+            return;
+        }
 
         // File
         File file = null;
