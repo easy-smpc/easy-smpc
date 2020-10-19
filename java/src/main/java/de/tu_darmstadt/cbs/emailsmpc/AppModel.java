@@ -1,5 +1,6 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
+import de.tu_darmstadt.cbs.differentialprivacy.*;
 import java.io.Serializable;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -20,6 +21,8 @@ public class AppModel implements Serializable {
     public String name;
     private Message[] unsentMessages;
     public File filename;
+    public boolean useDifferentialPrivacy;
+    public double epsilonDP;
     private static final long serialVersionUID = 67394185932574354L;
 
     public AppModel() {
@@ -31,6 +34,8 @@ public class AppModel implements Serializable {
         participants = null;
         unsentMessages = null;
         filename = null;
+        useDifferentialPrivacy = false;
+        epsilonDP = 0;
     }
 
     public void initializeStudy(String name, Participant[] participants, Bin[] bins) throws IllegalStateException {
@@ -50,6 +55,13 @@ public class AppModel implements Serializable {
         this.participants = participants;
         if (state == AppState.NONE)
             state = AppState.STARTING;
+    }
+    public void initializeStudy(String name, Participant[] participants, Bin[] bins, boolean useDP, double dpEpsilon) throws IllegalStateException {
+        if (!(state == AppState.NONE || state == AppState.STARTING))
+            throw new IllegalStateException("Unable to initialize study at state" + state);
+        useDifferentialPrivacy = useDP;
+        epsilonDP = dpEpsilon;
+        initializeStudy(name, participants, bins);
     }
 
     /**
@@ -130,6 +142,9 @@ public class AppModel implements Serializable {
     public void toSendingShares(BigInteger[] values) throws IllegalArgumentException {
         if (values.length != bins.length)
             throw new IllegalArgumentException("Number of values not equal number of bins");
+        if(useDifferentialPrivacy == true){
+          values = LaplaceMechanism.privatize(values, 1, ComposeDP.getSimpleIndividualEpsilon(epsilonDP, participants.length));
+        }
         for (int i = 0; i < bins.length; i++) {
             bins[i].shareValue(values[i]);
         }
