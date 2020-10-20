@@ -57,10 +57,10 @@ public class Resources {
     public static int                   MAX_SIZE_TEXTFIELD_Y      = 30;
 
     /** Min x-size of a text area */
-    public static int                   SIZE_TEXTAREA_X           = 400;
+    public static int                   SIZE_TEXTAREA_X           = 800;
 
     /** Min y-size of a text area */
-    public static int                   SIZE_TEXTAREA_Y           = 100;
+    public static int                   SIZE_TEXTAREA_Y           = 150;
 
     /** Default column size for a text field */
     public static int                   DEFAULT_COLUMN_SIZE       = 10;

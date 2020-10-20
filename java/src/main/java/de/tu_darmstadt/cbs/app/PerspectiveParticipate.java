@@ -14,7 +14,6 @@
 package de.tu_darmstadt.cbs.app;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -22,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -29,18 +29,17 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
+import de.tu_darmstadt.cbs.app.components.ComponentAdditionalAction;
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.EntryBin;
 import de.tu_darmstadt.cbs.app.components.EntryParticipant;
+import de.tu_darmstadt.cbs.app.components.ExchangeStringPicker;
 import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
@@ -59,10 +58,10 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
     private JPanel             bins;
     /** Text field containing title of study */
     private ComponentTextField title;
+    /** enterExchangeString button */
+    private JButton            enterExchangeStringButton;
     /** Save button */
     private JButton            save;
-//    /** Text field containing data entered by a participant (which was received by user) */
-    private JTextArea  participantDumpedData; // interim
 
 
     /**
@@ -84,14 +83,10 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
     /**
      * Sets data for a participant derived from the string entered
      */
-    private void setDataForParticipant() {
-        try {
-            SMPCServices.getServicesSMPC()
-                        .initalizeAsNewStudyParticipation(this.participantDumpedData.getText());
+    public void setDataForParticipant() {
             participants.removeAll();
             bins.removeAll();
-            this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
-            this.participantDumpedData.setBorder(BorderFactory.createEmptyBorder());
+            this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);            
             for (Participant currentParticipant : SMPCServices.getServicesSMPC()
                                                               .getAppModel().participants) {
                 EntryParticipant newNameEmailParticipantEntry = new EntryParticipant(currentParticipant.name,
@@ -109,13 +104,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
             participants.revalidate();
             participants.repaint();
             bins.revalidate();
-            bins.repaint();
-        } catch (IllegalArgumentException e) {
-            this.participantDumpedData.setBorder(BorderFactory.createLineBorder(Color.RED));
-            this.participantDumpedData.revalidate();
-            this.participantDumpedData.repaint();
-            this.save.setEnabled(false);   
-        }
+            bins.repaint();        
     }
     
     /**
@@ -183,7 +172,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         panel.setLayout(new BorderLayout());
 
         // -------
-        // Name of study
+        // Study title
         // -------
         JPanel title = new JPanel();
         panel.add(title, BorderLayout.NORTH);
@@ -203,50 +192,8 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         
         // Central panel
         JPanel central = new JPanel();
-        //central.setLayout(new GridLayout(2, 1)); // Interim textarena for dump string
-        central.setLayout(new GridLayout(3, 1));
-        panel.add(central, BorderLayout.CENTER);
-        
-        // -------
-        // Interim: textarena for dump string
-        // -------      
-      this.participantDumpedData = new JTextArea();
-      participantDumpedData.setLineWrap(true);
-      participantDumpedData.getDocument().addDocumentListener(new DocumentListener() {
-          @Override
-          public void removeUpdate(DocumentEvent e) {
-              if (participantDumpedData.getText().isEmpty()) {
-                  PerspectiveParticipate.this.participants.removeAll();
-                  PerspectiveParticipate.this.bins.removeAll();
-                  save.setEnabled(false);
-                  participants.add(new EntryParticipant("", "", false), 0); //empty entry
-                  bins.add(new EntryBin(false), 0);
-              } else {
-                  PerspectiveParticipate.this.participants.removeAll();
-                  PerspectiveParticipate.this.bins.removeAll();
-                  setDataForParticipant();
-              }
-          }
-
-          @Override
-          public void insertUpdate(DocumentEvent e) {
-              PerspectiveParticipate.this.participants.removeAll();
-              PerspectiveParticipate.this.bins.removeAll();
-              setDataForParticipant();
-          }
-
-          @Override
-          public void changedUpdate(DocumentEvent e) {
-              // TODO Implement
-
-          } 
-       
-    } );
-    central.add(participantDumpedData);    
-      // -------
-      // Ende Interim: textarena for dump string
-      // -------    
-        
+        central.setLayout(new GridLayout(2, 1));
+        panel.add(central, BorderLayout.CENTER);        
         
         // ------
         // Participants
@@ -278,8 +225,24 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         this.bins.add(new EntryBin(false), 0); //empty entry
            
         // ------
-        // Save button
+        // EnterExchangeString button and save button
         // ------
+        JPanel buttonsPane = new JPanel();
+        buttonsPane.setLayout(new GridLayout(2, 1));
+        enterExchangeStringButton = new JButton(Resources.getString("PerspectiveParticipate.enterExchangeString"));
+        enterExchangeStringButton.addActionListener(new ActionListener() {            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new ExchangeStringPicker(central,new ComponentAdditionalAction() {            
+                    @Override
+                    public void additionalAction() {
+                        PerspectiveParticipate.this.setDataForParticipant();
+                    }
+                } );         
+            }
+        });
+        
+        buttonsPane.add(enterExchangeStringButton, 0,0);
         save = new JButton(Resources.getString("PerspectiveCreate.save"));
         save.setEnabled(this.areValuesValid());
         save.addActionListener(new ActionListener() {
@@ -288,6 +251,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
                 save();
             }
         });
-        panel.add(save, BorderLayout.SOUTH);        
+        buttonsPane.add(save, 0,1);
+        panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 }

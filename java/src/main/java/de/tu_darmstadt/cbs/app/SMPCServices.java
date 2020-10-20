@@ -214,10 +214,10 @@ public class SMPCServices {
      * @param Data
      *            copied by user manually in program
      */
-    public void initalizeAsNewStudyParticipation(String dumpedData) {
+    public void initalizeAsNewStudyParticipation(String exchangeString) {
         this.appModel = new AppModel();
         this.appModel.toParticipating();
-        this.appModel.toEnteringValues(dumpedData);
+        this.appModel.toEnteringValues(exchangeString);
     }
 
     /**
