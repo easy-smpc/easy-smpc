@@ -38,13 +38,7 @@ public class LaplaceMechanism {
   public static BigInteger privatize(BigInteger count, double sensitivity, double epsilon) {
     double noise_draw = LaplaceMechanism.laplace(0, sensitivity/epsilon);
     BigInteger noise;
-    if (Math.signum(noise_draw) == -1){
-      noise = BigInteger.valueOf((long)Math.floor(noise_draw));
-    } else if (Math.signum(noise_draw) == 1){
-      noise = BigInteger.valueOf((long)Math.ceil(noise_draw));
-    } else {
-      return count;
-    }
+    noise = BigInteger.valueOf((long)Math.rint(noise_draw));
     return count.add(noise);
   }
   public static BigInteger[] privatize(BigInteger[] count, double sensitivity, double epsilon) {
