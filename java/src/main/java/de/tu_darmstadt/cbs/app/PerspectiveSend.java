@@ -21,6 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -66,29 +67,20 @@ public class PerspectiveSend extends Perspective {
      * Sets data from appModel
      */
     public void setDataAndShowPerspective() {
-            this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);         
-            int i = 0; //index count for participants to access messages
-            for (Participant currentParticipant : SMPCServices.getServicesSMPC().getAppModel().participants) {
-                EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name,
-                                                                       currentParticipant.emailAddress);
-                entry.setAddButtonText(Resources.getString("PerspectiveSend.sendEmailButton"));
-                if (i != SMPCServices.getServicesSMPC().getAppModel().ownId) {//Only set when not the own participant                    
-                    entry.setExchangeString(SMPCServices.getServicesSMPC().getAppModel().getUnsentMessageFor(i).data);                   
-                    entry.setAddListener(new ActionListener() {
-                        @Override
-                         public void actionPerformed(ActionEvent e) {
-                            PerspectiveSend.this.sendMail(entry);
-                         } 
-                     });
+        this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
+        int i = 0; // index count for participants to access messages
+        for (Participant currentParticipant : SMPCServices.getServicesSMPC().getAppModel().participants) {
+            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, currentParticipant.emailAddress, i != SMPCServices.getServicesSMPC().getAppModel().ownId);
+            entry.setSendListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    PerspectiveSend.this.sendMail(entry);
                 }
-                else
-                {
-                    entry.isOwnEntry(true);
-                }                             
-                i++;
-                participants.add(entry);
-            }
-            this.getApp().showPerspective(PerspectiveSend.class);
+            });
+            i++;
+            participants.add(entry);
+        }
+        this.getApp().showPerspective(PerspectiveSend.class);
     }
     
     /**
@@ -102,15 +94,32 @@ public class PerspectiveSend extends Perspective {
                                                                SMPCServices.getServicesSMPC().getAppModel().name),                                                                 
                                                  String.format(Resources.getString("PerspectiveSend.mailBody") //Generate body
                                                                ,entry.getLeftValue()
-                                                               ,entry.getExchangeString().replace("%", "%%"))
+                                                               ,getExchangeString(entry).replace("%", "%%"))
                                                  ).replace(" ", "%20"));
         try {
             Desktop.getDesktop().mail(mailToURI);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.mailToError") + e.getMessage());
         }
-        
     }
+     
+     /**
+      * Returns the exchange string for the given entry
+      * @param entry
+      */
+     private String getExchangeString(EntryParticipantSendMail entry) {
+         int id = Arrays.asList(participants.getComponents()).indexOf(entry);
+         return SMPCServices.getServicesSMPC().getAppModel().getUnsentMessageFor(id).data;
+     }
+     
+     /**
+      * Returns whether this is the own entry
+      * @param entry
+      * @return
+      */
+     private boolean isOwnEntry(Component entry) {
+         return Arrays.asList(participants.getComponents()).indexOf(entry) == SMPCServices.getServicesSMPC().getAppModel().ownId;
+     }
 
     /**
      * Save the project
@@ -207,8 +216,7 @@ public class PerspectiveSend extends Perspective {
             @Override
             public void actionPerformed(ActionEvent e) {
                 for (Component c : PerspectiveSend.this.participants.getComponents()) {
-                    if (!((EntryParticipantSendMail) c).getOwnEntry())
-                    {
+                    if (!isOwnEntry(c)) {
                         PerspectiveSend.this.sendMail((EntryParticipantSendMail) c);
                     }
                 }

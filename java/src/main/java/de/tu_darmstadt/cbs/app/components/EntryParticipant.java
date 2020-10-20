@@ -22,17 +22,10 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class EntryParticipant extends ComponentEntry {
-    
+public class EntryParticipant extends ComponentEntryAddRemove {
+
     /** SVUID */
     private static final long serialVersionUID = -6907197312982454382L;
-
-    /**
-     * Creates a new instance
-     */
-    public EntryParticipant() {
-        this("", "", true);
-    }
 
     /**
      * Creates a new instance
@@ -61,34 +54,5 @@ public class EntryParticipant extends ComponentEntry {
                   }
                 },
               enabled);
-    }
-    
-    /**
-     * Creates a new instance
-     * @param name
-     * @param email
-     * @param enabled
-     */
-    public EntryParticipant(String name, String email, boolean fieldsEnabled, boolean buttonsDisplayed) {
-        super(Resources.getString("Participant.0"), //$NON-NLS-1$
-              name,
-              fieldsEnabled,
-              new ComponentTextFieldValidator() {
-                @Override
-                public boolean validate(String text) {
-                    // TODO: Must ensure that no two bins have the same name
-                    return !text.trim().isEmpty();
-                }
-              },
-              Resources.getString("Participant.1"), //$NON-NLS-1$
-              email,
-              fieldsEnabled,
-              new ComponentTextFieldValidator() {
-                  @Override
-                  public boolean validate(String text) {
-                      return Participant.validEmail(text);
-                  }
-                },
-              buttonsDisplayed);
     }
 }
