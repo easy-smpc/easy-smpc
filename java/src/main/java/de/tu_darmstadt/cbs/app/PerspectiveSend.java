@@ -98,9 +98,9 @@ public class PerspectiveSend extends Perspective {
      protected void sendMail(EntryParticipantSendMail entry) {
         URI mailToURI = URI.create(String.format(Resources.mailToString,
                                                  entry.getRightValue(), //E-mail address
-                                                 String.format(Resources.getString("DataSharingDisplayEntry.mailSubject"),//Generate subject 
+                                                 String.format(Resources.getString("PerspectiveSend.mailSubject"),//Generate subject 
                                                                SMPCServices.getServicesSMPC().getAppModel().name),                                                                 
-                                                 String.format(Resources.getString("DataSharingDisplayEntry.mailBody") //Generate body
+                                                 String.format(Resources.getString("PerspectiveSend.mailBody") //Generate body
                                                                ,entry.getLeftValue()
                                                                ,entry.getExchangeString().replace("%", "%%"))
                                                  ).replace(" ", "%20"));
