@@ -13,29 +13,119 @@
  */
 package de.tu_darmstadt.cbs.app.components;
 
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
+
+import de.tu_darmstadt.cbs.app.Resources;
+import de.tu_darmstadt.cbs.emailsmpc.Participant;
+
 /**
  * Display participants for sending mail only
  * 
  * @author Felix Wirth
  *
  */
-public class EntryParticipantSendMail extends EntryParticipant {
+public class EntryParticipantSendMail extends ComponentEntry {
 
     /** SVID */
     private static final long serialVersionUID = 7357425826027805679L;
+
+    /** Remove */
+    private JButton           send;
+
+    /** Change listener */
+    private ActionListener    sendListener;
+
+    /**
+     * Creates a new instance
+     * @param name
+     * @param email
+     */
+    public EntryParticipantSendMail(String name, String email) {
+        this(name, email, false);
+    }
+    
+    /**
+     * Creates a new instance
+     * @param name
+     * @param email
+     * @param buttonEnabled
+     */
+    public EntryParticipantSendMail(String name, String email, boolean buttonEnabled) {
+        super(Resources.getString("Participant.0"), //$NON-NLS-1$
+              name,
+              buttonEnabled,
+              new ComponentTextFieldValidator() {
+                @Override
+                public boolean validate(String text) {
+                    // TODO: Must ensure that no two bins have the same name
+                    return !text.trim().isEmpty();
+                }
+              },
+              Resources.getString("Participant.1"), //$NON-NLS-1$
+              email,
+              buttonEnabled,
+              new ComponentTextFieldValidator() {
+                  @Override
+                  public boolean validate(String text) {
+                      return Participant.validEmail(text);
+                  }
+                },
+              buttonEnabled);
+    }
+    
+
+    @Override
+    protected JPanel createAdditionalControls() {
+
+        // Panels
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        
+        // Buttons
+        this.send = new JButton(Resources.getString("PerspectiveSend.sendEmailButton"));
+        panel.add(send);
+        
+        // Listeners
+        this.send.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                send();
+            }
+        });
+        
+        // Done
+        return panel;
+    }
+
+    /**
+     * Send action
+     */
+    private void send() {
+        if (sendListener != null) {
+            sendListener.actionPerformed(new ActionEvent(this, 0, null));
+        }
+    }
+
+    /**
+     * Sets a change listener
+     * @param listener
+     */
+    public void setSendListener(ActionListener listener) {
+        this.sendListener = listener;
+    }
+
     private String exchangeString;
+    
     private boolean isOwnEntry;
     
-    public EntryParticipantSendMail(String name, String email) {
-        super(name, email, false, true);
-    }
-    
-    public void setAddButtonText(String text){
-        this.add.setText(text);
-    }
     public void isOwnEntry(boolean isOwnEntry){
         this.isOwnEntry = true;
-        this.add.setEnabled(false);
+        this.send.setEnabled(false);
     }
     public boolean getOwnEntry(){
         return isOwnEntry;

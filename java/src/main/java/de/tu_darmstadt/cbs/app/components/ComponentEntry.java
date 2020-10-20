@@ -16,10 +16,7 @@ package de.tu_darmstadt.cbs.app.components;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -44,18 +41,6 @@ public abstract class ComponentEntry extends JPanel {
     /** Right field */
     private ComponentTextField fieldRight;
 
-    /** Change listener */
-    private ActionListener     addListener;
-
-    /** Change listener */
-    private ActionListener     removeListener;
-
-    /** Add */
-    protected JButton            add;
-
-    /** Remove */
-    private JButton            remove;
-
     /**
      * Creates a new instance
      * @param leftString
@@ -66,7 +51,7 @@ public abstract class ComponentEntry extends JPanel {
      * @param rightValue
      * @param rightEnabled
      * @param rightValidator
-     * @param addRemoveEnabled
+     * @param buttonsEnabled
      */
     public ComponentEntry(String leftString,
                          String leftValue,
@@ -76,7 +61,7 @@ public abstract class ComponentEntry extends JPanel {
                          String rightValue,
                          boolean rightEnabled, 
                          ComponentTextFieldValidator rightValidator,
-                         boolean addRemoveEnabled) {
+                         boolean buttonsEnabled) {
         
         // Layout
         this.setBorder(new EmptyBorder(Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP));
@@ -128,33 +113,11 @@ public abstract class ComponentEntry extends JPanel {
         right.add(labelRight, BorderLayout.WEST);
         right.add(this.fieldRight, BorderLayout.CENTER);
         
-        // Add/remove
-        if (addRemoveEnabled) {
-            
-            // Panels
-            JPanel addremove = new JPanel();
-            addremove.setLayout(new GridLayout(1, 2));
-            right.add(addremove, BorderLayout.EAST);
-            
-            // Buttons
-            this.add = new JButton("+");
-            addremove.add(add);
-            this.remove = new JButton("-");
-            addremove.add(remove);
-            
-            // Listeners
-            this.add.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    add();
-                }
-            });
-            this.remove.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    remove();
-                }
-            });
+        // Additional controls
+        JPanel additionalControls = createAdditionalControls();
+        if (additionalControls != null) {
+            right.add(additionalControls, BorderLayout.EAST);
+            additionalControls.setEnabled(buttonsEnabled);
         }
     }
 
@@ -164,21 +127,14 @@ public abstract class ComponentEntry extends JPanel {
     public boolean areValuesValid() {
         return this.fieldLeft.isValueValid() && this.fieldRight.isValueValid();
     }
-    
-    /**
-     * Returns whether the right field is valid
-     */
-    public boolean isFieldRightValueValid() {
-        return this.fieldRight.isValueValid();
-    }
-    
+
     /**
      * @return
      */
     public String getLeftValue() {
         return this.fieldLeft.getText();
     }
-
+    
     /**
      * Returns the right value
      * @return
@@ -188,13 +144,12 @@ public abstract class ComponentEntry extends JPanel {
     }
     
     /**
-     * Sets a change listener
-     * @param listener
+     * Returns whether the right field is valid
      */
-    public void setAddListener(ActionListener listener) {
-        this.addListener = listener;
+    public boolean isFieldRightValueValid() {
+        return this.fieldRight.isValueValid();
     }
-    
+
     /**
      * Sets a change listener
      * @param listener
@@ -204,29 +159,5 @@ public abstract class ComponentEntry extends JPanel {
         this.fieldRight.setChangeListener(listener);
     }
     
-    /**
-     * Sets a change listener
-     * @param listener
-     */
-    public void setRemoveListener(ActionListener listener) {
-        this.removeListener = listener;
-    }
-    
-    /**
-     * Add action
-     */
-    private void add() {
-        if (addListener != null) {
-            addListener.actionPerformed(new ActionEvent(this, 0, null));
-        }        
-    }
-
-    /** 
-     * Remove action
-     */
-    private void remove() {
-        if (removeListener != null) {
-            removeListener.actionPerformed(new ActionEvent(this, 0, null));
-        }
-    }
+    protected abstract JPanel createAdditionalControls();
 }

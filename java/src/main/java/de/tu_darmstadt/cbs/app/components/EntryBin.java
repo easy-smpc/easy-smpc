@@ -13,6 +13,8 @@
  */
 package de.tu_darmstadt.cbs.app.components;
 
+import javax.swing.JPanel;
+
 import de.tu_darmstadt.cbs.app.Resources;
 
 /**
@@ -21,7 +23,7 @@ import de.tu_darmstadt.cbs.app.Resources;
  * @author Fabian Prasser
  * @author Felix Wirth
  */
-public class EntryBin extends ComponentEntry {
+public class EntryBin extends ComponentEntryAddRemove {
     
     /** SVUID*/
     private static final long serialVersionUID = 950691229934119178L;
@@ -30,7 +32,7 @@ public class EntryBin extends ComponentEntry {
      * Creates a new instance
      */
     public EntryBin() {
-       this("", true);
+       this("", true, true, true);
     }
 
     /**
@@ -38,72 +40,46 @@ public class EntryBin extends ComponentEntry {
      * @param enabled
      */
     public EntryBin(boolean enabled) {
-       this("", enabled);
+       this("", enabled, enabled, enabled);
     }
     
     /**
      * Creates a new instance
      * @param name
-     * @param enabled
+     * @param leftEnabled
+     * @param rightEnabled
+     * @param buttonsEnabled
      */
-    public EntryBin(String name, boolean enabled) {
+    public EntryBin(String name, boolean leftEnabled, boolean rightEnabled, boolean buttonsEnabled) {
         super(Resources.getString("BinEntry.0"), //$NON-NLS-1$
-             name,
-             enabled,
-             new ComponentTextFieldValidator() {
-               @Override
-               public boolean validate(String text) {
-                   // TODO: Must ensure that no two bins have the same name
-                   return !text.trim().isEmpty();
-               }
-             },
-             Resources.getString("BinEntry.1"), //$NON-NLS-1$
-             String.valueOf(0),
-             enabled,
-             new ComponentTextFieldValidator() {
-                 @Override
-                 public boolean validate(String text) {
-                     try {
-                         Integer.valueOf(text);
-                         return true;
-                     } catch (Exception e) {
-                         return false;
-                     }
-                 }
-               },
-             enabled);
+              name,
+              leftEnabled,
+              new ComponentTextFieldValidator() {
+                  @Override
+                  public boolean validate(String text) {
+                      // TODO: Must ensure that no two bins have the same name
+                      return !text.trim().isEmpty();
+                  }
+              },
+              Resources.getString("BinEntry.1"), //$NON-NLS-1$
+              String.valueOf(0),
+              rightEnabled,
+              new ComponentTextFieldValidator() {
+                  @Override
+                  public boolean validate(String text) {
+                      try {
+                          Integer.valueOf(text);
+                          return true;
+                      } catch (Exception e) {
+                          return false;
+                      }
+                  }
+              },
+              buttonsEnabled);
     }
-    
-    /**
-     * Creates a new instance
-     * @param name
-     * @param enabled
-     */
-    public EntryBin(String name, boolean leftEnabled, boolean rightEnabled, boolean removeEnabled) {
-        super(Resources.getString("BinEntry.0"), //$NON-NLS-1$
-             name,
-             leftEnabled,
-             new ComponentTextFieldValidator() {
-               @Override
-               public boolean validate(String text) {
-                   // TODO: Must ensure that no two bins have the same name
-                   return !text.trim().isEmpty();
-               }
-             },
-             Resources.getString("BinEntry.1"), //$NON-NLS-1$
-             String.valueOf(0),
-             rightEnabled,
-             new ComponentTextFieldValidator() {
-                 @Override
-                 public boolean validate(String text) {
-                     try {
-                         Integer.valueOf(text);
-                         return true;
-                     } catch (Exception e) {
-                         return false;
-                     }
-                 }
-               },
-             removeEnabled);
+
+    @Override
+    protected JPanel createAdditionalControls() {
+        return null;
     }
 }

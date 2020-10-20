@@ -71,10 +71,9 @@ public class PerspectiveSend extends Perspective {
             for (Participant currentParticipant : SMPCServices.getServicesSMPC().getAppModel().participants) {
                 EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name,
                                                                        currentParticipant.emailAddress);
-                entry.setAddButtonText(Resources.getString("PerspectiveSend.sendEmailButton"));
                 if (i != SMPCServices.getServicesSMPC().getAppModel().ownId) {//Only set when not the own participant                    
                     entry.setExchangeString(SMPCServices.getServicesSMPC().getAppModel().getUnsentMessageFor(i).data);                   
-                    entry.setAddListener(new ActionListener() {
+                    entry.setSendListener(new ActionListener() {
                         @Override
                          public void actionPerformed(ActionEvent e) {
                             PerspectiveSend.this.sendMail(entry);
