@@ -43,7 +43,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Fabian Prasser
  */
 
-public class PerspectiveSend extends Perspective {
+public class PerspectiveReceive extends Perspective {
 
     /** Panel for participants */
     private JPanel             participants;
@@ -59,7 +59,7 @@ public class PerspectiveSend extends Perspective {
      * Creates the perspective
      * @param app
      */
-    protected PerspectiveSend(App app) {
+    protected PerspectiveReceive(App app) {
         super(app, Resources.getString("PerspectiveSend.send")); //$NON-NLS-1$
     }
 
@@ -74,14 +74,13 @@ public class PerspectiveSend extends Perspective {
             entry.setSendListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    PerspectiveSend.this.sendMail(entry);
+                    PerspectiveReceive.this.sendMail(entry);
                 }
             });
             i++;
             participants.add(entry);
         }
-        this.validateSendMessages();
-        this.getApp().showPerspective(PerspectiveSend.class);
+        this.getApp().showPerspective(PerspectiveReceive.class);
     }
     
     /**
@@ -137,7 +136,7 @@ public class PerspectiveSend extends Perspective {
       * @return
       */
      private void validateSendMessages() {
-         this.save.setEnabled(!SMPCServices.getServicesSMPC().getAppModel().messagesUnsent());
+         //this.save.setEnabled(SMPCServices.getServicesSMPC().getAppModel().messagesUnsent());
      }
 
     /**
@@ -145,20 +144,11 @@ public class PerspectiveSend extends Perspective {
      * 
      */
     private void save() {
+        SMPCServices.getServicesSMPC().getAppModel().toRecievingShares();
         try {
-            switch(SMPCServices.getServicesSMPC().getAppModel().state) {
-                case SENDING_SHARE:
-                    SMPCServices.getServicesSMPC().getAppModel().toRecievingShares();
-                    break;
-                case SENDING_RESULT:
-                    SMPCServices.getServicesSMPC().getAppModel().toRecievingResult();
-                    break;
-                default:
-                    new Exception(String.format(Resources.getString("PerspectiveSend.wrongState"), SMPCServices.getServicesSMPC().getAppModel().state));
-                }        
           SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-          ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
-      } catch (Exception e) {
+
+      } catch (IOException e) {
           JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError") + e.getMessage());
       }
     }
@@ -218,9 +208,9 @@ public class PerspectiveSend extends Perspective {
         sendAllEmailsButton.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                for (Component c : PerspectiveSend.this.participants.getComponents()) {
+                for (Component c : PerspectiveReceive.this.participants.getComponents()) {
                     if (!isOwnEntry(c)) {
-                        PerspectiveSend.this.sendMail((EntryParticipantSendMail) c);
+                        PerspectiveReceive.this.sendMail((EntryParticipantSendMail) c);
                     }
                 }
             }
@@ -233,6 +223,7 @@ public class PerspectiveSend extends Perspective {
                 save();
             }
         });
+        this.validateSendMessages();
         buttonsPane.add(save, 0,1);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
