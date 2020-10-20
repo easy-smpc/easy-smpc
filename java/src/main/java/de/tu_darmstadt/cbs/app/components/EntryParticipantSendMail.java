@@ -118,24 +118,4 @@ public class EntryParticipantSendMail extends ComponentEntry {
     public void setSendListener(ActionListener listener) {
         this.sendListener = listener;
     }
-
-    private String exchangeString;
-    
-    private boolean isOwnEntry;
-    
-    public void isOwnEntry(boolean isOwnEntry){
-        this.isOwnEntry = true;
-        this.send.setEnabled(false);
-    }
-    public boolean getOwnEntry(){
-        return isOwnEntry;
-    }
-    
-    public void setExchangeString(String exchangeString){
-        this.exchangeString = exchangeString;
-    }
-    
-    public String getExchangeString(){
-        return this.exchangeString;
-    }
 }
