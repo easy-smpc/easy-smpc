@@ -14,6 +14,7 @@
 package de.tu_darmstadt.cbs.app.components;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 
@@ -117,7 +118,9 @@ public abstract class ComponentEntry extends JPanel {
         JPanel additionalControls = createAdditionalControls();
         if (additionalControls != null) {
             right.add(additionalControls, BorderLayout.EAST);
-            additionalControls.setEnabled(buttonsEnabled);
+            for (Component c : additionalControls.getComponents()) {
+                c.setEnabled(buttonsEnabled);
+            }
         }
     }
 

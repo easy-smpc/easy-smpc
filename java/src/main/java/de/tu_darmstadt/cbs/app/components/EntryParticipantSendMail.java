@@ -58,7 +58,7 @@ public class EntryParticipantSendMail extends ComponentEntry {
     public EntryParticipantSendMail(String name, String email, boolean buttonEnabled) {
         super(Resources.getString("Participant.0"), //$NON-NLS-1$
               name,
-              buttonEnabled,
+              false,
               new ComponentTextFieldValidator() {
                 @Override
                 public boolean validate(String text) {
@@ -68,7 +68,7 @@ public class EntryParticipantSendMail extends ComponentEntry {
               },
               Resources.getString("Participant.1"), //$NON-NLS-1$
               email,
-              buttonEnabled,
+              false,
               new ComponentTextFieldValidator() {
                   @Override
                   public boolean validate(String text) {
