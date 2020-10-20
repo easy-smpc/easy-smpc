@@ -41,7 +41,6 @@ import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.EntryBin;
 import de.tu_darmstadt.cbs.app.components.EntryParticipant;
-import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
@@ -211,7 +210,7 @@ public class PerspectiveCreate extends Perspective implements ChangeListener {
     private void save() {
         
         // Check whether at least three participants
-        if (this.participants.getComponents().length < 3) {
+        if (this.participants.getComponents().length < 1) {
             JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.notEnoughParticipants"));
             return;
         }
@@ -247,19 +246,16 @@ public class PerspectiveCreate extends Perspective implements ChangeListener {
 
         // Initialize 
         SMPCServices.getServicesSMPC().initalizeAsNewStudyCreation();
-
         // Pass over bins and participants
         SMPCServices.getServicesSMPC().getAppModel().toInitialSending(this.title.getText(),
                                                                       participants.toArray(new Participant[participants.size()]),
                                                                       bins.toArray(new Bin[bins.size()]));
-        //SMPCServices.getServicesSMPC().getAppModel().state = AppState.SENDING_SHARE;
 
         // Try to save file
         try {
             SMPCServices.getServicesSMPC().getAppModel().filename = file;
             SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-            SMPCServices.getServicesSMPC().setWorkflowState(AppState.SENDING_SHARE); //interim
-            SMPCServices.getServicesSMPC().commandAndControl(); //interim
+            ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError") + e.getMessage());
         }

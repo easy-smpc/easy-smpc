@@ -51,7 +51,7 @@ public abstract class ComponentEntry extends JPanel {
     private ActionListener     removeListener;
 
     /** Add */
-    private JButton            add;
+    protected JButton            add;
 
     /** Remove */
     private JButton            remove;

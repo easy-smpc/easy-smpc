@@ -40,7 +40,6 @@ import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.EntryBin;
 import de.tu_darmstadt.cbs.app.components.EntryParticipant;
 import de.tu_darmstadt.cbs.app.components.ExchangeStringPicker;
-import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
@@ -100,7 +99,6 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
                 newBin.setChangeListener(this);
                 bins.add(newBin);
             }
-            this.save.setEnabled(true);
             participants.revalidate();
             participants.repaint();
             bins.revalidate();
@@ -154,8 +152,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         try {
             SMPCServices.getServicesSMPC().getAppModel().filename = file;
             SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-            SMPCServices.getServicesSMPC().setWorkflowState(AppState.SENDING_SHARE); //interim
-            SMPCServices.getServicesSMPC().commandAndControl(); //interim
+            ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
 
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError") + e.getMessage());
@@ -243,7 +240,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         });
         
         buttonsPane.add(enterExchangeStringButton, 0,0);
-        save = new JButton(Resources.getString("PerspectiveCreate.save"));
+        save = new JButton(Resources.getString("PerspectiveParticipate.save"));
         save.setEnabled(this.areValuesValid());
         save.addActionListener(new ActionListener() {
             @Override

@@ -59,7 +59,7 @@ public class PerspectiveStart extends Perspective {
         buttons.add(button1);
         button1.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {                                
                 SMPCServices.getServicesSMPC().setWorkflowState(AppState.INITIAL_SENDING);
                 SMPCServices.getServicesSMPC().commandAndControl();
             }
