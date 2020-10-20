@@ -13,8 +13,6 @@
  */
 package de.tu_darmstadt.cbs.app.components;
 
-import javax.swing.JPanel;
-
 import de.tu_darmstadt.cbs.app.Resources;
 
 /**
@@ -76,10 +74,5 @@ public class EntryBin extends ComponentEntryAddRemove {
                   }
               },
               buttonsEnabled);
-    }
-
-    @Override
-    protected JPanel createAdditionalControls() {
-        return null;
     }
 }
