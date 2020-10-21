@@ -91,13 +91,13 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
                                                                                                        currentParticipant.emailAddress,
                                                                                                        false);
                 participants.add(newNameEmailParticipantEntry);
-
             }
             for (Bin currentBin : SMPCServices.getServicesSMPC().getAppModel().bins) {
                 EntryBin newBin = new EntryBin(currentBin.name, false, true, false);
                 newBin.setChangeListener(this);
                 bins.add(newBin);
             }
+            this.stateChanged(new ChangeEvent(this));
             participants.revalidate();
             participants.repaint();
             bins.revalidate();
@@ -203,8 +203,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         JScrollPane pane = new JScrollPane(participants);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.NORTH);    
-        
-                
+                        
         // ------
         // Bins
         // ------
@@ -227,34 +226,31 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         enterExchangeStringButton.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(new ExchangeStringPicker(new ComponentTextFieldValidator() {                    
+                if (new ExchangeStringPicker(new ComponentTextFieldValidator() {
                     @Override
                     public boolean validate(String text) {
                         try {
                             SMPCServices.getServicesSMPC().initalizeAsNewStudyParticipation(text);
                             return true;
-                            }
-                    catch (IllegalArgumentException e) {
-                        return false;
-                            }
+                        } catch (IllegalArgumentException e) {
+                            return false;
+                        }
                     }
-                }, central).showDialog())
-                {
+                }, central).showDialog()) {
                     PerspectiveParticipate.this.setDataForParticipant();
-                }    
-                
+                }
             }
         });
         
         buttonsPane.add(enterExchangeStringButton, 0,0);
         save = new JButton(Resources.getString("PerspectiveParticipate.save"));
-        save.setEnabled(false);
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 save();
             }
         });
+        save.setEnabled(false);
         buttonsPane.add(save, 0,1);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
