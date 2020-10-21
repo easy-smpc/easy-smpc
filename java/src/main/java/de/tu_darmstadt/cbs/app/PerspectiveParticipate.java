@@ -34,7 +34,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.tu_darmstadt.cbs.app.components.ComponentAdditionalAction;
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.EntryBin;
@@ -228,18 +227,28 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         enterExchangeStringButton.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                new ExchangeStringPicker(central,new ComponentAdditionalAction() {            
+                if(new ExchangeStringPicker(new ComponentTextFieldValidator() {                    
                     @Override
-                    public void additionalAction() {
-                        PerspectiveParticipate.this.setDataForParticipant();
+                    public boolean validate(String text) {
+                        try {
+                            SMPCServices.getServicesSMPC().initalizeAsNewStudyParticipation(text);
+                            return true;
+                            }
+                    catch (IllegalArgumentException e) {
+                        return false;
+                            }
                     }
-                } );         
+                }, central).showDialog())
+                {
+                    PerspectiveParticipate.this.setDataForParticipant();
+                }    
+                
             }
         });
         
         buttonsPane.add(enterExchangeStringButton, 0,0);
         save = new JButton(Resources.getString("PerspectiveParticipate.save"));
-        save.setEnabled(this.areValuesValid());
+        save.setEnabled(false);
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
