@@ -155,7 +155,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
             ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
 
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError") + e.getMessage());
+            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveParticipate.saveError") + e.getMessage());
         }
     }
 
@@ -197,14 +197,13 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         // ------
         this.participants = new JPanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                                     Resources.getString("PerspectiveCreate.participants"),
+                                                                     Resources.getString("PerspectiveParticipate.participants"),
                                                                      TitledBorder.LEFT,
                                                                      TitledBorder.DEFAULT_POSITION));
         this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
         JScrollPane pane = new JScrollPane(participants);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.NORTH);    
-        this.participants.add(new EntryParticipant("", "", false), 0); //empty entry
         
                 
         // ------
@@ -212,14 +211,13 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         // ------
         this.bins = new JPanel();
         this.bins.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                             Resources.getString("PerspectiveCreate.bins"),
+                                                             Resources.getString("PerspectiveParticipate.bins"),
                                                              TitledBorder.LEFT,
                                                              TitledBorder.DEFAULT_POSITION));
         this.bins.setLayout(new BoxLayout(this.bins, BoxLayout.Y_AXIS));
         pane = new JScrollPane(bins);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
-        this.bins.add(new EntryBin(false), 0); //empty entry
            
         // ------
         // EnterExchangeString button and save button

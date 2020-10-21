@@ -89,17 +89,19 @@ public class PerspectiveSend extends Perspective {
      * @param entry
      */
      protected void sendMail(EntryParticipantSendMail entry) {
-        URI mailToURI = URI.create(String.format(Resources.mailToString,
-                                                 entry.getRightValue(), //E-mail address
-                                                 String.format(Resources.getString("PerspectiveSend.mailSubject"),//Generate subject 
-                                                               SMPCServices.getServicesSMPC().getAppModel().name),                                                                 
-                                                 String.format(Resources.getString("PerspectiveSend.mailBody") //Generate body
-                                                               ,entry.getLeftValue()
-                                                               ,getExchangeString(entry).replace("%", "%%"))
-                                                 ).replace(" ", "%20"));
+        URI mailToURI;
         try {
+            mailToURI = URI.create(String.format(Resources.mailToString,
+                                                     entry.getRightValue(), //E-mail address
+                                                     String.format(Resources.getString("PerspectiveSend.mailSubject"),//Generate subject 
+                                                                   SMPCServices.getServicesSMPC().getAppModel().name),                                                                 
+                                                     String.format(Resources.getString("PerspectiveSend.mailBody") //Generate body
+                                                                   ,entry.getLeftValue()
+                                                                   ,getExchangeString(entry))
+                                                     ).replaceAll(" ", "%20"));
+            System.out.println(mailToURI.toString());
             Desktop.getDesktop().mail(mailToURI);
-            //Send a dialog to confirm mail sending
+          //Send a dialog to confirm mail sending
             if (JOptionPane.showConfirmDialog(null,
                                               String.format( Resources.getString("PerspectiveSend.confirmSendMail"), entry.getRightValue()),
                                               "",
@@ -109,6 +111,7 @@ public class PerspectiveSend extends Perspective {
             }
             
         } catch (IOException e) {
+            //UnsupportedEncodingException e1
             JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.mailToError") + e.getMessage());
         }    
     }
@@ -120,7 +123,7 @@ public class PerspectiveSend extends Perspective {
      private String getExchangeString(EntryParticipantSendMail entry) {
          int id = Arrays.asList(participants.getComponents()).indexOf(entry);
          return SMPCServices.getServicesSMPC().getAppModel().getUnsentMessageFor(id).data;
-     }
+     }     
      
      /**
       * Returns whether this is the own entry
@@ -159,7 +162,7 @@ public class PerspectiveSend extends Perspective {
           SMPCServices.getServicesSMPC().getAppModel().saveProgram();
           ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
       } catch (Exception e) {
-          JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError") + e.getMessage());
+          JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
       }
     }
 
