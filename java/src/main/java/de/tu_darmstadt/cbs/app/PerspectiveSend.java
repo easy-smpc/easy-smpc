@@ -98,8 +98,7 @@ public class PerspectiveSend extends Perspective {
                                                      String.format(Resources.getString("PerspectiveSend.mailBody") //Generate body
                                                                    ,entry.getLeftValue()
                                                                    ,getExchangeString(entry))
-                                                     ).replaceAll(" ", "%20"));
-            System.out.println(mailToURI.toString());
+                                                     ).replaceAll(" ", "%20"));         
             Desktop.getDesktop().mail(mailToURI);
           //Send a dialog to confirm mail sending
             if (JOptionPane.showConfirmDialog(null,
@@ -160,7 +159,7 @@ public class PerspectiveSend extends Perspective {
                     new Exception(String.format(Resources.getString("PerspectiveSend.wrongState"), SMPCServices.getServicesSMPC().getAppModel().state));
                 }        
           SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-          ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
+          ((PerspectiveReceive) this.getApp().getPerspective(PerspectiveReceive.class)).setDataAndShowPerspective();
       } catch (Exception e) {
           JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
       }
@@ -213,7 +212,7 @@ public class PerspectiveSend extends Perspective {
         central.add(pane, BorderLayout.NORTH);    
            
         // ------
-        // enterExchangeString button and save button
+        // send all e-mails button and save button
         // ------
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
