@@ -40,7 +40,11 @@ public class EntryParticipantSendMail extends ComponentEntryOneButton {
      * @param buttonEnabled
      */
     public EntryParticipantSendMail(String name, String email, boolean buttonEnabled) {
-        super(name, email, buttonEnabled);
+        super(Resources.getString("Participant.0"),
+              name,
+              Resources.getString("Participant.1"),
+              email,
+              buttonEnabled);
     }
 
     

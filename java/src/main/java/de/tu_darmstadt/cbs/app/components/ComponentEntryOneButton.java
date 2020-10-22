@@ -20,7 +20,6 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import de.tu_darmstadt.cbs.app.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
@@ -43,9 +42,10 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
      * @param name
      * @param email
      */
-    public ComponentEntryOneButton(String name, String email) {
-        this(name, email, false);
-    }
+//    public ComponentEntryOneButton(String name, String email) {
+//        this(name, email, false);
+//    }
+   
     
     /**
      * Creates a new instance
@@ -53,9 +53,13 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
      * @param email
      * @param buttonEnabled
      */
-    public ComponentEntryOneButton(String name, String email, boolean buttonEnabled) {
-        super(Resources.getString("Participant.0"), //$NON-NLS-1$
-              name,
+    public ComponentEntryOneButton(String leftString,
+                                   String leftValue,
+                                   String rightString,
+                                   String rightValue,
+                                   boolean buttonEnabled) {
+        super(leftString, //$NON-NLS-1$
+              leftValue,
               false,
               new ComponentTextFieldValidator() {
                 @Override
@@ -64,8 +68,8 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
                     return !text.trim().isEmpty();
                 }
               },
-              Resources.getString("Participant.1"), //$NON-NLS-1$
-              email,
+              rightString, //$NON-NLS-1$
+              rightValue,
               false,
               new ComponentTextFieldValidator() {
                   @Override
