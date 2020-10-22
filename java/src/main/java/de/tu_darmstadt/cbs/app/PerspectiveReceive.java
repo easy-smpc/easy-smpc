@@ -14,25 +14,30 @@
 package de.tu_darmstadt.cbs.app;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.EntryParticipantEnterExchangeString;
 import de.tu_darmstadt.cbs.app.components.ExchangeStringPicker;
 import de.tu_darmstadt.cbs.emailsmpc.AppState;
+import de.tu_darmstadt.cbs.emailsmpc.Bin;
+import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
@@ -41,7 +46,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Fabian Prasser
  */
 
-public class PerspectiveReceive extends Perspective {
+public class PerspectiveReceive extends Perspective implements ChangeListener {
 
     /** Panel for participants */
     private JPanel             participants;
@@ -66,6 +71,7 @@ public class PerspectiveReceive extends Perspective {
      */
     public void setDataAndShowPerspective() {
         this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
+        participants.removeAll();
         int i = 0; // index count for participants to access messages
         for (Participant currentParticipant : SMPCServices.getServicesSMPC().getAppModel().participants) {
             EntryParticipantEnterExchangeString entry = new EntryParticipantEnterExchangeString(currentParticipant.name, 
@@ -81,13 +87,14 @@ public class PerspectiveReceive extends Perspective {
                             return PerspectiveReceive.this.setMessageFromString(text, entry);
                         }
                     }, PerspectiveReceive.this.central).showDialog()) {
-                        // TODO: Setze häkchen?
+                        PerspectiveReceive.this.stateChanged(new ChangeEvent(this));
                     }
                 }
             });
             i++;
             participants.add(entry);
         }
+        this.stateChanged(new ChangeEvent(this));
         this.getApp().showPerspective(PerspectiveReceive.class);
     }
     
@@ -97,50 +104,75 @@ public class PerspectiveReceive extends Perspective {
      * @param entry
      * @return
      */
-    protected boolean setMessageFromString(String text, EntryParticipantEnterExchangeString entry) {
-        // TODO Set messages actually
+    protected boolean setMessageFromString(String exchangeString, EntryParticipantEnterExchangeString entry) {
+
+        try {
+            SMPCServices.getServicesSMPC()
+                        .getAppModel()
+                        .setShareFromMessage(Message.deserializeMessage(exchangeString),
+                                             SMPCServices.getServicesSMPC()
+                                                         .getAppModel()
+                                                         .getParticipantFromId(Arrays.asList(participants.getComponents())
+                                                                                     .indexOf(entry)));
+            return true;
+        } catch (IllegalStateException | IllegalArgumentException | ClassNotFoundException
+                | IOException e) {
+            System.out.println(e.toString());
+            return false;
+        }
+    }
+     
+    /**
+     * Reacts on all changes in any components
+     */
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        this.save.setEnabled(this.validateSharesComplete());
+    }
+    
+    /**
+     * Checks if all bins are complete
+     * @return
+     */
+    private boolean validateSharesComplete() {
+        for (Bin b : SMPCServices.getServicesSMPC().getAppModel().bins) {
+            if (!b.isComplete()) return false;
+        }
         return true;
     }
-
-    /**
-      * Returns the exchange string for the given entry
-      * @param entry
-      */
-     private String getExchangeString(EntryParticipantEnterExchangeString entry) {
-         int id = Arrays.asList(participants.getComponents()).indexOf(entry);
-         return SMPCServices.getServicesSMPC().getAppModel().getUnsentMessageFor(id).data;
-     }
-     
-     /**
-      * Returns whether this is the own entry
-      * @param entry
-      * @return
-      */
-     private boolean isOwnEntry(Component entry) {
-         return Arrays.asList(participants.getComponents()).indexOf(entry) == SMPCServices.getServicesSMPC().getAppModel().ownId;
-     }
-     
-//     /**
-//      * Checks if all messages are sent
-//      * @param entry
-//      * @return
-//      */
-//     private void validateSendMessages() {
-//         //this.save.setEnabled(SMPCServices.getServicesSMPC().getAppModel().messagesUnsent());
-//     }
 
     /**
      * Save the project
      * 
      */
     private void save() {
-//        SMPCServices.getServicesSMPC().getAppModel().toRecievingShares();
-//        try {
-//          SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-//
-//      } catch (IOException e) {
-//          JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError") + e.getMessage());
-//      }
+        try {
+            switch(SMPCServices.getServicesSMPC().getAppModel().state) {
+                case RECIEVING_SHARE:
+                    SMPCServices.getServicesSMPC().getAppModel().toSendingResult();
+                    break;
+                case RECIEVING_RESULT:
+                    SMPCServices.getServicesSMPC().getAppModel().toFinished();
+                    break;
+                default:
+                    throw new Exception(String.format(Resources.getString("PerspectiveSend.wrongState"), SMPCServices.getServicesSMPC().getAppModel().state));
+                }        
+          SMPCServices.getServicesSMPC().getAppModel().saveProgram();         
+          
+          switch(SMPCServices.getServicesSMPC().getAppModel().state) {
+          case SENDING_RESULT:
+              ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
+              break;
+          case FINISHED:
+              this.getApp().showPerspective(PerspectiveFinalize.class);
+              break;
+          default:
+              new Exception(String.format(Resources.getString("PerspectiveSend.wrongState"), SMPCServices.getServicesSMPC().getAppModel().state));
+          }      
+          
+      } catch (Exception e) {
+          JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
+      }
     }
 
     /**
@@ -192,7 +224,6 @@ public class PerspectiveReceive extends Perspective {
         // ------
         // save button
         // ------
-        JPanel buttonsPane = new JPanel();
         
         save = new JButton(Resources.getString("PerspectiveReceive.save"));
         save.addActionListener(new ActionListener() {

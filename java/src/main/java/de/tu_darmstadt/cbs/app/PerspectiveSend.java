@@ -31,6 +31,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
@@ -44,7 +46,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Fabian Prasser
  */
 
-public class PerspectiveSend extends Perspective {
+public class PerspectiveSend extends Perspective implements ChangeListener {
 
     /** Panel for participants */
     private JPanel             participants;
@@ -69,6 +71,7 @@ public class PerspectiveSend extends Perspective {
      */
     public void setDataAndShowPerspective() {
         this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
+        participants.removeAll();
         int i = 0; // index count for participants to access messages
         for (Participant currentParticipant : SMPCServices.getServicesSMPC().getAppModel().participants) {
             EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, 
@@ -83,7 +86,7 @@ public class PerspectiveSend extends Perspective {
             i++;
             participants.add(entry);
         }
-        this.validateSendMessages();
+        this.stateChanged(new ChangeEvent(this));
         this.getApp().showPerspective(PerspectiveSend.class);
     }
     
@@ -109,14 +112,21 @@ public class PerspectiveSend extends Perspective {
                                               "",
                                               JOptionPane.OK_CANCEL_OPTION) == 0) {            
             SMPCServices.getServicesSMPC().getAppModel().markMessageSent(Arrays.asList(participants.getComponents()).indexOf(entry));
-            this.validateSendMessages();
+            this.stateChanged(new ChangeEvent(this));
             }
             
         } catch (IOException e) {
-            //UnsupportedEncodingException e1
             JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.mailToError") + e.getMessage());
         }    
     }
+     
+     /**
+      * Reacts on all changes in any components
+      */
+     @Override
+     public void stateChanged(ChangeEvent e) {
+         this.save.setEnabled(!this.validateSentMessages());
+     }
      
      /**
       * Returns the exchange string for the given entry
@@ -142,8 +152,8 @@ public class PerspectiveSend extends Perspective {
       * @param entry
       * @return
       */
-     private void validateSendMessages() {
-         this.save.setEnabled(!SMPCServices.getServicesSMPC().getAppModel().messagesUnsent());
+     private boolean validateSentMessages() {
+         return SMPCServices.getServicesSMPC().getAppModel().messagesUnsent();
      }
 
     /**
@@ -152,17 +162,21 @@ public class PerspectiveSend extends Perspective {
      */
     private void save() {
         try {
-            switch(SMPCServices.getServicesSMPC().getAppModel().state) {
-                case SENDING_SHARE:
-                    SMPCServices.getServicesSMPC().getAppModel().toRecievingShares();
-                    break;
-                case SENDING_RESULT:
-                    SMPCServices.getServicesSMPC().getAppModel().toRecievingResult();
-                    break;
-                default:
-                    new Exception(String.format(Resources.getString("PerspectiveSend.wrongState"), SMPCServices.getServicesSMPC().getAppModel().state));
-                }        
-          SMPCServices.getServicesSMPC().getAppModel().saveProgram();
+            switch (SMPCServices.getServicesSMPC().getAppModel().state) {
+            case INITIAL_SENDING:
+                SMPCServices.getServicesSMPC().getAppModel().toRecievingShares();
+                break;
+            case SENDING_SHARE:
+                SMPCServices.getServicesSMPC().getAppModel().toRecievingShares();
+                break;
+            case SENDING_RESULT:
+                SMPCServices.getServicesSMPC().getAppModel().toRecievingResult();
+                break;
+            default:
+                throw new Exception(String.format(Resources.getString("PerspectiveSend.wrongState"),
+                                            SMPCServices.getServicesSMPC().getAppModel().state));
+            }
+            SMPCServices.getServicesSMPC().getAppModel().saveProgram();
           ((PerspectiveReceive) this.getApp().getPerspective(PerspectiveReceive.class)).setDataAndShowPerspective();
       } catch (Exception e) {
           JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
