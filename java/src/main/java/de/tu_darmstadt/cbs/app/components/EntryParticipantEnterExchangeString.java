@@ -21,15 +21,18 @@ import de.tu_darmstadt.cbs.app.Resources;
  * @author Felix Wirth
  *
  */
-public class EntryParticipantSendMail extends ComponentEntryOneButton {
+public class EntryParticipantEnterExchangeString extends ComponentEntryOneButton {
 
+
+    /** SVID */
+    private static final long serialVersionUID = 1321493331077271865L;
 
     /**
      * Creates a new instance
      * @param name
      * @param email
      */
-    public EntryParticipantSendMail(String name, String email) {
+    public EntryParticipantEnterExchangeString(String name, String email) {
         this(name, email, false);
     }
     
@@ -39,17 +42,16 @@ public class EntryParticipantSendMail extends ComponentEntryOneButton {
      * @param email
      * @param buttonEnabled
      */
-    public EntryParticipantSendMail(String name, String email, boolean buttonEnabled) {
-        super(name, email, buttonEnabled);
+    public EntryParticipantEnterExchangeString(String name, String email, boolean buttonEnabled) {
+      super(name, email, buttonEnabled);
     }
 
-    
     /**
      * Returns text for button (label)
      * @return button text
      */
     @Override
     protected String getText() {
-        return Resources.getString("PerspectiveSend.sendEmailButton");
-    }  
+        return Resources.getString("PerspectiveReceive.receive");
+    }
 }

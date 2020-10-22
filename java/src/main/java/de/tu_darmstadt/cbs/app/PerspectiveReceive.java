@@ -15,18 +15,14 @@ package de.tu_darmstadt.cbs.app;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Desktop;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.URI;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EtchedBorder;
@@ -34,7 +30,9 @@ import javax.swing.border.TitledBorder;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
-import de.tu_darmstadt.cbs.app.components.EntryParticipantSendMail;
+import de.tu_darmstadt.cbs.app.components.EntryParticipantEnterExchangeString;
+import de.tu_darmstadt.cbs.app.components.ExchangeStringPicker;
+import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
@@ -49,10 +47,10 @@ public class PerspectiveReceive extends Perspective {
     private JPanel             participants;
     /** Text field containing title of study */
     private ComponentTextField title;
-    /** send all emails at once button */
-    private JButton            sendAllEmailsButton;
     /** Save button */
     private JButton            save;
+    /** Central panel */
+    private JPanel central;
 
 
     /**
@@ -60,7 +58,7 @@ public class PerspectiveReceive extends Perspective {
      * @param app
      */
     protected PerspectiveReceive(App app) {
-        super(app, Resources.getString("PerspectiveSend.send")); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveReceive.receive")); //$NON-NLS-1$
     }
 
     /**
@@ -70,11 +68,21 @@ public class PerspectiveReceive extends Perspective {
         this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
         int i = 0; // index count for participants to access messages
         for (Participant currentParticipant : SMPCServices.getServicesSMPC().getAppModel().participants) {
-            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, currentParticipant.emailAddress, i != SMPCServices.getServicesSMPC().getAppModel().ownId);
+            EntryParticipantEnterExchangeString entry = new EntryParticipantEnterExchangeString(currentParticipant.name, 
+                                                                        currentParticipant.emailAddress,
+                                                                        i != SMPCServices.getServicesSMPC().getAppModel().ownId //Only set buttons when not the actual user...
+                                                                        && !( i == 0 && SMPCServices.getServicesSMPC().getAppModel().state == AppState.RECIEVING_SHARE)); // ... and not for participant to initiator in first round
             entry.setSendListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    PerspectiveReceive.this.sendMail(entry);
+                    if (new ExchangeStringPicker(new ComponentTextFieldValidator() {
+                        @Override
+                        public boolean validate(String text) {
+                            return PerspectiveReceive.this.setMessageFromString(text, entry);
+                        }
+                    }, PerspectiveReceive.this.central).showDialog()) {
+                        // TODO: Setze häkchen?
+                    }
                 }
             });
             i++;
@@ -83,40 +91,22 @@ public class PerspectiveReceive extends Perspective {
         this.getApp().showPerspective(PerspectiveReceive.class);
     }
     
-    /**
-     * Sends an e-mail to the participant entry
-     * @param entry
-     */
-     protected void sendMail(EntryParticipantSendMail entry) {
-        URI mailToURI = URI.create(String.format(Resources.mailToString,
-                                                 entry.getRightValue(), //E-mail address
-                                                 String.format(Resources.getString("PerspectiveSend.mailSubject"),//Generate subject 
-                                                               SMPCServices.getServicesSMPC().getAppModel().name),                                                                 
-                                                 String.format(Resources.getString("PerspectiveSend.mailBody") //Generate body
-                                                               ,entry.getLeftValue()
-                                                               ,getExchangeString(entry).replace("%", "%%"))
-                                                 ).replace(" ", "%20"));
-        try {
-            Desktop.getDesktop().mail(mailToURI);
-            //Send a dialog to confirm mail sending
-            if (JOptionPane.showConfirmDialog(null,
-                                              String.format( Resources.getString("PerspectiveSend.confirmSendMail"), entry.getRightValue()),
-                                              "",
-                                              JOptionPane.OK_CANCEL_OPTION) == 0) {            
-            SMPCServices.getServicesSMPC().getAppModel().markMessageSent(Arrays.asList(participants.getComponents()).indexOf(entry));
-            this.validateSendMessages();
-            }
-            
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.mailToError") + e.getMessage());
-        }    
-    }
      
      /**
+     * @param text
+     * @param entry
+     * @return
+     */
+    protected boolean setMessageFromString(String text, EntryParticipantEnterExchangeString entry) {
+        // TODO Set messages actually
+        return true;
+    }
+
+    /**
       * Returns the exchange string for the given entry
       * @param entry
       */
-     private String getExchangeString(EntryParticipantSendMail entry) {
+     private String getExchangeString(EntryParticipantEnterExchangeString entry) {
          int id = Arrays.asList(participants.getComponents()).indexOf(entry);
          return SMPCServices.getServicesSMPC().getAppModel().getUnsentMessageFor(id).data;
      }
@@ -130,27 +120,27 @@ public class PerspectiveReceive extends Perspective {
          return Arrays.asList(participants.getComponents()).indexOf(entry) == SMPCServices.getServicesSMPC().getAppModel().ownId;
      }
      
-     /**
-      * Checks if all messages are sent
-      * @param entry
-      * @return
-      */
-     private void validateSendMessages() {
-         //this.save.setEnabled(SMPCServices.getServicesSMPC().getAppModel().messagesUnsent());
-     }
+//     /**
+//      * Checks if all messages are sent
+//      * @param entry
+//      * @return
+//      */
+//     private void validateSendMessages() {
+//         //this.save.setEnabled(SMPCServices.getServicesSMPC().getAppModel().messagesUnsent());
+//     }
 
     /**
      * Save the project
      * 
      */
     private void save() {
-        SMPCServices.getServicesSMPC().getAppModel().toRecievingShares();
-        try {
-          SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-
-      } catch (IOException e) {
-          JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError") + e.getMessage());
-      }
+//        SMPCServices.getServicesSMPC().getAppModel().toRecievingShares();
+//        try {
+//          SMPCServices.getServicesSMPC().getAppModel().saveProgram();
+//
+//      } catch (IOException e) {
+//          JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError") + e.getMessage());
+//      }
     }
 
     /**
@@ -182,7 +172,7 @@ public class PerspectiveReceive extends Perspective {
         title.add(this.title, BorderLayout.CENTER);
         
         // Central panel
-        JPanel central = new JPanel();
+        central = new JPanel();
         central.setLayout(new GridLayout(2, 1));
         panel.add(central, BorderLayout.CENTER);        
         
@@ -191,7 +181,7 @@ public class PerspectiveReceive extends Perspective {
         // ------
         this.participants = new JPanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                                     Resources.getString("PerspectiveCreate.participants"),
+                                                                     Resources.getString("PerspectiveReceive.participants"),
                                                                      TitledBorder.LEFT,
                                                                      TitledBorder.DEFAULT_POSITION));
         this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
@@ -200,31 +190,17 @@ public class PerspectiveReceive extends Perspective {
         central.add(pane, BorderLayout.NORTH);    
            
         // ------
-        // enterExchangeString button and save button
+        // save button
         // ------
         JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(2, 1));
-        sendAllEmailsButton = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButton"));
-        sendAllEmailsButton.addActionListener(new ActionListener() {            
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                for (Component c : PerspectiveReceive.this.participants.getComponents()) {
-                    if (!isOwnEntry(c)) {
-                        PerspectiveReceive.this.sendMail((EntryParticipantSendMail) c);
-                    }
-                }
-            }
-        });
-        buttonsPane.add(sendAllEmailsButton, 0,0);
-        save = new JButton(Resources.getString("PerspectiveSend.save"));
+        
+        save = new JButton(Resources.getString("PerspectiveReceive.save"));
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 save();
             }
         });
-        this.validateSendMessages();
-        buttonsPane.add(save, 0,1);
-        panel.add(buttonsPane, BorderLayout.SOUTH);
+        panel.add(save, BorderLayout.SOUTH);
     }
 }

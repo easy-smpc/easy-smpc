@@ -70,7 +70,9 @@ public class PerspectiveSend extends Perspective {
         this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
         int i = 0; // index count for participants to access messages
         for (Participant currentParticipant : SMPCServices.getServicesSMPC().getAppModel().participants) {
-            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, currentParticipant.emailAddress, i != SMPCServices.getServicesSMPC().getAppModel().ownId);
+            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, 
+                                                                         currentParticipant.emailAddress,
+                                                                         i != SMPCServices.getServicesSMPC().getAppModel().ownId);
             entry.setSendListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
