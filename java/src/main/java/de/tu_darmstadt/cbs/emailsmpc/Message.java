@@ -1,15 +1,20 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
-import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64.*;
 import java.util.Base64;
-import java.util.Base64.Encoder;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 public class Message implements Serializable {
-    public final String       recipientName;
-    public final String       recipientEmailAddress;
-    public final String       data;
+    public final String recipientName;
+    public final String recipientEmailAddress;
+    public final String data;
     private static final long serialVersionUID = -3994038144373807054L;
 
     public Message(Participant recipient, String data) {
@@ -24,13 +29,6 @@ public class Message implements Serializable {
         this.data = getHashedData(data);
     }
 
-    // FW: Kontsuktor temporär eingefügt bis geklärt
-    public Message(String recipientName, String recipientEmailAddress, String data, boolean temp) {
-        this.recipientName = recipientName;
-        this.recipientEmailAddress = recipientEmailAddress;
-        this.data = data;
-    }
-
     // Disallow default constructor to avoid illegal states
     private Message() {
         recipientName = null;
@@ -41,8 +39,7 @@ public class Message implements Serializable {
     private String getHashedData(String data) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] digest = md.digest((this.recipientName + this.recipientEmailAddress +
-                                       data).getBytes());
+            byte[] digest = md.digest((this.recipientName + this.recipientEmailAddress + data).getBytes());
             Encoder be = Base64.getEncoder();
             return data + "@" + be.encodeToString(digest);
         } catch (NoSuchAlgorithmException e) {
@@ -52,13 +49,14 @@ public class Message implements Serializable {
     }
 
     public static boolean validateData(Participant recipient, String message) {
-        if (!(message.contains("@"))) return false;
+        if (!(message.contains("@")))
+            return false;
         String[] parts = message.split("@");
-        if (parts.length != 2) return false;
+        if (parts.length != 2)
+            return false;
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] digest = md.digest((recipient.name + recipient.emailAddress +
-                                       parts[0]).getBytes());
+            byte[] digest = md.digest((recipient.name + recipient.emailAddress + parts[0]).getBytes());
             Encoder be = Base64.getEncoder();
             return parts[1].equals(be.encodeToString(digest));
         } catch (NoSuchAlgorithmException e) {
@@ -72,10 +70,28 @@ public class Message implements Serializable {
     }
 
     public static String getMessageData(String msg) throws IllegalArgumentException {
-        if (!(msg.contains("@"))) throw new IllegalArgumentException("Message invalid");
+        if (!(msg.contains("@")))
+            throw new IllegalArgumentException("Message invalid");
         String[] parts = msg.split("@");
-        if (parts.length != 2) throw new IllegalArgumentException("Message invalid");
+        if (parts.length != 2)
+            throw new IllegalArgumentException("Message invalid");
         return parts[0];
+    }
+
+    public static String serializeMessage(Message msg) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(msg);
+        oos.close();
+        return Base64.getEncoder().encodeToString(bos.toByteArray());
+    }
+
+    public static Message deserializeMessage(String msg) throws IOException, ClassNotFoundException {
+        byte[] data = Base64.getDecoder().decode(msg);
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
+        Message message = (Message) ois.readObject();
+        ois.close();
+        return message;
     }
 
     @Override
@@ -85,11 +101,13 @@ public class Message implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (o == this) return true;
-        if (!(o instanceof Message)) return false;
+        if (o == this)
+            return true;
+        if (!(o instanceof Message))
+            return false;
         Message m = (Message) o;
-        return m.recipientName.equals(recipientName) &&
-               m.recipientEmailAddress.equals(recipientEmailAddress) && m.data.equals(data);
+        return m.recipientName.equals(recipientName) && m.recipientEmailAddress.equals(recipientEmailAddress)
+                && m.data.equals(data);
     }
 
     @Override
