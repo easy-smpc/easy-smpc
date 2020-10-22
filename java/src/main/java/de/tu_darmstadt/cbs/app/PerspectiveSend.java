@@ -35,6 +35,7 @@ import javax.swing.border.TitledBorder;
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.EntryParticipantSendMail;
+import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
@@ -120,10 +121,11 @@ public class PerspectiveSend extends Perspective {
      /**
       * Returns the exchange string for the given entry
       * @param entry
+     * @throws IOException 
       */
-     private String getExchangeString(EntryParticipantSendMail entry) {
+     private String getExchangeString(EntryParticipantSendMail entry) throws IOException {
          int id = Arrays.asList(participants.getComponents()).indexOf(entry);
-         return SMPCServices.getServicesSMPC().getAppModel().getUnsentMessageFor(id).data;
+         return Message.serializeMessage(SMPCServices.getServicesSMPC().getAppModel().getUnsentMessageFor(id));
      }     
      
      /**

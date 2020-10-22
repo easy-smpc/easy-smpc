@@ -40,6 +40,7 @@ import de.tu_darmstadt.cbs.app.components.EntryBin;
 import de.tu_darmstadt.cbs.app.components.EntryParticipant;
 import de.tu_darmstadt.cbs.app.components.ExchangeStringPicker;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
+import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
@@ -230,9 +231,9 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
                     @Override
                     public boolean validate(String text) {
                         try {
-                            SMPCServices.getServicesSMPC().initalizeAsNewStudyParticipation(text);
+                            SMPCServices.getServicesSMPC().initalizeAsNewStudyParticipation(Message.deserializeMessage(text).data);
                             return true;
-                        } catch (IllegalArgumentException e) {
+                        } catch (Exception e) {
                             return false;
                         }
                     }
