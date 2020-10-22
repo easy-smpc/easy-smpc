@@ -75,4 +75,40 @@ public class EntryBin extends ComponentEntryAddRemove {
               },
               buttonsEnabled);
     }
+    
+    
+    /**
+     * Creates a new instance
+     * @param name
+     * @param leftEnabled
+     * @param rightEnabled
+     * @param buttonsEnabled
+     */
+    public EntryBin(String name, String value) {
+        super(Resources.getString("BinEntry.0"), //$NON-NLS-1$
+              name,
+              false,
+              new ComponentTextFieldValidator() {
+                  @Override
+                  public boolean validate(String text) {
+                      // TODO: Must ensure that no two bins have the same name
+                      return !text.trim().isEmpty();
+                  }
+              },
+              Resources.getString("BinEntry.1"), //$NON-NLS-1$
+              value,
+              false,
+              new ComponentTextFieldValidator() {
+                  @Override
+                  public boolean validate(String text) {
+                      try {
+                          Integer.valueOf(text);
+                          return true;
+                      } catch (Exception e) {
+                          return false;
+                      }
+                  }
+              },
+              false);
+    }
 }

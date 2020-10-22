@@ -13,10 +13,22 @@
  */
 package de.tu_darmstadt.cbs.app;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 
-import lombok.Getter;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+
+import de.tu_darmstadt.cbs.app.components.ComponentTextField;
+import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
+import de.tu_darmstadt.cbs.app.components.EntryBinNoButton;
+import de.tu_darmstadt.cbs.app.components.EntryParticipant;
+import de.tu_darmstadt.cbs.emailsmpc.BinResult;
+import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
  * A perspective
@@ -26,28 +38,97 @@ import lombok.Getter;
 
 public class PerspectiveFinalize extends Perspective {
 
-    /**
-     * To be removed
-     */
-    @Getter
-    private JLabel myResult;
+    /** Panel for participants */
+    private JPanel             participants;
+    /** Panel for bins */
+    private JPanel             bins;
+    /** Text field containing title of study */
+    private ComponentTextField title;
+    
+    public void setDataAndShowPerspective() {
+        participants.removeAll();
+        bins.removeAll();
+        this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
+        for (Participant currentParticipant : SMPCServices.getServicesSMPC()
+                                                          .getAppModel().participants) {
+            participants.add(new EntryParticipant(currentParticipant.name,
+                                                  currentParticipant.emailAddress,
+                                                  false));
+        }
 
-    /**
-     * Creates the perspective
-     * @param app
-     */
+        for (BinResult binResult : SMPCServices.getServicesSMPC().getAppModel().getAllResults()) {
+            bins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
+        }
+        participants.revalidate();
+        participants.repaint();
+        bins.revalidate();
+        bins.repaint();       
+        this.getApp().showPerspective(PerspectiveFinalize.class);
+    }
+    
     protected PerspectiveFinalize(App app) {
         super(app, Resources.getString("PerspectiveFinalize.0")); //$NON-NLS-1$
     }
-
+    
     /**
-     * Creates and adds UI elements
+     *Creates and adds UI elements
      */
     @Override
     protected void createContents(JPanel panel) {
-        // TODO Auto-generated method stub
-        this.myResult = new JLabel("Placeholder"); //TODO: Replace entirely
-        panel.add(myResult);
 
+        // Layout
+        panel.setLayout(new BorderLayout());
+
+        // -------
+        // Study title
+        // -------
+        JPanel title = new JPanel();
+        panel.add(title, BorderLayout.NORTH);
+        title.setLayout(new BorderLayout());
+        title.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                         Resources.getString("PerspectiveCreate.studyTitle"),
+                                                         TitledBorder.LEFT,
+                                                         TitledBorder.DEFAULT_POSITION));
+        this.title = new ComponentTextField(new ComponentTextFieldValidator() {
+            @Override
+            public boolean validate(String text) {
+                return true; //no actual validation as field is not set by user
+            }
+        });
+        this.title.setEnabled(false);
+        title.add(this.title, BorderLayout.CENTER);
+        
+        // Central panel
+        JPanel central = new JPanel();
+        central.setLayout(new GridLayout(2, 1));
+        panel.add(central, BorderLayout.CENTER);        
+        
+        // ------
+        // Participants
+        // ------
+        this.participants = new JPanel();
+        this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                                     Resources.getString("PerspectiveParticipate.participants"),
+                                                                     TitledBorder.LEFT,
+                                                                     TitledBorder.DEFAULT_POSITION));
+        this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
+        JScrollPane pane = new JScrollPane(participants);
+        pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        central.add(pane, BorderLayout.NORTH);    
+                        
+        // ------
+        // Bins
+        // ------
+        this.bins = new JPanel();
+        this.bins.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                             Resources.getString("PerspectiveParticipate.bins"),
+                                                             TitledBorder.LEFT,
+                                                             TitledBorder.DEFAULT_POSITION));
+        this.bins.setLayout(new BoxLayout(this.bins, BoxLayout.Y_AXIS));
+        pane = new JScrollPane(bins);
+        pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        central.add(pane, BorderLayout.SOUTH);
+           
+      
     }
 }

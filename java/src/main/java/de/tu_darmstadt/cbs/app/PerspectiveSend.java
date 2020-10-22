@@ -221,7 +221,7 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
         // ------
         this.participants = new JPanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                                     Resources.getString("PerspectiveCreate.participants"),
+                                                                     Resources.getString("PerspectiveSend.participants"),
                                                                      TitledBorder.LEFT,
                                                                      TitledBorder.DEFAULT_POSITION));
         this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));

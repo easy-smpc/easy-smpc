@@ -155,7 +155,7 @@ public class PerspectiveReceive extends Perspective implements ChangeListener {
                     SMPCServices.getServicesSMPC().getAppModel().toFinished();
                     break;
                 default:
-                    throw new Exception(String.format(Resources.getString("PerspectiveSend.wrongState"), SMPCServices.getServicesSMPC().getAppModel().state));
+                    throw new Exception(String.format(Resources.getString("PerspectiveReceive.wrongState"), SMPCServices.getServicesSMPC().getAppModel().state));
                 }        
           SMPCServices.getServicesSMPC().getAppModel().saveProgram();         
           
@@ -164,14 +164,14 @@ public class PerspectiveReceive extends Perspective implements ChangeListener {
               ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
               break;
           case FINISHED:
-              this.getApp().showPerspective(PerspectiveFinalize.class);
+              ((PerspectiveFinalize) this.getApp().getPerspective(PerspectiveFinalize.class)).setDataAndShowPerspective();
               break;
           default:
-              new Exception(String.format(Resources.getString("PerspectiveSend.wrongState"), SMPCServices.getServicesSMPC().getAppModel().state));
+              new Exception(String.format(Resources.getString("PerspectiveReceive.wrongState"), SMPCServices.getServicesSMPC().getAppModel().state));
           }      
           
       } catch (Exception e) {
-          JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
+          JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveReceive.saveError") + e.getMessage());
       }
     }
 
