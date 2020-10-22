@@ -234,6 +234,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
                             SMPCServices.getServicesSMPC().initalizeAsNewStudyParticipation(Message.deserializeMessage(text).data);
                             return true;
                         } catch (Exception e) {
+                            System.out.println(e.toString());
                             return false;
                         }
                     }

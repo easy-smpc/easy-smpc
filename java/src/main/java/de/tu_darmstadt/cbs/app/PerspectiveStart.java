@@ -13,20 +13,14 @@
  */
 package de.tu_darmstadt.cbs.app;
 
-import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-
-import de.tu_darmstadt.cbs.emailsmpc.AppState;
 
 /**
  * A perspective
@@ -60,8 +54,7 @@ public class PerspectiveStart extends Perspective {
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {                                
-                SMPCServices.getServicesSMPC().setWorkflowState(AppState.INITIAL_SENDING);
-                SMPCServices.getServicesSMPC().commandAndControl();
+                getApp().showPerspective(PerspectiveCreate.class);
             }
         });
 
@@ -71,8 +64,7 @@ public class PerspectiveStart extends Perspective {
         button2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SMPCServices.getServicesSMPC().setWorkflowState(AppState.PARTICIPATING);
-                SMPCServices.getServicesSMPC().commandAndControl();
+                getApp().showPerspective(PerspectiveParticipate.class);
             }
         });
 
@@ -82,18 +74,7 @@ public class PerspectiveStart extends Perspective {
         button3.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                int returnFileChooser;
-                returnFileChooser = fileChooser.showSaveDialog((Component) e.getSource());
-                if (returnFileChooser == JFileChooser.APPROVE_OPTION) {
-                    try {
-                        SMPCServices.getServicesSMPC().loadFile(fileChooser.getSelectedFile());
-                        SMPCServices.getServicesSMPC().commandAndControl();
-                    } catch (ClassNotFoundException | IllegalArgumentException | IOException e1) {
-                        // TODO Auto-generated catch block
-                        JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveStart.errorLoading"));
-                    }
-                }
+                //TODO  Load file
             }
         });
 
