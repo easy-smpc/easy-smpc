@@ -69,6 +69,13 @@ public class Bin implements Serializable {
         }
     }
 
+    public void clearShares() {
+        for (int i = 0; i < inShares.length; i++) {
+            inShares[i] = null;
+            outShares[i] = null;
+        }
+    }
+
     public void shareValue(BigInteger value) throws IllegalStateException {
         if (!isInitialized())
             throw new IllegalStateException("Unable to share value in unititialized bin");
