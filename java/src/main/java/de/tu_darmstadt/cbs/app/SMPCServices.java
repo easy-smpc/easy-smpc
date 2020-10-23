@@ -141,9 +141,9 @@ public class SMPCServices {
      * @param text
      * @return
      */
-    public boolean isShareMessageValid(String text, int participantId) {
+    public boolean isMessageShareResultValid(String text, int participantId) {
         try {
-            return appModel.isShareMessageValid(Message.deserializeMessage(text),
+            return appModel.isMessageShareResultValid(Message.deserializeMessage(text),
                                                 appModel.getParticipantFromId(participantId));
         } catch (Exception e) {
             return false;

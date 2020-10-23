@@ -225,7 +225,7 @@ public class PerspectiveReceive extends Perspective implements ChangeListener, A
             @Override
             public boolean validate(String text) {
                 return SMPCServices.getServicesSMPC()
-                                   .isShareMessageValid(text,
+                                   .isMessageShareResultValid(text,
                                                         Arrays.asList(participants.getComponents())
                                                               .indexOf(entry));
             }

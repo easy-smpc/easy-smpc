@@ -354,14 +354,23 @@ public class AppModel implements Serializable {
     }
     
     /**
-     * Validates a given message to set a share
+     * Validates a given message to set a share or result
      * @param message
      * @return
      */
-    public boolean isShareMessageValid(Message msg, Participant sender) {
+    public boolean isMessageShareResultValid(Message msg, Participant sender) {
         try {
             Message.validateData(participants[ownId], msg.data);
-            ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
+            switch (state){
+            case RECIEVING_SHARE:
+                ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
+                break;
+            case RECIEVING_RESULT:
+                ResultMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
+                break;
+            default:
+                return false;
+            }            
             return true;
         } catch (Exception e) {
             return false;
