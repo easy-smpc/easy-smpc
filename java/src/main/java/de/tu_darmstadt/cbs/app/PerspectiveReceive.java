@@ -66,10 +66,8 @@ public class PerspectiveReceive extends Perspective implements ChangeListener {
         super(app, Resources.getString("PerspectiveReceive.receive")); //$NON-NLS-1$
     }
 
-    /**
-     * Sets data from appModel
-     */
-    public void setDataAndShowPerspective() {
+    @Override
+    protected void initialize() {
         this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
         participants.removeAll();
         int i = 0; // index count for participants to access messages
@@ -95,7 +93,6 @@ public class PerspectiveReceive extends Perspective implements ChangeListener {
             participants.add(entry);
         }
         this.stateChanged(new ChangeEvent(this));
-        this.getApp().showPerspective(PerspectiveReceive.class);
     }
     
      
@@ -162,6 +159,7 @@ public class PerspectiveReceive extends Perspective implements ChangeListener {
           switch(SMPCServices.getServicesSMPC().getAppModel().state) {
           case SENDING_RESULT:
               ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
+              this.getApp().showPerspective(PerspectiveSend.class);
               break;
           case FINISHED:
               ((PerspectiveFinalize) this.getApp().getPerspective(PerspectiveFinalize.class)).setDataAndShowPerspective();

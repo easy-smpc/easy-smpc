@@ -82,4 +82,9 @@ public class PerspectiveStart extends Perspective {
         panel.setLayout(new GridBagLayout());
         panel.add(buttons, new GridBagConstraints());
     }
+
+    @Override
+    protected void initialize() {
+        // Empty by design
+    }
 }

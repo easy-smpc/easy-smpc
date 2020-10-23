@@ -82,4 +82,9 @@ public abstract class Perspective {
      * @param panel
      */
     protected abstract void createContents(JPanel panel);
+    
+    /**
+     * Initialize perspective based on model
+     */
+    protected abstract void initialize();
 }

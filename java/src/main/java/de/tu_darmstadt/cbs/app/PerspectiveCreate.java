@@ -256,6 +256,7 @@ public class PerspectiveCreate extends Perspective implements ChangeListener {
             SMPCServices.getServicesSMPC().getAppModel().filename = file;
             SMPCServices.getServicesSMPC().getAppModel().saveProgram();
             ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
+            this.getApp().showPerspective(PerspectiveSend.class);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError") + e.getMessage());
         }

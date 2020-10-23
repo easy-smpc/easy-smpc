@@ -153,6 +153,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
             SMPCServices.getServicesSMPC().getAppModel().filename = file;
             SMPCServices.getServicesSMPC().getAppModel().saveProgram();
             ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
+            this.getApp().showPerspective(PerspectiveSend.class);
 
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveParticipate.saveError") + e.getMessage());
