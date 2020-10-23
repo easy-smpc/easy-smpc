@@ -177,12 +177,7 @@ public class PerspectiveReceive extends Perspective implements ChangeListener, A
                                                          Resources.getString("PerspectiveCreate.studyTitle"),
                                                          TitledBorder.LEFT,
                                                          TitledBorder.DEFAULT_POSITION));
-        this.title = new ComponentTextField(new ComponentTextFieldValidator() {
-            @Override
-            public boolean validate(String text) {
-                return true; //no actual validation as field is not set by user
-            }
-        });
+        this.title = new ComponentTextField(null); //no validation necessary
         this.title.setEnabled(false);
         title.add(this.title, BorderLayout.CENTER);
         

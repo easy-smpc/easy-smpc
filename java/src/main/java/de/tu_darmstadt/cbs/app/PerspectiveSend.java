@@ -35,7 +35,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
-import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.EntryParticipantSendMail;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
@@ -201,12 +200,7 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
                                                          Resources.getString("PerspectiveCreate.studyTitle"),
                                                          TitledBorder.LEFT,
                                                          TitledBorder.DEFAULT_POSITION));
-        this.title = new ComponentTextField(new ComponentTextFieldValidator() {
-            @Override
-            public boolean validate(String text) {
-                return true; //no actual validation as field is not set by user
-            }
-        });
+        this.title = new ComponentTextField(null); //no validation
         this.title.setEnabled(false);
         title.add(this.title, BorderLayout.CENTER);
         

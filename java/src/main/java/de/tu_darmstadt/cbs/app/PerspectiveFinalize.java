@@ -24,7 +24,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
-import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.EntryBinNoButton;
 import de.tu_darmstadt.cbs.app.components.EntryParticipant;
 import de.tu_darmstadt.cbs.emailsmpc.BinResult;
@@ -90,12 +89,7 @@ public class PerspectiveFinalize extends Perspective {
                                                          Resources.getString("PerspectiveCreate.studyTitle"),
                                                          TitledBorder.LEFT,
                                                          TitledBorder.DEFAULT_POSITION));
-        this.title = new ComponentTextField(new ComponentTextFieldValidator() {
-            @Override
-            public boolean validate(String text) {
-                return true; //no actual validation as field is not set by user
-            }
-        });
+        this.title = new ComponentTextField(null);//no validation
         this.title.setEnabled(false);
         title.add(this.title, BorderLayout.CENTER);
         

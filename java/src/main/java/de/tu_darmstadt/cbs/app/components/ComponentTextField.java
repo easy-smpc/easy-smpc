@@ -88,7 +88,12 @@ public class ComponentTextField extends JTextField {
      * Validates the value
      */
     private void validateValue() {
-        boolean isValid = validator.validate(this.getText());
+        boolean isValid;
+        if (validator != null) {
+            isValid = validator.validate(this.getText());
+        } else {
+            isValid = true;
+        }
         this.setBorder(isValid ? Resources.DEFAULT_BORDER : Resources.INVALID_BORDER);
         if (listener != null) {
             listener.stateChanged(new ChangeEvent(this));
