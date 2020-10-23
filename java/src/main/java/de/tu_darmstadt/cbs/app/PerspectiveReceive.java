@@ -224,9 +224,10 @@ public class PerspectiveReceive extends Perspective implements ChangeListener, A
         String message = new ExchangeStringPicker(new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {
-                // TODO: Hack, has side-effects
-                // TODO: Replace by validation
-                return PerspectiveReceive.this.setMessageFromString(text, entry);
+                return SMPCServices.getServicesSMPC()
+                                   .isShareMessageValid(text,
+                                                        Arrays.asList(participants.getComponents())
+                                                              .indexOf(entry));
             }
         }, PerspectiveReceive.this.central).showDialog();
 

@@ -13,16 +13,11 @@
  */
 package de.tu_darmstadt.cbs.app;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.JOptionPane;
-
 import de.tu_darmstadt.cbs.emailsmpc.AppModel;
 import de.tu_darmstadt.cbs.emailsmpc.AppState;
-import de.tu_darmstadt.cbs.emailsmpc.BinResult;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
 import lombok.Getter;
 import lombok.Setter;
@@ -139,6 +134,20 @@ public class SMPCServices {
             return appModel.isInitialParticipationMessageValid(data);
         } catch (Exception e) {
            return false;
+        }
+    }
+    
+    /**
+     * Check whether message is valid
+     * @param text
+     * @return
+     */
+    public boolean isShareMessageValid(String text, int participantId) {
+        try {
+            return appModel.isShareMessageValid(Message.deserializeMessage(text),
+                                                appModel.getParticipantFromId(participantId));
+        } catch (Exception e) {
+            return false;
         }
     }
 }
