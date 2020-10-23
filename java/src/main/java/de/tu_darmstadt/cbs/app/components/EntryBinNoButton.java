@@ -32,7 +32,7 @@ public class EntryBinNoButton extends EntryBin {
 
     @Override
     protected JPanel createAdditionalControls() {
-        return new JPanel();
+        return null;
     }
     
 }
