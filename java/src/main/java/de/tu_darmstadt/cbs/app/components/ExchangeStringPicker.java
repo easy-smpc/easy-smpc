@@ -36,14 +36,15 @@ import de.tu_darmstadt.cbs.app.Resources;
  *
  */
 public class ExchangeStringPicker extends JDialog implements ChangeListener {
+
     /** SVID */
     private static final long serialVersionUID = -2803385597185044215L;
     /** Component to enter exchangeString */
     private ComponentTextArea exchangeStringTextArea;
-    /** okButton*/
-    private JButton okButton;
-    /** Result of dialog */
-    private boolean result=true;
+    /** okButton */
+    private JButton           okButton;
+    /** Result*/
+    private String            result;
         
     /**
      * Create a new instance
@@ -72,14 +73,14 @@ public class ExchangeStringPicker extends JDialog implements ChangeListener {
         okButton.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                ExchangeStringPicker.this.result=true;
+                ExchangeStringPicker.this.result=exchangeStringTextArea.getText();
                 ExchangeStringPicker.this.dispose();           
             }
         });
         cancelButton.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                ExchangeStringPicker.this.result=false;
+                ExchangeStringPicker.this.result=null;
                 ExchangeStringPicker.this.dispose();           
             }
         });
@@ -87,7 +88,7 @@ public class ExchangeStringPicker extends JDialog implements ChangeListener {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                ExchangeStringPicker.this.result=false;
+                ExchangeStringPicker.this.result=null;
             }
         });
     }
@@ -103,7 +104,7 @@ public class ExchangeStringPicker extends JDialog implements ChangeListener {
     /**
      * Show this dialog
      */
-    public boolean showDialog(){        
+    public String showDialog(){        
         this.setModal(true);
         this.setVisible(true);
         return this.result;

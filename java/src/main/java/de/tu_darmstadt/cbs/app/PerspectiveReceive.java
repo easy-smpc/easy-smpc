@@ -46,7 +46,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Fabian Prasser
  */
 
-public class PerspectiveReceive extends Perspective implements ChangeListener {
+public class PerspectiveReceive extends Perspective implements ChangeListener, ActionListener {
 
     /** Panel for participants */
     private JPanel             participants;
@@ -76,19 +76,7 @@ public class PerspectiveReceive extends Perspective implements ChangeListener {
                                                                         currentParticipant.emailAddress,
                                                                         i != SMPCServices.getServicesSMPC().getAppModel().ownId //Only set buttons when not the actual user...
                                                                         && !( i == 0 && SMPCServices.getServicesSMPC().getAppModel().state == AppState.RECIEVING_SHARE)); // ... and not for participant to initiator in first round
-            entry.setButtonListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (new ExchangeStringPicker(new ComponentTextFieldValidator() {
-                        @Override
-                        public boolean validate(String text) {
-                            return PerspectiveReceive.this.setMessageFromString(text, entry);
-                        }
-                    }, PerspectiveReceive.this.central).showDialog()) {
-                        PerspectiveReceive.this.stateChanged(new ChangeEvent(this));
-                    }
-                }
-            });
+            entry.setButtonListener(this);
             i++;
             participants.add(entry);
         }
@@ -124,14 +112,14 @@ public class PerspectiveReceive extends Perspective implements ChangeListener {
      */
     @Override
     public void stateChanged(ChangeEvent e) {
-        this.save.setEnabled(this.validateSharesComplete());
+        this.save.setEnabled(this.areSharesComplete());
     }
     
     /**
      * Checks if all bins are complete
      * @return
      */
-    private boolean validateSharesComplete() {
+    private boolean areSharesComplete() {
         for (Bin b : SMPCServices.getServicesSMPC().getAppModel().bins) {
             if (!b.isComplete()) return false;
         }
@@ -232,5 +220,23 @@ public class PerspectiveReceive extends Perspective implements ChangeListener {
             }
         });
         panel.add(save, BorderLayout.SOUTH);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        EntryParticipantEnterExchangeString entry = (EntryParticipantEnterExchangeString) e.getSource();
+        String message = new ExchangeStringPicker(new ComponentTextFieldValidator() {
+            @Override
+            public boolean validate(String text) {
+                // TODO: Hack, has side-effects
+                // TODO: Replace by validation
+                return PerspectiveReceive.this.setMessageFromString(text, entry);
+            }
+        }, PerspectiveReceive.this.central).showDialog();
+
+        if (message != null) {
+            PerspectiveReceive.this.setMessageFromString(message, entry);
+            PerspectiveReceive.this.stateChanged(new ChangeEvent(this));
+        }
     }
 }
