@@ -49,7 +49,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Fabian Prasser
  */
 
-public class PerspectiveParticipate extends Perspective implements ChangeListener, ActionListener {
+public class PerspectiveParticipate extends Perspective implements ChangeListener {
 
     /** Panel for participants */
     private JPanel             participants;
@@ -87,7 +87,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
     public void setDataForParticipant(String exchangeString) {
         try {
             SMPCServices.getServicesSMPC()
-                        .initalizeAsNewStudyParticipation(Message.deserializeMessage(exchangeString).data);
+                        .getAppModel().toEnteringValues(Message.deserializeMessage(exchangeString).data);
             participants.removeAll();
             bins.removeAll();
             this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
@@ -238,7 +238,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         enterExchangeStringButton.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
- 
+                showExchangeStringPicker();
             }
         });
         
@@ -257,11 +257,14 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
 
     @Override
     protected void initialize() {
-        // Empty by design
+        SMPCServices.getServicesSMPC().initalizeAsNewStudyParticipation();
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
+
+    /**
+     * Shows the exchangeStringPicker
+     */
+    public void showExchangeStringPicker() {
         String exchangeString = new ExchangeStringPicker(new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {

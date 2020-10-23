@@ -53,7 +53,8 @@ public class PerspectiveStart extends Perspective {
         buttons.add(button1);
         button1.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {                                
+            public void actionPerformed(ActionEvent e) {
+                getApp().getPerspective(PerspectiveCreate.class).initialize();
                 getApp().showPerspective(PerspectiveCreate.class);
             }
         });
@@ -64,6 +65,7 @@ public class PerspectiveStart extends Perspective {
         button2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                getApp().getPerspective(PerspectiveParticipate.class).initialize();
                 getApp().showPerspective(PerspectiveParticipate.class);
             }
         });
