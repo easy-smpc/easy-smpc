@@ -143,6 +143,7 @@ public class PerspectiveReceive extends Perspective implements ChangeListener {
      * 
      */
     private void save() {
+        
         try {
             switch(SMPCServices.getServicesSMPC().getAppModel().state) {
                 case RECIEVING_SHARE:
@@ -158,14 +159,14 @@ public class PerspectiveReceive extends Perspective implements ChangeListener {
           
           switch(SMPCServices.getServicesSMPC().getAppModel().state) {
           case SENDING_RESULT:
-              ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
+              this.getApp().getPerspective(PerspectiveSend.class).initialize();
               this.getApp().showPerspective(PerspectiveSend.class);
               break;
           case FINISHED:
               ((PerspectiveFinalize) this.getApp().getPerspective(PerspectiveFinalize.class)).setDataAndShowPerspective();
               break;
           default:
-              new Exception(String.format(Resources.getString("PerspectiveReceive.wrongState"), SMPCServices.getServicesSMPC().getAppModel().state));
+              throw new Exception(String.format("Wrong Status %s", SMPCServices.getServicesSMPC().getAppModel().state));
           }      
           
       } catch (Exception e) {
