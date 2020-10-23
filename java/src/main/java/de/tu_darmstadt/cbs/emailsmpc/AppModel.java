@@ -340,6 +340,20 @@ public class AppModel implements Serializable {
         } else throw new IllegalArgumentException("Message invalid");
 
     }
+    
+    /**
+     * Validates a given message
+     * @param message
+     * @return
+     */
+    public boolean isInitialParticipationMessageValid(String message) {
+        try {
+            InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(message)));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     public void setModelFromMessage(String initialMsg) throws IllegalStateException,
                                                        IllegalArgumentException,

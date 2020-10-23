@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 import de.tu_darmstadt.cbs.emailsmpc.AppModel;
 import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.BinResult;
+import de.tu_darmstadt.cbs.emailsmpc.Message;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -125,5 +126,19 @@ public class SMPCServices {
         appModel = AppModel.loadModel(selectedFile);
         appModel.filename = selectedFile;
         this.workflowState = this.appModel.state;
+    }
+
+    /**
+     * Check whether message is valid
+     * @param text
+     * @return
+     */
+    public boolean isInitialParticipationMessageValid(String text) {
+        try {
+            String data =  Message.deserializeMessage(text).data;
+            return appModel.isInitialParticipationMessageValid(data);
+        } catch (Exception e) {
+           return false;
+        }
     }
 }

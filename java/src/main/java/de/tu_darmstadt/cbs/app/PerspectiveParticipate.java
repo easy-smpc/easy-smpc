@@ -230,13 +230,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
                 if (new ExchangeStringPicker(new ComponentTextFieldValidator() {
                     @Override
                     public boolean validate(String text) {
-                        try {
-                            SMPCServices.getServicesSMPC().initalizeAsNewStudyParticipation(Message.deserializeMessage(text).data);
-                            return true;
-                        } catch (Exception e) {
-                            System.out.println(e.toString());
-                            return false;
-                        }
+                        return SMPCServices.getServicesSMPC().isInitialParticipationMessageValid(text);
                     }
                 }, central).showDialog()) {
                     PerspectiveParticipate.this.setDataForParticipant();
