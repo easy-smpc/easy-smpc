@@ -49,7 +49,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Fabian Prasser
  */
 
-public class PerspectiveParticipate extends Perspective implements ChangeListener {
+public class PerspectiveParticipate extends Perspective implements ChangeListener, ActionListener {
 
     /** Panel for participants */
     private JPanel             participants;
@@ -61,6 +61,8 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
     private JButton            enterExchangeStringButton;
     /** Save button */
     private JButton            save;
+    /** Central panel */
+    private JPanel central;
 
 
     /**
@@ -80,17 +82,20 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
     }
 
     /**
-     * Sets data for a participant derived from the string entered
+     * Sets string and derived data for a participant
      */
-    public void setDataForParticipant() {
+    public void setDataForParticipant(String exchangeString) {
+        try {
+            SMPCServices.getServicesSMPC()
+                        .initalizeAsNewStudyParticipation(Message.deserializeMessage(exchangeString).data);
             participants.removeAll();
             bins.removeAll();
-            this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);            
+            this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
             for (Participant currentParticipant : SMPCServices.getServicesSMPC()
                                                               .getAppModel().participants) {
                 EntryParticipant newNameEmailParticipantEntry = new EntryParticipant(currentParticipant.name,
-                                                                                                       currentParticipant.emailAddress,
-                                                                                                       false);
+                                                                                     currentParticipant.emailAddress,
+                                                                                     false);
                 participants.add(newNameEmailParticipantEntry);
             }
             for (Bin currentBin : SMPCServices.getServicesSMPC().getAppModel().bins) {
@@ -98,11 +103,16 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
                 newBin.setChangeListener(this);
                 bins.add(newBin);
             }
-            this.stateChanged(new ChangeEvent(this));
             participants.revalidate();
             participants.repaint();
             bins.revalidate();
-            bins.repaint();        
+            bins.repaint();
+        } catch (ClassNotFoundException | IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                                          Resources.getString("PerspectiveParticipate.stringError") +
+                                                e.getMessage());
+        }
     }
     
     /**
@@ -152,7 +162,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         try {
             SMPCServices.getServicesSMPC().getAppModel().filename = file;
             SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-            ((PerspectiveSend) this.getApp().getPerspective(PerspectiveSend.class)).setDataAndShowPerspective();
+            this.getApp().getPerspective(PerspectiveSend.class).initialize();
             this.getApp().showPerspective(PerspectiveSend.class);
 
         } catch (IOException e) {
@@ -189,7 +199,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         title.add(this.title, BorderLayout.CENTER);
         
         // Central panel
-        JPanel central = new JPanel();
+        central = new JPanel();
         central.setLayout(new GridLayout(2, 1));
         panel.add(central, BorderLayout.CENTER);        
         
@@ -228,14 +238,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         enterExchangeStringButton.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (new ExchangeStringPicker(new ComponentTextFieldValidator() {
-                    @Override
-                    public boolean validate(String text) {
-                        return SMPCServices.getServicesSMPC().isInitialParticipationMessageValid(text);
-                    }
-                }, central).showDialog()) {
-                    PerspectiveParticipate.this.setDataForParticipant();
-                }
+ 
             }
         });
         
@@ -250,5 +253,24 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         save.setEnabled(false);
         buttonsPane.add(save, 0,1);
         panel.add(buttonsPane, BorderLayout.SOUTH);
+    }
+
+    @Override
+    protected void initialize() {
+        // Empty by design
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String exchangeString = new ExchangeStringPicker(new ComponentTextFieldValidator() {
+            @Override
+            public boolean validate(String text) {
+                return SMPCServices.getServicesSMPC().isInitialParticipationMessageValid(text);
+            }
+        }, central).showDialog();
+        if (exchangeString != null) {
+            setDataForParticipant(exchangeString);
+            stateChanged(new ChangeEvent(this));
+        }
     }
 }

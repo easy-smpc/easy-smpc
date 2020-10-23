@@ -95,7 +95,7 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
     }
 
     /**
-     * Send action
+     * Button action
      */
     private void buttonAction() {
         if (listener != null) {

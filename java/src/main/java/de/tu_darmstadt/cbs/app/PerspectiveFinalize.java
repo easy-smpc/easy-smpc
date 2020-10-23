@@ -45,7 +45,8 @@ public class PerspectiveFinalize extends Perspective {
     /** Text field containing title of study */
     private ComponentTextField title;
     
-    public void setDataAndShowPerspective() {
+    @Override
+    public void initialize() {
         participants.removeAll();
         bins.removeAll();
         this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);

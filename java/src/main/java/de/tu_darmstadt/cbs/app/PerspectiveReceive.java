@@ -131,35 +131,31 @@ public class PerspectiveReceive extends Perspective implements ChangeListener, A
      * 
      */
     private void save() {
-        
         try {
-            switch(SMPCServices.getServicesSMPC().getAppModel().state) {
-                case RECIEVING_SHARE:
-                    SMPCServices.getServicesSMPC().getAppModel().toSendingResult();
-                    break;
-                case RECIEVING_RESULT:
-                    SMPCServices.getServicesSMPC().getAppModel().toFinished();
-                    break;
-                default:
-                    throw new Exception(String.format(Resources.getString("PerspectiveReceive.wrongState"), SMPCServices.getServicesSMPC().getAppModel().state));
-                }        
-          SMPCServices.getServicesSMPC().getAppModel().saveProgram();         
-          
-          switch(SMPCServices.getServicesSMPC().getAppModel().state) {
-          case SENDING_RESULT:
-              this.getApp().getPerspective(PerspectiveSend.class).initialize();
-              this.getApp().showPerspective(PerspectiveSend.class);
-              break;
-          case FINISHED:
-              ((PerspectiveFinalize) this.getApp().getPerspective(PerspectiveFinalize.class)).setDataAndShowPerspective();
-              break;
-          default:
-              throw new Exception(String.format("Wrong Status %s", SMPCServices.getServicesSMPC().getAppModel().state));
-          }      
-          
-      } catch (Exception e) {
-          JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveReceive.saveError") + e.getMessage());
-      }
+            switch (SMPCServices.getServicesSMPC().getAppModel().state) {
+            case RECIEVING_SHARE:
+                SMPCServices.getServicesSMPC().getAppModel().toSendingResult();
+                SMPCServices.getServicesSMPC().getAppModel().saveProgram();
+                this.getApp().getPerspective(PerspectiveSend.class).initialize();
+                this.getApp().showPerspective(PerspectiveSend.class);
+                break;
+            case RECIEVING_RESULT:
+                SMPCServices.getServicesSMPC().getAppModel().toFinished();
+                SMPCServices.getServicesSMPC().getAppModel().saveProgram();
+                this.getApp().getPerspective(PerspectiveFinalize.class).initialize();
+                this.getApp().showPerspective(PerspectiveFinalize.class);
+                break;
+            default:
+                throw new Exception(String.format(Resources.getString("PerspectiveReceive.wrongState"),
+                                                  SMPCServices.getServicesSMPC()
+                                                              .getAppModel().state));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                                          Resources.getString("PerspectiveReceive.saveError") +
+                                                e.getMessage());
+        }
     }
 
     /**
