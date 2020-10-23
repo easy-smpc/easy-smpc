@@ -76,7 +76,7 @@ public class PerspectiveReceive extends Perspective implements ChangeListener {
                                                                         currentParticipant.emailAddress,
                                                                         i != SMPCServices.getServicesSMPC().getAppModel().ownId //Only set buttons when not the actual user...
                                                                         && !( i == 0 && SMPCServices.getServicesSMPC().getAppModel().state == AppState.RECIEVING_SHARE)); // ... and not for participant to initiator in first round
-            entry.setSendListener(new ActionListener() {
+            entry.setButtonListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (new ExchangeStringPicker(new ComponentTextFieldValidator() {

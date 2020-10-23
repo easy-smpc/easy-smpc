@@ -35,18 +35,8 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
     /** Remove */
     private JButton           button;
     /** Change listener */
-    private ActionListener    sendListener;
+    private ActionListener    listener;
 
-    /**
-     * Creates a new instance
-     * @param name
-     * @param email
-     */
-//    public ComponentEntryOneButton(String name, String email) {
-//        this(name, email, false);
-//    }
-   
-    
     /**
      * Creates a new instance
      * @param name
@@ -108,8 +98,8 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
      * Send action
      */
     private void buttonAction() {
-        if (sendListener != null) {
-            sendListener.actionPerformed(new ActionEvent(this, 0, null));
+        if (listener != null) {
+            listener.actionPerformed(new ActionEvent(this, 0, null));
         }
     }
 
@@ -117,9 +107,13 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
      * Sets a change listener
      * @param listener
      */
-    public void setSendListener(ActionListener listener) {
-        this.sendListener = listener;
+    public void setButtonListener(ActionListener listener) {
+        this.listener = listener;
     }
     
+    /**
+     * Implement this to return the text for the button
+     * @return
+     */
     protected abstract String getText();
 }

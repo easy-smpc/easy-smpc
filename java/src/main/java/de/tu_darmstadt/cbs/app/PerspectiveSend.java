@@ -75,7 +75,7 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
             EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, 
                                                                          currentParticipant.emailAddress,
                                                                          i != SMPCServices.getServicesSMPC().getAppModel().ownId);
-            entry.setSendListener(new ActionListener() {
+            entry.setButtonListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     PerspectiveSend.this.sendMail(entry);
