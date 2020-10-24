@@ -28,12 +28,15 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Felix Wirth
  *
  */
+
 public abstract class ComponentEntryOneButton extends ComponentEntry {
 
     /** SVID */
     private static final long serialVersionUID = -2630607826943052651L;
+
     /** Remove */
     private JButton           button;
+    
     /** Change listener */
     private ActionListener    listener;
 
@@ -71,6 +74,9 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
     }
     
 
+    /**
+     * Creates an additional control panel
+     */
     @Override
     protected JPanel createAdditionalControls() {
 

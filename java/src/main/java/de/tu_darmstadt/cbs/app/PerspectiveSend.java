@@ -43,16 +43,20 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * A perspective
  * 
  * @author Fabian Prasser
+ * @author Felix Wirth
  */
 
 public class PerspectiveSend extends Perspective implements ChangeListener {
 
     /** Panel for participants */
     private JPanel             participants;
+    
     /** Text field containing title of study */
     private ComponentTextField title;
+    
     /** send all emails at once button */
     private JButton            sendAllEmailsButton;
+    
     /** Save button */
     private JButton            save;
 
@@ -65,6 +69,9 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
         super(app, Resources.getString("PerspectiveSend.send")); //$NON-NLS-1$
     }
 
+    /**
+     * Initialize perspective based on model
+     */
     @Override
     protected void initialize() {
         this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
@@ -125,24 +132,28 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
          this.save.setEnabled(!this.validateSentMessages());
      }
      
-     /**
-      * Returns the exchange string for the given entry
-      * @param entry
-     * @throws IOException 
-      */
-     private String getExchangeString(EntryParticipantSendMail entry) throws IOException {
-         int id = Arrays.asList(participants.getComponents()).indexOf(entry);
-         return Message.serializeMessage(SMPCServices.getServicesSMPC().getAppModel().getUnsentMessageFor(id));
-     }     
-     
+    /**
+     * Returns the exchange string for the given entry
+     * 
+     * @param entry
+     * @throws IOException
+     */
+    private String getExchangeString(EntryParticipantSendMail entry) throws IOException {
+        int id = Arrays.asList(participants.getComponents()).indexOf(entry);
+        return Message.serializeMessage(SMPCServices.getServicesSMPC()
+                                                    .getAppModel()
+                                                    .getUnsentMessageFor(id));
+    }
+    
      /**
       * Returns whether this is the own entry
       * @param entry
       * @return
       */
-     private boolean isOwnEntry(Component entry) {
-         return Arrays.asList(participants.getComponents()).indexOf(entry) == SMPCServices.getServicesSMPC().getAppModel().ownId;
-     }
+    private boolean isOwnEntry(Component entry) {
+        return Arrays.asList(participants.getComponents())
+                     .indexOf(entry) == SMPCServices.getServicesSMPC().getAppModel().ownId;
+    }
      
      /**
       * Checks if all messages are sent
@@ -150,8 +161,8 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
       * @return
       */
      private boolean validateSentMessages() {
-         return SMPCServices.getServicesSMPC().getAppModel().messagesUnsent();
-     }
+        return SMPCServices.getServicesSMPC().getAppModel().messagesUnsent();
+    }
 
     /**
      * Save the project
@@ -171,14 +182,17 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
                 break;
             default:
                 throw new Exception(String.format(Resources.getString("PerspectiveSend.wrongState"),
-                                            SMPCServices.getServicesSMPC().getAppModel().state));
+                                                  SMPCServices.getServicesSMPC()
+                                                              .getAppModel().state));
             }
             SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-          this.getApp().getPerspective(PerspectiveReceive.class).initialize();
-          this.getApp().showPerspective(PerspectiveReceive.class);
-      } catch (Exception e) {
-          JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
-      }
+            this.getApp().getPerspective(PerspectiveReceive.class).initialize();
+            this.getApp().showPerspective(PerspectiveReceive.class);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null,
+                                          Resources.getString("PerspectiveSend.saveError") +
+                                                e.getMessage());
+        }
     }
 
     /**
@@ -209,9 +223,7 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
         central.setLayout(new GridLayout(2, 1));
         panel.add(central, BorderLayout.CENTER);        
         
-        // ------
         // Participants
-        // ------
         this.participants = new JPanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                      Resources.getString("PerspectiveSend.participants"),
@@ -222,9 +234,7 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.NORTH);    
            
-        // ------
         // send all e-mails button and save button
-        // ------
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
         sendAllEmailsButton = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButton"));

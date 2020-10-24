@@ -137,8 +137,6 @@ public class App extends JFrame {
 
         // Finally, make the frame visible
         this.setVisible(true);
-
-        SMPCServices.getServicesSMPC().setApp(this);
     }
 
     /**

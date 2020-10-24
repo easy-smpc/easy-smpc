@@ -26,10 +26,18 @@ public class EntryBinNoButton extends EntryBin {
     /** SVUID*/
     private static final long serialVersionUID = 3177581676116462949L;
     
+    /**
+     * Creates a new instance
+     * @param name
+     * @param value
+     */
     public EntryBinNoButton(String name, String value){
         super(name, value);
     }
 
+    /**
+     * Creates and additional control panel
+     */
     @Override
     protected JPanel createAdditionalControls() {
         return null;

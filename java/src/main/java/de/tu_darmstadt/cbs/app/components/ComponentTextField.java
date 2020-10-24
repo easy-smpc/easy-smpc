@@ -78,6 +78,11 @@ public class ComponentTextField extends JTextField {
         this.listener = listener;
     }
 
+    
+    /**
+     * Sets text for button
+     * @param text
+     */
     @Override
     public void setText(String t) {
         super.setText(t);

@@ -108,6 +108,10 @@ public abstract class ComponentEntryAddRemove extends ComponentEntry {
         }
     }
     
+    
+    /**
+     * Creates and additional control panel
+     */
     @Override
     protected JPanel createAdditionalControls() {
         

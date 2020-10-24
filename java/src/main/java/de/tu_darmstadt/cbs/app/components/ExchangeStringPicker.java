@@ -43,7 +43,7 @@ public class ExchangeStringPicker extends JDialog implements ChangeListener {
     private ComponentTextArea exchangeStringTextArea;
     /** okButton */
     private JButton           okButton;
-    /** Result*/
+    /** Result */
     private String            result;
         
     /**
@@ -54,12 +54,12 @@ public class ExchangeStringPicker extends JDialog implements ChangeListener {
     public ExchangeStringPicker(ComponentTextFieldValidator textAreaValidator , Component componentRelativePosition) {
         super();
         this.exchangeStringTextArea = new ComponentTextArea(textAreaValidator);
-        this.setSize(Resources.SIZE_TEXTAREA_X,Resources.SIZE_TEXTAREA_Y); 
-        this.setLocationRelativeTo(componentRelativePosition);                       
+        this.setSize(Resources.SIZE_TEXTAREA_X, Resources.SIZE_TEXTAREA_Y);
+        this.setLocationRelativeTo(componentRelativePosition);
         this.setTitle(Resources.getString("PerspectiveParticipate.PickerTitle"));
         this.getContentPane().setLayout(new BorderLayout());
         JLabel pickerText = new JLabel(Resources.getString("PerspectiveParticipate.PickerText"));
-        this.getContentPane().add(pickerText, BorderLayout.NORTH);                                                                     
+        this.getContentPane().add(pickerText, BorderLayout.NORTH);
         this.exchangeStringTextArea.setChangeListener(this);
         this.getContentPane().add(exchangeStringTextArea, BorderLayout.CENTER);
         JPanel buttonsPane = new JPanel();
@@ -69,26 +69,26 @@ public class ExchangeStringPicker extends JDialog implements ChangeListener {
         okButton.setEnabled(this.areValuesValid());
         JButton cancelButton = new JButton(Resources.getString("PerspectiveParticipate.cancel"));
         buttonsPane.add(cancelButton);
-        buttonsPane.add(okButton);        
-        okButton.addActionListener(new ActionListener() {            
+        buttonsPane.add(okButton);
+        okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ExchangeStringPicker.this.result=exchangeStringTextArea.getText();
-                ExchangeStringPicker.this.dispose();           
+                ExchangeStringPicker.this.result = exchangeStringTextArea.getText();
+                ExchangeStringPicker.this.dispose();
             }
         });
-        cancelButton.addActionListener(new ActionListener() {            
+        cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ExchangeStringPicker.this.result=null;
-                ExchangeStringPicker.this.dispose();           
+                ExchangeStringPicker.this.result = null;
+                ExchangeStringPicker.this.dispose();
             }
         });
         // Set value also when closed by cross in upper right corner
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                ExchangeStringPicker.this.result=null;
+                ExchangeStringPicker.this.result = null;
             }
         });
     }

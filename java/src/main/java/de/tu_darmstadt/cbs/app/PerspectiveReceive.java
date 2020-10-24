@@ -44,19 +44,22 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * A perspective
  * 
  * @author Fabian Prasser
+ * @author Felix Wirth
  */
 
 public class PerspectiveReceive extends Perspective implements ChangeListener, ActionListener {
 
     /** Panel for participants */
     private JPanel             participants;
+    
     /** Text field containing title of study */
     private ComponentTextField title;
+    
     /** Save button */
     private JButton            save;
+    
     /** Central panel */
     private JPanel central;
-
 
     /**
      * Creates the perspective
@@ -66,6 +69,9 @@ public class PerspectiveReceive extends Perspective implements ChangeListener, A
         super(app, Resources.getString("PerspectiveReceive.receive")); //$NON-NLS-1$
     }
 
+    /**
+     * Initialize perspective based on model
+     */
     @Override
     protected void initialize() {
         this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
@@ -167,9 +173,7 @@ public class PerspectiveReceive extends Perspective implements ChangeListener, A
         // Layout
         panel.setLayout(new BorderLayout());
 
-        // -------
         // Study title
-        // -------
         JPanel title = new JPanel();
         panel.add(title, BorderLayout.NORTH);
         title.setLayout(new BorderLayout());
@@ -186,9 +190,7 @@ public class PerspectiveReceive extends Perspective implements ChangeListener, A
         central.setLayout(new GridLayout(2, 1));
         panel.add(central, BorderLayout.CENTER);        
         
-        // ------
         // Participants
-        // ------
         this.participants = new JPanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                      Resources.getString("PerspectiveReceive.participants"),
@@ -199,9 +201,7 @@ public class PerspectiveReceive extends Perspective implements ChangeListener, A
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.NORTH);    
            
-        // ------
         // save button
-        // ------
         
         save = new JButton(Resources.getString("PerspectiveReceive.save"));
         save.addActionListener(new ActionListener() {
@@ -221,8 +221,8 @@ public class PerspectiveReceive extends Perspective implements ChangeListener, A
             public boolean validate(String text) {
                 return SMPCServices.getServicesSMPC()
                                    .isMessageShareResultValid(text,
-                                                        Arrays.asList(participants.getComponents())
-                                                              .indexOf(entry));
+                                                              Arrays.asList(participants.getComponents())
+                                                                    .indexOf(entry));
             }
         }, PerspectiveReceive.this.central).showDialog();
 

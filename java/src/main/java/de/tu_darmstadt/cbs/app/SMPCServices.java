@@ -17,10 +17,7 @@ import java.io.File;
 import java.io.IOException;
 
 import de.tu_darmstadt.cbs.emailsmpc.AppModel;
-import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Singleton object of this class is the controller in a MVC pattern
@@ -32,37 +29,18 @@ import lombok.Setter;
 public class SMPCServices {
     /** Singleton of this class */
     private static SMPCServices singleSMPC;
+    
     /** The object containing the secure multi-party computing API */
-    /**
-     * Returns appModel
-     * @return
+     private AppModel            appModel;
+   
+ 
+    /** 
+     * Returns the appModel instance
+     * @return appModel
      */
-    @Getter
-    private AppModel            appModel;
-    /** GUI state deviates slightly from state in the API, thus a second state variable */
-    /**
-     * Returns workflowState
-     * @return
-     */
-    @Getter
-    /**
-     * Gets workflowState
-     * @param workflowState
-     */
-    @Setter
-    private AppState            workflowState;
-    /** The app constructing the GUI */
-    /**
-     * Gets the app
-     * @return
-     */
-    @Getter
-    /**
-     * Sets the app
-     * @param app
-     */
-    @Setter
-    private App                 app;
+    public AppModel getAppModel() {
+        return appModel;
+    }
 
     /**
      * Get the object of this class as a singleton
@@ -76,18 +54,6 @@ public class SMPCServices {
     }
 
     /**
-     * Convenience method to mark messages as already sent
-     */
-    protected void markMessagesSent() {
-
-        for (int i = 0; i < SMPCServices.getServicesSMPC().getAppModel().numParticipants; i++) {
-            if (i != SMPCServices.getServicesSMPC().getAppModel().ownId) {
-                SMPCServices.getServicesSMPC().getAppModel().markMessageSent(i);
-            }
-        }
-    }
-
-    /**
      * Initializes APIs state as new study creation
      */
     public void initalizeAsNewStudyCreation() {
@@ -98,8 +64,6 @@ public class SMPCServices {
     /**
      * Initializes APIs state as new study participation
      * 
-     * @param Data
-     *            copied by user manually in program
      */
     public void initalizeAsNewStudyParticipation() {
         this.appModel = new AppModel();
@@ -119,11 +83,10 @@ public class SMPCServices {
                                             IOException {
         appModel = AppModel.loadModel(selectedFile);
         appModel.filename = selectedFile;
-        this.workflowState = this.appModel.state;
     }
 
     /**
-     * Check whether message is valid
+     * Check whether initial participation message is valid
      * @param text
      * @return
      */

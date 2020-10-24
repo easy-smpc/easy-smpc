@@ -48,16 +48,20 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * A perspective
  * 
  * @author Fabian Prasser
+ * @author Felix Wirth
  */
 
 public class PerspectiveCreate extends Perspective implements ChangeListener {
 
     /** Panel for participants */
     private JPanel             participants;
+    
     /** Panel for bins */
     private JPanel             bins;
+    
     /** Text field containing title of study */
     private ComponentTextField title;
+    
     /** Save button */
     private JButton            save;
 
@@ -296,9 +300,7 @@ public class PerspectiveCreate extends Perspective implements ChangeListener {
         central.setLayout(new GridLayout(2, 1));
         panel.add(central, BorderLayout.CENTER);
         
-        // ------
         // Participants
-        // ------
         this.participants = new JPanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                      Resources.getString("PerspectiveCreate.participants"),
@@ -310,9 +312,7 @@ public class PerspectiveCreate extends Perspective implements ChangeListener {
         central.add(pane, BorderLayout.NORTH);
         this.addParticipant(null, true);
 
-        // ------
         // Bins
-        // ------
         this.bins = new JPanel();
         this.bins.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                              Resources.getString("PerspectiveCreate.bins"),
@@ -324,9 +324,7 @@ public class PerspectiveCreate extends Perspective implements ChangeListener {
         central.add(pane, BorderLayout.SOUTH);
         this.addBin(null, true);
         
-        // ------
         // Save button
-        // ------
         save = new JButton(Resources.getString("PerspectiveCreate.save"));
         save.setEnabled(this.areValuesValid());
         save.addActionListener(new ActionListener() {
@@ -339,6 +337,9 @@ public class PerspectiveCreate extends Perspective implements ChangeListener {
         
     }
 
+    /**
+     * Initialize perspective based on model
+     */
     @Override
     protected void initialize() {
         // Empty by design

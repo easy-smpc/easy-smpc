@@ -33,17 +33,23 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * A perspective
  * 
  * @author Fabian Prasser
+ * @author Felix Wirth
  */
 
 public class PerspectiveFinalize extends Perspective {
 
     /** Panel for participants */
     private JPanel             participants;
+    
     /** Panel for bins */
     private JPanel             bins;
+    
     /** Text field containing title of study */
     private ComponentTextField title;
     
+    /**
+     * Initialize perspective based on model
+     */
     @Override
     public void initialize() {
         participants.removeAll();
@@ -62,10 +68,14 @@ public class PerspectiveFinalize extends Perspective {
         participants.revalidate();
         participants.repaint();
         bins.revalidate();
-        bins.repaint();       
+        bins.repaint();
         this.getApp().showPerspective(PerspectiveFinalize.class);
     }
     
+    /**
+     * Creates the perspective
+     * @param app
+     */
     protected PerspectiveFinalize(App app) {
         super(app, Resources.getString("PerspectiveFinalize.0")); //$NON-NLS-1$
     }
@@ -79,9 +89,7 @@ public class PerspectiveFinalize extends Perspective {
         // Layout
         panel.setLayout(new BorderLayout());
 
-        // -------
         // Study title
-        // -------
         JPanel title = new JPanel();
         panel.add(title, BorderLayout.NORTH);
         title.setLayout(new BorderLayout());
@@ -98,9 +106,7 @@ public class PerspectiveFinalize extends Perspective {
         central.setLayout(new GridLayout(2, 1));
         panel.add(central, BorderLayout.CENTER);        
         
-        // ------
         // Participants
-        // ------
         this.participants = new JPanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                      Resources.getString("PerspectiveParticipate.participants"),
@@ -111,9 +117,7 @@ public class PerspectiveFinalize extends Perspective {
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.NORTH);    
                         
-        // ------
         // Bins
-        // ------
         this.bins = new JPanel();
         this.bins.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                              Resources.getString("PerspectiveParticipate.bins"),

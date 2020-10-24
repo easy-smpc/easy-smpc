@@ -47,23 +47,28 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * A perspective
  * 
  * @author Fabian Prasser
+ * @author Felix Wirth
  */
 
 public class PerspectiveParticipate extends Perspective implements ChangeListener {
 
     /** Panel for participants */
     private JPanel             participants;
+    
     /** Panel for bins */
     private JPanel             bins;
+    
     /** Text field containing title of study */
     private ComponentTextField title;
+    
     /** enterExchangeString button */
     private JButton            enterExchangeStringButton;
+    
     /** Save button */
     private JButton            save;
+    
     /** Central panel */
     private JPanel central;
-
 
     /**
      * Creates the perspective
@@ -87,7 +92,8 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
     public void setDataForParticipant(String exchangeString) {
         try {
             SMPCServices.getServicesSMPC()
-                        .getAppModel().toEnteringValues(Message.deserializeMessage(exchangeString).data);
+                        .getAppModel()
+                        .toEnteringValues(Message.deserializeMessage(exchangeString).data);
             participants.removeAll();
             bins.removeAll();
             this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
@@ -179,9 +185,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         // Layout
         panel.setLayout(new BorderLayout());
 
-        // -------
         // Study title
-        // -------
         JPanel title = new JPanel();
         panel.add(title, BorderLayout.NORTH);
         title.setLayout(new BorderLayout());
@@ -198,9 +202,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         central.setLayout(new GridLayout(2, 1));
         panel.add(central, BorderLayout.CENTER);        
         
-        // ------
         // Participants
-        // ------
         this.participants = new JPanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                      Resources.getString("PerspectiveParticipate.participants"),
@@ -211,9 +213,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.NORTH);    
                         
-        // ------
         // Bins
-        // ------
         this.bins = new JPanel();
         this.bins.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                              Resources.getString("PerspectiveParticipate.bins"),
@@ -224,9 +224,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
            
-        // ------
         // EnterExchangeString button and save button
-        // ------
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
         enterExchangeStringButton = new JButton(Resources.getString("PerspectiveParticipate.enterExchangeString"));
@@ -250,6 +248,9 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
+    /**
+     * Initialize perspective based on model
+     */
     @Override
     protected void initialize() {
         SMPCServices.getServicesSMPC().initalizeAsNewStudyParticipation();

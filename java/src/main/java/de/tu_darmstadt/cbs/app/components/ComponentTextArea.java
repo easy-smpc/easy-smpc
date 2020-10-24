@@ -27,9 +27,7 @@ import de.tu_darmstadt.cbs.app.Resources;
  * @author Fabian Prasser
  */
 public class ComponentTextArea extends JTextArea {
-
-
-
+    
     /** SVID */
     private static final long serialVersionUID = 2813095397984608993L;
 

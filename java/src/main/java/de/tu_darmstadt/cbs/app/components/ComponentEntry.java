@@ -162,5 +162,8 @@ public abstract class ComponentEntry extends JPanel {
         this.fieldRight.setChangeListener(listener);
     }
     
+    /** Creates an additional control panel
+     * @return
+     */
     protected abstract JPanel createAdditionalControls();
 }

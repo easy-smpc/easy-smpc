@@ -24,6 +24,10 @@ import de.tu_darmstadt.cbs.app.Resources;
 public class EntryParticipantSendMail extends ComponentEntryOneButton {
 
 
+    /** SVID */
+    private static final long serialVersionUID = 3947342543992289608L;
+
+
     /**
      * Creates a new instance
      * @param name
