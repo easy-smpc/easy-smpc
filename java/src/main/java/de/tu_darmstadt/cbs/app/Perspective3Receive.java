@@ -17,13 +17,11 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EtchedBorder;
@@ -32,13 +30,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
-import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.EntryParticipantEnterExchangeString;
-import de.tu_darmstadt.cbs.app.components.ExchangeStringPicker;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
-import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
@@ -79,47 +74,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         super(app, Resources.getString("PerspectiveReceive.receive"), progress); //$NON-NLS-1$
     }
 
-    /**
-     * Initialize perspective based on model
-     */
     @Override
-    protected void initialize() {
-        this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
-        participants.removeAll();
-        int i = 0; // index count for participants to access messages
-        for (Participant currentParticipant : SMPCServices.getServicesSMPC().getAppModel().participants) {
-            EntryParticipantEnterExchangeString entry = new EntryParticipantEnterExchangeString(currentParticipant.name, 
-                                                                        currentParticipant.emailAddress,
-                                                                        i != SMPCServices.getServicesSMPC().getAppModel().ownId //Only set buttons when not the actual user...
-                                                                        && !( i == 0 && SMPCServices.getServicesSMPC().getAppModel().state == AppState.RECIEVING_SHARE)); // ... and not for participant to initiator in first round
-            entry.setButtonListener(this);
-            i++;
-            participants.add(entry);
-        }
-        this.stateChanged(new ChangeEvent(this));
-    }
-    
-     
-     /**
-     * @param text
-     * @param entry
-     * @return
-     */
-    protected boolean setMessageFromString(String exchangeString, EntryParticipantEnterExchangeString entry) {
-
-        try {
-            SMPCServices.getServicesSMPC()
-                        .getAppModel()
-                        .setShareFromMessage(Message.deserializeMessage(exchangeString),
-                                             SMPCServices.getServicesSMPC()
-                                                         .getAppModel()
-                                                         .getParticipantFromId(Arrays.asList(participants.getComponents())
-                                                                                     .indexOf(entry)));
-            return true;
-        } catch (IllegalStateException | IllegalArgumentException | ClassNotFoundException
-                | IOException e) {
-            System.out.println(e.toString());
-            return false;
+    public void actionPerformed(ActionEvent e) {
+        EntryParticipantEnterExchangeString entry = (EntryParticipantEnterExchangeString) e.getSource();
+        int index = Arrays.asList(participants.getComponents()).indexOf(entry);
+        if (getApp().actionReceiveMessage(index)) {
+            this.stateChanged(new ChangeEvent(this));
         }
     }
      
@@ -136,7 +96,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @return
      */
     private boolean areSharesComplete() {
-        for (Bin b : SMPCServices.getServicesSMPC().getAppModel().bins) {
+        for (Bin b : getApp().getModel().bins) {
             if (!b.isComplete()) return false;
         }
         return true;
@@ -146,32 +106,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * Save the project
      * 
      */
-    private void save() {
-        try {
-            switch (SMPCServices.getServicesSMPC().getAppModel().state) {
-            case RECIEVING_SHARE:
-                SMPCServices.getServicesSMPC().getAppModel().toSendingResult();
-                SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-                this.getApp().getPerspective(Perspective2Send.class).initialize();
-                this.getApp().showPerspective(Perspective2Send.class);
-                break;
-            case RECIEVING_RESULT:
-                SMPCServices.getServicesSMPC().getAppModel().toFinished();
-                SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-                this.getApp().getPerspective(Perspective6Finalize.class).initialize();
-                this.getApp().showPerspective(Perspective6Finalize.class);
-                break;
-            default:
-                throw new Exception(String.format(Resources.getString("PerspectiveReceive.wrongState"),
-                                                  SMPCServices.getServicesSMPC()
-                                                              .getAppModel().state));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null,
-                                          Resources.getString("PerspectiveReceive.saveError") +
-                                                e.getMessage());
-        }
+    protected void actionSave() {
+        getApp().actionFirstReceivingDone();
     }
 
     /**
@@ -217,28 +153,30 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                save();
+                actionSave();
             }
         });
         panel.add(save, BorderLayout.SOUTH);
     }
 
+    /**
+     * Initialize perspective based on model
+     */
     @Override
-    public void actionPerformed(ActionEvent e) {
-        EntryParticipantEnterExchangeString entry = (EntryParticipantEnterExchangeString) e.getSource();
-        String message = new ExchangeStringPicker(new ComponentTextFieldValidator() {
-            @Override
-            public boolean validate(String text) {
-                return SMPCServices.getServicesSMPC()
-                                   .isMessageShareResultValid(text,
-                                                              Arrays.asList(participants.getComponents())
-                                                                    .indexOf(entry));
-            }
-        }, Perspective3Receive.this.central).showDialog();
-
-        if (message != null) {
-            Perspective3Receive.this.setMessageFromString(message, entry);
-            Perspective3Receive.this.stateChanged(new ChangeEvent(this));
+    protected void initialize() {
+        this.title.setText(getApp().getModel().name);
+        this.participants.removeAll();
+        int i = 0; 
+        for (Participant currentParticipant : getApp().getModel().participants) {
+            
+            //Only set buttons when not the actual user and not for participant to initiator in first round
+            EntryParticipantEnterExchangeString entry = new EntryParticipantEnterExchangeString(currentParticipant.name, 
+                                                                        currentParticipant.emailAddress,
+                                                                        i != getApp().getModel().ownId && !( i == 0 && getApp().getModel().state == AppState.RECIEVING_SHARE));
+            entry.setButtonListener(this);
+            i++;
+            participants.add(entry);
         }
+        this.stateChanged(new ChangeEvent(this));
     }
 }

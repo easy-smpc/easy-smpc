@@ -51,34 +51,32 @@ public class Perspective0Start extends Perspective {
         buttons.setLayout(new GridLayout(3, 1));
 
         // Action 1
-        JButton button1 = new JButton(Resources.getString("PerspectiveStart.1")); //$NON-NLS-1$
+        JButton button1 = new JButton(Resources.getString("App.7")); //$NON-NLS-1$
         buttons.add(button1);
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                getApp().getPerspective(Perspective1ACreate.class).initialize();
-                getApp().showPerspective(Perspective1ACreate.class);
+                getApp().actionCreate();
             }
         });
 
         // Action 2
-        JButton button2 = new JButton(Resources.getString("PerspectiveStart.2")); //$NON-NLS-1$
+        JButton button2 = new JButton(Resources.getString("App.8")); //$NON-NLS-1$
         buttons.add(button2);
         button2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                getApp().getPerspective(Perspective1BParticipate.class).initialize();
-                getApp().showPerspective(Perspective1BParticipate.class);
+                getApp().actionParticipate();
             }
         });
 
         // Action 3
-        JButton button3 = new JButton(Resources.getString("PerspectiveStart.3")); //$NON-NLS-1$
+        JButton button3 = new JButton(Resources.getString("App.9")); //$NON-NLS-1$
         buttons.add(button3);
         button3.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO  Load file
+                getApp().actionLoad();
             }
         });
 

@@ -48,36 +48,31 @@ public class Perspective6Finalize extends Perspective {
     private ComponentTextField title;
     
     /**
+     * Creates the perspective
+     * @param app
+     */
+    protected Perspective6Finalize(App app) {
+        super(app, Resources.getString("PerspectiveFinalize.0"), 6); //$NON-NLS-1$
+    }
+    
+    /**
      * Initialize perspective based on model
      */
     @Override
     public void initialize() {
         participants.removeAll();
         bins.removeAll();
-        this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
-        for (Participant currentParticipant : SMPCServices.getServicesSMPC()
-                                                          .getAppModel().participants) {
-            participants.add(new EntryParticipant(currentParticipant.name,
-                                                  currentParticipant.emailAddress,
-                                                  false));
+        this.title.setText(getApp().getModel().name);
+        for (Participant currentParticipant : getApp().getModel().participants) {
+            participants.add(new EntryParticipant(currentParticipant.name, currentParticipant.emailAddress, false));
         }
-
-        for (BinResult binResult : SMPCServices.getServicesSMPC().getAppModel().getAllResults()) {
+        for (BinResult binResult : getApp().getModel().getAllResults()) {
             bins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
         }
         participants.revalidate();
         participants.repaint();
         bins.revalidate();
         bins.repaint();
-        this.getApp().showPerspective(Perspective6Finalize.class);
-    }
-    
-    /**
-     * Creates the perspective
-     * @param app
-     */
-    protected Perspective6Finalize(App app) {
-        super(app, Resources.getString("PerspectiveFinalize.0"), 6); //$NON-NLS-1$
     }
     
     /**
@@ -97,7 +92,8 @@ public class Perspective6Finalize extends Perspective {
                                                          Resources.getString("PerspectiveCreate.studyTitle"),
                                                          TitledBorder.LEFT,
                                                          TitledBorder.DEFAULT_POSITION));
-        this.title = new ComponentTextField(null);//no validation
+        
+        this.title = new ComponentTextField(null); // No validation
         this.title.setEnabled(false);
         title.add(this.title, BorderLayout.CENTER);
         
@@ -127,7 +123,5 @@ public class Perspective6Finalize extends Perspective {
         pane = new JScrollPane(bins);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
-           
-      
     }
 }

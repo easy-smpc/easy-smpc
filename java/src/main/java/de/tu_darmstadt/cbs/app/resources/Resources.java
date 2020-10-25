@@ -63,6 +63,9 @@ public class Resources {
     /** Preferred height for the progress container */
     public static final int             PROGRESS_PREFERRED_HEIGHT = 50;
 
+    /** Ending for project files */
+    public static final String          FILE_ENDING               = "smpc";
+
     /**
      * No instantiation
      */

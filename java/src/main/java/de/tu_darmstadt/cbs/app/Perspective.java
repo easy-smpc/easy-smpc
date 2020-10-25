@@ -57,15 +57,6 @@ public abstract class Perspective {
     }
 
     /**
-     * Returns the title
-     * 
-     * @return
-     */
-    public String getTitle() {
-        return this.title;
-    }
-
-    /**
      * The actual content
      * 
      * @return
@@ -81,16 +72,20 @@ public abstract class Perspective {
     }
 
     /**
+     * Returns the title
+     * 
+     * @return
+     */
+    public String getTitle() {
+        return this.title;
+    }
+
+    /**
      * Creates the contents
      * 
      * @param panel
      */
     protected abstract void createContents(JPanel panel);
-    
-    /**
-     * Initialize perspective based on model
-     */
-    protected abstract void initialize();
     
     /**
      * Returns the progress associated with this perspective
@@ -99,4 +94,9 @@ public abstract class Perspective {
     protected int getProgress() {
         return this.progress;
     }
+    
+    /**
+     * Initialize perspective based on model
+     */
+    protected abstract void initialize();
 }

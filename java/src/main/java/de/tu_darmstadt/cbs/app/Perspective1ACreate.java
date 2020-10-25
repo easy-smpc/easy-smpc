@@ -18,8 +18,6 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +26,6 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -79,6 +76,39 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      */
     public void stateChanged(ChangeEvent e) {
         this.save.setEnabled(this.areValuesValid());
+    }
+
+    /**
+     * Save the project and proceed.
+     */
+    private void actionSave() {
+        
+        // Check whether at least three participants
+        if (this.participants.getComponents().length < 1) {
+            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.notEnoughParticipants"));
+            return;
+        }
+
+        
+        // Collect participants
+        List<Participant> participants = new ArrayList<>();
+        for (Component entry : this.participants.getComponents()) {
+            Participant participant = new Participant(((EntryParticipant)entry).getLeftValue(),
+                                                      ((EntryParticipant)entry).getRightValue());
+            participants.add(participant);
+        }
+        
+        // Collect bins
+        List<Bin> bins = new ArrayList<>();
+        for (Component entry : this.bins.getComponents()) {
+            Bin bin = new Bin(((EntryBin)entry).getLeftValue());
+            bin.initialize(participants.size());
+            bin.shareValue(new BigInteger(((EntryBin)entry).getRightValue()));
+            bins.add(bin);
+        }
+
+        // Initialize study
+        getApp().actionCreateDone(this.title.getText(), participants.toArray(new Participant[participants.size()]), bins.toArray(new Bin[bins.size()]));
     }
 
     /**
@@ -208,66 +238,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     }
 
     /**
-     * Save the project
-     * 
-     * @return Saving actually performed?
-     */
-    private void save() {
-        
-        // Check whether at least three participants
-        if (this.participants.getComponents().length < 1) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.notEnoughParticipants"));
-            return;
-        }
-
-        // File
-        File file = null;
-        JFileChooser fileChooser = new JFileChooser();
-        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-            file = fileChooser.getSelectedFile();
-        }
-        
-        // Check
-        if (file == null) {
-            return;
-        }
-        
-        // Collect participants
-        List<Participant> participants = new ArrayList<>();
-        for (Component entry : this.participants.getComponents()) {
-            Participant participant = new Participant(((EntryParticipant)entry).getLeftValue(),
-                                                      ((EntryParticipant)entry).getRightValue());
-            participants.add(participant);
-        }
-        
-        // Collect bins
-        List<Bin> bins = new ArrayList<>();
-        for (Component entry : this.bins.getComponents()) {
-            Bin bin = new Bin(((EntryBin)entry).getLeftValue());
-            bin.initialize(participants.size());
-            bin.shareValue(new BigInteger(((EntryBin)entry).getRightValue()));
-            bins.add(bin);
-        }
-
-        // Initialize 
-        SMPCServices.getServicesSMPC().initalizeAsNewStudyCreation();
-        // Pass over bins and participants
-        SMPCServices.getServicesSMPC().getAppModel().toInitialSending(this.title.getText(),
-                                                                      participants.toArray(new Participant[participants.size()]),
-                                                                      bins.toArray(new Bin[bins.size()]));
-
-        // Try to save file
-        try {
-            SMPCServices.getServicesSMPC().getAppModel().filename = file;
-            SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-            this.getApp().getPerspective(Perspective2Send.class).initialize();
-            this.getApp().showPerspective(Perspective2Send.class);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError") + e.getMessage());
-        }
-    }
-
-    /**
      *Creates and adds UI elements
      */
     @Override
@@ -292,8 +262,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 return !text.trim().isEmpty();
             }
         });
-        this.title.setChangeListener(this);
-        // TODO: Wie ohne fixed length auskommen? Oder zumindest die Arten Längen festzulegen harmonisieren                                                       
+        this.title.setChangeListener(this);                                                     
         title.add(this.title, BorderLayout.CENTER);
         
         // Central panel
@@ -311,7 +280,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         JScrollPane pane = new JScrollPane(participants);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.NORTH);
-        this.addParticipant(null, true);
 
         // Bins
         this.bins = new JPanel();
@@ -323,7 +291,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         pane = new JScrollPane(bins);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
-        this.addBin(null, true);
         
         // Save button
         save = new JButton(Resources.getString("PerspectiveCreate.save"));
@@ -331,7 +298,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                save();
+                actionSave();
             }
         });
         panel.add(save, BorderLayout.SOUTH);
@@ -343,7 +310,17 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      */
     @Override
     protected void initialize() {
-        // Empty by design
         
+        // Clear
+        this.participants.removeAll();
+        this.bins.removeAll();
+        this.title.setText("");
+
+        // Add initial
+        this.addParticipant(null, true);
+        this.addBin(null, true);
+        
+        // Update
+        this.stateChanged(new ChangeEvent(this));
     }
 }

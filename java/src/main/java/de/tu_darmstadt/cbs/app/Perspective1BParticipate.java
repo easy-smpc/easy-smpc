@@ -18,15 +18,11 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
 import java.math.BigInteger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EtchedBorder;
@@ -35,13 +31,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
-import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.EntryBin;
 import de.tu_darmstadt.cbs.app.components.EntryParticipant;
-import de.tu_darmstadt.cbs.app.components.ExchangeStringPicker;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
-import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
@@ -61,9 +54,6 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     
     /** Text field containing title of study */
     private ComponentTextField title;
-    
-    /** enterExchangeString button */
-    private JButton            enterExchangeStringButton;
     
     /** Save button */
     private JButton            save;
@@ -88,40 +78,18 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     }
 
     /**
-     * Sets string and derived data for a participant
+     * Save the project
+     * 
+     * @return Saving actually performed?
      */
-    public void setDataForParticipant(String exchangeString) {
-        try {
-            SMPCServices.getServicesSMPC()
-                        .getAppModel()
-                        .toEnteringValues(Message.deserializeMessage(exchangeString).data);
-            participants.removeAll();
-            bins.removeAll();
-            this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
-            for (Participant currentParticipant : SMPCServices.getServicesSMPC()
-                                                              .getAppModel().participants) {
-                EntryParticipant newNameEmailParticipantEntry = new EntryParticipant(currentParticipant.name,
-                                                                                     currentParticipant.emailAddress,
-                                                                                     false);
-                participants.add(newNameEmailParticipantEntry);
-            }
-            for (Bin currentBin : SMPCServices.getServicesSMPC().getAppModel().bins) {
-                EntryBin newBin = new EntryBin(currentBin.name, false, true, false);
-                newBin.setChangeListener(this);
-                bins.add(newBin);
-            }
-            participants.revalidate();
-            participants.repaint();
-            bins.revalidate();
-            bins.repaint();
-        } catch (ClassNotFoundException | IOException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null,
-                                          Resources.getString("PerspectiveParticipate.stringError") +
-                                                e.getMessage());
+    private void actionSave() {
+        BigInteger[] secret = new BigInteger[getApp().getModel().bins.length];
+        for (int i = 0; i < this.bins.getComponents().length; i++) {
+            secret[i] = new BigInteger(((EntryBin) this.bins.getComponents()[i]).getRightValue());
         }
+        getApp().actionParticipateDone(secret);
     }
-    
+
     /**
      * Checks bins for validity
      * @return
@@ -135,46 +103,6 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         }        
         // Done
         return true;
-    }
-
-    /**
-     * Save the project
-     * 
-     * @return Saving actually performed?
-     */
-    private void save() {
-        // File
-        File file = null;
-        JFileChooser fileChooser = new JFileChooser();
-        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
-            file = fileChooser.getSelectedFile();
-        }
-        
-        // Check
-        if (file == null) {
-            return;
-        }
-        
-      BigInteger[] secretValuesofParticipant = new BigInteger[SMPCServices.getServicesSMPC()
-                                                                         .getAppModel().bins.length];
-      Integer i = 0;
-      for(Component currentBinEntry: this.bins.getComponents())
-      {
-          
-          secretValuesofParticipant[i] = new BigInteger(( (EntryBin) currentBinEntry).getRightValue());
-          i++;
-      }
-      SMPCServices.getServicesSMPC().getAppModel().toSendingShares(secretValuesofParticipant);
-        // Try to save file
-        try {
-            SMPCServices.getServicesSMPC().getAppModel().filename = file;
-            SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-            this.getApp().getPerspective(Perspective2Send.class).initialize();
-            this.getApp().showPerspective(Perspective2Send.class);
-
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveParticipate.saveError") + e.getMessage());
-        }
     }
 
     /**
@@ -225,28 +153,16 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
            
-        // EnterExchangeString button and save button
-        JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(2, 1));
-        enterExchangeStringButton = new JButton(Resources.getString("PerspectiveParticipate.enterExchangeString"));
-        enterExchangeStringButton.addActionListener(new ActionListener() {            
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                showExchangeStringPicker();
-            }
-        });
-        
-        buttonsPane.add(enterExchangeStringButton, 0,0);
+       
         save = new JButton(Resources.getString("PerspectiveParticipate.save"));
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                save();
+                actionSave();
             }
         });
         save.setEnabled(false);
-        buttonsPane.add(save, 0,1);
-        panel.add(buttonsPane, BorderLayout.SOUTH);
+        panel.add(save, BorderLayout.SOUTH);
     }
 
     /**
@@ -254,23 +170,29 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      */
     @Override
     protected void initialize() {
-        SMPCServices.getServicesSMPC().initalizeAsNewStudyParticipation();
-    }
 
-
-    /**
-     * Shows the exchangeStringPicker
-     */
-    public void showExchangeStringPicker() {
-        String exchangeString = new ExchangeStringPicker(new ComponentTextFieldValidator() {
-            @Override
-            public boolean validate(String text) {
-                return SMPCServices.getServicesSMPC().isInitialParticipationMessageValid(text);
-            }
-        }, central).showDialog();
-        if (exchangeString != null) {
-            setDataForParticipant(exchangeString);
-            stateChanged(new ChangeEvent(this));
+        // Clear
+        participants.removeAll();
+        bins.removeAll();
+        
+        // Title
+        this.title.setText(getApp().getModel().name);
+        
+        // Add participants
+        for (Participant currentParticipant : getApp().getModel().participants) {
+            EntryParticipant newNameEmailParticipantEntry = new EntryParticipant(currentParticipant.name, currentParticipant.emailAddress, false);
+            participants.add(newNameEmailParticipantEntry);
         }
+        for (Bin currentBin : getApp().getModel().bins) {
+            EntryBin newBin = new EntryBin(currentBin.name, false, true, false);
+            newBin.setChangeListener(this);
+            bins.add(newBin);
+        }
+        
+        // Redraw
+        participants.revalidate();
+        participants.repaint();
+        bins.revalidate();
+        bins.repaint();
     }
 }

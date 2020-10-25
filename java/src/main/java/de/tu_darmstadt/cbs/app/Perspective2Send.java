@@ -50,16 +50,16 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class Perspective2Send extends Perspective implements ChangeListener {
 
     /** Panel for participants */
-    private JPanel             participants;
-    
+    private JPanel                                 participants;
+
     /** Text field containing title of study */
-    private ComponentTextField title;
-    
+    private ComponentTextField                     title;
+
     /** send all emails at once button */
-    private JButton            sendAllEmailsButton;
-    
+    private JButton                                sendAllEmailsButton;
+
     /** Save button */
-    private JButton            save;
+    private JButton                                save;
 
     /**
      * Creates the perspective
@@ -79,68 +79,13 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     }
 
     /**
-     * Initialize perspective based on model
-     */
-    @Override
-    protected void initialize() {
-        this.title.setText(SMPCServices.getServicesSMPC().getAppModel().name);
-        participants.removeAll();
-        int i = 0; // index count for participants to access messages
-        for (Participant currentParticipant : SMPCServices.getServicesSMPC().getAppModel().participants) {
-            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, 
-                                                                         currentParticipant.emailAddress,
-                                                                         i != SMPCServices.getServicesSMPC().getAppModel().ownId);
-            entry.setButtonListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    Perspective2Send.this.sendMail(entry);
-                }
-            });
-            i++;
-            participants.add(entry);
-        }
-        this.stateChanged(new ChangeEvent(this));
-        this.getApp().showPerspective(Perspective2Send.class);
-    }
-    
-    /**
-     * Sends an e-mail to the participant entry
-     * @param entry
-     */
-     protected void sendMail(EntryParticipantSendMail entry) {
-        URI mailToURI;
-        try {
-            mailToURI = URI.create(String.format(Resources.mailToString,
-                                                     entry.getRightValue(), //E-mail address
-                                                     String.format(Resources.getString("PerspectiveSend.mailSubject"),//Generate subject 
-                                                                   SMPCServices.getServicesSMPC().getAppModel().name),                                                                 
-                                                     String.format(Resources.getString("PerspectiveSend.mailBody") //Generate body
-                                                                   ,entry.getLeftValue()
-                                                                   ,getExchangeString(entry))
-                                                     ).replaceAll(" ", "%20"));         
-            Desktop.getDesktop().mail(mailToURI);
-          //Send a dialog to confirm mail sending
-            if (JOptionPane.showConfirmDialog(null,
-                                              String.format( Resources.getString("PerspectiveSend.confirmSendMail"), entry.getRightValue()),
-                                              "",
-                                              JOptionPane.OK_CANCEL_OPTION) == 0) {            
-            SMPCServices.getServicesSMPC().getAppModel().markMessageSent(Arrays.asList(participants.getComponents()).indexOf(entry));
-            this.stateChanged(new ChangeEvent(this));
-            }
-            
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.mailToError") + e.getMessage());
-        }    
-    }
-     
-     /**
       * Reacts on all changes in any components
       */
      @Override
      public void stateChanged(ChangeEvent e) {
-         this.save.setEnabled(!this.validateSentMessages());
+         this.save.setEnabled(!getApp().getModel().messagesUnsent());
      }
-     
+    
     /**
      * Returns the exchange string for the given entry
      * 
@@ -149,59 +94,52 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     private String getExchangeString(EntryParticipantSendMail entry) throws IOException {
         int id = Arrays.asList(participants.getComponents()).indexOf(entry);
-        return Message.serializeMessage(SMPCServices.getServicesSMPC()
-                                                    .getAppModel()
-                                                    .getUnsentMessageFor(id));
+        return Message.serializeMessage(getApp().getModel().getUnsentMessageFor(id));
     }
-    
+     
      /**
       * Returns whether this is the own entry
       * @param entry
       * @return
       */
     private boolean isOwnEntry(Component entry) {
-        return Arrays.asList(participants.getComponents())
-                     .indexOf(entry) == SMPCServices.getServicesSMPC().getAppModel().ownId;
+        return Arrays.asList(participants.getComponents()).indexOf(entry) == getApp().getModel().ownId;
     }
      
-     /**
-      * Checks if all messages are sent
-      * @param entry
-      * @return
-      */
-     private boolean validateSentMessages() {
-        return SMPCServices.getServicesSMPC().getAppModel().messagesUnsent();
-    }
-
     /**
-     * Save the project
-     * 
+     * Save action
      */
-    private void save() {
+    protected void actionSave() {
+        getApp().actionFirstSendingDone();
+    }
+    
+     /**
+     * Sends an e-mail to the participant entry
+     * @param entry
+     */
+     protected void actionSendMail(EntryParticipantSendMail entry) {
+        URI mailToURI;
         try {
-            switch (SMPCServices.getServicesSMPC().getAppModel().state) {
-            case INITIAL_SENDING:
-                SMPCServices.getServicesSMPC().getAppModel().toRecievingShares();
-                break;
-            case SENDING_SHARE:
-                SMPCServices.getServicesSMPC().getAppModel().toRecievingShares();
-                break;
-            case SENDING_RESULT:
-                SMPCServices.getServicesSMPC().getAppModel().toRecievingResult();
-                break;
-            default:
-                throw new Exception(String.format(Resources.getString("PerspectiveSend.wrongState"),
-                                                  SMPCServices.getServicesSMPC()
-                                                              .getAppModel().state));
+            mailToURI = URI.create(String.format(Resources.mailToString,
+                                                     entry.getRightValue(), //E-mail address
+                                                     String.format(Resources.getString("PerspectiveSend.mailSubject"),//Generate subject 
+                                                                   getApp().getModel().name),                                                                 
+                                                     String.format(Resources.getString("PerspectiveSend.mailBody") //Generate body
+                                                                   ,entry.getLeftValue()
+                                                                   ,getExchangeString(entry))
+                                                     ).replaceAll(" ", "%20"));         
+            Desktop.getDesktop().mail(mailToURI);
+            
+            //Send a dialog to confirm mail sending
+            if (JOptionPane.showConfirmDialog(this.getPanel(),
+                                              String.format(Resources.getString("PerspectiveSend.confirmSendMail"), entry.getRightValue()),
+                                              "", JOptionPane.OK_CANCEL_OPTION) == 0) {
+                getApp().actionMarkMessageSent(Arrays.asList(participants.getComponents()).indexOf(entry));
+                this.stateChanged(new ChangeEvent(this));
             }
-            SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-            this.getApp().getPerspective(Perspective3Receive.class).initialize();
-            this.getApp().showPerspective(Perspective3Receive.class);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,
-                                          Resources.getString("PerspectiveSend.saveError") +
-                                                e.getMessage());
-        }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this.getPanel(), Resources.getString("PerspectiveSend.mailToError") + e.getMessage());
+        }    
     }
 
     /**
@@ -252,7 +190,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             public void actionPerformed(ActionEvent e) {
                 for (Component c : Perspective2Send.this.participants.getComponents()) {
                     if (!isOwnEntry(c)) {
-                        Perspective2Send.this.sendMail((EntryParticipantSendMail) c);
+                        Perspective2Send.this.actionSendMail((EntryParticipantSendMail) c);
                     }
                 }
             }
@@ -262,10 +200,33 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                save();
+                actionSave();
             }
         });
         buttonsPane.add(save, 0,1);
         panel.add(buttonsPane, BorderLayout.SOUTH);
+    }
+
+    /**
+     * Initialize perspective based on model
+     */
+    @Override
+    protected void initialize() {
+        this.title.setText(getApp().getModel().name);
+        participants.removeAll();
+        int i = 0; // index count for participants to access messages
+        for (Participant currentParticipant : getApp().getModel().participants) {
+            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, currentParticipant.emailAddress, i != getApp().getModel().ownId);
+            entry.setButtonListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    actionSendMail(entry);
+                }
+            });
+            i++;
+            participants.add(entry);
+        }
+        this.stateChanged(new ChangeEvent(this));
+        this.getApp().showPerspective(Perspective2Send.class);
     }
 }

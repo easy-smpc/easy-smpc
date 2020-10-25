@@ -29,4 +29,11 @@ public class Perspective4Send extends Perspective2Send {
     protected Perspective4Send(App app) {
         super(app, 4);
     }
+
+    /**
+     * Save action
+     */
+    protected void actionSave() {
+        getApp().actionSecondSendingDone();
+    }
 }

@@ -29,4 +29,10 @@ public class Perspective5Receive extends Perspective3Receive {
     protected Perspective5Receive(App app) {
         super(app, 5);
     }
+
+    @Override
+    protected void actionSave() {
+        getApp().actionSecondReceivingDone();
+    }
+
 }
