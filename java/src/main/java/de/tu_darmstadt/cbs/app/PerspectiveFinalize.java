@@ -26,6 +26,7 @@ import javax.swing.border.TitledBorder;
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.EntryBinNoButton;
 import de.tu_darmstadt.cbs.app.components.EntryParticipant;
+import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.BinResult;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 

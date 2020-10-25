@@ -22,6 +22,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import de.tu_darmstadt.cbs.app.resources.Resources;
+
 /**
  * A perspective
  * 

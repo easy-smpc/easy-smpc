@@ -27,7 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.tu_darmstadt.cbs.app.Resources;
+import de.tu_darmstadt.cbs.app.resources.Resources;
 
 /**
  * Component to enter exchangeString

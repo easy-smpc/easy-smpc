@@ -13,7 +13,7 @@
  */
 package de.tu_darmstadt.cbs.app.components;
 
-import de.tu_darmstadt.cbs.app.Resources;
+import de.tu_darmstadt.cbs.app.resources.Resources;
 
 /**
  * Entry for bins in the histogram

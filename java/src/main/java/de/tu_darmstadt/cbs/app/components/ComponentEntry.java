@@ -23,7 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
 
-import de.tu_darmstadt.cbs.app.Resources;
+import de.tu_darmstadt.cbs.app.resources.Resources;
 
 /**
  * Abstract entry with two fields

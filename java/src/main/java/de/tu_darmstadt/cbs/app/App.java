@@ -13,6 +13,7 @@
  */
 package de.tu_darmstadt.cbs.app;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,6 +28,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import de.tu_darmstadt.cbs.app.components.ComponentProgress;
+import de.tu_darmstadt.cbs.app.resources.Resources;
 
 /**
  * Main UI of the app
@@ -82,12 +86,18 @@ public class App extends JFrame {
         this.setLocationRelativeTo(null);
         this.setIconImage(Resources.getIcon());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        this.setLayout(new BorderLayout());
+        
+        // -----------------
+        // Progress
+        // -----------------
+        this.add(new ComponentProgress(0), BorderLayout.NORTH);
+        
         // -----------------
         // Panels
         // -----------------
         this.cards = new JPanel(new CardLayout());
-        this.add(this.cards);
+        this.add(this.cards, BorderLayout.CENTER);
 
         // -----------------
         // Menu
@@ -131,7 +141,6 @@ public class App extends JFrame {
         addPerspective(new PerspectiveCreate(this));
         addPerspective(new PerspectiveStart(this));
         
-
         // Show the first perspective
         showPerspective(0);
 

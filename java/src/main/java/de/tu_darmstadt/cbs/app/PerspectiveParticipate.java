@@ -39,6 +39,7 @@ import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.EntryBin;
 import de.tu_darmstadt.cbs.app.components.EntryParticipant;
 import de.tu_darmstadt.cbs.app.components.ExchangeStringPicker;
+import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;

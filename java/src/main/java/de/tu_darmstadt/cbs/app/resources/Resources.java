@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.tu_darmstadt.cbs.app;
+package de.tu_darmstadt.cbs.app.resources;
 
 import java.awt.Color;
 import java.awt.Image;
@@ -34,46 +34,34 @@ import javax.swing.border.Border;
 public class Resources {
 
     /** Invalid border */
-    public static final Border          INVALID_BORDER            = BorderFactory.createLineBorder(new Color(255,69,0));
+    public static final Border          INVALID_BORDER            = BorderFactory.createLineBorder(new Color(255, 69, 0));
 
     /** Default border */
-    public static final Border          DEFAULT_BORDER            = UIManager.getLookAndFeel()
-                                                                             .getDefaults()
-                                                                             .getBorder("TextField.border");
+    public static final Border          DEFAULT_BORDER            = UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border");
 
     /** Row gap */
-    public static int                   ROW_GAP                   = 2;
+    public static final int             ROW_GAP                   = 2;
 
     /** Row height */
     public static final int             ROW_HEIGHT                = 20;
 
-    /** Row height for a text area */
-    public static final int             COLOUMNS_TEXTAREA         = 80;
-
-    /** Maximal x-size of a text field */
-    public static int                   MAX_SIZE_TEXTFIELD_X      = 500;
-
-    /** Maximal y-size of a text field */
-    public static int                   MAX_SIZE_TEXTFIELD_Y      = 30;
-
     /** Min x-size of a text area */
-    public static int                   SIZE_TEXTAREA_X           = 800;
+    public static final int             SIZE_TEXTAREA_X           = 400;
 
     /** Min y-size of a text area */
-    public static int                   SIZE_TEXTAREA_Y           = 150;
+    public static final int             SIZE_TEXTAREA_Y           = 200;
 
-    /** Default column size for a text field */
-    public static int                   DEFAULT_COLUMN_SIZE       = 10;
-    
     /** String to generate mailto link */
-    public static String mailToString = "mailto:%s?subject=%s&body=%s";
-    
+    public static final String          mailToString              = "mailto:%s?subject=%s&body=%s";
 
     /** Bundle name */
-    private static final String         BUNDLE_NAME               = "de.tu_darmstadt.cbs.app.messages";       //$NON-NLS-1$
+    private static final String         BUNDLE_NAME               = "de.tu_darmstadt.cbs.app.resources.messages"; //$NON-NLS-1$
 
     /** Bundle */
     private static final ResourceBundle RESOURCE_BUNDLE           = ResourceBundle.getBundle(BUNDLE_NAME);
+
+    /** Preferred height for the progress container */
+    public static final int             PROGRESS_PREFERRED_HEIGHT = 50;
 
     /**
      * No instantiation
@@ -104,6 +92,20 @@ public class Resources {
      */
     public static Image getIcon() throws IOException {
         InputStream stream = Resources.class.getResourceAsStream("icon.png");
+        return ImageIO.read(stream);
+    }
+
+    /**
+     * Returns a progress image 1 <= i <= 6
+     * 
+     * @return
+     * @throws IOException
+     */
+    public static Image getProgress(int i) throws IOException {
+        if (i < 0 || i > 6) {
+            throw new IllegalArgumentException("Progress must be in [0, 6]");
+        }
+        InputStream stream = Resources.class.getResourceAsStream("progress-" + i + ".png");
         return ImageIO.read(stream);
     }
 

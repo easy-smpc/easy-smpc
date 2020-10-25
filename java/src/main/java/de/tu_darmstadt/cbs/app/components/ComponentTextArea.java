@@ -19,7 +19,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import de.tu_darmstadt.cbs.app.Resources;
+import de.tu_darmstadt.cbs.app.resources.Resources;
 
 /**
  * A validated text area
