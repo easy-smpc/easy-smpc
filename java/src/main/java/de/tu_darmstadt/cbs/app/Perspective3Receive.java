@@ -48,7 +48,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Felix Wirth
  */
 
-public class PerspectiveReceive extends Perspective implements ChangeListener, ActionListener {
+public class Perspective3Receive extends Perspective implements ChangeListener, ActionListener {
 
     /** Panel for participants */
     private JPanel             participants;
@@ -66,7 +66,7 @@ public class PerspectiveReceive extends Perspective implements ChangeListener, A
      * Creates the perspective
      * @param app
      */
-    protected PerspectiveReceive(App app) {
+    protected Perspective3Receive(App app) {
         super(app, Resources.getString("PerspectiveReceive.receive")); //$NON-NLS-1$
     }
 
@@ -143,14 +143,14 @@ public class PerspectiveReceive extends Perspective implements ChangeListener, A
             case RECIEVING_SHARE:
                 SMPCServices.getServicesSMPC().getAppModel().toSendingResult();
                 SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-                this.getApp().getPerspective(PerspectiveSend.class).initialize();
-                this.getApp().showPerspective(PerspectiveSend.class);
+                this.getApp().getPerspective(Perspective2Send.class).initialize();
+                this.getApp().showPerspective(Perspective2Send.class);
                 break;
             case RECIEVING_RESULT:
                 SMPCServices.getServicesSMPC().getAppModel().toFinished();
                 SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-                this.getApp().getPerspective(PerspectiveFinalize.class).initialize();
-                this.getApp().showPerspective(PerspectiveFinalize.class);
+                this.getApp().getPerspective(Perspective6Finalize.class).initialize();
+                this.getApp().showPerspective(Perspective6Finalize.class);
                 break;
             default:
                 throw new Exception(String.format(Resources.getString("PerspectiveReceive.wrongState"),
@@ -225,11 +225,11 @@ public class PerspectiveReceive extends Perspective implements ChangeListener, A
                                                               Arrays.asList(participants.getComponents())
                                                                     .indexOf(entry));
             }
-        }, PerspectiveReceive.this.central).showDialog();
+        }, Perspective3Receive.this.central).showDialog();
 
         if (message != null) {
-            PerspectiveReceive.this.setMessageFromString(message, entry);
-            PerspectiveReceive.this.stateChanged(new ChangeEvent(this));
+            Perspective3Receive.this.setMessageFromString(message, entry);
+            Perspective3Receive.this.stateChanged(new ChangeEvent(this));
         }
     }
 }

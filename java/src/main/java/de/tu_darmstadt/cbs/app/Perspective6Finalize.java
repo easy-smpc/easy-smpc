@@ -36,8 +36,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Fabian Prasser
  * @author Felix Wirth
  */
-
-public class PerspectiveFinalize extends Perspective {
+public class Perspective6Finalize extends Perspective {
 
     /** Panel for participants */
     private JPanel             participants;
@@ -70,14 +69,14 @@ public class PerspectiveFinalize extends Perspective {
         participants.repaint();
         bins.revalidate();
         bins.repaint();
-        this.getApp().showPerspective(PerspectiveFinalize.class);
+        this.getApp().showPerspective(Perspective6Finalize.class);
     }
     
     /**
      * Creates the perspective
      * @param app
      */
-    protected PerspectiveFinalize(App app) {
+    protected Perspective6Finalize(App app) {
         super(app, Resources.getString("PerspectiveFinalize.0")); //$NON-NLS-1$
     }
     

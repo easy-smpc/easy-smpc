@@ -51,7 +51,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Felix Wirth
  */
 
-public class PerspectiveParticipate extends Perspective implements ChangeListener {
+public class Perspective1BParticipate extends Perspective implements ChangeListener {
 
     /** Panel for participants */
     private JPanel             participants;
@@ -75,7 +75,7 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
      * Creates the perspective
      * @param app
      */
-    protected PerspectiveParticipate(App app) {
+    protected Perspective1BParticipate(App app) {
         super(app, Resources.getString("PerspectiveParticipate.participate")); //$NON-NLS-1$
     }
 
@@ -169,8 +169,8 @@ public class PerspectiveParticipate extends Perspective implements ChangeListene
         try {
             SMPCServices.getServicesSMPC().getAppModel().filename = file;
             SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-            this.getApp().getPerspective(PerspectiveSend.class).initialize();
-            this.getApp().showPerspective(PerspectiveSend.class);
+            this.getApp().getPerspective(Perspective2Send.class).initialize();
+            this.getApp().showPerspective(Perspective2Send.class);
 
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveParticipate.saveError") + e.getMessage());

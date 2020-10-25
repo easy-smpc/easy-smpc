@@ -30,13 +30,13 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  * @author Fabian Prasser
  */
 
-public class PerspectiveStart extends Perspective {
+public class Perspective0Start extends Perspective {
 
     /**
      * Creates the perspective
      * @param app
      */
-    protected PerspectiveStart(App app) {
+    protected Perspective0Start(App app) {
         super(app, Resources.getString("PerspectiveStart.0")); //$NON-NLS-1$
     }
 
@@ -56,8 +56,8 @@ public class PerspectiveStart extends Perspective {
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                getApp().getPerspective(PerspectiveCreate.class).initialize();
-                getApp().showPerspective(PerspectiveCreate.class);
+                getApp().getPerspective(Perspective1ACreate.class).initialize();
+                getApp().showPerspective(Perspective1ACreate.class);
             }
         });
 
@@ -67,8 +67,8 @@ public class PerspectiveStart extends Perspective {
         button2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                getApp().getPerspective(PerspectiveParticipate.class).initialize();
-                getApp().showPerspective(PerspectiveParticipate.class);
+                getApp().getPerspective(Perspective1BParticipate.class).initialize();
+                getApp().showPerspective(Perspective1BParticipate.class);
             }
         });
 

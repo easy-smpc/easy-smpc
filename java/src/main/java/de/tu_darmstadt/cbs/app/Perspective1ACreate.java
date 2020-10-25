@@ -52,7 +52,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Felix Wirth
  */
 
-public class PerspectiveCreate extends Perspective implements ChangeListener {
+public class Perspective1ACreate extends Perspective implements ChangeListener {
 
     /** Panel for participants */
     private JPanel             participants;
@@ -70,7 +70,7 @@ public class PerspectiveCreate extends Perspective implements ChangeListener {
      * Creates the perspective
      * @param app
      */
-    protected PerspectiveCreate(App app) {
+    protected Perspective1ACreate(App app) {
         super(app, Resources.getString("PerspectiveCreate.0")); //$NON-NLS-1$
     }
 
@@ -260,8 +260,8 @@ public class PerspectiveCreate extends Perspective implements ChangeListener {
         try {
             SMPCServices.getServicesSMPC().getAppModel().filename = file;
             SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-            this.getApp().getPerspective(PerspectiveSend.class).initialize();
-            this.getApp().showPerspective(PerspectiveSend.class);
+            this.getApp().getPerspective(Perspective2Send.class).initialize();
+            this.getApp().showPerspective(Perspective2Send.class);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.saveError") + e.getMessage());
         }

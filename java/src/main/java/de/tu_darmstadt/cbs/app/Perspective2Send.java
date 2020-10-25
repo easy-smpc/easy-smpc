@@ -47,7 +47,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Felix Wirth
  */
 
-public class PerspectiveSend extends Perspective implements ChangeListener {
+public class Perspective2Send extends Perspective implements ChangeListener {
 
     /** Panel for participants */
     private JPanel             participants;
@@ -66,7 +66,7 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
      * Creates the perspective
      * @param app
      */
-    protected PerspectiveSend(App app) {
+    protected Perspective2Send(App app) {
         super(app, Resources.getString("PerspectiveSend.send")); //$NON-NLS-1$
     }
 
@@ -85,14 +85,14 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
             entry.setButtonListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    PerspectiveSend.this.sendMail(entry);
+                    Perspective2Send.this.sendMail(entry);
                 }
             });
             i++;
             participants.add(entry);
         }
         this.stateChanged(new ChangeEvent(this));
-        this.getApp().showPerspective(PerspectiveSend.class);
+        this.getApp().showPerspective(Perspective2Send.class);
     }
     
     /**
@@ -187,8 +187,8 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
                                                               .getAppModel().state));
             }
             SMPCServices.getServicesSMPC().getAppModel().saveProgram();
-            this.getApp().getPerspective(PerspectiveReceive.class).initialize();
-            this.getApp().showPerspective(PerspectiveReceive.class);
+            this.getApp().getPerspective(Perspective3Receive.class).initialize();
+            this.getApp().showPerspective(Perspective3Receive.class);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null,
                                           Resources.getString("PerspectiveSend.saveError") +
@@ -242,9 +242,9 @@ public class PerspectiveSend extends Perspective implements ChangeListener {
         sendAllEmailsButton.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                for (Component c : PerspectiveSend.this.participants.getComponents()) {
+                for (Component c : Perspective2Send.this.participants.getComponents()) {
                     if (!isOwnEntry(c)) {
-                        PerspectiveSend.this.sendMail((EntryParticipantSendMail) c);
+                        Perspective2Send.this.sendMail((EntryParticipantSendMail) c);
                     }
                 }
             }
