@@ -76,7 +76,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      * @param app
      */
     protected Perspective1BParticipate(App app) {
-        super(app, Resources.getString("PerspectiveParticipate.participate")); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveParticipate.participate"), 1); //$NON-NLS-1$
     }
 
     /**

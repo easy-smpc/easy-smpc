@@ -61,13 +61,21 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     /** Save button */
     private JButton            save;
 
-
     /**
      * Creates the perspective
      * @param app
      */
     protected Perspective2Send(App app) {
-        super(app, Resources.getString("PerspectiveSend.send")); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveSend.send"), 2); //$NON-NLS-1$
+    }
+
+    /**
+     * Creates the perspective
+     * @param app
+     * @param progress
+     */
+    protected Perspective2Send(App app, int progress) {
+        super(app, Resources.getString("PerspectiveSend.send"), progress); //$NON-NLS-1$
     }
 
     /**

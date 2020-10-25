@@ -31,16 +31,20 @@ public abstract class Perspective {
     private final App    app;
     /** Title */
     private final String title;
+    /** Progress*/
+    private final int progress;
 
     /**
      * Creates a new instance
      * 
      * @param app
      * @param title
+     * @param progress
      */
-    protected Perspective(App app, String title) {
+    protected Perspective(App app, String title, int progress) {
         this.app = app;
         this.title = title;
+        this.progress = progress;
     }
 
     /**
@@ -87,4 +91,12 @@ public abstract class Perspective {
      * Initialize perspective based on model
      */
     protected abstract void initialize();
+    
+    /**
+     * Returns the progress associated with this perspective
+     * @return
+     */
+    protected int getProgress() {
+        return this.progress;
+    }
 }

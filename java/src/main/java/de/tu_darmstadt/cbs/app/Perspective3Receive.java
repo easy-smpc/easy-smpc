@@ -67,7 +67,16 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @param app
      */
     protected Perspective3Receive(App app) {
-        super(app, Resources.getString("PerspectiveReceive.receive")); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveReceive.receive"), 3); //$NON-NLS-1$
+    }
+
+    /**
+     * Creates the perspective
+     * @param app
+     * @param progress
+     */
+    protected Perspective3Receive(App app, int progress) {
+        super(app, Resources.getString("PerspectiveReceive.receive"), progress); //$NON-NLS-1$
     }
 
     /**

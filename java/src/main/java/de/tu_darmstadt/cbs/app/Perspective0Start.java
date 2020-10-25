@@ -37,7 +37,7 @@ public class Perspective0Start extends Perspective {
      * @param app
      */
     protected Perspective0Start(App app) {
-        super(app, Resources.getString("PerspectiveStart.0")); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveStart.0"), 0); //$NON-NLS-1$
     }
 
     /**

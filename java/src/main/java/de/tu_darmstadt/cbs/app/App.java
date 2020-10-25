@@ -68,6 +68,8 @@ public class App extends JFrame {
     private JPanel            cards;
     /** Menu */
     private JMenu             actionMenu;
+    /** Progress*/
+    private ComponentProgress progress;
     /** List of perspectives */
     private List<Perspective> perspectives = new ArrayList<Perspective>();
 
@@ -91,7 +93,8 @@ public class App extends JFrame {
         // -----------------
         // Progress
         // -----------------
-        this.add(new ComponentProgress(0), BorderLayout.NORTH);
+        this.progress = new ComponentProgress(0);
+        this.add(this.progress, BorderLayout.NORTH);
         
         // -----------------
         // Panels
@@ -177,6 +180,7 @@ public class App extends JFrame {
     protected void showPerspective(Perspective perspective) {
         CardLayout cl = (CardLayout) (cards.getLayout());
         cl.show(cards, perspective.getTitle());
+        progress.setProgress(perspective.getProgress());
     }
 
     /**

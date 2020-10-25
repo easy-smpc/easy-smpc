@@ -27,6 +27,6 @@ public class Perspective4Send extends Perspective2Send {
      * @param app
      */
     protected Perspective4Send(App app) {
-        super(app);
+        super(app, 4);
     }
 }

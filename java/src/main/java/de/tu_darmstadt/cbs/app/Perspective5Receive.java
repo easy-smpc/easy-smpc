@@ -27,6 +27,6 @@ public class Perspective5Receive extends Perspective3Receive {
      * @param app
      */
     protected Perspective5Receive(App app) {
-        super(app);
+        super(app, 5);
     }
 }

@@ -77,7 +77,7 @@ public class Perspective6Finalize extends Perspective {
      * @param app
      */
     protected Perspective6Finalize(App app) {
-        super(app, Resources.getString("PerspectiveFinalize.0")); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveFinalize.0"), 6); //$NON-NLS-1$
     }
     
     /**

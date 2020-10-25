@@ -71,7 +71,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      * @param app
      */
     protected Perspective1ACreate(App app) {
-        super(app, Resources.getString("PerspectiveCreate.0")); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveCreate.0"), 1); //$NON-NLS-1$
     }
 
     /**
