@@ -134,7 +134,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             if (JOptionPane.showConfirmDialog(this.getPanel(),
                                               String.format(Resources.getString("PerspectiveSend.confirmSendMail"), entry.getRightValue()),
                                               "", JOptionPane.OK_CANCEL_OPTION) == 0) {
-                getApp().actionMarkMessageSent(Arrays.asList(participants.getComponents()).indexOf(entry));
+                int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
+                getApp().actionMarkMessageSent(index);
                 this.stateChanged(new ChangeEvent(this));
             }
         } catch (IOException e) {
@@ -188,9 +189,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         sendAllEmailsButton.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                for (Component c : Perspective2Send.this.participants.getComponents()) {
+                for (Component c : participants.getComponents()) {
                     if (!isOwnEntry(c)) {
-                        Perspective2Send.this.actionSendMail((EntryParticipantSendMail) c);
+                        actionSendMail((EntryParticipantSendMail) c);
                     }
                 }
             }
@@ -213,10 +214,11 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     @Override
     protected void initialize() {
         this.title.setText(getApp().getModel().name);
-        participants.removeAll();
+        this.participants.removeAll();
         int i = 0; // index count for participants to access messages
         for (Participant currentParticipant : getApp().getModel().participants) {
             EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, currentParticipant.emailAddress, i != getApp().getModel().ownId);
+            participants.add(entry);
             entry.setButtonListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -224,9 +226,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 }
             });
             i++;
-            participants.add(entry);
         }
         this.stateChanged(new ChangeEvent(this));
-        this.getApp().showPerspective(Perspective2Send.class);
     }
 }

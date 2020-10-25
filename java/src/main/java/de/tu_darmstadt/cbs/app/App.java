@@ -246,16 +246,23 @@ public class App extends JFrame {
 
     /**
      * Opens a file chooser
+     * @param load 
      * @return
      */
-    private File getFile() {
+    private File getFile(boolean load) {
 
         // File
         File file = null;
         JFileChooser fileChooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING); //$NON-NLS-1$
         fileChooser.setFileFilter(filter);
-        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+        int state = 0;
+        if (load) {
+            fileChooser.showOpenDialog(this);
+        } else {
+            fileChooser.showSaveDialog(this);
+        }
+        if (state == JFileChooser.APPROVE_OPTION) {
             file = fileChooser.getSelectedFile();
         }
         
@@ -264,14 +271,88 @@ public class App extends JFrame {
             return null;
         }
         
+        // Fix extension on save
+        if (!load) {
+            String fname = file.getAbsolutePath();
+            if(!fname.endsWith("." + Resources.FILE_ENDING) ) {
+                file = new File(fname + ("." + Resources.FILE_ENDING));
+            }
+        }
+        
         // Check permissions
-        if (!file.canRead() || !file.canWrite()) {
+        if ((load && !file.canRead()) || (file.exists() && !load && !file.canWrite())) {
             JOptionPane.showMessageDialog(this, Resources.getString("App.12"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$ //$NON-NLS-2$
             return null;
         }
         
         // Should work
         return file;
+    }
+
+    /**
+     * Check whether initial participation message is valid
+     * @param text
+     * @return
+     */
+    private boolean isInitialParticipationMessageValid(String text) {
+        if (model == null) return false;
+        try {
+            String data =  Message.deserializeMessage(text).data;
+            return model.isInitialParticipationMessageValid(data);
+        } catch (Exception e) {
+           return false;
+        }
+    }
+
+    /**
+     * Check whether message is valid
+     * @param text
+     * @return
+     */
+    private boolean isMessageShareResultValid(String text, int participantId) {
+        if (model == null) return false;
+        try {
+            return model.isMessageShareResultValid(Message.deserializeMessage(text), model.getParticipantFromId(participantId));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Shows a perspective
+     * 
+     * @param clazz
+     */
+    private void showPerspective(Class<?> clazz) {
+        int index = 0;
+        for (Perspective p : perspectives) {
+            if (p.getClass().equals(clazz)) {
+                showPerspective(index);
+            }
+            index++;
+        }
+    }
+    
+    /**
+     * Shows the perspective with the given index
+     * 
+     * @param index
+     */
+    private void showPerspective(int index) {
+        showPerspective(perspectives.get(index));
+    }
+
+    /**
+     * Shows a certain perspective
+     * 
+     * @param perspective
+     */
+    private void showPerspective(Perspective perspective) {
+        perspective.initialize();
+        CardLayout cl = (CardLayout) (cards.getLayout());
+        cl.show(cards, perspective.getTitle());
+        progress.setProgress(perspective.getProgress());
+        progress.repaint();
     }
 
     /**
@@ -289,7 +370,7 @@ public class App extends JFrame {
         this.model.toStarting();
         this.showPerspective(Perspective1ACreate.class);
     }
-    
+
     /**
      * Called when action create is done
      * @param participants
@@ -311,7 +392,7 @@ public class App extends JFrame {
             model.toStarting();
         }
     }
-    
+
     /**
      * Shows the exit dialog
      */
@@ -349,14 +430,14 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
         }
     }
-
+    
     /**
      * Load action
      */
     protected void actionLoad() {
 
         // Open dialog
-        File file = getFile();
+        File file = getFile(true);
         
         // Check
         if (file == null) {
@@ -473,7 +554,7 @@ public class App extends JFrame {
     protected boolean actionSave() {
         
         // Open dialog
-        File file = getFile();
+        File file = getFile(false);
         
         // Check
         if (file == null) {
@@ -541,70 +622,5 @@ public class App extends JFrame {
             }
         }
         return returnPerspective;
-    }
-
-    /**
-     * Check whether initial participation message is valid
-     * @param text
-     * @return
-     */
-    protected boolean isInitialParticipationMessageValid(String text) {
-        if (model == null) return false;
-        try {
-            String data =  Message.deserializeMessage(text).data;
-            return model.isInitialParticipationMessageValid(data);
-        } catch (Exception e) {
-           return false;
-        }
-    }
-    
-    /**
-     * Check whether message is valid
-     * @param text
-     * @return
-     */
-    protected boolean isMessageShareResultValid(String text, int participantId) {
-        if (model == null) return false;
-        try {
-            return model.isMessageShareResultValid(Message.deserializeMessage(text), model.getParticipantFromId(participantId));
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    /**
-     * Shows a perspective
-     * 
-     * @param clazz
-     */
-    protected void showPerspective(Class<?> clazz) {
-        int index = 0;
-        for (Perspective p : perspectives) {
-            if (p.getClass().equals(clazz)) {
-                showPerspective(index);
-            }
-            index++;
-        }
-    }
-
-    /**
-     * Shows the perspective with the given index
-     * 
-     * @param index
-     */
-    protected void showPerspective(int index) {
-        showPerspective(perspectives.get(index));
-    }
-
-    /**
-     * Shows a certain perspective
-     * 
-     * @param perspective
-     */
-    protected void showPerspective(Perspective perspective) {
-        perspective.initialize();
-        CardLayout cl = (CardLayout) (cards.getLayout());
-        cl.show(cards, perspective.getTitle());
-        progress.setProgress(perspective.getProgress());
     }
 }
