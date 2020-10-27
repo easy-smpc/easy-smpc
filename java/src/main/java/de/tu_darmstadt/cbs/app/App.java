@@ -36,7 +36,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import de.tu_darmstadt.cbs.app.components.ComponentProgress;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
-import de.tu_darmstadt.cbs.app.components.ExchangeStringPicker;
+import de.tu_darmstadt.cbs.app.components.DialogStringPicker;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.AppModel;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -211,7 +211,7 @@ public class App extends JFrame {
     public boolean actionReceiveMessage(int index) {
         
         // Ask for message
-        String message = new ExchangeStringPicker(new ComponentTextFieldValidator() {
+        String message = new DialogStringPicker(new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {
                 return isMessageShareResultValid(text, index);
@@ -506,7 +506,7 @@ public class App extends JFrame {
     protected void actionParticipate() {
         
         // Ask for string
-        String exchangeString = new ExchangeStringPicker(new ComponentTextFieldValidator() {
+        String exchangeString = new DialogStringPicker(new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {
                 return isInitialParticipationMessageValid(text);

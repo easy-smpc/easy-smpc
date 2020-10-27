@@ -19,6 +19,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -35,18 +36,18 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  * Dialog for entering a string
  * 
  * @author Felix Wirth
- *
+ * @author Fabian Prasser
  */
 public class DialogStringPicker extends JDialog implements ChangeListener {
 
     /** SVID */
     private static final long serialVersionUID = -2803385597185044215L;
-    /** Component to enter exchangeString */
+    /** Component to enter string */
     private ComponentTextArea text;
-    /** okButton */
-    private JButton           button;
     /** Result */
     private String            result;
+    /** Button*/
+    private JButton           buttonOK;
         
     /**
      * Create a new instance
@@ -54,43 +55,49 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
      * @param additionalAction  Action which will be performed when clicking the okButton
      */
     public DialogStringPicker(ComponentTextFieldValidator validator, Component parent) {
-        super();
-        this.text = new ComponentTextArea(validator);
+
+        // Dialog properties
         this.setSize(Resources.SIZE_TEXTAREA_X, Resources.SIZE_TEXTAREA_Y);
         this.setLocationRelativeTo(parent);
         this.setTitle(Resources.getString("PerspectiveParticipate.PickerTitle"));
         this.getContentPane().setLayout(new BorderLayout());
         this.setIconImage(((JFrame)SwingUtilities.getWindowAncestor(parent)).getIconImage());
+        
+        // Text
+        this.text = new ComponentTextArea(validator);
         JLabel pickerText = new JLabel(Resources.getString("PerspectiveParticipate.PickerText"));
-        this.getContentPane().add(pickerText, BorderLayout.NORTH);
+        this.add(pickerText, BorderLayout.NORTH);
         this.text.setChangeListener(this);
-        this.getContentPane().add(text, BorderLayout.CENTER);
+        this.add(text, BorderLayout.CENTER);
+        
+        // Button
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(1, 2));
         this.getContentPane().add(buttonsPane, BorderLayout.SOUTH);
-        button = new JButton(Resources.getString("PerspectiveParticipate.ok"));
-        button.setEnabled(this.areValuesValid());
-        JButton cancelButton = new JButton(Resources.getString("PerspectiveParticipate.cancel"));
-        buttonsPane.add(cancelButton);
-        buttonsPane.add(button);
-        button.addActionListener(new ActionListener() {
+        this.buttonOK = new JButton(Resources.getString("PerspectiveParticipate.ok"));
+        this.buttonOK.setEnabled(this.areValuesValid());
+        JButton buttonCancel = new JButton(Resources.getString("PerspectiveParticipate.cancel"));
+        buttonsPane.add(buttonCancel);
+        buttonsPane.add(buttonOK);
+        
+        // Listeners
+        this.buttonOK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 DialogStringPicker.this.result = text.getText();
                 DialogStringPicker.this.dispose();
             }
         });
-        cancelButton.addActionListener(new ActionListener() {
+        buttonCancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 DialogStringPicker.this.result = null;
                 DialogStringPicker.this.dispose();
             }
         });
-        // Set value also when closed by cross in upper right corner
         this.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+            public void windowClosing(WindowEvent windowEvent) {
                 DialogStringPicker.this.result = null;
             }
         });
@@ -101,7 +108,7 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
      */
     @Override
     public void stateChanged(ChangeEvent e) {
-        this.button.setEnabled(this.areValuesValid());
+        this.buttonOK.setEnabled(this.areValuesValid());
     }
     
     /**
@@ -114,7 +121,7 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
     }
       
     /**
-     * Checks exchangeString for validity
+     * Checks string for validity
      * @return
      */
     private boolean areValuesValid() {
