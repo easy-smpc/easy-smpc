@@ -33,6 +33,8 @@ public abstract class Perspective {
     private final String title;
     /** Progress*/
     private final int progress;
+    /** Panel*/
+    private final JPanel panel;
 
     /**
      * Creates a new instance
@@ -45,6 +47,12 @@ public abstract class Perspective {
         this.app = app;
         this.title = title;
         this.progress = progress;
+        this.panel = new JPanel();
+        this.panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                              title,
+                                                              TitledBorder.CENTER,
+                                                              TitledBorder.DEFAULT_POSITION));
+        this.createContents(panel);
     }
 
     /**
@@ -62,12 +70,6 @@ public abstract class Perspective {
      * @return
      */
     public Component getPanel() {
-        JPanel panel = new JPanel();
-        panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                         title,
-                                                         TitledBorder.CENTER,
-                                                         TitledBorder.DEFAULT_POSITION));
-        this.createContents(panel);
         return panel;
     }
 
