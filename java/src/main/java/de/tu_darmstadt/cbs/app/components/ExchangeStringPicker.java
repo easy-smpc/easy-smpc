@@ -22,8 +22,10 @@ import java.awt.event.WindowAdapter;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -40,40 +42,41 @@ public class ExchangeStringPicker extends JDialog implements ChangeListener {
     /** SVID */
     private static final long serialVersionUID = -2803385597185044215L;
     /** Component to enter exchangeString */
-    private ComponentTextArea exchangeStringTextArea;
+    private ComponentTextArea text;
     /** okButton */
-    private JButton           okButton;
+    private JButton           button;
     /** Result */
     private String            result;
         
     /**
      * Create a new instance
-     * @param componentRelativePosition Component to set the location of JDialog relative to
+     * @param parent Component to set the location of JDialog relative to
      * @param additionalAction  Action which will be performed when clicking the okButton
      */
-    public ExchangeStringPicker(ComponentTextFieldValidator textAreaValidator , Component componentRelativePosition) {
+    public ExchangeStringPicker(ComponentTextFieldValidator validator, Component parent) {
         super();
-        this.exchangeStringTextArea = new ComponentTextArea(textAreaValidator);
+        this.text = new ComponentTextArea(validator);
         this.setSize(Resources.SIZE_TEXTAREA_X, Resources.SIZE_TEXTAREA_Y);
-        this.setLocationRelativeTo(componentRelativePosition);
+        this.setLocationRelativeTo(parent);
         this.setTitle(Resources.getString("PerspectiveParticipate.PickerTitle"));
         this.getContentPane().setLayout(new BorderLayout());
+        this.setIconImage(((JFrame)SwingUtilities.getWindowAncestor(parent)).getIconImage());
         JLabel pickerText = new JLabel(Resources.getString("PerspectiveParticipate.PickerText"));
         this.getContentPane().add(pickerText, BorderLayout.NORTH);
-        this.exchangeStringTextArea.setChangeListener(this);
-        this.getContentPane().add(exchangeStringTextArea, BorderLayout.CENTER);
+        this.text.setChangeListener(this);
+        this.getContentPane().add(text, BorderLayout.CENTER);
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(1, 2));
         this.getContentPane().add(buttonsPane, BorderLayout.SOUTH);
-        okButton = new JButton(Resources.getString("PerspectiveParticipate.ok"));
-        okButton.setEnabled(this.areValuesValid());
+        button = new JButton(Resources.getString("PerspectiveParticipate.ok"));
+        button.setEnabled(this.areValuesValid());
         JButton cancelButton = new JButton(Resources.getString("PerspectiveParticipate.cancel"));
         buttonsPane.add(cancelButton);
-        buttonsPane.add(okButton);
-        okButton.addActionListener(new ActionListener() {
+        buttonsPane.add(button);
+        button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ExchangeStringPicker.this.result = exchangeStringTextArea.getText();
+                ExchangeStringPicker.this.result = text.getText();
                 ExchangeStringPicker.this.dispose();
             }
         });
@@ -98,7 +101,7 @@ public class ExchangeStringPicker extends JDialog implements ChangeListener {
      */
     @Override
     public void stateChanged(ChangeEvent e) {
-        this.okButton.setEnabled(this.areValuesValid());
+        this.button.setEnabled(this.areValuesValid());
     }
     
     /**
@@ -109,14 +112,12 @@ public class ExchangeStringPicker extends JDialog implements ChangeListener {
         this.setVisible(true);
         return this.result;
     }
-    
-    
+      
     /**
      * Checks exchangeString for validity
      * @return
      */
     private boolean areValuesValid() {
-        return this.exchangeStringTextArea.isValueValid();
+        return this.text.isValueValid();
     } 
-    
 }
