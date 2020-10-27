@@ -32,12 +32,12 @@ import javax.swing.event.ChangeListener;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 
 /**
- * Component to enter exchangeString
+ * Dialog for entering a string
  * 
  * @author Felix Wirth
  *
  */
-public class ExchangeStringPicker extends JDialog implements ChangeListener {
+public class DialogStringPicker extends JDialog implements ChangeListener {
 
     /** SVID */
     private static final long serialVersionUID = -2803385597185044215L;
@@ -53,7 +53,7 @@ public class ExchangeStringPicker extends JDialog implements ChangeListener {
      * @param parent Component to set the location of JDialog relative to
      * @param additionalAction  Action which will be performed when clicking the okButton
      */
-    public ExchangeStringPicker(ComponentTextFieldValidator validator, Component parent) {
+    public DialogStringPicker(ComponentTextFieldValidator validator, Component parent) {
         super();
         this.text = new ComponentTextArea(validator);
         this.setSize(Resources.SIZE_TEXTAREA_X, Resources.SIZE_TEXTAREA_Y);
@@ -76,22 +76,22 @@ public class ExchangeStringPicker extends JDialog implements ChangeListener {
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ExchangeStringPicker.this.result = text.getText();
-                ExchangeStringPicker.this.dispose();
+                DialogStringPicker.this.result = text.getText();
+                DialogStringPicker.this.dispose();
             }
         });
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ExchangeStringPicker.this.result = null;
-                ExchangeStringPicker.this.dispose();
+                DialogStringPicker.this.result = null;
+                DialogStringPicker.this.dispose();
             }
         });
         // Set value also when closed by cross in upper right corner
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                ExchangeStringPicker.this.result = null;
+                DialogStringPicker.this.result = null;
             }
         });
     }
