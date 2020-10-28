@@ -99,20 +99,6 @@ public class Resources {
     }
 
     /**
-     * Returns a progress image 1 <= i <= 6
-     * 
-     * @return
-     * @throws IOException
-     */
-    public static Image getProgress(int i) throws IOException {
-        if (i < 0 || i > 6) {
-            throw new IllegalArgumentException("Progress must be in [0, 6]");
-        }
-        InputStream stream = Resources.class.getResourceAsStream("progress-" + i + ".png");
-        return ImageIO.read(stream);
-    }
-
-    /**
      * Menu item
      * 
      * @return
@@ -121,17 +107,5 @@ public class Resources {
     public static ImageIcon getMenuItem() throws IOException {
         InputStream stream = Resources.class.getResourceAsStream("icon.png");
         return new ImageIcon(ImageIO.read(stream).getScaledInstance(16, 16, Image.SCALE_DEFAULT));
-    }
-
-    /**
-     * Returns progress text
-     * @param i
-     * @return
-     */
-    public static String getProgressText(int i) {
-        if (i < 0 || i > 5) {
-            throw new IllegalArgumentException("Progress must be in [0, 5]");
-        }
-        return getString("Progress." + i);
     }
 }

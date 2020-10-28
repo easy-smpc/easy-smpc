@@ -20,11 +20,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -61,10 +64,14 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
         this.getContentPane().setLayout(new BorderLayout());
         this.setIconImage(parent.getIconImage());
         
+        // Title
+        ((JComponent) this.getContentPane()).setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                                                        Resources.getString("PerspectiveParticipate.PickerText"),
+                                                                                        TitledBorder.CENTER,
+                                                                                        TitledBorder.DEFAULT_POSITION));
+        
         // Text
         this.text = new ComponentTextArea(validator);
-        JLabel pickerText = new JLabel(Resources.getString("PerspectiveParticipate.PickerText"));
-        this.add(pickerText, BorderLayout.NORTH);
         this.text.setChangeListener(this);
         this.add(text, BorderLayout.CENTER);
         

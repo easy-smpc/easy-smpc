@@ -16,16 +16,13 @@ package de.tu_darmstadt.cbs.app.components;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Image;
-import java.io.IOException;
 
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextPane;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
+import javax.swing.border.BevelBorder;
 
 import de.tu_darmstadt.cbs.app.resources.Resources;
 
@@ -39,49 +36,46 @@ public class ComponentProgress extends JPanel {
     /** SVUID */
     private static final long    serialVersionUID = -7413394015204651280L;
 
-    /** Images to use by the control */
-    private static final Image[] images;
-
-    /** Progress */
-    private int                  progress         = 0;
+    /** Transparent color */
+    private static final Color[] COLORS           = new Color[] { Color.decode("#F7D8BA"),
+                                                                  Color.decode("#FFE7C7"),
+                                                                  Color.decode("#FEF8DD"),
+                                                                  Color.decode("#E1F8DC"),
+                                                                  Color.decode("#CAF1DE"),
+                                                                  Color.decode("#ACDDDE") };
 
     /** Text areas */
-    private JTextPane[]          texts            = new JTextPane[6];
-
-    static {
-        try {
-            images = new Image[] { Resources.getProgress(0),
-                                   Resources.getProgress(1),
-                                   Resources.getProgress(2),
-                                   Resources.getProgress(3),
-                                   Resources.getProgress(4),
-                                   Resources.getProgress(5),
-                                   Resources.getProgress(6) };
-        } catch (IOException e) {
-            throw new RuntimeException("Problem initializing progress control");
-        }
-    }
+    private JLabel[]          texts            = new JLabel[6];
     
     /**
      * Creates a new instance
      * @param progress
      */
     public ComponentProgress(int progress) {
-        this.setProgress(progress);
+        
+        // Create texts
         this.setLayout(new GridLayout(1, this.texts.length));
         for (int i = 0; i < this.texts.length; i++) {
-            this.texts[i] = new JTextPane();
+            
+            // Text pane with horizontally centered text
+            this.texts[i] = new JLabel();
             this.texts[i].setFocusable(false);
-            this.texts[i].setBackground(new Color(0, 0, 0, 0));
-            this.texts[i].setForeground(Color.WHITE);
-            this.texts[i].setText(Resources.getProgressText(i));
+            this.texts[i].setBackground(new Color(255, 255, 255, 0));
+            this.texts[i].setForeground(Color.BLACK);
+            this.texts[i].setText(Resources.getString("Progress." + i));
             this.texts[i].setFont(this.texts[i].getFont().deriveFont(Font.BOLD));
-            StyledDocument doc = this.texts[i].getStyledDocument();
-            SimpleAttributeSet center = new SimpleAttributeSet();
-            StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
-            doc.setParagraphAttributes(0, doc.getLength(), center, false);
-            this.add(this.texts[i]);
+            
+            // Center vertically
+            JPanel panel = new JPanel();
+            panel.setBackground(COLORS[i]);
+            panel.setLayout(new GridBagLayout());
+            panel.add(this.texts[i]);
+            panel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+            this.add(panel);
         }
+        
+        // Init
+        this.setProgress(progress);
     }
     
     /**
@@ -92,14 +86,15 @@ public class ComponentProgress extends JPanel {
         if (progress < 0 || progress > 6) {
             throw new IllegalArgumentException("Progress must be in [0, 6]");
         }
-        this.progress = progress;
-        this.repaint();
-    }
-
-    @Override
-    public void paintComponent(Graphics p) {
-        super.paintComponent(p);
-        p.drawImage(images[progress], 0, 0, this.getWidth(), this.getHeight(), this);
+        int index = progress == 0 ? -1 : progress - 1;
+        for (int i = 0; i < this.texts.length; i++) {
+            this.texts[i].setForeground(i == index ? Color.WHITE : Color.BLACK);
+            this.texts[i].getParent().setBackground(i == index ? Color.BLACK : COLORS[i]);
+            this.texts[i].getParent().invalidate();
+            this.texts[i].invalidate();
+            this.texts[i].getParent().repaint();
+            this.texts[i].repaint();
+        }
     }
 
     @Override

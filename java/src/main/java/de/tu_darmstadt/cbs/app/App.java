@@ -34,6 +34,8 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.formdev.flatlaf.FlatLightLaf;
+
 import de.tu_darmstadt.cbs.app.components.ComponentProgress;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.DialogStringPicker;
@@ -67,9 +69,11 @@ public class App extends JFrame {
                                            IllegalAccessException,
                                            UnsupportedLookAndFeelException,
                                            IOException {
-
-        // Configure look and feel
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        try {
+            UIManager.setLookAndFeel( new FlatLightLaf() ); // OR FlatDarculaLaf
+        } catch( Exception ex ) {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        }
 
         // Start App
         new App();
@@ -133,6 +137,16 @@ public class App extends JFrame {
         // Action menu
         actionMenu = new JMenu(Resources.getString("App.1")); //$NON-NLS-1$
         jmb.add(actionMenu);
+
+        // Create
+        JMenuItem jmiStart = new JMenuItem(Resources.getString("App.14"), Resources.getMenuItem()); //$NON-NLS-1$
+        actionMenu.add(jmiStart);
+        jmiStart.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionStart();
+            }
+        });
 
         // Create
         JMenuItem jmiCreate = new JMenuItem(Resources.getString("App.7"), Resources.getMenuItem()); //$NON-NLS-1$
@@ -208,7 +222,7 @@ public class App extends JFrame {
      * @param index
      * @return
      */
-    public boolean actionReceiveMessage(int index) {
+    protected boolean actionReceiveMessage(int index) {
         
         // Ask for message
         String message = new DialogStringPicker(new ComponentTextFieldValidator() {
@@ -360,6 +374,13 @@ public class App extends JFrame {
      */
     protected void actionAbout() {
         // TODO Implement
+    }
+
+    /**
+     * Start action
+     */
+    protected void actionStart() {
+        this.showPerspective(Perspective0Start.class);
     }
 
     /**
