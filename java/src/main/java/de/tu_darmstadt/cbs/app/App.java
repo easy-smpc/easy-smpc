@@ -189,7 +189,7 @@ public class App extends JFrame {
         });
 
         // Add perspectives
-        addPerspective(new Perspective6Finalize(this));
+        addPerspective(new Perspective6Result(this));
         addPerspective(new Perspective3Receive(this));
         addPerspective(new Perspective2Send(this));
         addPerspective(new Perspective1BParticipate(this));
@@ -487,7 +487,7 @@ public class App extends JFrame {
             showPerspective(Perspective5Receive.class);
             break;
         case FINISHED:
-            showPerspective(Perspective6Finalize.class);
+            showPerspective(Perspective6Result.class);
             break;
         }
     }
@@ -580,7 +580,7 @@ public class App extends JFrame {
         try {
             this.model.toFinished();
             this.model.saveProgram();
-            this.showPerspective(Perspective6Finalize.class);
+            this.showPerspective(Perspective6Result.class);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError") + e.getMessage());
         }
