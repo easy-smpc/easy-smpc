@@ -15,6 +15,7 @@ package de.tu_darmstadt.cbs.app.components;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -74,6 +75,7 @@ public class ComponentProgress extends JPanel {
             this.texts[i].setBackground(new Color(0, 0, 0, 0));
             this.texts[i].setForeground(Color.WHITE);
             this.texts[i].setText(Resources.getProgressText(i));
+            this.texts[i].setFont(this.texts[i].getFont().deriveFont(Font.BOLD));
             StyledDocument doc = this.texts[i].getStyledDocument();
             SimpleAttributeSet center = new SimpleAttributeSet();
             StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
