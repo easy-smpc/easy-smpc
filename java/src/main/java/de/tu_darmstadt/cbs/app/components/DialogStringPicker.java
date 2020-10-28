@@ -14,7 +14,6 @@
 package de.tu_darmstadt.cbs.app.components;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,7 +25,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -54,14 +52,14 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
      * @param parent Component to set the location of JDialog relative to
      * @param additionalAction  Action which will be performed when clicking the okButton
      */
-    public DialogStringPicker(ComponentTextFieldValidator validator, Component parent) {
+    public DialogStringPicker(ComponentTextFieldValidator validator, JFrame parent) {
 
         // Dialog properties
         this.setSize(Resources.SIZE_TEXTAREA_X, Resources.SIZE_TEXTAREA_Y);
         this.setLocationRelativeTo(parent);
         this.setTitle(Resources.getString("PerspectiveParticipate.PickerTitle"));
         this.getContentPane().setLayout(new BorderLayout());
-        this.setIconImage(((JFrame)SwingUtilities.getWindowAncestor(parent)).getIconImage());
+        this.setIconImage(parent.getIconImage());
         
         // Text
         this.text = new ComponentTextArea(validator);
