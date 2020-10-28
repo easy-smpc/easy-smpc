@@ -14,7 +14,6 @@
 package de.tu_darmstadt.cbs.app;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
@@ -53,9 +52,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     
     /** Save button */
     private JButton            save;
-    
-    /** Central panel */
-    private JPanel central;
 
     /**
      * Creates the perspective
@@ -131,11 +127,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         this.title.setEnabled(false);
         title.add(this.title, BorderLayout.CENTER);
         
-        // Central panel
-        central = new JPanel();
-        central.setLayout(new GridLayout(2, 1));
-        panel.add(central, BorderLayout.CENTER);        
-        
         // Participants
         this.participants = new JPanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
@@ -145,10 +136,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
         JScrollPane pane = new JScrollPane(participants);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        central.add(pane, BorderLayout.NORTH);    
+        panel.add(pane, BorderLayout.CENTER);
            
         // save button
-        
         save = new JButton(Resources.getString("PerspectiveReceive.save"));
         save.addActionListener(new ActionListener() {
             @Override

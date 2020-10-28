@@ -55,9 +55,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     /** Text field containing title of study */
     private ComponentTextField                     title;
 
-    /** send all emails at once button */
-    private JButton                                sendAllEmailsButton;
-
     /** Save button */
     private JButton                                save;
 
@@ -166,11 +163,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         this.title.setEnabled(false);
         title.add(this.title, BorderLayout.CENTER);
         
-        // Central panel
-        JPanel central = new JPanel();
-        central.setLayout(new GridLayout(2, 1));
-        panel.add(central, BorderLayout.CENTER);        
-        
         // Participants
         this.participants = new JPanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
@@ -180,13 +172,13 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
         JScrollPane pane = new JScrollPane(participants);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        central.add(pane, BorderLayout.NORTH);    
+        panel.add(pane, BorderLayout.CENTER);    
            
         // send all e-mails button and save button
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
-        sendAllEmailsButton = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButton"));
-        sendAllEmailsButton.addActionListener(new ActionListener() {            
+        JButton send = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButton"));
+        send.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
                 for (Component c : participants.getComponents()) {
@@ -196,7 +188,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 }
             }
         });
-        buttonsPane.add(sendAllEmailsButton, 0,0);
+        buttonsPane.add(send, 0, 0);
         save = new JButton(Resources.getString("PerspectiveSend.save"));
         save.addActionListener(new ActionListener() {
             @Override
@@ -204,7 +196,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 actionSave();
             }
         });
-        buttonsPane.add(save, 0,1);
+        buttonsPane.add(save, 0, 1);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
