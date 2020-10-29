@@ -67,9 +67,7 @@ public abstract class ComponentEntry extends JPanel {
         // Layout
         this.setBorder(new EmptyBorder(Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP));
         this.setLayout(new GridLayout(1, 2, Resources.ROW_GAP, Resources.ROW_GAP));
-        this.setMaximumSize(new Dimension(Integer.MAX_VALUE, Resources.ROW_HEIGHT));
-        this.setMinimumSize(new Dimension(0, Resources.ROW_HEIGHT));
-        
+
         // Left
         JPanel left = new JPanel();
         left.setLayout(new BorderLayout());
@@ -122,6 +120,10 @@ public abstract class ComponentEntry extends JPanel {
                 c.setEnabled(buttonsEnabled);
             }
         }
+        
+        // Set size to fix layout issues
+        this.setMaximumSize(new Dimension(Integer.MAX_VALUE, this.fieldLeft.getPreferredSize().height + 4));
+        this.setMinimumSize(new Dimension(0, this.fieldLeft.getPreferredSize().height + 4));
     }
 
     /**

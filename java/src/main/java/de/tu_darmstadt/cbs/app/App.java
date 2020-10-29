@@ -218,35 +218,6 @@ public class App extends JFrame {
     }
 
     /**
-     * Action to receive a message
-     * @param index
-     * @return
-     */
-    protected boolean actionReceiveMessage(int index) {
-        
-        // Ask for message
-        String message = new DialogStringPicker(new ComponentTextFieldValidator() {
-            @Override
-            public boolean validate(String text) {
-                return isMessageShareResultValid(text, index);
-            }
-        }, this).showDialog();
-
-        // If message selected
-        if (message != null) {
-            try {
-                this.model.setShareFromMessage(Message.deserializeMessage(message), model.getParticipantFromId(index));
-                return true;
-            } catch (IllegalStateException | IllegalArgumentException | ClassNotFoundException | IOException e) {
-                return false;
-            }
-        }
-        
-        // Done
-        return false;
-    }
-    
-    /**
      * Adds a new perspective
      * 
      * @param perspective
@@ -257,7 +228,7 @@ public class App extends JFrame {
         perspectives.add(0, perspective);
         cards.add(perspective.getPanel(), perspective.getTitle());
     }
-
+    
     /**
      * Opens a file chooser
      * @param load 
@@ -331,7 +302,7 @@ public class App extends JFrame {
             return false;
         }
     }
-    
+
     /**
      * Shows a perspective
      * 
@@ -355,7 +326,7 @@ public class App extends JFrame {
     private void showPerspective(int index) {
         showPerspective(perspectives.get(index));
     }
-
+    
     /**
      * Shows a certain perspective
      * 
@@ -374,13 +345,6 @@ public class App extends JFrame {
      */
     protected void actionAbout() {
         // TODO Implement
-    }
-
-    /**
-     * Start action
-     */
-    protected void actionStart() {
-        this.showPerspective(Perspective0Start.class);
     }
 
     /**
@@ -451,7 +415,7 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
         }
     }
-    
+
     /**
      * Load action
      */
@@ -520,7 +484,7 @@ public class App extends JFrame {
     protected void actionMarkMessageSent(int index) {
         this.model.markMessageSent(index);
     }
-
+    
     /**
      * Participate action
      */
@@ -570,6 +534,35 @@ public class App extends JFrame {
     }
 
     /**
+     * Action to receive a message
+     * @param index
+     * @return
+     */
+    protected boolean actionReceiveMessage(int index) {
+        
+        // Ask for message
+        String message = new DialogStringPicker(new ComponentTextFieldValidator() {
+            @Override
+            public boolean validate(String text) {
+                return isMessageShareResultValid(text, index);
+            }
+        }, this).showDialog();
+
+        // If message selected
+        if (message != null) {
+            try {
+                this.model.setShareFromMessage(Message.deserializeMessage(message), model.getParticipantFromId(index));
+                return true;
+            } catch (IllegalStateException | IllegalArgumentException | ClassNotFoundException | IOException e) {
+                return false;
+            }
+        }
+        
+        // Done
+        return false;
+    }
+
+    /**
      * Saves the project
      */
     protected boolean actionSave() {
@@ -593,7 +586,7 @@ public class App extends JFrame {
             return false;
         }
     }
-    
+
     /**
      * Action performed when second receiving done
      */
@@ -606,7 +599,7 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError") + e.getMessage());
         }
     }
-
+    
     /**
      * Second sending done
      */
@@ -618,6 +611,13 @@ public class App extends JFrame {
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
         }
+    }
+
+    /**
+     * Start action
+     */
+    protected void actionStart() {
+        this.showPerspective(Perspective0Start.class);
     }
 
     /**

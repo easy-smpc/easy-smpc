@@ -42,9 +42,6 @@ public class Resources {
     /** Row gap */
     public static final int             ROW_GAP                   = 2;
 
-    /** Row height */
-    public static final int             ROW_HEIGHT                = 20;
-
     /** Min x-size of a text area */
     public static final int             SIZE_TEXTAREA_X           = 400;
 
