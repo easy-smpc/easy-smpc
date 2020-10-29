@@ -189,6 +189,9 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             bins.add(newBin);
         }
         
+        // Zpdate
+        this.stateChanged(new ChangeEvent(this));
+        
         // Redraw
         participants.revalidate();
         participants.repaint();

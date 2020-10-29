@@ -19,10 +19,9 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  * Display participants for sending mail only
  * 
  * @author Felix Wirth
- *
+ * @author Fabian Prasser
  */
 public class EntryParticipantEnterExchangeString extends ComponentEntryOneButton {
-
 
     /** SVID */
     private static final long serialVersionUID = 1321493331077271865L;
@@ -43,11 +42,7 @@ public class EntryParticipantEnterExchangeString extends ComponentEntryOneButton
      * @param buttonEnabled
      */
     public EntryParticipantEnterExchangeString(String name, String email, boolean buttonEnabled) {
-      super(Resources.getString("Participant.0"),
-            name,
-            Resources.getString("Participant.1"),
-            email,
-            buttonEnabled);
+      super(Resources.getString("Participant.0"), name, Resources.getString("Participant.1"), email, buttonEnabled);
     }
 
     /**

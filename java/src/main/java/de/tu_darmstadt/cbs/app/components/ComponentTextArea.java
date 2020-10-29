@@ -27,9 +27,9 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  * @author Fabian Prasser
  */
 public class ComponentTextArea extends JTextArea {
-    
+
     /** SVID */
-    private static final long serialVersionUID = 2813095397984608993L;
+    private static final long           serialVersionUID = 2813095397984608993L;
 
     /** Validator */
     private ComponentTextFieldValidator validator;
@@ -83,8 +83,7 @@ public class ComponentTextArea extends JTextArea {
      * Validates the value
      */
     private void validateValue() {
-        boolean isValid = validator.validate(this.getText());
-        this.setBorder(isValid ? Resources.DEFAULT_BORDER : Resources.INVALID_BORDER);
+        this.setBorder(isValueValid() ? Resources.DEFAULT_BORDER : Resources.INVALID_BORDER);
         if (listener != null) {
             listener.stateChanged(new ChangeEvent(this));
         }

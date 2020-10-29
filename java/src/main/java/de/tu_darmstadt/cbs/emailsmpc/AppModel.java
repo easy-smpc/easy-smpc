@@ -376,21 +376,7 @@ public class AppModel implements Serializable {
             return false;
         }
     }
-    
-    /**
-     * Validates a given message to initiate a participation
-     * @param message
-     * @return
-     */
-    public boolean isInitialParticipationMessageValid(String message) {
-        try {
-            InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(message)));
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-    
+
     public void setModelFromMessage(String initialMsg)
             throws IllegalStateException, IllegalArgumentException, ClassNotFoundException, IOException {
         if (state != AppState.PARTICIPATING)

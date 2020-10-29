@@ -42,6 +42,7 @@ import de.tu_darmstadt.cbs.app.components.DialogStringPicker;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.AppModel;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
+import de.tu_darmstadt.cbs.emailsmpc.InitialMessage;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
@@ -280,12 +281,12 @@ public class App extends JFrame {
      * @return
      */
     private boolean isInitialParticipationMessageValid(String text) {
-        if (model == null) return false;
         try {
             String data =  Message.deserializeMessage(text).data;
-            return model.isInitialParticipationMessageValid(data);
+            InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(data)));
+            return true;
         } catch (Exception e) {
-           return false;
+            return false;
         }
     }
 
@@ -299,6 +300,7 @@ public class App extends JFrame {
         try {
             return model.isMessageShareResultValid(Message.deserializeMessage(text), model.getParticipantFromId(participantId));
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -502,10 +504,11 @@ public class App extends JFrame {
         if (exchangeString != null) {
 
             // Initialize
-            this.model = new AppModel();
-            this.model.toParticipating();
             try {
-                this.model.toEnteringValues(Message.deserializeMessage(exchangeString).data);
+                String data = Message.deserializeMessage(exchangeString).data;
+                this.model = InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(data)));
+                this.model.toEnteringValues(data);
+                this.showPerspective(Perspective1BParticipate.class);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveParticipate.stringError") + e.getMessage());
                 this.model = null;
