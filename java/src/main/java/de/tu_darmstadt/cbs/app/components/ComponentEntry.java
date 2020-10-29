@@ -122,8 +122,8 @@ public abstract class ComponentEntry extends JPanel {
         }
         
         // Set size to fix layout issues
-        this.setMaximumSize(new Dimension(Integer.MAX_VALUE, this.fieldLeft.getPreferredSize().height + 4));
-        this.setMinimumSize(new Dimension(0, this.fieldLeft.getPreferredSize().height + 4));
+        this.setMaximumSize(new Dimension(Integer.MAX_VALUE, this.fieldLeft.getPreferredSize().height + Resources.ROW_GAP * 2));
+        this.setMinimumSize(new Dimension(0, this.fieldLeft.getPreferredSize().height + Resources.ROW_GAP * 2));
     }
 
     /**
