@@ -296,7 +296,7 @@ public class App extends JFrame {
      * @return
      */
     private boolean isMessageShareResultValid(String text, int participantId) {
-        if (model == null) return false;
+        if (model == null || text.trim().isEmpty()) return false;
         try {
             return model.isMessageShareResultValid(Message.deserializeMessage(text), model.getParticipantFromId(participantId));
         } catch (Exception e) {
