@@ -13,6 +13,8 @@
  */
 package de.tu_darmstadt.cbs.app;
 
+import de.tu_darmstadt.cbs.app.resources.Resources;
+
 /**
  * A perspective
  * 
@@ -27,7 +29,7 @@ public class Perspective5Receive extends Perspective3Receive {
      * @param app
      */
     protected Perspective5Receive(App app) {
-        super(app, 5);
+        super(app, Resources.getString("PerspectiveReceive.receive2nd") , 5);
     }
 
     @Override

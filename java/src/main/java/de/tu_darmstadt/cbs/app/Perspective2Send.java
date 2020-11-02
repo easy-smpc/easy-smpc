@@ -74,6 +74,16 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     protected Perspective2Send(App app, int progress) {
         super(app, Resources.getString("PerspectiveSend.send"), progress); //$NON-NLS-1$
     }
+    
+    /**
+     * Creates the perspective
+     * @param app
+     * @param progress
+     */
+    protected Perspective2Send(App app, String title , int progress) {
+        super(app, title, progress); //$NON-NLS-1$
+    }
+    
 
     /**
       * Reacts on all changes in any components

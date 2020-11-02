@@ -13,6 +13,8 @@
  */
 package de.tu_darmstadt.cbs.app;
 
+import de.tu_darmstadt.cbs.app.resources.Resources;
+
 /**
  * A perspective
  * 
@@ -27,7 +29,7 @@ public class Perspective4Send extends Perspective2Send {
      * @param app
      */
     protected Perspective4Send(App app) {
-        super(app, 4);
+        super(app, Resources.getString("PerspectiveSend.send2nd") , 4);
     }
 
     /**

@@ -205,6 +205,8 @@ public class App extends JFrame {
 
         // Add perspectives
         addPerspective(new Perspective6Result(this));
+        addPerspective(new Perspective5Receive(this));
+        addPerspective(new Perspective4Send(this));
         addPerspective(new Perspective3Receive(this));
         addPerspective(new Perspective2Send(this));
         addPerspective(new Perspective1BParticipate(this));
@@ -399,7 +401,7 @@ public class App extends JFrame {
         try {
             this.model.toSendingResult();
             this.model.saveProgram();
-            this.showPerspective(Perspective2Send.class);
+            this.showPerspective(Perspective4Send.class);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError") + e.getMessage());
         }
