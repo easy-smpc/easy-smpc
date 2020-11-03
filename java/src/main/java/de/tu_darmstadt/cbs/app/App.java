@@ -498,13 +498,13 @@ public class App extends JFrame {
         String exchangeString = new DialogStringPicker(new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {
-                return isInitialParticipationMessageValid(text);
+                return isInitialParticipationMessageValid(stripExchangeMessage(text));
             }
         }, this).showDialog();
         
         // If valid string provided
         if (exchangeString != null) {
-
+            exchangeString = stripExchangeMessage(exchangeString); 
             // Initialize
             try {
                 String data = Message.deserializeMessage(exchangeString).data;
@@ -548,13 +548,14 @@ public class App extends JFrame {
         // Ask for message
         String message = new DialogStringPicker(new ComponentTextFieldValidator() {
             @Override
-            public boolean validate(String text) {
-                return isMessageShareResultValid(text, index);
+            public boolean validate(String text) {                
+                return isMessageShareResultValid(stripExchangeMessage(text), index);
             }
         }, this).showDialog();
 
         // If message selected
         if (message != null) {
+            message = stripExchangeMessage(message);
             try {
                 this.model.setShareFromMessage(Message.deserializeMessage(message), model.getParticipantFromId(index));
                 return true;
@@ -648,5 +649,23 @@ public class App extends JFrame {
             }
         }
         return returnPerspective;
+    }
+    
+    /**
+     * Convenience method to remove exchange message tags
+     * @param text
+     * @return
+     */
+    private String stripExchangeMessage(String text) {
+        text = text.replaceAll("\n", "");
+        if (text.contains(Resources.exchangeStringStartTag)) {
+            text = text.substring(text.indexOf(Resources.exchangeStringStartTag) +
+                                  Resources.exchangeStringStartTag.length(),
+                                  text.length());
+        }
+        if (text.contains(Resources.exchangeStringEndTag)) {
+            text = text.substring(0, text.indexOf(Resources.exchangeStringEndTag));
+        }
+        return text;
     }
 }
