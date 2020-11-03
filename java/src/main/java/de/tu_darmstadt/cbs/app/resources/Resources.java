@@ -47,10 +47,16 @@ public class Resources {
 
     /** Min y-size of a text area */
     public static final int             SIZE_TEXTAREA_Y           = 200;
-
-    /** String to generate mailto link */
-    public static final String          mailToString              = "mailto:%s?subject=%s&body=%s";
-
+    
+    /** String indicating start of exchange string */
+    public static final String          exchangeStringStartTag              = "BEGIN_PAYLOAD:";
+    
+    /** String indicating end of exchange string */
+    public static final String          exchangeStringEndTag              = ":END_PAYLOAD";
+    
+    /** Char length for exchange before line break */
+    public static final String          exchangeStringNewLineCountChar              = "150";
+    
     /** Bundle name */
     private static final String         BUNDLE_NAME               = "de.tu_darmstadt.cbs.app.resources.messages"; //$NON-NLS-1$
 

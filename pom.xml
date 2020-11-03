@@ -36,11 +36,10 @@
     	<version>4.8.1</version>
     	<scope>test</scope>
 	</dependency>
-	    <dependency>
-	        <groupId>org.projectlombok</groupId>
-	        <artifactId>lombok</artifactId>
-	        <version>1.18.10</version>
-	        <scope>provided</scope>
-	    </dependency>
+<dependency>
+  		<groupId>org.apache.httpcomponents</groupId>
+  		<artifactId>httpclient</artifactId>
+  		<version>4.5.13</version>
+  	</dependency>
   </dependencies>
 </project>

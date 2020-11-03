@@ -21,6 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
@@ -33,6 +34,8 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import org.apache.http.client.utils.URIBuilder;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.EntryParticipantSendMail;
@@ -125,18 +128,27 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @param entry
      */
      protected void actionSendMail(EntryParticipantSendMail entry) {
-        URI mailToURI;
         try {
-            mailToURI = URI.create(String.format(Resources.mailToString,
-                                                     entry.getRightValue(), //E-mail address
-                                                     String.format(Resources.getString("PerspectiveSend.mailSubject"),//Generate subject 
-                                                                   getApp().getModel().name),                                                                 
-                                                     String.format(Resources.getString("PerspectiveSend.mailBody") //Generate body
-                                                                   ,entry.getLeftValue()
-                                                                   ,getExchangeString(entry))
-                                                     ).replaceAll(" ", "%20"));         
-            Desktop.getDesktop().mail(mailToURI);
-            
+            URIBuilder emailURIBuilder = new URIBuilder().setScheme("mailto");
+            emailURIBuilder.setPath(entry.getRightValue()); // E-mail address
+            emailURIBuilder.addParameter("subject",
+                                         String.format(Resources.getString("PerspectiveSend.mailSubject"),
+                                                       getApp().getModel().name));
+            String formatedExchangeString = Resources.exchangeStringStartTag +
+                                            getExchangeString(entry) +
+                                            Resources.exchangeStringEndTag;           
+            formatedExchangeString = formatedExchangeString.replaceAll("(.{" + Resources.exchangeStringNewLineCountChar +
+                                              "})",
+                                              "$1\n");
+            emailURIBuilder.addParameter("body",
+                                         String.format(Resources.getString("PerspectiveSend.mailBody"),
+                                                       entry.getLeftValue(), // Name of participant
+                                                       formatedExchangeString));
+            Desktop.getDesktop()
+                   .mail(new URI(emailURIBuilder.toString()
+                                                .replace("+", "%20")
+                                                .replace(":/", ":")));
+
             //Send a dialog to confirm mail sending
             if (JOptionPane.showConfirmDialog(this.getPanel(),
                                               String.format(Resources.getString("PerspectiveSend.confirmSendMail"), entry.getRightValue()),
@@ -145,7 +157,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 getApp().actionMarkMessageSent(index);
                 this.stateChanged(new ChangeEvent(this));
             }
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             JOptionPane.showMessageDialog(this.getPanel(), Resources.getString("PerspectiveSend.mailToError") + e.getMessage());
         }    
     }
