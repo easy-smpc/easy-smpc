@@ -21,6 +21,9 @@ import java.awt.Component;
  */
 public class ComponentTextAreaNoEntry extends ComponentTextArea{
     
+    /** SVID*/
+    private static final long serialVersionUID = -409784899589033224L;
+
     ComponentTextAreaNoEntry(String text, Component parent) {
         super(text, null);
         this.setLineWrap(true);
