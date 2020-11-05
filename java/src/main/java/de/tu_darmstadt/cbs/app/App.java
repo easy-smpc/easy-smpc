@@ -497,9 +497,14 @@ public class App extends JFrame {
      * Participate action
      */
     protected void actionParticipate() {
+         //try to get string from clip board
+        String clipboardText = stripExchangeMessage(getTextFromClipBoard());
+        if (!isInitialParticipationMessageValid(clipboardText)) {
+            clipboardText = "";
+        }
         
         // Ask for string
-        String exchangeString = new DialogStringPicker(getTextFromClipBoard(), new ComponentTextFieldValidator() {
+        String exchangeString = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {
                 return isInitialParticipationMessageValid(stripExchangeMessage(text));
@@ -548,9 +553,13 @@ public class App extends JFrame {
      * @return
      */
     protected boolean actionReceiveMessage(int index) {       
-        
+       //try to get string from clip board
+       String clipboardText = stripExchangeMessage(getTextFromClipBoard());
+       if (!isMessageShareResultValid(clipboardText, index)) {
+           clipboardText = "";
+       } 
         // Ask for message
-        String message = new DialogStringPicker(getTextFromClipBoard(), new ComponentTextFieldValidator() {
+        String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {                
                 return isMessageShareResultValid(stripExchangeMessage(text), index);
@@ -580,7 +589,7 @@ public class App extends JFrame {
         String text = "";
         if (Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).isDataFlavorSupported(DataFlavor.stringFlavor)) {
             try {
-                text = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);
+                text = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);              
             } catch (HeadlessException | UnsupportedFlavorException | IOException e) {
                 // No error message  necessary
                 e.printStackTrace();
