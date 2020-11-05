@@ -42,6 +42,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 import de.tu_darmstadt.cbs.app.components.ComponentProgress;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
+import de.tu_darmstadt.cbs.app.components.DialogAbout;
 import de.tu_darmstadt.cbs.app.components.DialogStringPicker;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.AppModel;
@@ -352,7 +353,7 @@ public class App extends JFrame {
      * Shows the about dialog
      */
     protected void actionAbout() {
-        // TODO Implement
+        new DialogAbout(this);
     }
 
     /**

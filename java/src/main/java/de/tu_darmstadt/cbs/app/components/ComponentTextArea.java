@@ -73,7 +73,11 @@ public class ComponentTextArea extends JTextArea {
      * @return
      */
     public boolean isValueValid() {
+        if (validator != null)
+        {
         return this.validator.validate(this.getText());
+        }
+        return true;
     }
 
     /**

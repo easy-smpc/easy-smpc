@@ -68,6 +68,12 @@ public class Resources {
 
     /** Ending for project files */
     public static final String          FILE_ENDING               = "smpc";
+    
+    /** About dialog size x*/
+    public static final int SIZE_DIALOG_X = 500;
+    
+    /** About dialog size y*/
+    public static final int SIZE_DIALOG_Y = 300;
 
     /**
      * No instantiation
