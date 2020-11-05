@@ -55,7 +55,7 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
      * @param parent Component to set the location of JDialog relative to
      * @param additionalAction  Action which will be performed when clicking the okButton
      */
-    public DialogStringPicker(ComponentTextFieldValidator validator, JFrame parent) {
+    public DialogStringPicker(String textDefault, ComponentTextFieldValidator validator, JFrame parent) {
 
         // Dialog properties
         this.setSize(Resources.SIZE_TEXTAREA_X, Resources.SIZE_TEXTAREA_Y);
@@ -71,7 +71,7 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
                                                                                         TitledBorder.DEFAULT_POSITION));
         
         // Text
-        this.text = new ComponentTextArea(validator);
+        this.text = new ComponentTextArea(textDefault, validator);
         this.text.setChangeListener(this);
         this.add(text, BorderLayout.CENTER);
         

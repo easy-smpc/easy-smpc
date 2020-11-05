@@ -62,6 +62,11 @@ public class ComponentTextArea extends JTextArea {
             }
         });
     }
+    
+    public ComponentTextArea(String textDefault, ComponentTextFieldValidator validator) {
+        this(validator);
+        this.setText(textDefault);        
+    }
 
     /**
      * Returns whether the value is valid

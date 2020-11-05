@@ -15,6 +15,10 @@ package de.tu_darmstadt.cbs.app;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.HeadlessException;
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -495,7 +499,7 @@ public class App extends JFrame {
     protected void actionParticipate() {
         
         // Ask for string
-        String exchangeString = new DialogStringPicker(new ComponentTextFieldValidator() {
+        String exchangeString = new DialogStringPicker(getTextFromClipBoard(), new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {
                 return isInitialParticipationMessageValid(stripExchangeMessage(text));
@@ -543,10 +547,10 @@ public class App extends JFrame {
      * @param index
      * @return
      */
-    protected boolean actionReceiveMessage(int index) {
+    protected boolean actionReceiveMessage(int index) {       
         
         // Ask for message
-        String message = new DialogStringPicker(new ComponentTextFieldValidator() {
+        String message = new DialogStringPicker(getTextFromClipBoard(), new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {                
                 return isMessageShareResultValid(stripExchangeMessage(text), index);
@@ -566,6 +570,23 @@ public class App extends JFrame {
         
         // Done
         return false;
+    }
+
+    /**
+     * Returns text from clip board if valid
+     * @return clip board text
+     */
+    private String getTextFromClipBoard() {
+        String text = "";
+        if (Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            try {
+                text = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);
+            } catch (HeadlessException | UnsupportedFlavorException | IOException e) {
+                // No error message  necessary
+                e.printStackTrace();
+            }
+        };
+        return text;
     }
 
     /**
@@ -657,7 +678,7 @@ public class App extends JFrame {
      * @return
      */
     private String stripExchangeMessage(String text) {
-        text = text.replaceAll("\n", "");
+        text = text.replaceAll("\n", "").trim();
         if (text.contains(Resources.exchangeStringStartTag)) {
             text = text.substring(text.indexOf(Resources.exchangeStringStartTag) +
                                   Resources.exchangeStringStartTag.length(),
