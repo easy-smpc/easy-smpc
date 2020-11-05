@@ -13,11 +13,15 @@
  */
 package de.tu_darmstadt.cbs.app.components;
 
+import javax.swing.Action;
+import javax.swing.JPopupMenu;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.DefaultEditorKit;
 
 import de.tu_darmstadt.cbs.app.resources.Resources;
 
@@ -45,6 +49,14 @@ public class ComponentTextArea extends JTextArea {
         this.setLineWrap(true);
         this.validator = validator;
         this.validateValue();
+        // Pop up menu in textfield
+        JPopupMenu menu = new JPopupMenu();
+        Action paste = new DefaultEditorKit.PasteAction();
+        paste.putValue(Action.NAME, Resources.getString("TextArea.paste"));
+        paste.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control V"));
+        menu.add(paste);
+        this.setComponentPopupMenu(menu);
+        //listener for validation
         this.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void changedUpdate(DocumentEvent e) {

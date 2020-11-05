@@ -63,20 +63,22 @@ public class DialogAbout extends JDialog {
         this.getContentPane().setLayout(new BorderLayout());
         this.setIconImage(parent.getIconImage());
         JPanel central = new JPanel();
-        
+
         // Texts
-        central.setLayout(new BorderLayout());       
-        central.add(new JPanel().add(new ComponentTextAreaNoEntry(LICENSE, this)), BorderLayout.CENTER);
-        central.add(new JPanel().add(new ComponentTextAreaNoEntry(CONTRIBUTORS, this)), BorderLayout.SOUTH);
+        central.setLayout(new BorderLayout());
+        central.add(new JPanel().add(new ComponentTextAreaNoEntry(LICENSE, this)),
+                    BorderLayout.CENTER);
+        central.add(new JPanel().add(new ComponentTextAreaNoEntry(CONTRIBUTORS, this)),
+                    BorderLayout.SOUTH);
         this.getContentPane().add(central, BorderLayout.CENTER);
-        
+
         // Buttons
         JPanel buttonPane = new JPanel();
         buttonPane.setLayout(new BorderLayout());
-        this.getContentPane().add(buttonPane, BorderLayout.SOUTH);       
+        this.getContentPane().add(buttonPane, BorderLayout.SOUTH);
         JButton buttonOK = new JButton(Resources.getString("About.ok"));
         buttonPane.add(buttonOK, BorderLayout.CENTER);
-        buttonOK.addActionListener(new  ActionListener() {            
+        buttonOK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // TODO Auto-generated method stub
