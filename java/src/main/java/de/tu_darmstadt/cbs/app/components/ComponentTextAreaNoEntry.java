@@ -15,6 +15,8 @@ package de.tu_darmstadt.cbs.app.components;
 
 import java.awt.Component;
 
+import javax.swing.JPopupMenu;
+
 /**
  * @author Felix Wirth
  *
@@ -24,11 +26,18 @@ public class ComponentTextAreaNoEntry extends ComponentTextArea{
     /** SVID */
     private static final long serialVersionUID = -409784899589033224L;
 
+    /**
+     * Creates a new instance
+     * @param text
+     * @param parent
+     */
     ComponentTextAreaNoEntry(String text, Component parent) {
         super(text, null);
+        this.setComponentPopupMenu(new JPopupMenu());
         this.setLineWrap(true);
         this.setEditable(false);
         this.setBackground(parent.getBackground());
+        
     }
 
 }

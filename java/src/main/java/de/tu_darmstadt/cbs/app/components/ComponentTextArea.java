@@ -41,6 +41,8 @@ public class ComponentTextArea extends JTextArea {
     /** Listener */
     private ChangeListener              listener;
 
+    protected JPopupMenu menu;
+
     /**
      * Creates a new instance
      * @param validator
@@ -49,8 +51,8 @@ public class ComponentTextArea extends JTextArea {
         this.setLineWrap(true);
         this.validator = validator;
         this.validateValue();
-        // Pop up menu in textfield
-        JPopupMenu menu = new JPopupMenu();
+        // Pop up menu in text field
+        menu = new JPopupMenu();
         Action paste = new DefaultEditorKit.PasteAction();
         paste.putValue(Action.NAME, Resources.getString("TextArea.paste"));
         paste.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control V"));
