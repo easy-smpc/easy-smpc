@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -37,6 +38,8 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.reflections.Reflections;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
@@ -209,17 +212,18 @@ public class App extends JFrame {
         });
 
         // Add perspectives
-        addPerspective(new Perspective6Result(this));
-        addPerspective(new Perspective5Receive(this));
-        addPerspective(new Perspective4Send(this));
-        addPerspective(new Perspective3Receive(this));
-        addPerspective(new Perspective2Send(this));
-        addPerspective(new Perspective1BParticipate(this));
-        addPerspective(new Perspective1ACreate(this));
-        addPerspective(new Perspective0Start(this));
+        Reflections reflectionPerspective = new Reflections(Perspective.class.getPackageName());
+        Set<Class<? extends Perspective>> perspectives = reflectionPerspective.getSubTypesOf(Perspective.class);
+        for(Class<? extends Perspective> perspective: perspectives ) {
+            try {
+                addPerspective(perspective.getDeclaredConstructor(App.class).newInstance(this));
+            } catch (Exception e1) {     
+                e1.printStackTrace();
+            }
+        }
         
-        // Show the first perspective
-        showPerspective(0);
+        // Show the start perspective
+        showPerspective(getPerspective(Perspective0Start.class));
 
         // Finally, make the frame visible
         this.setVisible(true);
