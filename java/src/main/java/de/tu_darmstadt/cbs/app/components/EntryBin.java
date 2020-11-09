@@ -13,6 +13,8 @@
  */
 package de.tu_darmstadt.cbs.app.components;
 
+import java.math.BigInteger;
+
 import de.tu_darmstadt.cbs.app.resources.Resources;
 
 /**
@@ -66,7 +68,7 @@ public class EntryBin extends ComponentEntryAddRemove {
                   @Override
                   public boolean validate(String text) {
                       try {
-                          Integer.valueOf(text);
+                          new BigInteger(text.trim());
                           return true;
                       } catch (Exception e) {
                           return false;

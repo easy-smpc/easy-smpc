@@ -103,7 +103,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         for (Component entry : this.bins.getComponents()) {
             Bin bin = new Bin(((EntryBin)entry).getLeftValue());
             bin.initialize(participants.size());
-            bin.shareValue(new BigInteger(((EntryBin)entry).getRightValue()));
+            bin.shareValue(new BigInteger(((EntryBin)entry).getRightValue().trim()));
             bins.add(bin);
         }
 
