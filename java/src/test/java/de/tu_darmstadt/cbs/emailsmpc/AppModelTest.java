@@ -49,6 +49,16 @@ public class AppModelTest {
         testmodel.toInitialSending("Teststudy", part, bins);
         return testmodel;
     }
+    @Test
+    public void CloneTest() {
+        BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
+                BigInteger.valueOf(4) };
+        AppModel model0 = AppModelTest.getInitializedModel(3, 4, secrets0);
+        AppModel copy = (AppModel) model0.clone();
+        assertTrue((copy != model0));
+        assertTrue(copy.equals(model0));
+        assertTrue(copy.studyUID.equals(model0.studyUID));
+    }
 
     @Test
     public void AddingBins() {

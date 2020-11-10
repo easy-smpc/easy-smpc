@@ -2,7 +2,7 @@ package de.tu_darmstadt.cbs.emailsmpc;
 
 import java.math.BigInteger;
 
-public class BinResult {
+public class BinResult implements Cloneable {
     public String name;
     public BigInteger value;
 
@@ -32,4 +32,12 @@ public class BinResult {
         return name + ": " + value.toString();
     }
 
+    @Override
+    public Object clone() {
+      try {
+        return (BinResult) super.clone();
+      } catch (CloneNotSupportedException e) {
+        return new BinResult(this.name, this.value);
+      }
+    }
 }

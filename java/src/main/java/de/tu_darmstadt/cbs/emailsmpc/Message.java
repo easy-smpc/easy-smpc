@@ -11,7 +11,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-public class Message implements Serializable {
+public class Message implements Serializable, Cloneable {
     public final String recipientName;
     public final String recipientEmailAddress;
     public final String data;
@@ -116,5 +116,18 @@ public class Message implements Serializable {
         result = 31 * result + recipientEmailAddress.hashCode();
         result = 31 * result + data.hashCode();
         return result;
+    }
+
+    @Override
+    public Object clone() {
+      try {
+        return (Message) super.clone();
+      } catch (CloneNotSupportedException e) {
+        try {
+          return Message.deserializeMessage(Message.serializeMessage(this));
+        } catch (Exception er) {
+          throw new RuntimeException("Cloning a Message seriously went wrong!");
+        }
+      }
     }
 }

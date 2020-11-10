@@ -11,7 +11,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-public class AppModel implements Serializable {
+public class AppModel implements Serializable, Cloneable {
     public String studyUID = UIDGenerator.generateShortUID(8);
     public int numParticipants;
     public int ownId;
@@ -568,5 +568,35 @@ public class AppModel implements Serializable {
         return "AppModel [numParticipants=" + numParticipants + ", ownId=" + ownId + ", state=" + state + ", bins="
                 + Arrays.toString(bins) + ", participants=" + Arrays.toString(participants) + ", name=" + name
                 + ", unsentMessages=" + Arrays.toString(unsentMessages) + ", filename=" + filename + "]";
+    }
+
+    @Override
+    public Object clone() {
+      AppModel newModel = null;
+      try {
+        newModel = (AppModel) super.clone();
+      } catch (CloneNotSupportedException e) {
+        newModel = new AppModel();
+      }
+      newModel.name = this.name;
+      newModel.numParticipants = this.numParticipants;
+      newModel.ownId = this.ownId;
+      newModel.studyUID = this.studyUID;
+      newModel.state = this.state;
+      newModel.bins = new Bin[this.bins.length];
+      newModel.participants = new Participant[this.participants.length];
+      newModel.unsentMessages = new Message[this.unsentMessages.length];
+      newModel.filename = this.filename;
+      for (int i = 0; i < newModel.bins.length; i++) {
+        newModel.bins[i] = (Bin) this.bins[i].clone();
+      }
+      for (int i = 0; i < newModel.participants.length; i++) {
+        newModel.participants[i] = (Participant) this.participants[i].clone();
+      }
+      for (int i = 0; i < newModel.unsentMessages.length; i++) {
+        if(this.unsentMessages[i] != null)
+          newModel.unsentMessages[i] = (Message) this.unsentMessages[i].clone();
+      }
+      return newModel;
     }
 }
