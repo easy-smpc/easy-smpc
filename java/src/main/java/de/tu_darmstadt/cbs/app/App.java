@@ -50,6 +50,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.InitialMessage;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
+import de.tu_darmstadt.cbs.emailsmpc.StateRollbackException;
 
 /**
  * Main UI of the app
@@ -373,18 +374,15 @@ public class App extends JFrame {
     protected void actionCreateDone(String title, Participant[] participants, Bin[] bins) {
 
         // Pass over bins and participants
+      try {
         model.toInitialSending(title, participants, bins);
-
-        // Try to save
         if (actionSave()) {
-
-            // Proceed to the next step
             this.showPerspective(Perspective2Send.class);
-        } else {
-            
-            // Roll back
-            model.toStarting();
         }
+      } catch (StateRollbackException e) {
+      //TODO Handle State Rollback
+      System.err.println("Congratulations, you found a novel error");
+      }
     }
 
     /**
@@ -408,6 +406,7 @@ public class App extends JFrame {
             this.model.saveProgram();
             this.showPerspective(Perspective4Send.class);
         } catch (Exception e) {
+            // TODO Handle StateRollbackException
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError") + e.getMessage());
         }
     }
@@ -420,7 +419,8 @@ public class App extends JFrame {
         try {
             this.model.saveProgram();
             this.showPerspective(Perspective3Receive.class);
-        } catch (IOException e) {
+        } catch (StateRollbackException e) {
+            // TODO Handle StateRollbackException
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
         }
     }
@@ -535,17 +535,15 @@ public class App extends JFrame {
     protected void actionParticipateDone(BigInteger[] secret) {
 
         // Pass over bins and participants
+      try {
         model.toSendingShares(secret);
-
-        // Try to save
         if (actionSave()) {
-
-            // Proceed to the next step
             this.showPerspective(Perspective2Send.class);
-        } else {
-            
-            // TODO: Roll back
         }
+      } catch (StateRollbackException e) {
+        // TODO Handle StateRollbackException
+        System.err.println("Oops, this state rollback needs to be handled properly");
+      }
     }
 
     /**
@@ -573,7 +571,8 @@ public class App extends JFrame {
             try {
                 this.model.setShareFromMessage(Message.deserializeMessage(message), model.getParticipantFromId(index));
                 return true;
-            } catch (IllegalStateException | IllegalArgumentException | ClassNotFoundException | IOException e) {
+            } catch (IllegalStateException | IllegalArgumentException | ClassNotFoundException | IOException | StateRollbackException e) {
+              // TODO Handle State Rollback
                 return false;
             }
         }
@@ -617,7 +616,8 @@ public class App extends JFrame {
             model.filename = file;
             model.saveProgram();
             return true;
-        } catch (IOException e) {
+        } catch (StateRollbackException e) {
+          //TODO Handle State Rollback
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.saveError") + e.getMessage()); //$NON-NLS-1$
             model.filename = null;
             return false;
@@ -628,11 +628,12 @@ public class App extends JFrame {
      * Action performed when second receiving done
      */
     protected void actionSecondReceivingDone() {
+        this.model.toFinished();
         try {
-            this.model.toFinished();
             this.model.saveProgram();
             this.showPerspective(Perspective6Result.class);
         } catch (Exception e) {
+          //TODO Handle State Rollback
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError") + e.getMessage());
         }
     }
@@ -645,7 +646,8 @@ public class App extends JFrame {
         try {
             this.model.saveProgram();
             this.showPerspective(Perspective5Receive.class);
-        } catch (IOException e) {
+        } catch (StateRollbackException e) {
+          //TODO Handle Rollback
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
         }
     }

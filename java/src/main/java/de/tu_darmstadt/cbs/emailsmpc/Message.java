@@ -52,21 +52,16 @@ public class Message implements Serializable, Cloneable {
         return null;
     }
 
-    public static boolean validateData(int senderID, Participant recipient, String message) {
+    public static boolean validateData(int senderID, Participant recipient, String message) throws NoSuchAlgorithmException {
         if (!(message.contains("@")))
             return false;
         String[] parts = message.split("@");
         if (parts.length != 2)
             return false;
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] digest = md.digest((String.valueOf(senderID) + recipient.name + recipient.emailAddress + parts[0]).getBytes());
-            Encoder be = Base64.getEncoder();
-            return parts[1].equals(be.encodeToString(digest));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return false;
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] digest = md.digest((String.valueOf(senderID) + recipient.name + recipient.emailAddress + parts[0]).getBytes());
+        Encoder be = Base64.getEncoder();
+        return parts[1].equals(be.encodeToString(digest));
     }
 
     public static String getMessageData(Message msg) throws IllegalArgumentException {

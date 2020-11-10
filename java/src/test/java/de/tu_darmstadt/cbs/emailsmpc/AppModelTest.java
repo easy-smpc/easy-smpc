@@ -16,7 +16,7 @@ public class AppModelTest {
     /**
      * Rigorous Test :-)
      */
-    static private AppModel getInitializedModel(int numParticipants, int numBins) {
+    static private AppModel getInitializedModel(int numParticipants, int numBins) throws StateRollbackException {
         AppModel testmodel = new AppModel();
         Participant[] part = new Participant[numParticipants];
         Bin[] bins = new Bin[numBins];
@@ -33,7 +33,7 @@ public class AppModelTest {
         return testmodel;
     }
 
-    static private AppModel getInitializedModel(int numParticipants, int numBins, BigInteger[] array) {
+    static private AppModel getInitializedModel(int numParticipants, int numBins, BigInteger[] array) throws StateRollbackException {
         AppModel testmodel = new AppModel();
         Participant[] part = new Participant[numParticipants];
         Bin[] bins = new Bin[numBins];
@@ -50,7 +50,7 @@ public class AppModelTest {
         return testmodel;
     }
     @Test
-    public void CloneTest() {
+    public void CloneTest() throws StateRollbackException{
         BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
                 BigInteger.valueOf(4) };
         AppModel model0 = AppModelTest.getInitializedModel(3, 4, secrets0);
@@ -61,13 +61,13 @@ public class AppModelTest {
     }
 
     @Test
-    public void AddingBins() {
+    public void AddingBins() throws StateRollbackException {
         AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
         assertTrue(testmodel.bins.length == 4);
     }
 
     @Test
-    public void AddingParticipants() {
+    public void AddingParticipants() throws StateRollbackException {
         AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
         assertTrue(testmodel.participants.length == 3);
     }
@@ -82,22 +82,17 @@ public class AppModelTest {
     }
 
     @Test
-    public void SaveLoad() throws IOException, ClassNotFoundException {
+    public void SaveLoad() throws StateRollbackException, ClassNotFoundException, IOException {
         AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
-        try {
             File fn = new File("testing.dat");
             testmodel.filename = fn;
             testmodel.saveProgram();
             AppModel load = AppModel.loadModel(fn);
             assertTrue(load.equals(testmodel));
-        } catch (Exception e) {
-            e.printStackTrace(System.out);
-            throw e;
-        }
     }
 
     @Test
-    public void TestWithThree() throws IOException, ClassNotFoundException {
+    public void TestWithThree() throws StateRollbackException, ClassNotFoundException {
         BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
                 BigInteger.valueOf(4) };
         AppModel model0 = AppModelTest.getInitializedModel(3, 4, secrets0);
