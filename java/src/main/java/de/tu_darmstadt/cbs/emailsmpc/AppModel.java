@@ -272,7 +272,7 @@ public class AppModel implements Serializable, Cloneable {
     private Message getInitialMessage(int recipientId) throws IOException {
         InitialMessage data = new InitialMessage(this, recipientId);
         Participant recipient = this.participants[recipientId];
-        return new Message(recipient, data.getMessage());
+        return new Message(ownId, recipient, data.getMessage());
     }
 
     public void populateInitialMessages() throws IOException, IllegalStateException {
@@ -295,7 +295,7 @@ public class AppModel implements Serializable, Cloneable {
     private Message getShareMessage(int recipientId) throws IOException {
         ShareMessage data = new ShareMessage(this, recipientId);
         Participant recipient = this.participants[recipientId];
-        return new Message(recipient, data.getMessage());
+        return new Message(ownId, recipient, data.getMessage());
     }
 
     public void populateShareMessages() throws IOException, IllegalStateException {
@@ -334,7 +334,7 @@ public class AppModel implements Serializable, Cloneable {
             throws IllegalStateException, IllegalArgumentException, ClassNotFoundException, IOException {
         if (!(state == AppState.RECIEVING_SHARE || state == AppState.RECIEVING_RESULT))
             throw new IllegalStateException("Setting a share from a Message is not allowed at state " + state);
-        if (Message.validateData(participants[ownId], msg.data)) {
+        if (Message.validateData(getParticipantId(sender), participants[ownId], msg.data)) {
             if (state == AppState.RECIEVING_SHARE) {
                 ShareMessage sm = ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
                 int senderId = getParticipantId(sender);
@@ -360,7 +360,7 @@ public class AppModel implements Serializable, Cloneable {
      */
     public boolean isMessageShareResultValid(Message msg, Participant sender) {
         try {
-            Message.validateData(participants[ownId], msg.data);
+            Message.validateData(getParticipantId(sender), participants[ownId], msg.data);
             switch (state){
             case RECIEVING_SHARE:
                 ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
@@ -409,7 +409,7 @@ public class AppModel implements Serializable, Cloneable {
         for (int i = 0; i < numParticipants; i++) {
             if (i != ownId) {
                 Participant recipient = this.participants[i];
-                unsentMessages[i] = new Message(recipient, data.getMessage());
+                unsentMessages[i] = new Message(ownId, recipient, data.getMessage());
             } else {
                 for (Bin b : bins) {
                     b.setInShare(b.getSumShare(), ownId);
