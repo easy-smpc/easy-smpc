@@ -502,10 +502,14 @@ public class AppModel implements Serializable {
             return false;
         AppModel m = (AppModel) o;
         boolean result = (m.numParticipants == numParticipants);
+        result = result && (m.studyUID.equals(studyUID));
         result = result && (m.ownId == ownId);
         result = result && (m.state.equals(state));
         result = result && (m.name.equals(name));
-        result = result && (m.filename.equals(filename));
+        if (m.filename != null)
+          result = result && (m.filename.equals(filename));
+        else
+          result = result && (filename == null);
         result = result && (m.bins.length == bins.length);
         result = result && (m.participants.length == participants.length);
         result = result && (m.unsentMessages.length == unsentMessages.length);
