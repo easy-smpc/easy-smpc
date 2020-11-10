@@ -100,7 +100,7 @@ public class Message implements Serializable, Cloneable {
 
     @Override
     public String toString() {
-        return "From "+ senderID.toString() + " to " +recipientName + "<" + recipientEmailAddress + ">:\n" + data;
+        return "From "+ String.valueOf(senderID) + " to " +recipientName + "<" + recipientEmailAddress + ">:\n" + data;
     }
 
     @Override
