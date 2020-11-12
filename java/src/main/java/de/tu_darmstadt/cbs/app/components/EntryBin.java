@@ -104,7 +104,7 @@ public class EntryBin extends ComponentEntryAddRemove {
                   @Override
                   public boolean validate(String text) {
                       try {
-                          Integer.valueOf(text);
+                          new BigInteger(text);
                           return true;
                       } catch (Exception e) {
                           return false;
