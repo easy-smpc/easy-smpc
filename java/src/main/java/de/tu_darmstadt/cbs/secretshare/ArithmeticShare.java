@@ -7,7 +7,7 @@ import java.io.Serializable;
  * This class implements an arithmetic share
  * @author Tobias Kussel
  */
-public class ArithmeticShare implements Serializable {
+public class ArithmeticShare implements Serializable, Cloneable {
 
     /** SVUID*/
     private static final long serialVersionUID = 5017971477461756174L;
@@ -73,5 +73,13 @@ public class ArithmeticShare implements Serializable {
     @Override
     public String toString() {
         return value + " mod " + prime;
+    }
+    @Override
+    public Object clone() {
+      try {
+        return (ArithmeticShare) super.clone();
+      } catch (CloneNotSupportedException e) {
+        return new ArithmeticShare(this.value, this.prime);
+      }
     }
 }

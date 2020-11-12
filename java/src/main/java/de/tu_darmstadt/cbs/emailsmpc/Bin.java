@@ -5,7 +5,7 @@ import java.math.BigInteger;
 import java.io.Serializable;
 import java.util.Arrays;
 
-public class Bin implements Serializable {
+public class Bin implements Serializable, Cloneable {
     public final String name;
     private ArithmeticShare[] inShares;
     private ArithmeticShare[] outShares;
@@ -184,5 +184,21 @@ public class Bin implements Serializable {
         }
         return result;
 
+    }
+    @Override
+    public Object clone() {
+      Bin newBin = null;
+      try {
+        newBin = (Bin) super.clone();
+      } catch (CloneNotSupportedException e) {
+        newBin = new Bin(this.name, this.inShares.length);
+      }
+      for (int i = 0; i < this.inShares.length; i++) {
+        if (this.inShares[i] != null)
+          newBin.inShares[i] = (ArithmeticShare) this.inShares[i].clone();
+        if (this.outShares[i] != null)
+          newBin.outShares[i] =(ArithmeticShare) this.outShares[i].clone();
+      }
+      return newBin;
     }
 }
