@@ -114,6 +114,7 @@ public class App extends JFrame {
         this.setIconImage(Resources.getIcon());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);// Close only if user clicks yes in dialog
         
         // -----------------
         // Progress
@@ -133,7 +134,7 @@ public class App extends JFrame {
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 actionExit();
             }
-        });
+        });     
 
         // -----------------
         // Menu
