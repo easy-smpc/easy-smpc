@@ -25,7 +25,7 @@ import javax.swing.border.TitledBorder;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.EntryBinNoButton;
-import de.tu_darmstadt.cbs.app.components.EntryParticipant;
+import de.tu_darmstadt.cbs.app.components.EntryParticipantNoButton;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.BinResult;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
@@ -64,7 +64,7 @@ public class Perspective6Result extends Perspective {
         bins.removeAll();
         this.title.setText(getApp().getModel().name);
         for (Participant currentParticipant : getApp().getModel().participants) {
-            participants.add(new EntryParticipant(currentParticipant.name, currentParticipant.emailAddress, false));
+            participants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress));
         }
         for (BinResult binResult : getApp().getModel().getAllResults()) {
             bins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
