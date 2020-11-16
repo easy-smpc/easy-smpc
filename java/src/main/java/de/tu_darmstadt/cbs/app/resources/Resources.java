@@ -15,8 +15,12 @@ package de.tu_darmstadt.cbs.app.resources;
 
 import java.awt.Color;
 import java.awt.Image;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -74,6 +78,9 @@ public class Resources {
     
     /** About dialog size y*/
     public static final int SIZE_DIALOG_Y = 300;
+    
+    /** The charset used to read the license text */
+    private final static Charset        CHARSET         = StandardCharsets.UTF_8;
 
     /**
      * No instantiation
@@ -94,6 +101,38 @@ public class Resources {
         } catch (MissingResourceException e) {
             return '!' + key + '!';
         }
+    }
+    
+    /**
+     * Reads the content from the file license.txt located in the package
+     * org.deidentifier.arx.gui.resources and returns the content as string.
+     * 
+     * @return
+     */
+    public static String getLicenseText() {
+        InputStream stream = Resources.class.getResourceAsStream("license.txt"); //$NON-NLS-1$
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream, CHARSET));
+        String content = ""; //$NON-NLS-1$
+        try {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            line = br.readLine();
+            while (line != null) {
+                sb.append(line);
+                sb.append(System.lineSeparator());
+                line = br.readLine();
+            }
+            content = sb.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return content;
     }
 
     /**
