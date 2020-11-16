@@ -77,6 +77,26 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     public void stateChanged(ChangeEvent e) {
         this.save.setEnabled(this.areValuesValid());
     }
+    
+    /**
+     * Removes empty lines in participants and bins
+     */
+    private void actionRemoveEmptyLines() {
+
+        for (Component entry : this.participants.getComponents()) {
+            if (((EntryParticipant) entry).getLeftValue().trim().isEmpty() &&
+                ((EntryParticipant) entry).getRightValue().trim().isEmpty()) {
+                removeParticipant((EntryParticipant) entry);
+            }
+        }
+
+        for (Component entry : this.bins.getComponents()) {
+            if (((EntryBin) entry).getLeftValue().trim().isEmpty() &&
+                ((EntryBin) entry).getRightValue().trim().isEmpty()) {
+                removeBin((EntryBin) entry);
+            }
+        }
+    }
 
     /**
      * Save the project and proceed.
@@ -292,7 +312,19 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
         
-        // Save button
+        // Remove empty lines button and save button
+        JPanel buttonsPane = new JPanel();
+        buttonsPane.setLayout(new GridLayout(2, 1));
+        
+        JButton removeEmptylines = new JButton(Resources.getString("PerspectiveCreate.removeEmptyLines"));
+        removeEmptylines.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionRemoveEmptyLines();
+            }
+        });
+        buttonsPane.add(removeEmptylines, 0, 0);
+        
         save = new JButton(Resources.getString("PerspectiveCreate.save"));
         save.setEnabled(this.areValuesValid());
         save.addActionListener(new ActionListener() {
@@ -301,8 +333,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 actionSave();
             }
         });
-        panel.add(save, BorderLayout.SOUTH);
-        
+        buttonsPane.add(save, 0, 1);
+        panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
     /**
