@@ -1,12 +1,13 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
 import static org.junit.Assert.assertTrue;
-import java.math.BigInteger;
-import java.security.NoSuchAlgorithmException;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
+import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -126,10 +127,10 @@ public class AppModelTest {
         model0.toRecievingShares();
         model1.toRecievingShares();
         model2.toRecievingShares();
-        model0.setShareFromMessage(share10, model0.getParticipantFromId(1));
-        model0.setShareFromMessage(share20, model0.getParticipantFromId(2));
-        model1.setShareFromMessage(share21, model1.getParticipantFromId(2));
-        model2.setShareFromMessage(share12, model2.getParticipantFromId(1));
+        model0.setShareFromMessage(share10);
+        model0.setShareFromMessage(share20);
+        model1.setShareFromMessage(share21);
+        model2.setShareFromMessage(share12);
         model0.toSendingResult();
         model1.toSendingResult();
         model2.toSendingResult();
@@ -148,12 +149,12 @@ public class AppModelTest {
         model0.toRecievingResult();
         model1.toRecievingResult();
         model2.toRecievingResult();
-        model0.setShareFromMessage(result10, model0.getParticipantFromId(1));
-        model0.setShareFromMessage(result20, model0.getParticipantFromId(2));
-        model1.setShareFromMessage(result01, model1.getParticipantFromId(0));
-        model1.setShareFromMessage(result21, model1.getParticipantFromId(2));
-        model2.setShareFromMessage(result02, model2.getParticipantFromId(0));
-        model2.setShareFromMessage(result12, model2.getParticipantFromId(1));
+        model0.setShareFromMessage(result10);
+        model0.setShareFromMessage(result20);
+        model1.setShareFromMessage(result01);
+        model1.setShareFromMessage(result21);
+        model2.setShareFromMessage(result02);
+        model2.setShareFromMessage(result12);
         model0.toFinished();
         model1.toFinished();
         model2.toFinished();
