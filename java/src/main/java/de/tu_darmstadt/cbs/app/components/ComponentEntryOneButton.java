@@ -122,4 +122,12 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
      * @return
      */
     protected abstract String getText();
+    
+    
+    /**
+     * Disables button
+     */
+    public void disableButton() {
+        this.button.setEnabled(false);
+    }
 }

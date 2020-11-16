@@ -22,6 +22,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
@@ -62,6 +63,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     /** Save button */
     private JButton                                save;
 
+    private JButton send;
+
     /**
      * Creates the perspective
      * @param app
@@ -94,7 +97,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
       */
      @Override
      public void stateChanged(ChangeEvent e) {
-         this.save.setEnabled(!getApp().getModel().messagesUnsent());
+         boolean messagesUnsent = getApp().getModel().messagesUnsent();
+         this.save.setEnabled(!messagesUnsent);
+         this.send.setEnabled(messagesUnsent);
      }
     
     /**
@@ -116,6 +121,15 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     private boolean isOwnEntry(Component entry) {
         return Arrays.asList(participants.getComponents()).indexOf(entry) == getApp().getModel().ownId;
     }
+    
+    /**
+     * Returns whether there are unsent message for the entry
+     * @param entry
+     * @return
+     */
+   private boolean unsentMessages(Component entry) {
+       return getApp().getModel().getUnsentMessageFor(Arrays.asList(participants.getComponents()).indexOf(entry)) != null;                     
+   }
      
     /**
      * Save action
@@ -126,44 +140,63 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     
      /**
      * Sends an e-mail to the participant entry
-     * @param entry
+     * @param list
      */
-     protected void actionSendMail(EntryParticipantSendMail entry) {
+    protected void actionSendMail(ArrayList<EntryParticipantSendMail> list) {
         try {
-            URIBuilder emailURIBuilder = new URIBuilder().setScheme("mailto");
-            emailURIBuilder.setPath(entry.getRightValue()); // E-mail address
-            emailURIBuilder.addParameter("subject",
-                                         String.format(Resources.getString("PerspectiveSend.mailSubject"),
-                                                       getApp().getModel().name,
-                                                       getApp().getModel().state == AppState.SENDING_RESULT ? 2 : 1));
-            String formatedExchangeString = Resources.exchangeStringStartTag +
-                                            getExchangeString(entry) +
-                                            Resources.exchangeStringEndTag;           
-            formatedExchangeString = formatedExchangeString.replaceAll("(.{" + Resources.exchangeStringNewLineCountChar +
-                                              "})",
-                                              "$1\n");
-            emailURIBuilder.addParameter("body",
-                                         String.format(Resources.getString("PerspectiveSend.mailBody"),
-                                                       entry.getLeftValue(), // Name of participant
-                                                       getApp().getModel().state == AppState.SENDING_RESULT ? 5 : 3,//Step number
-                                                       formatedExchangeString,
-                                                       getApp().getModel().participants[getApp().getModel().ownId].name));
-            Desktop.getDesktop()
-                   .mail(new URI(emailURIBuilder.toString()
-                                                .replace("+", "%20")
-                                                .replace(":/", ":")));
-
-            //Send a dialog to confirm mail sending
-            if (JOptionPane.showConfirmDialog(this.getPanel(),
-                                              String.format(Resources.getString("PerspectiveSend.confirmSendMail"), entry.getRightValue()),
-                                              "", JOptionPane.OK_CANCEL_OPTION) == 0) {
-                int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
-                getApp().actionMarkMessageSent(index);
-                this.stateChanged(new ChangeEvent(this));
+            for (EntryParticipantSendMail entry : list) {
+                URIBuilder emailURIBuilder = new URIBuilder().setScheme("mailto");
+                emailURIBuilder.setPath(entry.getRightValue()); // E-mail
+                                                                // address
+                emailURIBuilder.addParameter("subject",
+                                             String.format(Resources.getString("PerspectiveSend.mailSubject"),
+                                                           getApp().getModel().name,
+                                                           getApp().getModel().state == AppState.SENDING_RESULT
+                                                                   ? 2
+                                                                   : 1));
+                String formatedExchangeString = Resources.exchangeStringStartTag +
+                                                getExchangeString(entry) +
+                                                Resources.exchangeStringEndTag;
+                formatedExchangeString = formatedExchangeString.replaceAll("(.{" +
+                                                                           Resources.exchangeStringNewLineCountChar +
+                                                                           "})",
+                                                                           "$1\n");
+                emailURIBuilder.addParameter("body",
+                                             String.format(Resources.getString("PerspectiveSend.mailBody"),
+                                                           entry.getLeftValue(), // Name
+                                                                                 // of
+                                                                                 // participant
+                                                           getApp().getModel().state == AppState.SENDING_RESULT
+                                                                   ? 5
+                                                                   : 3, // Step
+                                                                        // number
+                                                           formatedExchangeString,
+                                                           getApp().getModel().participants[getApp().getModel().ownId].name));
+                Desktop.getDesktop()
+                       .mail(new URI(emailURIBuilder.toString()
+                                                    .replace("+", "%20")
+                                                    .replace(":/", ":")));
             }
+
+            // Send a dialog to confirm mail sending          
+            if (JOptionPane.showConfirmDialog(this.getPanel(),
+                                              String.format(Resources.getString("PerspectiveSend.confirmSendMailGeneric")),
+                                              "",
+                                              JOptionPane.OK_CANCEL_OPTION) == 0) {
+                for (EntryParticipantSendMail entry : list) {
+                    int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
+                    getApp().actionMarkMessageSent(index);
+                    entry.disableButton();
+                }
+            }
+
         } catch (IOException | URISyntaxException e) {
-            JOptionPane.showMessageDialog(this.getPanel(), Resources.getString("PerspectiveSend.mailToError") + e.getMessage());
-        }    
+            JOptionPane.showMessageDialog(this.getPanel(),
+                                          Resources.getString("PerspectiveSend.mailToError") +
+                                                           e.getMessage());
+        }
+        this.stateChanged(new ChangeEvent(this));
+
     }
 
     /**
@@ -203,15 +236,17 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         // send all e-mails button and save button
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
-        JButton send = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButton"));
+        send = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButton"));
         send.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
+                ArrayList<EntryParticipantSendMail> list = new ArrayList<>();
                 for (Component c : participants.getComponents()) {
-                    if (!isOwnEntry(c)) {
-                        actionSendMail((EntryParticipantSendMail) c);
+                    if (!isOwnEntry(c) && unsentMessages(c) ) {
+                        list.add((EntryParticipantSendMail)  c);                        
                     }
                 }
+                actionSendMail(list);
             }
         });
         buttonsPane.add(send, 0, 0);
@@ -240,7 +275,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             entry.setButtonListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    actionSendMail(entry);
+                    ArrayList<EntryParticipantSendMail> list = new ArrayList<>();
+                    list.add(entry);
+                    actionSendMail(list);
                 }
             });
             i++;
