@@ -143,7 +143,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             emailURIBuilder.addParameter("body",
                                          String.format(Resources.getString("PerspectiveSend.mailBody"),
                                                        entry.getLeftValue(), // Name of participant
-                                                       formatedExchangeString));
+                                                       formatedExchangeString,
+                                                       getApp().getModel().participants[getApp().getModel().ownId].name));
             Desktop.getDesktop()
                    .mail(new URI(emailURIBuilder.toString()
                                                 .replace("+", "%20")
