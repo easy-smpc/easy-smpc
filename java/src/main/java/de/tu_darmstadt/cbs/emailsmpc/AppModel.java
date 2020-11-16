@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
@@ -546,31 +546,39 @@ public class AppModel implements Serializable, Cloneable {
 
     @Override
     public Object clone() {
-      AppModel newModel = null;
-      try {
-        newModel = (AppModel) super.clone();
-      } catch (CloneNotSupportedException e) {
-        newModel = new AppModel();
-      }
-      newModel.name = this.name;
-      newModel.numParticipants = this.numParticipants;
-      newModel.ownId = this.ownId;
-      newModel.studyUID = this.studyUID;
-      newModel.state = this.state;
-      newModel.bins = new Bin[this.bins.length];
-      newModel.participants = new Participant[this.participants.length];
-      newModel.unsentMessages = new Message[this.unsentMessages.length];
-      newModel.filename = this.filename;
-      for (int i = 0; i < newModel.bins.length; i++) {
-        newModel.bins[i] = (Bin) this.bins[i].clone();
-      }
-      for (int i = 0; i < newModel.participants.length; i++) {
-        newModel.participants[i] = (Participant) this.participants[i].clone();
-      }
-      for (int i = 0; i < newModel.unsentMessages.length; i++) {
-        if(this.unsentMessages[i] != null)
-          newModel.unsentMessages[i] = (Message) this.unsentMessages[i].clone();
-      }
+        AppModel newModel = null;
+        try {
+            newModel = (AppModel) super.clone();
+        } catch (CloneNotSupportedException e) {
+            newModel = new AppModel();
+        }
+        newModel.name = this.name;
+        newModel.numParticipants = this.numParticipants;
+        newModel.ownId = this.ownId;
+        newModel.studyUID = this.studyUID;
+        newModel.state = this.state;
+        newModel.filename = this.filename;     
+        if (this.bins != null) {
+            newModel.bins = new Bin[this.bins.length];
+            for (int i = 0; i < newModel.bins.length; i++) {
+                newModel.bins[i] = (Bin) this.bins[i].clone();
+            }
+        }
+      
+        if (this.participants != null) {
+            newModel.participants = new Participant[this.participants.length];
+            for (int i = 0; i < newModel.participants.length; i++) {
+                newModel.participants[i] = (Participant) this.participants[i].clone();
+            }
+        }
+      
+        if (this.unsentMessages != null) {
+            newModel.unsentMessages = new Message[this.unsentMessages.length];
+            for (int i = 0; i < newModel.unsentMessages.length; i++) {
+                if (this.unsentMessages[i] != null) newModel.unsentMessages[i] = (Message) this.unsentMessages[i].clone();
+            }
+        }
+     
       return newModel;
     }
 }
