@@ -316,7 +316,7 @@ public class AppModel implements Serializable, Cloneable {
 
     public void setShareFromMessage(Message msg)
             throws IllegalStateException, IllegalArgumentException, NoSuchAlgorithmException, ClassNotFoundException, IOException {
-        Participant sender = participants[msg.senderID];
+        Participant sender = getParticipantFromId(msg.senderID);
         if (!(state == AppState.RECIEVING_SHARE || state == AppState.RECIEVING_RESULT))
             throw new IllegalStateException("Setting a share from a Message is not allowed at state " + state);
         if (Message.validateData(getParticipantId(sender), participants[ownId], msg.data)) {
@@ -343,8 +343,9 @@ public class AppModel implements Serializable, Cloneable {
      * @param message
      * @return
      */
-    public boolean isMessageShareResultValid(Message msg, Participant sender) {
+    public boolean isMessageShareResultValid(Message msg) {
         try {
+            Participant sender = getParticipantFromId(msg.senderID);
             Message.validateData(getParticipantId(sender), participants[ownId], msg.data);
             switch (state){
             case RECIEVING_SHARE:
