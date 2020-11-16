@@ -59,5 +59,12 @@ public class EntryParticipantSendMail extends ComponentEntryOneButton {
     @Override
     protected String getText() {
         return Resources.getString("PerspectiveSend.sendEmailButton");
-    }  
+    }
+    
+    /**
+     * Disables button
+     */
+    public void disableButton() {
+        this.button.setEnabled(false);
+    }
 }

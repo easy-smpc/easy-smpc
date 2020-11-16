@@ -35,7 +35,7 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
     private static final long serialVersionUID = -2630607826943052651L;
 
     /** Remove */
-    private JButton           button;
+    protected JButton           button;
     
     /** Change listener */
     private ActionListener    listener;
@@ -123,11 +123,4 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
      */
     protected abstract String getText();
     
-    
-    /**
-     * Disables button
-     */
-    public void disableButton() {
-        this.button.setEnabled(false);
-    }
 }
