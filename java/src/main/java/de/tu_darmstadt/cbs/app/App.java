@@ -329,10 +329,10 @@ public class App extends JFrame {
      * @param text
      * @return
      */
-    private boolean isMessageShareResultValid(String text, int participantId) {
+    private boolean isMessageShareResultValid(String text) {
         if (model == null || text.trim().isEmpty()) return false;
         try {
-            return model.isMessageShareResultValid(Message.deserializeMessage(text), model.getParticipantFromId(participantId));
+            return model.isMessageShareResultValid(Message.deserializeMessage(text));
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -619,20 +619,19 @@ public class App extends JFrame {
 
     /**
      * Action to receive a message
-     * @param index
      * @return
      */
-    protected boolean actionReceiveMessage(int index) {       
+    protected boolean actionReceiveMessage() {       
        //try to get string from clip board
        String clipboardText = stripExchangeMessage(getTextFromClipBoard());
-       if (!isMessageShareResultValid(clipboardText, index)) {
+       if (!isMessageShareResultValid(clipboardText)) {
            clipboardText = "";
        } 
         // Ask for message
         String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {                
-                return isMessageShareResultValid(stripExchangeMessage(text), index);
+                return isMessageShareResultValid(stripExchangeMessage(text));
             }
         }, this).showDialog();
 
@@ -641,7 +640,7 @@ public class App extends JFrame {
             message = stripExchangeMessage(message);
             AppModel snapshot = this.beginTransaction();
             try {
-                this.model.setShareFromMessage(Message.deserializeMessage(message), model.getParticipantFromId(index));
+                this.model.setShareFromMessage(Message.deserializeMessage(message));
                 return true;
             } catch (IOException | IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException e) {
                 this.rollback(snapshot);

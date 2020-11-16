@@ -14,9 +14,9 @@
 package de.tu_darmstadt.cbs.app;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -29,9 +29,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
-import de.tu_darmstadt.cbs.app.components.EntryParticipantEnterExchangeString;
+import de.tu_darmstadt.cbs.app.components.EntryParticipant;
 import de.tu_darmstadt.cbs.app.resources.Resources;
-import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
@@ -81,9 +80,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        EntryParticipantEnterExchangeString entry = (EntryParticipantEnterExchangeString) e.getSource();
-        int index = Arrays.asList(participants.getComponents()).indexOf(entry);
-        if (getApp().actionReceiveMessage(index)) {
+        if (getApp().actionReceiveMessage()) {
             this.stateChanged(new ChangeEvent(this));
         }
     }
@@ -146,8 +143,15 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         JScrollPane pane = new JScrollPane(participants);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         panel.add(pane, BorderLayout.CENTER);
-           
-        // save button
+        
+        
+        // Receive button and save button
+        JPanel buttonsPane = new JPanel();
+        buttonsPane.setLayout(new GridLayout(2, 1));
+        JButton receive = new JButton(Resources.getString("PerspectiveReceive.receive"));
+        receive.addActionListener(this);       
+        buttonsPane.add(receive, 0, 0);
+        
         save = new JButton(Resources.getString("PerspectiveReceive.save"));
         save.addActionListener(new ActionListener() {
             @Override
@@ -155,7 +159,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                 actionSave();
             }
         });
-        panel.add(save, BorderLayout.SOUTH);
+        buttonsPane.add(save, 0, 1);
+        panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
     /**
@@ -165,15 +170,11 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     protected void initialize() {
         this.title.setText(getApp().getModel().name);
         this.participants.removeAll();
-        int i = 0; 
         for (Participant currentParticipant : getApp().getModel().participants) {
-            
-            //Only set buttons when not the actual user and not for participant to initiator in first round
-            EntryParticipantEnterExchangeString entry = new EntryParticipantEnterExchangeString(currentParticipant.name, 
-                                                                        currentParticipant.emailAddress,
-                                                                        i != getApp().getModel().ownId && !( i == 0 && getApp().getModel().state == AppState.RECIEVING_SHARE));
-            entry.setButtonListener(this);
-            i++;
+
+            EntryParticipant entry = new EntryParticipant(currentParticipant.name,
+                                                          currentParticipant.emailAddress,
+                                                          false);
             participants.add(entry);
         }
         this.stateChanged(new ChangeEvent(this));
