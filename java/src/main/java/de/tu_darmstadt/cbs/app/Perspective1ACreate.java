@@ -91,8 +91,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         }
 
         for (Component entry : this.bins.getComponents()) {
-            if (((EntryBin) entry).getLeftValue().trim().isEmpty() &&
-                ((EntryBin) entry).getRightValue().trim().isEmpty()) {
+            if (((EntryBin) entry).getLeftValue().trim().isEmpty()) {
                 removeBin((EntryBin) entry);
             }
         }
