@@ -108,16 +108,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         return Message.serializeMessage(getApp().getModel().getUnsentMessageFor(id));
     }
     
-    /**
-     * Returns the round number of SMPC-prozess
-     * 
-     * @return
-     */
-    private Integer getRoundNumber() {
- 
-        return getApp().getModel().state == AppState.SENDING_RESULT ? 2 : 1;
-    }
-    
      /**
       * Returns whether this is the own entry
       * @param entry
@@ -145,7 +135,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             emailURIBuilder.addParameter("subject",
                                          String.format(Resources.getString("PerspectiveSend.mailSubject"),
                                                        getApp().getModel().name,
-                                                       getRoundNumber()));
+                                                       getApp().getModel().state == AppState.SENDING_RESULT ? 2 : 1));
             String formatedExchangeString = Resources.exchangeStringStartTag +
                                             getExchangeString(entry) +
                                             Resources.exchangeStringEndTag;           
@@ -155,7 +145,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             emailURIBuilder.addParameter("body",
                                          String.format(Resources.getString("PerspectiveSend.mailBody"),
                                                        entry.getLeftValue(), // Name of participant
-                                                       getRoundNumber() + 2,//Step number
+                                                       getApp().getModel().state == AppState.SENDING_RESULT ? 5 : 3,//Step number
                                                        formatedExchangeString,
                                                        getApp().getModel().participants[getApp().getModel().ownId].name));
             Desktop.getDesktop()
