@@ -2,6 +2,7 @@ package de.tu_darmstadt.cbs.emailsmpc;
 
 import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
@@ -15,8 +16,10 @@ import org.junit.Test;
 public class AppModelTest {
     /**
      * Rigorous Test :-)
+     * @throws IOException 
+     * @throws IllegalStateException 
      */
-    static private AppModel getInitializedModel(int numParticipants, int numBins) throws StateRollbackException {
+    static private AppModel getInitializedModel(int numParticipants, int numBins) throws IllegalStateException, IOException {
         AppModel testmodel = new AppModel();
         Participant[] part = new Participant[numParticipants];
         Bin[] bins = new Bin[numBins];
@@ -33,7 +36,7 @@ public class AppModelTest {
         return testmodel;
     }
 
-    static private AppModel getInitializedModel(int numParticipants, int numBins, BigInteger[] array) throws StateRollbackException {
+    static private AppModel getInitializedModel(int numParticipants, int numBins, BigInteger[] array) throws IllegalStateException, IOException {
         AppModel testmodel = new AppModel();
         Participant[] part = new Participant[numParticipants];
         Bin[] bins = new Bin[numBins];
@@ -50,7 +53,7 @@ public class AppModelTest {
         return testmodel;
     }
     @Test
-    public void CloneTest() throws StateRollbackException{
+    public void CloneTest() throws IllegalStateException, IOException {
         BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
                 BigInteger.valueOf(4) };
         AppModel model0 = AppModelTest.getInitializedModel(3, 4, secrets0);
@@ -61,13 +64,13 @@ public class AppModelTest {
     }
 
     @Test
-    public void AddingBins() throws StateRollbackException {
+    public void AddingBins() throws IllegalStateException, IOException {
         AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
         assertTrue(testmodel.bins.length == 4);
     }
 
     @Test
-    public void AddingParticipants() throws StateRollbackException {
+    public void AddingParticipants() throws IllegalStateException, IOException {
         AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
         assertTrue(testmodel.participants.length == 3);
     }
@@ -82,7 +85,7 @@ public class AppModelTest {
     }
 
     @Test
-    public void SaveLoad() throws StateRollbackException, ClassNotFoundException, IOException {
+    public void SaveLoad() throws ClassNotFoundException, IOException {
         AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
             File fn = new File("testing.dat");
             testmodel.filename = fn;
@@ -92,7 +95,7 @@ public class AppModelTest {
     }
 
     @Test
-    public void TestWithThree() throws StateRollbackException, ClassNotFoundException {
+    public void TestWithThree() throws ClassNotFoundException, IllegalStateException, IOException, IllegalArgumentException, NoSuchAlgorithmException {
         BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
                 BigInteger.valueOf(4) };
         AppModel model0 = AppModelTest.getInitializedModel(3, 4, secrets0);

@@ -24,6 +24,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +51,6 @@ import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.InitialMessage;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
-import de.tu_darmstadt.cbs.emailsmpc.StateRollbackException;
 
 /**
  * Main UI of the app
@@ -114,6 +114,7 @@ public class App extends JFrame {
         this.setIconImage(Resources.getIcon());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);// Close only if user clicks yes in dialog
         
         // -----------------
         // Progress
@@ -133,7 +134,7 @@ public class App extends JFrame {
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 actionExit();
             }
-        });
+        });     
 
         // -----------------
         // Menu
@@ -239,6 +240,14 @@ public class App extends JFrame {
     }
     
     /**
+     * Starts a transaction
+     * @return
+     */
+    private AppModel beginTransaction() {
+        return this.model != null ? (AppModel)this.model.clone() : null;
+    }
+
+    /**
      * Opens a file chooser
      * @param load 
      * @return
@@ -284,6 +293,23 @@ public class App extends JFrame {
     }
 
     /**
+     * Returns text from clip board if valid
+     * @return clip board text
+     */
+    private String getTextFromClipBoard() {
+        String text = "";
+        if (Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            try {
+                text = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);              
+            } catch (HeadlessException | UnsupportedFlavorException | IOException e) {
+                // No error message  necessary
+                e.printStackTrace();
+            }
+        };
+        return text;
+    }
+
+    /**
      * Check whether initial participation message is valid
      * @param text
      * @return
@@ -297,7 +323,7 @@ public class App extends JFrame {
             return false;
         }
     }
-
+    
     /**
      * Check whether message is valid
      * @param text
@@ -310,6 +336,16 @@ public class App extends JFrame {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+    
+    /**
+     * Rolls back a transaction
+     * @param snapshot
+     */
+    private void rollback(AppModel snapshot) {
+        if (this.model != null && snapshot != null) {
+            this.model.update(snapshot);
         }
     }
 
@@ -327,7 +363,7 @@ public class App extends JFrame {
             index++;
         }
     }
-    
+
     /**
      * Shows the perspective with the given index
      * 
@@ -336,7 +372,7 @@ public class App extends JFrame {
     private void showPerspective(int index) {
         showPerspective(perspectives.get(index));
     }
-    
+
     /**
      * Shows a certain perspective
      * 
@@ -348,6 +384,24 @@ public class App extends JFrame {
         cl.show(cards, perspective.getTitle());
         progress.setProgress(perspective.getProgress());
         progress.repaint();
+    }
+    
+    /**
+     * Convenience method to remove exchange message tags
+     * @param text
+     * @return
+     */
+    private String stripExchangeMessage(String text) {
+        text = text.replaceAll("\n", "").trim();
+        if (text.contains(Resources.exchangeStringStartTag)) {
+            text = text.substring(text.indexOf(Resources.exchangeStringStartTag) +
+                                  Resources.exchangeStringStartTag.length(),
+                                  text.length());
+        }
+        if (text.contains(Resources.exchangeStringEndTag)) {
+            text = text.substring(0, text.indexOf(Resources.exchangeStringEndTag));
+        }
+        return text;
     }
 
     /**
@@ -361,8 +415,15 @@ public class App extends JFrame {
      * Create action
      */
     protected void actionCreate() {
-        this.model = new AppModel();
-        this.model.toStarting();
+        AppModel snapshot = this.beginTransaction();
+        try {
+            this.model = new AppModel();
+            this.model.toStarting();
+        } catch (IllegalStateException | IOException e) {
+            this.rollback(snapshot);
+            JOptionPane.showMessageDialog(this, Resources.getString("App.15") + e.getMessage());
+            return;
+        }
         this.showPerspective(Perspective1ACreate.class);
     }
 
@@ -374,15 +435,18 @@ public class App extends JFrame {
     protected void actionCreateDone(String title, Participant[] participants, Bin[] bins) {
 
         // Pass over bins and participants
-      try {
-        model.toInitialSending(title, participants, bins);
-        if (actionSave()) {
-            this.showPerspective(Perspective2Send.class);
+        AppModel snapshot = this.beginTransaction();
+        try {
+            model.toInitialSending(title, participants, bins);
+            if (actionSave()) {
+                this.showPerspective(Perspective2Send.class);
+            } else {
+                this.rollback(snapshot);
+            }
+        } catch (IllegalStateException | IOException e) {
+            this.rollback(snapshot);
+            JOptionPane.showMessageDialog(this, Resources.getString("App.15") + e.getMessage());
         }
-      } catch (StateRollbackException e) {
-      //TODO Handle State Rollback
-      System.err.println("Congratulations, you found a novel error");
-      }
     }
 
     /**
@@ -401,30 +465,34 @@ public class App extends JFrame {
      * Action performed when first receiving done
      */
     protected void actionFirstReceivingDone() {
+        AppModel snapshot = this.beginTransaction();
         try {
             this.model.toSendingResult();
             this.model.saveProgram();
-            this.showPerspective(Perspective4Send.class);
         } catch (Exception e) {
-            // TODO Handle StateRollbackException
+            this.rollback(snapshot);
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError") + e.getMessage());
+            return;
         }
+        this.showPerspective(Perspective4Send.class);
     }
 
     /**
      * First sending done
      */
     protected void actionFirstSendingDone() {
-        this.model.toRecievingShares();
+        AppModel snapshot = this.beginTransaction();
         try {
+            this.model.toRecievingShares();
             this.model.saveProgram();
-            this.showPerspective(Perspective3Receive.class);
-        } catch (StateRollbackException e) {
-            // TODO Handle StateRollbackException
+        } catch (IllegalStateException | IOException e) {
+            this.rollback(snapshot);
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
+            return;
         }
+        this.showPerspective(Perspective3Receive.class);
     }
-
+    
     /**
      * Load action
      */
@@ -493,7 +561,7 @@ public class App extends JFrame {
     protected void actionMarkMessageSent(int index) {
         this.model.markMessageSent(index);
     }
-    
+
     /**
      * Participate action
      */
@@ -535,15 +603,18 @@ public class App extends JFrame {
     protected void actionParticipateDone(BigInteger[] secret) {
 
         // Pass over bins and participants
-      try {
-        model.toSendingShares(secret);
-        if (actionSave()) {
-            this.showPerspective(Perspective2Send.class);
+        AppModel snapshot = this.beginTransaction();
+        try {
+            model.toSendingShares(secret);
+            if (actionSave()) {
+                this.showPerspective(Perspective2Send.class);
+            } else {
+                this.rollback(snapshot);
+            }
+        } catch (IOException | IllegalStateException | IllegalArgumentException e) {
+            this.rollback(snapshot);
+            JOptionPane.showMessageDialog(this, Resources.getString("App.15") + e.getMessage());
         }
-      } catch (StateRollbackException e) {
-        // TODO Handle StateRollbackException
-        System.err.println("Oops, this state rollback needs to be handled properly");
-      }
     }
 
     /**
@@ -568,34 +639,18 @@ public class App extends JFrame {
         // If message selected
         if (message != null) {
             message = stripExchangeMessage(message);
+            AppModel snapshot = this.beginTransaction();
             try {
                 this.model.setShareFromMessage(Message.deserializeMessage(message), model.getParticipantFromId(index));
                 return true;
-            } catch (IllegalStateException | IllegalArgumentException | ClassNotFoundException | IOException | StateRollbackException e) {
-              // TODO Handle State Rollback
+            } catch (IOException | IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException e) {
+                this.rollback(snapshot);
                 return false;
             }
         }
         
         // Done
         return false;
-    }
-
-    /**
-     * Returns text from clip board if valid
-     * @return clip board text
-     */
-    private String getTextFromClipBoard() {
-        String text = "";
-        if (Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).isDataFlavorSupported(DataFlavor.stringFlavor)) {
-            try {
-                text = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);              
-            } catch (HeadlessException | UnsupportedFlavorException | IOException e) {
-                // No error message  necessary
-                e.printStackTrace();
-            }
-        };
-        return text;
     }
 
     /**
@@ -612,44 +667,48 @@ public class App extends JFrame {
         }
 
         // Try to save file
+        AppModel snapshot = this.beginTransaction();
         try {
             model.filename = file;
             model.saveProgram();
             return true;
-        } catch (StateRollbackException e) {
-          //TODO Handle State Rollback
+        } catch (IOException e) {
+            this.rollback(snapshot);
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.saveError") + e.getMessage()); //$NON-NLS-1$
-            model.filename = null;
             return false;
-        }
-    }
-
-    /**
-     * Action performed when second receiving done
-     */
-    protected void actionSecondReceivingDone() {
-        this.model.toFinished();
-        try {
-            this.model.saveProgram();
-            this.showPerspective(Perspective6Result.class);
-        } catch (Exception e) {
-          //TODO Handle State Rollback
-            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError") + e.getMessage());
         }
     }
     
     /**
+     * Action performed when second receiving done
+     */
+    protected void actionSecondReceivingDone() {
+        AppModel snapshot = this.beginTransaction();
+        try {
+            this.model.toFinished();
+            this.model.saveProgram();
+        } catch (Exception e) {
+            this.rollback(snapshot);
+            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError") + e.getMessage());
+            return;
+        }
+        this.showPerspective(Perspective6Result.class);
+    }
+
+    /**
      * Second sending done
      */
     protected void actionSecondSendingDone() {
-        this.model.toRecievingResult();
+        AppModel snapshot = this.beginTransaction();
         try {
+            this.model.toRecievingResult();
             this.model.saveProgram();
-            this.showPerspective(Perspective5Receive.class);
-        } catch (StateRollbackException e) {
-          //TODO Handle Rollback
+        } catch (IOException e) {
+            this.rollback(snapshot);
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveSend.saveError") + e.getMessage());
+            return;
         }
+        this.showPerspective(Perspective5Receive.class);
     }
 
     /**
@@ -666,7 +725,7 @@ public class App extends JFrame {
     protected AppModel getModel() {
         return this.model;
     }
-
+    
     /**
      * Returns a perspective
      * 
@@ -682,23 +741,5 @@ public class App extends JFrame {
             }
         }
         return returnPerspective;
-    }
-    
-    /**
-     * Convenience method to remove exchange message tags
-     * @param text
-     * @return
-     */
-    private String stripExchangeMessage(String text) {
-        text = text.replaceAll("\n", "").trim();
-        if (text.contains(Resources.exchangeStringStartTag)) {
-            text = text.substring(text.indexOf(Resources.exchangeStringStartTag) +
-                                  Resources.exchangeStringStartTag.length(),
-                                  text.length());
-        }
-        if (text.contains(Resources.exchangeStringEndTag)) {
-            text = text.substring(0, text.indexOf(Resources.exchangeStringEndTag));
-        }
-        return text;
     }
 }
