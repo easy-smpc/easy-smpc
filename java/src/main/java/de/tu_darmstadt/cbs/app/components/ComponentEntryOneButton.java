@@ -40,17 +40,20 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
     /** Change listener */
     private ActionListener    listener;
 
+
     /**
      * Creates a new instance
-     * @param name
-     * @param email
-     * @param buttonEnabled
+     * @param leftString
+     * @param leftValue
+     * @param rightString
+     * @param rightValue
+     * @param additionalControlsEnabled
      */
     public ComponentEntryOneButton(String leftString,
                                    String leftValue,
                                    String rightString,
                                    String rightValue,
-                                   boolean buttonEnabled) {
+                                   boolean additionalControlsEnabled) {
         super(leftString, //$NON-NLS-1$
               leftValue,
               false,
@@ -70,7 +73,8 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
                       return Participant.validEmail(text);
                   }
                 },
-              buttonEnabled);        
+              additionalControlsEnabled
+              );        
     }
     
 

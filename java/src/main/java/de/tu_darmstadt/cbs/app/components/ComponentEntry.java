@@ -52,7 +52,7 @@ public abstract class ComponentEntry extends JPanel {
      * @param rightValue
      * @param rightEnabled
      * @param rightValidator
-     * @param buttonsEnabled
+     * @param additionalControlsEnabled
      */
     public ComponentEntry(String leftString,
                          String leftValue,
@@ -62,7 +62,7 @@ public abstract class ComponentEntry extends JPanel {
                          String rightValue,
                          boolean rightEnabled, 
                          ComponentTextFieldValidator rightValidator,
-                         boolean buttonsEnabled) {
+                         boolean additionalControlsEnabled) {
         
         // Layout
         this.setBorder(new EmptyBorder(Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP));
@@ -117,7 +117,7 @@ public abstract class ComponentEntry extends JPanel {
         if (additionalControls != null) {
             right.add(additionalControls, BorderLayout.EAST);
             for (Component c : additionalControls.getComponents()) {
-                c.setEnabled(buttonsEnabled);
+                c.setEnabled(additionalControlsEnabled);
             }
         }
         

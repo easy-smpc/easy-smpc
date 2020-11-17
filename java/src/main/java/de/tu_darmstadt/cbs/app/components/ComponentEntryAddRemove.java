@@ -53,6 +53,7 @@ public abstract class ComponentEntryAddRemove extends ComponentEntry {
      * @param rightValue
      * @param rightEnabled
      * @param rightValidator
+     * @param additionalControlsEnabled
      */
     public ComponentEntryAddRemove(String leftString,
                                    String leftValue,
@@ -61,8 +62,8 @@ public abstract class ComponentEntryAddRemove extends ComponentEntry {
                                    String rightString,
                                    String rightValue,
                                    boolean rightEnabled,
-                                   ComponentTextFieldValidator rightValidator,
-                                   boolean buttonsEnabled) {
+                                   ComponentTextFieldValidator rightValidator,                             
+                                   boolean additionalControlsEnabled) {
         super(leftString,
               leftValue,
               leftEnabled,
@@ -70,8 +71,8 @@ public abstract class ComponentEntryAddRemove extends ComponentEntry {
               rightString,
               rightValue,
               rightEnabled,
-              rightValidator,
-              buttonsEnabled);
+              rightValidator,              
+              additionalControlsEnabled);
     }
 
     /**

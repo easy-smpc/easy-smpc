@@ -32,8 +32,9 @@ public class EntryParticipant extends ComponentEntryAddRemove {
      * @param name
      * @param email
      * @param enabled
+     * @param additionalControlsEnabled
      */
-    public EntryParticipant(String name, String email, boolean enabled) {
+    public EntryParticipant(String name, String email, boolean enabled, boolean additionalControlsEnabled) {
         super(Resources.getString("Participant.0"), //$NON-NLS-1$
               name,
               enabled,
@@ -53,6 +54,6 @@ public class EntryParticipant extends ComponentEntryAddRemove {
                       return Participant.validEmail(text);
                   }
                 },
-              enabled);
+              additionalControlsEnabled);
     }
 }

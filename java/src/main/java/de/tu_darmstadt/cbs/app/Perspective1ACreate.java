@@ -172,7 +172,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         index = index == -1 ? 0 : index + 1;
         
         // Create and add entry
-        EntryParticipant entry = new EntryParticipant("", "", enabled);
+        EntryParticipant entry = new EntryParticipant("", "", enabled, enabled);
         entry.setChangeListener(this);
         entry.setAddListener(new ActionListener() {
            @Override

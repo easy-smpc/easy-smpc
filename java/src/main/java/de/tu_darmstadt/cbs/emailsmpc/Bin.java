@@ -1,9 +1,11 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
-import de.tu_darmstadt.cbs.secretshare.*;
-import java.math.BigInteger;
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.Arrays;
+
+import de.tu_darmstadt.cbs.secretshare.ArithmeticShare;
+import de.tu_darmstadt.cbs.secretshare.ArithmeticSharing;
 
 public class Bin implements Serializable, Cloneable {
     public final String name;
@@ -121,6 +123,10 @@ public class Bin implements Serializable, Cloneable {
                 return false;
         }
         return true;
+    }
+    
+    public boolean isCompleteForParticipantId(int participantId) {
+        return inShares[participantId] != null ? true : false;
     }
 
     public BigInteger reconstructBin() throws IllegalStateException {

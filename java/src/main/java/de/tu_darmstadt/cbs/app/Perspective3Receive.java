@@ -14,6 +14,7 @@
 package de.tu_darmstadt.cbs.app;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,8 +30,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
-import de.tu_darmstadt.cbs.app.components.EntryParticipant;
+import de.tu_darmstadt.cbs.app.components.EntryParticipantCheckmark;
 import de.tu_darmstadt.cbs.app.resources.Resources;
+import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
@@ -90,9 +92,23 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     @Override
     public void stateChanged(ChangeEvent e) {
+        checkmarkParticipantEntries();
         this.save.setEnabled(this.areSharesComplete());
     }
     
+    /**
+     * Check participant entries visually if complete
+     */
+    private void checkmarkParticipantEntries() {
+        int i=0;
+        for (Component c : this.participants.getComponents()) {
+            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(i == getApp().getModel().ownId || //Always mark own id as "received"
+                                                                (getApp().getModel().state != AppState.RECIEVING_RESULT  &&  i == 0) || //Mark first entry in first round as received
+                                                                areSharesCompleteForParticipantId(i)); //Mark if share complete
+            i++;
+        }
+    }
+
     /**
      * Checks if all bins are complete
      * @return
@@ -100,6 +116,17 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     private boolean areSharesComplete() {
         for (Bin b : getApp().getModel().bins) {
             if (!b.isComplete()) return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Checks if all bins for a certain user id are complete
+     * @return
+     */
+    private boolean areSharesCompleteForParticipantId(int participantId) {
+        for (Bin b : getApp().getModel().bins) {
+            if (!b.isCompleteForParticipantId(participantId)) return false;
         }
         return true;
     }
@@ -171,10 +198,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         this.title.setText(getApp().getModel().name);
         this.participants.removeAll();
         for (Participant currentParticipant : getApp().getModel().participants) {
-
-            EntryParticipant entry = new EntryParticipant(currentParticipant.name,
-                                                          currentParticipant.emailAddress,
-                                                          false);
+            EntryParticipantCheckmark entry = new EntryParticipantCheckmark(currentParticipant.name,
+                                                          currentParticipant.emailAddress);
             participants.add(entry);
         }
         this.stateChanged(new ChangeEvent(this));

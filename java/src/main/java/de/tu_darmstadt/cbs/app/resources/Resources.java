@@ -145,6 +145,17 @@ public class Resources {
         InputStream stream = Resources.class.getResourceAsStream("icon.png");
         return ImageIO.read(stream);
     }
+    
+    /**
+     * Icon
+     * 
+     * @return
+     * @throws IOException
+     */
+    public static Image getCheckmark() throws IOException {
+        InputStream stream = Resources.class.getResourceAsStream("checkmark.png");
+        return ImageIO.read(stream);
+    }
 
     /**
      * Menu item

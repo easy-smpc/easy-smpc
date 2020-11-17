@@ -48,9 +48,12 @@ public class EntryBin extends ComponentEntryAddRemove {
      * @param name
      * @param leftEnabled
      * @param rightEnabled
-     * @param buttonsEnabled
+     * @param additionalControlsEnabled
      */
-    public EntryBin(String name, boolean leftEnabled, boolean rightEnabled, boolean buttonsEnabled) {
+    public EntryBin(String name,
+                    boolean leftEnabled,
+                    boolean rightEnabled,
+                    boolean additionalControlsEnabled) {
         super(Resources.getString("BinEntry.0"), //$NON-NLS-1$
               name,
               leftEnabled,
@@ -74,17 +77,15 @@ public class EntryBin extends ComponentEntryAddRemove {
                           return false;
                       }
                   }
-              },
-              buttonsEnabled);
+              },              
+              additionalControlsEnabled);
     }
     
     
     /**
      * Creates a new instance
      * @param name
-     * @param leftEnabled
-     * @param rightEnabled
-     * @param buttonsEnabled
+     * @param value
      */
     public EntryBin(String name, String value) {
         super(Resources.getString("BinEntry.0"), //$NON-NLS-1$

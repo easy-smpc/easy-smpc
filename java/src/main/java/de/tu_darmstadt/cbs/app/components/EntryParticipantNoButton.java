@@ -32,7 +32,7 @@ public class EntryParticipantNoButton extends EntryParticipant {
      * @param value
      */
     public EntryParticipantNoButton(String name, String value){
-        super(name, value, false);
+        super(name, value, false, false);
     }
 
     /**
