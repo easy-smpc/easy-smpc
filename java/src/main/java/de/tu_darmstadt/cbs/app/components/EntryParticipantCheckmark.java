@@ -53,7 +53,7 @@ public class EntryParticipantCheckmark extends EntryParticipant {
     protected JPanel createAdditionalControls() {
         JPanel panel = new JPanel();
         try {
-            Image imageScaled = Resources.getCheckmark().getScaledInstance(Resources.SIZE_CHECKMARK_X, Resources.SIZE_CHECKMARK_Y,  java.awt.Image.SCALE_SMOOTH);
+            Image imageScaled = Resources.getCheckmark();
             imageLabel = new JLabel();
             imageLabel.setIcon(new ImageIcon(imageScaled));
             panel.add(imageLabel, BorderLayout.EAST);

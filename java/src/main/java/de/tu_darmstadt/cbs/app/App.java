@@ -293,6 +293,22 @@ public class App extends JFrame {
     }
 
     /**
+     * Convenience method to remove exchange message tags
+     * @param text
+     * @return
+     */
+    private String getStrippedExchangeMessage(String text) {
+        text = text.replaceAll("\n", "").trim();
+        if (text.contains(Resources.MESSAGE_START_TAG)) {
+            text = text.substring(text.indexOf(Resources.MESSAGE_START_TAG) + Resources.MESSAGE_START_TAG.length(), text.length());
+        }
+        if (text.contains(Resources.MESSAGE_END_TAG)) {
+            text = text.substring(0, text.indexOf(Resources.MESSAGE_END_TAG));
+        }
+        return text;
+    }
+
+    /**
      * Returns text from clip board if valid
      * @return clip board text
      */
@@ -302,13 +318,12 @@ public class App extends JFrame {
             try {
                 text = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);              
             } catch (HeadlessException | UnsupportedFlavorException | IOException e) {
-                // No error message  necessary
-                e.printStackTrace();
+                // TODO: Logging
             }
         };
         return text;
     }
-
+    
     /**
      * Check whether initial participation message is valid
      * @param text
@@ -338,7 +353,7 @@ public class App extends JFrame {
             return false;
         }
     }
-    
+
     /**
      * Rolls back a transaction
      * @param snapshot
@@ -372,7 +387,7 @@ public class App extends JFrame {
     private void showPerspective(int index) {
         showPerspective(perspectives.get(index));
     }
-
+    
     /**
      * Shows a certain perspective
      * 
@@ -384,24 +399,6 @@ public class App extends JFrame {
         cl.show(cards, perspective.getTitle());
         progress.setProgress(perspective.getProgress());
         progress.repaint();
-    }
-    
-    /**
-     * Convenience method to remove exchange message tags
-     * @param text
-     * @return
-     */
-    private String stripExchangeMessage(String text) {
-        text = text.replaceAll("\n", "").trim();
-        if (text.contains(Resources.exchangeStringStartTag)) {
-            text = text.substring(text.indexOf(Resources.exchangeStringStartTag) +
-                                  Resources.exchangeStringStartTag.length(),
-                                  text.length());
-        }
-        if (text.contains(Resources.exchangeStringEndTag)) {
-            text = text.substring(0, text.indexOf(Resources.exchangeStringEndTag));
-        }
-        return text;
     }
 
     /**
@@ -567,7 +564,7 @@ public class App extends JFrame {
      */
     protected void actionParticipate() {
          //try to get string from clip board
-        String clipboardText = stripExchangeMessage(getTextFromClipBoard());
+        String clipboardText = getStrippedExchangeMessage(getTextFromClipBoard());
         if (!isInitialParticipationMessageValid(clipboardText)) {
             clipboardText = "";
         }
@@ -576,13 +573,13 @@ public class App extends JFrame {
         String exchangeString = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {
-                return isInitialParticipationMessageValid(stripExchangeMessage(text));
+                return isInitialParticipationMessageValid(getStrippedExchangeMessage(text));
             }
         }, this).showDialog();
         
         // If valid string provided
         if (exchangeString != null) {
-            exchangeString = stripExchangeMessage(exchangeString); 
+            exchangeString = getStrippedExchangeMessage(exchangeString); 
             // Initialize
             try {
                 String data = Message.deserializeMessage(exchangeString).data;
@@ -623,7 +620,7 @@ public class App extends JFrame {
      */
     protected boolean actionReceiveMessage() {       
        //try to get string from clip board
-       String clipboardText = stripExchangeMessage(getTextFromClipBoard());
+       String clipboardText = getStrippedExchangeMessage(getTextFromClipBoard());
        if (!isMessageShareResultValid(clipboardText)) {
            clipboardText = "";
        } 
@@ -631,13 +628,13 @@ public class App extends JFrame {
         String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {                
-                return isMessageShareResultValid(stripExchangeMessage(text));
+                return isMessageShareResultValid(getStrippedExchangeMessage(text));
             }
         }, this).showDialog();
 
         // If message selected
         if (message != null) {
-            message = stripExchangeMessage(message);
+            message = getStrippedExchangeMessage(message);
             AppModel snapshot = this.beginTransaction();
             try {
                 this.model.setShareFromMessage(Message.deserializeMessage(message));

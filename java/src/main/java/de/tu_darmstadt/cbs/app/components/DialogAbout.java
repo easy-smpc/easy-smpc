@@ -35,13 +35,6 @@ public class DialogAbout extends JDialog {
     /** SVID */
     private static final long serialVersionUID = -3124059494844509921L;
 
-
-    
-    // TODO add contact mail adress and github page
-    /** Contributors */
-    private static final String CONTRIBUTORS = "EasySMPC was created by Tobias Kussel, Fabian Prasser and Felix Wirth.\n" +
-            "Please contact X or visit github page Y in case of inquiries \n";
-    
     /**
      * Create a new instance
      * @param parent Component to set the location of JDialog relative to
@@ -55,10 +48,8 @@ public class DialogAbout extends JDialog {
 
         // Texts
         central.setLayout(new BorderLayout());
-        central.add(new JPanel().add(new ComponentTextAreaNoEntry(Resources.getLicenseText(), this)),
-                    BorderLayout.CENTER);
-        central.add(new JPanel().add(new ComponentTextAreaNoEntry(CONTRIBUTORS, this)),
-                    BorderLayout.SOUTH);
+        central.add(new JPanel().add(new ComponentTextAreaNoEntry(Resources.getLicenseText(), this)), BorderLayout.CENTER);
+        central.add(new JPanel().add(new ComponentTextAreaNoEntry(Resources.getString("About.Contributors"), this)), BorderLayout.SOUTH);
         this.getContentPane().add(central, BorderLayout.CENTER);
 
         // Buttons
@@ -70,7 +61,6 @@ public class DialogAbout extends JDialog {
         buttonOK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
                 DialogAbout.this.dispose();
             }
         });

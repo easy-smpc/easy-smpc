@@ -37,11 +37,17 @@ import javax.swing.border.Border;
  */
 public class Resources {
 
+    /** Bundle name */
+    private static final String         BUNDLE_NAME               = "de.tu_darmstadt.cbs.app.resources.messages"; //$NON-NLS-1$
+
+    /** Bundle */
+    private static final ResourceBundle RESOURCE_BUNDLE           = ResourceBundle.getBundle(BUNDLE_NAME);
+
     /** Invalid border */
     public static final Border          INVALID_BORDER            = BorderFactory.createLineBorder(new Color(255, 69, 0));
 
     /** Default border */
-    public static final Border          DEFAULT_BORDER            = UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border");
+    public static final Border          DEFAULT_BORDER            = UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border"); //$NON-NLS-1$
 
     /** Row gap */
     public static final int             ROW_GAP                   = 2;
@@ -51,43 +57,37 @@ public class Resources {
 
     /** Min y-size of a text area */
     public static final int             SIZE_TEXTAREA_Y           = 200;
-    
-    /** String indicating start of exchange string */
-    public static final String          exchangeStringStartTag              = "BEGIN_PAYLOAD:";
-    
-    /** String indicating end of exchange string */
-    public static final String          exchangeStringEndTag              = ":END_PAYLOAD";
-    
-    /** Char length for exchange before line break */
-    public static final String          exchangeStringNewLineCountChar              = "150";
-    
-    /** Bundle name */
-    private static final String         BUNDLE_NAME               = "de.tu_darmstadt.cbs.app.resources.messages"; //$NON-NLS-1$
 
-    /** Bundle */
-    private static final ResourceBundle RESOURCE_BUNDLE           = ResourceBundle.getBundle(BUNDLE_NAME);
+    /** String indicating start of exchange string */
+    public static final String          MESSAGE_START_TAG         = "BEGIN_PAYLOAD\n"; //$NON-NLS-1$
+
+    /** String indicating end of exchange string */
+    public static final String          MESSAGE_END_TAG           = "\nEND_PAYLOAD"; //$NON-NLS-1$
+
+    /** Char length for exchange before line break */
+    public static final int             MESSAGE_LINE_WIDTH        = 150;
 
     /** Preferred height for the progress container */
     public static final int             PROGRESS_PREFERRED_HEIGHT = 50;
 
     /** Ending for project files */
-    public static final String          FILE_ENDING               = "smpc";
-    
-    /** About dialog size x*/
-    public static final int SIZE_DIALOG_X = 500;
-    
-    /** About dialog size y*/
-    public static final int SIZE_DIALOG_Y = 300;
-    
+    public static final String          FILE_ENDING               = "smpc"; //$NON-NLS-1$
+
+    /** About dialog size x */
+    public static final int             SIZE_DIALOG_X             = 500;
+
+    /** About dialog size y */
+    public static final int             SIZE_DIALOG_Y             = 300;
+
     /** The charset used to read the license text */
-    private final static Charset        CHARSET         = StandardCharsets.UTF_8;
-    
-    /** Size of checkmark clipart x*/
-    public static final int SIZE_CHECKMARK_X = 15;
-    
-    /** Size of checkmark clipart y*/
-    public static final int SIZE_CHECKMARK_Y = 12;
-    
+    private final static Charset        CHARSET                   = StandardCharsets.UTF_8;
+
+    /** Size of checkmark clipart x */
+    public static final int             SIZE_CHECKMARK_X          = 15;
+
+    /** Size of checkmark clipart y */
+    public static final int             SIZE_CHECKMARK_Y          = 12;
+
     /**
      * No instantiation
      */
@@ -160,7 +160,7 @@ public class Resources {
      */
     public static Image getCheckmark() throws IOException {
         InputStream stream = Resources.class.getResourceAsStream("checkmark.png");
-        return ImageIO.read(stream);
+        return ImageIO.read(stream).getScaledInstance(Resources.SIZE_CHECKMARK_X, Resources.SIZE_CHECKMARK_Y,  java.awt.Image.SCALE_SMOOTH);
     }
 
     /**

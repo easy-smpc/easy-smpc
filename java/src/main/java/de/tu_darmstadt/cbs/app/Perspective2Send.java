@@ -55,15 +55,16 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class Perspective2Send extends Perspective implements ChangeListener {
 
     /** Panel for participants */
-    private JPanel                                 participants;
+    private JPanel             participants;
 
     /** Text field containing title of study */
-    private ComponentTextField                     title;
+    private ComponentTextField title;
 
     /** Save button */
-    private JButton                                save;
+    private JButton            save;
 
-    private JButton send;
+    /** Send button */
+    private JButton            send;
 
     /**
      * Creates the perspective
@@ -144,45 +145,34 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     protected void actionSendMail(ArrayList<EntryParticipantSendMail> list) {
         try {
+            
+            // For each entry
             for (EntryParticipantSendMail entry : list) {
-                URIBuilder emailURIBuilder = new URIBuilder().setScheme("mailto");
-                emailURIBuilder.setPath(entry.getRightValue()); // E-mail
-                                                                // address
-                emailURIBuilder.addParameter("subject",
-                                             String.format(Resources.getString("PerspectiveSend.mailSubject"),
-                                                           getApp().getModel().name,
-                                                           getApp().getModel().state == AppState.SENDING_RESULT
-                                                                   ? 2
-                                                                   : 1));
-                String formatedExchangeString = Resources.exchangeStringStartTag +
-                                                getExchangeString(entry) +
-                                                Resources.exchangeStringEndTag;
-                formatedExchangeString = formatedExchangeString.replaceAll("(.{" +
-                                                                           Resources.exchangeStringNewLineCountChar +
-                                                                           "})",
-                                                                           "$1\n");
-                emailURIBuilder.addParameter("body",
-                                             String.format(Resources.getString("PerspectiveSend.mailBody"),
-                                                           entry.getLeftValue(), // Name
-                                                                                 // of
-                                                                                 // participant
-                                                           getApp().getModel().state == AppState.SENDING_RESULT
-                                                                   ? 5
-                                                                   : 3, // Step
-                                                                        // number
-                                                           formatedExchangeString,
-                                                           getApp().getModel().participants[getApp().getModel().ownId].name));
-                Desktop.getDesktop()
-                       .mail(new URI(emailURIBuilder.toString()
-                                                    .replace("+", "%20")
-                                                    .replace(":/", ":")));
+                
+                // Prepare URI parts
+                String subject = String.format(Resources.getString("PerspectiveSend.mailSubject"),
+                                               getApp().getModel().name,
+                                               getApp().getModel().state == AppState.SENDING_RESULT ? 2 : 1);
+                String exchangeString = Resources.MESSAGE_START_TAG + getExchangeString(entry) + Resources.MESSAGE_END_TAG;
+                exchangeString = exchangeString.replaceAll("(.{" + Resources.MESSAGE_LINE_WIDTH + "})", "$1\n");
+                String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
+                                            entry.getLeftValue(), // Name of participant
+                                            getApp().getModel().state == AppState.SENDING_RESULT ? 5 : 3, // Step number
+                                            exchangeString,
+                                            getApp().getModel().participants[getApp().getModel().ownId].name);
+                
+                // Build URI
+                URIBuilder builder = new URIBuilder().setScheme("mailto");
+                builder.setPath(entry.getRightValue()) // E-mail address
+                       .addParameter("subject", subject)
+                       .addParameter("body", body);
+                
+                // Open email
+                Desktop.getDesktop().mail(new URI(builder.toString().replace("+", "%20").replace(":/", ":")));
             }
 
             // Send a dialog to confirm mail sending          
-            if (JOptionPane.showConfirmDialog(this.getPanel(),
-                                              String.format(Resources.getString("PerspectiveSend.confirmSendMailGeneric")),
-                                              "",
-                                              JOptionPane.OK_CANCEL_OPTION) == 0) {
+            if (JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendMailGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
                 for (EntryParticipantSendMail entry : list) {
                     int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
                     getApp().actionMarkMessageSent(index);
@@ -191,12 +181,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             }
 
         } catch (IOException | URISyntaxException e) {
-            JOptionPane.showMessageDialog(this.getPanel(),
-                                          Resources.getString("PerspectiveSend.mailToError") +
-                                                           e.getMessage());
+            JOptionPane.showMessageDialog(this.getPanel(), Resources.getString("PerspectiveSend.mailToError") + e.getMessage());
         }
         this.stateChanged(new ChangeEvent(this));
-
     }
 
     /**
