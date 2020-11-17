@@ -81,7 +81,13 @@ public class Resources {
     
     /** The charset used to read the license text */
     private final static Charset        CHARSET         = StandardCharsets.UTF_8;
-
+    
+    /** Size of checkmark clipart x*/
+    public static final int SIZE_CHECKMARK_X = 15;
+    
+    /** Size of checkmark clipart y*/
+    public static final int SIZE_CHECKMARK_Y = 12;
+    
     /**
      * No instantiation
      */
