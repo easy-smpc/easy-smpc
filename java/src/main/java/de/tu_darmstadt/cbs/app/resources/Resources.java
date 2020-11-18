@@ -59,10 +59,10 @@ public class Resources {
     public static final int             SIZE_TEXTAREA_Y           = 200;
 
     /** String indicating start of exchange string */
-    public static final String          MESSAGE_START_TAG         = "BEGIN_PAYLOAD\n"; //$NON-NLS-1$
+    public static final String          MESSAGE_START_TAG         = "BEGIN_PAYLOAD"; //$NON-NLS-1$
 
     /** String indicating end of exchange string */
-    public static final String          MESSAGE_END_TAG           = "\nEND_PAYLOAD"; //$NON-NLS-1$
+    public static final String          MESSAGE_END_TAG           = "END_PAYLOAD"; //$NON-NLS-1$
 
     /** Char length for exchange before line break */
     public static final int             MESSAGE_LINE_WIDTH        = 150;

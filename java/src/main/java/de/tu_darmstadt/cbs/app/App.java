@@ -146,7 +146,7 @@ public class App extends JFrame {
         actionMenu = new JMenu(Resources.getString("App.1")); //$NON-NLS-1$
         jmb.add(actionMenu);
 
-        // Create
+        // Start
         JMenuItem jmiStart = new JMenuItem(Resources.getString("App.14"), Resources.getMenuItem()); //$NON-NLS-1$
         actionMenu.add(jmiStart);
         jmiStart.addActionListener(new ActionListener() {
@@ -174,8 +174,8 @@ public class App extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 actionParticipate();
             }
-        });
-
+        });        
+        
         // Load
         JMenuItem jmiLoad = new JMenuItem(Resources.getString("App.9"), Resources.getMenuItem()); //$NON-NLS-1$
         actionMenu.add(jmiLoad);
@@ -183,6 +183,16 @@ public class App extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionLoad();
+            }
+        });
+        
+        // Save
+        JMenuItem jmiSave = new JMenuItem(Resources.getString("App.16"), Resources.getMenuItem()); //$NON-NLS-1$
+        actionMenu.add(jmiSave);
+        jmiSave.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionSave();
             }
         });
         
@@ -654,18 +664,17 @@ public class App extends JFrame {
      */
     protected boolean actionSave() {
         
-        // Open dialog
-        File file = getFile(false);
-        
-        // Check
-        if (file == null) {
-            return false;
-        }
+        if (model.filename == null) {
+            // Open dialog
+            File file = getFile(false);
 
+            // Check
+            if (file == null) { return false; }
+            model.filename = file;
+        }
         // Try to save file
         AppModel snapshot = this.beginTransaction();
-        try {
-            model.filename = file;
+        try {           
             model.saveProgram();
             return true;
         } catch (IOException e) {

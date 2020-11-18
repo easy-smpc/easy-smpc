@@ -60,8 +60,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     /** Text field containing title of study */
     private ComponentTextField title;
 
-    /** Save button */
-    private JButton            save;
+    /** Proceed button */
+    private JButton            proceed;
 
     /** Send button */
     private JButton            send;
@@ -99,10 +99,25 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      @Override
      public void stateChanged(ChangeEvent e) {
          boolean messagesUnsent = getApp().getModel().messagesUnsent();
-         this.save.setEnabled(!messagesUnsent);
+         this.proceed.setEnabled(!messagesUnsent);
          this.send.setEnabled(messagesUnsent);
+         areSendMailButtonsClickable();
      }
     
+    /**
+     * 
+     */
+    private void areSendMailButtonsClickable() { 
+        int i = 0;
+        for (Component c : this.participants.getComponents()) {
+            if (i == getApp().getModel().ownId ||
+                getApp().getModel().getUnsentMessageFor(i) == null){
+                ((EntryParticipantSendMail) c).disableButton();
+            }
+        i++;
+        }        
+    }
+
     /**
      * Returns the exchange string for the given entry
      * 
@@ -153,7 +168,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 String subject = String.format(Resources.getString("PerspectiveSend.mailSubject"),
                                                getApp().getModel().name,
                                                getApp().getModel().state == AppState.SENDING_RESULT ? 2 : 1);
-                String exchangeString = Resources.MESSAGE_START_TAG + getExchangeString(entry) + Resources.MESSAGE_END_TAG;
+                String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
                 exchangeString = exchangeString.replaceAll("(.{" + Resources.MESSAGE_LINE_WIDTH + "})", "$1\n");
                 String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
                                             entry.getLeftValue(), // Name of participant
@@ -176,7 +191,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 for (EntryParticipantSendMail entry : list) {
                     int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
                     getApp().actionMarkMessageSent(index);
-                    entry.disableButton();
                 }
             }
 
@@ -220,7 +234,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         panel.add(pane, BorderLayout.CENTER);    
            
-        // send all e-mails button and save button
+        // send all e-mails button and proceed button
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
         send = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButton"));
@@ -237,14 +251,14 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             }
         });
         buttonsPane.add(send, 0, 0);
-        save = new JButton(Resources.getString("PerspectiveSend.save"));
-        save.addActionListener(new ActionListener() {
+        proceed = new JButton(Resources.getString("PerspectiveSend.proceed"));
+        proceed.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionSave();
             }
         });
-        buttonsPane.add(save, 0, 1);
+        buttonsPane.add(proceed, 0, 1);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 

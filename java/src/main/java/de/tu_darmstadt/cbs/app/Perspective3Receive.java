@@ -51,8 +51,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     /** Text field containing title of study */
     private ComponentTextField title;
     
-    /** Save button */
-    private JButton            save;
+    /** Proceed button */
+    private JButton            proceed;
 
     /**
      * Creates the perspective
@@ -93,7 +93,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     @Override
     public void stateChanged(ChangeEvent e) {
         checkmarkParticipantEntries();
-        this.save.setEnabled(this.areSharesComplete());
+        this.proceed.setEnabled(this.areSharesComplete());
     }
     
     /**
@@ -179,14 +179,14 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         receive.addActionListener(this);       
         buttonsPane.add(receive, 0, 0);
         
-        save = new JButton(Resources.getString("PerspectiveReceive.save"));
-        save.addActionListener(new ActionListener() {
+        proceed = new JButton(Resources.getString("PerspectiveReceive.proceed"));
+        proceed.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionSave();
             }
         });
-        buttonsPane.add(save, 0, 1);
+        buttonsPane.add(proceed, 0, 1);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
