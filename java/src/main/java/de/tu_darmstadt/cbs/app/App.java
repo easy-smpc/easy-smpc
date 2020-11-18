@@ -82,7 +82,7 @@ public class App extends JFrame {
         } catch( Exception ex ) {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
-
+               
         // Start App
         new App();
     }
@@ -113,7 +113,6 @@ public class App extends JFrame {
         this.setSize(800, 600);
         this.setLocationRelativeTo(null);
         this.setIconImage(Resources.getIcon());
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout());
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);// Close only if user clicks yes in dialog
         
@@ -433,13 +432,33 @@ public class App extends JFrame {
      * Change the language
      */
     protected void actionChangeLanguage() {
-        Resources.setResourceBundleLocale((Locale) JOptionPane.showInputDialog(null,
-                                                                               Resources.getString("App.18"),
-                                                                               Resources.getString("App.17"),
-                                                                               JOptionPane.QUESTION_MESSAGE,
-                                                                               null,
-                                                                               Resources.getAvailableLanguages(),
-                                                                               Resources.getAvailableLanguages()[0]));
+        Locale newLocale;
+        Locale oldLocale = Resources.getResourceBundleLocale();        
+        
+        // get new locale
+        newLocale = (Locale) JOptionPane.showInputDialog(null,
+                                                      Resources.getString("App.18"),
+                                                      Resources.getString("App.17"),
+                                                      JOptionPane.QUESTION_MESSAGE,
+                                                      null,
+                                                      Resources.getAvailableLanguages(),
+                                                      Resources.getAvailableLanguages()[0]);
+        // confirm restart
+        if (!oldLocale.equals(newLocale) && newLocale != null && JOptionPane.showConfirmDialog(this,
+                                                            Resources.getString("App.20"), //$NON-NLS-1$
+                                                            Resources.getString("App.19"), //$NON-NLS-1$
+                                                            JOptionPane.YES_NO_OPTION,
+                                                            JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+            try {
+                Resources.setResourceBundleLocale(newLocale);
+                new App();
+                dispose();
+            } catch (IOException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, Resources.getString("App.21") + e.getMessage());
+                Resources.setResourceBundleLocale(oldLocale);
+            }
+        }
     }
 
     /**

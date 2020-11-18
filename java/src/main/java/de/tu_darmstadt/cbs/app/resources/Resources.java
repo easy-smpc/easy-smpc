@@ -42,7 +42,7 @@ public class Resources {
     private static final String         BUNDLE_NAME               = "de.tu_darmstadt.cbs.app.resources.messages"; //$NON-NLS-1$
 
     /** Bundle */
-    private static ResourceBundle resource_bundle           = ResourceBundle.getBundle(BUNDLE_NAME, new Locale("",""));
+    private static ResourceBundle resource_bundle           = ResourceBundle.getBundle(BUNDLE_NAME);
 
     /** Invalid border */
     public static final Border          INVALID_BORDER            = BorderFactory.createLineBorder(new Color(255, 69, 0));
@@ -113,15 +113,22 @@ public class Resources {
     }
     
     /**
+     * Get locale of resource bundle
+     * 
+     * @return
+     */
+    public static Locale getResourceBundleLocale(){
+        return resource_bundle.getLocale();
+    }
+    
+    /**
      * Set locale of resource bundle
      * 
      * @return
      */
     public static void setResourceBundleLocale(Locale locale)
     {
-        if (locale.equals(Locale.ENGLISH)) {
-            locale = new Locale("", ""); //if english use default
-        }
+        Locale.setDefault(Locale.ENGLISH);
         resource_bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
     }
     
