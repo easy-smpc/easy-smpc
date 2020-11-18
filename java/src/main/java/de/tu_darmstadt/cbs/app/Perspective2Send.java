@@ -105,7 +105,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      }
     
     /**
-     * 
+     * Validates each send mail button whether it should be clickable
      */
     private void areSendMailButtonsClickable() { 
         int i = 0;

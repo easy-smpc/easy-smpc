@@ -27,6 +27,7 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -210,6 +211,16 @@ public class App extends JFrame {
         JMenu jmHelp = new JMenu(Resources.getString("App.2")); //$NON-NLS-1$
         jmb.add(jmHelp);
         
+        // Change language
+        JMenuItem jmiChangeLanguage = new JMenuItem(Resources.getString("App.17"), Resources.getMenuItem()); //$NON-NLS-1$
+        jmHelp.add(jmiChangeLanguage);
+        jmiChangeLanguage.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionChangeLanguage();
+            }
+        });
+        
         // About menu
         JMenuItem jmiAbout = new JMenuItem(Resources.getString("App.3"), Resources.getMenuItem()); //$NON-NLS-1$
         jmHelp.add(jmiAbout);
@@ -218,7 +229,7 @@ public class App extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 actionAbout();
             }
-        });
+        });       
 
         // Add perspectives
         addPerspective(new Perspective6Result(this));
@@ -416,6 +427,19 @@ public class App extends JFrame {
      */
     protected void actionAbout() {
         new DialogAbout(this);
+    }
+    
+    /**
+     * Change the language
+     */
+    protected void actionChangeLanguage() {
+        Resources.setResourceBundleLocale((Locale) JOptionPane.showInputDialog(null,
+                                                                               Resources.getString("App.18"),
+                                                                               Resources.getString("App.17"),
+                                                                               JOptionPane.QUESTION_MESSAGE,
+                                                                               null,
+                                                                               Resources.getAvailableLanguages(),
+                                                                               Resources.getAvailableLanguages()[0]));
     }
 
     /**

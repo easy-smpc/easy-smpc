@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -41,7 +42,7 @@ public class Resources {
     private static final String         BUNDLE_NAME               = "de.tu_darmstadt.cbs.app.resources.messages"; //$NON-NLS-1$
 
     /** Bundle */
-    private static final ResourceBundle RESOURCE_BUNDLE           = ResourceBundle.getBundle(BUNDLE_NAME);
+    private static ResourceBundle resource_bundle           = ResourceBundle.getBundle(BUNDLE_NAME, new Locale("",""));
 
     /** Invalid border */
     public static final Border          INVALID_BORDER            = BorderFactory.createLineBorder(new Color(255, 69, 0));
@@ -87,6 +88,8 @@ public class Resources {
 
     /** Size of checkmark clipart y */
     public static final int             SIZE_CHECKMARK_Y          = 12;
+    
+    private static final Locale[] AVAILABLE_LANGUAGES       = { Locale.ENGLISH, Locale.GERMAN };
 
     /**
      * No instantiation
@@ -103,10 +106,33 @@ public class Resources {
      */
     public static String getString(String key) {
         try {
-            return RESOURCE_BUNDLE.getString(key);
+            return resource_bundle.getString(key);
         } catch (MissingResourceException e) {
             return '!' + key + '!';
         }
+    }
+    
+    /**
+     * Set locale of resource bundle
+     * 
+     * @return
+     */
+    public static void setResourceBundleLocale(Locale locale)
+    {
+        if (locale.equals(Locale.ENGLISH)) {
+            locale = new Locale("", ""); //if english use default
+        }
+        resource_bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+    }
+    
+    /**
+     * Returns all available languages
+     * 
+     * @return
+     */
+    public static Locale[] getAvailableLanguages()
+    {
+        return AVAILABLE_LANGUAGES;
     }
     
     /**
