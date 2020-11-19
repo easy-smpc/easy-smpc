@@ -35,6 +35,7 @@ public abstract class Perspective {
     private final int progress;
     /** Panel*/
     private final JPanel panel;
+    
 
     /**
      * Creates a new instance
@@ -101,4 +102,9 @@ public abstract class Perspective {
      * Initialize perspective based on model
      */
     protected abstract void initialize();
+    
+    /**
+     * Does perspective allow interim saving
+     */
+    protected abstract boolean isInterimSavingPossible();
 }

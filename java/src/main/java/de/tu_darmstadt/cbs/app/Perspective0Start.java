@@ -31,7 +31,10 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  */
 
 public class Perspective0Start extends Perspective {
-
+    
+    /** Is interim saving in this perspective possible */
+    private final boolean interimSavingPossible = false;
+    
     /**
      * Creates the perspective
      * @param app
@@ -87,6 +90,11 @@ public class Perspective0Start extends Perspective {
 
     @Override
     protected void initialize() {
-        // Empty by design
+        getApp().getJmiInterimSave().setVisible(isInterimSavingPossible());
+    }
+
+    @Override
+    protected boolean isInterimSavingPossible() {
+        return interimSavingPossible;
     }
 }

@@ -62,6 +62,9 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     
     /** Save button */
     private JButton            save;
+    
+    /** Is interim saving in this perspective possible */
+    private final boolean      interimSavingPossible = false;
 
     /**
      * Creates the perspective
@@ -76,6 +79,11 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      */
     public void stateChanged(ChangeEvent e) {
         this.save.setEnabled(this.areValuesValid());
+    }
+    
+    @Override
+    protected boolean isInterimSavingPossible() {
+        return interimSavingPossible;
     }
     
     /**

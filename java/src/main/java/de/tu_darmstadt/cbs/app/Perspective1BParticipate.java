@@ -60,6 +60,9 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     
     /** Central panel */
     private JPanel central;
+    
+    /** Is interim saving in this perspective possible */
+    private final boolean      interimSavingPossible = false;
 
     /**
      * Creates the perspective
@@ -68,7 +71,12 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     protected Perspective1BParticipate(App app) {
         super(app, Resources.getString("PerspectiveParticipate.participate"), 1); //$NON-NLS-1$
     }
-
+    
+    @Override
+    protected boolean isInterimSavingPossible() {
+        return interimSavingPossible;
+    }
+    
     /**
      * Reacts on all changes in any components
      */

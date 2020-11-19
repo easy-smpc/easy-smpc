@@ -53,7 +53,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  */
 
 public class Perspective2Send extends Perspective implements ChangeListener {
-
+    
     /** Panel for participants */
     private JPanel             participants;
 
@@ -65,6 +65,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
 
     /** Send button */
     private JButton            send;
+    
+    /** Is interim saving in this perspective possible */
+    private final boolean      interimSavingPossible = true;
 
     /**
      * Creates the perspective
@@ -92,7 +95,11 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         super(app, title, progress); //$NON-NLS-1$
     }
     
-
+    @Override
+    protected boolean isInterimSavingPossible() {
+        return interimSavingPossible;
+    }
+    
     /**
       * Reacts on all changes in any components
       */
@@ -267,6 +274,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     @Override
     protected void initialize() {
+        getApp().getJmiInterimSave().setVisible(isInterimSavingPossible()); 
         this.title.setText(getApp().getModel().name);
         this.participants.removeAll();
         int i = 0; // index count for participants to access messages

@@ -53,6 +53,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     
     /** Proceed button */
     private JButton            proceed;
+    
+    /** Is interim saving in this perspective possible */
+    private final boolean      interimSavingPossible = true;
 
     /**
      * Creates the perspective
@@ -79,7 +82,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     protected Perspective3Receive(App app, String title , int progress) {
         super(app, title, progress); //$NON-NLS-1$
     }
-
+    
+    @Override
+    protected boolean isInterimSavingPossible() {
+        return interimSavingPossible;
+    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         if (getApp().actionReceiveMessage()) {
@@ -195,11 +203,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     @Override
     protected void initialize() {
+        getApp().getJmiInterimSave().setVisible(isInterimSavingPossible());
         this.title.setText(getApp().getModel().name);
         this.participants.removeAll();
         for (Participant currentParticipant : getApp().getModel().participants) {
             EntryParticipantCheckmark entry = new EntryParticipantCheckmark(currentParticipant.name,
-                                                          currentParticipant.emailAddress);
+                                                                            currentParticipant.emailAddress);
             participants.add(entry);
         }
         this.stateChanged(new ChangeEvent(this));

@@ -98,6 +98,8 @@ public class App extends JFrame {
     private ComponentProgress progress;
     /** List of perspectives */
     private List<Perspective> perspectives = new ArrayList<Perspective>();
+    /** Interim save menu item */
+    private JMenuItem jmiInterimSave;
 
     /**
      * Creates a new instance
@@ -186,10 +188,10 @@ public class App extends JFrame {
             }
         });
         
-        // Save
-        JMenuItem jmiSave = new JMenuItem(Resources.getString("App.16"), Resources.getMenuItem()); //$NON-NLS-1$
-        actionMenu.add(jmiSave);
-        jmiSave.addActionListener(new ActionListener() {
+        // Interim save
+        jmiInterimSave = new JMenuItem(Resources.getString("App.16"), Resources.getMenuItem()); //$NON-NLS-1$
+        actionMenu.add(jmiInterimSave);
+        jmiInterimSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionSave();
@@ -789,5 +791,12 @@ public class App extends JFrame {
             }
         }
         return returnPerspective;
+    }
+    
+    /**
+     * @return jmiInterimSave
+     */
+    public JMenuItem getJmiInterimSave() {
+        return jmiInterimSave;
     }
 }
