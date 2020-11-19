@@ -22,7 +22,11 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -558,18 +562,26 @@ public class App extends JFrame {
 
         // Load file
         try {
-            this.model = AppModel.loadModel(file);
+            //this.model = AppModel.loadModel(file);
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));           
+            App newApp = (App) ois.readObject();
+            newApp.getModel().filename = file;
+            newApp.openPerspectiveByState();
+            ois.close();
+            dispose();
         } catch (Exception e) {
-            this.model = null;
             JOptionPane.showMessageDialog(this, Resources.getString("App.11") + e.getMessage()); //$NON-NLS-1$
             return;
         }
         
         // Set and switch to correct perspective
-        this.model.filename = file;
-        this.showPerspective(Perspective1BParticipate.class);
-        
-        // TODO: Check that this really are valid transitions
+        //this.model.filename = file;
+        // Necessary? this.showPerspective(Perspective1BParticipate.class);               
+        }
+    /**
+     * Opens a perspective by state
+     */
+    private void openPerspectiveByState() {
         switch (this.model.state) {
         case NONE:
             showPerspective(Perspective0Start.class);
@@ -600,8 +612,8 @@ public class App extends JFrame {
             break;
         case FINISHED:
             showPerspective(Perspective6Result.class);
-            break;
-        }
+            break;      
+    }
     }
 
     /**
@@ -715,14 +727,15 @@ public class App extends JFrame {
             if (file == null) { return false; }
             model.filename = file;
         }
-        // Try to save file
-        AppModel snapshot = this.beginTransaction();
-        try {           
-            model.saveProgram();
+        // Try to save file               
+        try {                       
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(model.filename));
+            oos.writeObject(this);
+            oos.close();
             return true;
         } catch (IOException e) {
-            this.rollback(snapshot);
-            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.saveError") + e.getMessage()); //$NON-NLS-1$
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.saveError")); //$NON-NLS-1$
             return false;
         }
     }
