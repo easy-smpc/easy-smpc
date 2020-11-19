@@ -140,10 +140,10 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     }
 
     /**
-     * Save the project
+     * Proceed the project
      * 
      */
-    protected void actionSave() {
+    protected void actionProceed() {
         getApp().actionFirstReceivingDone();
     }
 
@@ -191,7 +191,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         proceed.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionSave();
+                actionProceed();
             }
         });
         buttonsPane.add(proceed, 0, 1);

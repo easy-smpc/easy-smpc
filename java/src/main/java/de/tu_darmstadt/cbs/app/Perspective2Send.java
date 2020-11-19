@@ -155,9 +155,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
    }
      
     /**
-     * Save action
+     * Proceed action
      */
-    protected void actionSave() {
+    protected void actionProceed() {
         getApp().actionFirstSendingDone();
     }
     
@@ -202,7 +202,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             }
 
         } catch (IOException | URISyntaxException e) {
-            JOptionPane.showMessageDialog(this.getPanel(), Resources.getString("PerspectiveSend.mailToError") + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this.getPanel(), Resources.getString("PerspectiveSend.mailToError"), Resources.getString("PerspectiveSend.mailToErrorTitle"), JOptionPane.ERROR_MESSAGE);
         }
         this.stateChanged(new ChangeEvent(this));
     }
@@ -262,7 +263,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         proceed.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionSave();
+                actionProceed();
             }
         });
         buttonsPane.add(proceed, 0, 1);

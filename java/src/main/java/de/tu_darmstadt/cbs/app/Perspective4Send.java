@@ -35,7 +35,7 @@ public class Perspective4Send extends Perspective2Send {
     /**
      * Save action
      */
-    protected void actionSave() {
+    protected void actionProceed() {
         getApp().actionSecondSendingDone();
     }
 }

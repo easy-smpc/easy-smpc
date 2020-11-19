@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import de.tu_darmstadt.cbs.app.resources.Resources;
@@ -59,6 +60,7 @@ public class EntryParticipantCheckmark extends EntryParticipant {
             panel.add(imageLabel, BorderLayout.EAST);
         } catch (IOException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(this, Resources.getString("Participant.3"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
         }
         return panel;
     }  

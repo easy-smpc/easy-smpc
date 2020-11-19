@@ -33,7 +33,7 @@ public class Perspective5Receive extends Perspective3Receive {
     }
 
     @Override
-    protected void actionSave() {
+    protected void actionProceed() {
         getApp().actionSecondReceivingDone();
     }
 

@@ -143,8 +143,7 @@ public class Resources {
     }
     
     /**
-     * Reads the content from the file license.txt located in the package
-     * org.deidentifier.arx.gui.resources and returns the content as string.
+     * Reads the content from the file license.txt and returns the content as string.
      * 
      * @return
      */
@@ -164,6 +163,7 @@ public class Resources {
             content = sb.toString();
         } catch (IOException e) {
             e.printStackTrace();
+            
         } finally {
             try {
                 br.close();
