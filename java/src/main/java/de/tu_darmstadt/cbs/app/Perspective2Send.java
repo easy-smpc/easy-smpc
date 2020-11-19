@@ -105,24 +105,26 @@ public class Perspective2Send extends Perspective implements ChangeListener {
       */
      @Override
      public void stateChanged(ChangeEvent e) {
+         // Check clickable send all mails button and save button
          boolean messagesUnsent = getApp().getModel().messagesUnsent();
          this.proceed.setEnabled(!messagesUnsent);
-         this.send.setEnabled(messagesUnsent);
-         areSendMailButtonsClickable();
+         this.send.setEnabled(messagesUnsent);  
+         //Check buttons clickable
+         for (Component c : this.participants.getComponents()) {
+                 ((EntryParticipantSendMail) c).setButtonEnabled(isMailButtonClickable(c));
+             }
      }
     
     /**
      * Validates each send mail button whether it should be clickable
      */
-    private void areSendMailButtonsClickable() { 
-        int i = 0;
-        for (Component c : this.participants.getComponents()) {
-            if (i == getApp().getModel().ownId ||
-                getApp().getModel().getUnsentMessageFor(i) == null){
-                ((EntryParticipantSendMail) c).disableButton();
-            }
-        i++;
-        }        
+    private boolean isMailButtonClickable(Component c) {
+        int index = Arrays.asList(participants.getComponents()).indexOf(c);
+        if (index == getApp().getModel().ownId ||
+            getApp().getModel().getUnsentMessageFor(index) == null) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -132,8 +134,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @throws IOException
      */
     private String getExchangeString(EntryParticipantSendMail entry) throws IOException {
-        int id = Arrays.asList(participants.getComponents()).indexOf(entry);
-        return Message.serializeMessage(getApp().getModel().getUnsentMessageFor(id));
+        int index = Arrays.asList(participants.getComponents()).indexOf(entry);
+        return Message.serializeMessage(getApp().getModel().getUnsentMessageFor(index));
     }
     
      /**
