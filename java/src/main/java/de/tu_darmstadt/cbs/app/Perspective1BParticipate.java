@@ -208,6 +208,9 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         bins.repaint();
     }
     
+    /**
+     * run by scheduler
+     */
     @Override
     public void run() {
         // Empty per default

@@ -134,6 +134,9 @@ public class Perspective6Result extends Perspective {
         central.add(pane, BorderLayout.SOUTH);
     }
     
+    /**
+     * run by scheduler
+     */
     @Override
     public void run() {
         // Empty per default

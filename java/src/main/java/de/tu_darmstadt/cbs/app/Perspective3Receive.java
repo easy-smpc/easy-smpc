@@ -219,6 +219,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         this.stateChanged(new ChangeEvent(this));
     }
     
+    /**
+     * run by scheduler
+     */
     @Override
     public void run() {
         getApp().actionReceiveMessage(false);
