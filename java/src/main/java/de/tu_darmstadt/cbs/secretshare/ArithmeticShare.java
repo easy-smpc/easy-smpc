@@ -1,7 +1,7 @@
 package de.tu_darmstadt.cbs.secretshare;
 
-import java.math.BigInteger;
 import java.io.Serializable;
+import java.math.BigInteger;
 
 /**
  * This class implements an arithmetic share
@@ -76,10 +76,6 @@ public class ArithmeticShare implements Serializable, Cloneable {
     }
     @Override
     public Object clone() {
-      try {
-        return (ArithmeticShare) super.clone();
-      } catch (CloneNotSupportedException e) {
         return new ArithmeticShare(this.value, this.prime);
-      }
     }
 }
