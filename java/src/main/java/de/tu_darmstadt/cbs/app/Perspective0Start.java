@@ -91,10 +91,17 @@ public class Perspective0Start extends Perspective {
     @Override
     protected void initialize() {
         getApp().getJmiInterimSave().setVisible(isInterimSavingPossible());
+        getApp().stopScheduledExecution(); // stop possible task execution
     }
 
     @Override
     protected boolean isInterimSavingPossible() {
         return interimSavingPossible;
+    }
+
+    @Override
+    public void run() {
+        // Empty per default
+        
     }
 }

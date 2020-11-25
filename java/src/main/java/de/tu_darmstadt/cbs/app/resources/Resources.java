@@ -91,6 +91,8 @@ public class Resources {
     
     private static final Locale[] AVAILABLE_LANGUAGES       = { Locale.ENGLISH, Locale.GERMAN };
 
+    public static final long INTERVAL_SCHEDULER_SECONDS = 3;
+
     /**
      * No instantiation
      */

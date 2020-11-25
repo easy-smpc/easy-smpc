@@ -25,7 +25,7 @@ import javax.swing.border.TitledBorder;
  * 
  * @author Fabian Prasser
  */
-public abstract class Perspective {
+public abstract class Perspective implements Runnable {
 
     /** App */
     private final App    app;

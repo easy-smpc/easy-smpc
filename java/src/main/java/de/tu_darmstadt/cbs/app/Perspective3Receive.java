@@ -90,7 +90,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (getApp().actionReceiveMessage()) {
+        if (getApp().actionReceiveMessage(true)) {
             this.stateChanged(new ChangeEvent(this));
         }
     }
@@ -144,7 +144,10 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * 
      */
     protected void actionProceed() {
-        getApp().actionFirstReceivingDone();
+        getApp().stopScheduledExecution();
+        if (!getApp().actionFirstReceivingDone()) {
+            getApp().startScheduledExecution(this);
+        }
     }
 
     /**
@@ -203,6 +206,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     @Override
     protected void initialize() {
+        getApp().stopScheduledExecution(); // stop possible task execution
+        getApp().startScheduledExecution(this);
         getApp().getJmiInterimSave().setVisible(isInterimSavingPossible());
         this.title.setText(getApp().getModel().name);
         this.participants.removeAll();
@@ -211,6 +216,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                                                             currentParticipant.emailAddress);
             participants.add(entry);
         }
+        this.stateChanged(new ChangeEvent(this));
+    }
+    
+    @Override
+    public void run() {
+        getApp().actionReceiveMessage(false);
         this.stateChanged(new ChangeEvent(this));
     }
 }

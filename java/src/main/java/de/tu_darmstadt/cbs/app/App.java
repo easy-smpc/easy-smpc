@@ -13,6 +13,8 @@
  */
 package de.tu_darmstadt.cbs.app;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.HeadlessException;
@@ -28,6 +30,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -62,7 +67,10 @@ public class App extends JFrame {
 
     /** SVUID */
     private static final long serialVersionUID = 8047583915796168387L;
-
+    
+    /** Scheduler */
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    
     /**
      * Main entry point
      * 
@@ -100,6 +108,8 @@ public class App extends JFrame {
     private List<Perspective> perspectives = new ArrayList<Perspective>();
     /** Interim save menu item */
     private JMenuItem jmiInterimSave;
+
+    private ScheduledFuture<?> schedulerExecutionHandler;
 
     /**
      * Creates a new instance
@@ -371,7 +381,6 @@ public class App extends JFrame {
         try {
             return model.isMessageShareResultValid(Message.deserializeMessage(text));
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
     }
@@ -518,8 +527,9 @@ public class App extends JFrame {
 
     /**
      * Action performed when first receiving done
+     * @return successful
      */
-    protected void actionFirstReceivingDone() {
+    protected boolean actionFirstReceivingDone() {
         AppModel snapshot = this.beginTransaction();
         try {
             this.model.toSendingResult();
@@ -528,9 +538,10 @@ public class App extends JFrame {
             this.rollback(snapshot);
             e.printStackTrace();          
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
-            return;
+            return false;
         }
         this.showPerspective(Perspective4Send.class);
+        return true;
     }
 
     /**
@@ -680,20 +691,21 @@ public class App extends JFrame {
      * Action to receive a message
      * @return
      */
-    protected boolean actionReceiveMessage() {       
+    protected boolean actionReceiveMessage(boolean withDialog) {       
        //try to get string from clip board
-       String clipboardText = getStrippedExchangeMessage(getTextFromClipBoard());
-       if (!isMessageShareResultValid(clipboardText)) {
-           clipboardText = "";
-       } 
+       String message = getStrippedExchangeMessage(getTextFromClipBoard());
+       if (!isMessageShareResultValid(message)) {
+           message = null;
+       }
+       if(withDialog) {
         // Ask for message
-        String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
+            message = new DialogStringPicker(message, new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {                
                 return isMessageShareResultValid(getStrippedExchangeMessage(text));
             }
         }, this).showDialog();
-
+       }
         // If message selected
         if (message != null) {
             message = getStrippedExchangeMessage(message);
@@ -705,8 +717,7 @@ public class App extends JFrame {
                 this.rollback(snapshot);
                 return false;
             }
-        }
-        
+        }       
         // Done
         return false;
     }
@@ -739,8 +750,9 @@ public class App extends JFrame {
     
     /**
      * Action performed when second receiving done
+     * @return successful
      */
-    protected void actionSecondReceivingDone() {
+    protected boolean actionSecondReceivingDone() {
         AppModel snapshot = this.beginTransaction();
         try {
             this.model.toFinished();
@@ -749,9 +761,10 @@ public class App extends JFrame {
             this.rollback(snapshot);
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
-            return;
+            return false;
         }
         this.showPerspective(Perspective6Result.class);
+        return true;
     }
 
     /**
@@ -777,7 +790,26 @@ public class App extends JFrame {
     protected void actionStart() {
         this.showPerspective(Perspective0Start.class);
     }
-
+    
+    /**
+     * Register periodically execution
+     */
+    protected void startScheduledExecution(Perspective perspective){
+        schedulerExecutionHandler = scheduler.scheduleAtFixedRate(perspective,
+                                                                  0,
+                                                                  Resources.INTERVAL_SCHEDULER_SECONDS,
+                                                                  SECONDS);
+    } 
+    
+    /**
+     * Stop periodically execution
+     */
+    protected void stopScheduledExecution() {
+        if (schedulerExecutionHandler != null) {
+            schedulerExecutionHandler.cancel(true);
+        }
+    }
+    
     /**
      * Returns the model
      * @return

@@ -68,6 +68,7 @@ public class Perspective6Result extends Perspective {
      */
     @Override
     public void initialize() {
+        getApp().stopScheduledExecution(); // stop possible task execution
         participants.removeAll();
         bins.removeAll();
         this.title.setText(getApp().getModel().name);
@@ -131,5 +132,11 @@ public class Perspective6Result extends Perspective {
         pane = new JScrollPane(bins);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
+    }
+    
+    @Override
+    public void run() {
+        // Empty per default
+        
     }
 }

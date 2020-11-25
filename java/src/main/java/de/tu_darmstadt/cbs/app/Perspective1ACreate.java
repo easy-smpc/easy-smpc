@@ -353,6 +353,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     protected void initialize() {
         
         // Clear
+        getApp().stopScheduledExecution(); // stop possible task execution
         this.participants.removeAll();
         this.bins.removeAll();
         this.title.setText("");
@@ -363,5 +364,11 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Update
         this.stateChanged(new ChangeEvent(this));
+    }
+    
+    @Override
+    public void run() {
+        // Empty per default
+        
     }
 }
