@@ -93,6 +93,8 @@ public class Resources {
 
     public static final long INTERVAL_SCHEDULER_SECONDS = 3;
 
+    public static final String FILE_ENDING_CSV = "csv";
+
     /**
      * No instantiation
      */

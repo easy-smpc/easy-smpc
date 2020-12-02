@@ -284,14 +284,14 @@ public class App extends JFrame {
     /**
      * Opens a file chooser
      * @param load 
+     * @param fileNameExtensionFilter
      * @return
      */
-    private File getFile(boolean load) {
+    public File getFile(boolean load, FileNameExtensionFilter filter) {
 
         // File
         File file = null;
-        JFileChooser fileChooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING); //$NON-NLS-1$
+        JFileChooser fileChooser = new JFileChooser();      
         fileChooser.setFileFilter(filter);
         int state = 0;
         if (load) {
@@ -567,7 +567,7 @@ public class App extends JFrame {
     protected void actionLoad() {
 
         // Open dialog
-        File file = getFile(true);
+        File file = getFile(true, new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING));
         
         // Check
         if (file == null) {
@@ -728,7 +728,7 @@ public class App extends JFrame {
         
         if (model.filename == null) {
             // Open dialog
-            File file = getFile(false);
+            File file = getFile(false,  new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING));
 
             // Check
             if (file == null) { return false; }
