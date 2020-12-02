@@ -66,24 +66,10 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class App extends JFrame {
 
     /** SVUID */
-    private static final long serialVersionUID = 8047583915796168387L;    
-    /** Model */
-    private AppModel          model;
-    /** Cards */
-    private JPanel            cards;
-    /** Menu */
-    private JMenu             actionMenu;
-    /** Progress*/
-    private ComponentProgress progress;
-    /** List of perspectives */
-    private List<Perspective> perspectives = new ArrayList<Perspective>();
-    /** Interim save menu item */
-    private JMenuItem jmiInterimSave;
+    private static final long serialVersionUID = 8047583915796168387L;
+    
     /** Scheduler */
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);    
-    /** Execution handler for scheduler */
-    private ScheduledFuture<?> schedulerExecutionHandler;
-
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     
     /**
      * Main entry point
@@ -109,6 +95,21 @@ public class App extends JFrame {
         new App();
     }
 
+    /** Model */
+    private AppModel          model;
+
+    /** Cards */
+    private JPanel            cards;
+    /** Menu */
+    private JMenu             actionMenu;
+    /** Progress*/
+    private ComponentProgress progress;
+    /** List of perspectives */
+    private List<Perspective> perspectives = new ArrayList<Perspective>();
+    /** Interim save menu item */
+    private JMenuItem jmiInterimSave;
+
+    private ScheduledFuture<?> schedulerExecutionHandler;
 
     /**
      * Creates a new instance
@@ -688,10 +689,8 @@ public class App extends JFrame {
 
     /**
      * Action to receive a message
-     * @param withDialog Entry per dialog or from clipboard
      * @return
      */
-
     protected boolean actionReceiveMessage(boolean withDialog) {       
        //try to get string from clip board
        String message = getStrippedExchangeMessage(getTextFromClipBoard());

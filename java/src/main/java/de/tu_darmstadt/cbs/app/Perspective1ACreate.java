@@ -366,9 +366,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.stateChanged(new ChangeEvent(this));
     }
     
-    /**
-     * run by scheduler
-     */
     @Override
     public void run() {
         // Empty per default

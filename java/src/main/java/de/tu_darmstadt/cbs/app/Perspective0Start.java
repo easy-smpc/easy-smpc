@@ -99,9 +99,6 @@ public class Perspective0Start extends Perspective {
         return interimSavingPossible;
     }
 
-    /**
-     * run by scheduler
-     */
     @Override
     public void run() {
         // Empty per default
