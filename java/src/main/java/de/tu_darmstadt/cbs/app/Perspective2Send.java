@@ -277,7 +277,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     @Override
     protected void initialize() {
-        getApp().stopScheduledExecution(); // stop possible task execution
         getApp().getJmiInterimSave().setVisible(isInterimSavingPossible()); 
         this.title.setText(getApp().getModel().name);
         this.participants.removeAll();
@@ -298,9 +297,4 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         this.stateChanged(new ChangeEvent(this));
     }
     
-    @Override
-    public void run() {
-        // Empty per default
-        
-    }
 }

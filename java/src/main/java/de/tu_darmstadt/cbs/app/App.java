@@ -31,8 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -43,6 +41,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.ChangeEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.formdev.flatlaf.FlatLightLaf;
@@ -67,10 +66,7 @@ public class App extends JFrame {
 
     /** SVUID */
     private static final long serialVersionUID = 8047583915796168387L;
-    
-    /** Scheduler */
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    
+        
     /**
      * Main entry point
      * 
@@ -108,8 +104,8 @@ public class App extends JFrame {
     private List<Perspective> perspectives = new ArrayList<Perspective>();
     /** Interim save menu item */
     private JMenuItem jmiInterimSave;
-
-    private ScheduledFuture<?> schedulerExecutionHandler;
+    /** Index of current displayed perspective */
+    private int currentPerspective;
 
     /**
      * Creates a new instance
@@ -254,6 +250,12 @@ public class App extends JFrame {
         
         // Show the first perspective
         showPerspective(0);
+        
+        // Register periodically execution
+        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new TaskPollClipboard(this),
+                                                                                     0,
+                                                                                     Resources.INTERVAL_SCHEDULER_SECONDS,
+                                                                                     SECONDS);
 
         // Finally, make the frame visible
         this.setVisible(true);
@@ -350,7 +352,6 @@ public class App extends JFrame {
             try {
                 text = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);              
             } catch (HeadlessException | UnsupportedFlavorException | IOException e) {
-                // TODO: Logging
             }
         };
         return text;
@@ -417,6 +418,7 @@ public class App extends JFrame {
      */
     private void showPerspective(int index) {
         showPerspective(perspectives.get(index));
+        currentPerspective = index;
     }
     
     /**
@@ -529,7 +531,7 @@ public class App extends JFrame {
      * Action performed when first receiving done
      * @return successful
      */
-    protected boolean actionFirstReceivingDone() {
+    protected void actionFirstReceivingDone() {
         AppModel snapshot = this.beginTransaction();
         try {
             this.model.toSendingResult();
@@ -538,10 +540,8 @@ public class App extends JFrame {
             this.rollback(snapshot);
             e.printStackTrace();          
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
-            return false;
         }
         this.showPerspective(Perspective4Send.class);
-        return true;
     }
 
     /**
@@ -588,7 +588,6 @@ public class App extends JFrame {
         this.model.filename = file;
         this.showPerspective(Perspective1BParticipate.class);
         
-        // TODO: Check that this really are valid transitions
         switch (this.model.state) {
         case NONE:
             showPerspective(Perspective0Start.class);
@@ -792,25 +791,6 @@ public class App extends JFrame {
     }
     
     /**
-     * Register periodically execution
-     */
-    protected void startScheduledExecution(Perspective perspective){
-        schedulerExecutionHandler = scheduler.scheduleAtFixedRate(perspective,
-                                                                  0,
-                                                                  Resources.INTERVAL_SCHEDULER_SECONDS,
-                                                                  SECONDS);
-    } 
-    
-    /**
-     * Stop periodically execution
-     */
-    protected void stopScheduledExecution() {
-        if (schedulerExecutionHandler != null) {
-            schedulerExecutionHandler.cancel(true);
-        }
-    }
-    
-    /**
      * Returns the model
      * @return
      */
@@ -840,5 +820,13 @@ public class App extends JFrame {
      */
     public JMenuItem getJmiInterimSave() {
         return jmiInterimSave;
+    }
+    
+    
+    /**
+     * calls the stateChange event on the current displayed perspective
+     */
+    public void stateChangedCurrentDisplayedPerspective(ChangeEvent changeEvent) {
+        perspectives.get(currentPerspective).stateChanged(changeEvent);
     }
 }

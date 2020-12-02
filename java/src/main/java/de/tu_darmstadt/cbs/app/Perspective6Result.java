@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.EntryBinNoButton;
@@ -68,7 +69,6 @@ public class Perspective6Result extends Perspective {
      */
     @Override
     public void initialize() {
-        getApp().stopScheduledExecution(); // stop possible task execution
         participants.removeAll();
         bins.removeAll();
         this.title.setText(getApp().getModel().name);
@@ -134,9 +134,12 @@ public class Perspective6Result extends Perspective {
         central.add(pane, BorderLayout.SOUTH);
     }
     
+    /**
+     * Reacts on all changes in any components
+     */
     @Override
-    public void run() {
-        // Empty per default
-        
+    public void stateChanged(ChangeEvent e) {
+        // Empty by default        
     }
+   
 }

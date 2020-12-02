@@ -180,7 +180,6 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     protected void initialize() {
 
         // Clear
-        getApp().stopScheduledExecution(); // stop possible task execution
         participants.removeAll();
         bins.removeAll();
         
@@ -208,9 +207,4 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         bins.repaint();
     }
     
-    @Override
-    public void run() {
-        // Empty per default
-        
-    }
 }

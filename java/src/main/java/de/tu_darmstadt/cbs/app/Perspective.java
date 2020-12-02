@@ -19,13 +19,14 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeListener;
 
 /**
  * Implements a perspective in the GUI
  * 
  * @author Fabian Prasser
  */
-public abstract class Perspective implements Runnable {
+public abstract class Perspective implements ChangeListener {
 
     /** App */
     private final App    app;
