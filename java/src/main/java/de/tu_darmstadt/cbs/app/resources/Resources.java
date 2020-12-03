@@ -92,8 +92,12 @@ public class Resources {
     private static final Locale[] AVAILABLE_LANGUAGES       = { Locale.ENGLISH, Locale.GERMAN };
     /** Interval schedule for tasks in background */
     public static final long INTERVAL_SCHEDULER_SECONDS = 3;
-    /** File ending for CSV-Files */
+    /** File ending for CSV-files */
     public static final String FILE_ENDING_CSV = "csv";
+    /** File ending for Excel-2007-files */
+    public static final String FILE_ENDING_EXCEL_XLSX = "xlsx";
+    /** Maximal cells and rows in Excel 2007 format */
+    public static final int MAX_COUNT_EXCEL = 1048576;
 
     /**
      * No instantiation

@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +40,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
@@ -121,11 +127,12 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         if (file != null) {
             try {                
                 EntryBin previousBin = null;
-                Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(';').parse(new FileReader(file));
+                Iterable<CSVRecord> records = CSVFormat.DEFAULT.parse(new FileReader(file));
                 this.bins.removeAll();                
                 for (CSVRecord record : records) {                  
                     previousBin = addBin(previousBin, record.get(0) ,record.get(1), true);
                 }
+                this.stateChanged(new ChangeEvent(this));
                 
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(getPanel(), Resources.getString("App.11"), Resources.getString("PerspectiveCreate.CSVReadingError"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
@@ -133,6 +140,98 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             }
         }
     }
+    
+    /**
+     * Loads bin names and data from an Excel-file
+     */
+    private void actionLoadExcel() {
+        File file = getApp().getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX) );
+        if (file != null) {
+            try {                
+                Workbook workbook = WorkbookFactory.create(file, "", true);
+                Sheet sheet = workbook.getSheetAt(0);
+                this.bins.removeAll();
+                // get all filled rows and columns
+                List<Integer> listRows = new ArrayList<>();
+                List<Integer> listColumns = new ArrayList<>();
+                for (int row = 0; row < Resources.MAX_COUNT_EXCEL; row++) {
+                    boolean rowHasContent = false;
+                    if (sheet.getRow(row) != null) {
+                        for (int column = 0; column < Resources.MAX_COUNT_EXCEL; column++) {
+                            if (sheet.getRow(row).getCell(column) != null &&
+                                sheet.getRow(row).getCell(column).getCellType() != CellType.BLANK) {
+                                rowHasContent = true;
+                                if (!listColumns.contains(column)) listColumns.add(column);
+                            }
+                        }
+                        if (rowHasContent) listRows.add(row);
+                    }
+                }
+                //throw error, if if more then two columns or rows 
+                if (listRows.size() != 2 && listColumns.size() != 2) {
+                    throw new IllegalArgumentException("Exactly two lines or columns required");
+                }
+                int majorModifier, minorModifier;
+                if (listRows.size() == 2) {
+                    majorModifier = 0;
+                    minorModifier = 1;
+                } else {
+                    majorModifier = 1;
+                    minorModifier = 0;
+                }
+                // read data rows or column wise
+                int row = listRows.get(0);
+                int col = listColumns.get(0);
+                EntryBin previousBin = null;
+                while ((listRows.size() != 2 && row <= listRows.get(listRows.size() - 1)) ||
+                       (listColumns.size() != 2 &&
+                        col <= listColumns.get(listColumns.size() - 1))) {
+                    previousBin = addBin(previousBin,
+                                         extractExcelCellContent(sheet.getRow(row).getCell(col),true),
+                                         extractExcelCellContent(sheet.getRow(row + minorModifier).getCell(col + majorModifier),true),
+                                         true);                    
+                    row = row + majorModifier;
+                    col = col + minorModifier;
+                }
+                this.stateChanged(new ChangeEvent(this));
+                workbook.close();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ExcelReadingError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+                e.printStackTrace();
+            }
+            catch (IllegalArgumentException e) {
+                JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ExcelDataError"), Resources.getString("PerspectiveCreate.ExcelDataErrorTitle"),  JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * Extracts the data in an excel cell as a string
+     * @param cell
+     */
+    private String extractExcelCellContent(Cell cell, boolean originalCellType) {
+        if (cell != null) {
+        switch (originalCellType ? cell.getCellType() : cell.getCachedFormulaResultType()){
+            case NUMERIC:
+                double number = cell.getNumericCellValue();
+                //return integer if no decimal part
+                return number == Math.floor(number) ? String.valueOf((int) number) : String.valueOf(number) ;
+            case STRING:
+                return cell.getStringCellValue();
+            case BLANK:
+                return "";
+            case _NONE:
+                return "";
+            case FORMULA:
+                return extractExcelCellContent(cell, false);
+            default:
+                return "";
+         }
+        }
+        else return "";
+    }
+
 
     /**
      * Save the project and proceed.
@@ -140,7 +239,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void actionSave() {
         
         // Check whether at least three participants
-        if (this.participants.getComponents().length < 1) {
+        if (this.participants.getComponents().length < 3) {
             JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.notEnoughParticipants"));
             return;
         }
@@ -352,15 +451,28 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(3, 1));
         
-        // load csv button
-        JButton loadCSV = new JButton(Resources.getString("PerspectiveCreate.loadTextFile"));
+        // load csv buttons
+        JPanel loadbuttonsPane = new JPanel();
+        loadbuttonsPane.setLayout(new GridLayout(1, 2));
+        JButton loadCSV = new JButton(Resources.getString("PerspectiveCreate.loadCSVFile"));
         loadCSV.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionLoadCSV();
             }
         });
-        buttonsPane.add(loadCSV, 0, 0);
+        loadbuttonsPane.add(loadCSV, 0, 0); 
+        
+        // load excel buttons
+        JButton loadExcel = new JButton(Resources.getString("PerspectiveCreate.loadExcelFile"));
+        loadExcel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionLoadExcel();
+            }
+        });
+        loadbuttonsPane.add(loadExcel, 1, 0);        
+        buttonsPane.add(loadbuttonsPane, 0, 0);
         
         // Remove empty lines button
         JButton removeEmptylines = new JButton(Resources.getString("PerspectiveCreate.removeEmptyLines"));
