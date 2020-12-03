@@ -20,7 +20,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -122,13 +121,13 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         if (file != null) {
             try {                
                 EntryBin previousBin = null;
-                Iterable<CSVRecord> records = CSVFormat.DEFAULT.parse(new FileReader(file));
+                Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(';').parse(new FileReader(file));
                 this.bins.removeAll();                
                 for (CSVRecord record : records) {                  
                     previousBin = addBin(previousBin, record.get(0) ,record.get(1), true);
                 }
                 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 JOptionPane.showMessageDialog(getPanel(), Resources.getString("App.11"), Resources.getString("PerspectiveCreate.CSVReadingError"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
                 e.printStackTrace();
             }
@@ -184,7 +183,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         entry.setAddListener(new ActionListener() {
            @Override
             public void actionPerformed(ActionEvent e) {
-               addBin(entry, "", String.valueOf(0), true);
+               addBin(entry, "", "", true);
             } 
         });
         entry.setRemoveListener(new ActionListener() {
@@ -398,7 +397,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
 
         // Add initial
         this.addParticipant(null, true);
-        this.addBin(null, "", String.valueOf(0), true);
+        this.addBin(null, "", "", true);
         
         // Update
         this.stateChanged(new ChangeEvent(this));

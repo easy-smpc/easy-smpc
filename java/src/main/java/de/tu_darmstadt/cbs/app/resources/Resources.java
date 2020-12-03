@@ -88,11 +88,11 @@ public class Resources {
 
     /** Size of checkmark clipart y */
     public static final int             SIZE_CHECKMARK_Y          = 12;
-    
+    /** Available languages */
     private static final Locale[] AVAILABLE_LANGUAGES       = { Locale.ENGLISH, Locale.GERMAN };
-
+    /** Interval schedule for tasks in background */
     public static final long INTERVAL_SCHEDULER_SECONDS = 3;
-
+    /** File ending for CSV-Files */
     public static final String FILE_ENDING_CSV = "csv";
 
     /**

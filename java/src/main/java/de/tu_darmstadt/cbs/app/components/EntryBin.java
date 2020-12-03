@@ -40,14 +40,14 @@ public class EntryBin extends ComponentEntryAddRemove {
      * @param enabled
      */
     public EntryBin(boolean enabled) {
-       this("", enabled, String.valueOf(0), enabled, enabled);
+       this("", enabled, "", enabled, enabled);
     }
     
     /**
      * Creates a new instance
      * @param name
-     * @param value 
      * @param leftEnabled
+     * @param value - zero if empty
      * @param rightEnabled
      * @param additionalControlsEnabled
      */
@@ -67,7 +67,7 @@ public class EntryBin extends ComponentEntryAddRemove {
                   }
               },
               Resources.getString("BinEntry.1"), //$NON-NLS-1$
-              value,
+              !value.trim().isEmpty() ? value : String.valueOf(0),
               rightEnabled,
               new ComponentTextFieldValidator() {
                   @Override
