@@ -295,9 +295,9 @@ public class App extends JFrame {
         fileChooser.setFileFilter(filter);
         int state = 0;
         if (load) {
-            fileChooser.showOpenDialog(this);
+            state = fileChooser.showOpenDialog(this);
         } else {
-            fileChooser.showSaveDialog(this);
+            state = fileChooser.showSaveDialog(this);
         }
         if (state == JFileChooser.APPROVE_OPTION) {
             file = fileChooser.getSelectedFile();
