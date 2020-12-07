@@ -96,8 +96,10 @@ public class Resources {
     public static final String FILE_ENDING_CSV = "csv";
     /** File ending for Excel-2007-files */
     public static final String FILE_ENDING_EXCEL_XLSX = "xlsx";
-    /** Maximal cells and rows in Excel 2007 format */
-    public static final int MAX_COUNT_EXCEL = 1048576;
+    /** Maximal rows in Excel 2007 format */
+    public static final int MAX_COUNT_ROWS_EXCEL = 1048576;
+    /** Maximal columns in Excel 2007 format */
+    public static final int MAX_COUNT_COLUMN_EXCEL = 16384;
 
     /**
      * No instantiation
