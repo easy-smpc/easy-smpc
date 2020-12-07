@@ -102,19 +102,24 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      * Removes empty lines in participants and bins
      */
     private void actionRemoveEmptyLines() {
-        //Remove participants if both fields empty
         for (Component entry : this.participants.getComponents()) {
-            if (((EntryParticipant) entry).getLeftValue().trim().isEmpty() &&
-                ((EntryParticipant) entry).getRightValue().trim().isEmpty()) {
-                removeParticipant((EntryParticipant) entry);
+            if (this.participants.getComponentCount() > 1) {
+                // Remove participants if both fields empty
+                if (((EntryParticipant) entry).getLeftValue().trim().isEmpty() &&
+                    ((EntryParticipant) entry).getRightValue().trim().isEmpty()) {
+                    removeParticipant((EntryParticipant) entry);
+                }
             }
         }
-        //Remove bin if left field empty and right field empty or zero
+
         for (Component entry : this.bins.getComponents()) {
-            if (((EntryBin) entry).getLeftValue().trim().isEmpty() &&
-                (((EntryBin) entry).getRightValue().trim().isEmpty()) ||
-                ((EntryBin) entry).getRightValue().trim().equals("0")) {
-                removeBin((EntryBin) entry);
+            if (this.bins.getComponentCount() > 1) {
+                // Remove bin if left field empty and right field empty or zero
+                if (((EntryBin) entry).getLeftValue().trim().isEmpty() &&
+                    ((((EntryBin) entry).getRightValue().trim().isEmpty()) ||
+                     ((EntryBin) entry).getRightValue().trim().equals(String.valueOf(0)))) {
+                    removeBin((EntryBin) entry);
+                }
             }
         }
     }
