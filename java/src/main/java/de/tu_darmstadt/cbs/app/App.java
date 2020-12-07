@@ -24,10 +24,13 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
@@ -43,6 +46,12 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
@@ -280,7 +289,65 @@ public class App extends JFrame {
     private AppModel beginTransaction() {
         return this.model != null ? (AppModel)this.model.clone() : null;
     }
-
+    
+    /**
+     * Reads data from an Excel file
+     * @return List of data
+     */
+    public HashMap<String, String> getCSVData() {        
+        HashMap<String, String> resultMap = null;
+        File file = getFile(true,
+                            new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"),
+                                                        Resources.FILE_ENDING_CSV));
+        String delimiter = (String) JOptionPane.showInputDialog(null,
+                                                                Resources.getString("App.24"),
+                                                                Resources.getString("App.23"),
+                                                                JOptionPane.QUESTION_MESSAGE,
+                                                                null,
+                                                                Resources.DELIMITERS,
+                                                                Resources.DELIMITERS[0]);
+        if (file != null && delimiter != null) {
+            try {
+                resultMap = new LinkedHashMap<String, String>();
+                Iterable<CSVRecord> records = CSVFormat.newFormat(delimiter.charAt(0))
+                                                       .parse(new FileReader(file));
+                for (CSVRecord record : records) {
+                    resultMap.put(record.get(0), record.get(1));
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this,
+                                              Resources.getString("App.11"), //$NON-NLS-1$
+                                              Resources.getString("PerspectiveCreate.CSVReadingError"),
+                                              JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        }
+        return resultMap;
+    }
+    
+    /**
+     * Reads data from an Excel file
+     * @return List of data
+     */
+    public HashMap<String, String> getExcelData() {
+        File file = getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX) );
+        if (file != null) {
+            try {                
+                Workbook workbook = WorkbookFactory.create(file, "", true);
+                Sheet sheet = workbook.getSheetAt(0);
+                return new ExcelExtractor(sheet).getExtractedData();            
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ExcelReadingError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+                e.printStackTrace();
+            }
+            catch (IllegalArgumentException e) {
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ExcelDataError"), Resources.getString("PerspectiveCreate.ExcelDataErrorTitle"),  JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+    
     /**
      * Opens a file chooser
      * @param load 

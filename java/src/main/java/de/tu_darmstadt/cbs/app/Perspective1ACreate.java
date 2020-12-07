@@ -18,14 +18,12 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -37,13 +35,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
@@ -124,63 +115,31 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     }
     
     /**
-     * Loads bin names and data from a CSV-file
+     * Loads and sets bin names and data from a CSV-file
      */
     private void actionLoadCSV() {
-        File file = getApp().getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV) );
-        String delimiter = (String) JOptionPane.showInputDialog(null,
-                                                                Resources.getString("App.24"),
-                                                                Resources.getString("App.23"),
-                                                                JOptionPane.QUESTION_MESSAGE,
-                                                                null,
-                                                                Resources.DELIMITERS,
-                                                                Resources.DELIMITERS[0]);
-        if (file != null && delimiter != null) {
-            try {                       
-                EntryBin previousBin = null;
-                Iterable<CSVRecord> records = CSVFormat.newFormat(delimiter.charAt(0)).parse(new FileReader(file));
-                this.bins.removeAll();                
-                for (CSVRecord record : records) {                  
-                    previousBin = addBin(previousBin, record.get(0) ,record.get(1), true);
-                }
-                this.stateChanged(new ChangeEvent(this));
-                
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(getPanel(), Resources.getString("App.11"), Resources.getString("PerspectiveCreate.CSVReadingError"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
-                e.printStackTrace();
-            }
-        }
+        setBinNamesValues(getApp().getCSVData());  
     }
     
     /**
-     * Loads bin names and data from an Excel-file
+     * Loads and sets bin names and data from an CSV-file
      */
     private void actionLoadExcel() {
-        File file = getApp().getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX) );
-        if (file != null) {
-            try {                
-                Workbook workbook = WorkbookFactory.create(file, "", true);
-                Sheet sheet = workbook.getSheetAt(0);
-                this.bins.removeAll();
-                ExcelExtractor excelExtractor = new ExcelExtractor(sheet);
-                EntryBin previousBin = null;
-                for (SimpleEntry<String, String> entry : excelExtractor.getExtractedData()) {
-                    previousBin = addBin(previousBin,
-                                         entry.getKey(),
-                                         entry.getValue(),
-                                         true);
-                }                
-                this.stateChanged(new ChangeEvent(this));
-                workbook.close();
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ExcelReadingError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
-                e.printStackTrace();
-            }
-            catch (IllegalArgumentException e) {
-                JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ExcelDataError"), Resources.getString("PerspectiveCreate.ExcelDataErrorTitle"),  JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
-                e.printStackTrace();
+        setBinNamesValues(getApp().getExcelData());        
+    }
+    
+    /**
+     * Sets bin names and values
+     */
+    private void setBinNamesValues(HashMap<String, String> data) {                 
+        if (data != null) {
+            this.bins.removeAll();
+            EntryBin previousBin = null;
+            for (Entry<String, String> entry : data.entrySet()) {
+                previousBin = addBin(previousBin, entry.getKey(), entry.getValue(), true);
             }
         }
+        this.stateChanged(new ChangeEvent(this));              
     }
 
     /**
@@ -401,7 +360,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(3, 1));
         
-        // load csv buttons
+        // load csv button
         JPanel loadbuttonsPane = new JPanel();
         loadbuttonsPane.setLayout(new GridLayout(1, 2));
         JButton loadCSV = new JButton(Resources.getString("PerspectiveCreate.loadCSVFile"));
@@ -413,7 +372,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         });
         loadbuttonsPane.add(loadCSV, 0, 0); 
         
-        // load excel buttons
+        // load excel button
         JButton loadExcel = new JButton(Resources.getString("PerspectiveCreate.loadExcelFile"));
         loadExcel.addActionListener(new ActionListener() {
             @Override
