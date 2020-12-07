@@ -129,10 +129,17 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      */
     private void actionLoadCSV() {
         File file = getApp().getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV) );
-        if (file != null) {
-            try {                
+        String delimiter = (String) JOptionPane.showInputDialog(null,
+                                                                Resources.getString("App.24"),
+                                                                Resources.getString("App.23"),
+                                                                JOptionPane.QUESTION_MESSAGE,
+                                                                null,
+                                                                Resources.DELIMITERS,
+                                                                Resources.DELIMITERS[0]);
+        if (file != null && delimiter != null) {
+            try {                       
                 EntryBin previousBin = null;
-                Iterable<CSVRecord> records = CSVFormat.DEFAULT.parse(new FileReader(file));
+                Iterable<CSVRecord> records = CSVFormat.newFormat(delimiter.charAt(0)).parse(new FileReader(file));
                 this.bins.removeAll();                
                 for (CSVRecord record : records) {                  
                     previousBin = addBin(previousBin, record.get(0) ,record.get(1), true);
