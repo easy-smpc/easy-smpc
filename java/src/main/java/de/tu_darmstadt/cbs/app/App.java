@@ -296,14 +296,9 @@ public class App extends JFrame {
      */
     public HashMap<String, String> getCSVData() {        
         HashMap<String, String> resultMap = null;
-        
-        // add file filter for csv
-        ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
-        filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"),
-                                                Resources.FILE_ENDING_CSV));      
-        // get file
-        File file = getFile(true, filters);
-        // get delimter
+        File file = getFile(true,
+                            new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"),
+                                                        Resources.FILE_ENDING_CSV));
         String delimiter = (String) JOptionPane.showInputDialog(null,
                                                                 Resources.getString("App.24"),
                                                                 Resources.getString("App.23"),
@@ -335,13 +330,7 @@ public class App extends JFrame {
      * @return List of data
      */
     public HashMap<String, String> getExcelData() {
-        //set filter 
-        ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
-        filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX)); 
-        filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription97"), Resources.FILE_ENDING_EXCEL_XLS)); 
-        
-        // get file
-        File file = getFile(true, filters);
+        File file = getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX) );
         if (file != null) {
             try {                
                 Workbook workbook = WorkbookFactory.create(file, "", true);
@@ -365,16 +354,12 @@ public class App extends JFrame {
      * @param fileNameExtensionFilter
      * @return
      */
-    public File getFile(boolean load, ArrayList<FileNameExtensionFilter> filters) {
+    public File getFile(boolean load, FileNameExtensionFilter filter) {
 
         // File
         File file = null;
-        JFileChooser fileChooser = new JFileChooser();
-        for (FileNameExtensionFilter filter : filters) {
-            fileChooser.addChoosableFileFilter(filter);
-        }
-        fileChooser.setFileFilter(filters.get(0));
-        
+        JFileChooser fileChooser = new JFileChooser();      
+        fileChooser.setFileFilter(filter);
         int state = 0;
         if (load) {
             state = fileChooser.showOpenDialog(this);
@@ -647,11 +632,9 @@ public class App extends JFrame {
      * Load action
      */
     protected void actionLoad() {
-        
-         ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
-         filters.add(new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING));
+
         // Open dialog
-        File file = getFile(true, filters);
+        File file = getFile(true, new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING));
         
         // Check
         if (file == null) {
@@ -811,12 +794,8 @@ public class App extends JFrame {
     protected boolean actionSave() {
         
         if (model.filename == null) {
-            // set file filter
-            ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
-            filters.add(new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING)); 
-     
             // Open dialog
-            File file = getFile(false, filters);
+            File file = getFile(false,  new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING));
 
             // Check
             if (file == null) { return false; }

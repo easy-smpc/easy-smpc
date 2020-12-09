@@ -93,11 +93,9 @@ public class Resources {
     /** Interval schedule for tasks in background */
     public static final long      INTERVAL_SCHEDULER_SECONDS = 3;
     /** File ending for CSV-files */
-    public static final String    FILE_ENDING_CSV            = "csv";  
+    public static final String    FILE_ENDING_CSV            = "csv";
     /** File ending for Excel-2007-files */
     public static final String    FILE_ENDING_EXCEL_XLSX     = "xlsx";
-    /** File ending for Excel-97-files */
-    public static final String    FILE_ENDING_EXCEL_XLS     = "xls";
     /** Maximal rows in Excel 2007 format */
     public static final int       MAX_COUNT_ROWS_EXCEL       = 1048576;
     /** Maximal columns in Excel 2007 format */
