@@ -291,8 +291,8 @@ public class App extends JFrame {
     }
     
     /**
-     * Reads data from an Excel file
-     * @return List of data
+     * Reads data from an CSV file
+     * @return data
      */
     public HashMap<String, String> getCSVData() {        
         HashMap<String, String> resultMap = null;
@@ -332,7 +332,7 @@ public class App extends JFrame {
     
     /**
      * Reads data from an Excel file
-     * @return List of data
+     * @return data
      */
     public HashMap<String, String> getExcelData() {
         //set filter 
@@ -343,7 +343,7 @@ public class App extends JFrame {
         // get file
         File file = getFile(true, filters);
         if (file != null) {
-            try {                
+            try {              
                 Workbook workbook = WorkbookFactory.create(file, "", true);
                 Sheet sheet = workbook.getSheetAt(0);
                 return new ExcelExtractor(sheet).getExtractedData();            
