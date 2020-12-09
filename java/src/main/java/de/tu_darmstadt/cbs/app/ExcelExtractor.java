@@ -13,7 +13,9 @@
  */
 package de.tu_darmstadt.cbs.app;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -101,6 +103,7 @@ public class ExcelExtractor {
      * @param sheet
      */
     private void determineFilledRowsColumns() throws IllegalArgumentException {
+        Timestamp ts1 = new Timestamp(new Date().getTime());
         for (int row = 0; row < Resources.MAX_COUNT_ROWS_EXCEL; row++) {
             boolean rowHasContent = false;
             if (sheet.getRow(row) != null) {
@@ -113,8 +116,10 @@ public class ExcelExtractor {
                 }
                 if (rowHasContent) listRows.add(row);
             }
-        }        
-        //throw error, if if more then two columns or rows 
+        }
+        Timestamp ts2 = new Timestamp(new Date().getTime());
+        System.out.println("Length iterating Excel: " +  String.valueOf(ts2.getTime() -ts1.getTime() ));
+        //throw error, if more then two columns or rows 
         if (listRows.size() != EXACT_ROW_COLUMNS_LENGTH && listColumns.size() != EXACT_ROW_COLUMNS_LENGTH) {
             throw new IllegalArgumentException(String.format("", EXACT_ROW_COLUMNS_LENGTH));
         }
