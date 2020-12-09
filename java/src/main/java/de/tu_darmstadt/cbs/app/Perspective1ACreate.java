@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,6 +40,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -162,14 +163,54 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 Workbook workbook = WorkbookFactory.create(file, "", true);
                 Sheet sheet = workbook.getSheetAt(0);
                 this.bins.removeAll();
-                ExcelExtractor excelExtractor = new ExcelExtractor(sheet);
+                // get all filled rows and columns
+                List<Integer> listRows = new ArrayList<>();
+                List<Integer> listColumns = new ArrayList<>();
+                for (int row = 0; row < Resources.MAX_COUNT_ROWS_EXCEL; row++) {
+                    boolean rowHasContent = false;
+                    if (sheet.getRow(row) != null) {
+                        for (int column = 0; column < Resources.MAX_COUNT_COLUMN_EXCEL; column++) {
+                            if (sheet.getRow(row).getCell(column) != null &&
+                                sheet.getRow(row).getCell(column).getCellType() != CellType.BLANK) {
+                                rowHasContent = true;
+                                if (!listColumns.contains(column)) listColumns.add(column);
+                            }
+                        }
+                        if (rowHasContent) listRows.add(row);
+                    }
+                }
+                //throw error, if if more then two columns or rows 
+                if (listRows.size() != 2 && listColumns.size() != 2) {
+                    throw new IllegalArgumentException("Exactly two lines or columns required");
+                }
+                int rowDistancePermanent, colDistancePermanent, rowDistanceTemp, colDistanceTemp;
+                boolean columnsOriented;
+                if (listColumns.size() == 2) {
+                    rowDistancePermanent = 1;
+                    colDistancePermanent = 0;      
+                    rowDistanceTemp = 0;
+                    colDistanceTemp = listColumns.get(1)-listColumns.get(0);
+                    columnsOriented = true;
+                } else {
+                    rowDistancePermanent = 0;
+                    colDistancePermanent = 1;
+                    rowDistanceTemp = listRows.get(1)-listRows.get(0);
+                    colDistanceTemp = 0;
+                    columnsOriented = false;
+                }
+                // read data rows or column wise
+                int row = listRows.get(0);
+                int col = listColumns.get(0);
                 EntryBin previousBin = null;
-                for (SimpleEntry<String, String> entry : excelExtractor.getExtractedData()) {
+                while ((columnsOriented && row <= listRows.get(listRows.size() - 1)) ||
+                       (!columnsOriented && col <= listColumns.get(listColumns.size() - 1))) {
                     previousBin = addBin(previousBin,
-                                         entry.getKey(),
-                                         entry.getValue(),
-                                         true);
-                }                
+                                         extractExcelCellContent(sheet.getRow(row).getCell(col),true),
+                                         extractExcelCellContent(sheet.getRow(row + rowDistanceTemp).getCell(col + colDistanceTemp),true),
+                                         true);                    
+                    row = row + rowDistancePermanent;
+                    col = col + colDistancePermanent;
+                }
                 this.stateChanged(new ChangeEvent(this));
                 workbook.close();
             } catch (IOException e) {
@@ -182,6 +223,33 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             }
         }
     }
+    
+    /**
+     * Extracts the data in an excel cell as a string
+     * @param cell
+     */
+    private String extractExcelCellContent(Cell cell, boolean originalCellType) {
+        if (cell != null) {
+        switch (originalCellType ? cell.getCellType() : cell.getCachedFormulaResultType()){
+            case NUMERIC:
+                double number = cell.getNumericCellValue();
+                //return integer if no decimal part
+                return number == Math.floor(number) ? String.valueOf((int) number) : String.valueOf(number) ;
+            case STRING:
+                return cell.getStringCellValue();
+            case BLANK:
+                return "";
+            case _NONE:
+                return "";
+            case FORMULA:
+                return extractExcelCellContent(cell, false);
+            default:
+                return "";
+         }
+        }
+        else return "";
+    }
+
 
     /**
      * Save the project and proceed.
