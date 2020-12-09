@@ -159,10 +159,10 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 // get all filled rows and columns
                 List<Integer> listRows = new ArrayList<>();
                 List<Integer> listColumns = new ArrayList<>();
-                for (int row = 0; row < Resources.MAX_COUNT_ROWS_EXCEL; row++) {
+                for (int row = 0; row < Resources.MAX_COUNT_EXCEL; row++) {
                     boolean rowHasContent = false;
                     if (sheet.getRow(row) != null) {
-                        for (int column = 0; column < Resources.MAX_COUNT_COLUMN_EXCEL; column++) {
+                        for (int column = 0; column < Resources.MAX_COUNT_EXCEL; column++) {
                             if (sheet.getRow(row).getCell(column) != null &&
                                 sheet.getRow(row).getCell(column).getCellType() != CellType.BLANK) {
                                 rowHasContent = true;
