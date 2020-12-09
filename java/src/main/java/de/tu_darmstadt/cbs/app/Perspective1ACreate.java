@@ -18,9 +18,6 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,10 +33,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
@@ -113,27 +106,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             }
         }
     }
-    
-    /**
-     * Loads bin names and data from a CSV-file
-     */
-    private void actionLoadCSV() {
-        File file = getApp().getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV) );
-        if (file != null) {
-            try {                
-                EntryBin previousBin = null;
-                Iterable<CSVRecord> records = CSVFormat.DEFAULT.parse(new FileReader(file));
-                this.bins.removeAll();                
-                for (CSVRecord record : records) {                  
-                    previousBin = addBin(previousBin, record.get(0) ,record.get(1), true);
-                }
-                
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(getPanel(), Resources.getString("App.11"), Resources.getString("PerspectiveCreate.CSVReadingError"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
-                e.printStackTrace();
-            }
-        }
-    }
 
     /**
      * Save the project and proceed.
@@ -172,19 +144,19 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      * Adds a new line for bin entry
      * @param enabled
      */
-    private EntryBin addBin(EntryBin previous, String name, String value, boolean enabled) {
+    private void addBin(EntryBin previous, boolean enabled) {
 
         // Find index
         int index = Arrays.asList(this.bins.getComponents()).indexOf(previous);
         index = index == -1 ? 0 : index + 1;
         
         // Create and add entry
-        EntryBin entry = new EntryBin(name, enabled, value, enabled, enabled);
+        EntryBin entry = new EntryBin(enabled);
         entry.setChangeListener(this);
         entry.setAddListener(new ActionListener() {
            @Override
             public void actionPerformed(ActionEvent e) {
-               addBin(entry, "", String.valueOf(0), true);
+               addBin(entry, true);
             } 
         });
         entry.setRemoveListener(new ActionListener() {
@@ -196,7 +168,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.bins.add(entry, index);
         this.bins.revalidate();
         this.bins.repaint();
-        return entry;
     }
 
     /**
@@ -350,20 +321,10 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
         
+        // Remove empty lines button and save button
         JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(3, 1));
+        buttonsPane.setLayout(new GridLayout(2, 1));
         
-        // load csv button
-        JButton loadCSV = new JButton(Resources.getString("PerspectiveCreate.loadTextFile"));
-        loadCSV.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionLoadCSV();
-            }
-        });
-        buttonsPane.add(loadCSV, 0, 0);
-        
-        // Remove empty lines button
         JButton removeEmptylines = new JButton(Resources.getString("PerspectiveCreate.removeEmptyLines"));
         removeEmptylines.addActionListener(new ActionListener() {
             @Override
@@ -371,8 +332,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 actionRemoveEmptyLines();
             }
         });
-        buttonsPane.add(removeEmptylines, 0, 1);
-        //save button
+        buttonsPane.add(removeEmptylines, 0, 0);
+        
         save = new JButton(Resources.getString("PerspectiveCreate.save"));
         save.setEnabled(this.areValuesValid());
         save.addActionListener(new ActionListener() {
@@ -381,7 +342,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 actionSave();
             }
         });
-        buttonsPane.add(save, 0, 2);
+        buttonsPane.add(save, 0, 1);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
@@ -398,7 +359,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
 
         // Add initial
         this.addParticipant(null, true);
-        this.addBin(null, "", String.valueOf(0), true);
+        this.addBin(null, true);
         
         // Update
         this.stateChanged(new ChangeEvent(this));

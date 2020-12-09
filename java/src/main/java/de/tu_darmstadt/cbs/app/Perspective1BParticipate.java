@@ -192,7 +192,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             participants.add(newNameEmailParticipantEntry);
         }
         for (Bin currentBin : getApp().getModel().bins) {
-            EntryBin newBin = new EntryBin(currentBin.name, false,String.valueOf(0), true, false);
+            EntryBin newBin = new EntryBin(currentBin.name, false, true, false);
             newBin.setChangeListener(this);
             bins.add(newBin);
         }
