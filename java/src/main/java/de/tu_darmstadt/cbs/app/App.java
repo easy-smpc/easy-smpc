@@ -28,9 +28,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -345,13 +343,9 @@ public class App extends JFrame {
         // get file
         File file = getFile(true, filters);
         if (file != null) {
-            try {
-                Timestamp ts1 = new Timestamp(new Date().getTime());
+            try {              
                 Workbook workbook = WorkbookFactory.create(file, "", true);
                 Sheet sheet = workbook.getSheetAt(0);
-                Timestamp ts2 = new Timestamp(new Date().getTime());
-                System.out.println("Length initial loading Excel: " +  String.valueOf(ts2.getTime() -ts1.getTime() ));
-
                 return new ExcelExtractor(sheet).getExtractedData();            
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ExcelReadingError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               

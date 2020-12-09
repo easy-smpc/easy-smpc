@@ -19,10 +19,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigInteger;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -137,12 +135,9 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         if (data != null) {
             this.bins.removeAll();
             EntryBin previousBin = null;
-            Timestamp ts1 = new Timestamp(new Date().getTime());
             for (Entry<String, String> entry : data.entrySet()) {
                 previousBin = addBin(previousBin, entry.getKey(), entry.getValue(), true);
             }
-            Timestamp ts2 = new Timestamp(new Date().getTime());
-            System.out.println("Length iterating hashmap: " +  String.valueOf(ts2.getTime() -ts1.getTime() ));
         }
         this.stateChanged(new ChangeEvent(this));              
     }
