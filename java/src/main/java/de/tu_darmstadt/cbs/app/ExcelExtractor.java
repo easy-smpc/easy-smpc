@@ -13,9 +13,8 @@
  */
 package de.tu_darmstadt.cbs.app;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -25,7 +24,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 
 /**
- * Class to obtain data if exactly two columns or lines can be found in an Excel file
+ * Helper functions to process data from Microsoft Excel files
  * 
  * @author Felix Wirth
  *
@@ -40,15 +39,18 @@ public class ExcelExtractor {
     /** Exact number rows or columns */
     private final int EXACT_ROW_COLUMNS_LENGTH = 2;
     /** List of extracted data */
-    private HashMap<String, String> extractedData =  new LinkedHashMap <String, String>();
+    private List<SimpleEntry<String, String>> extractedData = new ArrayList<>();
     
     /** Return the extracted data
      * 
      * @return the data
      */
-    public HashMap<String, String> getExtractedData() throws IllegalArgumentException {
+    public List<SimpleEntry<String, String>> getExtractedData() throws IllegalArgumentException {
+        if (extractedData.size() == 0)
+        {
+            extractData();
+        }
         return extractedData;
-        
     }
 
     /**Creates a new instance
@@ -57,7 +59,6 @@ public class ExcelExtractor {
      */
     ExcelExtractor(Sheet sheet) {
         this.sheet = sheet;
-        extractData();
     }
     
     /** Extracts data from the sheet
@@ -89,8 +90,8 @@ public class ExcelExtractor {
         int col = listColumns.get(0);
         while ((columnsOriented && row <= listRows.get(listRows.size() - 1)) ||
                (!columnsOriented && col <= listColumns.get(listColumns.size() - 1))) {
-                extractedData.put(extractExcelCellContent(sheet.getRow(row).getCell(col),true),
-                                                  extractExcelCellContent(sheet.getRow(row + rowDistanceTemp).getCell(col + colDistanceTemp),true));              
+                extractedData.add(new SimpleEntry(extractExcelCellContent(sheet.getRow(row).getCell(col),true),
+                                                  extractExcelCellContent(sheet.getRow(row + rowDistanceTemp).getCell(col + colDistanceTemp),true)));              
             row = row + rowDistancePermanent;
             col = col + colDistancePermanent;
         }        
