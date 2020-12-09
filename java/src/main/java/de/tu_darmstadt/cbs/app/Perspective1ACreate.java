@@ -171,33 +171,27 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 if (listRows.size() != 2 && listColumns.size() != 2) {
                     throw new IllegalArgumentException("Exactly two lines or columns required");
                 }
-                int rowDistancePermanent, colDistancePermanent, rowDistanceTemp, colDistanceTemp;
-                boolean columnsOriented;
-                if (listColumns.size() == 2) {
-                    rowDistancePermanent = 1;
-                    colDistancePermanent = 0;      
-                    rowDistanceTemp = 0;
-                    colDistanceTemp = listColumns.get(1)-listColumns.get(0);
-                    columnsOriented = true;
+                int majorModifier, minorModifier;
+                if (listRows.size() == 2) {
+                    majorModifier = 0;
+                    minorModifier = 1;
                 } else {
-                    rowDistancePermanent = 0;
-                    colDistancePermanent = 1;
-                    rowDistanceTemp = listRows.get(1)-listRows.get(0);
-                    colDistanceTemp = 0;
-                    columnsOriented = false;
+                    majorModifier = 1;
+                    minorModifier = 0;
                 }
                 // read data rows or column wise
                 int row = listRows.get(0);
                 int col = listColumns.get(0);
                 EntryBin previousBin = null;
-                while ((columnsOriented && row <= listRows.get(listRows.size() - 1)) ||
-                       (!columnsOriented && col <= listColumns.get(listColumns.size() - 1))) {
+                while ((listRows.size() != 2 && row <= listRows.get(listRows.size() - 1)) ||
+                       (listColumns.size() != 2 &&
+                        col <= listColumns.get(listColumns.size() - 1))) {
                     previousBin = addBin(previousBin,
                                          extractExcelCellContent(sheet.getRow(row).getCell(col),true),
-                                         extractExcelCellContent(sheet.getRow(row + rowDistanceTemp).getCell(col + colDistanceTemp),true),
+                                         extractExcelCellContent(sheet.getRow(row + minorModifier).getCell(col + majorModifier),true),
                                          true);                    
-                    row = row + rowDistancePermanent;
-                    col = col + colDistancePermanent;
+                    row = row + majorModifier;
+                    col = col + minorModifier;
                 }
                 this.stateChanged(new ChangeEvent(this));
                 workbook.close();
