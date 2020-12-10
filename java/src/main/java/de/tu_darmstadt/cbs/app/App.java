@@ -22,12 +22,10 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,16 +41,15 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
-
 import com.formdev.flatlaf.FlatLightLaf;
 
 import de.tu_darmstadt.cbs.app.components.ComponentProgress;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.DialogAbout;
 import de.tu_darmstadt.cbs.app.components.DialogStringPicker;
+import de.tu_darmstadt.cbs.app.importdata.CSVExtractor;
 import de.tu_darmstadt.cbs.app.importdata.ExcelExtractor;
+import de.tu_darmstadt.cbs.app.importdata.Extractor;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.AppModel;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -274,69 +271,40 @@ public class App extends JFrame {
      */
     private AppModel beginTransaction() {
         return this.model != null ? (AppModel)this.model.clone() : null;
-    }
+    }    
     
     /**
-     * Reads data from an Excel file
+     * Reads data from a file
      * @return List of data
      */
-    public Map<String, String> getCSVData() {        
-        Map<String, String> resultMap = null;
-        
-        // Add file filter for csv
-        ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
-        filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"),
-                                                Resources.FILE_ENDING_CSV));      
-        // Get file
-        File file = getFile(true, filters);
-        // Get delimter
-        String delimiter = (String) JOptionPane.showInputDialog(null,
-                                                                Resources.getString("App.24"),
-                                                                Resources.getString("App.23"),
-                                                                JOptionPane.QUESTION_MESSAGE,
-                                                                null,
-                                                                Resources.DELIMITERS,
-                                                                Resources.DELIMITERS[0]);
-        if (file != null && delimiter != null) {
-            try {
-                resultMap = new LinkedHashMap<String, String>();
-                Iterable<CSVRecord> records = CSVFormat.newFormat(delimiter.charAt(0))
-                                                       .parse(new FileReader(file));
-                for (CSVRecord record : records) {
-                    resultMap.put(record.get(0), record.get(1));
-                }
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this,
-                                              Resources.getString("App.11"), //$NON-NLS-1$
-                                              Resources.getString("PerspectiveCreate.CSVReadingError"),
-                                              JOptionPane.ERROR_MESSAGE);
-                e.printStackTrace();
-            }
-        }
-        return resultMap;
-    }
-    
-    /**
-     * Reads data from an Excel file
-     * @return List of data
-     */
-    public Map<String, String> getExcelData() {
+    public Map<String, String> getDataFromFile() {
         // Set filter 
         ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
         filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX)); 
         filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription97"), Resources.FILE_ENDING_EXCEL_XLS)); 
+        filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
         
         // Get file
         File file = getFile(true, filters);
         if (file != null) {
-            try {                
-                return new ExcelExtractor(file).getExtractedData();            
+            try {
+                Extractor extractor;
+                
+                // Choose correct extractor
+                if (file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS)) {
+                    extractor = new ExcelExtractor(file);
+                }
+                else {
+                    extractor = new CSVExtractor(file);
+                }
+                
+                return extractor.getExtractedData();            
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ExcelReadingError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
                 e.printStackTrace();
             }
             catch (IllegalArgumentException e) {
-                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ExcelDataError"), Resources.getString("PerspectiveCreate.ExcelDataErrorTitle"),  JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadDataError"), Resources.getString("App.11"),  JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
                 e.printStackTrace();
             }
         }

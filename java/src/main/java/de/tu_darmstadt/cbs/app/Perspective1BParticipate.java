@@ -101,46 +101,47 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     }
     
     /**
-     * Loads and sets bin names and data from an Excel-file
+     * Loads and sets bin names and data from a file
      */
-    private void actionLoadExcel() {
-        setBinValues(getApp().getExcelData());           
-    }
-    
-    /**
-     * Loads and sets bin names and data from an CSV-file
-     */
-    private void actionLoadCSV() {
-        setBinValues(getApp().getCSVData());           
+    private void actionLoadFromFile() {
+        Map<String, String> data  = getApp().getDataFromFile();        
+        if (data != null) {
+            
+            // if data has exactly one entry more then expected the first line is probably a header
+            if (data.size() == this.bins.getComponentCount() + 1) {
+                data.remove((String) data.values().toArray()[0]);
+            }
+
+            // Check data has expected length
+            if (data.size() == this.bins.getComponentCount()) {
+                setBinValues(data);
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(getPanel(),
+                                              Resources.getString("PerspectiveCreate.BinsLengthUnequalData"), //$NON-NLS-1$
+                                              Resources.getString("App.11"),
+                                              JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
     
     /**
      * Sets bin values
      */
     private void setBinValues(Map<String,String> data ) {
-        // TODO remove header line
-        if (data != null) {
-            if (data.size() == this.bins.getComponentCount()) {
-                int index = 0;
-                if (data != null) {
-                    for (Component c : this.bins.getComponents()) {
-                        String value = data.get(((EntryBin) c).getLeftValue());
-                        if (value == null) {
-                            value = (String) data.values().toArray()[index];
-                            
-                        }
-                        ((EntryBin) c).setRightValue(value);
-                        index++;
-                    }
-                }
-                this.stateChanged(new ChangeEvent(this));
-            } else {
-                JOptionPane.showMessageDialog(getPanel(),
-                                              Resources.getString("PerspectiveCreate.BinsLengthUnequalData"), //$NON-NLS-1$
-                                              Resources.getString("App.11"),
-                                              JOptionPane.ERROR_MESSAGE);
+        int index = 0;
+        for (Component c : this.bins.getComponents()) {
+            String value = data.get(((EntryBin) c).getLeftValue());
+            
+            // If no success with key value use order to get value
+            if (value == null) {
+                value = (String) data.values().toArray()[index];
             }
-        } 
+            ((EntryBin) c).setRightValue(value);
+            index++;
+        }
+        this.stateChanged(new ChangeEvent(this));
     }
 
     /**
@@ -205,34 +206,20 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         pane = new JScrollPane(bins);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
-           
         
-        // Load csv button
-        JPanel loadbuttonsPane = new JPanel();
-        loadbuttonsPane.setLayout(new GridLayout(1, 2));
-        JButton loadCSV = new JButton(Resources.getString("PerspectiveCreate.loadCSVFile"));
-        loadCSV.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionLoadCSV();
-            }
-
-        });
-        loadbuttonsPane.add(loadCSV, 0, 0); 
-        
+        // Buttons pane
         JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(2, 1));
+        buttonsPane.setLayout(new GridLayout(3, 1));
         
-        // Load excel button
-        JButton loadExcel = new JButton(Resources.getString("PerspectiveCreate.loadExcelFile"));
-        loadExcel.addActionListener(new ActionListener() {
+        // Load from file button      
+        JButton loadFromFile = new JButton(Resources.getString("PerspectiveCreate.LoadFromFile"));
+        loadFromFile.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionLoadExcel();
+                actionLoadFromFile();
             }
         });
-        loadbuttonsPane.add(loadExcel, 1, 0);        
-        buttonsPane.add(loadbuttonsPane, 0, 0);
+        buttonsPane.add(loadFromFile, 0, 0);   
 
         // Save button
         save = new JButton(Resources.getString("PerspectiveParticipate.save"));

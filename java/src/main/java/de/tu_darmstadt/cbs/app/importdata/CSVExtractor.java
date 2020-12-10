@@ -32,8 +32,6 @@ import org.apache.commons.csv.CSVRecord;
 public class CSVExtractor extends Extractor{
     /** file */
     private File file;
-    /** Delimiter for file */
-    private String delimiter;
    
     /**
      * Creates a new instance
@@ -42,9 +40,8 @@ public class CSVExtractor extends Extractor{
      * @throws IOException 
      * @throws FileNotFoundException 
      */
-    public CSVExtractor(File file, String delimiter) throws FileNotFoundException, IOException {
+    public CSVExtractor(File file) throws FileNotFoundException, IOException {
         this.file = file;
-        this.delimiter = delimiter;
         extractData();
     }
     
@@ -56,11 +53,21 @@ public class CSVExtractor extends Extractor{
      */
     private void extractData() throws FileNotFoundException, IOException {
         extractedData = new LinkedHashMap<String, String>();
-        Iterable<CSVRecord> records = CSVFormat.newFormat(delimiter.charAt(0))
+        Iterable<CSVRecord> records = CSVFormat.newFormat(identifyDelimiter())
                                                .parse(new FileReader(file));
         for (CSVRecord record : records) {
             extractedData.put(record.get(0), record.get(1));
         }
+    }
+
+    /**
+     * Try to identify delimiter in CSV file
+     * 
+     * @return
+     */
+    private char identifyDelimiter() {
+     // TODO Do an actual implementation
+        return ';'; 
     }
 
     @Override

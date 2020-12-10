@@ -115,31 +115,25 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     }
     
     /**
-     * Loads and sets bin names and data from a CSV-file
+     * Loads and sets bin names and data from a file
      */
-    private void actionLoadCSV() {
-        setBinNamesValues(getApp().getCSVData());  
-    }
-    
-    /**
-     * Loads and sets bin names and data from an CSV-file
-     */
-    private void actionLoadExcel() {
-        setBinNamesValues(getApp().getExcelData());        
+    private void actionLoadFromFile() {
+        Map data = getApp().getDataFromFile();
+        if (data != null) {
+            setBinNamesValues(data);
+        }   
     }
     
     /**
      * Sets bin names and values
      */
     private void setBinNamesValues(Map<String, String> data) {                 
-        if (data != null) {
-            this.bins.removeAll();
-            EntryBin previousBin = null;
-            for (Entry<String, String> entry : data.entrySet()) {
-                previousBin = addBin(previousBin, entry.getKey(), entry.getValue(), true);
-            }
+        this.bins.removeAll();
+        EntryBin previousBin = null;
+        for (Entry<String, String> entry : data.entrySet()) {
+            previousBin = addBin(previousBin, entry.getKey(), entry.getValue(), true);
         }
-        this.stateChanged(new ChangeEvent(this));              
+        this.stateChanged(new ChangeEvent(this));           
     }
 
     /**
@@ -357,31 +351,19 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
         
+        // Buttons pane
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(3, 1));
         
-        // Load csv button
-        JPanel loadbuttonsPane = new JPanel();
-        loadbuttonsPane.setLayout(new GridLayout(1, 2));
-        JButton loadCSV = new JButton(Resources.getString("PerspectiveCreate.loadCSVFile"));
-        loadCSV.addActionListener(new ActionListener() {
+        // Load from file button      
+        JButton loadFromFile = new JButton(Resources.getString("PerspectiveCreate.LoadFromFile"));
+        loadFromFile.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionLoadCSV();
+                actionLoadFromFile();
             }
         });
-        loadbuttonsPane.add(loadCSV, 0, 0); 
-        
-        // Load excel button
-        JButton loadExcel = new JButton(Resources.getString("PerspectiveCreate.loadExcelFile"));
-        loadExcel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionLoadExcel();
-            }
-        });
-        loadbuttonsPane.add(loadExcel, 1, 0);        
-        buttonsPane.add(loadbuttonsPane, 0, 0);
+        buttonsPane.add(loadFromFile, 0, 0);        
         
         // Remove empty lines button
         JButton removeEmptylines = new JButton(Resources.getString("PerspectiveCreate.removeEmptyLines"));
@@ -392,6 +374,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             }
         });
         buttonsPane.add(removeEmptylines, 0, 1);
+        
         // Save button
         save = new JButton(Resources.getString("PerspectiveCreate.save"));
         save.setEnabled(this.areValuesValid());
