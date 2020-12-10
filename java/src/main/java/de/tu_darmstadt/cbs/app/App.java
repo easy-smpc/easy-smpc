@@ -13,8 +13,6 @@
  */
 package de.tu_darmstadt.cbs.app;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.HeadlessException;
@@ -33,7 +31,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.Executors;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -44,7 +41,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.event.ChangeEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.csv.CSVFormat;
@@ -113,8 +109,6 @@ public class App extends JFrame {
     private List<Perspective> perspectives = new ArrayList<Perspective>();
     /** Interim save menu item */
     private JMenuItem jmiInterimSave;
-    /** Index of current displayed perspective */
-    private int currentPerspective;
 
     /**
      * Creates a new instance
@@ -259,13 +253,7 @@ public class App extends JFrame {
         
         // Show the first perspective
         showPerspective(0);
-        
-        // Register periodically execution
-        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new TaskPollClipboard(this),
-                                                                                     0,
-                                                                                     Resources.INTERVAL_SCHEDULER_SECONDS,
-                                                                                     SECONDS);
-
+             
         // Finally, make the frame visible
         this.setVisible(true);
     }
@@ -500,7 +488,6 @@ public class App extends JFrame {
      */
     private void showPerspective(int index) {
         showPerspective(perspectives.get(index));
-        currentPerspective = index;
     }
     
     /**
@@ -908,13 +895,5 @@ public class App extends JFrame {
      */
     public JMenuItem getJmiInterimSave() {
         return jmiInterimSave;
-    }
-    
-    
-    /**
-     * calls the stateChange event on the current displayed perspective
-     */
-    public void stateChangedCurrentDisplayedPerspective(ChangeEvent changeEvent) {
-        perspectives.get(currentPerspective).stateChanged(changeEvent);
     }
 }

@@ -91,7 +91,7 @@ public class Resources {
     /** Available languages */
     private static final Locale[] AVAILABLE_LANGUAGES       = { Locale.ENGLISH, Locale.GERMAN };
     /** Interval schedule for tasks in background */
-    public static final long      INTERVAL_SCHEDULER_SECONDS = 3;
+    public static final long      INTERVAL_SCHEDULER_MILLISECONDS = 200;
     /** File ending for CSV-files */
     public static final String    FILE_ENDING_CSV            = "csv";  
     /** File ending for Excel-2007-files */

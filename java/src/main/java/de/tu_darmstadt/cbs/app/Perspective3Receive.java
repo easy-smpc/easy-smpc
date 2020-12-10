@@ -63,6 +63,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     protected Perspective3Receive(App app) {
         super(app, Resources.getString("PerspectiveReceive.receive"), 3); //$NON-NLS-1$
+        // Register execution periodically
+        new TaskPollClipboardReceive(this);
     }
 
     /**
@@ -72,6 +74,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     protected Perspective3Receive(App app, int progress) {
         super(app, Resources.getString("PerspectiveReceive.receive"), progress); //$NON-NLS-1$
+        // Register execution periodically
+        new TaskPollClipboardReceive(this);
     }
     
     /**
@@ -81,6 +85,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     protected Perspective3Receive(App app, String title , int progress) {
         super(app, title, progress); //$NON-NLS-1$
+        new TaskPollClipboardReceive(this);
     }
     
     @Override
@@ -212,5 +217,5 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             participants.add(entry);
         }
         this.stateChanged(new ChangeEvent(this));
-    }    
+    }
 }

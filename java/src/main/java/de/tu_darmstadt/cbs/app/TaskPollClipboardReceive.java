@@ -13,31 +13,40 @@
  */
 package de.tu_darmstadt.cbs.app;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import javax.swing.event.ChangeEvent;
 
+import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.AppState;
 
 /**
  * A class to poll the clipboard periodically for messages
- * @author Felix Wirth
  * 
+ * @author Felix Wirth
  */
-public class TaskPollClipboard implements Runnable {
-    /** App */
-    private App app;
+public class TaskPollClipboardReceive implements Runnable {
+    /** PerspectiveReceive */
+    private Perspective3Receive perspectiveReceive;
 
     /**
-     * @return the app
+     * @return the perspectiveReceive
      */
-    public App getApp() {
-        return app;
+    public Perspective3Receive getPerspectiveReceive() {
+        return perspectiveReceive;
     }
     
     /**
      * Creates a new instance
      */
-    TaskPollClipboard(App app) {
-        this.app = app;
+    public TaskPollClipboardReceive(Perspective3Receive perspectiveReceive) {
+        this.perspectiveReceive = perspectiveReceive;
+        Executors.newScheduledThreadPool(1)
+                 .scheduleAtFixedRate(this,
+                                      0,
+                                      Resources.INTERVAL_SCHEDULER_MILLISECONDS,
+                                      TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -45,15 +54,15 @@ public class TaskPollClipboard implements Runnable {
      */
     @Override
     public void run() {
-        //If app is in state to receive a message
-        if (getApp().getModel() != null &&
-            (getApp().getModel().state == AppState.RECIEVING_SHARE ||
-             getApp().getModel().state == AppState.RECIEVING_RESULT)) {
-            //if successfully set new message update perspective
-            if (getApp().actionReceiveMessage(false))
-            {   
-                getApp().stateChangedCurrentDisplayedPerspective(new ChangeEvent(this));
+        // If app is in state to receive a message
+        if (perspectiveReceive.getApp().getModel() != null &&
+            (perspectiveReceive.getApp().getModel().state == AppState.RECIEVING_SHARE ||
+             perspectiveReceive.getApp().getModel().state == AppState.RECIEVING_RESULT)) {
+            // if successfully set new message update perspective
+            if (perspectiveReceive.getApp().actionReceiveMessage(false)) {
+                perspectiveReceive.stateChanged(new ChangeEvent(this));
             }
-        }        
+        }
     }
+    
 }
