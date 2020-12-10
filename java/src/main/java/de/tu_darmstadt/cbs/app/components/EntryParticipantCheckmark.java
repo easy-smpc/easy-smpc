@@ -59,7 +59,6 @@ public class EntryParticipantCheckmark extends EntryParticipant {
             imageLabel.setIcon(new ImageIcon(imageScaled));
             panel.add(imageLabel, BorderLayout.EAST);
         } catch (IOException e) {
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("Participant.3"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
         }
         return panel;

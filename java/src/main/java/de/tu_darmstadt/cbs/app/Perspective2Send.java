@@ -204,7 +204,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             }
 
         } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this.getPanel(), Resources.getString("PerspectiveSend.mailToError"), Resources.getString("PerspectiveSend.mailToErrorTitle"), JOptionPane.ERROR_MESSAGE);
         }
         this.stateChanged(new ChangeEvent(this));

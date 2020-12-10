@@ -28,6 +28,7 @@ import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 
@@ -176,13 +177,12 @@ public class Resources {
             }
             content = sb.toString();
         } catch (IOException e) {
-            e.printStackTrace();
-            
+            JOptionPane.showMessageDialog(null, Resources.getString("Resources.ErrorLicenseLoading"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE);            
         } finally {
             try {
                 br.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, Resources.getString("Resources.ErrorLicenseLoading"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE);            
             }
         }
         return content;

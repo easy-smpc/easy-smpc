@@ -299,11 +299,9 @@ public class App extends JFrame {
                 return extractor.getExtractedData();            
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
-                e.printStackTrace();
             }
             catch (IllegalArgumentException e) {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadDataError"), Resources.getString("App.11"),  JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
-                e.printStackTrace();
             }
         }
         return null;
@@ -469,7 +467,6 @@ public class App extends JFrame {
                 new App();
                 dispose();
             } catch (IOException e) {
-                e.printStackTrace();
                 JOptionPane.showMessageDialog(this, Resources.getString("App.21") , Resources.getString("App.19"), JOptionPane.ERROR_MESSAGE);
                 Resources.setResourceBundleLocale(oldLocale);
             }
@@ -486,7 +483,6 @@ public class App extends JFrame {
             this.model.toStarting();
         } catch (IllegalStateException | IOException e) {
             this.rollback(snapshot);
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("App.15"), Resources.getString("App.22"), JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -511,7 +507,6 @@ public class App extends JFrame {
             }
         } catch (IllegalStateException | IOException e) {
             this.rollback(snapshot);
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("App.15"), Resources.getString("App.22"), JOptionPane.ERROR_MESSAGE);
 
         }
@@ -539,8 +534,7 @@ public class App extends JFrame {
             this.model.toSendingResult();
             this.model.saveProgram();
         } catch (Exception e) {
-            this.rollback(snapshot);
-            e.printStackTrace();          
+            this.rollback(snapshot);    
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
         }
         this.showPerspective(Perspective4Send.class);
@@ -555,8 +549,7 @@ public class App extends JFrame {
             this.model.toRecievingShares();
             this.model.saveProgram();
         } catch (IllegalStateException | IOException e) {
-            this.rollback(snapshot);
-            e.printStackTrace();          
+            this.rollback(snapshot);      
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveSend.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -583,7 +576,6 @@ public class App extends JFrame {
             this.model = AppModel.loadModel(file);
         } catch (Exception e) {
             this.model = null;
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("App.11"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE ); //$NON-NLS-1$
             return;
         }
@@ -660,7 +652,6 @@ public class App extends JFrame {
                 this.model.toEnteringValues(data);
                 this.showPerspective(Perspective1BParticipate.class);
             } catch (Exception e) {
-                e.printStackTrace();
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveParticipate.stringError"), Resources.getString("PerspectiveParticipate.stringErrorTitle"), JOptionPane.ERROR_MESSAGE);
                 this.model = null;
             }
@@ -752,7 +743,6 @@ public class App extends JFrame {
             return true;
         } catch (IOException e) {
             this.rollback(snapshot);
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$
             return false;
         }
@@ -770,7 +760,6 @@ public class App extends JFrame {
             this.model.saveProgram();
         } catch (Exception e) {
             this.rollback(snapshot);
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
             return false;
         }
@@ -788,7 +777,6 @@ public class App extends JFrame {
             this.model.saveProgram();
         } catch (IOException e) {
             this.rollback(snapshot);
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveSend.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
             return;
         }
