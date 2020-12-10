@@ -32,7 +32,6 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  * Class to obtain data if exactly two columns or lines can be found in an Excel file
  * 
  * @author Felix Wirth
- *
  */
 public class ExcelExtractor extends Extractor {
     /** The excel sheet */

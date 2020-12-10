@@ -27,7 +27,6 @@ import org.apache.commons.csv.CSVRecord;
  * Class to obtain data if exactly two columns or lines can be found in an Excel file
  * 
  * @author Felix Wirth
- *
  */
 public class CSVExtractor extends Extractor{
     /** file */

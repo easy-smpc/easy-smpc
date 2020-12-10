@@ -20,7 +20,6 @@ import java.util.Map;
  * Implements an extractor for data
  * 
  * @author Felix Wirth
- *
  */
 public abstract class Extractor {
     /** Exact number rows or columns */
