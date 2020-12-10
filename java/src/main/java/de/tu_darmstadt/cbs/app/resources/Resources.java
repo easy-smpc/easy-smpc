@@ -99,10 +99,10 @@ public class Resources {
     public static final String    FILE_ENDING_EXCEL_XLSX     = "xlsx";
     /** File ending for Excel-97-files */
     public static final String    FILE_ENDING_EXCEL_XLS     = "xls";
-    /** Maximal rows in Excel 2007 format */
-    public static final int       MAX_COUNT_ROWS_EXCEL       = 64;
-    /** Maximal columns in Excel 2007 format */
-    public static final int       MAX_COUNT_COLUMN_EXCEL     = 64;
+    /** Maximal rows considered */
+    public static final int       MAX_COUNT_ROWS       = 64;
+    /** Maximal columns considered */
+    public static final int       MAX_COUNT_COLUMNS     = 64;
     /** Standard delimiter for CSV files */
     public static final String[]  DELIMITERS                 = { ";", ",", "|" };
 

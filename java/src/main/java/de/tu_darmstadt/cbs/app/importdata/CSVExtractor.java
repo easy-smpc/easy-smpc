@@ -13,49 +13,57 @@
  */
 package de.tu_darmstadt.cbs.app.importdata;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
+import de.tu_darmstadt.cbs.app.resources.Resources;
 
 /**
- * Class to obtain data if exactly two columns or lines can be found in an Excel file
+ * Class to obtain data if exactly two columns or lines can be found in an Excel
+ * file
  * 
  * @author Felix Wirth
  */
-public class CSVExtractor extends Extractor{
-    /** file */
-    private File file;
-   
+public class CSVExtractor extends Extractor {
+    
     /**
      * Creates a new instance
      * 
-     * @param  file
-     * @throws IOException 
-     * @throws FileNotFoundException 
+     * @param file
+     * @throws IOException
+     * @throws IllegalArgumentException
      */
-    public CSVExtractor(File file) throws FileNotFoundException, IOException {
-        this.file = file;
-        extractData();
+    public CSVExtractor(File file) throws IOException, IllegalArgumentException {
+        super(file);
     }
-    
-    /**
-     * Extracts the data
-     * @throws IOException 
-     * @throws FileNotFoundException 
-     * 
-     */
-    private void extractData() throws FileNotFoundException, IOException {
-        extractedData = new LinkedHashMap<String, String>();
-        Iterable<CSVRecord> records = CSVFormat.newFormat(identifyDelimiter())
-                                               .parse(new FileReader(file));
-        for (CSVRecord record : records) {
-            extractedData.put(record.get(0), record.get(1));
+
+    @Override
+    protected void loadDataRaw() throws IOException {
+        String delimiter = identifyDelimiter();
+        int indexRow = 0;
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = reader.readLine()) != null && indexRow < Resources.MAX_COUNT_ROWS) {
+                // TODO Remove more than one delimiter next to another
+                String[] splittedString = line.split(delimiter);
+                int indexCol = 0;
+                while (indexCol < splittedString.length && indexCol < Resources.MAX_COUNT_COLUMNS) {
+                    if (splittedString[indexCol] != null &&
+                        !splittedString[indexCol].trim().isEmpty()) {
+                        dataRaw[indexRow][indexCol] = splittedString[indexCol];
+                    } else {
+                        dataRaw[indexRow][indexCol] = null;
+                    }
+                    indexCol++;
+                }
+                indexRow++;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -64,13 +72,8 @@ public class CSVExtractor extends Extractor{
      * 
      * @return
      */
-    private char identifyDelimiter() {
-     // TODO Do an actual implementation
-        return ';'; 
-    }
-
-    @Override
-    public Map<String, String> getExtractedData() throws IllegalArgumentException {
-        return extractedData;
+    private String identifyDelimiter() {
+        // TODO Do an actual implementation
+        return ";";
     }
 }
