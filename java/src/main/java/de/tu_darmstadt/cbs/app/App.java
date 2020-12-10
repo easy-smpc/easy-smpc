@@ -15,10 +15,6 @@ package de.tu_darmstadt.cbs.app;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.HeadlessException;
-import java.awt.Toolkit;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -50,8 +46,10 @@ import de.tu_darmstadt.cbs.app.components.DialogStringPicker;
 import de.tu_darmstadt.cbs.app.importdata.CSVExtractor;
 import de.tu_darmstadt.cbs.app.importdata.ExcelExtractor;
 import de.tu_darmstadt.cbs.app.importdata.Extractor;
+import de.tu_darmstadt.cbs.app.importdata.TaskPollClipboardReceive;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.AppModel;
+import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.InitialMessage;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
@@ -359,40 +357,10 @@ public class App extends JFrame {
         // Should work
         return file;
     }
-
-    /**
-     * Convenience method to remove exchange message tags
-     * @param text
-     * @return
-     */
-    private String getStrippedExchangeMessage(String text) {
-        text = text.replaceAll("\n", "").trim();
-        if (text.contains(Resources.MESSAGE_START_TAG)) {
-            text = text.substring(text.indexOf(Resources.MESSAGE_START_TAG) + Resources.MESSAGE_START_TAG.length(), text.length());
-        }
-        if (text.contains(Resources.MESSAGE_END_TAG)) {
-            text = text.substring(0, text.indexOf(Resources.MESSAGE_END_TAG));
-        }
-        return text;
-    }
-
-    /**
-     * Returns text from clip board if valid
-     * @return clip board text
-     */
-    private String getTextFromClipBoard() {
-        String text = "";
-        if (Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).isDataFlavorSupported(DataFlavor.stringFlavor)) {
-            try {
-                text = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);              
-            } catch (HeadlessException | UnsupportedFlavorException | IOException e) {
-            }
-        };
-        return text;
-    }
     
     /**
      * Check whether initial participation message is valid
+     * 
      * @param text
      * @return
      */
@@ -408,10 +376,11 @@ public class App extends JFrame {
     
     /**
      * Check whether message is valid
+     * 
      * @param text
      * @return
      */
-    private boolean isMessageShareResultValid(String text) {
+    public boolean isMessageShareResultValid(String text) {
         if (model == null || text.trim().isEmpty()) return false;
         try {
             return model.isMessageShareResultValid(Message.deserializeMessage(text));
@@ -670,25 +639,23 @@ public class App extends JFrame {
      */
     protected void actionParticipate() {
          // Try to get string from clip board
-        String clipboardText = getStrippedExchangeMessage(getTextFromClipBoard());
-        if (!isInitialParticipationMessageValid(clipboardText)) {
-            clipboardText = "";
-        }
+        String clipboardText = TaskPollClipboardReceive.getStrippedExchangeMessage(TaskPollClipboardReceive.getTextFromClipBoard());
+        clipboardText = isInitialParticipationMessageValid(clipboardText) ? clipboardText : "";
         
         // Ask for string
-        String exchangeString = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
+        String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {
-                return isInitialParticipationMessageValid(getStrippedExchangeMessage(text));
+                return isInitialParticipationMessageValid(TaskPollClipboardReceive.getStrippedExchangeMessage(text));
             }
         }, this).showDialog();
         
         // If valid string provided
-        if (exchangeString != null) {
-            exchangeString = getStrippedExchangeMessage(exchangeString); 
+        if (message != null) {
+            message = TaskPollClipboardReceive.getStrippedExchangeMessage(message); 
             // Initialize
             try {
-                String data = Message.deserializeMessage(exchangeString).data;
+                String data = Message.deserializeMessage(message).data;
                 this.model = InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(data)));
                 this.model.toEnteringValues(data);
                 this.showPerspective(Perspective1BParticipate.class);
@@ -723,37 +690,42 @@ public class App extends JFrame {
 
     /**
      * Action to receive a message
+     * 
      * @return
      */
-    protected boolean actionReceiveMessage(boolean withDialog) {       
+    protected void actionReceiveMessage() {       
        // Try to get string from clip board
-       String message = getStrippedExchangeMessage(getTextFromClipBoard());
-       if (!isMessageShareResultValid(message)) {
-           message = null;
-       }
-       if(withDialog) {
+        String clipboardText = TaskPollClipboardReceive.getStrippedExchangeMessage(TaskPollClipboardReceive.getTextFromClipBoard());
+        clipboardText = isMessageShareResultValid(clipboardText) ? clipboardText : "";
+
         // Ask for message
-            message = new DialogStringPicker(message, new ComponentTextFieldValidator() {
+            String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {                
-                return isMessageShareResultValid(getStrippedExchangeMessage(text));
+                return isMessageShareResultValid(TaskPollClipboardReceive.getStrippedExchangeMessage(text));
             }
-        }, this).showDialog();
-       }
+        }, this).showDialog();           
+            
         // If message selected
         if (message != null) {
-            message = getStrippedExchangeMessage(message);
-            AppModel snapshot = this.beginTransaction();
-            try {
-                this.model.setShareFromMessage(Message.deserializeMessage(message));
-                return true;
-            } catch (IOException | IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException e) {
-                this.rollback(snapshot);
-                return false;
-            }
-        }       
-        // Done
-        return false;
+            message = TaskPollClipboardReceive.getStrippedExchangeMessage(message);
+            setMessageShare(TaskPollClipboardReceive.getStrippedExchangeMessage(message));           
+        }  
+    }
+
+    /**
+     * Set message share (message in perspectives receive)
+     * 
+     * @param message
+     */
+    public void setMessageShare(String message) {
+        AppModel snapshot = this.beginTransaction();        
+        try {
+            this.model.setShareFromMessage(Message.deserializeMessage(message));
+        } catch (IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException | IOException e) {
+            this.rollback(snapshot);
+            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.messageError"), Resources.getString("PerspectiveReceive.messageErrorTitle"), JOptionPane.ERROR_MESSAGE);
+        }        
     }
 
     /**
@@ -788,6 +760,7 @@ public class App extends JFrame {
     
     /**
      * Action performed when second receiving done
+     * 
      * @return successful
      */
     protected boolean actionSecondReceivingDone() {
@@ -859,5 +832,18 @@ public class App extends JFrame {
      */
     public JMenuItem getJmiInterimSave() {
         return jmiInterimSave;
+    }
+    
+    /**
+     * Get model state
+     * 
+     * @return AppState
+     */
+    public AppState getModelState() {
+        if (getModel() != null) {
+            return getModel().state;
+        } else {
+            return null;
+        }
     }
 }

@@ -31,6 +31,7 @@ import javax.swing.event.ChangeListener;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.EntryParticipantCheckmark;
+import de.tu_darmstadt.cbs.app.importdata.TaskPollClipboardReceive;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -85,6 +86,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     protected Perspective3Receive(App app, String title , int progress) {
         super(app, title, progress); //$NON-NLS-1$
+        // Register execution periodically
         new TaskPollClipboardReceive(this);
     }
     
@@ -95,9 +97,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (getApp().actionReceiveMessage(true)) {
-            this.stateChanged(new ChangeEvent(this));
-        }
+        getApp().actionReceiveMessage();
+        this.stateChanged(new ChangeEvent(this));
     }
      
     /**
