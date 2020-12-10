@@ -45,9 +45,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
@@ -55,6 +52,7 @@ import de.tu_darmstadt.cbs.app.components.ComponentProgress;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.DialogAbout;
 import de.tu_darmstadt.cbs.app.components.DialogStringPicker;
+import de.tu_darmstadt.cbs.app.importdata.ExcelExtractor;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.AppModel;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -332,9 +330,7 @@ public class App extends JFrame {
         File file = getFile(true, filters);
         if (file != null) {
             try {                
-                Workbook workbook = WorkbookFactory.create(file, "", true);
-                Sheet sheet = workbook.getSheetAt(0);
-                return new ExcelExtractor(sheet).getExtractedData();            
+                return new ExcelExtractor(file).getExtractedData();            
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ExcelReadingError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
                 e.printStackTrace();

@@ -11,16 +11,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.tu_darmstadt.cbs.app;
+package de.tu_darmstadt.cbs.app.importdata;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import de.tu_darmstadt.cbs.app.resources.Resources;
 
@@ -30,18 +34,14 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  * @author Felix Wirth
  *
  */
-public class ExcelExtractor {
-    /** Exact number rows or columns */
-    private static final int    EXACT_ROW_COLUMNS_LENGTH = 2;
+public class ExcelExtractor extends Extractor {
     /** The excel sheet */
     private Sheet               sheet;
     /** List of non-empty rows in sheet */
     private List<Integer>       listRows                 = new ArrayList<>();
     /** List of non-empty columns in sheet */
     private List<Integer>       listColumns              = new ArrayList<>();
-    /** List of extracted data */
-    private Map<String, String> extractedData            = new LinkedHashMap<String, String>();
-   
+      
     /**
      * Return the extracted data
      * 
@@ -54,10 +54,13 @@ public class ExcelExtractor {
     /**
      * Creates a new instance
      * 
-     * @param sheet
+     * @param  file
+     * @throws IOException 
+     * @throws EncryptedDocumentException 
      */
-    ExcelExtractor(Sheet sheet) {
-        this.sheet = sheet;
+    public ExcelExtractor(File file) throws EncryptedDocumentException, IOException {
+        Workbook workbook = WorkbookFactory.create(file, "", true);
+        this.sheet = workbook.getSheetAt(0);        
         extractData();
     }
     
