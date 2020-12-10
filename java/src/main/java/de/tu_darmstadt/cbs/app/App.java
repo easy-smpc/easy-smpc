@@ -482,7 +482,7 @@ public class App extends JFrame {
         Locale oldLocale = Resources.getResourceBundleLocale();        
         
         // Get new locale
-        newLocale = (Locale) JOptionPane.showInputDialog(null,
+        newLocale = (Locale) JOptionPane.showInputDialog(this,
                                                       Resources.getString("App.18"),
                                                       Resources.getString("App.17"),
                                                       JOptionPane.QUESTION_MESSAGE,

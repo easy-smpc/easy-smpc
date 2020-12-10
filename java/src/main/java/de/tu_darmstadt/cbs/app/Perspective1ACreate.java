@@ -143,7 +143,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Check whether at least three participants
         if (this.participants.getComponents().length < 3) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.notEnoughParticipants"));
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.notEnoughParticipants"));
             return;
         }
 
@@ -268,7 +268,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Check whether it's the last entry
         if (this.bins.getComponentCount() == 1) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.errorTooFewEntries"));
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.errorTooFewEntries"));
             return;
         }
         
@@ -286,7 +286,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Check whether it's the last entry
         if (this.participants.getComponentCount() == 1) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.errorTooFewEntries"));
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.errorTooFewEntries"));
             return;
         }
         
