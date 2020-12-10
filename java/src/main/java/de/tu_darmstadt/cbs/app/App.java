@@ -27,10 +27,10 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -282,16 +282,16 @@ public class App extends JFrame {
      * Reads data from an Excel file
      * @return List of data
      */
-    public HashMap<String, String> getCSVData() {        
-        HashMap<String, String> resultMap = null;
+    public Map<String, String> getCSVData() {        
+        Map<String, String> resultMap = null;
         
-        // add file filter for csv
+        // Add file filter for csv
         ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
         filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"),
                                                 Resources.FILE_ENDING_CSV));      
-        // get file
+        // Get file
         File file = getFile(true, filters);
-        // get delimter
+        // Get delimter
         String delimiter = (String) JOptionPane.showInputDialog(null,
                                                                 Resources.getString("App.24"),
                                                                 Resources.getString("App.23"),
@@ -322,13 +322,13 @@ public class App extends JFrame {
      * Reads data from an Excel file
      * @return List of data
      */
-    public HashMap<String, String> getExcelData() {
-        //set filter 
+    public Map<String, String> getExcelData() {
+        // Set filter 
         ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
         filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX)); 
         filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription97"), Resources.FILE_ENDING_EXCEL_XLS)); 
         
-        // get file
+        // Get file
         File file = getFile(true, filters);
         if (file != null) {
             try {                
@@ -517,7 +517,7 @@ public class App extends JFrame {
         Locale newLocale;
         Locale oldLocale = Resources.getResourceBundleLocale();        
         
-        // get new locale
+        // Get new locale
         newLocale = (Locale) JOptionPane.showInputDialog(null,
                                                       Resources.getString("App.18"),
                                                       Resources.getString("App.17"),
@@ -525,7 +525,7 @@ public class App extends JFrame {
                                                       null,
                                                       Resources.getAvailableLanguages(),
                                                       Resources.getAvailableLanguages()[0]);
-        // confirm restart
+        // Confirm restart
         if (!oldLocale.equals(newLocale) && newLocale != null && JOptionPane.showConfirmDialog(this,
                                                             Resources.getString("App.20"), //$NON-NLS-1$
                                                             Resources.getString("App.19"), //$NON-NLS-1$
@@ -705,7 +705,7 @@ public class App extends JFrame {
      * Participate action
      */
     protected void actionParticipate() {
-         //try to get string from clip board
+         // Try to get string from clip board
         String clipboardText = getStrippedExchangeMessage(getTextFromClipBoard());
         if (!isInitialParticipationMessageValid(clipboardText)) {
             clipboardText = "";
@@ -762,7 +762,7 @@ public class App extends JFrame {
      * @return
      */
     protected boolean actionReceiveMessage(boolean withDialog) {       
-       //try to get string from clip board
+       // Try to get string from clip board
        String message = getStrippedExchangeMessage(getTextFromClipBoard());
        if (!isMessageShareResultValid(message)) {
            message = null;
@@ -798,7 +798,7 @@ public class App extends JFrame {
     protected boolean actionSave() {
         
         if (model.filename == null) {
-            // set file filter
+            // Set file filter
             ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
             filters.add(new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING)); 
      

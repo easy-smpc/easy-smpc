@@ -58,7 +58,7 @@ public class TaskPollClipboardReceive implements Runnable {
         if (perspectiveReceive.getApp().getModel() != null &&
             (perspectiveReceive.getApp().getModel().state == AppState.RECIEVING_SHARE ||
              perspectiveReceive.getApp().getModel().state == AppState.RECIEVING_RESULT)) {
-            // if successfully set new message update perspective
+            // If successfully set new message update perspective
             if (perspectiveReceive.getApp().actionReceiveMessage(false)) {
                 perspectiveReceive.stateChanged(new ChangeEvent(this));
             }

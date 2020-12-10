@@ -21,8 +21,8 @@ import java.awt.event.ActionListener;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
@@ -131,7 +131,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     /**
      * Sets bin names and values
      */
-    private void setBinNamesValues(HashMap<String, String> data) {                 
+    private void setBinNamesValues(Map<String, String> data) {                 
         if (data != null) {
             this.bins.removeAll();
             EntryBin previousBin = null;
@@ -360,7 +360,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(3, 1));
         
-        // load csv button
+        // Load csv button
         JPanel loadbuttonsPane = new JPanel();
         loadbuttonsPane.setLayout(new GridLayout(1, 2));
         JButton loadCSV = new JButton(Resources.getString("PerspectiveCreate.loadCSVFile"));
@@ -372,7 +372,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         });
         loadbuttonsPane.add(loadCSV, 0, 0); 
         
-        // load excel button
+        // Load excel button
         JButton loadExcel = new JButton(Resources.getString("PerspectiveCreate.loadExcelFile"));
         loadExcel.addActionListener(new ActionListener() {
             @Override
@@ -392,7 +392,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             }
         });
         buttonsPane.add(removeEmptylines, 0, 1);
-        //save button
+        // Save button
         save = new JButton(Resources.getString("PerspectiveCreate.save"));
         save.setEnabled(this.areValuesValid());
         save.addActionListener(new ActionListener() {

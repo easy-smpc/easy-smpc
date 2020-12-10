@@ -19,7 +19,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigInteger;
-import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -117,7 +117,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     /**
      * Sets bin values
      */
-    private void setBinValues(HashMap<String,String> data ) {
+    private void setBinValues(Map<String,String> data ) {
         // TODO remove header line
         if (data != null) {
             if (data.size() == this.bins.getComponentCount()) {
@@ -207,7 +207,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         central.add(pane, BorderLayout.SOUTH);
            
         
-        // load csv button
+        // Load csv button
         JPanel loadbuttonsPane = new JPanel();
         loadbuttonsPane.setLayout(new GridLayout(1, 2));
         JButton loadCSV = new JButton(Resources.getString("PerspectiveCreate.loadCSVFile"));
@@ -223,7 +223,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
         
-        // load excel button
+        // Load excel button
         JButton loadExcel = new JButton(Resources.getString("PerspectiveCreate.loadExcelFile"));
         loadExcel.addActionListener(new ActionListener() {
             @Override
@@ -234,7 +234,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         loadbuttonsPane.add(loadExcel, 1, 0);        
         buttonsPane.add(loadbuttonsPane, 0, 0);
 
-        // save button
+        // Save button
         save = new JButton(Resources.getString("PerspectiveParticipate.save"));
         save.addActionListener(new ActionListener() {
             @Override
@@ -265,7 +265,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             participants.add(newNameEmailParticipantEntry);
         }
         for (Bin currentBin : getApp().getModel().bins) {
-            EntryBin newBin = new EntryBin(currentBin.name, false,"", true, false);
+            EntryBin newBin = new EntryBin(currentBin.name, false, "", true, false);
             newBin.setChangeListener(this);
             bins.add(newBin);
         }

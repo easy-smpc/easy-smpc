@@ -32,7 +32,7 @@ public class EntryBin extends ComponentEntryAddRemove {
      * Creates a new instance
      */
     public EntryBin() {
-       this("", true, String.valueOf(0),  true, true);
+       this("", true, String.valueOf(0), true, true);
     }
 
     /**
