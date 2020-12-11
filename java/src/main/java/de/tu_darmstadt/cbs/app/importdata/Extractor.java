@@ -71,7 +71,7 @@ public abstract class Extractor {
      * Prepares the data extraction
      */
     protected void determineDataProperties() throws IllegalArgumentException {
-        // identify non-empty rows and columns
+        // Identify non-empty rows and columns
         for (int indexRow = 0; indexRow <= dataRaw.length - 1; indexRow++) {
             boolean rowHasContent = false;
             if (dataRaw[indexRow] != null) {
@@ -89,7 +89,7 @@ public abstract class Extractor {
                 }
             }
         }
-        // Throw error, if not expected columns or rows
+        // Throw error, if not expected columns or rows length
         if (listRows.size() != EXACT_ROW_COLUMNS_LENGTH &&
             listColumns.size() != EXACT_ROW_COLUMNS_LENGTH) {
             throw new IllegalArgumentException(String.format("", EXACT_ROW_COLUMNS_LENGTH));
@@ -117,11 +117,13 @@ public abstract class Extractor {
             colDistanceTemp = 0;
             columnsOriented = false;
         }
+        
         // Extract data from filled rows or columns
         int row = listRows.get(0);
         int col = listColumns.get(0);
         while ((columnsOriented && row <= listRows.get(listRows.size() - 1)) ||
                (!columnsOriented && col <= listColumns.get(listColumns.size() - 1))) {
+            
             // Assume first row/columns has bin name, second has bin value
             extractedData.put(dataRaw[row][col],
                               dataRaw[row + rowDistanceTemp][col + colDistanceTemp]);

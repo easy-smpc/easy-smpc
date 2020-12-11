@@ -55,11 +55,12 @@ public class ExcelExtractor extends Extractor {
 
         // Iterate over cell
         for (int indexRow = 0; indexRow < Resources.MAX_COUNT_ROWS; indexRow++) {
+            
             // Check entire row is not null
             if (sheet.getRow(indexRow) != null) {
                 for (int indexCol = 0; indexCol < Resources.MAX_COUNT_COLUMNS; indexCol++) {
                     Cell cell = sheet.getRow(indexRow).getCell(indexCol);
-
+                    
                     // Check if cell is not empty
                     if (cell != null && cell.getCellType() != CellType.BLANK &&
                         !extractExcelCellContent(cell, true).trim().isEmpty()) {
@@ -84,9 +85,9 @@ public class ExcelExtractor extends Extractor {
             switch (originalCellType ? cell.getCellType() : cell.getCachedFormulaResultType()) {
             case NUMERIC:
                 double number = cell.getNumericCellValue();
-                // return integer if no decimal part
-                return number == Math.floor(number) ? String.valueOf((int) number)
-                        : String.valueOf(number);
+                
+                // Return integer if no decimal part
+                return number == Math.floor(number) ? String.valueOf((int) number) : String.valueOf(number);
             case STRING:
                 return cell.getStringCellValue();
             case BLANK:

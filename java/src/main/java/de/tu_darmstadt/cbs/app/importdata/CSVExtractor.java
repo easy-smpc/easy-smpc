@@ -43,28 +43,29 @@ public class CSVExtractor extends Extractor {
     protected void loadDataRaw() throws IOException {
         String delimiter = identifyDelimiter();
         int indexRow = 0;
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = reader.readLine()) != null && indexRow < Resources.MAX_COUNT_ROWS) {
-                // TODO Remove more than one delimiter next to another
-                String[] splittedString = line.split(delimiter);
-                int indexCol = 0;
-                while (indexCol < splittedString.length && indexCol < Resources.MAX_COUNT_COLUMNS) {
-                    if (splittedString[indexCol] != null &&
-                        !splittedString[indexCol].trim().isEmpty()) {
-                        dataRaw[indexRow][indexCol] = splittedString[indexCol];
-                    } else {
-                        dataRaw[indexRow][indexCol] = null;
-                    }
-                    indexCol++;
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String line;
+        
+        // Iterate over each line
+        while ((line = reader.readLine()) != null && indexRow < Resources.MAX_COUNT_ROWS) {
+            // Replace several delimiters next to each other with one 
+            line = line.replaceAll(delimiter + "{2,}", delimiter); 
+            String[] splittedString = line.split(delimiter);
+            int indexCol = 0;
+            
+         // Iterate over each column
+            while (indexCol < splittedString.length && indexCol < Resources.MAX_COUNT_COLUMNS) {
+                if (splittedString[indexCol] != null &&
+                    !splittedString[indexCol].trim().isEmpty()) {
+                    dataRaw[indexRow][indexCol] = splittedString[indexCol];
+                } else {
+                    dataRaw[indexRow][indexCol] = null;
                 }
-                indexRow++;
+                indexCol++;
             }
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            indexRow++;
         }
+        reader.close();     
     }
 
     /**
