@@ -31,8 +31,6 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  */
 
 public abstract class Extractor {
-    /** Exact number rows or columns */
-    protected static final int    EXACT_ROW_COLUMNS_LENGTH = 2;
     /** List of extracted data */
     protected Map<String, String> extractedData            = new LinkedHashMap<String, String>();
     /** List of non-empty rows in sheet */
@@ -90,9 +88,9 @@ public abstract class Extractor {
             }
         }
         // Throw error, if not expected columns or rows length
-        if (listRows.size() != EXACT_ROW_COLUMNS_LENGTH &&
-            listColumns.size() != EXACT_ROW_COLUMNS_LENGTH) {
-            throw new IllegalArgumentException(String.format("", EXACT_ROW_COLUMNS_LENGTH));
+        if (listRows.size() != Resources.EXACT_ROW_COLUMNS_LENGTH &&
+            listColumns.size() != Resources.EXACT_ROW_COLUMNS_LENGTH) {
+            throw new IllegalArgumentException(Resources.getString("PerspectiveCreate.LoadDataError"));
         }
     }
     
@@ -104,7 +102,7 @@ public abstract class Extractor {
         int rowDistancePermanent, colDistancePermanent, rowDistanceTemp, colDistanceTemp;
         boolean columnsOriented;
         // Check orientation
-        if (listColumns.size() == EXACT_ROW_COLUMNS_LENGTH) {
+        if (listColumns.size() == Resources.EXACT_ROW_COLUMNS_LENGTH) {
             rowDistancePermanent = 1;
             colDistancePermanent = 0;
             rowDistanceTemp = 0;

@@ -118,7 +118,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      * Loads and sets bin names and data from a file
      */
     private void actionLoadFromFile() {
-        Map data = getApp().getDataFromFile();
+        Map<String, String> data = getApp().getDataFromFile();
         if (data != null) {
             setBinNamesValues(data);
         }   

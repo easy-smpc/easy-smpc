@@ -294,8 +294,7 @@ public class App extends JFrame {
                 }
                 else {
                     extractor = new CSVExtractor(file);
-                }
-                
+                }                
                 return extractor.getExtractedData();            
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               

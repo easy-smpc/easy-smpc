@@ -41,7 +41,14 @@ public class CSVExtractor extends Extractor {
 
     @Override
     protected void loadDataRaw() throws IOException {
-        String delimiter = identifyDelimiter();
+        String delimiter = "";
+        try {
+         delimiter = String.valueOf(CSVSyntaxDetector.getDelimiter(file));
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
+        char lineBreak = CSVSyntaxDetector.getDelimiter(file);
         int indexRow = 0;
         BufferedReader reader = new BufferedReader(new FileReader(file));
         String line;
@@ -57,7 +64,8 @@ public class CSVExtractor extends Extractor {
             while (indexCol < splittedString.length && indexCol < Resources.MAX_COUNT_COLUMNS) {
                 if (splittedString[indexCol] != null &&
                     !splittedString[indexCol].trim().isEmpty()) {
-                    dataRaw[indexRow][indexCol] = splittedString[indexCol];
+                    // Set data and replace line break with a simple space
+                    dataRaw[indexRow][indexCol] = splittedString[indexCol].replace(lineBreak, ' ');
                 } else {
                     dataRaw[indexRow][indexCol] = null;
                 }
@@ -66,15 +74,5 @@ public class CSVExtractor extends Extractor {
             indexRow++;
         }
         reader.close();     
-    }
-
-    /**
-     * Try to identify delimiter in CSV file
-     * 
-     * @return
-     */
-    private String identifyDelimiter() {
-        // TODO Do an actual implementation
-        return ";";
-    }
+    }   
 }

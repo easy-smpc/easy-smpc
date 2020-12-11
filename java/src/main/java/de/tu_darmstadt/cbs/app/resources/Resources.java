@@ -103,8 +103,16 @@ public class Resources {
     public static final int       MAX_COUNT_ROWS       = 64;
     /** Maximal columns considered */
     public static final int       MAX_COUNT_COLUMNS     = 64;
-    /** Standard delimiter for CSV files */
-    public static final String[]  DELIMITERS                 = { ";", ",", "|" };
+    /** Delimiters considered for CSV files */
+    public static final char[]   DELIMITERS        = { ';', ',', '|', '\t' };
+    /** Line breaks considered for CSV files */
+    public static final char[][] LINEBREAKS        = { { '\n' }, { '\r', '\n' }, { '\r' } };
+    /** Maximum number of lines to be loaded for preview purposes for CSV file detection. */
+    public static final int      PREVIEW_MAX_LINES = 25;
+    /** Maximum number of chars to be loaded for detecting separators for CSV file detection. */
+    public static final int      DETECT_MAX_CHARS  = 100000;
+    /** Exact number rows or columns for data extraction from file */
+    public static final int    EXACT_ROW_COLUMNS_LENGTH = 2;
 
     /**
      * No instantiation
