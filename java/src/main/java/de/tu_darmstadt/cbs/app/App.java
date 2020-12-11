@@ -525,18 +525,17 @@ public class App extends JFrame {
 
     /**
      * Action performed when first receiving done
-     * @return successful
      */
     protected void actionFirstReceivingDone() {
         AppModel snapshot = this.beginTransaction();
         try {
             this.model.toSendingResult();
             this.model.saveProgram();
+            this.showPerspective(Perspective4Send.class);
         } catch (Exception e) {
             this.rollback(snapshot);    
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
-        }
-        this.showPerspective(Perspective4Send.class);
+        }        
     }
 
     /**
@@ -749,10 +748,8 @@ public class App extends JFrame {
     
     /**
      * Action performed when second receiving done
-     * 
-     * @return successful
      */
-    protected boolean actionSecondReceivingDone() {
+    protected void actionSecondReceivingDone() {
         AppModel snapshot = this.beginTransaction();
         try {
             this.model.toFinished();
@@ -760,10 +757,8 @@ public class App extends JFrame {
         } catch (Exception e) {
             this.rollback(snapshot);
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
-            return false;
         }
         this.showPerspective(Perspective6Result.class);
-        return true;
     }
 
     /**
