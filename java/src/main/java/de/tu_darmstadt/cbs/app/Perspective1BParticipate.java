@@ -19,6 +19,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
@@ -104,44 +105,27 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      * Loads and sets bin names and data from a file
      */
     private void actionLoadFromFile() {
-        Map<String, String> data  = getApp().getDataFromFile();        
+        Map<String, String> data = getApp().getDataFromFile();
+        ArrayList<String> binsWithoutValue = new ArrayList<>();
         if (data != null) {
+            for (Component c : this.bins.getComponents()) {
+                String value = data.get(((EntryBin) c).getLeftValue());
+                if (value == null) {
+                    binsWithoutValue.add(((EntryBin) c).getLeftValue());
+                }
+                ((EntryBin) c).setRightValue(value);
+            }
             
-            // If data has exactly one entry more then expected the first line is probably a header
-            if (data.size() == this.bins.getComponentCount() + 1) {
-                data.remove((String) data.values().toArray()[0]);
-            }
-
-            // Check data has expected length
-            if (data.size() == this.bins.getComponentCount()) {
-                setBinValues(data);
-            }
-            else
-            {
+            // Error message if a value for at least one bin was not found
+            if (binsWithoutValue.size() > 0){                
                 JOptionPane.showMessageDialog(getPanel(),
-                                              Resources.getString("PerspectiveCreate.BinsLengthUnequalData"), //$NON-NLS-1$
+                                              String.format(Resources.getString("PerspectiveParticipate.BinsWithoutValues"),
+                                                            binsWithoutValue.toString().substring(1, binsWithoutValue.toString().length() - 1)),
                                               Resources.getString("App.11"),
                                               JOptionPane.ERROR_MESSAGE);
-            }
+            }            
+            this.stateChanged(new ChangeEvent(this));
         }
-    }
-    
-    /**
-     * Sets bin values
-     */
-    private void setBinValues(Map<String,String> data ) {
-        int index = 0;
-        for (Component c : this.bins.getComponents()) {
-            String value = data.get(((EntryBin) c).getLeftValue());
-            
-            // If no success with key value use order to get value
-            if (value == null) {
-                value = (String) data.values().toArray()[index];
-            }
-            ((EntryBin) c).setRightValue(value);
-            index++;
-        }
-        this.stateChanged(new ChangeEvent(this));
     }
 
     /**
