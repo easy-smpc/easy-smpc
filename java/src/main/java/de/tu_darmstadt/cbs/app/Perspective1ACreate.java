@@ -120,27 +120,20 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void actionLoadFromFile() {
         Map<String, String> data = getApp().getDataFromFile();
         if (data != null) {
-            setBinNamesValues(data);
+            this.bins.removeAll();
+            EntryBin previousBin = null;
+            for (Entry<String, String> entry : data.entrySet()) {
+                previousBin = addBin(previousBin, entry.getKey(), entry.getValue(), true);
+            }
+            this.stateChanged(new ChangeEvent(this));
         }   
-    }
-    
-    /**
-     * Sets bin names and values
-     */
-    private void setBinNamesValues(Map<String, String> data) {                 
-        this.bins.removeAll();
-        EntryBin previousBin = null;
-        for (Entry<String, String> entry : data.entrySet()) {
-            previousBin = addBin(previousBin, entry.getKey(), entry.getValue(), true);
-        }
-        this.stateChanged(new ChangeEvent(this));           
     }
 
     /**
      * Save the project and proceed.
      */
     private void actionSave() {
-        
+       
         // Check whether at least three participants
         if (this.participants.getComponents().length < 3) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.notEnoughParticipants"));
@@ -305,9 +298,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         // Layout
         panel.setLayout(new BorderLayout());
 
-        // -------
         // Name of study
-        // -------
         JPanel title = new JPanel();
         panel.add(title, BorderLayout.NORTH);
         title.setLayout(new BorderLayout());

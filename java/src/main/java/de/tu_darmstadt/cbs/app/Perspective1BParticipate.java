@@ -107,7 +107,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         Map<String, String> data  = getApp().getDataFromFile();        
         if (data != null) {
             
-            // if data has exactly one entry more then expected the first line is probably a header
+            // If data has exactly one entry more then expected the first line is probably a header
             if (data.size() == this.bins.getComponentCount() + 1) {
                 data.remove((String) data.values().toArray()[0]);
             }

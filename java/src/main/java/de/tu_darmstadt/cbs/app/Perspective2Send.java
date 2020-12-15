@@ -218,9 +218,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         // Layout
         panel.setLayout(new BorderLayout());
 
-        // -------
         // Study title
-        // -------
         JPanel title = new JPanel();
         panel.add(title, BorderLayout.NORTH);
         title.setLayout(new BorderLayout());
@@ -228,7 +226,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                          Resources.getString("PerspectiveCreate.studyTitle"),
                                                          TitledBorder.LEFT,
                                                          TitledBorder.DEFAULT_POSITION));
-        this.title = new ComponentTextField(null); //no validation
+        this.title = new ComponentTextField(null); // No validation
         this.title.setEnabled(false);
         title.add(this.title, BorderLayout.CENTER);
         

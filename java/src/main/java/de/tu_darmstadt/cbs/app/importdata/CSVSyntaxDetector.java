@@ -42,15 +42,11 @@ public class CSVSyntaxDetector {
         // Prepare
         char delimiter = Resources.DELIMITERS[0];
         BufferedReader r = null;
-//        try {
-        r = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charset.defaultCharset()));
-//        } finally {
-//            if (r != null) {
-//                r.close();
-//            }
-//        }
         final IntIntOpenHashMap map = new IntIntOpenHashMap();
         final CharIntOpenHashMap delimitors = new CharIntOpenHashMap();
+        
+        try {
+        r = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charset.defaultCharset()));        
         for (int i=0; i<Resources.DELIMITERS.length; i++) {
             delimitors.put(Resources.DELIMITERS[i], i);
         }
@@ -76,7 +72,11 @@ public class CSVSyntaxDetector {
             countLines++;
         }
         r.close();
-
+        } finally {
+            if (r != null) {
+                r.close();
+            }
+        }
         // If nothing found, return default
         if (map.isEmpty()) {
             return delimiter;

@@ -13,11 +13,8 @@
  */
 package de.tu_darmstadt.cbs.app.importdata;
 
-import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +29,7 @@ import de.tu_darmstadt.cbs.emailsmpc.AppState;
  * 
  * @author Felix Wirth
  */
+
 public class TaskPollClipboardReceive implements Runnable {
     /** PerspectiveReceive */
     private Perspective3Receive perspectiveReceive;
@@ -48,11 +46,7 @@ public class TaskPollClipboardReceive implements Runnable {
      */
     public TaskPollClipboardReceive(Perspective3Receive perspectiveReceive) {
             this.perspectiveReceive = perspectiveReceive;
-            Executors.newScheduledThreadPool(2)
-                                       .scheduleAtFixedRate(this,
-                                                            0,
-                                                            Resources.INTERVAL_SCHEDULER_MILLISECONDS,
-                                                            TimeUnit.MILLISECONDS);        
+            Executors.newScheduledThreadPool(1).scheduleAtFixedRate(this, 0, Resources.INTERVAL_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);        
     }
     
     /**
@@ -94,11 +88,11 @@ public class TaskPollClipboardReceive implements Runnable {
      * @return clip board text
      */
     public static String getTextFromClipBoard() {
-        String text = "";
+        String text = null;
         if (Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).isDataFlavorSupported(DataFlavor.stringFlavor)) {
             try {
                 text = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);              
-            } catch (HeadlessException | UnsupportedFlavorException | IOException e) {
+            } catch (Exception e) {
                 // No error message to user necessary
             }
         };

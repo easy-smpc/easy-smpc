@@ -120,15 +120,11 @@ public class App extends JFrame {
         this.setLayout(new BorderLayout());
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);// Close only if user clicks yes in dialog
         
-        // -----------------
         // Progress
-        // -----------------
         this.progress = new ComponentProgress(0);
         this.add(this.progress, BorderLayout.NORTH);
         
-        // -----------------
         // Panels
-        // -----------------
         this.cards = new JPanel(new CardLayout());
         this.add(this.cards, BorderLayout.CENTER);
         
@@ -140,9 +136,7 @@ public class App extends JFrame {
             }
         });     
 
-        // -----------------
         // Menu
-        // ------------------
         JMenuBar jmb = new JMenuBar();
         this.setJMenuBar(jmb);
 
@@ -362,6 +356,9 @@ public class App extends JFrame {
      * @return
      */
     private boolean isInitialParticipationMessageValid(String text) {
+        if (text == null) {
+            return false;
+        }
         try {
             String data =  Message.deserializeMessage(text).data;
             InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(data)));
@@ -378,7 +375,7 @@ public class App extends JFrame {
      * @return
      */
     public boolean isMessageShareResultValid(String text) {
-        if (model == null || text.trim().isEmpty()) return false;
+        if (model == null || text == null || text.trim().isEmpty()) return false;
         try {
             return model.isMessageShareResultValid(Message.deserializeMessage(text));
         } catch (Exception e) {
