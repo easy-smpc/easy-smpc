@@ -13,10 +13,12 @@
  */
 package de.tu_darmstadt.cbs.app.importdata;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 
 import de.tu_darmstadt.cbs.app.resources.Resources;
 
@@ -41,32 +43,22 @@ public class CSVExtractor extends Extractor {
 
     @Override
     protected void loadDataRaw() throws IOException {
-        String delimiter = String.valueOf(CSVSyntaxDetector.getDelimiter(file));
-        char[] lineBreak = CSVSyntaxDetector.getLinebreak(file);
+        Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(CSVSyntaxDetector.getDelimiter(file))
+                                                       .parse(new FileReader(file));
         int indexRow = 0;
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        String line;
-        
-        // Iterate over each line
-        while ((line = reader.readLine()) != null && indexRow < Resources.MAX_COUNT_ROWS) {
-            // Replace several delimiters next to each other with one 
-            line = line.replaceAll(delimiter + "{2,}", delimiter); 
-            String[] splittedString = line.split(delimiter);
-            int indexCol = 0;
-            
-         // Iterate over each column
-            while (indexCol < splittedString.length && indexCol < Resources.MAX_COUNT_COLUMNS) {
-                if (splittedString[indexCol] != null &&
-                    !splittedString[indexCol].trim().isEmpty()) {
-                    // Set data and replace line break with a simple space
-                    dataRaw[indexRow][indexCol] = splittedString[indexCol].replaceAll(String.copyValueOf(lineBreak), " ");
-                } else {
-                    dataRaw[indexRow][indexCol] = null;
+        for (CSVRecord recordRow : records) {
+            int indexColumn = 0;
+            for (String recordField : recordRow) {
+                dataRaw[indexRow][indexColumn] = recordField;
+                indexColumn++;
+                if (indexColumn == Resources.MAX_COUNT_COLUMNS) {
+                    break;
                 }
-                indexCol++;
             }
             indexRow++;
+            if (indexRow == Resources.MAX_COUNT_ROWS) {
+                break;
+            }
         }
-        reader.close();     
-    }   
+    }
 }
