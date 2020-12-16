@@ -249,5 +249,5 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         participants.repaint();
         bins.revalidate();
         bins.repaint();
-    }    
+    }
 }

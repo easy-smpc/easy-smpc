@@ -131,6 +131,5 @@ public class Perspective6Result extends Perspective {
         pane = new JScrollPane(bins);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
-    }
-   
+    }   
 }

@@ -97,5 +97,4 @@ public class Perspective0Start extends Perspective {
     protected boolean isInterimSavingPossible() {
         return interimSavingPossible;
     }
-
 }

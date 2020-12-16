@@ -397,5 +397,4 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         // Update
         this.stateChanged(new ChangeEvent(this));
     }
-    
 }
