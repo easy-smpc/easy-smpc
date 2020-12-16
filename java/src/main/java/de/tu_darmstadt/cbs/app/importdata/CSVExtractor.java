@@ -23,8 +23,7 @@ import org.apache.commons.csv.CSVRecord;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 
 /**
- * Class to obtain data if exactly two columns or lines can be found in an Excel
- * file
+ * Reads CSV content
  * 
  * @author Felix Wirth
  */
@@ -42,23 +41,27 @@ public class CSVExtractor extends Extractor {
     }
 
     @Override
-    protected void loadDataRaw() throws IOException {
-        Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(CSVSyntaxDetector.getDelimiter(file))
-                                                       .parse(new FileReader(file));
+    protected String[][] loadRawData() throws IOException {
+        String[][] rawData = new String[Resources.MAX_COUNT_ROWS][Resources.MAX_COUNT_COLUMNS];
+        Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(CSVSyntaxDetector.getDelimiter(getFile()))
+                                                       .parse(new FileReader(getFile()));
         int indexRow = 0;
         for (CSVRecord recordRow : records) {
             int indexColumn = 0;
             for (String recordField : recordRow) {
-                dataRaw[indexRow][indexColumn] = recordField;
+                rawData[indexRow][indexColumn] = recordField;
+                // Break if maximum reached
                 indexColumn++;
                 if (indexColumn == Resources.MAX_COUNT_COLUMNS) {
                     break;
                 }
             }
+            // Break if maximum reached
             indexRow++;
             if (indexRow == Resources.MAX_COUNT_ROWS) {
                 break;
             }
         }
-    }
+        return rawData;
+    }    
 }

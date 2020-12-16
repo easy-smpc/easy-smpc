@@ -15,9 +15,7 @@ package de.tu_darmstadt.cbs.app.importdata;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.EncryptedDocumentException;
@@ -25,23 +23,15 @@ import org.apache.poi.EncryptedDocumentException;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 
 /**
- * Extracts data from a two dimensional arra which can be filled by different files formats
+ * Extracts data from a two dimensional array which can be filled by different file formats
  * 
  * @author Felix Wirth
  */
 
 public abstract class Extractor {
-    /** List of extracted data */
-    protected Map<String, String> extractedData            = new LinkedHashMap<String, String>();
-    /** List of non-empty rows in sheet */
-    private List<Integer>         listRows                 = new ArrayList<>();
-    /** List of non-empty columns in sheet */
-    private List<Integer>         listColumns              = new ArrayList<>();
-    /** Raw data */
-    protected String[][]          dataRaw = new String[Resources.MAX_COUNT_ROWS][Resources.MAX_COUNT_COLUMNS];
     /** File of data origin */
-    protected File                file;    
-    
+    private File          file;
+
     /**
      * Creates a new instance
      * 
@@ -50,88 +40,133 @@ public abstract class Extractor {
      * @throws EncryptedDocumentException
      */
     protected Extractor(File file) throws IOException, IllegalArgumentException {
-        this.file = file;
-        loadDataRaw();
-        determineDataProperties();
-        extractData();
+        this.file = file;    
+    }
+
+    /**
+     * @return the file
+     */
+    protected File getFile() {
+        return file;
     }
 
     /**
      * Returns the extracted data
      * 
      * @return the data
+     * @throws IOException 
      */
-    public Map<String, String> getExtractedData() throws IllegalArgumentException {
-        return extractedData;
-    }    
-        
-    /**
-     * Prepares the data extraction
-     */
-    protected void determineDataProperties() throws IllegalArgumentException {
-        // Identify non-empty rows and columns
-        for (int indexRow = 0; indexRow <= dataRaw.length - 1; indexRow++) {
-            boolean rowHasContent = false;
-            if (dataRaw[indexRow] != null) {
-                for (int indexCol = 0; indexCol <= dataRaw[indexRow].length - 1; indexCol++) {
-                    if (dataRaw[indexRow][indexCol] != null &&
-                        !dataRaw[indexRow][indexCol].trim().isEmpty()) {
-                        rowHasContent = true;
-                        if (!listColumns.contains(indexCol)) {
-                            listColumns.add(indexCol);
-                        }
-                    }
-                }
-                if (rowHasContent && !listRows.contains(indexRow)) {
-                    listRows.add(indexRow);
-                }
-            }
-        }
-        // Throw error, if not expected columns or rows length
-        if (listRows.size() != Resources.EXACT_ROW_COLUMNS_LENGTH &&
-            listColumns.size() != Resources.EXACT_ROW_COLUMNS_LENGTH) {
-            throw new IllegalArgumentException(Resources.getString("PerspectiveCreate.LoadDataError"));
-        }
+    public Map<String, String> getExtractedData() throws IllegalArgumentException, IOException {
+        return extractData(stripRawData(loadRawData()));
     }
     
     /**
-     * Extract the data
+     * Remove all empty rows and columns
+     * 
+     * @param rawData
+     * @return the data without empty lines and columns
      */
-    protected void extractData() throws IllegalArgumentException {
+    private String[][] stripRawData(String[][] rawData) {      
+        String[][] strippedData = null;
+        int indexRowStrippedData = 0;
+        for (int indexRow = 0; indexRow <= rawData.length - 1; indexRow++) {
+            boolean rowNotEmpty = false;
+            if (rawData[indexRow] != null) {
+                int indexColumnStrippedData = 0;
+                for (int indexColumn = 0; indexColumn <= rawData[indexRow].length -
+                                                         1; indexColumn++) {
+                    if (rawData[indexRow][indexColumn] != null &&
+                        !rawData[indexRow][indexColumn].trim().isEmpty()) {
+                        strippedData = setFieldInArray(strippedData,
+                                                       indexRowStrippedData,
+                                                       indexColumnStrippedData,
+                                                       rawData[indexRow][indexColumn]);
+                        rowNotEmpty = true;
+                        indexColumnStrippedData++;
+                    }
+                }
+                if (rowNotEmpty) {
+                    indexRowStrippedData++;
+                }
+            }
+        }
+        return strippedData;
+    }
+    
 
-        int rowDistancePermanent, colDistancePermanent, rowDistanceTemp, colDistanceTemp;
-        boolean columnsOriented;
-        // Check orientation
-        if (listColumns.size() == Resources.EXACT_ROW_COLUMNS_LENGTH) {
-            rowDistancePermanent = 1;
-            colDistancePermanent = 0;
-            rowDistanceTemp = 0;
-            colDistanceTemp = listColumns.get(1) - listColumns.get(0);
-            columnsOriented = true;
-        } else {
-            rowDistancePermanent = 0;
-            colDistancePermanent = 1;
-            rowDistanceTemp = listRows.get(1) - listRows.get(0);
-            colDistanceTemp = 0;
-            columnsOriented = false;
+    /**
+     * Sets a value in an array while extending the array if necessary
+     * 
+     * @param old array
+     * @param row of value
+     * @param column of value
+     * @param value
+     * @return the new array
+     */
+    private String[][] setFieldInArray(String[][] oldArray, int row, int column, String value) {
+        String[][] newArray;
+        
+        // Initialize if null
+        if (oldArray == null) {
+            oldArray = new String[row + 1][column + 1];
         }
         
-        // Extract data from filled rows or columns
-        int row = listRows.get(0);
-        int col = listColumns.get(0);
-        while ((columnsOriented && row <= listRows.get(listRows.size() - 1)) ||
-               (!columnsOriented && col <= listColumns.get(listColumns.size() - 1))) {
-            
-            // Assume first row/columns has bin name, second has bin value
-            extractedData.put(dataRaw[row][col],
-                              dataRaw[row + rowDistanceTemp][col + colDistanceTemp]);
-            row = row + rowDistancePermanent;
-            col = col + colDistancePermanent;
+        // If old array is too small, create new one and copy values
+        if (oldArray.length <= row || oldArray[0].length <= column) {
+            newArray = new String[Math.max(row + 1, oldArray.length)][Math.max(column + 1,
+                                                                               oldArray[0].length)];
+            for (int indexRow = 0; indexRow < oldArray.length; indexRow++) {
+                for (int indexColums = 0; indexColums < oldArray[0].length; indexColums++) {
+                    newArray[indexRow][indexColums] = oldArray[indexRow][indexColums];
+                }
+            }
+        } else {
+            newArray = oldArray;
         }
+        
+        // Set new value
+        newArray[row][column] = value;
+        return newArray;
+    }
+
+    /**
+     * Extracts the data out of a stripped array
+     * 
+     * @param strippedData
+     * @return extracted data
+     * @throws IllegalArgumentException
+     */
+    private Map<String,String> extractData(String[][] strippedData) throws IllegalArgumentException {
+        Map<String, String> extractedData            = new LinkedHashMap<String, String>();
+        
+        // Throw error, if not expected columns or rows length
+        if (strippedData.length != Resources.EXACT_ROW_COLUMNS_LENGTH &&
+            strippedData[0].length != Resources.EXACT_ROW_COLUMNS_LENGTH) {
+            throw new IllegalArgumentException(Resources.getString("PerspectiveCreate.LoadDataError"));
+        }
+        
+        // Transpose if rows oriented
+        if (strippedData[0].length > Resources.EXACT_ROW_COLUMNS_LENGTH) {
+            String[][] untransposed = strippedData;
+            strippedData = new String[untransposed[0].length][untransposed.length];
+            for (int indexRow = 0; indexRow < untransposed.length; indexRow++) {
+                for (int indexColumn = 0; indexColumn < untransposed[0].length; indexColumn++) {
+                    strippedData[indexColumn][indexRow] = untransposed[indexRow][indexColumn];
+                }
+            }
+        }
+           
+        // Extract data from filled rows
+        for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
+            // Assume first column contains bin name, second has bin value
+            extractedData.put(strippedData[indexRow][0], strippedData[indexRow][1]);
+        }
+        return extractedData;
     }
     
     /**
      * Loads the data in a common format of a two dimensional array
+     * @return two dimensional array of data
      */
-    protected abstract void loadDataRaw() throws IOException;
+    protected abstract String[][] loadRawData() throws IOException;
 }

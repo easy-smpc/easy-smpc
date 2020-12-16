@@ -20,7 +20,6 @@ import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 import de.tu_darmstadt.cbs.app.resources.Resources;
@@ -44,35 +43,35 @@ public class ExcelExtractor extends Extractor {
     }
 
     @Override
-    protected void loadDataRaw() throws IOException {
-        Workbook workbook;
+    protected String[][] loadRawData() throws IOException {
+        String[][] rawData = new String[Resources.MAX_COUNT_ROWS][Resources.MAX_COUNT_COLUMNS];
+        Sheet sheet;
         try {
-            workbook = WorkbookFactory.create(this.file, "", true);
+            sheet = WorkbookFactory.create(getFile(), "", true).getSheetAt(0);
         } catch (EncryptedDocumentException | IOException e) {
             throw new IOException(e.getMessage());
         }
-        Sheet sheet = workbook.getSheetAt(0);
 
         // Iterate over cell
         for (int indexRow = 0; indexRow < Resources.MAX_COUNT_ROWS; indexRow++) {
-            
             // Check entire row is not null
             if (sheet.getRow(indexRow) != null) {
                 for (int indexCol = 0; indexCol < Resources.MAX_COUNT_COLUMNS; indexCol++) {
                     Cell cell = sheet.getRow(indexRow).getCell(indexCol);
-                    
+
                     // Check if cell is not empty
                     if (cell != null && cell.getCellType() != CellType.BLANK &&
                         !extractExcelCellContent(cell, true).trim().isEmpty()) {
-                        dataRaw[indexRow][indexCol] = extractExcelCellContent(cell, true);
+                        rawData[indexRow][indexCol] = extractExcelCellContent(cell, true);
                     } else {
-                        dataRaw[indexRow][indexCol] = null;
+                        rawData[indexRow][indexCol] = null;
                     }
                 }
             } else {
-                dataRaw[indexRow] = null;
+                rawData[indexRow] = null;
             }
         }
+        return rawData;
     }
     
     /**
@@ -84,8 +83,7 @@ public class ExcelExtractor extends Extractor {
         if (cell != null) {
             switch (originalCellType ? cell.getCellType() : cell.getCachedFormulaResultType()) {
             case NUMERIC:
-                double number = cell.getNumericCellValue();
-                
+                double number = cell.getNumericCellValue();                
                 // Return integer if no decimal part
                 return number == Math.floor(number) ? String.valueOf((int) number) : String.valueOf(number);
             case STRING:
