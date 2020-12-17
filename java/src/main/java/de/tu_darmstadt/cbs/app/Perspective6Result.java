@@ -22,7 +22,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.EntryBinNoButton;
@@ -132,14 +131,5 @@ public class Perspective6Result extends Perspective {
         pane = new JScrollPane(bins);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
-    }
-    
-    /**
-     * Reacts on all changes in any components
-     */
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        // Empty by default        
-    }
-   
+    }   
 }

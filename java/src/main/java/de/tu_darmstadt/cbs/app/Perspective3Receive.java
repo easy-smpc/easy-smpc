@@ -31,6 +31,7 @@ import javax.swing.event.ChangeListener;
 
 import de.tu_darmstadt.cbs.app.components.ComponentTextField;
 import de.tu_darmstadt.cbs.app.components.EntryParticipantCheckmark;
+import de.tu_darmstadt.cbs.app.importdata.TaskPollClipboardReceive;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -62,7 +63,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @param app
      */
     protected Perspective3Receive(App app) {
-        super(app, Resources.getString("PerspectiveReceive.receive"), 3); //$NON-NLS-1$
+        this(app, Resources.getString("PerspectiveReceive.receive"), 3); //$NON-NLS-1$
     }
 
     /**
@@ -71,7 +72,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @param progress
      */
     protected Perspective3Receive(App app, int progress) {
-        super(app, Resources.getString("PerspectiveReceive.receive"), progress); //$NON-NLS-1$
+        this(app, Resources.getString("PerspectiveReceive.receive"), progress); //$NON-NLS-1$
     }
     
     /**
@@ -79,8 +80,10 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @param app
      * @param progress
      */
-    protected Perspective3Receive(App app, String title , int progress) {
+    protected Perspective3Receive(App app, String title, int progress) {
         super(app, title, progress); //$NON-NLS-1$
+        // Register execution periodically
+        new TaskPollClipboardReceive(this);
     }
     
     @Override
@@ -90,9 +93,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (getApp().actionReceiveMessage(true)) {
-            this.stateChanged(new ChangeEvent(this));
-        }
+        getApp().actionReceiveMessage();
+        this.stateChanged(new ChangeEvent(this));
     }
      
     /**
@@ -212,5 +214,5 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             participants.add(entry);
         }
         this.stateChanged(new ChangeEvent(this));
-    }    
+    }
 }

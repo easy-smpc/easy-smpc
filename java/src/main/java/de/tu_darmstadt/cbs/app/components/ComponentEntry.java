@@ -149,6 +149,14 @@ public abstract class ComponentEntry extends JPanel {
     }
     
     /**
+     * Sets the right value
+     * @return
+     */
+    public void setRightValue(String text) {
+        this.fieldRight.setText(text);
+    }
+    
+    /**
      * Returns whether the right field is valid
      */
     public boolean isFieldRightValueValid() {

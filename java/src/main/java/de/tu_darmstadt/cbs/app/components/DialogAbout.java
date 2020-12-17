@@ -16,10 +16,12 @@ package de.tu_darmstadt.cbs.app.components;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import de.tu_darmstadt.cbs.app.resources.Resources;
@@ -48,7 +50,11 @@ public class DialogAbout extends JDialog {
 
         // Texts
         central.setLayout(new BorderLayout());
-        central.add(new JPanel().add(new ComponentTextAreaNoEntry(Resources.getLicenseText(), this)), BorderLayout.CENTER);
+        try {
+            central.add(new JPanel().add(new ComponentTextAreaNoEntry(Resources.getLicenseText(), this)), BorderLayout.CENTER);
+        } catch (IOException e1) {
+            JOptionPane.showMessageDialog(null, Resources.getString("Resources.ErrorLicenseLoading"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE);
+        }
         central.add(new JPanel().add(new ComponentTextAreaNoEntry(Resources.getString("About.Contributors"), this)), BorderLayout.SOUTH);
         this.getContentPane().add(central, BorderLayout.CENTER);
 

@@ -21,7 +21,6 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
 
 import de.tu_darmstadt.cbs.app.resources.Resources;
 
@@ -98,13 +97,4 @@ public class Perspective0Start extends Perspective {
     protected boolean isInterimSavingPossible() {
         return interimSavingPossible;
     }
-    
-    /**
-     * Reacts on all changes in any components
-     */
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        // Empty by default        
-    }
-
 }

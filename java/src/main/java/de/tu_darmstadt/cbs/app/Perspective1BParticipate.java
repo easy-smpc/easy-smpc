@@ -19,10 +19,13 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EtchedBorder;
@@ -99,6 +102,33 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     }
 
     /**
+     * Loads and sets bin names and data from a file
+     */
+    private void actionLoadFromFile() {
+        Map<String, String> data = getApp().getDataFromFile();
+        ArrayList<String> binsWithoutValue = new ArrayList<>();
+        if (data != null) {
+            for (Component c : this.bins.getComponents()) {
+                String value = data.get(((EntryBin) c).getLeftValue());
+                if (value == null) {
+                    binsWithoutValue.add(((EntryBin) c).getLeftValue());
+                }
+                ((EntryBin) c).setRightValue(value);
+            }
+            
+            // Error message if a value for at least one bin was not found
+            if (binsWithoutValue.size() > 0){                
+                JOptionPane.showMessageDialog(getPanel(),
+                                              String.format(Resources.getString("PerspectiveParticipate.BinsWithoutValues"),
+                                                            binsWithoutValue.toString().substring(1, binsWithoutValue.toString().length() - 1)),
+                                              Resources.getString("App.11"),
+                                              JOptionPane.ERROR_MESSAGE);
+            }            
+            this.stateChanged(new ChangeEvent(this));
+        }
+    }
+
+    /**
      * Checks bins for validity
      * @return
      */
@@ -160,8 +190,22 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         pane = new JScrollPane(bins);
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
-           
-       
+
+        // Buttons pane
+        JPanel buttonsPane = new JPanel();
+        buttonsPane.setLayout(new GridLayout(3, 1));
+        
+        // Load from file button      
+        JButton loadFromFile = new JButton(Resources.getString("PerspectiveCreate.LoadFromFile"));
+        loadFromFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionLoadFromFile();
+            }
+        });
+        buttonsPane.add(loadFromFile, 0, 0);   
+
+        // Save button
         save = new JButton(Resources.getString("PerspectiveParticipate.save"));
         save.addActionListener(new ActionListener() {
             @Override
@@ -169,8 +213,8 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
                 actionSave();
             }
         });
-        save.setEnabled(false);
-        panel.add(save, BorderLayout.SOUTH);
+        buttonsPane.add(save, 0, 1);
+        panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
     /**
@@ -192,7 +236,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             participants.add(newNameEmailParticipantEntry);
         }
         for (Bin currentBin : getApp().getModel().bins) {
-            EntryBin newBin = new EntryBin(currentBin.name, false, true, false);
+            EntryBin newBin = new EntryBin(currentBin.name, false, "", true, false);
             newBin.setChangeListener(this);
             bins.add(newBin);
         }
@@ -206,5 +250,4 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         bins.revalidate();
         bins.repaint();
     }
-    
 }
