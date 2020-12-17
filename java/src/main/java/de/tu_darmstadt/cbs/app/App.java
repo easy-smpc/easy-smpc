@@ -43,8 +43,6 @@ import de.tu_darmstadt.cbs.app.components.ComponentProgress;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.DialogAbout;
 import de.tu_darmstadt.cbs.app.components.DialogStringPicker;
-import de.tu_darmstadt.cbs.app.importdata.CSVExtractor;
-import de.tu_darmstadt.cbs.app.importdata.ExcelExtractor;
 import de.tu_darmstadt.cbs.app.importdata.Extractor;
 import de.tu_darmstadt.cbs.app.importdata.TaskPollClipboardReceive;
 import de.tu_darmstadt.cbs.app.resources.Resources;
@@ -269,27 +267,12 @@ public class App extends JFrame {
      * Reads data from a file
      * @return List of data
      */
-    public Map<String, String> getDataFromFile() {
-        // Set filter 
-        ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
-        filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX)); 
-        filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription97"), Resources.FILE_ENDING_EXCEL_XLS)); 
-        filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
-        
+    public Map<String, String> getDataFromFile() {               
         // Get file
-        File file = getFile(true, filters);
+        File file = getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX), new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription97"), Resources.FILE_ENDING_EXCEL_XLS),new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
         if (file != null) {
             try {
-                Extractor extractor;
-                
-                // Choose correct extractor
-                if (file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS)) {
-                    extractor = new ExcelExtractor(file);
-                }
-                else {
-                    extractor = new CSVExtractor(file);
-                }                
-                return extractor.getExtractedData();            
+                return Extractor.forFile(file).getExtractedData();       
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
             }
@@ -306,30 +289,27 @@ public class App extends JFrame {
      * @param fileNameExtensionFilter
      * @return
      */
-    public File getFile(boolean load, ArrayList<FileNameExtensionFilter> filters) {
-
-        // File
-        File file = null;
+    public File getFile(boolean load, FileNameExtensionFilter... filters) {
+        // Prepare
         JFileChooser fileChooser = new JFileChooser();
-        for (FileNameExtensionFilter filter : filters) {
-            fileChooser.addChoosableFileFilter(filter);
-        }
-        fileChooser.setFileFilter(filters.get(0));
         
-        int state = 0;
-        if (load) {
-            state = fileChooser.showOpenDialog(this);
-        } else {
-            state = fileChooser.showSaveDialog(this);
-        }
-        if (state == JFileChooser.APPROVE_OPTION) {
-            file = fileChooser.getSelectedFile();
+        // Set possible file filters
+        for (int i = 0; i < filters.length; i++) {
+            fileChooser.addChoosableFileFilter(filters[i]);
         }
         
-        // Check
-        if (file == null) {
+        // Set default file filters
+        if (filters.length > 0) {
+            fileChooser.setFileFilter(filters[0]);
+        }
+        
+        // Open or save dialog
+        int state = load ? fileChooser.showOpenDialog(this) : fileChooser.showSaveDialog(this);
+        // Check file
+        if (state != JFileChooser.APPROVE_OPTION) {
             return null;
-        }
+            }
+        File file = fileChooser.getSelectedFile();
         
         // Fix extension on save
         if (!load) {
@@ -375,7 +355,9 @@ public class App extends JFrame {
      * @return
      */
     public boolean isMessageShareResultValid(String text) {
-        if (model == null || text == null || text.trim().isEmpty()) return false;
+        if (model == null || text == null || text.trim().isEmpty()) {
+            return false;
+            }
         try {
             return model.isMessageShareResultValid(Message.deserializeMessage(text));
         } catch (Exception e) {
@@ -427,6 +409,7 @@ public class App extends JFrame {
         CardLayout cl = (CardLayout) (cards.getLayout());
         cl.show(cards, perspective.getTitle());
         progress.setProgress(perspective.getProgress());
+        jmiInterimSave.setEnabled(perspective.isInterimSavingPossible());
         progress.repaint();
     }
 
@@ -441,6 +424,7 @@ public class App extends JFrame {
      * Change the language
      */
     protected void actionChangeLanguage() {
+        // Prepare
         Locale newLocale;
         Locale oldLocale = Resources.getResourceBundleLocale();        
         
@@ -504,7 +488,6 @@ public class App extends JFrame {
         } catch (IllegalStateException | IOException e) {
             this.rollback(snapshot);
             JOptionPane.showMessageDialog(this, Resources.getString("App.15"), Resources.getString("App.22"), JOptionPane.ERROR_MESSAGE);
-
         }
     }
 
@@ -554,12 +537,9 @@ public class App extends JFrame {
     /**
      * Load action
      */
-    protected void actionLoad() {
-        
-         ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
-         filters.add(new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING));
+    protected void actionLoad() {       
         // Open dialog
-        File file = getFile(true, filters);
+        File file = getFile(true, new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING));
         
         // Check
         if (file == null) {
@@ -575,10 +555,7 @@ public class App extends JFrame {
             return;
         }
         
-        // Set and switch to correct perspective
-        this.model.filename = file;
-        this.showPerspective(Perspective1BParticipate.class);
-        
+        // Set and switch to correct perspective        
         switch (this.model.state) {
         case NONE:
             showPerspective(Perspective0Start.class);
@@ -627,7 +604,7 @@ public class App extends JFrame {
     protected void actionParticipate() {
          // Try to get string from clip board
         String clipboardText = TaskPollClipboardReceive.getStrippedExchangeMessage(TaskPollClipboardReceive.getTextFromClipBoard());
-        clipboardText = isInitialParticipationMessageValid(clipboardText) ? clipboardText : "";
+        clipboardText = isInitialParticipationMessageValid(clipboardText) ? clipboardText : null;
         
         // Ask for string
         String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
@@ -682,15 +659,15 @@ public class App extends JFrame {
     protected void actionReceiveMessage() {       
        // Try to get string from clip board
         String clipboardText = TaskPollClipboardReceive.getStrippedExchangeMessage(TaskPollClipboardReceive.getTextFromClipBoard());
-        clipboardText = isMessageShareResultValid(clipboardText) ? clipboardText : "";
+        clipboardText = isMessageShareResultValid(clipboardText) ? clipboardText : null;
 
         // Ask for message
-            String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
+        String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
             @Override
-            public boolean validate(String text) {                
+            public boolean validate(String text) {
                 return isMessageShareResultValid(TaskPollClipboardReceive.getStrippedExchangeMessage(text));
-            }
-        }, this).showDialog();           
+                }
+            }, this).showDialog();           
             
         // If message selected
         if (message != null) {
@@ -719,13 +696,9 @@ public class App extends JFrame {
      */
     protected boolean actionSave() {
         
-        if (model.filename == null) {
-            // Set file filter
-            ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
-            filters.add(new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING)); 
-     
+        if (model.filename == null) {    
             // Open dialog
-            File file = getFile(false, filters);
+            File file = getFile(false, new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING));
 
             // Check
             if (file == null) { return false; }
@@ -804,14 +777,7 @@ public class App extends JFrame {
             }
         }
         return returnPerspective;
-    }
-    
-    /**
-     * @return jmiInterimSave
-     */
-    public JMenuItem getJmiInterimSave() {
-        return jmiInterimSave;
-    }
+    }    
     
     /**
      * Get model state

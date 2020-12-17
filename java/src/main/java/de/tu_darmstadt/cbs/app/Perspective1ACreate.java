@@ -65,15 +65,12 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     /** Save button */
     private JButton            save;
     
-    /** Is interim saving in this perspective possible */
-    private final boolean      interimSavingPossible = false;
-
     /**
      * Creates the perspective
      * @param app
      */
     protected Perspective1ACreate(App app) {
-        super(app, Resources.getString("PerspectiveCreate.0"), 1); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveCreate.0"), 1, false); //$NON-NLS-1$
     }
 
     /**
@@ -83,34 +80,42 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.save.setEnabled(this.areValuesValid());
     }
     
-    @Override
-    protected boolean isInterimSavingPossible() {
-        return interimSavingPossible;
-    }
-    
     /**
      * Removes empty lines in participants and bins
      */
     private void actionRemoveEmptyLines() {
+        // Collect to remove
+        List<EntryParticipant> participantsToRemove = new ArrayList<>();
         for (Component entry : this.participants.getComponents()) {
             if (this.participants.getComponentCount() > 1) {
                 // Remove participants if both fields empty
                 if (((EntryParticipant) entry).getLeftValue().trim().isEmpty() &&
                     ((EntryParticipant) entry).getRightValue().trim().isEmpty()) {
-                    removeParticipant((EntryParticipant) entry);
+                    participantsToRemove.add((EntryParticipant) entry);
                 }
             }
         }
-
+        // Actually remove
+        for (EntryParticipant entry : participantsToRemove) {
+            removeParticipant(entry);
+        }
+        
+        // Collect to remove
+        List<EntryBin> binsToRemove = new ArrayList<>();
         for (Component entry : this.bins.getComponents()) {
             if (this.bins.getComponentCount() > 1) {
                 // Remove bin if left field empty and right field empty or zero
                 if (((EntryBin) entry).getLeftValue().trim().isEmpty() &&
                     ((((EntryBin) entry).getRightValue().trim().isEmpty()) ||
                      ((EntryBin) entry).getRightValue().trim().equals(String.valueOf(0)))) {
-                    removeBin((EntryBin) entry);
+                    binsToRemove.add((EntryBin) entry);
                 }
             }
+        }
+        
+        // Actually remove
+        for (EntryBin entry : binsToRemove) {
+            removeBin((EntryBin) entry);
         }
     }
     
@@ -139,7 +144,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.notEnoughParticipants"));
             return;
         }
-
         
         // Collect participants
         List<Participant> participants = new ArrayList<>();

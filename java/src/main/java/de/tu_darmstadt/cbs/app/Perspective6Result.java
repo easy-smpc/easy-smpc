@@ -45,22 +45,14 @@ public class Perspective6Result extends Perspective {
     private JPanel             bins;
     
     /** Text field containing title of study */
-    private ComponentTextField title;
-    
-    /** Is interim saving in this perspective possible */
-    private final boolean      interimSavingPossible = true;
+    private ComponentTextField title;    
     
     /**
      * Creates the perspective
      * @param app
      */
     protected Perspective6Result(App app) {
-        super(app, Resources.getString("PerspectiveFinalize.0"), 6); //$NON-NLS-1$
-    }
-    
-    @Override
-    protected boolean isInterimSavingPossible() {
-        return interimSavingPossible;
+        super(app, Resources.getString("PerspectiveFinalize.0"), 6, false); //$NON-NLS-1$
     }
     
     /**

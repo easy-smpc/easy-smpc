@@ -49,7 +49,7 @@ public class ExcelExtractor extends Extractor {
         try {
             sheet = WorkbookFactory.create(getFile(), "", true).getSheetAt(0);
         } catch (EncryptedDocumentException | IOException e) {
-            throw new IOException(e.getMessage());
+            throw new IOException(e);
         }
 
         // Iterate over cell

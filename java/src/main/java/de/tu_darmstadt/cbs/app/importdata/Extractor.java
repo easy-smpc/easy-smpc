@@ -29,6 +29,7 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  */
 
 public abstract class Extractor {
+    
     /** File of data origin */
     private File          file;
 
@@ -169,4 +170,23 @@ public abstract class Extractor {
      * @return two dimensional array of data
      */
     protected abstract String[][] loadRawData() throws IOException;
+
+    /**
+     * Creates a new extractor for a given file
+     * 
+     * @param file
+     * @return
+     * @throws IOException 
+     * @throws IllegalArgumentException 
+     */
+    public static Extractor forFile(File file) throws IllegalArgumentException, IOException {
+        
+        // Choose correct extractor
+        if (file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS)) {
+            return new ExcelExtractor(file);
+        }
+        else {
+            return new CSVExtractor(file);
+        }   
+    }
 }
