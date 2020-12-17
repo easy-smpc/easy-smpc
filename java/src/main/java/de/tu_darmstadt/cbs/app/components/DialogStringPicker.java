@@ -71,7 +71,7 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
                                                                                         TitledBorder.DEFAULT_POSITION));
         
         // Text
-        this.text = new ComponentTextArea(textDefault, validator);
+        this.text = new ComponentTextArea(textDefault == null ? "" : textDefault, validator);
         this.text.setChangeListener(this);
         this.add(text, BorderLayout.CENTER);
         

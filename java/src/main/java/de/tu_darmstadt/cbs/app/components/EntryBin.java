@@ -32,7 +32,7 @@ public class EntryBin extends ComponentEntryAddRemove {
      * Creates a new instance
      */
     public EntryBin() {
-       this("", true, true, true);
+       this("", true, String.valueOf(0), true, true);
     }
 
     /**
@@ -40,18 +40,20 @@ public class EntryBin extends ComponentEntryAddRemove {
      * @param enabled
      */
     public EntryBin(boolean enabled) {
-       this("", enabled, enabled, enabled);
+       this("", enabled, "", enabled, enabled);
     }
     
     /**
      * Creates a new instance
      * @param name
      * @param leftEnabled
+     * @param value - zero if empty
      * @param rightEnabled
      * @param additionalControlsEnabled
      */
     public EntryBin(String name,
                     boolean leftEnabled,
+                    String value,
                     boolean rightEnabled,
                     boolean additionalControlsEnabled) {
         super(Resources.getString("BinEntry.0"), //$NON-NLS-1$
@@ -65,7 +67,7 @@ public class EntryBin extends ComponentEntryAddRemove {
                   }
               },
               Resources.getString("BinEntry.1"), //$NON-NLS-1$
-              String.valueOf(0),
+              !value.trim().isEmpty() ? value : String.valueOf(0),
               rightEnabled,
               new ComponentTextFieldValidator() {
                   @Override

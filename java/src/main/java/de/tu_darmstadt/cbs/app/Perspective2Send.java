@@ -109,7 +109,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
          boolean messagesUnsent = getApp().getModel().messagesUnsent();
          this.proceed.setEnabled(!messagesUnsent);
          this.send.setEnabled(messagesUnsent);  
-         //Check buttons clickable
+         // Check buttons clickable
          for (Component c : this.participants.getComponents()) {
                  ((EntryParticipantSendMail) c).setButtonEnabled(isMailButtonClickable(c));
              }
@@ -204,7 +204,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             }
 
         } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this.getPanel(), Resources.getString("PerspectiveSend.mailToError"), Resources.getString("PerspectiveSend.mailToErrorTitle"), JOptionPane.ERROR_MESSAGE);
         }
         this.stateChanged(new ChangeEvent(this));
@@ -219,9 +218,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         // Layout
         panel.setLayout(new BorderLayout());
 
-        // -------
         // Study title
-        // -------
         JPanel title = new JPanel();
         panel.add(title, BorderLayout.NORTH);
         title.setLayout(new BorderLayout());
@@ -229,7 +226,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                          Resources.getString("PerspectiveCreate.studyTitle"),
                                                          TitledBorder.LEFT,
                                                          TitledBorder.DEFAULT_POSITION));
-        this.title = new ComponentTextField(null); //no validation
+        this.title = new ComponentTextField(null); // No validation
         this.title.setEnabled(false);
         title.add(this.title, BorderLayout.CENTER);
         
@@ -244,7 +241,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         panel.add(pane, BorderLayout.CENTER);    
            
-        // send all e-mails button and proceed button
+        // Send all e-mails button and proceed button
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
         send = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButton"));
@@ -277,12 +274,14 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     @Override
     protected void initialize() {
-        getApp().getJmiInterimSave().setVisible(isInterimSavingPossible()); 
+        getApp().getJmiInterimSave().setVisible(isInterimSavingPossible());
         this.title.setText(getApp().getModel().name);
         this.participants.removeAll();
-        int i = 0; // index count for participants to access messages
+        int i = 0; // Index count for participants to access messages
         for (Participant currentParticipant : getApp().getModel().participants) {
-            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, currentParticipant.emailAddress, i != getApp().getModel().ownId);
+            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name,
+                                                                          currentParticipant.emailAddress,
+                                                                          i != getApp().getModel().ownId);
             participants.add(entry);
             entry.setButtonListener(new ActionListener() {
                 @Override

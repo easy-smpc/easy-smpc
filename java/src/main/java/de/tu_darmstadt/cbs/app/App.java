@@ -15,10 +15,6 @@ package de.tu_darmstadt.cbs.app;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.HeadlessException;
-import java.awt.Toolkit;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -28,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -46,8 +43,13 @@ import de.tu_darmstadt.cbs.app.components.ComponentProgress;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.DialogAbout;
 import de.tu_darmstadt.cbs.app.components.DialogStringPicker;
+import de.tu_darmstadt.cbs.app.importdata.CSVExtractor;
+import de.tu_darmstadt.cbs.app.importdata.ExcelExtractor;
+import de.tu_darmstadt.cbs.app.importdata.Extractor;
+import de.tu_darmstadt.cbs.app.importdata.TaskPollClipboardReceive;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.AppModel;
+import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.InitialMessage;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
@@ -62,7 +64,7 @@ public class App extends JFrame {
 
     /** SVUID */
     private static final long serialVersionUID = 8047583915796168387L;
-
+        
     /**
      * Main entry point
      * 
@@ -118,15 +120,11 @@ public class App extends JFrame {
         this.setLayout(new BorderLayout());
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);// Close only if user clicks yes in dialog
         
-        // -----------------
         // Progress
-        // -----------------
         this.progress = new ComponentProgress(0);
         this.add(this.progress, BorderLayout.NORTH);
         
-        // -----------------
         // Panels
-        // -----------------
         this.cards = new JPanel(new CardLayout());
         this.add(this.cards, BorderLayout.CENTER);
         
@@ -138,9 +136,7 @@ public class App extends JFrame {
             }
         });     
 
-        // -----------------
         // Menu
-        // ------------------
         JMenuBar jmb = new JMenuBar();
         this.setJMenuBar(jmb);
 
@@ -244,7 +240,7 @@ public class App extends JFrame {
         
         // Show the first perspective
         showPerspective(0);
-
+             
         // Finally, make the frame visible
         this.setVisible(true);
     }
@@ -267,25 +263,64 @@ public class App extends JFrame {
      */
     private AppModel beginTransaction() {
         return this.model != null ? (AppModel)this.model.clone() : null;
+    }    
+    
+    /**
+     * Reads data from a file
+     * @return List of data
+     */
+    public Map<String, String> getDataFromFile() {
+        // Set filter 
+        ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
+        filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX)); 
+        filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription97"), Resources.FILE_ENDING_EXCEL_XLS)); 
+        filters.add(new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
+        
+        // Get file
+        File file = getFile(true, filters);
+        if (file != null) {
+            try {
+                Extractor extractor;
+                
+                // Choose correct extractor
+                if (file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS)) {
+                    extractor = new ExcelExtractor(file);
+                }
+                else {
+                    extractor = new CSVExtractor(file);
+                }                
+                return extractor.getExtractedData();            
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+            }
+            catch (IllegalArgumentException e) {
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadDataError"), Resources.getString("App.11"),  JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+            }
+        }
+        return null;
     }
-
+    
     /**
      * Opens a file chooser
      * @param load 
+     * @param fileNameExtensionFilter
      * @return
      */
-    private File getFile(boolean load) {
+    public File getFile(boolean load, ArrayList<FileNameExtensionFilter> filters) {
 
         // File
         File file = null;
         JFileChooser fileChooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING); //$NON-NLS-1$
-        fileChooser.setFileFilter(filter);
+        for (FileNameExtensionFilter filter : filters) {
+            fileChooser.addChoosableFileFilter(filter);
+        }
+        fileChooser.setFileFilter(filters.get(0));
+        
         int state = 0;
         if (load) {
-            fileChooser.showOpenDialog(this);
+            state = fileChooser.showOpenDialog(this);
         } else {
-            fileChooser.showSaveDialog(this);
+            state = fileChooser.showSaveDialog(this);
         }
         if (state == JFileChooser.APPROVE_OPTION) {
             file = fileChooser.getSelectedFile();
@@ -313,45 +348,17 @@ public class App extends JFrame {
         // Should work
         return file;
     }
-
-    /**
-     * Convenience method to remove exchange message tags
-     * @param text
-     * @return
-     */
-    private String getStrippedExchangeMessage(String text) {
-        text = text.replaceAll("\n", "").trim();
-        if (text.contains(Resources.MESSAGE_START_TAG)) {
-            text = text.substring(text.indexOf(Resources.MESSAGE_START_TAG) + Resources.MESSAGE_START_TAG.length(), text.length());
-        }
-        if (text.contains(Resources.MESSAGE_END_TAG)) {
-            text = text.substring(0, text.indexOf(Resources.MESSAGE_END_TAG));
-        }
-        return text;
-    }
-
-    /**
-     * Returns text from clip board if valid
-     * @return clip board text
-     */
-    private String getTextFromClipBoard() {
-        String text = "";
-        if (Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).isDataFlavorSupported(DataFlavor.stringFlavor)) {
-            try {
-                text = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);              
-            } catch (HeadlessException | UnsupportedFlavorException | IOException e) {
-                // TODO: Logging
-            }
-        };
-        return text;
-    }
     
     /**
      * Check whether initial participation message is valid
+     * 
      * @param text
      * @return
      */
     private boolean isInitialParticipationMessageValid(String text) {
+        if (text == null) {
+            return false;
+        }
         try {
             String data =  Message.deserializeMessage(text).data;
             InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(data)));
@@ -363,15 +370,15 @@ public class App extends JFrame {
     
     /**
      * Check whether message is valid
+     * 
      * @param text
      * @return
      */
-    private boolean isMessageShareResultValid(String text) {
-        if (model == null || text.trim().isEmpty()) return false;
+    public boolean isMessageShareResultValid(String text) {
+        if (model == null || text == null || text.trim().isEmpty()) return false;
         try {
             return model.isMessageShareResultValid(Message.deserializeMessage(text));
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
     }
@@ -437,15 +444,15 @@ public class App extends JFrame {
         Locale newLocale;
         Locale oldLocale = Resources.getResourceBundleLocale();        
         
-        // get new locale
-        newLocale = (Locale) JOptionPane.showInputDialog(null,
+        // Get new locale
+        newLocale = (Locale) JOptionPane.showInputDialog(this,
                                                       Resources.getString("App.18"),
                                                       Resources.getString("App.17"),
                                                       JOptionPane.QUESTION_MESSAGE,
                                                       null,
                                                       Resources.getAvailableLanguages(),
                                                       Resources.getAvailableLanguages()[0]);
-        // confirm restart
+        // Confirm restart
         if (!oldLocale.equals(newLocale) && newLocale != null && JOptionPane.showConfirmDialog(this,
                                                             Resources.getString("App.20"), //$NON-NLS-1$
                                                             Resources.getString("App.19"), //$NON-NLS-1$
@@ -456,7 +463,6 @@ public class App extends JFrame {
                 new App();
                 dispose();
             } catch (IOException e) {
-                e.printStackTrace();
                 JOptionPane.showMessageDialog(this, Resources.getString("App.21") , Resources.getString("App.19"), JOptionPane.ERROR_MESSAGE);
                 Resources.setResourceBundleLocale(oldLocale);
             }
@@ -473,7 +479,6 @@ public class App extends JFrame {
             this.model.toStarting();
         } catch (IllegalStateException | IOException e) {
             this.rollback(snapshot);
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("App.15"), Resources.getString("App.22"), JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -498,7 +503,6 @@ public class App extends JFrame {
             }
         } catch (IllegalStateException | IOException e) {
             this.rollback(snapshot);
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("App.15"), Resources.getString("App.22"), JOptionPane.ERROR_MESSAGE);
 
         }
@@ -524,13 +528,11 @@ public class App extends JFrame {
         try {
             this.model.toSendingResult();
             this.model.saveProgram();
+            this.showPerspective(Perspective4Send.class);
         } catch (Exception e) {
-            this.rollback(snapshot);
-            e.printStackTrace();          
+            this.rollback(snapshot);    
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-        this.showPerspective(Perspective4Send.class);
+        }        
     }
 
     /**
@@ -542,8 +544,7 @@ public class App extends JFrame {
             this.model.toRecievingShares();
             this.model.saveProgram();
         } catch (IllegalStateException | IOException e) {
-            this.rollback(snapshot);
-            e.printStackTrace();          
+            this.rollback(snapshot);      
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveSend.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -554,9 +555,11 @@ public class App extends JFrame {
      * Load action
      */
     protected void actionLoad() {
-
+        
+         ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
+         filters.add(new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING));
         // Open dialog
-        File file = getFile(true);
+        File file = getFile(true, filters);
         
         // Check
         if (file == null) {
@@ -568,7 +571,6 @@ public class App extends JFrame {
             this.model = AppModel.loadModel(file);
         } catch (Exception e) {
             this.model = null;
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("App.11"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE ); //$NON-NLS-1$
             return;
         }
@@ -577,7 +579,6 @@ public class App extends JFrame {
         this.model.filename = file;
         this.showPerspective(Perspective1BParticipate.class);
         
-        // TODO: Check that this really are valid transitions
         switch (this.model.state) {
         case NONE:
             showPerspective(Perspective0Start.class);
@@ -624,31 +625,28 @@ public class App extends JFrame {
      * Participate action
      */
     protected void actionParticipate() {
-         //try to get string from clip board
-        String clipboardText = getStrippedExchangeMessage(getTextFromClipBoard());
-        if (!isInitialParticipationMessageValid(clipboardText)) {
-            clipboardText = "";
-        }
+         // Try to get string from clip board
+        String clipboardText = TaskPollClipboardReceive.getStrippedExchangeMessage(TaskPollClipboardReceive.getTextFromClipBoard());
+        clipboardText = isInitialParticipationMessageValid(clipboardText) ? clipboardText : "";
         
         // Ask for string
-        String exchangeString = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
+        String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {
-                return isInitialParticipationMessageValid(getStrippedExchangeMessage(text));
+                return isInitialParticipationMessageValid(TaskPollClipboardReceive.getStrippedExchangeMessage(text));
             }
         }, this).showDialog();
         
         // If valid string provided
-        if (exchangeString != null) {
-            exchangeString = getStrippedExchangeMessage(exchangeString); 
+        if (message != null) {
+            message = TaskPollClipboardReceive.getStrippedExchangeMessage(message); 
             // Initialize
             try {
-                String data = Message.deserializeMessage(exchangeString).data;
+                String data = Message.deserializeMessage(message).data;
                 this.model = InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(data)));
                 this.model.toEnteringValues(data);
                 this.showPerspective(Perspective1BParticipate.class);
             } catch (Exception e) {
-                e.printStackTrace();
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveParticipate.stringError"), Resources.getString("PerspectiveParticipate.stringErrorTitle"), JOptionPane.ERROR_MESSAGE);
                 this.model = null;
             }
@@ -678,37 +676,42 @@ public class App extends JFrame {
 
     /**
      * Action to receive a message
+     * 
      * @return
      */
-    protected boolean actionReceiveMessage() {       
-       //try to get string from clip board
-       String clipboardText = getStrippedExchangeMessage(getTextFromClipBoard());
-       if (!isMessageShareResultValid(clipboardText)) {
-           clipboardText = "";
-       } 
+    protected void actionReceiveMessage() {       
+       // Try to get string from clip board
+        String clipboardText = TaskPollClipboardReceive.getStrippedExchangeMessage(TaskPollClipboardReceive.getTextFromClipBoard());
+        clipboardText = isMessageShareResultValid(clipboardText) ? clipboardText : "";
+
         // Ask for message
-        String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
+            String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {                
-                return isMessageShareResultValid(getStrippedExchangeMessage(text));
+                return isMessageShareResultValid(TaskPollClipboardReceive.getStrippedExchangeMessage(text));
             }
-        }, this).showDialog();
-
+        }, this).showDialog();           
+            
         // If message selected
         if (message != null) {
-            message = getStrippedExchangeMessage(message);
-            AppModel snapshot = this.beginTransaction();
-            try {
-                this.model.setShareFromMessage(Message.deserializeMessage(message));
-                return true;
-            } catch (IOException | IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException e) {
-                this.rollback(snapshot);
-                return false;
-            }
-        }
-        
-        // Done
-        return false;
+            message = TaskPollClipboardReceive.getStrippedExchangeMessage(message);
+            setMessageShare(TaskPollClipboardReceive.getStrippedExchangeMessage(message));           
+        }  
+    }
+
+    /**
+     * Set message share (message in perspectives receive)
+     * 
+     * @param message
+     */
+    public void setMessageShare(String message) {
+        AppModel snapshot = this.beginTransaction();        
+        try {
+            this.model.setShareFromMessage(Message.deserializeMessage(message));
+        } catch (IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException | IOException e) {
+            this.rollback(snapshot);
+            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.messageError"), Resources.getString("PerspectiveReceive.messageErrorTitle"), JOptionPane.ERROR_MESSAGE);
+        }        
     }
 
     /**
@@ -717,8 +720,12 @@ public class App extends JFrame {
     protected boolean actionSave() {
         
         if (model.filename == null) {
+            // Set file filter
+            ArrayList<FileNameExtensionFilter> filters  = new ArrayList<>();
+            filters.add(new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING)); 
+     
             // Open dialog
-            File file = getFile(false);
+            File file = getFile(false, filters);
 
             // Check
             if (file == null) { return false; }
@@ -731,7 +738,6 @@ public class App extends JFrame {
             return true;
         } catch (IOException e) {
             this.rollback(snapshot);
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$
             return false;
         }
@@ -747,9 +753,7 @@ public class App extends JFrame {
             this.model.saveProgram();
         } catch (Exception e) {
             this.rollback(snapshot);
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
-            return;
         }
         this.showPerspective(Perspective6Result.class);
     }
@@ -764,7 +768,6 @@ public class App extends JFrame {
             this.model.saveProgram();
         } catch (IOException e) {
             this.rollback(snapshot);
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveSend.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -777,7 +780,7 @@ public class App extends JFrame {
     protected void actionStart() {
         this.showPerspective(Perspective0Start.class);
     }
-
+    
     /**
      * Returns the model
      * @return
@@ -808,5 +811,18 @@ public class App extends JFrame {
      */
     public JMenuItem getJmiInterimSave() {
         return jmiInterimSave;
+    }
+    
+    /**
+     * Get model state
+     * 
+     * @return AppState
+     */
+    public AppState getModelState() {
+        if (getModel() != null) {
+            return getModel().state;
+        } else {
+            return null;
+        }
     }
 }

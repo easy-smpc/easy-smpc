@@ -58,7 +58,7 @@ public class ComponentTextArea extends JTextArea {
         paste.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control V"));
         menu.add(paste);
         this.setComponentPopupMenu(menu);
-        //listener for validation
+        // Listener for validation
         this.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void changedUpdate(DocumentEvent e) {

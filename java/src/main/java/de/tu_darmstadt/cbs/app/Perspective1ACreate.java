@@ -22,6 +22,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -90,31 +92,51 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      * Removes empty lines in participants and bins
      */
     private void actionRemoveEmptyLines() {
-        //Remove participants if both fields empty
         for (Component entry : this.participants.getComponents()) {
-            if (((EntryParticipant) entry).getLeftValue().trim().isEmpty() &&
-                ((EntryParticipant) entry).getRightValue().trim().isEmpty()) {
-                removeParticipant((EntryParticipant) entry);
+            if (this.participants.getComponentCount() > 1) {
+                // Remove participants if both fields empty
+                if (((EntryParticipant) entry).getLeftValue().trim().isEmpty() &&
+                    ((EntryParticipant) entry).getRightValue().trim().isEmpty()) {
+                    removeParticipant((EntryParticipant) entry);
+                }
             }
         }
-        //Remove bin if left field empty and right field empty or zero
+
         for (Component entry : this.bins.getComponents()) {
-            if (((EntryBin) entry).getLeftValue().trim().isEmpty() &&
-                (((EntryBin) entry).getRightValue().trim().isEmpty()) ||
-                ((EntryBin) entry).getRightValue().trim().equals("0")) {
-                removeBin((EntryBin) entry);
+            if (this.bins.getComponentCount() > 1) {
+                // Remove bin if left field empty and right field empty or zero
+                if (((EntryBin) entry).getLeftValue().trim().isEmpty() &&
+                    ((((EntryBin) entry).getRightValue().trim().isEmpty()) ||
+                     ((EntryBin) entry).getRightValue().trim().equals(String.valueOf(0)))) {
+                    removeBin((EntryBin) entry);
+                }
             }
         }
+    }
+    
+    /**
+     * Loads and sets bin names and data from a file
+     */
+    private void actionLoadFromFile() {
+        Map<String, String> data = getApp().getDataFromFile();
+        if (data != null) {
+            this.bins.removeAll();
+            EntryBin previousBin = null;
+            for (Entry<String, String> entry : data.entrySet()) {
+                previousBin = addBin(previousBin, entry.getKey(), entry.getValue(), true);
+            }
+            this.stateChanged(new ChangeEvent(this));
+        }   
     }
 
     /**
      * Save the project and proceed.
      */
     private void actionSave() {
-        
+       
         // Check whether at least three participants
-        if (this.participants.getComponents().length < 1) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.notEnoughParticipants"));
+        if (this.participants.getComponents().length < 3) {
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.notEnoughParticipants"));
             return;
         }
 
@@ -144,19 +166,19 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      * Adds a new line for bin entry
      * @param enabled
      */
-    private void addBin(EntryBin previous, boolean enabled) {
+    private EntryBin addBin(EntryBin previous, String name, String value, boolean enabled) {
 
         // Find index
         int index = Arrays.asList(this.bins.getComponents()).indexOf(previous);
         index = index == -1 ? 0 : index + 1;
         
         // Create and add entry
-        EntryBin entry = new EntryBin(enabled);
+        EntryBin entry = new EntryBin(name, enabled, value, enabled, enabled);
         entry.setChangeListener(this);
         entry.setAddListener(new ActionListener() {
            @Override
             public void actionPerformed(ActionEvent e) {
-               addBin(entry, true);
+               addBin(entry, "", "", true);
             } 
         });
         entry.setRemoveListener(new ActionListener() {
@@ -168,6 +190,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.bins.add(entry, index);
         this.bins.revalidate();
         this.bins.repaint();
+        return entry;
     }
 
     /**
@@ -238,7 +261,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Check whether it's the last entry
         if (this.bins.getComponentCount() == 1) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.errorTooFewEntries"));
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.errorTooFewEntries"));
             return;
         }
         
@@ -256,7 +279,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Check whether it's the last entry
         if (this.participants.getComponentCount() == 1) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveCreate.errorTooFewEntries"));
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.errorTooFewEntries"));
             return;
         }
         
@@ -275,9 +298,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         // Layout
         panel.setLayout(new BorderLayout());
 
-        // -------
         // Name of study
-        // -------
         JPanel title = new JPanel();
         panel.add(title, BorderLayout.NORTH);
         title.setLayout(new BorderLayout());
@@ -321,10 +342,21 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
         
-        // Remove empty lines button and save button
+        // Buttons pane
         JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(2, 1));
+        buttonsPane.setLayout(new GridLayout(3, 1));
         
+        // Load from file button      
+        JButton loadFromFile = new JButton(Resources.getString("PerspectiveCreate.LoadFromFile"));
+        loadFromFile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionLoadFromFile();
+            }
+        });
+        buttonsPane.add(loadFromFile, 0, 0);        
+        
+        // Remove empty lines button
         JButton removeEmptylines = new JButton(Resources.getString("PerspectiveCreate.removeEmptyLines"));
         removeEmptylines.addActionListener(new ActionListener() {
             @Override
@@ -332,8 +364,9 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 actionRemoveEmptyLines();
             }
         });
-        buttonsPane.add(removeEmptylines, 0, 0);
+        buttonsPane.add(removeEmptylines, 0, 1);
         
+        // Save button
         save = new JButton(Resources.getString("PerspectiveCreate.save"));
         save.setEnabled(this.areValuesValid());
         save.addActionListener(new ActionListener() {
@@ -342,7 +375,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 actionSave();
             }
         });
-        buttonsPane.add(save, 0, 1);
+        buttonsPane.add(save, 0, 2);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
@@ -359,7 +392,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
 
         // Add initial
         this.addParticipant(null, true);
-        this.addBin(null, true);
+        this.addBin(null, "", "", true);
         
         // Update
         this.stateChanged(new ChangeEvent(this));
