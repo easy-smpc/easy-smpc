@@ -109,10 +109,7 @@ public class Resources {
     public static final int       MAX_COUNT_COLUMNS               = 64;
     /** Delimiters considered for CSV files */
     public static final char[]    DELIMITERS                      = { ';', ',', '|', '\t' };
-    /** Line breaks considered for CSV files */
-    public static final char[][]  LINEBREAKS                      = { { '\n' },
-                                                                      { '\r', '\n' },
-                                                                      { '\r' } };
+    
     /**
      * Maximum number of lines to be loaded for preview purposes for CSV file
      * detection.
@@ -152,7 +149,7 @@ public class Resources {
      * 
      * @return
      */
-    public static Locale getResourceBundleLocale(){
+    public static Locale getResourceBundleLocale() {
         return resource_bundle.getLocale();
     }
     
@@ -161,8 +158,7 @@ public class Resources {
      * 
      * @return
      */
-    public static void setResourceBundleLocale(Locale locale)
-    {
+    public static void setResourceBundleLocale(Locale locale) {
         Locale.setDefault(Locale.ENGLISH);
         resource_bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
     }
@@ -172,8 +168,7 @@ public class Resources {
      * 
      * @return
      */
-    public static Locale[] getAvailableLanguages()
-    {
+    public static Locale[] getAvailableLanguages() {
         return AVAILABLE_LANGUAGES;
     }
     

@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -64,17 +65,14 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     private JButton            proceed;
 
     /** Send button */
-    private JButton            send;
-    
-    /** Is interim saving in this perspective possible */
-    private final boolean      interimSavingPossible = true;
+    private JButton            send;    
 
     /**
      * Creates the perspective
      * @param app
      */
     protected Perspective2Send(App app) {
-        super(app, Resources.getString("PerspectiveSend.send"), 2); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveSend.send"), 2, true); //$NON-NLS-1$
     }
 
     /**
@@ -83,7 +81,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @param progress
      */
     protected Perspective2Send(App app, int progress) {
-        super(app, Resources.getString("PerspectiveSend.send"), progress); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveSend.send"), progress, true); //$NON-NLS-1$
     }
     
     /**
@@ -92,12 +90,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @param progress
      */
     protected Perspective2Send(App app, String title , int progress) {
-        super(app, title, progress); //$NON-NLS-1$
-    }
-    
-    @Override
-    protected boolean isInterimSavingPossible() {
-        return interimSavingPossible;
+        super(app, title, progress, true); //$NON-NLS-1$
     }
     
     /**
@@ -167,7 +160,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * Sends an e-mail to the participant entry
      * @param list
      */
-    protected void actionSendMail(ArrayList<EntryParticipantSendMail> list) {
+    protected void actionSendMail(List<EntryParticipantSendMail> list) {
         try {
             
             // For each entry
@@ -248,7 +241,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         send.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                ArrayList<EntryParticipantSendMail> list = new ArrayList<>();
+                List<EntryParticipantSendMail> list = new ArrayList<>();
                 for (Component c : participants.getComponents()) {
                     if (!isOwnEntry(c) && unsentMessages(c) ) {
                         list.add((EntryParticipantSendMail)  c);                        
@@ -274,7 +267,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     @Override
     protected void initialize() {
-        getApp().getJmiInterimSave().setVisible(isInterimSavingPossible());
         this.title.setText(getApp().getModel().name);
         this.participants.removeAll();
         int i = 0; // Index count for participants to access messages
@@ -286,7 +278,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             entry.setButtonListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    ArrayList<EntryParticipantSendMail> list = new ArrayList<>();
+                    List<EntryParticipantSendMail> list = new ArrayList<>();
                     list.add(entry);
                     actionSendMail(list);
                 }

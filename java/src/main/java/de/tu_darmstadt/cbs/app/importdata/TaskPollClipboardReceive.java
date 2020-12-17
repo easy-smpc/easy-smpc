@@ -22,7 +22,6 @@ import javax.swing.event.ChangeEvent;
 
 import de.tu_darmstadt.cbs.app.Perspective3Receive;
 import de.tu_darmstadt.cbs.app.resources.Resources;
-import de.tu_darmstadt.cbs.emailsmpc.AppState;
 
 /**
  * A class to poll the clipboard periodically for messages
@@ -32,20 +31,13 @@ import de.tu_darmstadt.cbs.emailsmpc.AppState;
 
 public class TaskPollClipboardReceive implements Runnable {
     /** PerspectiveReceive */
-    private Perspective3Receive perspectiveReceive;
-
-    /**
-     * @return the perspectiveReceive
-     */
-    public Perspective3Receive getPerspectiveReceive() {
-        return perspectiveReceive;
-    }
+    private Perspective3Receive parent;
     
     /**
      * Creates a new instance
      */
     public TaskPollClipboardReceive(Perspective3Receive perspectiveReceive) {
-            this.perspectiveReceive = perspectiveReceive;
+            this.parent = perspectiveReceive;
             Executors.newScheduledThreadPool(1).scheduleAtFixedRate(this, 0, Resources.INTERVAL_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);        
     }
     
@@ -55,14 +47,13 @@ public class TaskPollClipboardReceive implements Runnable {
     @Override
     public void run() {
         // If app is in state to receive a message
-        if (perspectiveReceive.getApp().getModelState() != null &&
-            (perspectiveReceive.getApp().getModelState() == AppState.RECIEVING_SHARE ||
-             perspectiveReceive.getApp().getModelState() == AppState.RECIEVING_RESULT)) {            
+        if (this.parent.isVisible()) {            
             // Set message if valid
             String message = getStrippedExchangeMessage(getTextFromClipBoard());         
-            if (perspectiveReceive.getApp().isMessageShareResultValid(message)) {
-                perspectiveReceive.getApp().setMessageShare(message);
-                perspectiveReceive.stateChanged(new ChangeEvent(this));
+            if (parent.getApp().isMessageShareResultValid(message)) {
+                parent.getApp().setMessageShare(message);
+                // TODO: Delegate to perspective or app 
+                parent.stateChanged(new ChangeEvent(this));
             }
         }
     }
@@ -88,14 +79,13 @@ public class TaskPollClipboardReceive implements Runnable {
      * @return clip board text
      */
     public static String getTextFromClipBoard() {
-        String text = null;
         if (Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).isDataFlavorSupported(DataFlavor.stringFlavor)) {
             try {
-                text = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);              
+                return (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);              
             } catch (Exception e) {
                 // No error message to user necessary
             }
-        };
-        return text;
+        }
+        return null;
     }
 }

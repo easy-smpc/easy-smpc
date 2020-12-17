@@ -41,6 +41,5 @@ public class EntryBinNoButton extends EntryBin {
     @Override
     protected JPanel createAdditionalControls() {
         return null;
-    }
-    
+    }  
 }

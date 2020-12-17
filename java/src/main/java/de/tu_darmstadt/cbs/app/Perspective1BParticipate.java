@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
@@ -63,22 +64,14 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     
     /** Central panel */
     private JPanel central;
-    
-    /** Is interim saving in this perspective possible */
-    private final boolean      interimSavingPossible = false;
 
     /**
      * Creates the perspective
      * @param app
      */
     protected Perspective1BParticipate(App app) {
-        super(app, Resources.getString("PerspectiveParticipate.participate"), 1); //$NON-NLS-1$
-    }
-    
-    @Override
-    protected boolean isInterimSavingPossible() {
-        return interimSavingPossible;
-    }
+        super(app, Resources.getString("PerspectiveParticipate.participate"), 1, false); //$NON-NLS-1$
+    }    
     
     /**
      * Reacts on all changes in any components
@@ -106,7 +99,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      */
     private void actionLoadFromFile() {
         Map<String, String> data = getApp().getDataFromFile();
-        ArrayList<String> binsWithoutValue = new ArrayList<>();
+        List<String> binsWithoutValue = new ArrayList<>();
         if (data != null) {
             for (Component c : this.bins.getComponents()) {
                 String value = data.get(((EntryBin) c).getLeftValue());
