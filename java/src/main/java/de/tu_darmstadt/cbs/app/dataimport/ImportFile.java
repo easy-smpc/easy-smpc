@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.tu_darmstadt.cbs.app.importdata;
+package de.tu_darmstadt.cbs.app.dataimport;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +31,7 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  * @author Felix Wirth
  */
 
-public abstract class Extractor {
+public abstract class ImportFile {
     
     /**
      * Creates a new extractor for a given file
@@ -41,14 +41,14 @@ public abstract class Extractor {
      * @throws IOException 
      * @throws IllegalArgumentException 
      */
-    public static Extractor forFile(File file) throws IllegalArgumentException, IOException {
+    public static ImportFile forFile(File file) throws IllegalArgumentException, IOException {
         
         // Choose correct extractor
         if (file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS)) {
-            return new ExcelExtractor(file);
+            return new ImportExcel(file);
         }
         else {
-            return new CSVExtractor(file);
+            return new ImportCSV(file);
         }   
     }
 
@@ -62,7 +62,7 @@ public abstract class Extractor {
      * @throws IOException
      * @throws EncryptedDocumentException
      */
-    protected Extractor(File file) throws IOException, IllegalArgumentException {
+    protected ImportFile(File file) throws IOException, IllegalArgumentException {
         this.file = file;    
     }
 

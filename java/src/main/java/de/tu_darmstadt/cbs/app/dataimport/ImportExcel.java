@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.tu_darmstadt.cbs.app.importdata;
+package de.tu_darmstadt.cbs.app.dataimport;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +31,7 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  * 
  * @author Felix Wirth
  */
-public class ExcelExtractor extends Extractor {
+public class ImportExcel extends ImportFile {
 
     /**
      * Creates a new instance
@@ -40,7 +40,7 @@ public class ExcelExtractor extends Extractor {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public ExcelExtractor(File file) throws IOException, IllegalArgumentException {
+    public ImportExcel(File file) throws IOException, IllegalArgumentException {
         super(file);
     }
 

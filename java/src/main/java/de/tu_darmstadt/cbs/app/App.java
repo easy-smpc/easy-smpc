@@ -43,8 +43,8 @@ import de.tu_darmstadt.cbs.app.components.ComponentProgress;
 import de.tu_darmstadt.cbs.app.components.ComponentTextFieldValidator;
 import de.tu_darmstadt.cbs.app.components.DialogAbout;
 import de.tu_darmstadt.cbs.app.components.DialogStringPicker;
-import de.tu_darmstadt.cbs.app.importdata.Extractor;
-import de.tu_darmstadt.cbs.app.importdata.TaskPollClipboardReceive;
+import de.tu_darmstadt.cbs.app.dataimport.ImportFile;
+import de.tu_darmstadt.cbs.app.dataimport.ImportClipboard;
 import de.tu_darmstadt.cbs.app.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.AppModel;
 import de.tu_darmstadt.cbs.emailsmpc.AppState;
@@ -252,7 +252,7 @@ public class App extends JFrame {
         File file = getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX), new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription97"), Resources.FILE_ENDING_EXCEL_XLS),new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
         if (file != null) {
             try {
-                return Extractor.forFile(file).getExtractedData();       
+                return ImportFile.forFile(file).getExtractedData();       
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
             }
@@ -631,20 +631,20 @@ public class App extends JFrame {
      */
     protected void actionParticipate() {
          // Try to get string from clip board
-        String clipboardText = TaskPollClipboardReceive.getStrippedExchangeMessage(TaskPollClipboardReceive.getTextFromClipBoard());
+        String clipboardText = ImportClipboard.getStrippedExchangeMessage(ImportClipboard.getTextFromClipBoard());
         clipboardText = isInitialParticipationMessageValid(clipboardText) ? clipboardText : null;
         
         // Ask for string
         String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {
-                return isInitialParticipationMessageValid(TaskPollClipboardReceive.getStrippedExchangeMessage(text));
+                return isInitialParticipationMessageValid(ImportClipboard.getStrippedExchangeMessage(text));
             }
         }, this).showDialog();
         
         // If valid string provided
         if (message != null) {
-            message = TaskPollClipboardReceive.getStrippedExchangeMessage(message); 
+            message = ImportClipboard.getStrippedExchangeMessage(message); 
             // Initialize
             try {
                 String data = Message.deserializeMessage(message).data;
@@ -686,21 +686,21 @@ public class App extends JFrame {
      */
     protected void actionReceiveMessage() {       
        // Try to get string from clip board
-        String clipboardText = TaskPollClipboardReceive.getStrippedExchangeMessage(TaskPollClipboardReceive.getTextFromClipBoard());
+        String clipboardText = ImportClipboard.getStrippedExchangeMessage(ImportClipboard.getTextFromClipBoard());
         clipboardText = isMessageShareResultValid(clipboardText) ? clipboardText : null;
 
         // Ask for message
         String message = new DialogStringPicker(clipboardText, new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {
-                return isMessageShareResultValid(TaskPollClipboardReceive.getStrippedExchangeMessage(text));
+                return isMessageShareResultValid(ImportClipboard.getStrippedExchangeMessage(text));
                 }
             }, this).showDialog();           
             
         // If message selected
         if (message != null) {
-            message = TaskPollClipboardReceive.getStrippedExchangeMessage(message);
-            setMessageShare(TaskPollClipboardReceive.getStrippedExchangeMessage(message));           
+            message = ImportClipboard.getStrippedExchangeMessage(message);
+            setMessageShare(ImportClipboard.getStrippedExchangeMessage(message));           
         }  
     }
     

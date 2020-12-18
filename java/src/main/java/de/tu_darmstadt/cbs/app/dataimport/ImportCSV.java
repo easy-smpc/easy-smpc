@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.tu_darmstadt.cbs.app.importdata;
+package de.tu_darmstadt.cbs.app.dataimport;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -36,7 +36,7 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  * 
  * @author Felix Wirth
  */
-public class CSVExtractor extends Extractor {
+public class ImportCSV extends ImportFile {
     
     /**
      * Creates a new instance
@@ -45,7 +45,7 @@ public class CSVExtractor extends Extractor {
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public CSVExtractor(File file) throws IOException, IllegalArgumentException {
+    public ImportCSV(File file) throws IOException, IllegalArgumentException {
         super(file);
     }
 

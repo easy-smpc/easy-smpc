@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.tu_darmstadt.cbs.app.importdata;
+package de.tu_darmstadt.cbs.app.dataimport;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -29,7 +29,7 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  * @author Felix Wirth
  */
 
-public class TaskPollClipboardReceive implements Runnable {
+public class ImportClipboard implements Runnable {
     /**
      * Convenience method to remove exchange message tags
      * @param text
@@ -67,7 +67,7 @@ public class TaskPollClipboardReceive implements Runnable {
     /**
      * Creates a new instance
      */
-    public TaskPollClipboardReceive(Perspective3Receive perspectiveReceive) {
+    public ImportClipboard(Perspective3Receive perspectiveReceive) {
             this.parent = perspectiveReceive;
             Executors.newScheduledThreadPool(1).scheduleAtFixedRate(this, 0, Resources.INTERVAL_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);        
     }
