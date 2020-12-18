@@ -15,6 +15,8 @@ package de.tu_darmstadt.cbs.app.importdata;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -44,8 +46,11 @@ public class ExcelExtractor extends Extractor {
 
     @Override
     protected String[][] loadRawData() throws IOException {
-        String[][] rawData = new String[Resources.MAX_COUNT_ROWS][Resources.MAX_COUNT_COLUMNS];
+        // Prepare
         Sheet sheet;
+        List<List<String>> rows = new ArrayList<>();
+        
+        // Load Excel sheet
         try {
             sheet = WorkbookFactory.create(getFile(), "", true).getSheetAt(0);
         } catch (EncryptedDocumentException | IOException e) {
@@ -56,22 +61,20 @@ public class ExcelExtractor extends Extractor {
         for (int indexRow = 0; indexRow < Resources.MAX_COUNT_ROWS; indexRow++) {
             // Check entire row is not null
             if (sheet.getRow(indexRow) != null) {
+                List<String> column = new ArrayList<>();
                 for (int indexCol = 0; indexCol < Resources.MAX_COUNT_COLUMNS; indexCol++) {
                     Cell cell = sheet.getRow(indexRow).getCell(indexCol);
 
                     // Check if cell is not empty
                     if (cell != null && cell.getCellType() != CellType.BLANK &&
                         !extractExcelCellContent(cell, true).trim().isEmpty()) {
-                        rawData[indexRow][indexCol] = extractExcelCellContent(cell, true);
-                    } else {
-                        rawData[indexRow][indexCol] = null;
+                        column.add(extractExcelCellContent(cell, true));
                     }
                 }
-            } else {
-                rawData[indexRow] = null;
+                rows.add(column);
             }
         }
-        return rawData;
+        return rowsListToArray(rows);
     }
     
     /**

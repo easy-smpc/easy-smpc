@@ -20,6 +20,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -48,28 +50,33 @@ public class CSVExtractor extends Extractor {
     }
 
     @Override
-    protected String[][] loadRawData() throws IOException {
-        String[][] rawData = new String[Resources.MAX_COUNT_ROWS][Resources.MAX_COUNT_COLUMNS];
+    protected String[][] loadRawData() throws IOException {     
         Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(getDelimiter())
                                                        .parse(new FileReader(getFile()));
+        List<List<String>> rows = new ArrayList<>();
+        
         int indexRow = 0;
         for (CSVRecord recordRow : records) {
             int indexColumn = 0;
+            List<String> column = new ArrayList<>();
             for (String recordField : recordRow) {
-                rawData[indexRow][indexColumn] = recordField;
+                column.add(recordField);
                 // Break if maximum reached
                 indexColumn++;
                 if (indexColumn == Resources.MAX_COUNT_COLUMNS) {
                     break;
                 }
             }
+            rows.add(column);
             // Break if maximum reached
             indexRow++;
             if (indexRow == Resources.MAX_COUNT_ROWS) {
                 break;
             }
         }
-        return rawData;
+        
+        // Done
+        return rowsListToArray(rows);
     }
     
     /**

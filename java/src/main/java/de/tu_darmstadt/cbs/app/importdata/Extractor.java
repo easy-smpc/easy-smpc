@@ -15,7 +15,10 @@ package de.tu_darmstadt.cbs.app.importdata;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.EncryptedDocumentException;
@@ -64,70 +67,104 @@ public abstract class Extractor {
     /**
      * Remove all empty rows and columns
      * 
-     * @param rawData
+     * @param data
      * @return the data without empty lines and columns
      */
-    private String[][] stripRawData(String[][] rawData) {      
-        String[][] strippedData = null;
-        int indexRowStrippedData = 0;
-        for (int indexRow = 0; indexRow <= rawData.length - 1; indexRow++) {
-            boolean rowNotEmpty = false;
-            if (rawData[indexRow] != null) {
-                int indexColumnStrippedData = 0;
-                for (int indexColumn = 0; indexColumn <= rawData[indexRow].length -
-                                                         1; indexColumn++) {
-                    if (rawData[indexRow][indexColumn] != null &&
-                        !rawData[indexRow][indexColumn].trim().isEmpty()) {
-                        strippedData = setFieldInArray(strippedData,
-                                                       indexRowStrippedData,
-                                                       indexColumnStrippedData,
-                                                       rawData[indexRow][indexColumn]);
-                        rowNotEmpty = true;
-                        indexColumnStrippedData++;
-                    }
-                }
-                if (rowNotEmpty) {
-                    indexRowStrippedData++;
+    private String[][] stripRawData(String[][] data) {
+
+        // Prepare
+        int columns = -1;
+        List<List<String>> rows = new ArrayList<>();
+
+        // Remove empty rows
+        for (String[] row : data) {
+
+            // Check
+            if (isNotEmpty(row)) {
+
+                // Add non-empty row
+                rows.add(new ArrayList<String>(Arrays.asList(row)));
+
+                // Perform a sanity check
+                columns = columns == -1 ? row.length : columns;
+                if (columns != row.length) {
+                    throw new IllegalArgumentException("Array must be rectangular");
                 }
             }
         }
-        return strippedData;
+
+        // Remove empty columns
+        for (int column = 0; column < columns; column++) {
+
+            // First determine whether the column is empty
+            boolean isEmpty = true;
+            for (List<String> row : rows) {
+                if (isNotEmpty(row.get(column))) {
+                    isEmpty = false;
+                    break;
+                }
+            }
+
+            // If column is empty, remove from data
+            if (isEmpty) {
+                for (List<String> row : rows) {
+                    row.remove(column);
+                }
+                columns--;
+            }
+        }
+        
+        // Done
+        return  rowsListToArray(rows);
     }
-    
 
     /**
-     * Sets a value in an array while extending the array if necessary
+     * Convert list of lists to array
      * 
-     * @param old array
-     * @param row of value
-     * @param column of value
-     * @param value
-     * @return the new array
+     * @param list of list of strings 
+     * @return Array [][]
      */
-    private String[][] setFieldInArray(String[][] oldArray, int row, int column, String value) {
-        String[][] newArray;
-        
-        // Initialize if null
-        if (oldArray == null) {
-            oldArray = new String[row + 1][column + 1];
+    protected String[][] rowsListToArray(List<List<String>> rows) {
+        // Convert list of lists to array
+        String[][] result = new String[rows.size()][];
+        int index = 0;
+        for (List<String> row : rows) {
+            result[index++] = row.toArray(new String[row.size()]);
         }
-        
-        // If old array is too small, create new one and copy values
-        if (oldArray.length <= row || oldArray[0].length <= column) {
-            newArray = new String[Math.max(row + 1, oldArray.length)][Math.max(column + 1,
-                                                                               oldArray[0].length)];
-            for (int indexRow = 0; indexRow < oldArray.length; indexRow++) {
-                for (int indexColums = 0; indexColums < oldArray[0].length; indexColums++) {
-                    newArray[indexRow][indexColums] = oldArray[indexRow][indexColums];
-                }
+        return result;
+    }
+
+    /**
+     * Checks whether an array is empty
+     * 
+     * @param array
+     * @return
+     */
+    private boolean isNotEmpty(String[] array) {
+
+        // Check
+        if (array == null || array.length == 0) { return false; }
+
+        // Check elements
+        boolean empty = true;
+        for (String o : array) {
+            if (isNotEmpty(o)) {
+                empty = false;
+                break;
             }
-        } else {
-            newArray = oldArray;
         }
-        
-        // Set new value
-        newArray[row][column] = value;
-        return newArray;
+        // Done
+        return !empty;
+    }
+
+    /**
+     * Checks whether a string is empty
+     * 
+     * @param o
+     * @return
+     */
+    private boolean isNotEmpty(String o) {
+        return o != null && !o.trim().isEmpty();
     }
 
     /**
@@ -135,32 +172,24 @@ public abstract class Extractor {
      * 
      * @param strippedData
      * @return extracted data
-     * @throws IllegalArgumentException
      */
-    private Map<String,String> extractData(String[][] strippedData) throws IllegalArgumentException {
-        Map<String, String> extractedData            = new LinkedHashMap<String, String>();
+    private Map<String,String> extractData(String[][] strippedData) {
         
-        // Throw error, if not expected columns or rows length
-        if (strippedData.length != Resources.EXACT_ROW_COLUMNS_LENGTH &&
-            strippedData[0].length != Resources.EXACT_ROW_COLUMNS_LENGTH) {
-            throw new IllegalArgumentException(Resources.getString("PerspectiveCreate.LoadDataError"));
-        }
-        
-        // Transpose if rows oriented
-        if (strippedData[0].length > Resources.EXACT_ROW_COLUMNS_LENGTH) {
-            String[][] untransposed = strippedData;
-            strippedData = new String[untransposed[0].length][untransposed.length];
-            for (int indexRow = 0; indexRow < untransposed.length; indexRow++) {
-                for (int indexColumn = 0; indexColumn < untransposed[0].length; indexColumn++) {
-                    strippedData[indexColumn][indexRow] = untransposed[indexRow][indexColumn];
-                }
+        // Prepare
+        Map<String, String> extractedData = new LinkedHashMap<String, String>();
+
+        if (strippedData.length != Resources.EXACT_ROW_COLUMNS_LENGTH) {
+            // Extract data from filled rows
+            for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
+                // Assume first column contains bin name, second has bin value
+                extractedData.put(strippedData[indexRow][0], strippedData[indexRow][1]);
             }
-        }
-           
-        // Extract data from filled rows
-        for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
-            // Assume first column contains bin name, second has bin value
-            extractedData.put(strippedData[indexRow][0], strippedData[indexRow][1]);
+        } else {
+            // Extract data from filled columns
+            for (int indexColumn = 0; indexColumn < strippedData[0].length; indexColumn++) {
+                // Assume first column contains bin name, second has bin value
+                extractedData.put(strippedData[0][indexColumn], strippedData[1][indexColumn]);
+            }
         }
         return extractedData;
     }
