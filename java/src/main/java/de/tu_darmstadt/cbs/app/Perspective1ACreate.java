@@ -194,6 +194,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.bins.add(entry, index);
         this.bins.revalidate();
         this.bins.repaint();
+        this.stateChanged(new ChangeEvent(this));
         return entry;
     }
 
@@ -226,6 +227,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.participants.add(entry, index);
         this.participants.revalidate();
         this.participants.repaint();
+        this.stateChanged(new ChangeEvent(this));
     }
 
     /**
@@ -271,6 +273,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Remove and update
         this.bins.remove(entry);
+        this.stateChanged(new ChangeEvent(this));
         this.bins.revalidate();
         this.bins.repaint();
     }
@@ -289,6 +292,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Remove and update
         this.participants.remove(entry);
+        this.stateChanged(new ChangeEvent(this));
         this.participants.revalidate();    
         this.participants.repaint();
     }
