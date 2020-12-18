@@ -143,4 +143,10 @@ public abstract class ComponentEntryAddRemove extends ComponentEntry {
         // Done
         return panel;
     }
+    
+    /**
+     * Are components fields empty
+     */
+    public abstract boolean isEmpty();
+
 }

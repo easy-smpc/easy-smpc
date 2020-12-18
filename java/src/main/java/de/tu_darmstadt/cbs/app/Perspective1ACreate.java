@@ -87,35 +87,32 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         // Collect to remove
         List<EntryParticipant> participantsToRemove = new ArrayList<>();
         for (Component entry : this.participants.getComponents()) {
-            if (this.participants.getComponentCount() > 1) {
                 // Remove participants if both fields empty
-                if (((EntryParticipant) entry).getLeftValue().trim().isEmpty() &&
-                    ((EntryParticipant) entry).getRightValue().trim().isEmpty()) {
+                if (((EntryParticipant) entry).isEmpty()) {
                     participantsToRemove.add((EntryParticipant) entry);
                 }
-            }
         }
         // Actually remove
         for (EntryParticipant entry : participantsToRemove) {
-            removeParticipant(entry);
+            if (this.participants.getComponentCount() > 1) {
+                removeParticipant(entry);
+            }
         }
         
         // Collect to remove
         List<EntryBin> binsToRemove = new ArrayList<>();
         for (Component entry : this.bins.getComponents()) {
-            if (this.bins.getComponentCount() > 1) {
                 // Remove bin if left field empty and right field empty or zero
-                if (((EntryBin) entry).getLeftValue().trim().isEmpty() &&
-                    ((((EntryBin) entry).getRightValue().trim().isEmpty()) ||
-                     ((EntryBin) entry).getRightValue().trim().equals(String.valueOf(0)))) {
+                if (((EntryBin) entry).isEmpty()) {
                     binsToRemove.add((EntryBin) entry);
                 }
-            }
         }
         
         // Actually remove
         for (EntryBin entry : binsToRemove) {
-            removeBin((EntryBin) entry);
+            if (this.bins.getComponentCount() > 1) {
+                removeBin((EntryBin) entry);
+            }
         }
     }
     

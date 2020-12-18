@@ -56,4 +56,12 @@ public class EntryParticipant extends ComponentEntryAddRemove {
                 },
               additionalControlsEnabled);
     }
+    
+    /**
+     * Returns true if both values are empty
+     */
+    @Override
+    public boolean isEmpty() {
+        return (this.getLeftValue().trim().isEmpty() && this.getRightValue().trim().isEmpty());     
+    }
 }

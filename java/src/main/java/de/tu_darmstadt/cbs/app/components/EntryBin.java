@@ -116,4 +116,14 @@ public class EntryBin extends ComponentEntryAddRemove {
               },
               false);
     }
+
+    /**
+     * Returns true if left value is empty and right value is empty or "0"
+     */
+    @Override
+    public boolean isEmpty() {
+        return (this.getLeftValue().trim().isEmpty() &&
+                 (this.getRightValue().trim().isEmpty()) ||
+                  this.getRightValue().trim().equals(String.valueOf(0)));        
+    }
 }
