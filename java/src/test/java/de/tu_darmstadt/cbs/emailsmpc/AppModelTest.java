@@ -1,9 +1,13 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
 import static org.junit.Assert.assertTrue;
-import java.math.BigInteger;
+
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -13,8 +17,10 @@ import org.junit.Test;
 public class AppModelTest {
     /**
      * Rigorous Test :-)
+     * @throws IOException 
+     * @throws IllegalStateException 
      */
-    static private AppModel getInitializedModel(int numParticipants, int numBins) {
+    static private AppModel getInitializedModel(int numParticipants, int numBins) throws IllegalStateException, IOException {
         AppModel testmodel = new AppModel();
         Participant[] part = new Participant[numParticipants];
         Bin[] bins = new Bin[numBins];
@@ -31,7 +37,7 @@ public class AppModelTest {
         return testmodel;
     }
 
-    static private AppModel getInitializedModel(int numParticipants, int numBins, BigInteger[] array) {
+    static private AppModel getInitializedModel(int numParticipants, int numBins, BigInteger[] array) throws IllegalStateException, IOException {
         AppModel testmodel = new AppModel();
         Participant[] part = new Participant[numParticipants];
         Bin[] bins = new Bin[numBins];
@@ -47,36 +53,50 @@ public class AppModelTest {
         testmodel.toInitialSending("Teststudy", part, bins);
         return testmodel;
     }
+    @Test
+    public void CloneTest() throws IllegalStateException, IOException {
+        BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
+                BigInteger.valueOf(4) };
+        AppModel model0 = AppModelTest.getInitializedModel(3, 4, secrets0);
+        AppModel copy = (AppModel) model0.clone();
+        assertTrue((copy != model0));
+        assertTrue(copy.equals(model0));
+        assertTrue(copy.studyUID.equals(model0.studyUID));
+    }
 
     @Test
-    public void AddingBins() {
+    public void AddingBins() throws IllegalStateException, IOException {
         AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
         assertTrue(testmodel.bins.length == 4);
     }
 
     @Test
-    public void AddingParticipants() {
+    public void AddingParticipants() throws IllegalStateException, IOException {
         AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
         assertTrue(testmodel.participants.length == 3);
     }
+    @Test
+    public void NonCollidingUID(){
+      Set<String> ids = new HashSet<String>();
+      for (int i = 0; i < 1000; i++ ) {
+        AppModel model = new AppModel();
+        assertTrue(!ids.contains(model.studyUID));
+        ids.add(model.studyUID);
+      }
+    }
 
     @Test
-    public void SaveLoad() throws IOException, ClassNotFoundException {
+    public void SaveLoad() throws ClassNotFoundException, IOException {
         AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
-        try {
             File fn = new File("testing.dat");
             testmodel.filename = fn;
             testmodel.saveProgram();
             AppModel load = AppModel.loadModel(fn);
             assertTrue(load.equals(testmodel));
-        } catch (Exception e) {
-            e.printStackTrace(System.out);
-            throw e;
-        }
     }
 
     @Test
-    public void TestWithThree() throws IOException, ClassNotFoundException {
+    public void TestWithThree() throws ClassNotFoundException, IllegalStateException, IOException, IllegalArgumentException, NoSuchAlgorithmException {
         BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
                 BigInteger.valueOf(4) };
         AppModel model0 = AppModelTest.getInitializedModel(3, 4, secrets0);
@@ -107,10 +127,10 @@ public class AppModelTest {
         model0.toRecievingShares();
         model1.toRecievingShares();
         model2.toRecievingShares();
-        model0.setShareFromMessage(share10, model0.getParticipantFromId(1));
-        model0.setShareFromMessage(share20, model0.getParticipantFromId(2));
-        model1.setShareFromMessage(share21, model1.getParticipantFromId(2));
-        model2.setShareFromMessage(share12, model2.getParticipantFromId(1));
+        model0.setShareFromMessage(share10);
+        model0.setShareFromMessage(share20);
+        model1.setShareFromMessage(share21);
+        model2.setShareFromMessage(share12);
         model0.toSendingResult();
         model1.toSendingResult();
         model2.toSendingResult();
@@ -129,12 +149,12 @@ public class AppModelTest {
         model0.toRecievingResult();
         model1.toRecievingResult();
         model2.toRecievingResult();
-        model0.setShareFromMessage(result10, model0.getParticipantFromId(1));
-        model0.setShareFromMessage(result20, model0.getParticipantFromId(2));
-        model1.setShareFromMessage(result01, model1.getParticipantFromId(0));
-        model1.setShareFromMessage(result21, model1.getParticipantFromId(2));
-        model2.setShareFromMessage(result02, model2.getParticipantFromId(0));
-        model2.setShareFromMessage(result12, model2.getParticipantFromId(1));
+        model0.setShareFromMessage(result10);
+        model0.setShareFromMessage(result20);
+        model1.setShareFromMessage(result01);
+        model1.setShareFromMessage(result21);
+        model2.setShareFromMessage(result02);
+        model2.setShareFromMessage(result12);
         model0.toFinished();
         model1.toFinished();
         model2.toFinished();

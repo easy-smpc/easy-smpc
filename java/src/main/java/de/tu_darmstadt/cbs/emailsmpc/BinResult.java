@@ -2,7 +2,7 @@ package de.tu_darmstadt.cbs.emailsmpc;
 
 import java.math.BigInteger;
 
-public class BinResult {
+public class BinResult{
     public String name;
     public BigInteger value;
 
@@ -31,5 +31,4 @@ public class BinResult {
     public String toString() {
         return name + ": " + value.toString();
     }
-
 }

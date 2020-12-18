@@ -1,13 +1,13 @@
 package de.tu_darmstadt.cbs.secretshare;
 
-import java.math.BigInteger;
 import java.io.Serializable;
+import java.math.BigInteger;
 
 /**
  * This class implements an arithmetic share
  * @author Tobias Kussel
  */
-public class ArithmeticShare implements Serializable {
+public class ArithmeticShare implements Serializable, Cloneable {
 
     /** SVUID*/
     private static final long serialVersionUID = 5017971477461756174L;
@@ -73,5 +73,9 @@ public class ArithmeticShare implements Serializable {
     @Override
     public String toString() {
         return value + " mod " + prime;
+    }
+    @Override
+    public Object clone() {
+        return new ArithmeticShare(this.value, this.prime);
     }
 }

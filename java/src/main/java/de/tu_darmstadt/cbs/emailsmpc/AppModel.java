@@ -1,17 +1,19 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
-import java.io.Serializable;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-public class AppModel implements Serializable {
+public class AppModel implements Serializable, Cloneable {
+    public String studyUID = UIDGenerator.generateShortUID(8);
     public int numParticipants;
     public int ownId;
     public AppState state;
@@ -99,35 +101,31 @@ public class AppModel implements Serializable {
      *                         +------------------+
      *                         |     Finished     |
      *                         +------------------+
+     * @throws IOException 
+     * @throws IllegalStateException 
      */
 
-    public void toStarting() {
+    public void toStarting() throws IllegalStateException, IOException{
         advanceState(AppState.STARTING);
     }
 
-    public void toParticipating() {
+    public void toParticipating() throws IllegalStateException, IOException{
         advanceState(AppState.PARTICIPATING);
     }
 
     // Note, that bins need to be initialized and have shared values
-    public void toInitialSending(String name, Participant[] participants, Bin[] bins) {
+    public void toInitialSending(String name, Participant[] participants, Bin[] bins) throws IllegalStateException, IOException {
         initializeStudy(name, participants, bins);
         advanceState(AppState.INITIAL_SENDING);
     }
 
-    public void toEnteringValues(String initialMessage) {
-        try {
-            setModelFromMessage(initialMessage);
-            unsentMessages = new Message[numParticipants];
-        } catch (ClassNotFoundException e) {
-            System.out.println("Failed to set model from message: " + e);
-        } catch (IOException e) {
-            System.out.println("Failed to set model from message: " + e);
-        }
-        advanceState(AppState.ENTERING_VALUES);
+    public void toEnteringValues(String initialMessage) throws IllegalStateException, IOException, IllegalArgumentException, ClassNotFoundException{
+        setModelFromMessage(initialMessage);
+        unsentMessages = new Message[numParticipants];
+      advanceState(AppState.ENTERING_VALUES);
     }
 
-    public void toSendingShares(BigInteger[] values) throws IllegalArgumentException {
+    public void toSendingShares(BigInteger[] values) throws IllegalArgumentException, IllegalStateException, IOException {
         if (values.length != bins.length)
             throw new IllegalArgumentException("Number of values not equal number of bins");
         for (int i = 0; i < bins.length; i++) {
@@ -136,23 +134,23 @@ public class AppModel implements Serializable {
         advanceState(AppState.SENDING_SHARE);
     }
 
-    public void toRecievingShares() {
+    public void toRecievingShares() throws IllegalStateException, IOException{
         advanceState(AppState.RECIEVING_SHARE);
     }
 
-    public void toSendingResult() {
+    public void toSendingResult() throws IllegalStateException, IOException{
         advanceState(AppState.SENDING_RESULT);
     }
 
-    public void toRecievingResult() {
+    public void toRecievingResult() throws IllegalStateException, IOException{
         advanceState(AppState.RECIEVING_RESULT);
     }
 
-    public void toFinished() {
+    public void toFinished() throws IllegalStateException, IOException{
         advanceState(AppState.FINISHED);
     }
 
-    private void advanceState(AppState newState) throws IllegalStateException {
+    private void advanceState(AppState newState) throws IllegalStateException, IOException {
         switch (state) {
         case NONE:
             if (!(newState == AppState.STARTING || newState == AppState.PARTICIPATING))
@@ -162,14 +160,10 @@ public class AppModel implements Serializable {
             break;
         case STARTING:
             if (!(newState == AppState.INITIAL_SENDING))
-                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
-            try {
-                state = newState;
-                populateInitialMessages();
-                // Change GUI Window
-            } catch (Exception e) {
-                System.out.println("Something went wrong during creation of study: " + e);
-            }
+              throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+            state = newState;
+            populateInitialMessages();
+            // Change GUI Window
             break;
         case PARTICIPATING:
             if (newState != AppState.ENTERING_VALUES)
@@ -181,12 +175,8 @@ public class AppModel implements Serializable {
             if (newState != AppState.SENDING_SHARE)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             state = newState;
-            try {
-                populateShareMessages();
-                // Change GUI Window
-            } catch (IOException e) {
-                System.out.println("Something went wrong during creation of secret shares: " + e);
-            }
+            populateShareMessages();
+            // Change GUI Window
             break;
         case INITIAL_SENDING:
             if (newState != AppState.RECIEVING_SHARE)
@@ -230,12 +220,8 @@ public class AppModel implements Serializable {
             if (!isResultComputable())
                 throw new IllegalStateException("Not all shares collected");
             state = newState;
-            try {
-                populateResultMessages();
-                // Change GUI Window
-            } catch (Exception e) {
-                System.out.println("Something went wrong during creation of Result Message: " + e);
-            }
+            populateResultMessages();
+            // Change GUI Window
             break;
         case SENDING_RESULT:
             if (newState != AppState.RECIEVING_RESULT)
@@ -271,48 +257,47 @@ public class AppModel implements Serializable {
     private Message getInitialMessage(int recipientId) throws IOException {
         InitialMessage data = new InitialMessage(this, recipientId);
         Participant recipient = this.participants[recipientId];
-        return new Message(recipient, data.getMessage());
+        return new Message(ownId, recipient, data.getMessage());
     }
 
-    public void populateInitialMessages() throws IOException, IllegalStateException {
-        if (state != AppState.INITIAL_SENDING)
-            throw new IllegalStateException("Forbidden action (getInitialMessage) at current state " + state);
+    public void populateInitialMessages() throws IllegalStateException, IOException {
+      if (state != AppState.INITIAL_SENDING)
+        throw new IllegalStateException("Forbidden action (getInitialMessage) at current state " + state);
         for (int i = 0; i < numParticipants; i++) {
-            if (i != ownId)
-                unsentMessages[i] = getInitialMessage(i);
-            else {
-                for (Bin b : bins) {
-                    b.transferSharesOutIn(ownId);
-                }
+          if (i != ownId)
+            unsentMessages[i] = getInitialMessage(i);
+          else {
+            for (Bin b : bins) {
+              b.transferSharesOutIn(ownId);
             }
+          }
         }
         for (Bin b : bins) {
-            b.clearOutSharesExceptId(ownId);
+          b.clearOutSharesExceptId(ownId);
         }
     }
 
     private Message getShareMessage(int recipientId) throws IOException {
         ShareMessage data = new ShareMessage(this, recipientId);
         Participant recipient = this.participants[recipientId];
-        return new Message(recipient, data.getMessage());
+        return new Message(ownId, recipient, data.getMessage());
     }
 
-    public void populateShareMessages() throws IOException, IllegalStateException {
+    public void populateShareMessages() throws IllegalStateException, IOException {
         if (state != AppState.SENDING_SHARE)
             throw new IllegalStateException("Forbidden action (populateShareMessage) at current state " + state);
-        for (int i = 0; i < numParticipants; i++) {
+          for (int i = 0; i < numParticipants; i++) {
             if (i != ownId) {
-                unsentMessages[i] = getShareMessage(i);
+              unsentMessages[i] = getShareMessage(i);
             } else {
-                for (Bin b : bins) {
-                    b.transferSharesOutIn(ownId);
-                }
+              for (Bin b : bins) {
+                b.transferSharesOutIn(ownId);
+              }
             }
-        }
-        for (Bin b : bins) {
+          }
+          for (Bin b : bins) {
             b.clearOutSharesExceptId(ownId);
-        }
-
+          }
     }
 
     public int getParticipantId(Participant p) throws IllegalArgumentException {
@@ -329,11 +314,12 @@ public class AppModel implements Serializable {
         return participants[p];
     }
 
-    public void setShareFromMessage(Message msg, Participant sender)
-            throws IllegalStateException, IllegalArgumentException, ClassNotFoundException, IOException {
+    public void setShareFromMessage(Message msg)
+            throws IllegalStateException, IllegalArgumentException, NoSuchAlgorithmException, ClassNotFoundException, IOException {
+        Participant sender = getParticipantFromId(msg.senderID);
         if (!(state == AppState.RECIEVING_SHARE || state == AppState.RECIEVING_RESULT))
             throw new IllegalStateException("Setting a share from a Message is not allowed at state " + state);
-        if (Message.validateData(participants[ownId], msg.data)) {
+        if (Message.validateData(getParticipantId(sender), participants[ownId], msg.data)) {
             if (state == AppState.RECIEVING_SHARE) {
                 ShareMessage sm = ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
                 int senderId = getParticipantId(sender);
@@ -347,9 +333,34 @@ public class AppModel implements Serializable {
                     bins[i].setInShare(rm.bins[i].share, senderId);
                 }
             }
-        } else
+        } else {
             throw new IllegalArgumentException("Message invalid");
-
+        }
+    }
+    
+    /**
+     * Validates a given message to set a share or result
+     * @param message
+     * @return
+     */
+    public boolean isMessageShareResultValid(Message msg) {
+        try {
+            Participant sender = getParticipantFromId(msg.senderID);
+            Message.validateData(getParticipantId(sender), participants[ownId], msg.data);
+            switch (state){
+            case RECIEVING_SHARE:
+                ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
+                break;
+            case RECIEVING_RESULT:
+                ResultMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
+                break;
+            default:
+                return false;
+            }            
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public void setModelFromMessage(String initialMsg)
@@ -358,10 +369,11 @@ public class AppModel implements Serializable {
             throw new IllegalStateException("Setting the Model from a Message is not allowed at state " + state);
         AppModel model = InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(initialMsg)));
         model.state = AppState.PARTICIPATING;
-        setModel(model);
+        update(model);
     }
 
-    private void setModel(AppModel model) {
+    public void update(AppModel model) {
+        studyUID = model.studyUID;
         numParticipants = model.numParticipants;
         ownId = model.ownId;
         bins = model.bins;
@@ -376,24 +388,23 @@ public class AppModel implements Serializable {
         unsentMessages[recipientId] = null;
     }
 
-    public void populateResultMessages() throws IOException, IllegalStateException {
+    public void populateResultMessages() throws IllegalStateException, IOException {
         if (state != AppState.SENDING_RESULT)
             throw new IllegalStateException("Forbidden action (populateResultMessage) at current state " + state);
-
-        ResultMessage data = new ResultMessage(this);
-        for (int i = 0; i < numParticipants; i++) {
-            if (i != ownId) {
-                Participant recipient = this.participants[i];
-                unsentMessages[i] = new Message(recipient, data.getMessage());
-            } else {
-                for (Bin b : bins) {
-                    b.setInShare(b.getSumShare(), ownId);
-                }
-            }
+      ResultMessage data = new ResultMessage(this);
+      for (int i = 0; i < numParticipants; i++) {
+        if (i != ownId) {
+          Participant recipient = this.participants[i];
+          unsentMessages[i] = new Message(ownId, recipient, data.getMessage());
+        } else {
+          for (Bin b : bins) {
+            b.setInShare(b.getSumShare(), ownId);
+          }
         }
-        for (Bin b : bins) {
-            b.clearInSharesExceptId(ownId);
-        }
+      }
+      for (Bin b : bins) {
+        b.clearInSharesExceptId(ownId);
+      }
     }
 
     public void clearBins() {
@@ -438,25 +449,14 @@ public class AppModel implements Serializable {
         return ready;
     }
 
-    public void saveProgramAs() throws IOException {
-        // Get Filename fom GUI Filepicker
-        File fn = new File("filename.tmp");
-        filename = fn;
-        saveModel(filename);
-    }
-
-    public void saveProgram() throws IOException {
+    public void saveProgram() throws IllegalStateException, IOException {
         if (filename == null) {
-            saveProgramAs();
+            throw new IllegalStateException("No filename defined");
         } else {
-            saveModel(filename);
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename));
+            oos.writeObject(this);
+            oos.close();
         }
-    }
-
-    private void saveModel(File filename) throws IOException {
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename));
-        oos.writeObject(this);
-        oos.close();
     }
 
     public static AppModel loadModel(File filename)
@@ -477,10 +477,14 @@ public class AppModel implements Serializable {
             return false;
         AppModel m = (AppModel) o;
         boolean result = (m.numParticipants == numParticipants);
+        result = result && (m.studyUID.equals(studyUID));
         result = result && (m.ownId == ownId);
         result = result && (m.state.equals(state));
         result = result && (m.name.equals(name));
-        result = result && (m.filename.equals(filename));
+        if (m.filename != null)
+          result = result && (m.filename.equals(filename));
+        else
+          result = result && (filename == null);
         result = result && (m.bins.length == bins.length);
         result = result && (m.participants.length == participants.length);
         result = result && (m.unsentMessages.length == unsentMessages.length);
@@ -509,6 +513,7 @@ public class AppModel implements Serializable {
     public int hashCode() {
         int result = numParticipants;
         result = 31 * result + ownId;
+        result = 31 * result + studyUID.hashCode();
         result = 31 * result + state.hashCode();
         result = 31 * result + name.hashCode();
         if (filename != null)
@@ -536,8 +541,46 @@ public class AppModel implements Serializable {
 
     @Override
     public String toString() {
-        return "AppModel [numParticipants=" + numParticipants + ", ownId=" + ownId + ", state=" + state + ", bins="
+        return "AppModel [StudyUID=" + studyUID +", numParticipants=" + numParticipants + ", ownId=" + ownId + ", state=" + state + ", bins="
                 + Arrays.toString(bins) + ", participants=" + Arrays.toString(participants) + ", name=" + name
                 + ", unsentMessages=" + Arrays.toString(unsentMessages) + ", filename=" + filename + "]";
+    }
+
+    @Override
+    public Object clone() {
+        AppModel newModel = null;
+        try {
+            newModel = (AppModel) super.clone();
+        } catch (CloneNotSupportedException e) {
+            newModel = new AppModel();
+        }
+        newModel.name = this.name;
+        newModel.numParticipants = this.numParticipants;
+        newModel.ownId = this.ownId;
+        newModel.studyUID = this.studyUID;
+        newModel.state = this.state;
+        newModel.filename = this.filename;     
+        if (this.bins != null) {
+            newModel.bins = new Bin[this.bins.length];
+            for (int i = 0; i < newModel.bins.length; i++) {
+                newModel.bins[i] = (Bin) this.bins[i].clone();
+            }
+        }
+      
+        if (this.participants != null) {
+            newModel.participants = new Participant[this.participants.length];
+            for (int i = 0; i < newModel.participants.length; i++) {
+                newModel.participants[i] = (Participant) this.participants[i].clone();
+            }
+        }
+      
+        if (this.unsentMessages != null) {
+            newModel.unsentMessages = new Message[this.unsentMessages.length];
+            for (int i = 0; i < newModel.unsentMessages.length; i++) {
+                if (this.unsentMessages[i] != null) newModel.unsentMessages[i] = (Message) this.unsentMessages[i].clone();
+            }
+        }
+     
+      return newModel;
     }
 }

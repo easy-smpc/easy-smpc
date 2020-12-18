@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.Serializable;
 
-public class Participant implements Serializable {
+public class Participant implements Serializable, Cloneable {
     public final String name;
     public final String emailAddress;
     private static final long serialVersionUID = 5370286651195899392L;
@@ -13,7 +13,7 @@ public class Participant implements Serializable {
 
     public Participant(String name, String emailAddress) throws IllegalArgumentException {
         if (!Participant.validEmail(emailAddress))
-            throw new IllegalArgumentException("Invalid Email Address " + emailAddress);
+            throw new IllegalArgumentException("Invalid Email Address: " + emailAddress);
         this.name = name;
         this.emailAddress = emailAddress;
     }
@@ -43,5 +43,14 @@ public class Participant implements Serializable {
     public static boolean validEmail(String email) {
         Matcher m = regex.matcher(email);
         return m.matches();
+    }
+
+    @Override
+    public Object clone() {
+      try {
+        return (Participant) super.clone();
+      } catch (CloneNotSupportedException e) {
+        return new Participant(this.name, this.emailAddress);
+      }
     }
 }
