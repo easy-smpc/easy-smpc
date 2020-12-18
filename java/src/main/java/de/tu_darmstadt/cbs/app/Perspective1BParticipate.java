@@ -82,19 +82,6 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     }
 
     /**
-     * Save the project
-     * 
-     * @return Saving actually performed?
-     */
-    private void actionSave() {
-        BigInteger[] secret = new BigInteger[getApp().getModel().bins.length];
-        for (int i = 0; i < this.bins.getComponents().length; i++) {
-            secret[i] = new BigInteger(((EntryBin) this.bins.getComponents()[i]).getRightValue());
-        }
-        getApp().actionParticipateDone(secret);
-    }
-
-    /**
      * Loads and sets bin names and data from a file
      */
     private void actionLoadFromFile() {
@@ -119,6 +106,19 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             }            
             this.stateChanged(new ChangeEvent(this));
         }
+    }
+
+    /**
+     * Save the project
+     * 
+     * @return Saving actually performed?
+     */
+    private void actionSave() {
+        BigInteger[] secret = new BigInteger[getApp().getModel().bins.length];
+        for (int i = 0; i < this.bins.getComponents().length; i++) {
+            secret[i] = new BigInteger(((EntryBin) this.bins.getComponents()[i]).getRightValue());
+        }
+        getApp().actionParticipateDone(secret);
     }
 
     /**

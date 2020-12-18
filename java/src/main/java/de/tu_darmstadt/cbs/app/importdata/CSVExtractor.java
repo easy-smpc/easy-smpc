@@ -49,36 +49,6 @@ public class CSVExtractor extends Extractor {
         super(file);
     }
 
-    @Override
-    protected String[][] loadRawData() throws IOException {     
-        Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(getDelimiter())
-                                                       .parse(new FileReader(getFile()));
-        List<List<String>> rows = new ArrayList<>();
-        
-        int indexRow = 0;
-        for (CSVRecord recordRow : records) {
-            int indexColumn = 0;
-            List<String> column = new ArrayList<>();
-            for (String recordField : recordRow) {
-                column.add(recordField);
-                // Break if maximum reached
-                indexColumn++;
-                if (indexColumn == Resources.MAX_COUNT_COLUMNS) {
-                    break;
-                }
-            }
-            rows.add(column);
-            // Break if maximum reached
-            indexRow++;
-            if (indexRow == Resources.MAX_COUNT_ROWS) {
-                break;
-            }
-        }
-        
-        // Done
-        return rowsListToArray(rows);
-    }
-    
     /**
      * Detects a delimiter.
      * 
@@ -144,5 +114,35 @@ public class CSVExtractor extends Extractor {
         
         // Done
         return delimiter;
+    }
+    
+    @Override
+    protected String[][] loadRawData() throws IOException {     
+        Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(getDelimiter())
+                                                       .parse(new FileReader(getFile()));
+        List<List<String>> rows = new ArrayList<>();
+        
+        int indexRow = 0;
+        for (CSVRecord recordRow : records) {
+            int indexColumn = 0;
+            List<String> column = new ArrayList<>();
+            for (String recordField : recordRow) {
+                column.add(recordField);
+                // Break if maximum reached
+                indexColumn++;
+                if (indexColumn == Resources.MAX_COUNT_COLUMNS) {
+                    break;
+                }
+            }
+            rows.add(column);
+            // Break if maximum reached
+            indexRow++;
+            if (indexRow == Resources.MAX_COUNT_ROWS) {
+                break;
+            }
+        }
+        
+        // Done
+        return rowsListToArray(rows);
     }   
 }

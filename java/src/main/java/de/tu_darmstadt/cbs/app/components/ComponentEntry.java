@@ -149,20 +149,12 @@ public abstract class ComponentEntry extends JPanel {
     }
     
     /**
-     * Sets the right value
-     * @return
-     */
-    public void setRightValue(String text) {
-        this.fieldRight.setText(text);
-    }
-    
-    /**
      * Returns whether the right field is valid
      */
     public boolean isFieldRightValueValid() {
         return this.fieldRight.isValueValid();
     }
-
+    
     /**
      * Sets a change listener
      * @param listener
@@ -170,6 +162,14 @@ public abstract class ComponentEntry extends JPanel {
     public void setChangeListener(ChangeListener listener) {
         this.fieldLeft.setChangeListener(listener);
         this.fieldRight.setChangeListener(listener);
+    }
+
+    /**
+     * Sets the right value
+     * @return
+     */
+    public void setRightValue(String text) {
+        this.fieldRight.setText(text);
     }
     
     /** Creates an additional control panel

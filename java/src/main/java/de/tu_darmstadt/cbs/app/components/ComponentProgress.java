@@ -78,6 +78,11 @@ public class ComponentProgress extends JPanel {
         this.setProgress(progress);
     }
     
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(super.getPreferredSize().width, Resources.PROGRESS_PREFERRED_HEIGHT);
+    }
+
     /**
      * Progress
      * @param progress
@@ -95,10 +100,5 @@ public class ComponentProgress extends JPanel {
             this.texts[i].getParent().repaint();
             this.texts[i].repaint();
         }
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(super.getPreferredSize().width, Resources.PROGRESS_PREFERRED_HEIGHT);
     }
 }

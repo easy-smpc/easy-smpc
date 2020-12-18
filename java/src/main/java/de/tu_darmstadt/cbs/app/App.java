@@ -244,26 +244,6 @@ public class App extends JFrame {
     }
 
     /**
-     * Adds a new perspective
-     * 
-     * @param perspective
-     * @throws IOException
-     */
-    private void addPerspective(Perspective perspective) throws IOException {
-
-        perspectives.add(0, perspective);
-        cards.add(perspective.getPanel(), perspective.getTitle());
-    }
-    
-    /**
-     * Starts a transaction
-     * @return
-     */
-    private AppModel beginTransaction() {
-        return this.model != null ? (AppModel)this.model.clone() : null;
-    }    
-    
-    /**
      * Reads data from a file
      * @return List of data
      */
@@ -327,24 +307,18 @@ public class App extends JFrame {
         
         // Should work
         return file;
-    }
+    }    
     
     /**
-     * Check whether initial participation message is valid
+     * Get model state
      * 
-     * @param text
-     * @return
+     * @return AppState
      */
-    private boolean isInitialParticipationMessageValid(String text) {
-        if (text == null) {
-            return false;
-        }
-        try {
-            String data =  Message.deserializeMessage(text).data;
-            InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(data)));
-            return true;
-        } catch (Exception e) {
-            return false;
+    public AppState getModelState() {
+        if (getModel() != null) {
+            return getModel().state;
+        } else {
+            return null;
         }
     }
     
@@ -364,6 +338,60 @@ public class App extends JFrame {
             return false;
         }
     }
+    
+    /**
+     * Set message share (message in perspectives receive)
+     * 
+     * @param message
+     */
+    public void setMessageShare(String message) {
+        AppModel snapshot = this.beginTransaction();        
+        try {
+            this.model.setShareFromMessage(Message.deserializeMessage(message));
+        } catch (IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException | IOException e) {
+            this.rollback(snapshot);
+            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.messageError"), Resources.getString("PerspectiveReceive.messageErrorTitle"), JOptionPane.ERROR_MESSAGE);
+        }        
+    }
+    
+    /**
+     * Adds a new perspective
+     * 
+     * @param perspective
+     * @throws IOException
+     */
+    private void addPerspective(Perspective perspective) throws IOException {
+
+        perspectives.add(0, perspective);
+        cards.add(perspective.getPanel(), perspective.getTitle());
+    }
+
+    /**
+     * Starts a transaction
+     * @return
+     */
+    private AppModel beginTransaction() {
+        return this.model != null ? (AppModel)this.model.clone() : null;
+    }
+
+    /**
+     * Check whether initial participation message is valid
+     * 
+     * @param text
+     * @return
+     */
+    private boolean isInitialParticipationMessageValid(String text) {
+        if (text == null) {
+            return false;
+        }
+        try {
+            String data =  Message.deserializeMessage(text).data;
+            InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(data)));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     /**
      * Rolls back a transaction
@@ -374,7 +402,7 @@ public class App extends JFrame {
             this.model.update(snapshot);
         }
     }
-
+    
     /**
      * Shows a perspective
      * 
@@ -419,7 +447,7 @@ public class App extends JFrame {
     protected void actionAbout() {
         new DialogAbout(this);
     }
-    
+
     /**
      * Change the language
      */
@@ -502,7 +530,7 @@ public class App extends JFrame {
                                           System.exit(0);
                                       }
     }
-
+    
     /**
      * Action performed when first receiving done
      */
@@ -533,7 +561,7 @@ public class App extends JFrame {
         }
         this.showPerspective(Perspective3Receive.class);
     }
-    
+
     /**
      * Load action
      */
@@ -675,22 +703,7 @@ public class App extends JFrame {
             setMessageShare(TaskPollClipboardReceive.getStrippedExchangeMessage(message));           
         }  
     }
-
-    /**
-     * Set message share (message in perspectives receive)
-     * 
-     * @param message
-     */
-    public void setMessageShare(String message) {
-        AppModel snapshot = this.beginTransaction();        
-        try {
-            this.model.setShareFromMessage(Message.deserializeMessage(message));
-        } catch (IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException | IOException e) {
-            this.rollback(snapshot);
-            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.messageError"), Resources.getString("PerspectiveReceive.messageErrorTitle"), JOptionPane.ERROR_MESSAGE);
-        }        
-    }
-
+    
     /**
      * Saves the project
      */
@@ -715,7 +728,7 @@ public class App extends JFrame {
             return false;
         }
     }
-    
+
     /**
      * Action performed when second receiving done
      */
@@ -746,7 +759,7 @@ public class App extends JFrame {
         }
         this.showPerspective(Perspective5Receive.class);
     }
-
+    
     /**
      * Start action
      */
@@ -760,7 +773,7 @@ public class App extends JFrame {
      */
     protected AppModel getModel() {
         return this.model;
-    }
+    }    
     
     /**
      * Returns a perspective
@@ -777,18 +790,5 @@ public class App extends JFrame {
             }
         }
         return returnPerspective;
-    }    
-    
-    /**
-     * Get model state
-     * 
-     * @return AppState
-     */
-    public AppState getModelState() {
-        if (getModel() != null) {
-            return getModel().state;
-        } else {
-            return null;
-        }
     }
 }

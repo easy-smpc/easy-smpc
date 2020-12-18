@@ -124,52 +124,34 @@ public class Resources {
     public static final int       EXACT_ROW_COLUMNS_LENGTH        = 2;
 
     /**
-     * No instantiation
-     */
-    private Resources() {
-        // Empty by design
-    }
-
-    /**
-     * Returns a message
-     * 
-     * @param key
-     * @return
-     */
-    public static String getString(String key) {
-        try {
-            return resource_bundle.getString(key);
-        } catch (MissingResourceException e) {
-            return '!' + key + '!';
-        }
-    }
-    
-    /**
-     * Get locale of resource bundle
-     * 
-     * @return
-     */
-    public static Locale getResourceBundleLocale() {
-        return resource_bundle.getLocale();
-    }
-    
-    /**
-     * Set locale of resource bundle
-     * 
-     * @return
-     */
-    public static void setResourceBundleLocale(Locale locale) {
-        Locale.setDefault(Locale.ENGLISH);
-        resource_bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
-    }
-    
-    /**
      * Returns all available languages
      * 
      * @return
      */
     public static Locale[] getAvailableLanguages() {
         return AVAILABLE_LANGUAGES;
+    }
+
+    /**
+     * Icon
+     * 
+     * @return
+     * @throws IOException
+     */
+    public static Image getCheckmark() throws IOException {
+        InputStream stream = Resources.class.getResourceAsStream("checkmark.png");
+        return ImageIO.read(stream).getScaledInstance(Resources.SIZE_CHECKMARK_X, Resources.SIZE_CHECKMARK_Y,  java.awt.Image.SCALE_SMOOTH);
+    }
+    
+    /**
+     * Icon
+     * 
+     * @return
+     * @throws IOException
+     */
+    public static Image getIcon() throws IOException {
+        InputStream stream = Resources.class.getResourceAsStream("icon.png");
+        return ImageIO.read(stream);
     }
     
     /**
@@ -203,29 +185,7 @@ public class Resources {
         }
         return content;
     }
-
-    /**
-     * Icon
-     * 
-     * @return
-     * @throws IOException
-     */
-    public static Image getIcon() throws IOException {
-        InputStream stream = Resources.class.getResourceAsStream("icon.png");
-        return ImageIO.read(stream);
-    }
     
-    /**
-     * Icon
-     * 
-     * @return
-     * @throws IOException
-     */
-    public static Image getCheckmark() throws IOException {
-        InputStream stream = Resources.class.getResourceAsStream("checkmark.png");
-        return ImageIO.read(stream).getScaledInstance(Resources.SIZE_CHECKMARK_X, Resources.SIZE_CHECKMARK_Y,  java.awt.Image.SCALE_SMOOTH);
-    }
-
     /**
      * Menu item
      * 
@@ -235,5 +195,45 @@ public class Resources {
     public static ImageIcon getMenuItem() throws IOException {
         InputStream stream = Resources.class.getResourceAsStream("icon.png");
         return new ImageIcon(ImageIO.read(stream).getScaledInstance(16, 16, Image.SCALE_DEFAULT));
+    }
+    
+    /**
+     * Get locale of resource bundle
+     * 
+     * @return
+     */
+    public static Locale getResourceBundleLocale() {
+        return resource_bundle.getLocale();
+    }
+
+    /**
+     * Returns a message
+     * 
+     * @param key
+     * @return
+     */
+    public static String getString(String key) {
+        try {
+            return resource_bundle.getString(key);
+        } catch (MissingResourceException e) {
+            return '!' + key + '!';
+        }
+    }
+    
+    /**
+     * Set locale of resource bundle
+     * 
+     * @return
+     */
+    public static void setResourceBundleLocale(Locale locale) {
+        Locale.setDefault(Locale.ENGLISH);
+        resource_bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+    }
+
+    /**
+     * No instantiation
+     */
+    private Resources() {
+        // Empty by design
     }
 }

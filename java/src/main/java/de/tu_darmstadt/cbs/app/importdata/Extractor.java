@@ -33,6 +33,25 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
 
 public abstract class Extractor {
     
+    /**
+     * Creates a new extractor for a given file
+     * 
+     * @param file
+     * @return
+     * @throws IOException 
+     * @throws IllegalArgumentException 
+     */
+    public static Extractor forFile(File file) throws IllegalArgumentException, IOException {
+        
+        // Choose correct extractor
+        if (file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS)) {
+            return new ExcelExtractor(file);
+        }
+        else {
+            return new CSVExtractor(file);
+        }   
+    }
+
     /** File of data origin */
     private File          file;
 
@@ -48,13 +67,6 @@ public abstract class Extractor {
     }
 
     /**
-     * @return the file
-     */
-    protected File getFile() {
-        return file;
-    }
-
-    /**
      * Returns the extracted data
      * 
      * @return the data
@@ -64,6 +76,66 @@ public abstract class Extractor {
         return extractData(stripRawData(loadRawData()));
     }
     
+    /**
+     * Extracts the data out of a stripped array
+     * 
+     * @param strippedData
+     * @return extracted data
+     */
+    private Map<String,String> extractData(String[][] strippedData) {
+        
+        // Prepare
+        Map<String, String> extractedData = new LinkedHashMap<String, String>();
+
+        if (strippedData.length != Resources.EXACT_ROW_COLUMNS_LENGTH) {
+            // Extract data from filled rows
+            for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
+                // Assume first column contains bin name, second has bin value
+                extractedData.put(strippedData[indexRow][0], strippedData[indexRow][1]);
+            }
+        } else {
+            // Extract data from filled columns
+            for (int indexColumn = 0; indexColumn < strippedData[0].length; indexColumn++) {
+                // Assume first column contains bin name, second has bin value
+                extractedData.put(strippedData[0][indexColumn], strippedData[1][indexColumn]);
+            }
+        }
+        return extractedData;
+    }
+
+    /**
+     * Checks whether a string is empty
+     * 
+     * @param o
+     * @return
+     */
+    private boolean isNotEmpty(String o) {
+        return o != null && !o.trim().isEmpty();
+    }
+
+    /**
+     * Checks whether an array is empty
+     * 
+     * @param array
+     * @return
+     */
+    private boolean isNotEmpty(String[] array) {
+
+        // Check
+        if (array == null || array.length == 0) { return false; }
+
+        // Check elements
+        boolean empty = true;
+        for (String o : array) {
+            if (isNotEmpty(o)) {
+                empty = false;
+                break;
+            }
+        }
+        // Done
+        return !empty;
+    }
+
     /**
      * Remove all empty rows and columns
      * 
@@ -119,6 +191,19 @@ public abstract class Extractor {
     }
 
     /**
+     * @return the file
+     */
+    protected File getFile() {
+        return file;
+    }
+    
+    /**
+     * Loads the data in a common format of a two dimensional array
+     * @return two dimensional array of data
+     */
+    protected abstract String[][] loadRawData() throws IOException;
+
+    /**
      * Convert list of lists to array
      * 
      * @param list of list of strings 
@@ -132,90 +217,5 @@ public abstract class Extractor {
             result[index++] = row.toArray(new String[row.size()]);
         }
         return result;
-    }
-
-    /**
-     * Checks whether an array is empty
-     * 
-     * @param array
-     * @return
-     */
-    private boolean isNotEmpty(String[] array) {
-
-        // Check
-        if (array == null || array.length == 0) { return false; }
-
-        // Check elements
-        boolean empty = true;
-        for (String o : array) {
-            if (isNotEmpty(o)) {
-                empty = false;
-                break;
-            }
-        }
-        // Done
-        return !empty;
-    }
-
-    /**
-     * Checks whether a string is empty
-     * 
-     * @param o
-     * @return
-     */
-    private boolean isNotEmpty(String o) {
-        return o != null && !o.trim().isEmpty();
-    }
-
-    /**
-     * Extracts the data out of a stripped array
-     * 
-     * @param strippedData
-     * @return extracted data
-     */
-    private Map<String,String> extractData(String[][] strippedData) {
-        
-        // Prepare
-        Map<String, String> extractedData = new LinkedHashMap<String, String>();
-
-        if (strippedData.length != Resources.EXACT_ROW_COLUMNS_LENGTH) {
-            // Extract data from filled rows
-            for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
-                // Assume first column contains bin name, second has bin value
-                extractedData.put(strippedData[indexRow][0], strippedData[indexRow][1]);
-            }
-        } else {
-            // Extract data from filled columns
-            for (int indexColumn = 0; indexColumn < strippedData[0].length; indexColumn++) {
-                // Assume first column contains bin name, second has bin value
-                extractedData.put(strippedData[0][indexColumn], strippedData[1][indexColumn]);
-            }
-        }
-        return extractedData;
-    }
-    
-    /**
-     * Loads the data in a common format of a two dimensional array
-     * @return two dimensional array of data
-     */
-    protected abstract String[][] loadRawData() throws IOException;
-
-    /**
-     * Creates a new extractor for a given file
-     * 
-     * @param file
-     * @return
-     * @throws IOException 
-     * @throws IllegalArgumentException 
-     */
-    public static Extractor forFile(File file) throws IllegalArgumentException, IOException {
-        
-        // Choose correct extractor
-        if (file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS)) {
-            return new ExcelExtractor(file);
-        }
-        else {
-            return new CSVExtractor(file);
-        }   
     }
 }

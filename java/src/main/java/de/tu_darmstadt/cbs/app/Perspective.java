@@ -87,6 +87,13 @@ public abstract class Perspective {
     }
 
     /**
+     * Is perspective visible
+     */
+    public boolean isVisible() {
+        return this.panel.isVisible();
+    }
+    
+    /**
      * Creates the contents
      * 
      * @param panel
@@ -111,12 +118,5 @@ public abstract class Perspective {
      */
     protected boolean isInterimSavingPossible() {
         return interimSavingPossible;
-    }
-    
-    /**
-     * Is perspective visible
-     */
-    public boolean isVisible() {
-        return this.panel.isVisible();
     }
 }

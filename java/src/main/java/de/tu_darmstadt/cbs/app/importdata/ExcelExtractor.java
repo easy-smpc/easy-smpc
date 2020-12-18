@@ -44,6 +44,32 @@ public class ExcelExtractor extends Extractor {
         super(file);
     }
 
+    /**
+     * Extracts the data in an excel cell as a string
+     * 
+     * @param cell
+     */
+    private String extractExcelCellContent(Cell cell, boolean originalCellType) {
+        if (cell != null) {
+            switch (originalCellType ? cell.getCellType() : cell.getCachedFormulaResultType()) {
+            case NUMERIC:
+                double number = cell.getNumericCellValue();                
+                // Return integer if no decimal part
+                return number == Math.floor(number) ? String.valueOf((int) number) : String.valueOf(number);
+            case STRING:
+                return cell.getStringCellValue();
+            case BLANK:
+                return "";
+            case _NONE:
+                return "";
+            case FORMULA:
+                return extractExcelCellContent(cell, false);
+            default:
+                return "";
+            }
+        } else return "";
+    }
+    
     @Override
     protected String[][] loadRawData() throws IOException {
         // Prepare
@@ -75,31 +101,5 @@ public class ExcelExtractor extends Extractor {
             }
         }
         return rowsListToArray(rows);
-    }
-    
-    /**
-     * Extracts the data in an excel cell as a string
-     * 
-     * @param cell
-     */
-    private String extractExcelCellContent(Cell cell, boolean originalCellType) {
-        if (cell != null) {
-            switch (originalCellType ? cell.getCellType() : cell.getCachedFormulaResultType()) {
-            case NUMERIC:
-                double number = cell.getNumericCellValue();                
-                // Return integer if no decimal part
-                return number == Math.floor(number) ? String.valueOf((int) number) : String.valueOf(number);
-            case STRING:
-                return cell.getStringCellValue();
-            case BLANK:
-                return "";
-            case _NONE:
-                return "";
-            case FORMULA:
-                return extractExcelCellContent(cell, false);
-            default:
-                return "";
-            }
-        } else return "";
     }
 }

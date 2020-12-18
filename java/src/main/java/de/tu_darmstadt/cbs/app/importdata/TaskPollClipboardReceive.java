@@ -30,34 +30,6 @@ import de.tu_darmstadt.cbs.app.resources.Resources;
  */
 
 public class TaskPollClipboardReceive implements Runnable {
-    /** PerspectiveReceive */
-    private Perspective3Receive parent;
-    
-    /**
-     * Creates a new instance
-     */
-    public TaskPollClipboardReceive(Perspective3Receive perspectiveReceive) {
-            this.parent = perspectiveReceive;
-            Executors.newScheduledThreadPool(1).scheduleAtFixedRate(this, 0, Resources.INTERVAL_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);        
-    }
-    
-    /**
-     * Executed periodically when registered in an executor
-     */
-    @Override
-    public void run() {
-        // If app is in state to receive a message
-        if (this.parent.isVisible()) {            
-            // Set message if valid
-            String message = getStrippedExchangeMessage(getTextFromClipBoard());         
-            if (parent.getApp().isMessageShareResultValid(message)) {
-                parent.getApp().setMessageShare(message);
-                // TODO: Delegate to perspective or app 
-                parent.stateChanged(new ChangeEvent(this));
-            }
-        }
-    }
-    
     /**
      * Convenience method to remove exchange message tags
      * @param text
@@ -73,7 +45,7 @@ public class TaskPollClipboardReceive implements Runnable {
         }
         return text;
     }
-
+    
     /**
      * Returns text from clip board if valid
      * @return clip board text
@@ -87,5 +59,33 @@ public class TaskPollClipboardReceive implements Runnable {
             }
         }
         return null;
+    }
+    
+    /** PerspectiveReceive */
+    private Perspective3Receive parent;
+    
+    /**
+     * Creates a new instance
+     */
+    public TaskPollClipboardReceive(Perspective3Receive perspectiveReceive) {
+            this.parent = perspectiveReceive;
+            Executors.newScheduledThreadPool(1).scheduleAtFixedRate(this, 0, Resources.INTERVAL_SCHEDULER_MILLISECONDS, TimeUnit.MILLISECONDS);        
+    }
+
+    /**
+     * Executed periodically when registered in an executor
+     */
+    @Override
+    public void run() {
+        // If app is in state to receive a message
+        if (this.parent.isVisible()) {            
+            // Set message if valid
+            String message = getStrippedExchangeMessage(getTextFromClipBoard());         
+            if (parent.getApp().isMessageShareResultValid(message)) {
+                parent.getApp().setMessageShare(message);
+                // TODO: Delegate to perspective or app 
+                parent.stateChanged(new ChangeEvent(this));
+            }
+        }
     }
 }

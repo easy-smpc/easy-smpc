@@ -109,6 +109,17 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      }
     
     /**
+     * Returns the exchange string for the given entry
+     * 
+     * @param entry
+     * @throws IOException
+     */
+    private String getExchangeString(EntryParticipantSendMail entry) throws IOException {
+        int index = Arrays.asList(participants.getComponents()).indexOf(entry);
+        return Message.serializeMessage(getApp().getModel().getUnsentMessageFor(index));
+    }
+
+    /**
      * Validates each send mail button whether it should be clickable
      */
     private boolean isMailButtonClickable(Component c) {
@@ -118,17 +129,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Returns the exchange string for the given entry
-     * 
-     * @param entry
-     * @throws IOException
-     */
-    private String getExchangeString(EntryParticipantSendMail entry) throws IOException {
-        int index = Arrays.asList(participants.getComponents()).indexOf(entry);
-        return Message.serializeMessage(getApp().getModel().getUnsentMessageFor(index));
     }
     
      /**

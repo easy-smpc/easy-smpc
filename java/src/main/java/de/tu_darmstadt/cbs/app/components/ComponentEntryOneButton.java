@@ -79,6 +79,23 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
     
 
     /**
+     * Sets a change listener
+     * @param listener
+     */
+    public void setButtonListener(ActionListener listener) {
+        this.listener = listener;
+    }
+
+    /**
+     * Button action
+     */
+    private void buttonAction() {
+        if (listener != null) {
+            listener.actionPerformed(new ActionEvent(this, 0, null));
+        }
+    }
+
+    /**
      * Creates an additional control panel
      */
     @Override
@@ -102,23 +119,6 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
         
         // Done
         return panel;
-    }
-
-    /**
-     * Button action
-     */
-    private void buttonAction() {
-        if (listener != null) {
-            listener.actionPerformed(new ActionEvent(this, 0, null));
-        }
-    }
-
-    /**
-     * Sets a change listener
-     * @param listener
-     */
-    public void setButtonListener(ActionListener listener) {
-        this.listener = listener;
     }
     
     /**

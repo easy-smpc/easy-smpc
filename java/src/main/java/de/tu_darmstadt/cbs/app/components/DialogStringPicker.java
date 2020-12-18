@@ -109,20 +109,20 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
     }
 
     /**
-     * Reacts to changes
-     */
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        this.buttonOK.setEnabled(this.areValuesValid());
-    }
-    
-    /**
      * Show this dialog
      */
     public String showDialog(){        
         this.setModal(true);
         this.setVisible(true);
         return this.result;
+    }
+    
+    /**
+     * Reacts to changes
+     */
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        this.buttonOK.setEnabled(this.areValuesValid());
     }
       
     /**

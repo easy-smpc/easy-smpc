@@ -100,6 +100,28 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     }
     
     /**
+     * Checks if all bins are complete
+     * @return
+     */
+    private boolean areSharesComplete() {
+        for (Bin b : getApp().getModel().bins) {
+            if (!b.isComplete()) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if all bins for a certain user id are complete
+     * @return
+     */
+    private boolean areSharesCompleteForParticipantId(int participantId) {
+        for (Bin b : getApp().getModel().bins) {
+            if (!b.isCompleteForParticipantId(participantId)) return false;
+        }
+        return true;
+    }
+    
+    /**
      * Check participant entries visually if complete
      */
     private void checkmarkParticipantEntries() {
@@ -110,28 +132,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                                                 areSharesCompleteForParticipantId(i)); //Mark if share complete
             i++;
         }
-    }
-
-    /**
-     * Checks if all bins are complete
-     * @return
-     */
-    private boolean areSharesComplete() {
-        for (Bin b : getApp().getModel().bins) {
-            if (!b.isComplete()) return false;
-        }
-        return true;
-    }
-    
-    /**
-     * Checks if all bins for a certain user id are complete
-     * @return
-     */
-    private boolean areSharesCompleteForParticipantId(int participantId) {
-        for (Bin b : getApp().getModel().bins) {
-            if (!b.isCompleteForParticipantId(participantId)) return false;
-        }
-        return true;
     }
 
     /**
