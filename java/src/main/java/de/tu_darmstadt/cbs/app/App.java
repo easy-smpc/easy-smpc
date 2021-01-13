@@ -249,7 +249,10 @@ public class App extends JFrame {
      */
     public Map<String, String> getDataFromFile() {               
         // Get file
-        File file = getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX), new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription97"), Resources.FILE_ENDING_EXCEL_XLS),new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
+        File file = getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX), 
+                                  new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription97"), Resources.FILE_ENDING_EXCEL_XLS),
+                                  new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
+        
         if (file != null) {
             try {
                 return ImportFile.forFile(file).getExtractedData();       
