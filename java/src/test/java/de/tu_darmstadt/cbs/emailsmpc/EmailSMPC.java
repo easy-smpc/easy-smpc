@@ -6,7 +6,8 @@ import de.tu_darmstadt.cbs.secretshare.ArithmeticShare;
 import de.tu_darmstadt.cbs.secretshare.ArithmeticSharing;
 
 /**
- * Hello world!.
+ * Not really a test, but a hello world!.
+ * @author Tobias Kussel
  */
 public class EmailSMPC {
     

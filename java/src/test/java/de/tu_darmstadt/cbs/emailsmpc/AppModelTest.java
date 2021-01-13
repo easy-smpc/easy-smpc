@@ -12,13 +12,19 @@ import java.util.Set;
 import org.junit.Test;
 
 /**
- * Unit test for simple App.
+ * Unit tests for the app model
+ * @author Tobias Kussel
  */
 public class AppModelTest {
+    
     /**
-     * Rigorous Test :-)
-     * @throws IOException 
-     * @throws IllegalStateException 
+     * Rigorous Test :-).
+     *
+     * @param numParticipants the num participants
+     * @param numBins the num bins
+     * @return the initialized model
+     * @throws IllegalStateException the illegal state exception
+     * @throws IOException Signals that an I/O exception has occurred.
      */
     static private AppModel getInitializedModel(int numParticipants, int numBins) throws IllegalStateException, IOException {
         AppModel testmodel = new AppModel();
@@ -37,6 +43,16 @@ public class AppModelTest {
         return testmodel;
     }
 
+    /**
+     * Gets the initialized model.
+     *
+     * @param numParticipants the num participants
+     * @param numBins the num bins
+     * @param array the array
+     * @return the initialized model
+     * @throws IllegalStateException the illegal state exception
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     static private AppModel getInitializedModel(int numParticipants, int numBins, BigInteger[] array) throws IllegalStateException, IOException {
         AppModel testmodel = new AppModel();
         Participant[] part = new Participant[numParticipants];
@@ -53,6 +69,37 @@ public class AppModelTest {
         testmodel.toInitialSending("Teststudy", part, bins);
         return testmodel;
     }
+    
+    /**
+     * Adding bins.
+     *
+     * @throws IllegalStateException the illegal state exception
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @Test
+    public void AddingBins() throws IllegalStateException, IOException {
+        AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
+        assertTrue(testmodel.bins.length == 4);
+    }
+
+    /**
+     * Adding participants.
+     *
+     * @throws IllegalStateException the illegal state exception
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @Test
+    public void AddingParticipants() throws IllegalStateException, IOException {
+        AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
+        assertTrue(testmodel.participants.length == 3);
+    }
+
+    /**
+     * Clone test.
+     *
+     * @throws IllegalStateException the illegal state exception
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     @Test
     public void CloneTest() throws IllegalStateException, IOException {
         BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
@@ -63,18 +110,10 @@ public class AppModelTest {
         assertTrue(copy.equals(model0));
         assertTrue(copy.studyUID.equals(model0.studyUID));
     }
-
-    @Test
-    public void AddingBins() throws IllegalStateException, IOException {
-        AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
-        assertTrue(testmodel.bins.length == 4);
-    }
-
-    @Test
-    public void AddingParticipants() throws IllegalStateException, IOException {
-        AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
-        assertTrue(testmodel.participants.length == 3);
-    }
+    
+    /**
+     * Non colliding UID.
+     */
     @Test
     public void NonCollidingUID(){
       Set<String> ids = new HashSet<String>();
@@ -85,6 +124,12 @@ public class AppModelTest {
       }
     }
 
+    /**
+     * Save load.
+     *
+     * @throws ClassNotFoundException the class not found exception
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
     @Test
     public void SaveLoad() throws ClassNotFoundException, IOException {
         AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
@@ -95,6 +140,15 @@ public class AppModelTest {
             assertTrue(load.equals(testmodel));
     }
 
+    /**
+     * Test with three.
+     *
+     * @throws ClassNotFoundException the class not found exception
+     * @throws IllegalStateException the illegal state exception
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws NoSuchAlgorithmException the no such algorithm exception
+     */
     @Test
     public void TestWithThree() throws ClassNotFoundException, IllegalStateException, IOException, IllegalArgumentException, NoSuchAlgorithmException {
         BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),

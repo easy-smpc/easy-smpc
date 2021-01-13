@@ -4,9 +4,14 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * Unit Test for UID Generator
+ * Unit Test for UID Generator.
+ * @author Tobias Kussel
  */
 public class UIDGeneratorTest {
+  
+  /**
+   * Test length.
+   */
   @Test
   public void testLength() {
     for (int i = 2; i < 64+1; i *= 2 ){
