@@ -4,7 +4,7 @@ This project aims to provide a simple, easy to use application for calculating
 histograms of distributed data using email a a communication channel.
 
 As email provides no safeguard for a faithful protocol execution, we aim to
-provide GUI safeguards to helf executng protocol.
+provide GUI safeguards to help executing the protocol.
 
 At the moment two secret sharing techniques are implemented:
  1. Arithmetic Secret Sharing on the Field (2^127-1) (being the 12th mersenne
