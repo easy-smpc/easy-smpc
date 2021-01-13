@@ -10,23 +10,41 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 
+/**
+ * Initial message
+ * @author Tobias Kussel
+ */
 public class InitialMessage implements Serializable {
-    public String name;
-    public Participant[] participants;
-    public MessageBin[] bins;
-    public int recipientId;
+    
+    /** SVUID */
     private static final long serialVersionUID = 1631395617989735129L;
-
-    public InitialMessage(AppModel model, int recipientId) {
-        this.name = model.name;
-        this.participants = model.participants;
-        this.recipientId = recipientId;
-        this.bins = new MessageBin[model.bins.length];
-        for (int i = 0; i < model.bins.length; i++) {
-            bins[i] = new MessageBin(model.bins[i], recipientId);
-        }
+    
+    /**
+     * Decode message.
+     *
+     * @param msg the msg
+     * @return the initial message
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ClassNotFoundException the class not found exception
+     */
+    public static InitialMessage decodeMessage(String msg)
+            throws IOException, IllegalArgumentException, ClassNotFoundException {
+        Decoder decoder = Base64.getDecoder();
+        ByteArrayInputStream stream = new ByteArrayInputStream(decoder.decode(msg));
+        ObjectInputStream ois = new ObjectInputStream(stream);
+        Object o = ois.readObject();
+        if (!(o instanceof InitialMessage))
+            throw new IllegalArgumentException("Message not of type InitialMessage");
+        return (InitialMessage) o;
     }
-
+    
+    /**
+     * Gets the app model.
+     *
+     * @param msg the msg
+     * @return the app model
+     */
     public static AppModel getAppModel(InitialMessage msg) {
         AppModel model = new AppModel();
         model.name = msg.name;
@@ -40,26 +58,41 @@ public class InitialMessage implements Serializable {
         }
         return model;
     }
+    
+    /** The name. */
+    public String name;
+    
+    /** The participants. */
+    public Participant[] participants;
 
-    public String getMessage() throws IOException {
-        Encoder encoder = Base64.getEncoder();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(stream);
-        oos.writeObject(this);
-        return encoder.encodeToString(stream.toByteArray());
+    /** The bins. */
+    public MessageBin[] bins;
+
+    /** The recipient id. */
+    public int recipientId;
+
+    /**
+     * Instantiates a new initial message.
+     *
+     * @param model the model
+     * @param recipientId the recipient id
+     */
+    public InitialMessage(AppModel model, int recipientId) {
+        this.name = model.name;
+        this.participants = model.participants;
+        this.recipientId = recipientId;
+        this.bins = new MessageBin[model.bins.length];
+        for (int i = 0; i < model.bins.length; i++) {
+            bins[i] = new MessageBin(model.bins[i], recipientId);
+        }
     }
 
-    public static InitialMessage decodeMessage(String msg)
-            throws IOException, IllegalArgumentException, ClassNotFoundException {
-        Decoder decoder = Base64.getDecoder();
-        ByteArrayInputStream stream = new ByteArrayInputStream(decoder.decode(msg));
-        ObjectInputStream ois = new ObjectInputStream(stream);
-        Object o = ois.readObject();
-        if (!(o instanceof InitialMessage))
-            throw new IllegalArgumentException("Message not of type InitialMessage");
-        return (InitialMessage) o;
-    }
-
+    /**
+     * Equals.
+     *
+     * @param o the o
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object o) {
         if (o == this)
@@ -85,6 +118,25 @@ public class InitialMessage implements Serializable {
         return equal;
     }
 
+    /**
+     * Gets the message.
+     *
+     * @return the message
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public String getMessage() throws IOException {
+        Encoder encoder = Base64.getEncoder();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(stream);
+        oos.writeObject(this);
+        return encoder.encodeToString(stream.toByteArray());
+    }
+
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         int result = name.hashCode();

@@ -10,32 +10,43 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 
+/**
+ * Message for shares
+ * @author Tobias Kussel
+ */
 public class ShareMessage implements Serializable {
     
-    /** SVUID */
+    /**  SVUID. */
     private static final long serialVersionUID = 8085434766713123559L;
     
-    public MessageBin[] bins;
-    public Participant recipient;
-    public Participant sender;
-
-    public ShareMessage(AppModel model, int recipientId) {
-        this.recipient = model.participants[recipientId];
-        this.sender = model.participants[model.ownId];
-        this.bins = new MessageBin[model.bins.length];
-        for (int i = 0; i < model.bins.length; i++) {
-            bins[i] = new MessageBin(model.bins[i], recipientId);
-        }
+    /**
+     * Decode and verify.
+     *
+     * @param msg the msg
+     * @param sender the sender
+     * @param model the model
+     * @return the share message
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ClassNotFoundException the class not found exception
+     */
+    public static ShareMessage decodeAndVerify(String msg, Participant sender, AppModel model)
+            throws IOException, ClassNotFoundException {
+        ShareMessage sm = decodeMessage(msg);
+        if (verify(sm, sender, model))
+            return sm;
+        else
+            throw new IllegalArgumentException("Message invalid");
     }
-
-    public String getMessage() throws IOException {
-        Encoder encoder = Base64.getEncoder();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(stream);
-        oos.writeObject(this);
-        return encoder.encodeToString(stream.toByteArray());
-    }
-
+    
+    /**
+     * Decode message.
+     *
+     * @param msg the msg
+     * @return the share message
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ClassNotFoundException the class not found exception
+     */
     public static ShareMessage decodeMessage(String msg)
             throws IOException, IllegalArgumentException, ClassNotFoundException {
         Decoder decoder = Base64.getDecoder();
@@ -46,21 +57,50 @@ public class ShareMessage implements Serializable {
             throw new IllegalArgumentException("Message invalid");
         return (ShareMessage) o;
     }
-
-    public static ShareMessage decodeAndVerify(String msg, Participant sender, AppModel model)
-            throws IOException, ClassNotFoundException {
-        ShareMessage sm = decodeMessage(msg);
-        if (verify(sm, sender, model))
-            return sm;
-        else
-            throw new IllegalArgumentException("Message invalid");
-    }
-
+    
+    /**
+     * Verify.
+     *
+     * @param msg the msg
+     * @param sender the sender
+     * @param model the model
+     * @return true, if successful
+     */
     public static boolean verify(ShareMessage msg, Participant sender, AppModel model) {
         return msg.sender.equals(sender) && msg.recipient.equals(model.participants[model.ownId])
                 && msg.bins.length == model.bins.length;
     }
 
+    /** The bins. */
+    public MessageBin[] bins;
+
+    /** The recipient. */
+    public Participant recipient;
+
+    /** The sender. */
+    public Participant sender;
+
+    /**
+     * Instantiates a new share message.
+     *
+     * @param model the model
+     * @param recipientId the recipient id
+     */
+    public ShareMessage(AppModel model, int recipientId) {
+        this.recipient = model.participants[recipientId];
+        this.sender = model.participants[model.ownId];
+        this.bins = new MessageBin[model.bins.length];
+        for (int i = 0; i < model.bins.length; i++) {
+            bins[i] = new MessageBin(model.bins[i], recipientId);
+        }
+    }
+
+    /**
+     * Equals.
+     *
+     * @param o the o
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object o) {
         if (o == this)
@@ -80,6 +120,25 @@ public class ShareMessage implements Serializable {
         return equal;
     }
 
+    /**
+     * Gets the message.
+     *
+     * @return the message
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public String getMessage() throws IOException {
+        Encoder encoder = Base64.getEncoder();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(stream);
+        oos.writeObject(this);
+        return encoder.encodeToString(stream.toByteArray());
+    }
+
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         int result = recipient.hashCode();
@@ -90,6 +149,11 @@ public class ShareMessage implements Serializable {
         return result;
     }
 
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
     public String toString() {
         String result = "Recipient: " + recipient.toString() + "\nSender: " + sender.toString();

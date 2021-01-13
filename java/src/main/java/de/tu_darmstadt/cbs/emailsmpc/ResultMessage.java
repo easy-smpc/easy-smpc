@@ -10,38 +10,43 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 
+/**
+ * Message for results
+ * @author Tobias Kussel
+ */
 public class ResultMessage implements Serializable {
     
-    /** SVUID*/
+    /**  SVUID. */
     private static final long serialVersionUID = -4200808171593709179L;
-    public MessageBin[] bins;
-    public Participant sender;
-
-    @Override
-    public String toString() {
-        String result = "Sender: " + sender + "\n";
-        for (MessageBin b : bins) {
-            result = result + b.toString() + "\n";
-        }
-        return result;
+    
+    /**
+     * Decode and verify.
+     *
+     * @param msg the msg
+     * @param sender the sender
+     * @param model the model
+     * @return the result message
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ClassNotFoundException the class not found exception
+     */
+    public static ResultMessage decodeAndVerify(String msg, Participant sender, AppModel model)
+            throws IOException, ClassNotFoundException {
+        ResultMessage rm = decodeMessage(msg);
+        if (verify(rm, sender, model))
+            return rm;
+        else
+            throw new IllegalArgumentException("Message invalid");
     }
-
-    public ResultMessage(AppModel model) {
-        sender = model.participants[model.ownId];
-        bins = new MessageBin[model.bins.length];
-        for (int i = 0; i < model.bins.length; i++) {
-            bins[i] = new MessageBin(model.bins[i].name, model.bins[i].getSumShare());
-        }
-    }
-
-    public String getMessage() throws IOException {
-        Encoder encoder = Base64.getEncoder();
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(stream);
-        oos.writeObject(this);
-        return encoder.encodeToString(stream.toByteArray());
-    }
-
+    
+    /**
+     * Decode message.
+     *
+     * @param msg the msg
+     * @return the result message
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws ClassNotFoundException the class not found exception
+     */
     public static ResultMessage decodeMessage(String msg)
             throws IOException, IllegalArgumentException, ClassNotFoundException {
         Decoder decoder = Base64.getDecoder();
@@ -53,19 +58,43 @@ public class ResultMessage implements Serializable {
         return (ResultMessage) o;
     }
 
-    public static ResultMessage decodeAndVerify(String msg, Participant sender, AppModel model)
-            throws IOException, ClassNotFoundException {
-        ResultMessage rm = decodeMessage(msg);
-        if (verify(rm, sender, model))
-            return rm;
-        else
-            throw new IllegalArgumentException("Message invalid");
-    }
-
+    /**
+     * Verify.
+     *
+     * @param msg the msg
+     * @param sender the sender
+     * @param model the model
+     * @return true, if successful
+     */
     public static boolean verify(ResultMessage msg, Participant sender, AppModel model) {
         return msg.sender.equals(sender) && msg.bins.length == model.bins.length;
     }
 
+    /** The bins. */
+    public MessageBin[] bins;
+
+    /** The sender. */
+    public Participant sender;
+
+    /**
+     * Instantiates a new result message.
+     *
+     * @param model the model
+     */
+    public ResultMessage(AppModel model) {
+        sender = model.participants[model.ownId];
+        bins = new MessageBin[model.bins.length];
+        for (int i = 0; i < model.bins.length; i++) {
+            bins[i] = new MessageBin(model.bins[i].name, model.bins[i].getSumShare());
+        }
+    }
+
+    /**
+     * Equals.
+     *
+     * @param o the o
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object o) {
         if (o == this)
@@ -84,11 +113,44 @@ public class ResultMessage implements Serializable {
         return equal;
     }
 
+    /**
+     * Gets the message.
+     *
+     * @return the message
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public String getMessage() throws IOException {
+        Encoder encoder = Base64.getEncoder();
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(stream);
+        oos.writeObject(this);
+        return encoder.encodeToString(stream.toByteArray());
+    }
+
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         int result = sender.hashCode();
         for (MessageBin b : bins) {
             result = 31 * result + b.hashCode();
+        }
+        return result;
+    }
+
+    /**
+     * To string.
+     *
+     * @return the string
+     */
+    @Override
+    public String toString() {
+        String result = "Sender: " + sender + "\n";
+        for (MessageBin b : bins) {
+            result = result + b.toString() + "\n";
         }
         return result;
     }

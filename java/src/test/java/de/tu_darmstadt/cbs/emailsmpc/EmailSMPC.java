@@ -6,10 +6,15 @@ import de.tu_darmstadt.cbs.secretshare.ArithmeticShare;
 import de.tu_darmstadt.cbs.secretshare.ArithmeticSharing;
 
 /**
- * Hello world!
- *
+ * Hello world!.
  */
 public class EmailSMPC {
+    
+    /**
+     * The main method.
+     *
+     * @param args the arguments
+     */
     public static void main(String[] args) {
         int num_parties = 7;
         BigInteger secret = BigInteger.valueOf(15);
@@ -22,7 +27,6 @@ public class EmailSMPC {
         for (int i = 0; i != num_parties; i++) {
             System.out.println("Share " + i + ": " + shares[i]);
         }
-        System.out.println(
-                "The reconstructed secret is: " + ArithmeticSharing.reconstruct(shares) + " and should be: " + secret);
+        System.out.println("The reconstructed secret is: " + ArithmeticSharing.reconstruct(shares) + " and should be: " + secret);
     }
 }

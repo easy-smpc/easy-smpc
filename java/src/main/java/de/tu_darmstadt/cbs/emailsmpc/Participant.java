@@ -4,25 +4,70 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.Serializable;
 
+/**
+ * Represents a participant
+ * @author Tobias Kussel
+ */
 public class Participant implements Serializable, Cloneable {
-    public final String name;
-    public final String emailAddress;
+    
+    /** SVUID */
     private static final long serialVersionUID = 5370286651195899392L;
-    static private Pattern regex = Pattern
-            .compile("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$");
+    
+    /** The regex. */
+    private static final Pattern regex = Pattern.compile("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$");
+    
+    /**
+     * Valid email.
+     *
+     * @param email the email
+     * @return true, if successful
+     */
+    public static boolean validEmail(String email) {
+        Matcher m = regex.matcher(email);
+        return m.matches();
+    }
+    
+    /** The name. */
+    public final String name;
 
+    /** The email address. */
+    public final String emailAddress;
+
+    /**
+     * Instantiates a new participant.
+     *
+     * @param name the name
+     * @param emailAddress the email address
+     * @throws IllegalArgumentException the illegal argument exception
+     */
     public Participant(String name, String emailAddress) throws IllegalArgumentException {
-        if (!Participant.validEmail(emailAddress))
+        if (!Participant.validEmail(emailAddress)) {
             throw new IllegalArgumentException("Invalid Email Address: " + emailAddress);
+        }
         this.name = name;
         this.emailAddress = emailAddress;
     }
 
+    /**
+     * Clone.
+     *
+     * @return the object
+     */
     @Override
-    public String toString() {
-        return name + ": " + emailAddress;
+    public Object clone() {
+      try {
+        return (Participant) super.clone();
+      } catch (CloneNotSupportedException e) {
+        return new Participant(this.name, this.emailAddress);
+      }
     }
 
+    /**
+     * Equals.
+     *
+     * @param o the o
+     * @return true, if successful
+     */
     @Override
     public boolean equals(Object o) {
         if (o == this)
@@ -33,6 +78,11 @@ public class Participant implements Serializable, Cloneable {
         return p.name.equals(name) && p.emailAddress.equals(emailAddress);
     }
 
+    /**
+     * Hash code.
+     *
+     * @return the int
+     */
     @Override
     public int hashCode() {
         int result = name.hashCode();
@@ -40,17 +90,13 @@ public class Participant implements Serializable, Cloneable {
         return result;
     }
 
-    public static boolean validEmail(String email) {
-        Matcher m = regex.matcher(email);
-        return m.matches();
-    }
-
+    /**
+     * To string.
+     *
+     * @return the string
+     */
     @Override
-    public Object clone() {
-      try {
-        return (Participant) super.clone();
-      } catch (CloneNotSupportedException e) {
-        return new Participant(this.name, this.emailAddress);
-      }
+    public String toString() {
+        return name + ": " + emailAddress;
     }
 }

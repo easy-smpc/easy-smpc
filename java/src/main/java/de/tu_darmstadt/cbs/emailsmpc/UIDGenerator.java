@@ -5,14 +5,21 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.UUID;
+
+
 /**
- * This class implements a UID Generator
+ * This class implements a UID Generator.
+ *
  * @author Tobias Kussel
  */
 public class UIDGenerator {
+  
+  /** The Constant HEX_ALPHABET. */
   private static final char[] HEX_ALPHABET = "0123456789ABCDEF".toCharArray();
+  
   /**
-   * Convertes a byte array to an hex string
+   * Convertes a byte array to an hex string.
+   *
    * @param bytes input bytearray
    * @return return string
    */
@@ -25,12 +32,15 @@ public class UIDGenerator {
     }
     return new String(hexChars);
   }
+  
   /**
-   * Gernerates a short random UID by generating a uuid and xoring the bytes
+   * Generates a short random UID by generating a uuid and xoring the bytes
    * until a given size of hex chars is reached. This increases collision
    * probability so use a reasonable size.
+   *
    * @param size Size of resulting UID in hex chars. Must be power of 2.
    * @return UID String
+   * @throws IllegalStateException the illegal state exception
    */
   public static String generateShortUID(int size) throws IllegalStateException{
     if ((size %2) != 0)

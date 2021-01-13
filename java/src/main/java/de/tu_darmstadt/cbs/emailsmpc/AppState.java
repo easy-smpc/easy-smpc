@@ -1,5 +1,29 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
+/**
+ * Enum for the app state
+ * @author Tobias Kussel
+ */
 public enum AppState {
-    NONE, STARTING, PARTICIPATING, ENTERING_VALUES, INITIAL_SENDING, SENDING_SHARE, RECIEVING_SHARE, SENDING_RESULT, RECIEVING_RESULT, FINISHED
+    
+    /** The none. */
+    NONE, 
+ /** The starting. */
+ STARTING, 
+ /** The participating. */
+ PARTICIPATING, 
+ /** The entering values. */
+ ENTERING_VALUES, 
+ /** The initial sending. */
+ INITIAL_SENDING, 
+ /** The sending share. */
+ SENDING_SHARE, 
+ /** The recieving share. */
+ RECIEVING_SHARE, 
+ /** The sending result. */
+ SENDING_RESULT, 
+ /** The recieving result. */
+ RECIEVING_RESULT, 
+ /** The finished. */
+ FINISHED
 }
