@@ -1,8 +1,9 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
 import java.math.BigInteger;
-import java.security.SecureRandom;
-import de.tu_darmstadt.cbs.secretshare.*;
+
+import de.tu_darmstadt.cbs.secretshare.ArithmeticShare;
+import de.tu_darmstadt.cbs.secretshare.ArithmeticSharing;
 
 /**
  * Hello world!

@@ -1,15 +1,15 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64.*;
-import java.util.Base64;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 
 public class Message implements Serializable, Cloneable {
     public final String recipientName;
@@ -33,6 +33,7 @@ public class Message implements Serializable, Cloneable {
     }
 
     // Disallow default constructor to avoid illegal states
+    @SuppressWarnings("unused")
     private Message() {
         recipientName = null;
         recipientEmailAddress = null;

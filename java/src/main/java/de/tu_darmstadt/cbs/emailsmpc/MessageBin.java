@@ -1,9 +1,13 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
 import java.io.Serializable;
-import de.tu_darmstadt.cbs.secretshare.*;
+
+import de.tu_darmstadt.cbs.secretshare.ArithmeticShare;
 
 public class MessageBin implements Serializable {
+    
+    /** SVUID*/
+    private static final long serialVersionUID = -1447538147308567885L;
     public final String name;
     public final ArithmeticShare share;
 

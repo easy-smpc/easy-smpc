@@ -1,10 +1,10 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
-import java.util.UUID;
-import java.util.Arrays;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.UUID;
 /**
  * This class implements a UID Generator
  * @author Tobias Kussel
@@ -37,7 +37,6 @@ public class UIDGenerator {
       throw new IllegalArgumentException("Invalid size");
     int numSplits = (int)(6-Math.log(size)/Math.log(2)); // bisecting 265bit hash leads to full byte hex chars
     try{
-      UUID uuid = UUID.randomUUID();
       MessageDigest salt = MessageDigest.getInstance("SHA-256");
       salt.update(UUID.randomUUID().toString().getBytes("UTF-8"));
       byte[] uuidArray = salt.digest();

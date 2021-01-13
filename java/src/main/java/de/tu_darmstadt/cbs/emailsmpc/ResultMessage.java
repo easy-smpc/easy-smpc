@@ -1,17 +1,19 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
-import java.math.BigInteger;
-import java.io.Serializable;
-import java.util.Base64.*;
-import java.util.Base64;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import de.tu_darmstadt.cbs.secretshare.*;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
 
 public class ResultMessage implements Serializable {
+    
+    /** SVUID*/
+    private static final long serialVersionUID = -4200808171593709179L;
     public MessageBin[] bins;
     public Participant sender;
 
