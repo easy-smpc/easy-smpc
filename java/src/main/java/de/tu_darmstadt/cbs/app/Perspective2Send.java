@@ -231,7 +231,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                                      TitledBorder.DEFAULT_POSITION));
         this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
         JScrollPane pane = new JScrollPane(participants);
-        pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         panel.add(pane, BorderLayout.CENTER);    
            
         // Send all e-mails button and proceed button

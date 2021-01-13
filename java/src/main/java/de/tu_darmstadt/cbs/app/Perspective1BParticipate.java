@@ -170,7 +170,6 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
                                                                      TitledBorder.DEFAULT_POSITION));
         this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
         JScrollPane pane = new JScrollPane(participants);
-        pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.NORTH);    
                         
         // Bins
@@ -181,7 +180,6 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
                                                              TitledBorder.DEFAULT_POSITION));
         this.bins.setLayout(new BoxLayout(this.bins, BoxLayout.Y_AXIS));
         pane = new JScrollPane(bins);
-        pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         central.add(pane, BorderLayout.SOUTH);
 
         // Buttons pane
