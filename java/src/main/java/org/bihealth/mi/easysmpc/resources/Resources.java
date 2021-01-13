@@ -40,7 +40,7 @@ import javax.swing.border.Border;
 public class Resources {
 
     /** Bundle name */
-    private static final String   BUNDLE_NAME                     = "de.tu_darmstadt.cbs.app.resources.messages"; //$NON-NLS-1$
+    private static final String   BUNDLE_NAME                     = "org.bihealth.mi.easysmpc.resources.messages"; //$NON-NLS-1$
 
     /** Bundle */
     private static ResourceBundle resource_bundle                 = ResourceBundle.getBundle(BUNDLE_NAME);
