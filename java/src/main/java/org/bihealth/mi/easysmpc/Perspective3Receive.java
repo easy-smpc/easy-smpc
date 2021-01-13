@@ -44,7 +44,6 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Fabian Prasser
  * @author Felix Wirth
  */
-
 public class Perspective3Receive extends Perspective implements ChangeListener, ActionListener {
 
     /** Panel for participants */

@@ -23,6 +23,7 @@ import javax.swing.border.TitledBorder;
 /**
  * Implements a perspective in the GUI
  * 
+ * @author Felix Wirth
  * @author Fabian Prasser
  */
 public abstract class Perspective {

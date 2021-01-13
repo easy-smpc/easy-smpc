@@ -21,7 +21,6 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Fabian Prasser
  * @author Felix Wirth
  */
-
 public class Perspective5Receive extends Perspective3Receive {
 
     /**

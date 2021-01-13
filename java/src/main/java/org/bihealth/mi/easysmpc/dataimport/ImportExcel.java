@@ -29,6 +29,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * Reads Excel content
  * 
  * @author Felix Wirth
+ * @author Fabian Prasser
  */
 public class ImportExcel extends ImportFile {
 

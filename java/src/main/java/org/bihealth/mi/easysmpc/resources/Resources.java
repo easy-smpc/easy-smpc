@@ -34,6 +34,7 @@ import javax.swing.border.Border;
 /**
  * Accessor class for messages and settings used by the UI
  * 
+ * @author Felix Wirth
  * @author Fabian Prasser
  */
 public class Resources {
@@ -98,17 +99,17 @@ public class Resources {
     /** Interval schedule for tasks in background */
     public static final long      INTERVAL_SCHEDULER_MILLISECONDS = 200;
     /** File ending for CSV-files */
-    public static final String    FILE_ENDING_CSV                 = "csv";
+    public static final String    FILE_ENDING_CSV                 = "csv"; //$NON-NLS-1$
     /** File ending for Excel-2007-files */
-    public static final String    FILE_ENDING_EXCEL_XLSX          = "xlsx";
+    public static final String    FILE_ENDING_EXCEL_XLSX          = "xlsx"; //$NON-NLS-1$
     /** File ending for Excel-97-files */
-    public static final String    FILE_ENDING_EXCEL_XLS           = "xls";
+    public static final String    FILE_ENDING_EXCEL_XLS           = "xls"; //$NON-NLS-1$
     /** Maximal rows considered */
     public static final int       MAX_COUNT_ROWS                  = 64;
     /** Maximal columns considered */
     public static final int       MAX_COUNT_COLUMNS               = 64;
     /** Delimiters considered for CSV files */
-    public static final char[]    DELIMITERS                      = { ';', ',', '|', '\t' };
+    public static final char[]    DELIMITERS                      = { ';', ',', '|', '\t' }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     
     /**
      * Maximum number of lines to be loaded for preview purposes for CSV file
@@ -139,7 +140,7 @@ public class Resources {
      * @throws IOException
      */
     public static Image getCheckmark() throws IOException {
-        InputStream stream = Resources.class.getResourceAsStream("checkmark.png");
+        InputStream stream = Resources.class.getResourceAsStream("checkmark.png"); //$NON-NLS-1$
         return ImageIO.read(stream).getScaledInstance(Resources.SIZE_CHECKMARK_X, Resources.SIZE_CHECKMARK_Y,  java.awt.Image.SCALE_SMOOTH);
     }
     
@@ -150,7 +151,7 @@ public class Resources {
      * @throws IOException
      */
     public static Image getIcon() throws IOException {
-        InputStream stream = Resources.class.getResourceAsStream("icon.png");
+        InputStream stream = Resources.class.getResourceAsStream("icon.png"); //$NON-NLS-1$
         return ImageIO.read(stream);
     }
     
@@ -193,7 +194,7 @@ public class Resources {
      * @throws IOException
      */
     public static ImageIcon getMenuItem() throws IOException {
-        InputStream stream = Resources.class.getResourceAsStream("icon.png");
+        InputStream stream = Resources.class.getResourceAsStream("icon.png"); //$NON-NLS-1$
         return new ImageIcon(ImageIO.read(stream).getScaledInstance(16, 16, Image.SCALE_DEFAULT));
     }
     

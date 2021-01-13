@@ -27,9 +27,9 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 /**
  * A perspective
  * 
+ * @author Felix Wirth
  * @author Fabian Prasser
  */
-
 public class Perspective0Start extends Perspective {
     
     /**

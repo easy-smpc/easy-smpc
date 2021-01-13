@@ -57,6 +57,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 /**
  * Main UI of the app
  * 
+ * @author Felix Wirth
  * @author Fabian Prasser
  */
 public class App extends JFrame {

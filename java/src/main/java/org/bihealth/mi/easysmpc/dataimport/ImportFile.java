@@ -28,8 +28,8 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * Extracts data from a two dimensional array which can be filled by different file formats
  * 
  * @author Felix Wirth
+ * @author Fabian Prasser
  */
-
 public abstract class ImportFile {
     
     /**

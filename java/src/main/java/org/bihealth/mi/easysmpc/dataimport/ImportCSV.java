@@ -34,6 +34,7 @@ import com.carrotsearch.hppc.IntIntOpenHashMap;
  * Reads CSV content
  * 
  * @author Felix Wirth
+ * @author Fabian Prasser
  */
 public class ImportCSV extends ImportFile {
     

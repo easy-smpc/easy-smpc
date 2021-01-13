@@ -27,8 +27,8 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * A class to poll the clipboard periodically for messages
  * 
  * @author Felix Wirth
+ * @author Fabian Prasser
  */
-
 public class ImportClipboard implements Runnable {
     /**
      * Convenience method to remove exchange message tags
