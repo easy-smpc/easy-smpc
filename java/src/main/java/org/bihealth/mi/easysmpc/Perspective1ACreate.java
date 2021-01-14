@@ -164,35 +164,53 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     }
 
     /**
-     * Adds a new line for bin entry
+     * Adds several bins at once
+     * @param previous
+     * @param names
+     * @param values
      * @param enabled
+     * @return
      */
-    private EntryBin addBin(EntryBin previous, String name, String value, boolean enabled) {
+    private EntryBin addBin(EntryBin previous, List<String> names, List<String> values, List<Boolean> enabled) {
 
         // Find index
         int index = Arrays.asList(this.bins.getComponents()).indexOf(previous);
         index = index == -1 ? 0 : index + 1;
         
-        // Create and add entry
-        EntryBin entry = new EntryBin(name, enabled, value, enabled, enabled);
-        entry.setChangeListener(this);
-        entry.setAddListener(new ActionListener() {
-           @Override
-            public void actionPerformed(ActionEvent e) {
-               addBin(entry, "", "", true);
-            } 
-        });
-        entry.setRemoveListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                removeBin(entry);
-            }
-        });
-        this.bins.add(entry, index);
+        // Create and add entries
+        EntryBin entry = null;
+        for (int i = 0; i < names.size(); i++) {
+            entry = new EntryBin(names.get(i), enabled.get(i), values.get(i), enabled.get(i), enabled.get(i));
+            final EntryBin _entry = entry;
+            entry.setChangeListener(this);
+            entry.setAddListener(new ActionListener() {
+               @Override
+                public void actionPerformed(ActionEvent e) {
+                   addBin(_entry, "", "", true);
+                } 
+            });
+            entry.setRemoveListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    removeBin(_entry);
+                }
+            });
+            this.bins.add(entry, index);
+        }
+        
+        // Update GUI
         this.bins.revalidate();
         this.bins.repaint();
         this.stateChanged(new ChangeEvent(this));
         return entry;
+    }
+
+    /**
+     * Adds a new line for bin entry
+     * @param enabled
+     */
+    private EntryBin addBin(EntryBin previous, String name, String value, boolean enabled) {
+        return addBin(previous, Arrays.asList(name), Arrays.asList(value), Arrays.asList(enabled));
     }
 
     /**
