@@ -124,9 +124,15 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         if (data != null) {
             this.bins.removeAll();
             EntryBin previousBin = null;
+            List<String> names = new ArrayList<>();
+            List<String> values = new ArrayList<>();
+            List<Boolean>  enabled = new ArrayList<>();
             for (Entry<String, String> entry : data.entrySet()) {
-                previousBin = addBin(previousBin, entry.getKey(), entry.getValue(), true);
+                names.add(entry.getKey());
+                values.add(entry.getValue());
+                enabled.add(true);
             }
+            addBin(previousBin, names, values, enabled);
             this.stateChanged(new ChangeEvent(this));
         }   
     }

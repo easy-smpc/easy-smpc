@@ -105,9 +105,9 @@ public class Resources {
     /** File ending for Excel-97-files */
     public static final String    FILE_ENDING_EXCEL_XLS           = "xls"; //$NON-NLS-1$
     /** Maximal rows considered */
-    public static final int       MAX_COUNT_ROWS                  = 64;
+    public static final int       MAX_COUNT_ROWS                  = 250000;
     /** Maximal columns considered */
-    public static final int       MAX_COUNT_COLUMNS               = 64;
+    public static final int       MAX_COUNT_COLUMNS               = 250000;
     /** Delimiters considered for CSV files */
     public static final char[]    DELIMITERS                      = { ';', ',', '|', '\t' }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     
