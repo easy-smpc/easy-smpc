@@ -202,6 +202,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 }
             });
             this.bins.add(entry, index);
+            index++;
         }
         
         // Update GUI
