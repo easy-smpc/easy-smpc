@@ -230,15 +230,10 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             EntryBin newBin = new EntryBin(currentBin.name, false, "", true, false);
             newBin.setChangeListener(this);
             bins.add(newBin);
-        }
-        
-        // Zpdate
+        }     
+        // Update GUI
         this.stateChanged(new ChangeEvent(this));
-        
-        // Redraw
-        participants.revalidate();
-        participants.repaint();
-        bins.revalidate();
-        bins.repaint();
+        getPanel().revalidate();
+        getPanel().repaint();        
     }
 }

@@ -283,6 +283,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             });
             i++;
         }
+        // Update GUI
         this.stateChanged(new ChangeEvent(this));
+        getPanel().revalidate();
+        getPanel().repaint();    
     }
 }

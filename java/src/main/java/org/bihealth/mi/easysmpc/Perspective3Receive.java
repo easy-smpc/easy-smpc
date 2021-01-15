@@ -204,6 +204,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                                                             currentParticipant.emailAddress);
             participants.add(entry);
         }
+        // Update GUI
         this.stateChanged(new ChangeEvent(this));
+        getPanel().revalidate();
+        getPanel().repaint(); 
     }
 }

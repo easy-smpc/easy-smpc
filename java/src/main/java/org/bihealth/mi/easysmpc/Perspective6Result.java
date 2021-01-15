@@ -70,10 +70,9 @@ public class Perspective6Result extends Perspective {
         for (BinResult binResult : getApp().getModel().getAllResults()) {
             bins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
         }
-        participants.revalidate();
-        participants.repaint();
-        bins.revalidate();
-        bins.repaint();
+        // Update GUI
+        getPanel().revalidate();
+        getPanel().repaint(); 
     }
     
     /**
