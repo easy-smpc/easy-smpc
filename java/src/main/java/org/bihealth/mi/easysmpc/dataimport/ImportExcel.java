@@ -100,6 +100,7 @@ public class ImportExcel extends ImportFile {
                 rows.add(column);
             }
         }
+        sheet.getWorkbook().close();
         return rowsListToArray(rows);
     }
 }
