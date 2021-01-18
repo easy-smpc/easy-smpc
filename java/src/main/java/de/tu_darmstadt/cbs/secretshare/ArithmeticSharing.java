@@ -35,7 +35,7 @@ public class ArithmeticSharing {
             if (!(shares[i].prime.equals(first_prime))) {
                 throw new IllegalArgumentException("Incompatible primes found!");
             }
-            reconstruction = reconstruction.add(shares[i].value).mod(shares[i].prime);
+            reconstruction = reconstruction.add(shares[i].value).remainder(shares[i].prime);
         }
         return reconstruction;
     }
@@ -66,6 +66,24 @@ public class ArithmeticSharing {
     }
 
     /**
+     * Generate a signed blind
+     * @param bitlength Bitlength *including* sign bit
+     * @throws IllegalArgumentException Too small or negative bitlength
+     * @return BigInteger
+     */
+    private BigInteger getSignedBlind(int bitlength) throws IllegalArgumentException {
+      if (bitlength < 2)
+        throw new IllegalArgumentException("Bitlength must be larger than 2");
+      BigInteger value = new BigInteger(bitlength-1, randomGenerator);
+      byte[] randomByte = new byte[1];
+      randomGenerator.nextBytes(randomByte);
+      int signum = Byte.valueOf(randomByte[0]).intValue() & 0x01;
+      if (signum == 1)
+        value = value.negate();
+      return value;
+    }
+
+    /**
      * Share a secret
      * @param secret
      * @return
@@ -74,8 +92,8 @@ public class ArithmeticSharing {
         BigInteger[] shares = new BigInteger[numParties];
         shares[numParties - 1] = secret;
         for (int i = 0; i != numParties - 1; i++) {
-            shares[i] = new BigInteger(127, randomGenerator);
-            shares[numParties - 1] = shares[numParties - 1].subtract(shares[i]).mod(prime);
+            shares[i] = getSignedBlind(127);
+            shares[numParties - 1] = shares[numParties - 1].subtract(shares[i]).remainder(prime);
         }
         ArithmeticShare[] result = new ArithmeticShare[numParties];
         for (int i = 0; i != numParties; i++) {

@@ -62,7 +62,7 @@ public class ArithmeticShare implements Serializable, Cloneable {
             return this;
         if (this.value == BigInteger.ZERO)
             return other;
-        BigInteger sum = this.value.add(other.value).mod(this.prime);
+        BigInteger sum = this.value.add(other.value).remainder(this.prime);
         return new ArithmeticShare(sum, prime);
     }
 
