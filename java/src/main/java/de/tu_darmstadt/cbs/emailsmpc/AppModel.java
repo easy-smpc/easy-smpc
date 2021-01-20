@@ -331,6 +331,9 @@ public class AppModel implements Serializable, Cloneable {
      */
     public boolean isMessageShareResultValid(Message msg) {
         try {
+            if (msg.recipientID != ownId) {
+                return false;
+            }
             Participant sender = getParticipantFromId(msg.senderID);
             Message.validateData(getParticipantId(sender), participants[ownId], msg.data);
             switch (state){
@@ -423,7 +426,7 @@ public class AppModel implements Serializable, Cloneable {
       for (int i = 0; i < numParticipants; i++) {
         if (i != ownId) {
           Participant recipient = this.participants[i];
-          unsentMessages[i] = new Message(ownId, recipient, data.getMessage());
+          unsentMessages[i] = new Message(ownId, recipient, i, data.getMessage());
         } else {
           for (Bin b : bins) {
             b.setInShare(b.getSumShare(), ownId);
@@ -506,7 +509,10 @@ public class AppModel implements Serializable, Cloneable {
             throws IllegalStateException, IllegalArgumentException, NoSuchAlgorithmException, ClassNotFoundException, IOException {
         Participant sender = getParticipantFromId(msg.senderID);
         if (!(state == AppState.RECIEVING_SHARE || state == AppState.RECIEVING_RESULT))
-            throw new IllegalStateException("Setting a share from a Message is not allowed at state " + state);
+            throw new IllegalStateException("Setting a share from a Message is not allowed at state " + state);        
+        if (msg.recipientID != ownId) {
+            throw new IllegalArgumentException("Message recipient ist not participant in current Appmodel");
+        }
         if (Message.validateData(getParticipantId(sender), participants[ownId], msg.data)) {
             if (state == AppState.RECIEVING_SHARE) {
                 ShareMessage sm = ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
@@ -826,7 +832,7 @@ public class AppModel implements Serializable, Cloneable {
     private Message getInitialMessage(int recipientId) throws IOException {
         InitialMessage data = new InitialMessage(this, recipientId);
         Participant recipient = this.participants[recipientId];
-        return new Message(ownId, recipient, data.getMessage());
+        return new Message(ownId, recipient, recipientId, data.getMessage());
     }
 
     /**
@@ -839,6 +845,6 @@ public class AppModel implements Serializable, Cloneable {
     private Message getShareMessage(int recipientId) throws IOException {
         ShareMessage data = new ShareMessage(this, recipientId);
         Participant recipient = this.participants[recipientId];
-        return new Message(ownId, recipient, data.getMessage());
+        return new Message(ownId, recipient, recipientId, data.getMessage());
     }
 }
