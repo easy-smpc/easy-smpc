@@ -262,7 +262,7 @@ public class App extends JFrame {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
             }
             catch (IllegalArgumentException e) {
-                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadDataError"), Resources.getString("App.11"),  JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadDataError"), Resources.getString("App.11"),  JOptionPane.INFORMATION_MESSAGE); //$NON-NLS-1$               
             }
         }
         return null;

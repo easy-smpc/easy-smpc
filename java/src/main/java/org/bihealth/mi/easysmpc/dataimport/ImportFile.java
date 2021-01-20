@@ -185,8 +185,14 @@ public abstract class ImportFile {
             }
         }
         
+        // Final sanity check
+        String[][] strippedArray = rowsListToArray(rows);
+        if (strippedArray.length != Resources.EXACT_ROW_COLUMNS_LENGTH && strippedArray[0] != null && strippedArray[0].length != Resources.EXACT_ROW_COLUMNS_LENGTH) {
+            throw new IllegalArgumentException("Array must either have exact two rows or two columns");
+        }
+        
         // Done
-        return  rowsListToArray(rows);
+        return strippedArray;
     }
 
     /**
