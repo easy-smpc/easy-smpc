@@ -169,7 +169,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
                                                                      TitledBorder.LEFT,
                                                                      TitledBorder.DEFAULT_POSITION));
         this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
-        JScrollPane pane = new JScrollPane(participants);
+        JScrollPane pane = new JScrollPane(participants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         central.add(pane, BorderLayout.NORTH);    
                         
         // Bins
@@ -179,7 +179,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
                                                              TitledBorder.LEFT,
                                                              TitledBorder.DEFAULT_POSITION));
         this.bins.setLayout(new BoxLayout(this.bins, BoxLayout.Y_AXIS));
-        pane = new JScrollPane(bins);
+        pane = new JScrollPane(bins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         central.add(pane, BorderLayout.SOUTH);
 
         // Buttons pane
