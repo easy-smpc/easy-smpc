@@ -23,6 +23,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Base64.Encoder;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * A message to be sent between instances
@@ -43,7 +45,7 @@ public class Message implements Serializable, Cloneable {
      */
     public static Message deserializeMessage(String msg) throws IOException, ClassNotFoundException {
         byte[] data = Base64.getDecoder().decode(msg);
-        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
+        ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(data)));
         Message message = (Message) ois.readObject();
         ois.close();
         return message;
@@ -85,7 +87,7 @@ public class Message implements Serializable, Cloneable {
      */
     public static String serializeMessage(Message msg) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(bos));
         oos.writeObject(msg);
         oos.close();
         return Base64.getEncoder().encodeToString(bos.toByteArray());
