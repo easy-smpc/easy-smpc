@@ -184,7 +184,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
 
         // Buttons pane
         JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(3, 1));
+        buttonsPane.setLayout(new GridLayout(2, 1));
         
         // Load from file button      
         JButton loadFromFile = new JButton(Resources.getString("PerspectiveCreate.LoadFromFile"));
