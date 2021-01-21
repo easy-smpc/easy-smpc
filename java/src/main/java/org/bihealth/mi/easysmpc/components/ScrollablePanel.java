@@ -13,10 +13,6 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
-/**
- * Credits?
- *
- */
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.LayoutManager;
@@ -28,6 +24,10 @@ import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 
 /**
+ * This class allows for a panel, which is only scrollable vertically. 
+ * It is taken from https://tips4java.wordpress.com/2009/12/20/scrollable-panel/ and was slightly adapted
+ *  
+ *  Original documentation:
  *  A panel that implements the Scrollable interface. This class allows you
  *  to customize the scrollable features by using newly provided setter methods
  *  so you don't have to extend this class every time.
@@ -44,6 +44,9 @@ import javax.swing.SwingConstants;
  *  panels size. This has the effect of ensuring the viewport is always full as
  *  components added to the panel will be size to fill the area available,
  *  based on the rules of the applicable layout manager of course.
+ *  
+ * @author Rob Camick
+ * @author Felix Wirth
  */
 public class ScrollablePanel extends JPanel
     implements Scrollable, SwingConstants
