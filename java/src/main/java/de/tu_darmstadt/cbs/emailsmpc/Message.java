@@ -123,9 +123,6 @@ public class Message implements Serializable, Cloneable {
 
     /** The sender ID. */
     public final int senderID;
-    
-    /** The recipient ID. */
-    public final int recipientID;
 
     /**
      * Instantiates a new message.
@@ -134,11 +131,25 @@ public class Message implements Serializable, Cloneable {
      * @param recipient the recipient
      * @param data the data
      */
-    public Message(int senderID, Participant recipient, int recipientID, String data) {
+    public Message(int senderID, Participant recipient, String data) {
         this.senderID = senderID;
-        this.recipientID = recipientID;
         this.recipientName = recipient.name;
         this.recipientEmailAddress = recipient.emailAddress;
+        this.data = getHashedData(data);
+    }
+
+    /**
+     * Instantiates a new message.
+     *
+     * @param senderID the sender ID
+     * @param recipientName the recipient name
+     * @param recipientEmailAddress the recipient email address
+     * @param data the data
+     */
+    public Message(int senderID, String recipientName, String recipientEmailAddress, String data) {
+        this.senderID = senderID;
+        this.recipientName = recipientName;
+        this.recipientEmailAddress = recipientEmailAddress;
         this.data = getHashedData(data);
     }
 
@@ -151,7 +162,6 @@ public class Message implements Serializable, Cloneable {
         recipientEmailAddress = null;
         data = null;
         senderID = -1;
-        recipientID = -1;
     }
 
     /**
