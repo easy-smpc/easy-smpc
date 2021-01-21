@@ -512,7 +512,7 @@ public class AppModel implements Serializable, Cloneable {
         if (!(state == AppState.RECIEVING_SHARE || state == AppState.RECIEVING_RESULT))
             throw new IllegalStateException("Setting a share from a Message is not allowed at state " + state);
         if(!msg.recipientName.equals(getParticipantFromId(ownId).name) || !msg.recipientEmailAddress.equals(getParticipantFromId(ownId).emailAddress)){
-            throw new IllegalArgumentException("Message recipient is not participant in current appmodel");
+            throw new IllegalArgumentException("Message recipient is not the participant in current appmodel");
         }
         if (Message.validateData(getParticipantId(sender), participants[ownId], msg.data)) {
             if (state == AppState.RECIEVING_SHARE) {
