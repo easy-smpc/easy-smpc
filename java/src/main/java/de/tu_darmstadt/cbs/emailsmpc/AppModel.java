@@ -331,6 +331,10 @@ public class AppModel implements Serializable, Cloneable {
      */
     public boolean isMessageShareResultValid(Message msg) {
         try {
+            if(!msg.recipientName.equals(getParticipantFromId(ownId).name) || !msg.recipientEmailAddress.equals(getParticipantFromId(ownId).emailAddress)){
+                return false;
+            }
+            
             Participant sender = getParticipantFromId(msg.senderID);
             Message.validateData(getParticipantId(sender), participants[ownId], msg.data);
             switch (state){
@@ -507,6 +511,9 @@ public class AppModel implements Serializable, Cloneable {
         Participant sender = getParticipantFromId(msg.senderID);
         if (!(state == AppState.RECIEVING_SHARE || state == AppState.RECIEVING_RESULT))
             throw new IllegalStateException("Setting a share from a Message is not allowed at state " + state);
+        if(!msg.recipientName.equals(getParticipantFromId(ownId).name) || !msg.recipientEmailAddress.equals(getParticipantFromId(ownId).emailAddress)){
+            throw new IllegalArgumentException("Message recipient is not the participant in current appmodel");
+        }
         if (Message.validateData(getParticipantId(sender), participants[ownId], msg.data)) {
             if (state == AppState.RECIEVING_SHARE) {
                 ShareMessage sm = ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
