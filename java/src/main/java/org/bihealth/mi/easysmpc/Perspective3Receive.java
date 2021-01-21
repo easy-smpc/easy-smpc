@@ -31,6 +31,7 @@ import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmark;
+import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -47,7 +48,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class Perspective3Receive extends Perspective implements ChangeListener, ActionListener {
 
     /** Panel for participants */
-    private JPanel             participants;
+    private ScrollablePanel    participants;
     
     /** Text field containing title of study */
     private ComponentTextField title;
@@ -164,7 +165,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         title.add(this.title, BorderLayout.CENTER);
         
         // Participants
-        this.participants = new JPanel();
+        this.participants = new ScrollablePanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                      Resources.getString("PerspectiveReceive.participants"),
                                                                      TitledBorder.LEFT,

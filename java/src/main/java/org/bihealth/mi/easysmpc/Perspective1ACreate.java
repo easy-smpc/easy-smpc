@@ -41,7 +41,6 @@ import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.EntryBin;
 import org.bihealth.mi.easysmpc.components.EntryParticipant;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
-import org.bihealth.mi.easysmpc.components.ScrollablePanel.ScrollableSizeHint;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -354,8 +353,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Participants
         this.participants = new ScrollablePanel();
-        this.participants.setScrollableHeight(ScrollableSizeHint.NONE);
-        this.participants.setScrollableWidth(ScrollableSizeHint.FIT);
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                      Resources.getString("PerspectiveCreate.participants"),
                                                                      TitledBorder.LEFT,
@@ -366,8 +363,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
 
         // Bins
         this.bins = new ScrollablePanel();
-        this.bins.setScrollableHeight(ScrollableSizeHint.NONE);
-        this.bins.setScrollableWidth(ScrollableSizeHint.FIT);
         this.bins.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                              Resources.getString("PerspectiveCreate.bins"),
                                                              TitledBorder.LEFT,

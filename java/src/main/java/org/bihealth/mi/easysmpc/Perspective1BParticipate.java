@@ -37,6 +37,7 @@ import javax.swing.event.ChangeListener;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryBin;
 import org.bihealth.mi.easysmpc.components.EntryParticipant;
+import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -51,10 +52,10 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class Perspective1BParticipate extends Perspective implements ChangeListener {
 
     /** Panel for participants */
-    private JPanel             participants;
-    
+    private ScrollablePanel    participants;
+
     /** Panel for bins */
-    private JPanel             bins;
+    private ScrollablePanel    bins;
     
     /** Text field containing title of study */
     private ComponentTextField title;
@@ -163,7 +164,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         panel.add(central, BorderLayout.CENTER);        
         
         // Participants
-        this.participants = new JPanel();
+        this.participants = new ScrollablePanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                      Resources.getString("PerspectiveParticipate.participants"),
                                                                      TitledBorder.LEFT,
@@ -173,7 +174,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         central.add(pane, BorderLayout.NORTH);    
                         
         // Bins
-        this.bins = new JPanel();
+        this.bins = new ScrollablePanel();
         this.bins.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                              Resources.getString("PerspectiveParticipate.bins"),
                                                              TitledBorder.LEFT,
