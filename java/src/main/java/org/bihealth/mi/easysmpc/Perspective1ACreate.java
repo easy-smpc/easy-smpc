@@ -40,6 +40,7 @@ import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.EntryBin;
 import org.bihealth.mi.easysmpc.components.EntryParticipant;
+import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -54,10 +55,10 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class Perspective1ACreate extends Perspective implements ChangeListener {
 
     /** Panel for participants */
-    private JPanel             participants;
+    private ScrollablePanel             participants;
     
     /** Panel for bins */
-    private JPanel             bins;
+    private ScrollablePanel             bins;
     
     /** Text field containing title of study */
     private ComponentTextField title;
@@ -351,17 +352,17 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         panel.add(central, BorderLayout.CENTER);
         
         // Participants
-        this.participants = new JPanel();
+        this.participants = new ScrollablePanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                      Resources.getString("PerspectiveCreate.participants"),
                                                                      TitledBorder.LEFT,
                                                                      TitledBorder.DEFAULT_POSITION));
-        this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
+        this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));     
         JScrollPane pane = new JScrollPane(participants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         central.add(pane, BorderLayout.NORTH);
 
         // Bins
-        this.bins = new JPanel();
+        this.bins = new ScrollablePanel();
         this.bins.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                              Resources.getString("PerspectiveCreate.bins"),
                                                              TitledBorder.LEFT,

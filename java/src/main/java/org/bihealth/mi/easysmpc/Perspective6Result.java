@@ -26,6 +26,7 @@ import javax.swing.border.TitledBorder;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryBinNoButton;
 import org.bihealth.mi.easysmpc.components.EntryParticipantNoButton;
+import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.BinResult;
@@ -40,7 +41,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class Perspective6Result extends Perspective {
 
     /** Panel for participants */
-    private JPanel             participants;
+    private ScrollablePanel    participants;
     
     /** Panel for bins */
     private JPanel             bins;
@@ -103,7 +104,7 @@ public class Perspective6Result extends Perspective {
         panel.add(central, BorderLayout.CENTER);        
         
         // Participants
-        this.participants = new JPanel();
+        this.participants = new ScrollablePanel();
         this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                      Resources.getString("PerspectiveParticipate.participants"),
                                                                      TitledBorder.LEFT,
