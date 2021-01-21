@@ -32,12 +32,12 @@ public abstract class Perspective {
     private final App    app;
     /** Title */
     private final String title;
-    /** Progress*/
-    private final int progress;
-    /** Panel*/
+    /** Progress */
+    private final int    progress;
+    /** Panel */
     private final JPanel panel;
     /** Is interim saving in this perspective possible */
-    private boolean interimSavingPossible = false;
+    private boolean      canSave = false;
     
 
     /**
@@ -47,11 +47,11 @@ public abstract class Perspective {
      * @param title
      * @param progress
      */
-    protected Perspective(App app, String title, int progress, boolean interimSavingPossible) {
+    protected Perspective(App app, String title, int progress, boolean canSave) {
         this.app = app;
         this.title = title;
         this.progress = progress;
-        this.interimSavingPossible = interimSavingPossible;
+        this.canSave = canSave;
         this.panel = new JPanel();
         this.panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                               title,
@@ -117,7 +117,7 @@ public abstract class Perspective {
     /**
      * Does perspective allow interim saving
      */
-    protected boolean isInterimSavingPossible() {
-        return interimSavingPossible;
+    protected boolean canSave() {
+        return canSave;
     }
 }

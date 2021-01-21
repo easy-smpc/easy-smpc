@@ -442,7 +442,7 @@ public class App extends JFrame {
         CardLayout cl = (CardLayout) (cards.getLayout());
         cl.show(cards, perspective.getTitle());
         progress.setProgress(perspective.getProgress());
-        jmiInterimSave.setEnabled(perspective.isInterimSavingPossible());
+        jmiInterimSave.setEnabled(perspective.canSave());
         progress.repaint();
     }
 

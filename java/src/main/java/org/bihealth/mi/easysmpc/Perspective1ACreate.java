@@ -55,14 +55,14 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class Perspective1ACreate extends Perspective implements ChangeListener {
 
     /** Panel for participants */
-    private ScrollablePanel             participants;
-    
+    private ScrollablePanel    participants;
+
     /** Panel for bins */
-    private ScrollablePanel             bins;
-    
+    private ScrollablePanel    bins;
+
     /** Text field containing title of study */
     private ComponentTextField title;
-    
+
     /** Save button */
     private JButton            save;
     
