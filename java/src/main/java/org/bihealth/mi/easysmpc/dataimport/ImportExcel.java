@@ -50,7 +50,7 @@ public class ImportExcel extends ImportFile {
      * 
      * @param cell
      */
-    private String extractExcelCellContent(Cell cell, boolean originalCellType) {
+    private String getValue(Cell cell, boolean originalCellType) {
         if (cell != null) {
             switch (originalCellType ? cell.getCellType() : cell.getCachedFormulaResultType()) {
             case NUMERIC:
@@ -64,7 +64,7 @@ public class ImportExcel extends ImportFile {
             case _NONE:
                 return "";
             case FORMULA:
-                return extractExcelCellContent(cell, false);
+                return getValue(cell, false);
             default:
                 return "";
             }
@@ -72,7 +72,7 @@ public class ImportExcel extends ImportFile {
     }
     
     @Override
-    protected String[][] loadRawData() throws IOException {
+    protected String[][] load() throws IOException {
         
         // Prepare
         Sheet sheet;
@@ -110,7 +110,7 @@ public class ImportExcel extends ImportFile {
                     if (cell != null && cell.getCellType() != CellType.BLANK) {
                         
                         // Extract content
-                        String content = extractExcelCellContent(cell, true).trim();
+                        String content = getValue(cell, true).trim();
                         
                         // Check for empty content
                         if (!content.isEmpty()) {
@@ -134,6 +134,6 @@ public class ImportExcel extends ImportFile {
         sheet.getWorkbook().close();
         
         // Done
-        return rowsListToArray(rows);
+        return pack(rows);
     }
 }

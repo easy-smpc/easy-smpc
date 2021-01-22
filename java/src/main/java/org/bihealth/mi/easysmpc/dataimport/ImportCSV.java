@@ -117,7 +117,7 @@ public class ImportCSV extends ImportFile {
     }
     
     @Override
-    protected String[][] loadRawData() throws IOException {     
+    protected String[][] load() throws IOException {     
         
         // Open
         Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(getDelimiter()).parse(new FileReader(getFile()));
@@ -152,6 +152,6 @@ public class ImportCSV extends ImportFile {
         }
         
         // Done
-        return rowsListToArray(rows);
+        return pack(rows);
     }   
 }

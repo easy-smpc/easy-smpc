@@ -66,82 +66,22 @@ public abstract class ImportFile {
     }
 
     /**
-     * Returns the extracted data
+     * Returns the data as key-value pairs
      * 
      * @return the data
      * @throws IOException 
      */
-    public Map<String, String> getExtractedData() throws IllegalArgumentException, IOException {
-        return extractData(stripRawData(loadRawData()));
+    public Map<String, String> getData() throws IllegalArgumentException, IOException {
+        return extract(clean(load()));
     }
     
-    /**
-     * Extracts the data out of a stripped array
-     * 
-     * @param strippedData
-     * @return extracted data
-     */
-    private Map<String,String> extractData(String[][] strippedData) {
-        
-        // Prepare
-        Map<String, String> extractedData = new LinkedHashMap<String, String>();
-
-        if (strippedData.length != 2) {
-            // Extract data from filled rows
-            for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
-                // Assume first column contains bin name, second has bin value
-                extractedData.put(strippedData[indexRow][0], strippedData[indexRow][1]);
-            }
-        } else {
-            // Extract data from filled columns
-            for (int indexColumn = 0; indexColumn < strippedData[0].length; indexColumn++) {
-                // Assume first column contains bin name, second has bin value
-                extractedData.put(strippedData[0][indexColumn], strippedData[1][indexColumn]);
-            }
-        }
-        return extractedData;
-    }
-
-    /**
-     * Checks whether a string is empty
-     * 
-     * @param o
-     * @return
-     */
-    private boolean isNotEmpty(String o) {
-        return o != null && !o.trim().isEmpty();
-    }
-
-    /**
-     * Checks whether an array is empty
-     * 
-     * @param array
-     * @return
-     */
-    private boolean isNotEmpty(String[] array) {
-
-        // Check
-        if (array == null || array.length == 0) { return false; }
-
-        // Check elements
-        boolean empty = true;
-        for (String o : array) {
-            if (isNotEmpty(o)) {
-                empty = false;
-                break;
-            }
-        }
-        // Done
-        return !empty;
-    }
-
     /**
      * Remove all empty rows and columns
      * 
      * @param data
      * @return the data without empty lines and columns
      */
-    private String[][] stripRawData(String[][] data) {
+    private String[][] clean(String[][] data) {
 
         // Prepare
         int columns = -1;
@@ -186,13 +126,74 @@ public abstract class ImportFile {
         }
         
         // Final sanity check
-        String[][] strippedArray = rowsListToArray(rows);
-        if (strippedArray.length != 2 && strippedArray[0] != null && strippedArray[0].length != 2) {
+        String[][] result = pack(rows);
+        if (result.length != 2 && result[0] != null && result[0].length != 2) {
             throw new IllegalArgumentException("Array must either have exact two rows or two columns");
         }
         
         // Done
-        return strippedArray;
+        return result;
+    }
+
+    /**
+     * Extracts the data out of a stripped array
+     * 
+     * @param strippedData
+     * @return extracted data
+     */
+    private Map<String,String> extract(String[][] strippedData) {
+        
+        // Prepare
+        Map<String, String> result = new LinkedHashMap<String, String>();
+
+        // Two columns
+        if (strippedData.length != 2) {
+            for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
+                result.put(strippedData[indexRow][0], strippedData[indexRow][1]);
+            }
+       
+        // Two rows
+        } else {
+            for (int indexColumn = 0; indexColumn < strippedData[0].length; indexColumn++) {
+                result.put(strippedData[0][indexColumn], strippedData[1][indexColumn]);
+            }
+        }
+        
+        // Done
+        return result;
+    }
+
+    /**
+     * Checks whether a string is empty
+     * 
+     * @param o
+     * @return
+     */
+    private boolean isNotEmpty(String o) {
+        return o != null && !o.trim().isEmpty();
+    }
+
+    /**
+     * Checks whether an array is empty
+     * 
+     * @param array
+     * @return
+     */
+    private boolean isNotEmpty(String[] array) {
+
+        // Check
+        if (array == null || array.length == 0) { return false; }
+
+        // Check elements
+        boolean empty = true;
+        for (String o : array) {
+            if (isNotEmpty(o)) {
+                empty = false;
+                break;
+            }
+        }
+        // Done
+        return !empty;
     }
 
     /**
@@ -206,7 +207,7 @@ public abstract class ImportFile {
      * Loads the data in a row-oriented format of a two dimensional array
      * @return two dimensional array of data
      */
-    protected abstract String[][] loadRawData() throws IOException;
+    protected abstract String[][] load() throws IOException;
 
     /**
      * Convert list of lists to array. Makes sure that the result is rectangular.
@@ -214,7 +215,7 @@ public abstract class ImportFile {
      * @param list of list of strings 
      * @return Array [][]
      */
-    protected String[][] rowsListToArray(List<List<String>> rows) {
+    protected String[][] pack(List<List<String>> rows) {
         
         // Calculate number of columns
         int columns = 0;
