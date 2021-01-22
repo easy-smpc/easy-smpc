@@ -72,6 +72,7 @@ public class ImportExcel extends ImportFile {
     
     @Override
     protected String[][] loadRawData() throws IOException {
+        
         // Prepare
         Sheet sheet;
         List<List<String>> rows = new ArrayList<>();
@@ -82,25 +83,40 @@ public class ImportExcel extends ImportFile {
         } catch (EncryptedDocumentException | IOException e) {
             throw new IOException(e);
         }
+        
+        // Prepare bounds
+        int numRows = Math.min(sheet.getLastRowNum() + 1, Resources.MAX_COUNT_ROWS);
+        int numColumns = Math.min(sheet.getLastRowNum() + 1, Resources.MAX_COUNT_COLUMNS);
 
         // Iterate over cell
-        for (int indexRow = 0; indexRow < Resources.MAX_COUNT_ROWS; indexRow++) {
-            // Check entire row is not null
+        for (int indexRow = 0; indexRow < numRows; indexRow++) {
             if (sheet.getRow(indexRow) != null) {
                 List<String> column = new ArrayList<>();
-                for (int indexCol = 0; indexCol < Resources.MAX_COUNT_COLUMNS; indexCol++) {
+                for (int indexCol = 0; indexCol < numColumns; indexCol++) {
                     Cell cell = sheet.getRow(indexRow).getCell(indexCol);
 
                     // Check if cell is not empty
-                    if (cell != null && cell.getCellType() != CellType.BLANK &&
-                        !extractExcelCellContent(cell, true).trim().isEmpty()) {
-                        column.add(extractExcelCellContent(cell, true));
+                    if (cell != null && cell.getCellType() != CellType.BLANK) {
+                        
+                        // Extract content
+                        String content = extractExcelCellContent(cell, true).trim();
+                        
+                        // Check for empty content
+                        if (!content.isEmpty()) {
+                            
+                            // Add
+                            column.add(content);
+                        }
                     }
                 }
                 rows.add(column);
             }
         }
+        
+        // Close
         sheet.getWorkbook().close();
+        
+        // Done
         return rowsListToArray(rows);
     }
 }
