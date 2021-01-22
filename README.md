@@ -1,4 +1,4 @@
-# Secure Histograms via Email
+# EasySMPC - No-Code Secure Sum
 
 This project aims to provide a simple, easy to use application for calculating
 sums of distributed data using email as a communication channel.
