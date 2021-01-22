@@ -118,26 +118,35 @@ public class ImportCSV extends ImportFile {
     
     @Override
     protected String[][] loadRawData() throws IOException {     
-        Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(getDelimiter())
-                                                       .parse(new FileReader(getFile()));
+        
+        // Open
+        Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(getDelimiter()).parse(new FileReader(getFile()));
         List<List<String>> rows = new ArrayList<>();
         
+        // Load per row
         int indexRow = 0;
-        for (CSVRecord recordRow : records) {
+        for (CSVRecord record : records) {
+            
+            // Load cell values in columns
             int indexColumn = 0;
-            List<String> column = new ArrayList<>();
-            for (String recordField : recordRow) {
-                column.add(recordField);
+            List<String> row = new ArrayList<>();
+            for (String value : record) {
+                
+                value = value == null ? "" : value;
+                value = value.trim();
+                row.add(value.isEmpty() ? null : value);
+                
                 // Break if maximum reached
-                indexColumn++;
-                if (indexColumn == Resources.MAX_COUNT_COLUMNS) {
+                if (++indexColumn == Resources.MAX_COUNT_COLUMNS) {
                     break;
                 }
             }
-            rows.add(column);
+            
+            // Add row
+            rows.add(row);
+            
             // Break if maximum reached
-            indexRow++;
-            if (indexRow == Resources.MAX_COUNT_ROWS) {
+            if (++indexRow == Resources.MAX_COUNT_ROWS) {
                 break;
             }
         }

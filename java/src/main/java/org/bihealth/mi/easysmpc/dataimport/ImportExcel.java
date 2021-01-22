@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -86,16 +87,26 @@ public class ImportExcel extends ImportFile {
         
         // Prepare bounds
         int numRows = Math.min(sheet.getLastRowNum() + 1, Resources.MAX_COUNT_ROWS);
-        int numColumns = Math.min(sheet.getLastRowNum() + 1, Resources.MAX_COUNT_COLUMNS);
 
         // Iterate over cell
         for (int indexRow = 0; indexRow < numRows; indexRow++) {
-            if (sheet.getRow(indexRow) != null) {
-                List<String> column = new ArrayList<>();
+            
+            // Ignore empty rows
+            Row _row = sheet.getRow(indexRow);
+            if (_row != null) {
+                
+                // Construct row
+                List<String> row = new ArrayList<>();
+                
+                // Iterate over columns
+                int numColumns = Math.min(_row.getLastCellNum(), Resources.MAX_COUNT_COLUMNS);
                 for (int indexCol = 0; indexCol < numColumns; indexCol++) {
+                    
+                    // Get cell
                     Cell cell = sheet.getRow(indexRow).getCell(indexCol);
 
                     // Check if cell is not empty
+                    boolean added = false;
                     if (cell != null && cell.getCellType() != CellType.BLANK) {
                         
                         // Extract content
@@ -105,11 +116,17 @@ public class ImportExcel extends ImportFile {
                         if (!content.isEmpty()) {
                             
                             // Add
-                            column.add(content);
+                            row.add(content);
+                            added = true;
                         }
                     }
+                    
+                    // Add null, if nothing added
+                    if (!added) {
+                        row.add(null);
+                    }
                 }
-                rows.add(column);
+                rows.add(row);
             }
         }
         

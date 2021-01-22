@@ -86,7 +86,7 @@ public abstract class ImportFile {
         // Prepare
         Map<String, String> extractedData = new LinkedHashMap<String, String>();
 
-        if (strippedData.length != Resources.EXACT_ROW_COLUMNS_LENGTH) {
+        if (strippedData.length != 2) {
             // Extract data from filled rows
             for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
                 // Assume first column contains bin name, second has bin value
@@ -187,7 +187,7 @@ public abstract class ImportFile {
         
         // Final sanity check
         String[][] strippedArray = rowsListToArray(rows);
-        if (strippedArray.length != Resources.EXACT_ROW_COLUMNS_LENGTH && strippedArray[0] != null && strippedArray[0].length != Resources.EXACT_ROW_COLUMNS_LENGTH) {
+        if (strippedArray.length != 2 && strippedArray[0] != null && strippedArray[0].length != 2) {
             throw new IllegalArgumentException("Array must either have exact two rows or two columns");
         }
         
@@ -203,24 +203,33 @@ public abstract class ImportFile {
     }
     
     /**
-     * Loads the data in a common format of a two dimensional array
+     * Loads the data in a row-oriented format of a two dimensional array
      * @return two dimensional array of data
      */
     protected abstract String[][] loadRawData() throws IOException;
 
     /**
-     * Convert list of lists to array
+     * Convert list of lists to array. Makes sure that the result is rectangular.
      * 
      * @param list of list of strings 
      * @return Array [][]
      */
     protected String[][] rowsListToArray(List<List<String>> rows) {
+        
+        // Calculate number of columns
+        int columns = 0;
+        for (List<String> row : rows) {
+            columns = Math.max(row.size(), columns);
+        }
+        
         // Convert list of lists to array
         String[][] result = new String[rows.size()][];
         int index = 0;
         for (List<String> row : rows) {
-            result[index++] = row.toArray(new String[row.size()]);
+            result[index++] = row.toArray(new String[columns]);
         }
+        
+        // Done
         return result;
     }
 }

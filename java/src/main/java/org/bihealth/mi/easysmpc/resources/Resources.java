@@ -98,31 +98,30 @@ public class Resources {
                                                                       Locale.GERMAN };
     /** Interval schedule for tasks in background */
     public static final long      INTERVAL_SCHEDULER_MILLISECONDS = 200;
+    
     /** File ending for CSV-files */
     public static final String    FILE_ENDING_CSV                 = "csv"; //$NON-NLS-1$
+    
     /** File ending for Excel-2007-files */
     public static final String    FILE_ENDING_EXCEL_XLSX          = "xlsx"; //$NON-NLS-1$
+    
     /** File ending for Excel-97-files */
     public static final String    FILE_ENDING_EXCEL_XLS           = "xls"; //$NON-NLS-1$
+    
     /** Maximal rows considered */
     public static final int       MAX_COUNT_ROWS                  = 250000;
+    
     /** Maximal columns considered */
     public static final int       MAX_COUNT_COLUMNS               = 250000;
-    /** Delimiters considered for CSV files */
-    public static final char[]    DELIMITERS                      = { ';', ',', '|', '\t' }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     
-    /**
-     * Maximum number of lines to be loaded for preview purposes for CSV file
-     * detection.
-     */
+    /** Delimiters considered for CSV files */
+    public static final char[]    DELIMITERS                      = { ';', ',', '|', '\t' }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$  
+    
+    /** Maximum number of lines to be loaded for preview purposes for CSV file detection. */
     public static final int       PREVIEW_MAX_LINES               = 25;
-    /**
-     * Maximum number of chars to be loaded for detecting separators for CSV
-     * file detection.
-     */
+    
+    /** Maximum number of chars to be loaded for detecting separators for CSV file detection. */
     public static final int       DETECT_MAX_CHARS                = 100000;
-    /** Exact number rows or columns for data extraction from file */
-    public static final int       EXACT_ROW_COLUMNS_LENGTH        = 2;
 
     /**
      * Returns all available languages
