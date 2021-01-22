@@ -166,12 +166,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         
         // Participants
         this.participants = new ScrollablePanel();
-        this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+        this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
+        JScrollPane pane = new JScrollPane(participants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                      Resources.getString("PerspectiveReceive.participants"),
                                                                      TitledBorder.LEFT,
                                                                      TitledBorder.DEFAULT_POSITION));
-        this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
-        JScrollPane pane = new JScrollPane(participants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         panel.add(pane, BorderLayout.CENTER);
         
         

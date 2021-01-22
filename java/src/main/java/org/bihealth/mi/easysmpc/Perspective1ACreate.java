@@ -353,22 +353,23 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Participants
         this.participants = new ScrollablePanel();
-        this.participants.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                                     Resources.getString("PerspectiveCreate.participants"),
-                                                                     TitledBorder.LEFT,
-                                                                     TitledBorder.DEFAULT_POSITION));
         this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));     
         JScrollPane pane = new JScrollPane(participants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                                           Resources.getString("PerspectiveCreate.participants"),
+                                                                           TitledBorder.LEFT,
+                                                                           TitledBorder.DEFAULT_POSITION));
         central.add(pane, BorderLayout.NORTH);
 
         // Bins
         this.bins = new ScrollablePanel();
-        this.bins.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                             Resources.getString("PerspectiveCreate.bins"),
-                                                             TitledBorder.LEFT,
-                                                             TitledBorder.DEFAULT_POSITION));
         this.bins.setLayout(new BoxLayout(this.bins, BoxLayout.Y_AXIS));
         pane = new JScrollPane(bins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                                    Resources.getString("PerspectiveCreate.bins"),
+                                                                    TitledBorder.LEFT,
+                                                                    TitledBorder.DEFAULT_POSITION));
+
         central.add(pane, BorderLayout.SOUTH);
        
         // Buttons pane
