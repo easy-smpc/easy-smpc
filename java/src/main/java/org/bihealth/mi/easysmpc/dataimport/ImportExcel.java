@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -49,7 +50,7 @@ public class ImportExcel extends ImportFile {
      * 
      * @param cell
      */
-    private String extractExcelCellContent(Cell cell, boolean originalCellType) {
+    private String getValue(Cell cell, boolean originalCellType) {
         if (cell != null) {
             switch (originalCellType ? cell.getCellType() : cell.getCachedFormulaResultType()) {
             case NUMERIC:
@@ -63,7 +64,7 @@ public class ImportExcel extends ImportFile {
             case _NONE:
                 return "";
             case FORMULA:
-                return extractExcelCellContent(cell, false);
+                return getValue(cell, false);
             default:
                 return "";
             }
@@ -71,7 +72,8 @@ public class ImportExcel extends ImportFile {
     }
     
     @Override
-    protected String[][] loadRawData() throws IOException {
+    protected String[][] load() throws IOException {
+        
         // Prepare
         Sheet sheet;
         List<List<String>> rows = new ArrayList<>();
@@ -82,25 +84,56 @@ public class ImportExcel extends ImportFile {
         } catch (EncryptedDocumentException | IOException e) {
             throw new IOException(e);
         }
+        
+        // Prepare bounds
+        int numRows = Math.min(sheet.getLastRowNum() + 1, Resources.MAX_COUNT_ROWS);
 
         // Iterate over cell
-        for (int indexRow = 0; indexRow < Resources.MAX_COUNT_ROWS; indexRow++) {
-            // Check entire row is not null
-            if (sheet.getRow(indexRow) != null) {
-                List<String> column = new ArrayList<>();
-                for (int indexCol = 0; indexCol < Resources.MAX_COUNT_COLUMNS; indexCol++) {
+        for (int indexRow = 0; indexRow < numRows; indexRow++) {
+            
+            // Ignore empty rows
+            Row _row = sheet.getRow(indexRow);
+            if (_row != null) {
+                
+                // Construct row
+                List<String> row = new ArrayList<>();
+                
+                // Iterate over columns
+                int numColumns = Math.min(_row.getLastCellNum(), Resources.MAX_COUNT_COLUMNS);
+                for (int indexCol = 0; indexCol < numColumns; indexCol++) {
+                    
+                    // Get cell
                     Cell cell = sheet.getRow(indexRow).getCell(indexCol);
 
                     // Check if cell is not empty
-                    if (cell != null && cell.getCellType() != CellType.BLANK &&
-                        !extractExcelCellContent(cell, true).trim().isEmpty()) {
-                        column.add(extractExcelCellContent(cell, true));
+                    boolean added = false;
+                    if (cell != null && cell.getCellType() != CellType.BLANK) {
+                        
+                        // Extract content
+                        String content = getValue(cell, true).trim();
+                        
+                        // Check for empty content
+                        if (!content.isEmpty()) {
+                            
+                            // Add
+                            row.add(content);
+                            added = true;
+                        }
+                    }
+                    
+                    // Add null, if nothing added
+                    if (!added) {
+                        row.add(null);
                     }
                 }
-                rows.add(column);
+                rows.add(row);
             }
         }
+        
+        // Close
         sheet.getWorkbook().close();
-        return rowsListToArray(rows);
+        
+        // Done
+        return pack(rows);
     }
 }

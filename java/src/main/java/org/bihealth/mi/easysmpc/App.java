@@ -257,7 +257,7 @@ public class App extends JFrame {
         
         if (file != null) {
             try {
-                return ImportFile.forFile(file).getExtractedData();       
+                return ImportFile.forFile(file).getData();       
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
             }
