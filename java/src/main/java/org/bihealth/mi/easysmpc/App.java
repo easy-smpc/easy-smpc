@@ -355,7 +355,7 @@ public class App extends JFrame {
             Message msg = Message.deserializeMessage(message);
             if (!this.model.isCorrectRecipient(msg)) {
                 this.rollback(snapshot);
-                JOptionPane.showMessageDialog(this, "TODO", "TODO", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, Resources.getString("App.23"), Resources.getString("PerspectiveReceive.messageErrorTitle"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
             this.model.setShareFromMessage(msg);

@@ -340,10 +340,9 @@ public class AppModel implements Serializable, Cloneable {
      */
     public boolean isMessageShareResultValid(Message msg) {
         try {
-            if(!msg.recipientName.equals(getParticipantFromId(ownId).name) || !msg.recipientEmailAddress.equals(getParticipantFromId(ownId).emailAddress)){
+            if(isCorrectRecipient(msg)){
                 return false;
-            }
-            
+            }            
             Participant sender = getParticipantFromId(msg.senderID);
             Message.validateData(getParticipantId(sender), participants[ownId], msg.data);
             switch (state){
