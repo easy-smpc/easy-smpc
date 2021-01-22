@@ -358,8 +358,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         pane.setBorder(BorderFactory.createEmptyBorder());
         
         JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new BorderLayout());
-        centerPanel.add(pane, BorderLayout.CENTER);
+        centerPanel.setLayout(new GridLayout(1, 1));
+        centerPanel.add(pane);
         centerPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                              Resources.getString("PerspectiveCreate.participants"),
                                                              TitledBorder.LEFT,
@@ -373,8 +373,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         pane.setBorder(BorderFactory.createEmptyBorder());
         
         centerPanel = new JPanel();
-        centerPanel.setLayout(new BorderLayout());
-        centerPanel.add(pane, BorderLayout.CENTER);
+        centerPanel.setLayout(new GridLayout(1,1));
+        centerPanel.add(pane);
         centerPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                              Resources.getString("PerspectiveCreate.bins"),
                                                              TitledBorder.LEFT,
