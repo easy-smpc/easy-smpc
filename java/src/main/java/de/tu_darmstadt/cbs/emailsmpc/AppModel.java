@@ -324,6 +324,15 @@ public class AppModel implements Serializable, Cloneable {
     }
 
     /**
+     * Check whether the message is for the correct recipient
+     * @param msg
+     * @return
+     */
+    public boolean isCorrectRecipient(Message msg) {
+        return (msg.recipientName.equals(getParticipantFromId(ownId).name) && msg.recipientEmailAddress.equals(getParticipantFromId(ownId).emailAddress));
+    }
+
+    /**
      * Validates a given message to set a share or result.
      *
      * @param msg the msg
@@ -438,7 +447,7 @@ public class AppModel implements Serializable, Cloneable {
         b.clearInSharesExceptId(ownId);
       }
     }
-
+    
     /**
      * Populate share messages.
      *
@@ -461,7 +470,7 @@ public class AppModel implements Serializable, Cloneable {
             b.clearOutSharesExceptId(ownId);
           }
     }
-    
+
     /**
      * Save program.
      *
@@ -506,12 +515,12 @@ public class AppModel implements Serializable, Cloneable {
      * @throws ClassNotFoundException the class not found exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void setShareFromMessage(Message msg)
-            throws IllegalStateException, IllegalArgumentException, NoSuchAlgorithmException, ClassNotFoundException, IOException {
+    public void setShareFromMessage(Message msg) throws IllegalStateException, IllegalArgumentException, NoSuchAlgorithmException, ClassNotFoundException, IOException {
         Participant sender = getParticipantFromId(msg.senderID);
-        if (!(state == AppState.RECIEVING_SHARE || state == AppState.RECIEVING_RESULT))
-            throw new IllegalStateException("Setting a share from a Message is not allowed at state " + state);
-        if(!msg.recipientName.equals(getParticipantFromId(ownId).name) || !msg.recipientEmailAddress.equals(getParticipantFromId(ownId).emailAddress)){
+        if (!(state == AppState.RECIEVING_SHARE || state == AppState.RECIEVING_RESULT)) {
+            throw new IllegalStateException("Setting a share from a message is not allowed at state " + state);
+        }
+        if (!isCorrectRecipient(msg)) {
             throw new IllegalArgumentException("Message recipient does not match the current participant");
         }
         if (Message.validateData(getParticipantId(sender), participants[ownId], msg.data)) {

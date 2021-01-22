@@ -352,7 +352,13 @@ public class App extends JFrame {
     public void setMessageShare(String message) {
         AppModel snapshot = this.beginTransaction();        
         try {
-            this.model.setShareFromMessage(Message.deserializeMessage(message));
+            Message msg = Message.deserializeMessage(message);
+            if (!this.model.isCorrectRecipient(msg)) {
+                this.rollback(snapshot);
+                JOptionPane.showMessageDialog(this, "TODO", "TODO", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            this.model.setShareFromMessage(msg);
         } catch (IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException | IOException e) {
             this.rollback(snapshot);
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.messageError"), Resources.getString("PerspectiveReceive.messageErrorTitle"), JOptionPane.ERROR_MESSAGE);
