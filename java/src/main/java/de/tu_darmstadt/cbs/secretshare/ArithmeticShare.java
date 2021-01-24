@@ -50,7 +50,7 @@ public class ArithmeticShare implements Serializable, Cloneable {
     }
 
     /**
-     * Adds another arithmatic share
+     * Adds another arithmetic share
      * @param other
      * @return
      * @throws IllegalArgumentException
