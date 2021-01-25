@@ -16,7 +16,7 @@ package org.bihealth.mi.easysmpc.components;
 import javax.swing.JPanel;
 
 /**
- * Entry for bins in the histogram
+ * Entry for bins
  * 
  * @author Fabian Prasser
  * @author Felix Wirth

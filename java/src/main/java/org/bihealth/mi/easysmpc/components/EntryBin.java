@@ -18,7 +18,7 @@ import java.math.BigInteger;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
- * Entry for bins in the histogram
+ * Entry for bins
  * 
  * @author Fabian Prasser
  * @author Felix Wirth
