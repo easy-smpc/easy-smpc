@@ -340,7 +340,7 @@ public class AppModel implements Serializable, Cloneable {
      */
     public boolean isMessageShareResultValid(Message msg) {
         try {
-            if(isCorrectRecipient(msg)){
+            if(!isCorrectRecipient(msg)){
                 return false;
             }            
             Participant sender = getParticipantFromId(msg.senderID);
