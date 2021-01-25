@@ -122,6 +122,7 @@ public abstract class ImportFile {
                     row.remove(column);
                 }
                 columns--;
+                column--;
             }
         }
         
