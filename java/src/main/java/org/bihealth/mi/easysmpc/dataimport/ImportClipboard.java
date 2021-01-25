@@ -83,7 +83,6 @@ public class ImportClipboard implements Runnable {
             String message = getStrippedExchangeMessage(getTextFromClipBoard());         
             if (parent.getApp().isMessageShareResultValid(message)) {
                 parent.getApp().setMessageShare(message);
-                // TODO: Delegate to perspective or app 
                 parent.stateChanged(new ChangeEvent(this));
             }
         }
