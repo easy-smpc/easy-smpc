@@ -66,7 +66,7 @@ public class EntryBin extends ComponentEntryAddRemove {
                   }
               },
               Resources.getString("BinEntry.1"), //$NON-NLS-1$
-              !value.trim().isEmpty() ? value : String.valueOf(0),
+              (value != null && !value.trim().isEmpty()) ? value : String.valueOf(0),
               rightEnabled,
               new ComponentTextFieldValidator() {
                   @Override
