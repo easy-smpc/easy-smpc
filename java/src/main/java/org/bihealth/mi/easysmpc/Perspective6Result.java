@@ -14,10 +14,17 @@
 package org.bihealth.mi.easysmpc;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EtchedBorder;
@@ -47,33 +54,31 @@ public class Perspective6Result extends Perspective {
     private JPanel             bins;
     
     /** Text field containing title of study */
-    private ComponentTextField title;    
+    private ComponentTextField title;
+    
+    /** Export data button */
+    private JButton export;    
     
     /**
      * Creates the perspective
      * @param app
      */
     protected Perspective6Result(App app) {
-        super(app, Resources.getString("PerspectiveFinalize.0"), 6, false); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveResult.0"), 6, false); //$NON-NLS-1$
     }
     
     /**
-     * Initialize perspective based on model
+     * 
+     * @param Exports data
      */
-    @Override
-    public void initialize() {
-        participants.removeAll();
-        bins.removeAll();
-        this.title.setText(getApp().getModel().name);
-        for (Participant currentParticipant : getApp().getModel().participants) {
-            participants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress));
+    protected void actionExportData() {
+        // Create list from bins
+        List<List<String>> list = new ArrayList<>();
+        for (Component c : bins.getComponents()) {
+            list.add(new ArrayList<String>(Arrays.asList(((EntryBinNoButton) c).getLeftValue(),
+                                                         ((EntryBinNoButton) c).getRightValue())));
         }
-        for (BinResult binResult : getApp().getModel().getAllResults()) {
-            bins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
-        }
-        // Update GUI
-        getPanel().revalidate();
-        getPanel().repaint(); 
+        getApp().setDataToFile(list);
     }
     
     /**
@@ -123,5 +128,37 @@ public class Perspective6Result extends Perspective {
                                                              TitledBorder.DEFAULT_POSITION));
 
         central.add(pane, BorderLayout.SOUTH);
-    }   
+        
+        // Export button
+        JPanel buttonsPane = new JPanel();
+        buttonsPane.setLayout(new GridLayout(1, 1));
+        export = new JButton(Resources.getString("PerspectiveResult.1"));
+        export.addActionListener(new ActionListener() {            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionExportData();
+            }
+        });
+        buttonsPane.add(export, 0, 0);        
+        panel.add(buttonsPane, BorderLayout.SOUTH);
+    }
+
+    /**
+     * Initialize perspective based on model
+     */
+    @Override
+    public void initialize() {
+        participants.removeAll();
+        bins.removeAll();
+        this.title.setText(getApp().getModel().name);
+        for (Participant currentParticipant : getApp().getModel().participants) {
+            participants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress));
+        }
+        for (BinResult binResult : getApp().getModel().getAllResults()) {
+            bins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
+        }
+        // Update GUI
+        getPanel().revalidate();
+        getPanel().repaint(); 
+    }
 }

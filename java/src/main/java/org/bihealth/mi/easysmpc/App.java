@@ -41,6 +41,7 @@ import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
 import org.bihealth.mi.easysmpc.components.DialogStringPicker;
+import org.bihealth.mi.easysmpc.dataexport.ExportFile;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
 import org.bihealth.mi.easysmpc.dataimport.ImportFile;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -297,10 +298,11 @@ public class App extends JFrame {
         File file = fileChooser.getSelectedFile();
         
         // Fix extension on save
-        if (!load) {
+        if (!load && fileChooser.getFileFilter() != fileChooser.getAcceptAllFileFilter()) {
             String fname = file.getAbsolutePath();
-            if(!fname.endsWith("." + Resources.FILE_ENDING) ) {
-                file = new File(fname + ("." + Resources.FILE_ENDING));
+            String extension = ((FileNameExtensionFilter)fileChooser.getFileFilter()).getExtensions()[0] != null ? ((FileNameExtensionFilter)fileChooser.getFileFilter()).getExtensions()[0] : "";
+            if (!fname.endsWith("." + extension)) {
+                file = new File(fname + ("." + extension));
             }
         }
         
@@ -801,5 +803,25 @@ public class App extends JFrame {
             }
         }
         return returnPerspective;
+    }
+
+    /**
+     * Writes data to a file
+     * 
+     * @param data
+     */
+    public void setDataToFile(List<List<String>> data) {
+        // Get file
+        File file = getFile(false, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX),
+                                  new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
+        
+        if (file != null) {
+            try {
+                ExportFile.toFile(file).exportData(data);       
+            } catch (IOException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+            }
+        }
     }
 }
