@@ -43,7 +43,7 @@ public abstract class ImportFile {
     public static ImportFile forFile(File file) throws IllegalArgumentException, IOException {
         
         // Choose correct extractor
-        if (file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().contains(Resources.FILE_ENDING_EXCEL_XLS)) {
+        if (file.getName().endsWith(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().endsWith(Resources.FILE_ENDING_EXCEL_XLSX)) {
             return new ImportExcel(file);
         }
         else {
