@@ -52,7 +52,9 @@ public class AppModel implements Serializable, Cloneable {
         ois.close();
         if (!(o instanceof AppModel))
             throw new IllegalArgumentException("Invalid Save file");
-        return (AppModel) o;
+        AppModel model = (AppModel) o;
+        model.filename = filename;
+        return model;
     }
     
     /** The study UID. */
