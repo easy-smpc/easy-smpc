@@ -28,7 +28,6 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * 
  * @author Felix Wirth
  * @author Fabian Prasser
- *
  */
 public class ExportCSV extends ExportFile {
     
@@ -60,7 +59,6 @@ public class ExportCSV extends ExportFile {
         }
         
         // Finalize
-        csvPrinter.flush();
         csvPrinter.close();
     }
 }

@@ -288,7 +288,7 @@ public class App extends JFrame {
         if (filters.length > 0) {
             fileChooser.setFileFilter(filters[0]);
         }
-        
+
         // Open or save dialog
         int state = load ? fileChooser.showOpenDialog(this) : fileChooser.showSaveDialog(this);
         // Check file
@@ -297,10 +297,10 @@ public class App extends JFrame {
             }
         File file = fileChooser.getSelectedFile();
         
-        // Fix extension on save
-        if (!load && fileChooser.getFileFilter() != fileChooser.getAcceptAllFileFilter()) {
+        // Fix extension on save, only necessary if a specific file format has been selected
+        if (!load && fileChooser.getFileFilter() instanceof FileNameExtensionFilter) {
             String fname = file.getAbsolutePath();
-            String extension = ((FileNameExtensionFilter)fileChooser.getFileFilter()).getExtensions()[0] != null ? ((FileNameExtensionFilter)fileChooser.getFileFilter()).getExtensions()[0] : "";
+            String extension =  ((FileNameExtensionFilter)fileChooser.getFileFilter()).getExtensions()[0];
             if (!fname.endsWith("." + extension)) {
                 file = new File(fname + ("." + extension));
             }
@@ -810,7 +810,7 @@ public class App extends JFrame {
      * 
      * @param data
      */
-    public void setDataToFile(List<List<String>> data) {
+    public void exportData(List<List<String>> data) {
         // Get file
         File file = getFile(false, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX),
                                   new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
@@ -819,7 +819,6 @@ public class App extends JFrame {
             try {
                 ExportFile.toFile(file).exportData(data);       
             } catch (IOException e) {
-                e.printStackTrace();
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
             }
         }

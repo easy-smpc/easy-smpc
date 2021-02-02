@@ -78,7 +78,7 @@ public class Perspective6Result extends Perspective {
             list.add(new ArrayList<String>(Arrays.asList(((EntryBinNoButton) c).getLeftValue(),
                                                          ((EntryBinNoButton) c).getRightValue())));
         }
-        getApp().setDataToFile(list);
+        getApp().exportData(list);
     }
     
     /**
