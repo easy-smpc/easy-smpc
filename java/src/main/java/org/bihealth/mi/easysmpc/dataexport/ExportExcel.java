@@ -52,10 +52,15 @@ public class ExportExcel extends ExportFile {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet(Resources.getString("Export.0"));
 
-        // Write per row
-        int index = 0;
+        // Write header
+        Row row = sheet.createRow(0);
+        row.createCell(0).setCellValue(Resources.getString("Export.1"));
+        row.createCell(1).setCellValue(Resources.getString("Export.2"));
+        
+        // Write per row        
+        int index = 1;
         for (List<String> dataEntry : data) {
-            Row row = sheet.createRow(index);
+            row = sheet.createRow(index);
             row.createCell(0).setCellValue(dataEntry.get(0));
             row.createCell(1).setCellValue(dataEntry.get(1));
             index++;

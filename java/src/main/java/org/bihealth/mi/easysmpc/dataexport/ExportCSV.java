@@ -50,8 +50,8 @@ public class ExportCSV extends ExportFile {
        
         // Create file
         CSVPrinter csvPrinter = new CSVPrinter(new BufferedWriter(new FileWriter(getFile())),
-                                               CSVFormat.DEFAULT.withHeader(Resources.getString("BinEntry.0").replace(":", ""),
-                                                                            Resources.getString("BinEntry.1").replace(":", "")));
+                                               CSVFormat.DEFAULT.withHeader(Resources.getString("Export.1"),
+                                                                            Resources.getString("Export.2")));
 
         // Write per row
         for (List<String> dataEntry : data) {
