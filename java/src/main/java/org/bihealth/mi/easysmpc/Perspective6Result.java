@@ -131,7 +131,7 @@ public class Perspective6Result extends Perspective {
         
         // Export button
         JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(1, 1));
+        buttonsPane.setLayout(new BorderLayout());
         export = new JButton(Resources.getString("PerspectiveResult.1"));
         export.addActionListener(new ActionListener() {            
             @Override
@@ -139,7 +139,7 @@ public class Perspective6Result extends Perspective {
                 actionExportData();
             }
         });
-        buttonsPane.add(export, 0, 0);        
+        buttonsPane.add(export, BorderLayout.CENTER);        
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
