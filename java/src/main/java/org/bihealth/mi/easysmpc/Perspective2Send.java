@@ -43,9 +43,9 @@ import org.bihealth.mi.easysmpc.components.EntryParticipantSendMail;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
-import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
+import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 
 /**
  * A perspective
@@ -169,12 +169,12 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 // Prepare URI parts
                 String subject = String.format(Resources.getString("PerspectiveSend.mailSubject"),
                                                getApp().getModel().name,
-                                               getApp().getModel().state == AppState.SENDING_RESULT ? 2 : 1);
+                                               getApp().getModel().state == StudyState.SENDING_RESULT ? 2 : 1);
                 String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
                 exchangeString = exchangeString.replaceAll("(.{" + Resources.MESSAGE_LINE_WIDTH + "})", "$1\n");
                 String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
                                             entry.getLeftValue(), // Name of participant
-                                            getApp().getModel().state == AppState.SENDING_RESULT ? 5 : 3, // Step number
+                                            getApp().getModel().state == StudyState.SENDING_RESULT ? 5 : 3, // Step number
                                             exchangeString,
                                             getApp().getModel().participants[getApp().getModel().ownId].name);
                 

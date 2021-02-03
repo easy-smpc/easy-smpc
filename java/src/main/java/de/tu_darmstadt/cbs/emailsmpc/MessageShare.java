@@ -24,76 +24,84 @@ import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 
 /**
- * Initial message
+ * Message for shares
  * @author Tobias Kussel
  */
-public class InitialMessage implements Serializable {
+public class MessageShare implements Serializable {
     
-    /** SVUID */
-    private static final long serialVersionUID = 1631395617989735129L;
+    /**  SVUID. */
+    private static final long serialVersionUID = 8085434766713123559L;
+    
+    /**
+     * Decode and verify.
+     *
+     * @param msg the msg
+     * @param sender the sender
+     * @param model the model
+     * @return the share message
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ClassNotFoundException the class not found exception
+     */
+    public static MessageShare decodeAndVerify(String msg, Participant sender, Study model)
+            throws IOException, ClassNotFoundException {
+        MessageShare sm = decodeMessage(msg);
+        if (verify(sm, sender, model))
+            return sm;
+        else
+            throw new IllegalArgumentException("Message invalid");
+    }
     
     /**
      * Decode message.
      *
      * @param msg the msg
-     * @return the initial message
+     * @return the share message
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws IllegalArgumentException the illegal argument exception
      * @throws ClassNotFoundException the class not found exception
      */
-    public static InitialMessage decodeMessage(String msg)
+    public static MessageShare decodeMessage(String msg)
             throws IOException, IllegalArgumentException, ClassNotFoundException {
         Decoder decoder = Base64.getDecoder();
         ByteArrayInputStream stream = new ByteArrayInputStream(decoder.decode(msg));
         ObjectInputStream ois = new ObjectInputStream(stream);
         Object o = ois.readObject();
-        if (!(o instanceof InitialMessage))
-            throw new IllegalArgumentException("Message not of type InitialMessage");
-        return (InitialMessage) o;
+        if (!(o instanceof MessageShare))
+            throw new IllegalArgumentException("Message invalid");
+        return (MessageShare) o;
     }
     
     /**
-     * Gets the app model.
+     * Verify.
      *
      * @param msg the msg
-     * @return the app model
+     * @param sender the sender
+     * @param model the model
+     * @return true, if successful
      */
-    public static AppModel getAppModel(InitialMessage msg) {
-        AppModel model = new AppModel();
-        model.name = msg.name;
-        model.participants = msg.participants;
-        model.numParticipants = msg.participants.length;
-        model.ownId = msg.recipientId;
-        model.state = AppState.PARTICIPATING;
-        model.bins = new Bin[msg.bins.length];
-        for (int i = 0; i < msg.bins.length; i++) {
-            model.bins[i] = MessageBin.getBin(msg.bins[i], model.numParticipants);
-        }
-        return model;
+    public static boolean verify(MessageShare msg, Participant sender, Study model) {
+        return msg.sender.equals(sender) && msg.recipient.equals(model.participants[model.ownId])
+                && msg.bins.length == model.bins.length;
     }
-    
-    /** The name. */
-    public String name;
-    
-    /** The participants. */
-    public Participant[] participants;
 
     /** The bins. */
     public MessageBin[] bins;
 
-    /** The recipient id. */
-    public int recipientId;
+    /** The recipient. */
+    public Participant recipient;
+
+    /** The sender. */
+    public Participant sender;
 
     /**
-     * Instantiates a new initial message.
+     * Instantiates a new share message.
      *
      * @param model the model
      * @param recipientId the recipient id
      */
-    public InitialMessage(AppModel model, int recipientId) {
-        this.name = model.name;
-        this.participants = model.participants;
-        this.recipientId = recipientId;
+    public MessageShare(Study model, int recipientId) {
+        this.recipient = model.participants[recipientId];
+        this.sender = model.participants[model.ownId];
         this.bins = new MessageBin[model.bins.length];
         for (int i = 0; i < model.bins.length; i++) {
             bins[i] = new MessageBin(model.bins[i], recipientId);
@@ -110,19 +118,13 @@ public class InitialMessage implements Serializable {
     public boolean equals(Object o) {
         if (o == this)
             return true;
-        if (!(o instanceof InitialMessage))
+        if (!(o instanceof MessageShare))
             return false;
-        InitialMessage msg = (InitialMessage) o;
-        if (!(participants.length == msg.participants.length || bins.length == msg.bins.length))
+        MessageShare msg = (MessageShare) o;
+        if (bins.length != msg.bins.length)
             return false;
-        boolean equal = this.name.equals(msg.name);
-        equal = equal && (this.recipientId == msg.recipientId);
-
-        for (int i = 0; i < participants.length; i++) {
-            equal = equal && participants[i].equals(msg.participants[i]);
-            if (equal == false) // Short circuit comparisons if false
-                return false;
-        }
+        boolean equal = this.sender.equals(msg.sender);
+        equal = equal && this.recipient.equals(msg.recipient);
         for (int i = 0; i < bins.length; i++) {
             equal = equal && bins[i].equals(msg.bins[i]);
             if (equal == false) // Short circuit comparisons if false
@@ -152,13 +154,26 @@ public class InitialMessage implements Serializable {
      */
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        for (Participant p : participants) {
-            result = 31 * result + p.hashCode();
-        }
+        int result = recipient.hashCode();
+        result = 31 * result + sender.hashCode();
         for (MessageBin b : bins) {
             result = 31 * result + b.hashCode();
         }
-        return 31 * result + recipientId;
+        return result;
+    }
+
+    /**
+     * To string.
+     *
+     * @return the string
+     */
+    @Override
+    public String toString() {
+        String result = "Recipient: " + recipient.toString() + "\nSender: " + sender.toString();
+        result = result + "\nData:\n";
+        for (MessageBin b : bins) {
+            result = result + b.toString() + "\n";
+        }
+        return result;
     }
 }

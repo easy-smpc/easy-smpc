@@ -23,82 +23,82 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 
+import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
+
 /**
- * Message for results
+ * Initial message
  * @author Tobias Kussel
  */
-public class ResultMessage implements Serializable {
+public class MessageInitial implements Serializable {
     
-    /**  SVUID. */
-    private static final long serialVersionUID = -4200808171593709179L;
-    
-    /**
-     * Decode and verify.
-     *
-     * @param msg the msg
-     * @param sender the sender
-     * @param model the model
-     * @return the result message
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws ClassNotFoundException the class not found exception
-     */
-    public static ResultMessage decodeAndVerify(String msg, Participant sender, AppModel model)
-            throws IOException, ClassNotFoundException {
-        ResultMessage rm = decodeMessage(msg);
-        if (verify(rm, sender, model))
-            return rm;
-        else
-            throw new IllegalArgumentException("Message invalid");
-    }
+    /** SVUID */
+    private static final long serialVersionUID = 1631395617989735129L;
     
     /**
      * Decode message.
      *
      * @param msg the msg
-     * @return the result message
+     * @return the initial message
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws IllegalArgumentException the illegal argument exception
      * @throws ClassNotFoundException the class not found exception
      */
-    public static ResultMessage decodeMessage(String msg)
+    public static MessageInitial decodeMessage(String msg)
             throws IOException, IllegalArgumentException, ClassNotFoundException {
         Decoder decoder = Base64.getDecoder();
         ByteArrayInputStream stream = new ByteArrayInputStream(decoder.decode(msg));
         ObjectInputStream ois = new ObjectInputStream(stream);
         Object o = ois.readObject();
-        if (!(o instanceof ResultMessage))
-            throw new IllegalArgumentException("Message invalid");
-        return (ResultMessage) o;
+        if (!(o instanceof MessageInitial))
+            throw new IllegalArgumentException("Message not of type InitialMessage");
+        return (MessageInitial) o;
     }
-
+    
     /**
-     * Verify.
+     * Gets the app model.
      *
      * @param msg the msg
-     * @param sender the sender
-     * @param model the model
-     * @return true, if successful
+     * @return the app model
      */
-    public static boolean verify(ResultMessage msg, Participant sender, AppModel model) {
-        return msg.sender.equals(sender) && msg.bins.length == model.bins.length;
+    public static Study getAppModel(MessageInitial msg) {
+        Study model = new Study();
+        model.name = msg.name;
+        model.participants = msg.participants;
+        model.numParticipants = msg.participants.length;
+        model.ownId = msg.recipientId;
+        model.state = StudyState.PARTICIPATING;
+        model.bins = new Bin[msg.bins.length];
+        for (int i = 0; i < msg.bins.length; i++) {
+            model.bins[i] = MessageBin.getBin(msg.bins[i], model.numParticipants);
+        }
+        return model;
     }
+    
+    /** The name. */
+    public String name;
+    
+    /** The participants. */
+    public Participant[] participants;
 
     /** The bins. */
     public MessageBin[] bins;
 
-    /** The sender. */
-    public Participant sender;
+    /** The recipient id. */
+    public int recipientId;
 
     /**
-     * Instantiates a new result message.
+     * Instantiates a new initial message.
      *
      * @param model the model
+     * @param recipientId the recipient id
      */
-    public ResultMessage(AppModel model) {
-        sender = model.participants[model.ownId];
-        bins = new MessageBin[model.bins.length];
+    public MessageInitial(Study model, int recipientId) {
+        this.name = model.name;
+        this.participants = model.participants;
+        this.recipientId = recipientId;
+        this.bins = new MessageBin[model.bins.length];
         for (int i = 0; i < model.bins.length; i++) {
-            bins[i] = new MessageBin(model.bins[i].name, model.bins[i].getSumShare());
+            bins[i] = new MessageBin(model.bins[i], recipientId);
         }
     }
 
@@ -112,12 +112,19 @@ public class ResultMessage implements Serializable {
     public boolean equals(Object o) {
         if (o == this)
             return true;
-        if (!(o instanceof ResultMessage))
+        if (!(o instanceof MessageInitial))
             return false;
-        ResultMessage msg = (ResultMessage) o;
-        if (bins.length != msg.bins.length)
+        MessageInitial msg = (MessageInitial) o;
+        if (!(participants.length == msg.participants.length || bins.length == msg.bins.length))
             return false;
-        boolean equal = this.sender.equals(msg.sender);
+        boolean equal = this.name.equals(msg.name);
+        equal = equal && (this.recipientId == msg.recipientId);
+
+        for (int i = 0; i < participants.length; i++) {
+            equal = equal && participants[i].equals(msg.participants[i]);
+            if (equal == false) // Short circuit comparisons if false
+                return false;
+        }
         for (int i = 0; i < bins.length; i++) {
             equal = equal && bins[i].equals(msg.bins[i]);
             if (equal == false) // Short circuit comparisons if false
@@ -147,24 +154,13 @@ public class ResultMessage implements Serializable {
      */
     @Override
     public int hashCode() {
-        int result = sender.hashCode();
+        int result = name.hashCode();
+        for (Participant p : participants) {
+            result = 31 * result + p.hashCode();
+        }
         for (MessageBin b : bins) {
             result = 31 * result + b.hashCode();
         }
-        return result;
-    }
-
-    /**
-     * To string.
-     *
-     * @return the string
-     */
-    @Override
-    public String toString() {
-        String result = "Sender: " + sender + "\n";
-        for (MessageBin b : bins) {
-            result = result + b.toString() + "\n";
-        }
-        return result;
+        return 31 * result + recipientId;
     }
 }

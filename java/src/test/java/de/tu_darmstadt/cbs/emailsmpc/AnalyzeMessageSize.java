@@ -20,9 +20,7 @@ import java.math.BigInteger;
  * Small helper to analyze the size of messages (exchange strings)
  * 
  * @author Felix Wirth
- *
  */
-
 public class AnalyzeMessageSize {
 
     /**
@@ -31,9 +29,8 @@ public class AnalyzeMessageSize {
      * @throws IllegalStateException 
      */
     public static void main(String[] args) throws IllegalStateException, IOException {
-        BigInteger[] secrets0 = { BigInteger.valueOf(1) };
         
-        AppModel testmodel = new AppModel();
+        Study testmodel = new Study();
         Participant[] part = new Participant[3];
         Bin[] bins = new Bin[1];
         for (int i = 0; i < part.length; i++) {

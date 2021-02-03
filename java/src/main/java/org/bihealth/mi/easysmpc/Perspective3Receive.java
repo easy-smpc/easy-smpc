@@ -35,9 +35,9 @@ import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
-import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
+import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 
 /**
  * A perspective
@@ -129,7 +129,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         int i=0;
         for (Component c : this.participants.getComponents()) {
             ((EntryParticipantCheckmark) c).setCheckmarkEnabled(i == getApp().getModel().ownId || //Always mark own id as "received"
-                                                                (getApp().getModel().state != AppState.RECIEVING_RESULT  &&  i == 0) || //Mark first entry in first round as received
+                                                                (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  i == 0) || //Mark first entry in first round as received
                                                                 areSharesCompleteForParticipantId(i)); //Mark if share complete
             i++;
         }

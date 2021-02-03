@@ -47,12 +47,12 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
-import de.tu_darmstadt.cbs.emailsmpc.AppModel;
-import de.tu_darmstadt.cbs.emailsmpc.AppState;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
-import de.tu_darmstadt.cbs.emailsmpc.InitialMessage;
+import de.tu_darmstadt.cbs.emailsmpc.MessageInitial;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
+import de.tu_darmstadt.cbs.emailsmpc.Study;
+import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 
 /**
  * Main UI of the app
@@ -90,7 +90,7 @@ public class App extends JFrame {
     }
 
     /** Model */
-    private AppModel          model;
+    private Study          model;
 
     /** Cards */
     private JPanel            cards;
@@ -319,7 +319,7 @@ public class App extends JFrame {
      * 
      * @return AppState
      */
-    public AppState getModelState() {
+    public StudyState getModelState() {
         if (getModel() != null) {
             return getModel().state;
         } else {
@@ -350,7 +350,7 @@ public class App extends JFrame {
      * @param message
      */
     public void setMessageShare(String message) {
-        AppModel snapshot = this.beginTransaction();        
+        Study snapshot = this.beginTransaction();        
         try {
             Message msg = Message.deserializeMessage(message);
             if (!this.model.isCorrectRecipient(msg)) {
@@ -381,8 +381,8 @@ public class App extends JFrame {
      * Starts a transaction
      * @return
      */
-    private AppModel beginTransaction() {
-        return this.model != null ? (AppModel)this.model.clone() : null;
+    private Study beginTransaction() {
+        return this.model != null ? (Study)this.model.clone() : null;
     }
 
     /**
@@ -397,7 +397,7 @@ public class App extends JFrame {
         }
         try {
             String data =  Message.deserializeMessage(text).data;
-            InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(data)));
+            MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data)));
             return true;
         } catch (Exception e) {
             return false;
@@ -408,7 +408,7 @@ public class App extends JFrame {
      * Rolls back a transaction
      * @param snapshot
      */
-    private void rollback(AppModel snapshot) {
+    private void rollback(Study snapshot) {
         if (this.model != null && snapshot != null) {
             this.model.update(snapshot);
         }
@@ -496,9 +496,9 @@ public class App extends JFrame {
      * Create action
      */
     protected void actionCreate() {
-        AppModel snapshot = this.beginTransaction();
+        Study snapshot = this.beginTransaction();
         try {
-            this.model = new AppModel();
+            this.model = new Study();
             this.model.toStarting();
         } catch (IllegalStateException | IOException e) {
             this.rollback(snapshot);
@@ -516,7 +516,7 @@ public class App extends JFrame {
     protected void actionCreateDone(String title, Participant[] participants, Bin[] bins) {
 
         // Pass over bins and participants
-        AppModel snapshot = this.beginTransaction();
+        Study snapshot = this.beginTransaction();
         try {
             model.toInitialSending(title, participants, bins);
             if (actionSave()) {
@@ -546,7 +546,7 @@ public class App extends JFrame {
      * Action performed when first receiving done
      */
     protected void actionFirstReceivingDone() {
-        AppModel snapshot = this.beginTransaction();
+        Study snapshot = this.beginTransaction();
         try {
             this.model.toSendingResult();
             this.model.saveProgram();
@@ -561,7 +561,7 @@ public class App extends JFrame {
      * First sending done
      */
     protected void actionFirstSendingDone() {
-        AppModel snapshot = this.beginTransaction();
+        Study snapshot = this.beginTransaction();
         try {
             this.model.toRecievingShares();
             this.model.saveProgram();
@@ -587,7 +587,7 @@ public class App extends JFrame {
 
         // Load file
         try {
-            this.model = AppModel.loadModel(file);
+            this.model = Study.loadModel(file);
         } catch (Exception e) {
             this.model = null;
             JOptionPane.showMessageDialog(this, Resources.getString("App.11"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE ); //$NON-NLS-1$
@@ -659,7 +659,7 @@ public class App extends JFrame {
             // Initialize
             try {
                 String data = Message.deserializeMessage(message).data;
-                this.model = InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(data)));
+                this.model = MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data)));
                 this.model.toEnteringValues(data);
                 this.showPerspective(Perspective1BParticipate.class);
             } catch (Exception e) {
@@ -676,7 +676,7 @@ public class App extends JFrame {
     protected void actionParticipateDone(BigInteger[] secret) {
 
         // Pass over bins and participants
-        AppModel snapshot = this.beginTransaction();
+        Study snapshot = this.beginTransaction();
         try {
             model.toSendingShares(secret);
             if (actionSave()) {
@@ -729,7 +729,7 @@ public class App extends JFrame {
             model.filename = file;
         }
         // Try to save file
-        AppModel snapshot = this.beginTransaction();
+        Study snapshot = this.beginTransaction();
         try {           
             model.saveProgram();
             return true;
@@ -744,7 +744,7 @@ public class App extends JFrame {
      * Action performed when second receiving done
      */
     protected void actionSecondReceivingDone() {
-        AppModel snapshot = this.beginTransaction();
+        Study snapshot = this.beginTransaction();
         try {
             this.model.toFinished();
             this.model.saveProgram();
@@ -759,7 +759,7 @@ public class App extends JFrame {
      * Second sending done
      */
     protected void actionSecondSendingDone() {
-        AppModel snapshot = this.beginTransaction();
+        Study snapshot = this.beginTransaction();
         try {
             this.model.toRecievingResult();
             this.model.saveProgram();
@@ -782,7 +782,7 @@ public class App extends JFrame {
      * Returns the model
      * @return
      */
-    protected AppModel getModel() {
+    protected Study getModel() {
         return this.model;
     }    
     

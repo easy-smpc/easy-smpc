@@ -24,13 +24,13 @@ import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 
 /**
- * Message for shares
+ * Message for results
  * @author Tobias Kussel
  */
-public class ShareMessage implements Serializable {
+public class MessageResult implements Serializable {
     
     /**  SVUID. */
-    private static final long serialVersionUID = 8085434766713123559L;
+    private static final long serialVersionUID = -4200808171593709179L;
     
     /**
      * Decode and verify.
@@ -38,15 +38,15 @@ public class ShareMessage implements Serializable {
      * @param msg the msg
      * @param sender the sender
      * @param model the model
-     * @return the share message
+     * @return the result message
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws ClassNotFoundException the class not found exception
      */
-    public static ShareMessage decodeAndVerify(String msg, Participant sender, AppModel model)
+    public static MessageResult decodeAndVerify(String msg, Participant sender, Study model)
             throws IOException, ClassNotFoundException {
-        ShareMessage sm = decodeMessage(msg);
-        if (verify(sm, sender, model))
-            return sm;
+        MessageResult rm = decodeMessage(msg);
+        if (verify(rm, sender, model))
+            return rm;
         else
             throw new IllegalArgumentException("Message invalid");
     }
@@ -55,22 +55,22 @@ public class ShareMessage implements Serializable {
      * Decode message.
      *
      * @param msg the msg
-     * @return the share message
+     * @return the result message
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws IllegalArgumentException the illegal argument exception
      * @throws ClassNotFoundException the class not found exception
      */
-    public static ShareMessage decodeMessage(String msg)
+    public static MessageResult decodeMessage(String msg)
             throws IOException, IllegalArgumentException, ClassNotFoundException {
         Decoder decoder = Base64.getDecoder();
         ByteArrayInputStream stream = new ByteArrayInputStream(decoder.decode(msg));
         ObjectInputStream ois = new ObjectInputStream(stream);
         Object o = ois.readObject();
-        if (!(o instanceof ShareMessage))
+        if (!(o instanceof MessageResult))
             throw new IllegalArgumentException("Message invalid");
-        return (ShareMessage) o;
+        return (MessageResult) o;
     }
-    
+
     /**
      * Verify.
      *
@@ -79,32 +79,26 @@ public class ShareMessage implements Serializable {
      * @param model the model
      * @return true, if successful
      */
-    public static boolean verify(ShareMessage msg, Participant sender, AppModel model) {
-        return msg.sender.equals(sender) && msg.recipient.equals(model.participants[model.ownId])
-                && msg.bins.length == model.bins.length;
+    public static boolean verify(MessageResult msg, Participant sender, Study model) {
+        return msg.sender.equals(sender) && msg.bins.length == model.bins.length;
     }
 
     /** The bins. */
     public MessageBin[] bins;
 
-    /** The recipient. */
-    public Participant recipient;
-
     /** The sender. */
     public Participant sender;
 
     /**
-     * Instantiates a new share message.
+     * Instantiates a new result message.
      *
      * @param model the model
-     * @param recipientId the recipient id
      */
-    public ShareMessage(AppModel model, int recipientId) {
-        this.recipient = model.participants[recipientId];
-        this.sender = model.participants[model.ownId];
-        this.bins = new MessageBin[model.bins.length];
+    public MessageResult(Study model) {
+        sender = model.participants[model.ownId];
+        bins = new MessageBin[model.bins.length];
         for (int i = 0; i < model.bins.length; i++) {
-            bins[i] = new MessageBin(model.bins[i], recipientId);
+            bins[i] = new MessageBin(model.bins[i].name, model.bins[i].getSumShare());
         }
     }
 
@@ -118,13 +112,12 @@ public class ShareMessage implements Serializable {
     public boolean equals(Object o) {
         if (o == this)
             return true;
-        if (!(o instanceof ShareMessage))
+        if (!(o instanceof MessageResult))
             return false;
-        ShareMessage msg = (ShareMessage) o;
+        MessageResult msg = (MessageResult) o;
         if (bins.length != msg.bins.length)
             return false;
         boolean equal = this.sender.equals(msg.sender);
-        equal = equal && this.recipient.equals(msg.recipient);
         for (int i = 0; i < bins.length; i++) {
             equal = equal && bins[i].equals(msg.bins[i]);
             if (equal == false) // Short circuit comparisons if false
@@ -154,8 +147,7 @@ public class ShareMessage implements Serializable {
      */
     @Override
     public int hashCode() {
-        int result = recipient.hashCode();
-        result = 31 * result + sender.hashCode();
+        int result = sender.hashCode();
         for (MessageBin b : bins) {
             result = 31 * result + b.hashCode();
         }
@@ -169,8 +161,7 @@ public class ShareMessage implements Serializable {
      */
     @Override
     public String toString() {
-        String result = "Recipient: " + recipient.toString() + "\nSender: " + sender.toString();
-        result = result + "\nData:\n";
+        String result = "Sender: " + sender + "\n";
         for (MessageBin b : bins) {
             result = result + b.toString() + "\n";
         }

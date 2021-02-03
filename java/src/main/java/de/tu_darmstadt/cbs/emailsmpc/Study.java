@@ -26,12 +26,39 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 /**
- * Model for the app.
+ * Main class of the API
  * @author Tobias Kussel
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class AppModel implements Serializable, Cloneable {
+public class Study implements Serializable, Cloneable {
+    
+    /**
+     * Enum for the app state
+     * @author Tobias Kussel
+     */
+    public enum StudyState {
+     /** The none. */
+     NONE, 
+     /** The starting. */
+     STARTING, 
+     /** The participating. */
+     PARTICIPATING, 
+     /** The entering values. */
+     ENTERING_VALUES, 
+     /** The initial sending. */
+     INITIAL_SENDING, 
+     /** The sending share. */
+     SENDING_SHARE, 
+     /** The recieving share. */
+     RECIEVING_SHARE, 
+     /** The sending result. */
+     SENDING_RESULT, 
+     /** The recieving result. */
+     RECIEVING_RESULT, 
+     /** The finished. */
+     FINISHED
+    }
     
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 67394185932574354L;
@@ -45,14 +72,14 @@ public class AppModel implements Serializable, Cloneable {
      * @throws ClassNotFoundException the class not found exception
      * @throws IllegalArgumentException the illegal argument exception
      */
-    public static AppModel loadModel(File filename)
+    public static Study loadModel(File filename)
             throws IOException, ClassNotFoundException, IllegalArgumentException {
         ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename));
         Object o = ois.readObject();
         ois.close();
-        if (!(o instanceof AppModel))
+        if (!(o instanceof Study))
             throw new IllegalArgumentException("Invalid Save file");
-        return (AppModel) o;
+        return (Study) o;
     }
     
     /** The study UID. */
@@ -65,7 +92,7 @@ public class AppModel implements Serializable, Cloneable {
     public int ownId;
     
     /** The state. */
-    public AppState state;
+    public StudyState state;
     
     /** The bins. */
     public Bin[] bins;
@@ -85,11 +112,11 @@ public class AppModel implements Serializable, Cloneable {
     /**
      * Instantiates a new app model.
      */
-    public AppModel() {
+    public Study() {
         name = null;
         numParticipants = 0;
         ownId = 0;
-        state = AppState.NONE;
+        state = StudyState.NONE;
         bins = null;
         participants = null;
         unsentMessages = null;
@@ -112,11 +139,11 @@ public class AppModel implements Serializable, Cloneable {
      */
     @Override
     public Object clone() {
-        AppModel newModel = null;
+        Study newModel = null;
         try {
-            newModel = (AppModel) super.clone();
+            newModel = (Study) super.clone();
         } catch (CloneNotSupportedException e) {
-            newModel = new AppModel();
+            newModel = new Study();
         }
         newModel.name = this.name;
         newModel.numParticipants = this.numParticipants;
@@ -158,9 +185,9 @@ public class AppModel implements Serializable, Cloneable {
     public boolean equals(Object o) {
         if (o == this)
             return true;
-        if (!(o instanceof AppModel))
+        if (!(o instanceof Study))
             return false;
-        AppModel m = (AppModel) o;
+        Study m = (Study) o;
         boolean result = (m.numParticipants == numParticipants);
         result = result && (m.studyUID.equals(studyUID));
         result = result && (m.ownId == ownId);
@@ -201,7 +228,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      */
     public BinResult[] getAllResults() throws IllegalStateException {
-        if (state != AppState.FINISHED)
+        if (state != StudyState.FINISHED)
             throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
         BinResult[] result = new BinResult[bins.length];
         for (int i = 0; i < bins.length; i++) {
@@ -218,7 +245,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      */
     public BinResult getBinResult(int binId) throws IllegalStateException {
-        if (state != AppState.FINISHED)
+        if (state != StudyState.FINISHED)
             throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
         return new BinResult(bins[binId].name, bins[binId].reconstructBin());
     }
@@ -305,7 +332,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      */
     public void initializeStudy(String name, Participant[] participants, Bin[] bins) throws IllegalStateException {
-        if (!(state == AppState.NONE || state == AppState.STARTING))
+        if (!(state == StudyState.NONE || state == StudyState.STARTING))
             throw new IllegalStateException("Unable to initialize study at state" + state);
         this.name = name;
         numParticipants = participants.length;
@@ -319,8 +346,8 @@ public class AppModel implements Serializable, Cloneable {
         this.bins = bins;
         this.ownId = 0; // unneeded but for verbosity...
         this.participants = participants;
-        if (state == AppState.NONE)
-            state = AppState.STARTING;
+        if (state == StudyState.NONE)
+            state = StudyState.STARTING;
     }
 
     /**
@@ -347,10 +374,10 @@ public class AppModel implements Serializable, Cloneable {
             Message.validateData(getParticipantId(sender), participants[ownId], msg.data);
             switch (state){
             case RECIEVING_SHARE:
-                ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
+                MessageShare.decodeAndVerify(Message.getMessageData(msg), sender, this);
                 break;
             case RECIEVING_RESULT:
-                ResultMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
+                MessageResult.decodeAndVerify(Message.getMessageData(msg), sender, this);
                 break;
             default:
                 return false;
@@ -406,7 +433,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void populateInitialMessages() throws IllegalStateException, IOException {
-      if (state != AppState.INITIAL_SENDING)
+      if (state != StudyState.INITIAL_SENDING)
         throw new IllegalStateException("Forbidden action (getInitialMessage) at current state " + state);
         for (int i = 0; i < numParticipants; i++) {
           if (i != ownId)
@@ -429,9 +456,9 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void populateResultMessages() throws IllegalStateException, IOException {
-        if (state != AppState.SENDING_RESULT)
+        if (state != StudyState.SENDING_RESULT)
             throw new IllegalStateException("Forbidden action (populateResultMessage) at current state " + state);
-      ResultMessage data = new ResultMessage(this);
+      MessageResult data = new MessageResult(this);
       for (int i = 0; i < numParticipants; i++) {
         if (i != ownId) {
           Participant recipient = this.participants[i];
@@ -454,7 +481,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void populateShareMessages() throws IllegalStateException, IOException {
-        if (state != AppState.SENDING_SHARE)
+        if (state != StudyState.SENDING_SHARE)
             throw new IllegalStateException("Forbidden action (populateShareMessage) at current state " + state);
           for (int i = 0; i < numParticipants; i++) {
             if (i != ownId) {
@@ -497,10 +524,10 @@ public class AppModel implements Serializable, Cloneable {
      */
     public void setModelFromMessage(String initialMsg)
             throws IllegalStateException, IllegalArgumentException, ClassNotFoundException, IOException {
-        if (state != AppState.PARTICIPATING)
+        if (state != StudyState.PARTICIPATING)
             throw new IllegalStateException("Setting the Model from a Message is not allowed at state " + state);
-        AppModel model = InitialMessage.getAppModel(InitialMessage.decodeMessage(Message.getMessageData(initialMsg)));
-        model.state = AppState.PARTICIPATING;
+        Study model = MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(initialMsg)));
+        model.state = StudyState.PARTICIPATING;
         update(model);
     }
 
@@ -516,21 +543,21 @@ public class AppModel implements Serializable, Cloneable {
      */
     public void setShareFromMessage(Message msg) throws IllegalStateException, IllegalArgumentException, NoSuchAlgorithmException, ClassNotFoundException, IOException {
         Participant sender = getParticipantFromId(msg.senderID);
-        if (!(state == AppState.RECIEVING_SHARE || state == AppState.RECIEVING_RESULT)) {
+        if (!(state == StudyState.RECIEVING_SHARE || state == StudyState.RECIEVING_RESULT)) {
             throw new IllegalStateException("Setting a share from a message is not allowed at state " + state);
         }
         if (!isCorrectRecipient(msg)) {
             throw new IllegalArgumentException("Message recipient does not match the current participant");
         }
         if (Message.validateData(getParticipantId(sender), participants[ownId], msg.data)) {
-            if (state == AppState.RECIEVING_SHARE) {
-                ShareMessage sm = ShareMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
+            if (state == StudyState.RECIEVING_SHARE) {
+                MessageShare sm = MessageShare.decodeAndVerify(Message.getMessageData(msg), sender, this);
                 int senderId = getParticipantId(sender);
                 for (int i = 0; i < bins.length; i++) {
                     bins[i].setInShare(sm.bins[i].share, senderId);
                 }
             } else {
-                ResultMessage rm = ResultMessage.decodeAndVerify(Message.getMessageData(msg), sender, this);
+                MessageResult rm = MessageResult.decodeAndVerify(Message.getMessageData(msg), sender, this);
                 int senderId = getParticipantId(sender);
                 for (int i = 0; i < bins.length; i++) {
                     bins[i].setInShare(rm.bins[i].share, senderId);
@@ -553,7 +580,7 @@ public class AppModel implements Serializable, Cloneable {
     public void toEnteringValues(String initialMessage) throws IllegalStateException, IOException, IllegalArgumentException, ClassNotFoundException{
         setModelFromMessage(initialMessage);
         unsentMessages = new Message[numParticipants];
-      advanceState(AppState.ENTERING_VALUES);
+      advanceState(StudyState.ENTERING_VALUES);
     }
 
     /**
@@ -563,7 +590,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void toFinished() throws IllegalStateException, IOException{
-        advanceState(AppState.FINISHED);
+        advanceState(StudyState.FINISHED);
     }
 
     /**
@@ -578,7 +605,7 @@ public class AppModel implements Serializable, Cloneable {
     // Note, that bins need to be initialized and have shared values
     public void toInitialSending(String name, Participant[] participants, Bin[] bins) throws IllegalStateException, IOException {
         initializeStudy(name, participants, bins);
-        advanceState(AppState.INITIAL_SENDING);
+        advanceState(StudyState.INITIAL_SENDING);
     }
 
     /**
@@ -588,7 +615,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void toParticipating() throws IllegalStateException, IOException{
-        advanceState(AppState.PARTICIPATING);
+        advanceState(StudyState.PARTICIPATING);
     }
 
     /**
@@ -598,7 +625,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void toRecievingResult() throws IllegalStateException, IOException{
-        advanceState(AppState.RECIEVING_RESULT);
+        advanceState(StudyState.RECIEVING_RESULT);
     }
 
     /**
@@ -608,7 +635,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void toRecievingShares() throws IllegalStateException, IOException{
-        advanceState(AppState.RECIEVING_SHARE);
+        advanceState(StudyState.RECIEVING_SHARE);
     }
 
     /**
@@ -618,7 +645,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void toSendingResult() throws IllegalStateException, IOException{
-        advanceState(AppState.SENDING_RESULT);
+        advanceState(StudyState.SENDING_RESULT);
     }
 
     /**
@@ -635,7 +662,7 @@ public class AppModel implements Serializable, Cloneable {
         for (int i = 0; i < bins.length; i++) {
             bins[i].shareValue(values[i]);
         }
-        advanceState(AppState.SENDING_SHARE);
+        advanceState(StudyState.SENDING_SHARE);
     }
 
     /**
@@ -690,7 +717,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     public void toStarting() throws IllegalStateException, IOException{
-        advanceState(AppState.STARTING);
+        advanceState(StudyState.STARTING);
     }
 
     /**
@@ -710,7 +737,7 @@ public class AppModel implements Serializable, Cloneable {
      *
      * @param model the model
      */
-    public void update(AppModel model) {
+    public void update(Study model) {
         studyUID = model.studyUID;
         numParticipants = model.numParticipants;
         ownId = model.ownId;
@@ -727,36 +754,36 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private void advanceState(AppState newState) throws IllegalStateException, IOException {
+    private void advanceState(StudyState newState) throws IllegalStateException, IOException {
         switch (state) {
         case NONE:
-            if (!(newState == AppState.STARTING || newState == AppState.PARTICIPATING))
+            if (!(newState == StudyState.STARTING || newState == StudyState.PARTICIPATING))
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             // Change GUI Window
             state = newState;
             break;
         case STARTING:
-            if (!(newState == AppState.INITIAL_SENDING))
+            if (!(newState == StudyState.INITIAL_SENDING))
               throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             state = newState;
             populateInitialMessages();
             // Change GUI Window
             break;
         case PARTICIPATING:
-            if (newState != AppState.ENTERING_VALUES)
+            if (newState != StudyState.ENTERING_VALUES)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             state = newState;
             // Change GUI Window
             break;
         case ENTERING_VALUES:
-            if (newState != AppState.SENDING_SHARE)
+            if (newState != StudyState.SENDING_SHARE)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             state = newState;
             populateShareMessages();
             // Change GUI Window
             break;
         case INITIAL_SENDING:
-            if (newState != AppState.RECIEVING_SHARE)
+            if (newState != StudyState.RECIEVING_SHARE)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             if (messagesUnsent())
                 throw new IllegalStateException("Still unsent messages left");
@@ -774,7 +801,7 @@ public class AppModel implements Serializable, Cloneable {
             break;
         case SENDING_SHARE:
             // Forbid two parties
-            if (newState != AppState.RECIEVING_SHARE)
+            if (newState != StudyState.RECIEVING_SHARE)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             if (messagesUnsent())
                 throw new IllegalStateException("Still unsent messages left");
@@ -792,7 +819,7 @@ public class AppModel implements Serializable, Cloneable {
             // Change GUI Window
             break;
         case RECIEVING_SHARE:
-            if (newState != AppState.SENDING_RESULT)
+            if (newState != StudyState.SENDING_RESULT)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             if (!isResultComputable())
                 throw new IllegalStateException("Not all shares collected");
@@ -801,7 +828,7 @@ public class AppModel implements Serializable, Cloneable {
             // Change GUI Window
             break;
         case SENDING_RESULT:
-            if (newState != AppState.RECIEVING_RESULT)
+            if (newState != StudyState.RECIEVING_RESULT)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             if (messagesUnsent())
                 throw new IllegalStateException("Still unsent messages left");
@@ -818,7 +845,7 @@ public class AppModel implements Serializable, Cloneable {
             // Change GUI Window
             break;
         case RECIEVING_RESULT:
-            if (newState != AppState.FINISHED)
+            if (newState != StudyState.FINISHED)
                 throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
             if (!isResultComputable())
                 throw new IllegalStateException("Not all shares collected");
@@ -839,7 +866,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private Message getInitialMessage(int recipientId) throws IOException {
-        InitialMessage data = new InitialMessage(this, recipientId);
+        MessageInitial data = new MessageInitial(this, recipientId);
         Participant recipient = this.participants[recipientId];
         return new Message(ownId, recipient, data.getMessage());
     }
@@ -852,7 +879,7 @@ public class AppModel implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private Message getShareMessage(int recipientId) throws IOException {
-        ShareMessage data = new ShareMessage(this, recipientId);
+        MessageShare data = new MessageShare(this, recipientId);
         Participant recipient = this.participants[recipientId];
         return new Message(ownId, recipient, data.getMessage());
     }

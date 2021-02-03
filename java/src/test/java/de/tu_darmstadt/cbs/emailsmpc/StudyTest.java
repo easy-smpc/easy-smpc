@@ -25,10 +25,10 @@ import java.util.Set;
 import org.junit.Test;
 
 /**
- * Unit tests for the app model
+ * Unit tests for the API
  * @author Tobias Kussel
  */
-public class AppModelTest {
+public class StudyTest {
     
     /**
      * Rigorous Test :-).
@@ -39,8 +39,8 @@ public class AppModelTest {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    static private AppModel getInitializedModel(int numParticipants, int numBins) throws IllegalStateException, IOException {
-        AppModel testmodel = new AppModel();
+    static private Study getInitializedModel(int numParticipants, int numBins) throws IllegalStateException, IOException {
+        Study testmodel = new Study();
         Participant[] part = new Participant[numParticipants];
         Bin[] bins = new Bin[numBins];
         for (int i = 0; i < part.length; i++) {
@@ -66,8 +66,8 @@ public class AppModelTest {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    static private AppModel getInitializedModel(int numParticipants, int numBins, BigInteger[] array) throws IllegalStateException, IOException {
-        AppModel testmodel = new AppModel();
+    static private Study getInitializedModel(int numParticipants, int numBins, BigInteger[] array) throws IllegalStateException, IOException {
+        Study testmodel = new Study();
         Participant[] part = new Participant[numParticipants];
         Bin[] bins = new Bin[numBins];
         for (int i = 0; i < part.length; i++) {
@@ -91,7 +91,7 @@ public class AppModelTest {
      */
     @Test
     public void AddingBins() throws IllegalStateException, IOException {
-        AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
+        Study testmodel = StudyTest.getInitializedModel(3, 4);
         assertTrue(testmodel.bins.length == 4);
     }
 
@@ -103,7 +103,7 @@ public class AppModelTest {
      */
     @Test
     public void AddingParticipants() throws IllegalStateException, IOException {
-        AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
+        Study testmodel = StudyTest.getInitializedModel(3, 4);
         assertTrue(testmodel.participants.length == 3);
     }
 
@@ -117,8 +117,8 @@ public class AppModelTest {
     public void CloneTest() throws IllegalStateException, IOException {
         BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
                 BigInteger.valueOf(4) };
-        AppModel model0 = AppModelTest.getInitializedModel(3, 4, secrets0);
-        AppModel copy = (AppModel) model0.clone();
+        Study model0 = StudyTest.getInitializedModel(3, 4, secrets0);
+        Study copy = (Study) model0.clone();
         assertTrue((copy != model0));
         assertTrue(copy.equals(model0));
         assertTrue(copy.studyUID.equals(model0.studyUID));
@@ -131,7 +131,7 @@ public class AppModelTest {
     public void NonCollidingUID(){
       Set<String> ids = new HashSet<String>();
       for (int i = 0; i < 1000; i++ ) {
-        AppModel model = new AppModel();
+        Study model = new Study();
         assertTrue(!ids.contains(model.studyUID));
         ids.add(model.studyUID);
       }
@@ -145,11 +145,11 @@ public class AppModelTest {
      */
     @Test
     public void SaveLoad() throws ClassNotFoundException, IOException {
-        AppModel testmodel = AppModelTest.getInitializedModel(3, 4);
+        Study testmodel = StudyTest.getInitializedModel(3, 4);
             File fn = new File("testing.dat");
             testmodel.filename = fn;
             testmodel.saveProgram();
-            AppModel load = AppModel.loadModel(fn);
+            Study load = Study.loadModel(fn);
             assertTrue(load.equals(testmodel));
     }
 
@@ -166,9 +166,9 @@ public class AppModelTest {
     public void TestWithThree() throws ClassNotFoundException, IllegalStateException, IOException, IllegalArgumentException, NoSuchAlgorithmException {
         BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
                 BigInteger.valueOf(4) };
-        AppModel model0 = AppModelTest.getInitializedModel(3, 4, secrets0);
-        AppModel model1 = new AppModel();
-        AppModel model2 = new AppModel();
+        Study model0 = StudyTest.getInitializedModel(3, 4, secrets0);
+        Study model1 = new Study();
+        Study model2 = new Study();
         model1.toParticipating();
         model2.toParticipating();
         Message initialMessage1 = model0.getUnsentMessageFor(1);
