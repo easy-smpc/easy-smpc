@@ -42,7 +42,6 @@ public class EntryParticipant extends ComponentEntryAddRemove {
               new ComponentTextFieldValidator() {
                 @Override
                 public boolean validate(String text) {
-                    // TODO: Must ensure that no two bins have the same name
                     return !text.trim().isEmpty();
                 }
               },

@@ -60,7 +60,6 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
               new ComponentTextFieldValidator() {
                 @Override
                 public boolean validate(String text) {
-                    // TODO: Must ensure that no two bins have the same name
                     return !text.trim().isEmpty();
                 }
               },

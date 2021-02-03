@@ -18,7 +18,7 @@ import java.math.BigInteger;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
- * Entry for bins in the histogram
+ * Entry for bins
  * 
  * @author Fabian Prasser
  * @author Felix Wirth
@@ -62,12 +62,11 @@ public class EntryBin extends ComponentEntryAddRemove {
               new ComponentTextFieldValidator() {
                   @Override
                   public boolean validate(String text) {
-                      // TODO: Must ensure that no two bins have the same name
                       return !text.trim().isEmpty();
                   }
               },
               Resources.getString("BinEntry.1"), //$NON-NLS-1$
-              !value.trim().isEmpty() ? value : String.valueOf(0),
+              (value != null && !value.trim().isEmpty()) ? value : String.valueOf(0),
               rightEnabled,
               new ComponentTextFieldValidator() {
                   @Override
@@ -96,7 +95,6 @@ public class EntryBin extends ComponentEntryAddRemove {
               new ComponentTextFieldValidator() {
                   @Override
                   public boolean validate(String text) {
-                      // TODO: Must ensure that no two bins have the same name
                       return !text.trim().isEmpty();
                   }
               },

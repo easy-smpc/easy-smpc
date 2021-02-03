@@ -25,7 +25,7 @@ import javax.swing.JPanel;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
- * Entry for participants in the histogram
+ * Entry for participants
  * 
  * @author Fabian Prasser
  * @author Felix Wirth
