@@ -79,7 +79,9 @@ public class Study implements Serializable, Cloneable {
         ois.close();
         if (!(o instanceof Study))
             throw new IllegalArgumentException("Invalid Save file");
-        return (Study) o;
+        Study model = (Study) o;
+        model.filename = filename;
+        return model;
     }
     
     /** The study UID. */
