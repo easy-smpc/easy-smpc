@@ -58,11 +58,11 @@ public class Resources {
     /** Row gap */
     public static final int       ROW_GAP                         = 2;
 
-    /** Min x-size of a text area */
-    public static final int       SIZE_TEXTAREA_X                 = 400;
+    /** X-size of small dialog */
+    public static final int       SIZE_DIALOG_SMALL_X                 = 415;
 
-    /** Min y-size of a text area */
-    public static final int       SIZE_TEXTAREA_Y                 = 200;
+    /** Y-size of small dialog */
+    public static final int       SIZE_DIALOG_SMALL_Y                 = 150;
 
     /** String indicating start of exchange string */
     public static final String    MESSAGE_START_TAG               = "BEGIN_PAYLOAD";                              //$NON-NLS-1$

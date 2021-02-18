@@ -58,7 +58,7 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
     public DialogStringPicker(String textDefault, ComponentTextFieldValidator validator, JFrame parent) {
 
         // Dialog properties
-        this.setSize(Resources.SIZE_TEXTAREA_X, Resources.SIZE_TEXTAREA_Y);
+        this.setSize(Resources.SIZE_DIALOG_SMALL_X, Resources.SIZE_DIALOG_SMALL_Y);
         this.setLocationRelativeTo(parent);
         this.setTitle(Resources.getString("PerspectiveParticipate.PickerTitle"));
         this.getContentPane().setLayout(new BorderLayout());
