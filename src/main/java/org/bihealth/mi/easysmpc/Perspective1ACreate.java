@@ -102,15 +102,24 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      */
     public void stateChanged(ChangeEvent e) {
         this.save.setEnabled(this.areValuesValid());
+        
+        // If it is necessary to configure an e-mail box enable button
         this.configEmailboxButton.setEnabled(this.isMailBoxConfigNecessary());
-        this.automatedSeperateEmailbox.setEnabled(this.isAutomatedSeparateMailConfigPossible());
-        if (!this.isAutomatedSeparateMailConfigPossible()) {
+               
+        // If it is possible to configure e-mail automation with a separate account enable check box
+        if (this.isAutomatedSeparateMailConfigPossible()) {
+            this.automatedSeperateEmailbox.setEnabled(true);
+        } else {
+            // Otherwise disable and de-select
             this.automatedSeperateEmailbox.setSelected(false);
+            this.automatedSeperateEmailbox.setEnabled(false);
         }
+        
     }
     
     /**
      * Checks whether the user can choose a separate e-mail box
+     * 
      * @return
      */
     private boolean isAutomatedSeparateMailConfigPossible() {
@@ -197,6 +206,12 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         // Check whether at least three participants
         if (this.participants.getComponents().length < 3) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.notEnoughParticipants"));
+            return;
+        }
+        
+        // Check e-mail config if automated e-mail is selected
+        if (isMailBoxConfigNecessary() && connectionDetails == null) {
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.setMailboxProperties"));
             return;
         }
         
@@ -327,7 +342,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         // Check title
         if (!title.isValueValid()) {
             return false;
-        }
+        }       
         
         // Done
         return true;
