@@ -29,7 +29,7 @@ public class EntryServers extends ComponentEntry {
     
     /** SVID */
     private static final long serialVersionUID = 466453564994174241L;
-    /** Regex to check e-mail validity */
+    /** Regex to check dns validity */
     private static final Pattern regex = Pattern.compile("^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]))*$");
     
     /**

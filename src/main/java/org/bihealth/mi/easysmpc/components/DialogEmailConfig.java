@@ -47,7 +47,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /** E-Mail and password entry*/
     private EntryEMailPassword emailPasswordEntry; //TODO: Make password not visible    
     /** E-mail server entry */
-    private EntryServers imapPopServerEntry;
+    private EntryServers serversEntry;
     /** Button*/
     private JButton buttonCheckConnection;
     /** Button*/
@@ -81,11 +81,11 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         this.emailPasswordEntry = new EntryEMailPassword();
         this.emailPasswordEntry.setChangeListener(this);
         this.add(emailPasswordEntry);
-        this.imapPopServerEntry = new EntryServers();
-        this.imapPopServerEntry.setChangeListener(this);
+        this.serversEntry = new EntryServers();
+        this.serversEntry.setChangeListener(this);
         // Add
         central.add(emailPasswordEntry);
-        central.add(imapPopServerEntry);
+        central.add(serversEntry);
         this.getContentPane().add(central, BorderLayout.CENTER);        
         
         // Buttons        
@@ -117,7 +117,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         this.buttonOK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogEmailConfig.this.result = new EmailConnection(imapPopServerEntry.getLeftValue(), imapPopServerEntry.getRightValue(), emailPasswordEntry.getLeftValue(), emailPasswordEntry.getRightValue());
+                DialogEmailConfig.this.result = new EmailConnection(serversEntry.getLeftValue(), serversEntry.getRightValue(), emailPasswordEntry.getLeftValue(), emailPasswordEntry.getRightValue());
                 DialogEmailConfig.this.dispose();
             }
         });
@@ -160,6 +160,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     private boolean areValuesValid() {
         return this.emailPasswordEntry.areValuesValid() &&
-               this.imapPopServerEntry.areValuesValid();
+               this.serversEntry.areValuesValid();
     } 
 }
