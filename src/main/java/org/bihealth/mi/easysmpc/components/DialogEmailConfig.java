@@ -25,16 +25,19 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.bihealth.mi.easysmpc.dataexport.EmailConnection;
+import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.Participant;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
+import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
-// TODO One might consider to create an abstract ComponentDialog class for the dialogs
 /**
  * Dialog for entering details of a e-mail box
  * 
@@ -48,22 +51,25 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private EntryEMailPassword emailPasswordEntry; //TODO: Make password not visible    
     /** E-mail server entry */
     private EntryServers serversEntry;
+    /** Port of e-mail servers entry */
+    private EntryServerPorts serverPortsEntry;
     /** Button*/
     private JButton buttonCheckConnection;
     /** Button*/
     private JButton buttonOK;
     /** Result */
-    private EmailConnection result;
+    private ConnectionSettingsIMAP result;
         
     /**
      * Create a new instance
+     * 
      * @param parent Component to set the location of JDialog relative to
-     * @param additionalAction  Action which will be performed when clicking the okButton
      */
     public DialogEmailConfig(JFrame parent) {
 
         // Dialog properties
-        this.setSize(Resources.SIZE_DIALOG_SMALL_X, Resources.SIZE_DIALOG_SMALL_Y);
+        //TODO Size
+        this.setSize(Resources.SIZE_DIALOG_SMALL_X, Resources.SIZE_DIALOG_SMALL_Y + 50);
         this.setLocationRelativeTo(parent);
         this.setTitle(Resources.getString("EmailConfig.0"));
         this.getContentPane().setLayout(new BorderLayout());
@@ -77,28 +83,32 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         
         // Entry boxes
         JPanel central = new JPanel();
-        central.setLayout(new GridLayout(2, 1));
+        central.setLayout(new GridLayout(3, 1));
         this.emailPasswordEntry = new EntryEMailPassword();
         this.emailPasswordEntry.setChangeListener(this);
-        this.add(emailPasswordEntry);
         this.serversEntry = new EntryServers();
         this.serversEntry.setChangeListener(this);
+        this.serverPortsEntry = new EntryServerPorts();
+        this.serverPortsEntry.setChangeListener(this);
         // Add
         central.add(emailPasswordEntry);
         central.add(serversEntry);
+        central.add(serverPortsEntry);
         this.getContentPane().add(central, BorderLayout.CENTER);        
         
         // Buttons        
         JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(2, 1));      
+        buttonsPane.setLayout(new GridLayout(3, 1));      
         JPanel okCancelPane = new JPanel();
-        okCancelPane.setLayout(new GridLayout(1, 2));   
+        okCancelPane.setLayout(new GridLayout(1, 2));
+        JButton buttonDetermineConfig = new JButton(Resources.getString("EmailConfig.8"));
         this.buttonCheckConnection = new JButton(Resources.getString("EmailConfig.5"));
         this.buttonCheckConnection.setEnabled(this.areValuesValid());
         this.buttonOK = new JButton(Resources.getString("EmailConfig.6"));
         this.buttonOK.setEnabled(this.areValuesValid());
         JButton buttonCancel = new JButton(Resources.getString("EmailConfig.7"));
         // Add
+        buttonsPane.add(buttonDetermineConfig);
         buttonsPane.add(buttonCheckConnection);
         okCancelPane.add(buttonCancel);
         okCancelPane.add(buttonOK);
@@ -106,21 +116,27 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         getContentPane().add(buttonsPane, BorderLayout.SOUTH);
         
         // Listeners
+        buttonDetermineConfig.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionDetermineConfig();
+            }
+        });
+        
         this.buttonCheckConnection.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                boolean connectionCheckSuccessful = true; //TODO integrate easybus
-                buttonOK.setEnabled(connectionCheckSuccessful);
+                actionCheckConnection();
             }
         });
         
         this.buttonOK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogEmailConfig.this.result = new EmailConnection(serversEntry.getLeftValue(), serversEntry.getRightValue(), emailPasswordEntry.getLeftValue(), emailPasswordEntry.getRightValue());
-                DialogEmailConfig.this.dispose();
+                actionClose();
             }
         });
+        
         buttonCancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -128,6 +144,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                 DialogEmailConfig.this.dispose();
             }
         });
+        
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
@@ -135,11 +152,42 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             }
         });
     }
+    
+    /**
+     * Create a new instance
+     * 
+     * @param connectionsSettings to fill as default in the fields
+     * @param parent Component to set the location of JDialog relative to
+     */
+    public DialogEmailConfig(ConnectionSettingsIMAP connectionsSettings, JFrame parent) {
+        this(parent);
+        if (connectionsSettings != null) {
+            emailPasswordEntry.setLeftValue(connectionsSettings.getEmailAddress());
+            emailPasswordEntry.setRightValue(connectionsSettings.getPassword());
+            serversEntry.setLeftValue(connectionsSettings.getImapServer());
+            serversEntry.setRightValue(connectionsSettings.getSmtpServer());
+            serverPortsEntry.setLeftValue(Integer.toString(connectionsSettings.getImapPort()));
+            serverPortsEntry.setRightValue(Integer.toString(connectionsSettings.getSmtpPort()));
+        }        
+    }
+
+    /**
+     * Action check connection
+     */
+    protected void actionCheckConnection() {
+        //TODO non-shared mailbox
+        try {
+            new ConnectionIMAP(connectionSettingsFromEntries(), true);
+            buttonOK.setEnabled(true);
+        } catch (BusException e) {
+            JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.14"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
+        }        
+    }
 
     /**
      * Show this dialog
      */
-    public EmailConnection showDialog(){        
+    public ConnectionSettingsIMAP showDialog(){        
         this.setModal(true);
         this.setVisible(true);
         return this.result;
@@ -161,5 +209,55 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private boolean areValuesValid() {
         return this.emailPasswordEntry.areValuesValid() &&
                this.serversEntry.areValuesValid();
+    }
+    
+    /**
+     * Action close
+     */
+    private void actionClose() {
+        try {
+            this.result = connectionSettingsFromEntries();
+            DialogEmailConfig.this.dispose();
+        } catch (BusException e) {
+            JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.13"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Create a new connection settings object from data entries
+     * 
+     * @return connection settings
+     * @throws BusException
+     */
+    private ConnectionSettingsIMAP connectionSettingsFromEntries() throws BusException {
+        return new ConnectionSettingsIMAP(emailPasswordEntry.getLeftValue(),
+                                                 emailPasswordEntry.getRightValue(),
+                                                 serversEntry.getLeftValue(),
+                                                 Integer.valueOf(serverPortsEntry.getLeftValue()),
+                                                 serversEntry.getRightValue(),
+                                                 Integer.valueOf(serverPortsEntry.getRightValue()));
+    }
+    
+    /**
+     * Action determine e-mail configuration
+     */
+    private void actionDetermineConfig() {
+        // Check
+        if (this.emailPasswordEntry.getLeftValue() == null ||
+            !Participant.isEmailValid(this.emailPasswordEntry.getLeftValue())) {
+            JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.9"), Resources.getString("EmailConfig.10"), JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Try to determine and set
+        try {
+            ConnectionSettingsIMAP connectionSettings = new ConnectionSettingsIMAP(this.emailPasswordEntry.getLeftValue());
+            serversEntry.setLeftValue(connectionSettings.getImapServer());
+            serversEntry.setRightValue(connectionSettings.getSmtpServer());
+            serverPortsEntry.setLeftValue(Integer.toString(connectionSettings.getImapPort()));
+            serverPortsEntry.setRightValue(Integer.toString(connectionSettings.getSmtpPort()));
+        } catch (BusException e) {
+            JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.11"), Resources.getString("EmailConfig.10"), JOptionPane.WARNING_MESSAGE);
+        }
     } 
 }

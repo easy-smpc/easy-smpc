@@ -172,6 +172,14 @@ public abstract class ComponentEntry extends JPanel {
         this.fieldRight.setText(text);
     }
     
+    /**
+     * Sets the left value
+     * @return
+     */
+    public void setLeftValue(String text) {
+        this.fieldLeft.setText(text);
+    }
+    
     /** Creates an additional control panel
      * @return
      */

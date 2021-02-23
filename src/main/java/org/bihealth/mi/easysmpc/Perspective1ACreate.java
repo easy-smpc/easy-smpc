@@ -28,13 +28,11 @@ import java.util.Map.Entry;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -42,13 +40,13 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryBin;
 import org.bihealth.mi.easysmpc.components.EntryParticipant;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
-import org.bihealth.mi.easysmpc.dataexport.EmailConnection;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -74,20 +72,15 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     /** Save button */
     private JButton            save;
     
-    /** Radio Button usage of a shared mail box */
-    private JRadioButton sharedMailboxRadioButton;
-    
-    /** Radio Button usage of a separated mail box */
-    private JRadioButton separatedMailboxRadioButton;
-    
     /** Configure e-mail box*/
     private Button configEmailboxButton;
     
     /** Automated, separate e-mail box*/
-    private JCheckBox automatedSeperateEmailbox;
+    private JCheckBox automatedEmailbox;
     
     /** Details to connect to e-mail servers */
-    private EmailConnection connectionDetails;
+    private ConnectionSettingsIMAP emailConnectionSettings = null;
+
     
     /**
      * Creates the perspective
@@ -104,41 +97,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.save.setEnabled(this.areValuesValid());
         
         // If it is necessary to configure an e-mail box enable button
-        this.configEmailboxButton.setEnabled(this.isMailBoxConfigNecessary());
-               
-        // If it is possible to configure e-mail automation with a separate account enable check box
-        if (this.isAutomatedSeparateMailConfigPossible()) {
-            this.automatedSeperateEmailbox.setEnabled(true);
-        } else {
-            // Otherwise disable and de-select
-            this.automatedSeperateEmailbox.setSelected(false);
-            this.automatedSeperateEmailbox.setEnabled(false);
-        }
-        
-    }
-    
-    /**
-     * Checks whether the user can choose a separate e-mail box
-     * 
-     * @return
-     */
-    private boolean isAutomatedSeparateMailConfigPossible() {
-        if (this.separatedMailboxRadioButton.isSelected()) {
-        return true;
-        }
-        return false;
-    }
-
-    /**
-     * Checks whether a configuration of the e-mail box is necessary
-     * 
-     * @return
-     */
-    private boolean isMailBoxConfigNecessary() {
-        if (this.sharedMailboxRadioButton.isSelected() || this.automatedSeperateEmailbox.isSelected()) {
-            return true;
-        }
-        return false;
+        this.configEmailboxButton.setEnabled(this.automatedEmailbox.isSelected());                    
     }
 
     /**
@@ -210,7 +169,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         }
         
         // Check e-mail config if automated e-mail is selected
-        if (isMailBoxConfigNecessary() && connectionDetails == null) {
+        if (automatedEmailbox.isSelected() && emailConnectionSettings == null) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.setMailboxProperties"));
             return;
         }
@@ -416,56 +375,32 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.title.setChangeListener(this);
         titlePanel.add(this.title, BorderLayout.CENTER);
         
-        // Radio buttons shared separate mail box
-        JPanel radioButtonsPanel = new JPanel();
-        radioButtonsPanel.setLayout(new GridLayout(2,1));
-        sharedMailboxRadioButton = new JRadioButton(Resources.getString("PerspectiveCreate.RadioSharedBox"));
-        sharedMailboxRadioButton.setSelected(true); // TODO Should shared box be default?
-        sharedMailboxRadioButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                stateChanged(new ChangeEvent(this));
-            }
-        });       
-        separatedMailboxRadioButton = new JRadioButton(Resources.getString("PerspectiveCreate.RadioSeparatedBox"));
-        separatedMailboxRadioButton.addActionListener(new ActionListener() {
+        // Check box to use mail box automatically
+        JPanel checkBoxAutomatedEmailboxPanel = new JPanel();
+        checkBoxAutomatedEmailboxPanel.setBorder(new EmptyBorder(0,20,0,0));
+        checkBoxAutomatedEmailboxPanel.setLayout(new BorderLayout());        
+        automatedEmailbox = new JCheckBox(Resources.getString("PerspectiveCreate.AutomatedMailbox"));
+        automatedEmailbox.setSelected(true);
+        automatedEmailbox.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
                 stateChanged(new ChangeEvent(this));
             }
         });
-        ButtonGroup groupMailbox = new ButtonGroup();
-        groupMailbox.add(sharedMailboxRadioButton);
-        groupMailbox.add(separatedMailboxRadioButton);        
         
         // Button to configure e-mail
         configEmailboxButton = new Button(Resources.getString("PerspectiveCreate.OpenEMailConfig"));
         configEmailboxButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                 connectionDetails = new DialogEmailConfig(getApp()).showDialog();
-            }
-        });
-        
-        // Check box to use separate mail box automatically
-        JPanel checkBoxAutomatedSeparateEmailboxPanel = new JPanel();
-        checkBoxAutomatedSeparateEmailboxPanel.setBorder(new EmptyBorder(0,20,0,0));
-        checkBoxAutomatedSeparateEmailboxPanel.setLayout(new BorderLayout());
-        automatedSeperateEmailbox = new JCheckBox(Resources.getString("PerspectiveCreate.AutomatedSeparateBox"));
-        automatedSeperateEmailbox.addActionListener(new ActionListener() {            
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                stateChanged(new ChangeEvent(this));
+                emailConnectionSettings = new DialogEmailConfig(emailConnectionSettings, getApp()).showDialog();
             }
         });
         
         // Add
-        generalDataPanel.add(titlePanel);
-        radioButtonsPanel.add(sharedMailboxRadioButton);
-        radioButtonsPanel.add(separatedMailboxRadioButton);
-        generalDataPanel.add(radioButtonsPanel);
-        checkBoxAutomatedSeparateEmailboxPanel.add(automatedSeperateEmailbox);
-        generalDataPanel.add(checkBoxAutomatedSeparateEmailboxPanel);
+        generalDataPanel.add(titlePanel);       
+        checkBoxAutomatedEmailboxPanel.add(automatedEmailbox);
+        generalDataPanel.add(checkBoxAutomatedEmailboxPanel);
         generalDataPanel.add(configEmailboxButton);
         
         // Central panel
