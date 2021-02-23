@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -30,6 +31,8 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
+
+import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 
 /**
  * Accessor class for messages and settings used by the UI
@@ -122,7 +125,16 @@ public class Resources {
     
     /** Maximum number of chars to be loaded for detecting separators for CSV file detection. */
     public static final int       DETECT_MAX_CHARS                = 100000;
-
+    
+    /** Name of connectionSettingsMap in user preferences */
+    public static final String       CONNECTION_SETTINGS_MAP      = "CONNECTION_SETTINGS_MAP";
+    
+    /** Class to access connection settings in preferences */
+    public static final class HashMapStringConnectionSettingsIMAP extends HashMap<String, ConnectionSettingsIMAP> {
+        /** SVUID*/
+        private static final long serialVersionUID = 1L;            
+    }
+    
     /**
      * Returns all available languages
      * 

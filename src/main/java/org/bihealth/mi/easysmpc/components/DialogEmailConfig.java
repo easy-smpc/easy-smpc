@@ -19,6 +19,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -37,6 +43,7 @@ import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easysmpc.resources.Resources;
+import org.bihealth.mi.easysmpc.resources.Resources.HashMapStringConnectionSettingsIMAP;
 
 /**
  * Dialog for entering details of a e-mail box
@@ -59,6 +66,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private JButton buttonOK;
     /** Result */
     private ConnectionSettingsIMAP result;
+    /** Parent frame */
+    private JFrame parent;
         
     /**
      * Create a new instance
@@ -69,11 +78,12 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
 
         // Dialog properties
         //TODO Size
-        this.setSize(Resources.SIZE_DIALOG_SMALL_X, Resources.SIZE_DIALOG_SMALL_Y + 50);
-        this.setLocationRelativeTo(parent);
+        this.parent = parent;
+        this.setSize(Resources.SIZE_DIALOG_SMALL_X, Resources.SIZE_DIALOG_SMALL_Y + 75);
+        this.setLocationRelativeTo(this.parent);
         this.setTitle(Resources.getString("EmailConfig.0"));
         this.getContentPane().setLayout(new BorderLayout());
-        this.setIconImage(parent.getIconImage());
+        this.setIconImage(this.parent.getIconImage());
         
         // Title
         ((JComponent) this.getContentPane()).setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
@@ -98,28 +108,36 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         
         // Buttons        
         JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(3, 1));      
+        buttonsPane.setLayout(new GridLayout(4, 1));      
         JPanel okCancelPane = new JPanel();
         okCancelPane.setLayout(new GridLayout(1, 2));
         JButton buttonDetermineConfig = new JButton(Resources.getString("EmailConfig.8"));
+        JButton buttonLoadPrevious = new JButton(Resources.getString("EmailConfig.17"));
         this.buttonCheckConnection = new JButton(Resources.getString("EmailConfig.5"));
-        this.buttonCheckConnection.setEnabled(this.areValuesValid());
         this.buttonOK = new JButton(Resources.getString("EmailConfig.6"));
-        this.buttonOK.setEnabled(this.areValuesValid());
         JButton buttonCancel = new JButton(Resources.getString("EmailConfig.7"));
         // Add
+        buttonsPane.add(buttonLoadPrevious);
         buttonsPane.add(buttonDetermineConfig);
         buttonsPane.add(buttonCheckConnection);
         okCancelPane.add(buttonCancel);
         okCancelPane.add(buttonOK);
         buttonsPane.add(okCancelPane);
         getContentPane().add(buttonsPane, BorderLayout.SOUTH);
+        this.stateChanged(new ChangeEvent(this));
         
         // Listeners
         buttonDetermineConfig.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionDetermineConfig();
+            }
+        });
+        
+        buttonLoadPrevious.addActionListener(new ActionListener() {            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setFieldsFromConnectionSettings(new DialogEmailConfigPrevious(parent).showDialog());
             }
         });
         
@@ -161,6 +179,15 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     public DialogEmailConfig(ConnectionSettingsIMAP connectionsSettings, JFrame parent) {
         this(parent);
+        setFieldsFromConnectionSettings(connectionsSettings);
+    }
+
+    /**
+     * Sets fields in the dialog from a connection settings object
+     * 
+     * @param connectionsSettings
+     */
+    private void setFieldsFromConnectionSettings(ConnectionSettingsIMAP connectionsSettings) {
         if (connectionsSettings != null) {
             emailPasswordEntry.setLeftValue(connectionsSettings.getEmailAddress());
             emailPasswordEntry.setRightValue(connectionsSettings.getPassword());
@@ -168,7 +195,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             serversEntry.setRightValue(connectionsSettings.getSmtpServer());
             serverPortsEntry.setLeftValue(Integer.toString(connectionsSettings.getImapPort()));
             serverPortsEntry.setRightValue(Integer.toString(connectionsSettings.getSmtpPort()));
-        }        
+        }
     }
 
     /**
@@ -207,8 +234,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * @return
      */
     private boolean areValuesValid() {
-        return this.emailPasswordEntry.areValuesValid() &&
-               this.serversEntry.areValuesValid();
+        return this.emailPasswordEntry.areValuesValid() && this.serversEntry.areValuesValid() && this.serverPortsEntry.areValuesValid();
     }
     
     /**
@@ -217,10 +243,48 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private void actionClose() {
         try {
             this.result = connectionSettingsFromEntries();
+            storeConnectionSettingsInPreferences(this.result);
             DialogEmailConfig.this.dispose();
-        } catch (BusException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.13"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    /**
+     * Stores the settings in a map in the Preferences
+     * 
+     * @param connectionSettings
+     * @throws IOException 
+     * @throws ClassNotFoundException 
+     */
+    private void storeConnectionSettingsInPreferences(ConnectionSettingsIMAP connectionSettings) throws ClassNotFoundException, IOException {
+        // Prepare
+        Preferences userPreferences = Preferences.userRoot().node(this.getClass().getPackage().getName());
+        HashMapStringConnectionSettingsIMAP connectionSettingsMap;
+        
+        // Load connectionSettingsMap from preference or create
+        if (userPreferences.getByteArray(Resources.CONNECTION_SETTINGS_MAP, null) != null) {
+            ByteArrayInputStream in = new ByteArrayInputStream(userPreferences.getByteArray(Resources.CONNECTION_SETTINGS_MAP, null));
+            Object o = new ObjectInputStream(in).readObject();
+            if (!(o instanceof HashMapStringConnectionSettingsIMAP)) {
+                throw new IOException("Existing connection settings map can not be read");
+            }
+            connectionSettingsMap = (HashMapStringConnectionSettingsIMAP) o;
+        }
+        else {
+            connectionSettingsMap = new HashMapStringConnectionSettingsIMAP();
+        }
+        
+        // Put connection settings
+        connectionSettingsMap.put(connectionSettings.getEmailAddress(), connectionSettings);
+        
+        // Save in preferences
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos);
+        oos.writeObject(connectionSettingsMap);
+        oos.flush();
+        userPreferences.putByteArray(Resources.CONNECTION_SETTINGS_MAP , bos.toByteArray());
     }
 
     /**
