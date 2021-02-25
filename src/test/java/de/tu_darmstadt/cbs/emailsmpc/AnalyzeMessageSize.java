@@ -42,7 +42,7 @@ public class AnalyzeMessageSize {
             bins[i].shareValue(BigInteger.valueOf(1));
         }
         testmodel.toStarting();
-        testmodel.toInitialSending("A1231231", part, bins);
+        testmodel.toInitialSending("A1231231", part, bins, null);
         
         String serializedMessage = Message.serializeMessage(testmodel.getUnsentMessageFor(1));
         System.out.println("chars " + serializedMessage.length());

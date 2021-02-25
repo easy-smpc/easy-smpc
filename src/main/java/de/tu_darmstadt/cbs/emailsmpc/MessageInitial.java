@@ -19,9 +19,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
+
+import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 
 import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 
@@ -62,10 +65,12 @@ public class MessageInitial implements Serializable {
      */
     public static Study getAppModel(MessageInitial msg) {
         Study model = new Study();
+        model.studyUID = msg.studyUID;
         model.name = msg.name;
         model.participants = msg.participants;
         model.numParticipants = msg.participants.length;
         model.ownId = msg.recipientId;
+        model.connectionSettingsIMAP = msg.connectionSettingsIMAP;
         model.state = StudyState.PARTICIPATING;
         model.bins = new Bin[msg.bins.length];
         for (int i = 0; i < msg.bins.length; i++) {
@@ -85,6 +90,12 @@ public class MessageInitial implements Serializable {
 
     /** The recipient id. */
     public int recipientId;
+    
+    /** Connections settings for automatic mail processing. */
+    public ConnectionSettingsIMAP connectionSettingsIMAP;
+    
+    /** The study UID. */
+    public String studyUID;
 
     /**
      * Instantiates a new initial message.
@@ -93,46 +104,17 @@ public class MessageInitial implements Serializable {
      * @param recipientId the recipient id
      */
     public MessageInitial(Study model, int recipientId) {
+        this.studyUID = model.studyUID;
         this.name = model.name;
         this.participants = model.participants;
         this.recipientId = recipientId;
+        this.connectionSettingsIMAP = model.connectionSettingsIMAP; 
         this.bins = new MessageBin[model.bins.length];
         for (int i = 0; i < model.bins.length; i++) {
             bins[i] = new MessageBin(model.bins[i], recipientId);
         }
     }
-
-    /**
-     * Equals.
-     *
-     * @param o the o
-     * @return true, if successful
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (o == this)
-            return true;
-        if (!(o instanceof MessageInitial))
-            return false;
-        MessageInitial msg = (MessageInitial) o;
-        if (!(participants.length == msg.participants.length || bins.length == msg.bins.length))
-            return false;
-        boolean equal = this.name.equals(msg.name);
-        equal = equal && (this.recipientId == msg.recipientId);
-
-        for (int i = 0; i < participants.length; i++) {
-            equal = equal && participants[i].equals(msg.participants[i]);
-            if (equal == false) // Short circuit comparisons if false
-                return false;
-        }
-        for (int i = 0; i < bins.length; i++) {
-            equal = equal && bins[i].equals(msg.bins[i]);
-            if (equal == false) // Short circuit comparisons if false
-                return false;
-        }
-        return equal;
-    }
-
+    
     /**
      * Gets the message.
      *
@@ -147,20 +129,34 @@ public class MessageInitial implements Serializable {
         return encoder.encodeToString(stream.toByteArray());
     }
 
-    /**
-     * Hash code.
-     *
-     * @return the int
-     */
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        for (Participant p : participants) {
-            result = 31 * result + p.hashCode();
-        }
-        for (MessageBin b : bins) {
-            result = 31 * result + b.hashCode();
-        }
-        return 31 * result + recipientId;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(bins);
+        result = prime * result +
+                 ((connectionSettingsIMAP == null) ? 0 : connectionSettingsIMAP.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + Arrays.hashCode(participants);
+        result = prime * result + recipientId;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        MessageInitial other = (MessageInitial) obj;
+        if (!Arrays.equals(bins, other.bins)) return false;
+        if (connectionSettingsIMAP == null) {
+            if (other.connectionSettingsIMAP != null) return false;
+        } else if (!connectionSettingsIMAP.equals(other.connectionSettingsIMAP)) return false;
+        if (name == null) {
+            if (other.name != null) return false;
+        } else if (!name.equals(other.name)) return false;
+        if (!Arrays.equals(participants, other.participants)) return false;
+        if (recipientId != other.recipientId) return false;
+        return true;
     }
 }

@@ -22,7 +22,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Felix Wirth
  */
 public class Perspective5Receive extends Perspective3Receive {
-
+    
     /**
      * Creates a new instance
      * @param app
@@ -35,5 +35,9 @@ public class Perspective5Receive extends Perspective3Receive {
     protected void actionProceed() {
         getApp().actionSecondReceivingDone();
     }
-
+    
+    @Override
+    protected String getStepIdentifier() {
+        return Resources.STEP_2;
+    }
 }

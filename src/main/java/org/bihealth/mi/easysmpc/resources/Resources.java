@@ -65,7 +65,7 @@ public class Resources {
     public static final int       SIZE_DIALOG_SMALL_X                 = 415;
 
     /** Y-size of small dialog */
-    public static final int       SIZE_DIALOG_SMALL_Y                 = 150;
+    public static final int       SIZE_DIALOG_SMALL_Y                 = 225;
 
     /** String indicating start of exchange string */
     public static final String    MESSAGE_START_TAG               = "BEGIN_PAYLOAD";                              //$NON-NLS-1$
@@ -134,6 +134,15 @@ public class Resources {
         /** SVUID*/
         private static final long serialVersionUID = 1L;            
     }
+    
+    /** Interval to check mail box automatically */
+    public static final int INTERVAL_CHECK_MAILBOX_MILLISECONDS   = 1000;
+    
+    /** Step 1 identifier */
+    public static final String STEP_1                             = "_step1";
+    
+    /** Step 2 identifier */
+    public static final String STEP_2                             = "_step2";
     
     /**
      * Returns all available languages

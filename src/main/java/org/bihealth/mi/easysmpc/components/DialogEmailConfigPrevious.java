@@ -56,7 +56,7 @@ public class DialogEmailConfigPrevious extends JDialog {
     private JList<ConnectionSettingsIMAP> list;
     /** Result */
     private ConnectionSettingsIMAP result;
-    // TODO rather an anonymous inner class?
+
     /** Allows to set a custom text for each object in the list */
     private class CustomRenderer extends DefaultListCellRenderer {
         /** SVUID */
@@ -83,12 +83,13 @@ public class DialogEmailConfigPrevious extends JDialog {
      * Create a new instance
      * 
      * @param parent Component to set the location of JDialog relative to
+     * @throws IOException 
+     * @throws ClassNotFoundException 
      */
-    public DialogEmailConfigPrevious(JFrame parent) {
+    public DialogEmailConfigPrevious(JFrame parent) throws ClassNotFoundException, IOException {
 
         // Dialog properties
-        //TODO Size
-        this.setSize(Resources.SIZE_DIALOG_SMALL_X, Resources.SIZE_DIALOG_SMALL_Y + 50);
+        this.setSize(Resources.SIZE_DIALOG_SMALL_X - 125, Resources.SIZE_DIALOG_SMALL_Y);
         this.setLocationRelativeTo(parent);
         this.setTitle(Resources.getString("EmailConfig.17"));
         this.getContentPane().setLayout(new BorderLayout());
@@ -145,8 +146,10 @@ public class DialogEmailConfigPrevious extends JDialog {
      * Return all existing connection settings from preferences
      * 
      * @return
+     * @throws IOException 
+     * @throws ClassNotFoundException 
      */
-    private ConnectionSettingsIMAP[] getConnectionSettingFromPreferences() {
+    private ConnectionSettingsIMAP[] getConnectionSettingFromPreferences() throws ClassNotFoundException, IOException {
         // Prepare
         Preferences userPreferences = Preferences.userRoot().node(this.getClass().getPackage().getName());
         HashMapStringConnectionSettingsIMAP connectionSettingsMap;
@@ -156,22 +159,16 @@ public class DialogEmailConfigPrevious extends JDialog {
             return null;
         }
         
-        // Read from Preferences
-        try {
-            ByteArrayInputStream in = new ByteArrayInputStream(userPreferences.getByteArray(Resources.CONNECTION_SETTINGS_MAP, null));
-            Object o = new ObjectInputStream(in).readObject();
-            if (!(o instanceof HashMapStringConnectionSettingsIMAP)) {
-                throw new IOException("Existing connection settings map can not be read");
-            }
-            connectionSettingsMap = (HashMapStringConnectionSettingsIMAP) o;
-            
-            // Return
-            return connectionSettingsMap.values().toArray(new ConnectionSettingsIMAP[connectionSettingsMap.size()]);
-        } catch (Exception e) {
-            // TODO If this remains add proper error handling in constructor of class
-            e.printStackTrace();
+        // Read from preferences
+        ByteArrayInputStream in = new ByteArrayInputStream(userPreferences.getByteArray(Resources.CONNECTION_SETTINGS_MAP, null));
+        Object o = new ObjectInputStream(in).readObject();
+        if (!(o instanceof HashMapStringConnectionSettingsIMAP)) {
+            throw new IOException("Existing connection settings map can not be read");
         }
-        return null;
+        connectionSettingsMap = (HashMapStringConnectionSettingsIMAP) o;
+        
+        // Return
+        return connectionSettingsMap.values().toArray(new ConnectionSettingsIMAP[connectionSettingsMap.size()]);
     }
 
     /**

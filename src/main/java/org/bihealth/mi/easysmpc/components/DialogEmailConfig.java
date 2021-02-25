@@ -77,9 +77,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     public DialogEmailConfig(JFrame parent) {
 
         // Dialog properties
-        //TODO Size
         this.parent = parent;
-        this.setSize(Resources.SIZE_DIALOG_SMALL_X, Resources.SIZE_DIALOG_SMALL_Y + 75);
+        this.setSize(Resources.SIZE_DIALOG_SMALL_X, Resources.SIZE_DIALOG_SMALL_Y);
         this.setLocationRelativeTo(this.parent);
         this.setTitle(Resources.getString("EmailConfig.0"));
         this.getContentPane().setLayout(new BorderLayout());
@@ -137,7 +136,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         buttonLoadPrevious.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                setFieldsFromConnectionSettings(new DialogEmailConfigPrevious(parent).showDialog());
+                actionLoadPreviousConfig();
             }
         });
         
@@ -172,6 +171,17 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     }
     
     /**
+     * Sets fields from previous configurations
+     */
+    protected void actionLoadPreviousConfig() {
+        try {
+            setFieldsFromConnectionSettings(new DialogEmailConfigPrevious(parent).showDialog());
+        } catch (ClassNotFoundException | IOException e) {
+            JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.18"), Resources.getString("EmailConfig.17"), JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
      * Create a new instance
      * 
      * @param connectionsSettings to fill as default in the fields
@@ -202,7 +212,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * Action check connection
      */
     protected void actionCheckConnection() {
-        //TODO non-shared mailbox
         try {
             new ConnectionIMAP(connectionSettingsFromEntries(), true);
             buttonOK.setEnabled(true);

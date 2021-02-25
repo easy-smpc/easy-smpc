@@ -38,6 +38,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.http.client.utils.URIBuilder;
+import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantSendMail;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
@@ -64,8 +66,11 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     /** Proceed button */
     private JButton            proceed;
 
-    /** Send button */
-    private JButton            send;    
+    /** Send button manual */
+    private JButton            sendAllManual;
+    
+    /** Send button automatic */
+    private JButton            resendAllAutomatic;
 
     /**
      * Creates the perspective
@@ -101,13 +106,26 @@ public class Perspective2Send extends Perspective implements ChangeListener {
          // Check clickable send all mails button and save button
          boolean messagesUnsent = getApp().getModel().messagesUnsent();
          this.proceed.setEnabled(!messagesUnsent);
-         this.send.setEnabled(messagesUnsent);  
+         this.sendAllManual.setEnabled(messagesUnsent);
+         this.resendAllAutomatic.setEnabled(messagesUnsent && isAutomaticProcessingEnabled());
+
          // Check buttons clickable
          for (Component c : this.participants.getComponents()) {
                  ((EntryParticipantSendMail) c).setButtonEnabled(isMailButtonClickable(c));
              }
      }
     
+    /**
+     * Indicates whether the automatic processing enabled
+     * 
+     * @return enabled
+     */
+    private boolean isAutomaticProcessingEnabled() {
+        // Return if automatic connection is enabled and it is not initial sending of study creator
+        return getApp().getModel().connectionSettingsIMAP != null &&
+               !(getApp().getModelState() == StudyState.INITIAL_SENDING);
+    }
+
     /**
      * Returns the exchange string for the given entry
      * 
@@ -158,9 +176,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     
      /**
      * Sends an e-mail to the participant entry
+     * 
      * @param list
      */
-    protected void actionSendMail(List<EntryParticipantSendMail> list) {
+    protected void actionSendMailManual(List<EntryParticipantSendMail> list) {
         try {
             
             // For each entry
@@ -188,18 +207,82 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 Desktop.getDesktop().mail(new URI(builder.toString().replace("+", "%20").replace(":/", ":")));
             }
 
-            // Send a dialog to confirm mail sending          
+            // Send a dialog to confirm mail sending
             if (JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendMailGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
                 for (EntryParticipantSendMail entry : list) {
                     int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
                     getApp().actionMarkMessageSent(index);
                 }
+                // Persist changes
+                getApp().actionSave();
             }
 
         } catch (IOException | URISyntaxException e) {
             JOptionPane.showMessageDialog(this.getPanel(), Resources.getString("PerspectiveSend.mailToError"), Resources.getString("PerspectiveSend.mailToErrorTitle"), JOptionPane.ERROR_MESSAGE);
         }
         this.stateChanged(new ChangeEvent(this));
+    }
+    
+    /**
+     * Sends an e-mail to the participant entry automatically
+     * 
+     * @param list
+     */
+    protected void actionSendMailAutomatic(List<EntryParticipantSendMail> list) {
+        try {
+            if (getApp().getEMailBus() == null) {
+                throw new BusException("Unable to obtain e-mail bus");
+            }
+            boolean messageSent = false;
+            for (EntryParticipantSendMail entry : list) {
+                // Send message
+                getApp().getEMailBus()
+                        .send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
+                              new Scope(getApp().getModel().studyUID + getStepIdentifier()),
+                              new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
+                                                                      entry.getRightValue()));
+
+                // Mark message sent
+                int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
+                getApp().actionMarkMessageSent(index);
+                messageSent = true;
+            }
+            // Persist changes
+            if (messageSent) {
+                getApp().actionSave();
+                }
+        } catch (BusException | IOException e) {
+            JOptionPane.showMessageDialog(getPanel(),
+                                          Resources.getString("PerspectiveSend.sendAutomaticError"),
+                                          Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
+                                          JOptionPane.ERROR_MESSAGE);
+        }
+        this.stateChanged(new ChangeEvent(this));
+    }
+
+    
+    /**
+     * Returns an identifier for the current step
+     * 
+     * @return
+     */
+    protected String getStepIdentifier() {
+        return Resources.STEP_1;
+    }
+
+    /**
+     * List all participants with unsent messages
+     * 
+     * @return list of participants
+     */
+    private List<EntryParticipantSendMail> listUnsent() {
+        List<EntryParticipantSendMail> list = new ArrayList<>();
+        for (Component c : participants.getComponents()) {
+            if (!isOwnEntry(c) && unsentMessages(c) ) {
+                list.add((EntryParticipantSendMail)  c);                        
+            }
+        }
+        return list;
     }
 
     /**
@@ -233,23 +316,27 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                                            TitledBorder.DEFAULT_POSITION));
         panel.add(pane, BorderLayout.CENTER);    
            
-        // Send all e-mails button and proceed button
+        // Send all e-mails button manually
         JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(2, 1));
-        send = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButton"));
-        send.addActionListener(new ActionListener() {            
+        buttonsPane.setLayout(new GridLayout(3, 1));
+        sendAllManual = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButtonManual"));
+        sendAllManual.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<EntryParticipantSendMail> list = new ArrayList<>();
-                for (Component c : participants.getComponents()) {
-                    if (!isOwnEntry(c) && unsentMessages(c) ) {
-                        list.add((EntryParticipantSendMail)  c);                        
-                    }
-                }
-                actionSendMail(list);
+                actionSendMailManual(listUnsent());
             }
         });
-        buttonsPane.add(send, 0, 0);
+        buttonsPane.add(sendAllManual, 0, 0);
+        // Send all e-mails automatically button
+        resendAllAutomatic = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButtonAutomatic"));
+        resendAllAutomatic.addActionListener(new ActionListener() {            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionSendMailAutomatic(listUnsent());
+            }
+        });
+        buttonsPane.add(resendAllAutomatic, 0, 1);
+        // proceed button
         proceed = new JButton(Resources.getString("PerspectiveSend.proceed"));
         proceed.addActionListener(new ActionListener() {
             @Override
@@ -257,7 +344,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 actionProceed();
             }
         });
-        buttonsPane.add(proceed, 0, 1);
+        buttonsPane.add(proceed, 0, 2);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
@@ -279,11 +366,17 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 public void actionPerformed(ActionEvent e) {
                     List<EntryParticipantSendMail> list = new ArrayList<>();
                     list.add(entry);
-                    actionSendMail(list);
+                    actionSendMailManual(list);
                 }
             });
             i++;
         }
+        
+        // Send e-mails automatically if enabled 
+        if (isAutomaticProcessingEnabled()) {
+            actionSendMailAutomatic(listUnsent());
+        }
+        
         // Update GUI
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();

@@ -192,7 +192,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         }
 
         // Initialize study
-        getApp().actionCreateDone(this.title.getText(), participants.toArray(new Participant[participants.size()]), bins.toArray(new Bin[bins.size()]));
+        getApp().actionCreateDone(this.title.getText(), participants.toArray(new Participant[participants.size()]), bins.toArray(new Bin[bins.size()]), this.emailConnectionSettings);
     }
 
     /**

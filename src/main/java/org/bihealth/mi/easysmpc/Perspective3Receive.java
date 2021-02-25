@@ -22,6 +22,7 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EtchedBorder;
@@ -29,6 +30,10 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.Message;
+import org.bihealth.mi.easybus.MessageListener;
+import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmark;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
@@ -46,7 +51,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  * @author Felix Wirth
  */
 public class Perspective3Receive extends Perspective implements ChangeListener, ActionListener {
-
+    
     /** Panel for participants */
     private ScrollablePanel    participants;
     
@@ -55,7 +60,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     
     /** Proceed button */
     private JButton            proceed;
-
 
     /**
      * Creates the perspective
@@ -85,6 +89,48 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         new ImportClipboard(this);
     }    
     
+    /**
+     * Start the automatic import of e-mails if necessary
+     */
+    private void startAutomatedMailImport() {        
+        try {
+            if (getApp().getEMailBus() == null) {
+                throw new BusException("Unable to obtain e-mail bus");
+            }
+            // Add listener to process message from e-mail
+            getApp().getEMailBus().receive(new Scope(getApp().getModel().studyUID + getStepIdentifier()),
+                        new org.bihealth.mi.easybus.Participant(getApp().getModel()
+                                                                        .getParticipantFromId(getApp().getModel().ownId).name,
+                                                                getApp().getModel()
+                                                                        .getParticipantFromId(getApp().getModel().ownId).emailAddress),
+                        new MessageListener() {
+                            @Override
+                            public void receive(Message message) {
+                                String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
+                                if (getApp().isMessageShareResultValid(messageStripped)) {
+                                    getApp().setMessageShare(messageStripped);
+                                    stateChanged(new ChangeEvent(this));
+                                    getApp().actionSave();
+                                }
+                            }
+                        });
+        } catch (IllegalArgumentException | BusException e) {
+            JOptionPane.showMessageDialog(getPanel(),
+                                          Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
+                                          Resources.getString("PerspectiveReceive.AutomaticEmail"),
+                                          JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    /**
+     * Returns an identifier for the current step
+     * 
+     * @return
+     */
+    protected String getStepIdentifier() {
+        return Resources.STEP_1;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         getApp().actionReceiveMessage();
@@ -120,6 +166,16 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             if (!b.isCompleteForParticipantId(participantId)) return false;
         }
         return true;
+    }
+    
+    /**
+     * Indicates whether the automatic processing enabled
+     * 
+     * @return enabled
+     */
+    private boolean isAutomaticProcessingEnabled() {
+        // Return if automatic connection is enabled
+        return getApp().getModel().connectionSettingsIMAP != null;
     }
     
     /**
@@ -205,6 +261,13 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                                                             currentParticipant.emailAddress);
             participants.add(entry);
         }
+        
+        // TODO probably add de-initalization to shut-down once resp. receive perspective is closed
+        // Start import reading e-mails automatically if enabled 
+        if (isAutomaticProcessingEnabled()) {
+            startAutomatedMailImport();
+        }
+        
         // Update GUI
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();

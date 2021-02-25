@@ -37,6 +37,10 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.implementations.email.BusEmail;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
+import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
@@ -49,8 +53,8 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 import com.formdev.flatlaf.FlatLightLaf;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
-import de.tu_darmstadt.cbs.emailsmpc.MessageInitial;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
+import de.tu_darmstadt.cbs.emailsmpc.MessageInitial;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 import de.tu_darmstadt.cbs.emailsmpc.Study;
 import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
@@ -103,6 +107,8 @@ public class App extends JFrame {
     private List<Perspective> perspectives = new ArrayList<Perspective>();
     /** Interim save menu item */
     private JMenuItem jmiInterimSave;
+    /** Bus for automatic e-mail processing */
+    private BusEmail bus;
 
     /**
      * Creates a new instance
@@ -514,13 +520,14 @@ public class App extends JFrame {
      * Called when action create is done
      * @param participants
      * @param bins
+     * @param connectionSettings 
      */
-    protected void actionCreateDone(String title, Participant[] participants, Bin[] bins) {
+    protected void actionCreateDone(String title, Participant[] participants, Bin[] bins, ConnectionSettingsIMAP connectionSettingsIMAP) {
 
         // Pass over bins and participants
         Study snapshot = this.beginTransaction();
         try {
-            model.toInitialSending(title, participants, bins);
+            model.toInitialSending(title, participants, bins, connectionSettingsIMAP);
             if (actionSave()) {
                 this.showPerspective(Perspective2Send.class);
             } else {
@@ -750,11 +757,11 @@ public class App extends JFrame {
         try {
             this.model.toFinished();
             this.model.saveProgram();
+            this.showPerspective(Perspective6Result.class);
         } catch (Exception e) {
             this.rollback(snapshot);
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
         }
-        this.showPerspective(Perspective6Result.class);
     }
 
     /**
@@ -822,5 +829,20 @@ public class App extends JFrame {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
             }
         }
+    }
+    
+    /**
+     * Returns the bus
+     * 
+     * @return the bus
+     * @throws BusException 
+     */
+    public BusEmail getEMailBus() throws BusException {
+        if ((this.bus == null || !this.bus.isAlive()) &&
+            this.model.connectionSettingsIMAP != null) {
+            this.bus = new BusEmail(new ConnectionIMAP(this.model.connectionSettingsIMAP, true),
+                                    Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
+        }
+        return this.bus;
     }
 }
