@@ -106,7 +106,9 @@ public class DialogEmailConfigPrevious extends JDialog {
         list.setCellRenderer(new CustomRenderer());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);        
         // Add
-        central.add(new JScrollPane(list));
+        central.add(new JScrollPane(list,
+                                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                    JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
         this.getContentPane().add(central, BorderLayout.CENTER);        
         
         // Buttons             
