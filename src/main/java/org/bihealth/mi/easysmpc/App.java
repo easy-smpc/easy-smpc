@@ -40,7 +40,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
-import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
@@ -522,12 +522,12 @@ public class App extends JFrame {
      * @param bins
      * @param connectionSettings 
      */
-    protected void actionCreateDone(String title, Participant[] participants, Bin[] bins, ConnectionSettingsIMAP connectionSettingsIMAP) {
+    protected void actionCreateDone(String title, Participant[] participants, Bin[] bins, ConnectionIMAPSettings connectionIMAPSettings) {
 
         // Pass over bins and participants
         Study snapshot = this.beginTransaction();
         try {
-            model.toInitialSending(title, participants, bins, connectionSettingsIMAP);
+            model.toInitialSending(title, participants, bins, connectionIMAPSettings);
             if (actionSave()) {
                 this.showPerspective(Perspective2Send.class);
             } else {
@@ -839,8 +839,8 @@ public class App extends JFrame {
      */
     public BusEmail getEMailBus() throws BusException {
         if ((this.bus == null || !this.bus.isAlive()) &&
-            this.model.connectionSettingsIMAP != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.model.connectionSettingsIMAP, true),
+            this.model.connectionIMAPSettings != null) {
+            this.bus = new BusEmail(new ConnectionIMAP(this.model.connectionIMAPSettings, true),
                                     Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
         }
         return this.bus;

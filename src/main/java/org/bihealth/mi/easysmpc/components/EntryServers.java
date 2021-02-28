@@ -13,10 +13,9 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
-import java.util.regex.Pattern;
-
 import javax.swing.JPanel;
 
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -27,10 +26,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class EntryServers extends ComponentEntry {
     
     /** SVID */
-    private static final long serialVersionUID = 466453564994174241L;
-    /** Regex to check dns validity */
-    private static final Pattern regex = Pattern.compile("^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]))*$");
-    
+    private static final long serialVersionUID = 466453564994174241L;    
     /**
      * @param leftString
      * @param leftValue
@@ -49,7 +45,12 @@ public class EntryServers extends ComponentEntry {
               new ComponentTextFieldValidator() {
                     @Override
                     public boolean validate(String text) {
-                        return regex.matcher(text).matches();
+                        try {
+                            ConnectionIMAPSettings.checkDNSName(text);
+                            return true;
+                        } catch (IllegalArgumentException e) {
+                            return false;
+                        }
                     }
                 }, 
               Resources.getString("EmailConfig.4"), 
@@ -58,7 +59,12 @@ public class EntryServers extends ComponentEntry {
               new ComponentTextFieldValidator() {
                 @Override
                 public boolean validate(String text) {
-                    return regex.matcher(text).matches();
+                    try {
+                        ConnectionIMAPSettings.checkDNSName(text);
+                        return true;
+                    } catch (IllegalArgumentException e) {
+                        return false;
+                    }
                 }
               },
               false);

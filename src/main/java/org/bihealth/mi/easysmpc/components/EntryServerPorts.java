@@ -15,6 +15,7 @@ package org.bihealth.mi.easysmpc.components;
 
 import javax.swing.JPanel;
 
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -41,7 +42,13 @@ public class EntryServerPorts extends ComponentEntry {
               new ComponentTextFieldValidator() {
                     @Override
                     public boolean validate(String text) {
-                        return checkPortEntryValid(text);
+                        try {
+                            ConnectionIMAPSettings.checkPort(Integer.parseInt(text));
+                            return true;
+                        }
+                        catch (Exception e) {
+                            return false;
+                        }
                     }
                 }, 
               Resources.getString("EmailConfig.16"), 
@@ -50,7 +57,13 @@ public class EntryServerPorts extends ComponentEntry {
               new ComponentTextFieldValidator() {
                 @Override
                 public boolean validate(String text) {
-                    return checkPortEntryValid(text);
+                    try {
+                        ConnectionIMAPSettings.checkPort(Integer.parseInt(text));
+                        return true;
+                    }
+                    catch (Exception e) {
+                        return false;
+                    }
                 }
               },
               false);
@@ -59,26 +72,5 @@ public class EntryServerPorts extends ComponentEntry {
     @Override
     protected JPanel createAdditionalControls() {
         return null;
-    }
-
-    /**
-     * Check if a string is a valid port number
-     * 
-     * @param text
-     * @return
-     */
-    public static boolean checkPortEntryValid(String text) {
-        try {
-            int portNumber = Integer.parseInt(text);
-            if (portNumber > 1 || portNumber < 65535) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
-        catch (NumberFormatException e) {
-            return false;
-        }
     }
 }

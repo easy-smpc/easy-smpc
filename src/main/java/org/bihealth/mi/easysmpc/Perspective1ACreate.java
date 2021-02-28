@@ -40,7 +40,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
@@ -79,7 +79,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private JCheckBox automatedEmailbox;
     
     /** Details to connect to e-mail servers */
-    private ConnectionSettingsIMAP emailConnectionSettings = null;
+    private ConnectionIMAPSettings emailConnectionSettings = null;
 
     
     /**

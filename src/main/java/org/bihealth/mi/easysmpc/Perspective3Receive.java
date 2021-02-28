@@ -175,7 +175,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     private boolean isAutomaticProcessingEnabled() {
         // Return if automatic connection is enabled
-        return getApp().getModel().connectionSettingsIMAP != null;
+        return getApp().getModel().connectionIMAPSettings != null;
     }
     
     /**

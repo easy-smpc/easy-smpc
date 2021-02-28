@@ -41,9 +41,9 @@ import javax.swing.event.ChangeListener;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
-import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
-import org.bihealth.mi.easysmpc.resources.Resources.HashMapStringConnectionSettingsIMAP;
+import org.bihealth.mi.easysmpc.resources.Resources.HashMapStringConnectionIMAPSettings;
 
 /**
  * Dialog for entering details of a e-mail box
@@ -64,10 +64,13 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private JButton buttonCheckConnection;
     /** Button*/
     private JButton buttonOK;
+    /** Button */
+    private JButton buttonLoadPrevious;
     /** Result */
-    private ConnectionSettingsIMAP result;
+    private ConnectionIMAPSettings result;
     /** Parent frame */
     private JFrame parent;
+
         
     /**
      * Create a new instance
@@ -110,14 +113,14 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         buttonsPane.setLayout(new GridLayout(4, 1));      
         JPanel okCancelPane = new JPanel();
         okCancelPane.setLayout(new GridLayout(1, 2));
-        JButton buttonDetermineConfig = new JButton(Resources.getString("EmailConfig.8"));
-        JButton buttonLoadPrevious = new JButton(Resources.getString("EmailConfig.17"));
+        JButton buttonGuessConfig = new JButton(Resources.getString("EmailConfig.8"));
+        buttonLoadPrevious = new JButton(Resources.getString("EmailConfig.17"));
         this.buttonCheckConnection = new JButton(Resources.getString("EmailConfig.5"));
         this.buttonOK = new JButton(Resources.getString("EmailConfig.6"));
         JButton buttonCancel = new JButton(Resources.getString("EmailConfig.7"));
         // Add
         buttonsPane.add(buttonLoadPrevious);
-        buttonsPane.add(buttonDetermineConfig);
+        buttonsPane.add(buttonGuessConfig);
         buttonsPane.add(buttonCheckConnection);
         okCancelPane.add(buttonCancel);
         okCancelPane.add(buttonOK);
@@ -126,10 +129,10 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         this.stateChanged(new ChangeEvent(this));
         
         // Listeners
-        buttonDetermineConfig.addActionListener(new ActionListener() {
+        buttonGuessConfig.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionDetermineConfig();
+                actionGuessConfig();
             }
         });
         
@@ -187,7 +190,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * @param connectionsSettings to fill as default in the fields
      * @param parent Component to set the location of JDialog relative to
      */
-    public DialogEmailConfig(ConnectionSettingsIMAP connectionsSettings, JFrame parent) {
+    public DialogEmailConfig(ConnectionIMAPSettings connectionsSettings, JFrame parent) {
         this(parent);
         setFieldsFromConnectionSettings(connectionsSettings);
     }
@@ -197,14 +200,14 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * 
      * @param connectionsSettings
      */
-    private void setFieldsFromConnectionSettings(ConnectionSettingsIMAP connectionsSettings) {
+    private void setFieldsFromConnectionSettings(ConnectionIMAPSettings connectionsSettings) {
         if (connectionsSettings != null) {
             emailPasswordEntry.setLeftValue(connectionsSettings.getEmailAddress());
             emailPasswordEntry.setRightValue(connectionsSettings.getPassword());
-            serversEntry.setLeftValue(connectionsSettings.getImapServer());
-            serversEntry.setRightValue(connectionsSettings.getSmtpServer());
-            serverPortsEntry.setLeftValue(Integer.toString(connectionsSettings.getImapPort()));
-            serverPortsEntry.setRightValue(Integer.toString(connectionsSettings.getSmtpPort()));
+            serversEntry.setLeftValue(connectionsSettings.getIMAPServer());
+            serversEntry.setRightValue(connectionsSettings.getSMTPServer());
+            serverPortsEntry.setLeftValue(Integer.toString(connectionsSettings.getIMAPPort()));
+            serverPortsEntry.setRightValue(Integer.toString(connectionsSettings.getSMTPPort()));
         }
     }
 
@@ -213,7 +216,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     protected void actionCheckConnection() {
         try {
-            new ConnectionIMAP(connectionSettingsFromEntries(), true);
+            new ConnectionIMAP(connectionSettingsFromEntries(), true).checkConnection();
             buttonOK.setEnabled(true);
         } catch (BusException e) {
             JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.14"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
@@ -223,7 +226,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /**
      * Show this dialog
      */
-    public ConnectionSettingsIMAP showDialog(){        
+    public ConnectionIMAPSettings showDialog(){        
         this.setModal(true);
         this.setVisible(true);
         return this.result;
@@ -236,8 +239,17 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     public void stateChanged(ChangeEvent e) {
         this.buttonCheckConnection.setEnabled(this.areValuesValid());
         this.buttonOK.setEnabled(false);
+        this.buttonLoadPrevious.setEnabled((arePreviousConfigsExisting()));
     }
       
+    /**
+     * Check if previous configuration exist
+     * @return
+     */
+    private boolean arePreviousConfigsExisting() {
+        return DialogEmailConfigPrevious.getConnectionSettingFromPreferences() != null ? true : false;
+    }
+
     /**
      * Checks string for validity
      * @return
@@ -267,23 +279,23 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * @throws IOException 
      * @throws ClassNotFoundException 
      */
-    private void storeConnectionSettingsInPreferences(ConnectionSettingsIMAP connectionSettings) throws ClassNotFoundException, IOException {
+    private void storeConnectionSettingsInPreferences(ConnectionIMAPSettings connectionSettings) throws ClassNotFoundException, IOException {
         // Prepare
         Preferences userPreferences = Preferences.userRoot().node(this.getClass().getPackage().getName());
-        HashMapStringConnectionSettingsIMAP connectionSettingsMap;
+        HashMapStringConnectionIMAPSettings connectionSettingsMap;
         // TODO remove password?
         
         // Load connectionSettingsMap from preference or create
-        if (userPreferences.getByteArray(Resources.CONNECTION_SETTINGS_MAP, null) != null) {
+        if (DialogEmailConfigPrevious.getConnectionSettingFromPreferences() != null) {
             ByteArrayInputStream in = new ByteArrayInputStream(userPreferences.getByteArray(Resources.CONNECTION_SETTINGS_MAP, null));
             Object o = new ObjectInputStream(in).readObject();
-            if (!(o instanceof HashMapStringConnectionSettingsIMAP)) {
+            if (!(o instanceof HashMapStringConnectionIMAPSettings)) {
                 throw new IOException("Existing connection settings map can not be read");
             }
-            connectionSettingsMap = (HashMapStringConnectionSettingsIMAP) o;
+            connectionSettingsMap = (HashMapStringConnectionIMAPSettings) o;
         }
         else {
-            connectionSettingsMap = new HashMapStringConnectionSettingsIMAP();
+            connectionSettingsMap = new HashMapStringConnectionIMAPSettings();
         }
         
         // Put connection settings
@@ -303,19 +315,18 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * @return connection settings
      * @throws BusException
      */
-    private ConnectionSettingsIMAP connectionSettingsFromEntries() throws BusException {
-        return new ConnectionSettingsIMAP(emailPasswordEntry.getLeftValue(),
-                                                 emailPasswordEntry.getRightValue(),
-                                                 serversEntry.getLeftValue(),
-                                                 Integer.valueOf(serverPortsEntry.getLeftValue()),
-                                                 serversEntry.getRightValue(),
-                                                 Integer.valueOf(serverPortsEntry.getRightValue()));
+    private ConnectionIMAPSettings connectionSettingsFromEntries() throws BusException {
+        return new ConnectionIMAPSettings(emailPasswordEntry.getLeftValue()).setPassword(emailPasswordEntry.getRightValue())
+                                                                            .setIMAPServer(serversEntry.getLeftValue())
+                                                                            .setIMAPPort(Integer.valueOf(serverPortsEntry.getLeftValue()))
+                                                                            .setSMTPServer(serversEntry.getRightValue())
+                                                                            .setSMTPPort(Integer.valueOf(serverPortsEntry.getRightValue()));
     }
     
     /**
      * Action determine e-mail configuration
      */
-    private void actionDetermineConfig() {
+    private void actionGuessConfig() {
         // Check
         if (this.emailPasswordEntry.getLeftValue() == null ||
             !Participant.isEmailValid(this.emailPasswordEntry.getLeftValue())) {
@@ -325,12 +336,17 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
 
         // Try to determine and set
         try {
-            ConnectionSettingsIMAP connectionSettings = new ConnectionSettingsIMAP(this.emailPasswordEntry.getLeftValue());
-            serversEntry.setLeftValue(connectionSettings.getImapServer());
-            serversEntry.setRightValue(connectionSettings.getSmtpServer());
-            serverPortsEntry.setLeftValue(Integer.toString(connectionSettings.getImapPort()));
-            serverPortsEntry.setRightValue(Integer.toString(connectionSettings.getSmtpPort()));
-        } catch (BusException e) {
+            ConnectionIMAPSettings connectionSettings = new ConnectionIMAPSettings(this.emailPasswordEntry.getLeftValue());
+            if (connectionSettings.guess()) {
+                serversEntry.setLeftValue(connectionSettings.getIMAPServer());
+                serversEntry.setRightValue(connectionSettings.getSMTPServer());
+                serverPortsEntry.setLeftValue(Integer.toString(connectionSettings.getIMAPPort()));
+                serverPortsEntry.setRightValue(Integer.toString(connectionSettings.getSMTPPort()));
+            }
+            else {
+                throw new IllegalArgumentException("Configuration could not be guessed");
+            }
+        } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.11"), Resources.getString("EmailConfig.10"), JOptionPane.WARNING_MESSAGE);
         }
     } 

@@ -32,7 +32,7 @@ import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 
-import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 
 /**
  * Accessor class for messages and settings used by the UI
@@ -130,7 +130,7 @@ public class Resources {
     public static final String       CONNECTION_SETTINGS_MAP      = "CONNECTION_SETTINGS_MAP";
     
     /** Class to access connection settings in preferences */
-    public static final class HashMapStringConnectionSettingsIMAP extends HashMap<String, ConnectionSettingsIMAP> {
+    public static final class HashMapStringConnectionIMAPSettings extends HashMap<String, ConnectionIMAPSettings> {
         /** SVUID*/
         private static final long serialVersionUID = 1L;            
     }

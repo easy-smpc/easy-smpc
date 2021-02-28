@@ -122,7 +122,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     private boolean isAutomaticProcessingEnabled() {
         // Return if automatic connection is enabled and it is not initial sending of study creator
-        return getApp().getModel().connectionSettingsIMAP != null &&
+        return getApp().getModel().connectionIMAPSettings != null &&
                !(getApp().getModelState() == StudyState.INITIAL_SENDING);
     }
 

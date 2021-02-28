@@ -25,7 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 
 /**
  * Main class of the API
@@ -114,7 +114,7 @@ public class Study implements Serializable, Cloneable {
     public File filename;
     
     /** The e-mail connection details */
-    public ConnectionSettingsIMAP connectionSettingsIMAP;
+    public ConnectionIMAPSettings connectionIMAPSettings;
 
     /**
      * Instantiates a new app model.
@@ -337,14 +337,14 @@ public class Study implements Serializable, Cloneable {
      * @param name the name
      * @param participants the participants
      * @param bins the bins
-     * @param connectionSettingsIMAP 
+     * @param connectionIMAPSettings 
      * @throws IllegalStateException the illegal state exception
      */
-    public void initializeStudy(String name, Participant[] participants, Bin[] bins, ConnectionSettingsIMAP connectionSettingsIMAP) throws IllegalStateException {
+    public void initializeStudy(String name, Participant[] participants, Bin[] bins, ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException {
         if (!(state == StudyState.NONE || state == StudyState.STARTING))
             throw new IllegalStateException("Unable to initialize study at state" + state);
         this.name = name;
-        this.connectionSettingsIMAP = connectionSettingsIMAP;
+        this.connectionIMAPSettings = connectionIMAPSettings;
         numParticipants = participants.length;
         unsentMessages = new Message[numParticipants];
         for (Bin bin : bins) {
@@ -609,13 +609,13 @@ public class Study implements Serializable, Cloneable {
      * @param name the name
      * @param participants the participants
      * @param bins the bins
-     * @param connectionSettingsIMAP 
+     * @param connectionIMAPSettings 
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
     // Note, that bins need to be initialized and have shared values
-    public void toInitialSending(String name, Participant[] participants, Bin[] bins, ConnectionSettingsIMAP connectionSettingsIMAP) throws IllegalStateException, IOException {
-        initializeStudy(name, participants, bins, connectionSettingsIMAP);
+    public void toInitialSending(String name, Participant[] participants, Bin[] bins, ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException, IOException {
+        initializeStudy(name, participants, bins, connectionIMAPSettings);
         advanceState(StudyState.INITIAL_SENDING);
     }
 

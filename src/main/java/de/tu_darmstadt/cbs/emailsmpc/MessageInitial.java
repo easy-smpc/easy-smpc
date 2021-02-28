@@ -24,7 +24,7 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 
-import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 
 import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 
@@ -70,7 +70,7 @@ public class MessageInitial implements Serializable {
         model.participants = msg.participants;
         model.numParticipants = msg.participants.length;
         model.ownId = msg.recipientId;
-        model.connectionSettingsIMAP = msg.connectionSettingsIMAP;
+        model.connectionIMAPSettings = msg.connectionIMAPSettings;
         model.state = StudyState.PARTICIPATING;
         model.bins = new Bin[msg.bins.length];
         for (int i = 0; i < msg.bins.length; i++) {
@@ -92,7 +92,7 @@ public class MessageInitial implements Serializable {
     public int recipientId;
     
     /** Connections settings for automatic mail processing. */
-    public ConnectionSettingsIMAP connectionSettingsIMAP;
+    public ConnectionIMAPSettings connectionIMAPSettings;
     
     /** The study UID. */
     public String studyUID;
@@ -108,7 +108,7 @@ public class MessageInitial implements Serializable {
         this.name = model.name;
         this.participants = model.participants;
         this.recipientId = recipientId;
-        this.connectionSettingsIMAP = model.connectionSettingsIMAP; 
+        this.connectionIMAPSettings = model.connectionIMAPSettings; 
         this.bins = new MessageBin[model.bins.length];
         for (int i = 0; i < model.bins.length; i++) {
             bins[i] = new MessageBin(model.bins[i], recipientId);
@@ -135,7 +135,7 @@ public class MessageInitial implements Serializable {
         int result = 1;
         result = prime * result + Arrays.hashCode(bins);
         result = prime * result +
-                 ((connectionSettingsIMAP == null) ? 0 : connectionSettingsIMAP.hashCode());
+                 ((connectionIMAPSettings == null) ? 0 : connectionIMAPSettings.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + Arrays.hashCode(participants);
         result = prime * result + recipientId;
@@ -149,9 +149,9 @@ public class MessageInitial implements Serializable {
         if (getClass() != obj.getClass()) return false;
         MessageInitial other = (MessageInitial) obj;
         if (!Arrays.equals(bins, other.bins)) return false;
-        if (connectionSettingsIMAP == null) {
-            if (other.connectionSettingsIMAP != null) return false;
-        } else if (!connectionSettingsIMAP.equals(other.connectionSettingsIMAP)) return false;
+        if (connectionIMAPSettings == null) {
+            if (other.connectionIMAPSettings != null) return false;
+        } else if (!connectionIMAPSettings.equals(other.connectionIMAPSettings)) return false;
         if (name == null) {
             if (other.name != null) return false;
         } else if (!name.equals(other.name)) return false;

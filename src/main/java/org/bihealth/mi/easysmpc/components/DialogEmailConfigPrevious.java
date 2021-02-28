@@ -39,9 +39,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
-import org.bihealth.mi.easysmpc.resources.Resources.HashMapStringConnectionSettingsIMAP;
+import org.bihealth.mi.easysmpc.resources.Resources.HashMapStringConnectionIMAPSettings;
 
 /**
  * Dialog for entering details of a e-mail box
@@ -53,9 +53,9 @@ public class DialogEmailConfigPrevious extends JDialog {
     /** SVUID */
     private static final long serialVersionUID = 640267685135868545L;
     /** List to select */
-    private JList<ConnectionSettingsIMAP> list;
+    private JList<ConnectionIMAPSettings> list;
     /** Result */
-    private ConnectionSettingsIMAP result;
+    private ConnectionIMAPSettings result;
 
     /** Allows to set a custom text for each object in the list */
     private class CustomRenderer extends DefaultListCellRenderer {
@@ -73,7 +73,7 @@ public class DialogEmailConfigPrevious extends JDialog {
                                                                        index,
                                                                        isSelected,
                                                                        cellHasFocus);
-            label.setText(((ConnectionSettingsIMAP) value).getEmailAddress());
+            label.setText(((ConnectionIMAPSettings) value).getEmailAddress());
             return label;
         }
     };
@@ -151,10 +151,10 @@ public class DialogEmailConfigPrevious extends JDialog {
      * @throws IOException 
      * @throws ClassNotFoundException 
      */
-    private ConnectionSettingsIMAP[] getConnectionSettingFromPreferences() throws ClassNotFoundException, IOException {
+    public static ConnectionIMAPSettings[] getConnectionSettingFromPreferences() {
         // Prepare
-        Preferences userPreferences = Preferences.userRoot().node(this.getClass().getPackage().getName());
-        HashMapStringConnectionSettingsIMAP connectionSettingsMap;
+        Preferences userPreferences = Preferences.userRoot().node(DialogEmailConfigPrevious.class.getPackage().getName());
+        HashMapStringConnectionIMAPSettings connectionSettingsMap;
         
         // Check
         if (userPreferences.getByteArray(Resources.CONNECTION_SETTINGS_MAP, null) == null){
@@ -163,20 +163,27 @@ public class DialogEmailConfigPrevious extends JDialog {
         
         // Read from preferences
         ByteArrayInputStream in = new ByteArrayInputStream(userPreferences.getByteArray(Resources.CONNECTION_SETTINGS_MAP, null));
-        Object o = new ObjectInputStream(in).readObject();
-        if (!(o instanceof HashMapStringConnectionSettingsIMAP)) {
-            throw new IOException("Existing connection settings map can not be read");
+        Object o;
+        try {
+            o = new ObjectInputStream(in).readObject();
+            if (!(o instanceof HashMapStringConnectionIMAPSettings)) {
+                throw new IllegalArgumentException("HashMap of connections settings is not an instance of expected object");
+            }
+            connectionSettingsMap = (HashMapStringConnectionIMAPSettings) o;
+
+            // Return
+            return connectionSettingsMap.values().toArray(new ConnectionIMAPSettings[connectionSettingsMap.size()]);
+
+        } catch (ClassNotFoundException | IOException e) {
+            // If something goes wrong just return
+            return null;
         }
-        connectionSettingsMap = (HashMapStringConnectionSettingsIMAP) o;
-        
-        // Return
-        return connectionSettingsMap.values().toArray(new ConnectionSettingsIMAP[connectionSettingsMap.size()]);
     }
 
     /**
      * Shows this dialog
      */
-    public ConnectionSettingsIMAP showDialog(){        
+    public ConnectionIMAPSettings showDialog(){        
         this.setModal(true);
         this.setVisible(true);
         return this.result;
