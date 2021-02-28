@@ -23,7 +23,6 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * Entry servers
  * 
  * @author Felix Wirth
- *
  */
 public class EntryServers extends ComponentEntry {
     

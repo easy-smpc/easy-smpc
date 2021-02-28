@@ -21,10 +21,8 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * Entry server ports
  * 
  * @author Felix Wirth
- *
  */
 public class EntryServerPorts extends ComponentEntry {
-    
 
     /** SVUID */
     private static final long serialVersionUID = 1074880888679710657L;
@@ -43,13 +41,7 @@ public class EntryServerPorts extends ComponentEntry {
               new ComponentTextFieldValidator() {
                     @Override
                     public boolean validate(String text) {
-                        try {
-                            Integer.parseInt(text);
-                            return true;
-                        }
-                        catch (NumberFormatException e) {
-                            return false;
-                        }
+                        return checkPortEntryValid(text);
                     }
                 }, 
               Resources.getString("EmailConfig.16"), 
@@ -58,12 +50,7 @@ public class EntryServerPorts extends ComponentEntry {
               new ComponentTextFieldValidator() {
                 @Override
                 public boolean validate(String text) {
-                      try {
-                          Integer.parseInt(text);
-                          return true;
-                      } catch (NumberFormatException e) {
-                          return false;
-                      }
+                    return checkPortEntryValid(text);
                 }
               },
               false);
@@ -72,5 +59,26 @@ public class EntryServerPorts extends ComponentEntry {
     @Override
     protected JPanel createAdditionalControls() {
         return null;
+    }
+
+    /**
+     * Check if a string is a valid port number
+     * 
+     * @param text
+     * @return
+     */
+    public static boolean checkPortEntryValid(String text) {
+        try {
+            int portNumber = Integer.parseInt(text);
+            if (portNumber > 1 || portNumber < 65535) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

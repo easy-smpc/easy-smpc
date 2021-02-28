@@ -13,25 +13,20 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
-import java.util.regex.Pattern;
-
 import javax.swing.JPanel;
 
+import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
  * Entry of E-Mail address and password
  * 
  * @author Felix Wirth
- *
  */
 public class EntryEMailPassword extends ComponentEntry {
     
     /** SVUID*/
     private static final long serialVersionUID = -7858252891350611757L;
-    /** Regex to check e-mail validity */
-    private static final Pattern regex = Pattern.compile("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$");
-
     /**
      * @param leftString
      * @param leftValue
@@ -50,7 +45,7 @@ public class EntryEMailPassword extends ComponentEntry {
               new ComponentTextFieldValidator() {
                     @Override
                     public boolean validate(String text) {
-                        return regex.matcher(text).matches();
+                        return Participant.isEmailValid(text);
                     }
                 }, 
               Resources.getString("EmailConfig.2"), 

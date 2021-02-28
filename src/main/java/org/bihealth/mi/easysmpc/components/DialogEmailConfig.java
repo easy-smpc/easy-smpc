@@ -271,6 +271,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         // Prepare
         Preferences userPreferences = Preferences.userRoot().node(this.getClass().getPackage().getName());
         HashMapStringConnectionSettingsIMAP connectionSettingsMap;
+        // TODO remove password?
         
         // Load connectionSettingsMap from preference or create
         if (userPreferences.getByteArray(Resources.CONNECTION_SETTINGS_MAP, null) != null) {
