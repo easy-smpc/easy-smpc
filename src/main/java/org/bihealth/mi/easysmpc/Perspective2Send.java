@@ -32,6 +32,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -230,20 +231,17 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     protected void actionSendMailAutomatic(List<EntryParticipantSendMail> list) {
         try {
-            if (getApp().getEMailBus() == null) {
-                throw new BusException("Unable to obtain e-mail bus");
-            }
             boolean messageSent = false;
             for (EntryParticipantSendMail entry : list) {
                 // Send message
-                getApp().getEMailBus()
+                getApp().getModel().getEMailBus()
                         .send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
-                              new Scope(getApp().getModel().studyUID + getStepIdentifier()),
+                              new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
                               new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
                                                                       entry.getRightValue()));
 
                 // Mark message sent
-                int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
+                int index = Arrays.asList(participants.getComponents()).indexOf(entry);
                 getApp().actionMarkMessageSent(index);
                 messageSent = true;
             }
@@ -257,17 +255,18 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                           Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
                                           JOptionPane.ERROR_MESSAGE);
         }
-        this.stateChanged(new ChangeEvent(this));
+        stateChanged(new ChangeEvent(this));
     }
 
     
     /**
-     * Returns an identifier for the current step
+     * Returns an identifier for the current round of EasySMPC 
+     * This is needed to make sure the correct message are sent to the correct receivers
      * 
-     * @return
+     * @return round
      */
-    protected String getStepIdentifier() {
-        return Resources.STEP_1;
+    protected String getRoundIdentifier() {
+        return Resources.ROUND_1;
     }
 
     /**
@@ -332,7 +331,11 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         resendAllAutomatic.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionSendMailAutomatic(listUnsent());
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        actionSendMailAutomatic(listUnsent());
+                    }
+                  });
             }
         });
         buttonsPane.add(resendAllAutomatic, 0, 1);
@@ -374,7 +377,11 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         
         // Send e-mails automatically if enabled 
         if (isAutomaticProcessingEnabled()) {
-            actionSendMailAutomatic(listUnsent());
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    actionSendMailAutomatic(listUnsent());
+                }
+              });            
         }
         
         // Update GUI

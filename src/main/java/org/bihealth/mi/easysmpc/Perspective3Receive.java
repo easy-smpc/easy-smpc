@@ -50,7 +50,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  * @author Fabian Prasser
  * @author Felix Wirth
  */
-public class Perspective3Receive extends Perspective implements ChangeListener, ActionListener {
+public class Perspective3Receive extends Perspective implements ChangeListener, ActionListener, MessageListener {
     
     /** Panel for participants */
     private ScrollablePanel    participants;
@@ -94,26 +94,13 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     private void startAutomatedMailImport() {        
         try {
-            if (getApp().getEMailBus() == null) {
-                throw new BusException("Unable to obtain e-mail bus");
-            }
             // Add listener to process message from e-mail
-            getApp().getEMailBus().receive(new Scope(getApp().getModel().studyUID + getStepIdentifier()),
+            getApp().getModel().getEMailBus().receive(new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
                         new org.bihealth.mi.easybus.Participant(getApp().getModel()
                                                                         .getParticipantFromId(getApp().getModel().ownId).name,
                                                                 getApp().getModel()
                                                                         .getParticipantFromId(getApp().getModel().ownId).emailAddress),
-                        new MessageListener() {
-                            @Override
-                            public void receive(Message message) {
-                                String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
-                                if (getApp().isMessageShareResultValid(messageStripped)) {
-                                    getApp().setMessageShare(messageStripped);
-                                    stateChanged(new ChangeEvent(this));
-                                    getApp().actionSave();
-                                }
-                            }
-                        });
+                                                                this);
         } catch (IllegalArgumentException | BusException e) {
             JOptionPane.showMessageDialog(getPanel(),
                                           Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
@@ -123,12 +110,13 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     }
     
     /**
-     * Returns an identifier for the current step
+     * Returns an identifier for the current round of EasySMPC 
+     * This is needed to make sure the correct message are sent to the correct receivers
      * 
-     * @return
+     * @return round
      */
-    protected String getStepIdentifier() {
-        return Resources.STEP_1;
+    protected String getRoundIdentifier() {
+        return Resources.ROUND_1;
     }
 
     @Override
@@ -273,4 +261,14 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         getPanel().revalidate();
         getPanel().repaint(); 
     }
+
+    @Override
+    public void receive(Message message) {
+        String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
+        if (getApp().isMessageShareResultValid(messageStripped)) {
+            getApp().setMessageShare(messageStripped);
+            stateChanged(new ChangeEvent(this));
+            getApp().actionSave();
+        }
+    } 
 }

@@ -37,7 +37,7 @@ public class Perspective5Receive extends Perspective3Receive {
     }
     
     @Override
-    protected String getStepIdentifier() {
-        return Resources.STEP_2;
+    protected String getRoundIdentifier() {
+        return Resources.ROUND_2;
     }
 }

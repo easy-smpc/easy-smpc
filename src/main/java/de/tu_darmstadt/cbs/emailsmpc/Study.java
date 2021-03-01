@@ -25,7 +25,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.implementations.email.BusEmail;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
  * Main class of the API
@@ -115,6 +119,9 @@ public class Study implements Serializable, Cloneable {
     
     /** The e-mail connection details */
     public ConnectionIMAPSettings connectionIMAPSettings;
+    
+    /** Bus for automatic e-mail processing */
+    private transient BusEmail bus;
 
     /**
      * Instantiates a new app model.
@@ -893,5 +900,29 @@ public class Study implements Serializable, Cloneable {
         MessageShare data = new MessageShare(this, recipientId);
         Participant recipient = this.participants[recipientId];
         return new Message(ownId, recipient, data.getMessage());
+    }
+    
+    /**
+     * Returns the bus
+     * 
+     * @return the bus
+     * @throws BusException 
+     */
+    public BusEmail getEMailBus() throws BusException {
+        if ((this.bus == null || !this.bus.isAlive()) &&
+            this.connectionIMAPSettings != null) {
+            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true),
+                                    Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
+        }
+        return this.bus;
+    }
+    
+    /**
+     * Stops the bus
+     */
+    public void stopBus() {
+        if (this.bus != null) {
+            this.bus.stop();
+        } 
     }
 }

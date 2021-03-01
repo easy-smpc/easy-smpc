@@ -14,7 +14,6 @@
 package org.bihealth.mi.easysmpc;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -73,7 +72,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private JButton            save;
     
     /** Configure e-mail box*/
-    private Button configEmailboxButton;
+    private JButton configEmailboxButton;
     
     /** Automated, separate e-mail box*/
     private JCheckBox automatedEmailbox;
@@ -389,7 +388,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         });
         
         // Button to configure e-mail
-        configEmailboxButton = new Button(Resources.getString("PerspectiveCreate.OpenEMailConfig"));
+        configEmailboxButton = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfig"));
         configEmailboxButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

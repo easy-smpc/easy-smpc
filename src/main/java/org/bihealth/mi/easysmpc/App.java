@@ -37,9 +37,6 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.implementations.email.BusEmail;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
@@ -107,8 +104,6 @@ public class App extends JFrame {
     private List<Perspective> perspectives = new ArrayList<Perspective>();
     /** Interim save menu item */
     private JMenuItem jmiInterimSave;
-    /** Bus for automatic e-mail processing */
-    private BusEmail bus;
 
     /**
      * Creates a new instance
@@ -452,6 +447,10 @@ public class App extends JFrame {
      * @param perspective
      */
     private void showPerspective(Perspective perspective) {
+        // Stop the bus for automatic processing if running
+        if (this.model != null) {
+            this.model.stopBus();
+        }
         perspective.initialize();
         CardLayout cl = (CardLayout) (cards.getLayout());
         cl.show(cards, perspective.getTitle());
@@ -829,20 +828,5 @@ public class App extends JFrame {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
             }
         }
-    }
-    
-    /**
-     * Returns the bus
-     * 
-     * @return the bus
-     * @throws BusException 
-     */
-    public BusEmail getEMailBus() throws BusException {
-        if ((this.bus == null || !this.bus.isAlive()) &&
-            this.model.connectionIMAPSettings != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.model.connectionIMAPSettings, true),
-                                    Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
-        }
-        return this.bus;
     }
 }

@@ -37,7 +37,7 @@ public class Perspective4Send extends Perspective2Send {
     }
     
     @Override
-    protected String getStepIdentifier() {
-        return Resources.STEP_2;
+    protected String getRoundIdentifier() {
+        return Resources.ROUND_2;
     }
 }

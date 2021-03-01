@@ -139,10 +139,10 @@ public class Resources {
     public static final int INTERVAL_CHECK_MAILBOX_MILLISECONDS   = 1000;
     
     /** Step 1 identifier */
-    public static final String STEP_1                             = "_step1";
+    public static final String ROUND_1                             = "_round1";
     
     /** Step 2 identifier */
-    public static final String STEP_2                             = "_step2";
+    public static final String ROUND_2                             = "_round2";
     
     /**
      * Returns all available languages
