@@ -112,7 +112,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
 
          // Check buttons clickable
          for (Component c : this.participants.getComponents()) {
-                 ((EntryParticipantSendMail) c).setButtonEnabled(isMailButtonClickable(c));
+                 ((EntryParticipantSendMail) c).setButton1Enabled(isAutomaticProcessingEnabled() && isMailButtonClickable(c)); // Button 1 is for automatic sending
+                 ((EntryParticipantSendMail) c).setButton2Enabled(isMailButtonClickable(c));
              }
      }
     
@@ -364,7 +365,15 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                                           currentParticipant.emailAddress,
                                                                           i != getApp().getModel().ownId);
             participants.add(entry);
-            entry.setButtonListener(new ActionListener() {
+            entry.setButton1Listener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    List<EntryParticipantSendMail> list = new ArrayList<>();
+                    list.add(entry);
+                    actionSendMailAutomatic(list);
+                }
+            });
+            entry.setButton2Listener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     List<EntryParticipantSendMail> list = new ArrayList<>();

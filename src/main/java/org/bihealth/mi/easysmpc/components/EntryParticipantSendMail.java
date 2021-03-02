@@ -19,9 +19,10 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * Display participants for sending mail only
  * 
  * @author Felix Wirth
+ * @author Armin Müller
  *
  */
-public class EntryParticipantSendMail extends ComponentEntryOneButton {
+public class EntryParticipantSendMail extends ComponentEntryTwoButtons {
 
     /** SVID */
     private static final long serialVersionUID = 3947342543992289608L;
@@ -51,10 +52,17 @@ public class EntryParticipantSendMail extends ComponentEntryOneButton {
 
     
     /**
-     * Disables button
+     * Disables button 1
      */
-    public void setButtonEnabled(boolean enabled) {
-        this.button.setEnabled(enabled);
+    public void setButton1Enabled(boolean enabled) {
+        this.button1.setEnabled(enabled);
+    }
+    
+    /**
+     * Disables button 2
+     */
+    public void setButton2Enabled(boolean enabled) {
+        this.button2.setEnabled(enabled);
     }
     
     /**
@@ -62,7 +70,16 @@ public class EntryParticipantSendMail extends ComponentEntryOneButton {
      * @return button text
      */
     @Override
-    protected String getText() {
-        return Resources.getString("PerspectiveSend.sendEmailButton");
+    protected String getButton1Text() {
+        return Resources.getString("PerspectiveSend.sendEmailAutomaticButton");
+    }
+    
+    /**
+     * Returns text for button (label)
+     * @return button text
+     */
+    @Override
+    protected String getButton2Text() {
+        return Resources.getString("PerspectiveSend.sendEmailManualButton");
     }
 }
