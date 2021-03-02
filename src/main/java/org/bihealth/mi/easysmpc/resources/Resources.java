@@ -62,7 +62,7 @@ public class Resources {
     public static final int       ROW_GAP                         = 2;
 
     /** X-size of small dialog */
-    public static final int       SIZE_DIALOG_SMALL_X                 = 415;
+    public static final int       SIZE_DIALOG_SMALL_X                 = 450;
 
     /** Y-size of small dialog */
     public static final int       SIZE_DIALOG_SMALL_Y                 = 225;

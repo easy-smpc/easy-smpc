@@ -61,8 +61,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /** Port of e-mail servers entry */
     private EntryServerPorts serverPortsEntry;
     /** Button*/
-    private JButton buttonCheckConnection;
-    /** Button*/
     private JButton buttonOK;
     /** Button */
     private JButton buttonLoadPrevious;
@@ -110,18 +108,16 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         
         // Buttons        
         JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(4, 1));      
+        buttonsPane.setLayout(new GridLayout(3, 1));      
         JPanel okCancelPane = new JPanel();
         okCancelPane.setLayout(new GridLayout(1, 2));
         JButton buttonGuessConfig = new JButton(Resources.getString("EmailConfig.8"));
         buttonLoadPrevious = new JButton(Resources.getString("EmailConfig.17"));
-        this.buttonCheckConnection = new JButton(Resources.getString("EmailConfig.5"));
         this.buttonOK = new JButton(Resources.getString("EmailConfig.6"));
         JButton buttonCancel = new JButton(Resources.getString("EmailConfig.7"));
         // Add
         buttonsPane.add(buttonLoadPrevious);
         buttonsPane.add(buttonGuessConfig);
-        buttonsPane.add(buttonCheckConnection);
         okCancelPane.add(buttonCancel);
         okCancelPane.add(buttonOK);
         buttonsPane.add(okCancelPane);
@@ -143,17 +139,10 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             }
         });
         
-        this.buttonCheckConnection.addActionListener(new ActionListener() {            
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionCheckConnection();
-            }
-        });
-        
         this.buttonOK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionClose();
+                actionCheckAndProceed();
             }
         });
         
@@ -212,18 +201,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     }
 
     /**
-     * Action check connection
-     */
-    protected void actionCheckConnection() {
-        try {
-            new ConnectionIMAP(connectionSettingsFromEntries(), true).checkConnection();
-            buttonOK.setEnabled(true);
-        } catch (BusException e) {
-            JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.14"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
-        }        
-    }
-
-    /**
      * Show this dialog
      */
     public ConnectionIMAPSettings showDialog(){        
@@ -237,8 +214,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     @Override
     public void stateChanged(ChangeEvent e) {
-        this.buttonCheckConnection.setEnabled(this.areValuesValid());
-        this.buttonOK.setEnabled(false);
+        this.buttonOK.setEnabled(areValuesValid());
         this.buttonLoadPrevious.setEnabled((arePreviousConfigsExisting()));
     }
       
@@ -261,13 +237,20 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /**
      * Action close
      */
-    private void actionClose() {
+    private void actionCheckAndProceed() {
+        try {
+            new ConnectionIMAP(connectionSettingsFromEntries(), true).checkConnection();
+            buttonOK.setEnabled(true);
+        } catch (BusException e) {
+            JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.14"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
+            return;
+        }   
+        
         try {
             this.result = connectionSettingsFromEntries();
             storeConnectionSettingsInPreferences(this.result);
             DialogEmailConfig.this.dispose();
         } catch (Exception e) {
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.13"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
         }
     }
