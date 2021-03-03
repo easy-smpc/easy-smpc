@@ -14,6 +14,7 @@
 package org.bihealth.mi.easysmpc.components;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,10 +22,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
@@ -48,7 +50,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /** SVID */
     private static final long serialVersionUID = -5892937473681272650L;          
     /** E-Mail and password entry*/
-    private EntryEMailPassword emailPasswordEntry; //TODO: Make password not visible    
+    private EntryEMailPassword emailPasswordEntry;   
     /** E-mail server entry */
     private EntryServers serversEntry;
     /** Port of e-mail servers entry */
@@ -70,28 +72,33 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
 
         // Dialog properties
         this.parent = parent;
-        this.setSize(Resources.SIZE_DIALOG_SMALL_X, Resources.SIZE_DIALOG_SMALL_Y);
-        this.setLocationRelativeTo(this.parent);
         this.setTitle(Resources.getString("EmailConfig.0"));
         this.getContentPane().setLayout(new BorderLayout());
         this.setIconImage(this.parent.getIconImage());
+        this.setResizable(false);
         
         // Title
-        ((JComponent) this.getContentPane()).setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+        JPanel central = new JPanel();
+        central.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                                         Resources.getString("EmailConfig.0"),
                                                                                         TitledBorder.CENTER,
-                                                                                        TitledBorder.DEFAULT_POSITION));
-        
+                                                                                        TitledBorder.DEFAULT_POSITION));        
         // Entry boxes
-        JPanel central = new JPanel();
-        central.setLayout(new GridLayout(3, 1));
+        central.setLayout(new BoxLayout(central, BoxLayout.Y_AXIS));
+        JLabel warningText1 = new JLabel(Resources.getString("EmailConfig.20"));
+        warningText1.setForeground(Color.RED);
+        JLabel warningText2 = new JLabel(Resources.getString("EmailConfig.21"));
+        warningText2.setForeground(Color.RED);
         this.emailPasswordEntry = new EntryEMailPassword();
         this.emailPasswordEntry.setChangeListener(this);
         this.serversEntry = new EntryServers();
         this.serversEntry.setChangeListener(this);
         this.serverPortsEntry = new EntryServerPorts();
         this.serverPortsEntry.setChangeListener(this);
+        
         // Add
+        central.add(warningText1);
+        central.add(warningText2);
         central.add(emailPasswordEntry);
         central.add(serversEntry);
         central.add(serverPortsEntry);
@@ -175,6 +182,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * Show this dialog
      */
     public ConnectionIMAPSettings showDialog(){        
+        this.pack();
+        this.setLocationRelativeTo(this.parent);
         this.setModal(true);
         this.setVisible(true);
         return this.result;
