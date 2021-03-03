@@ -370,7 +370,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             participants.add(entry);
             
             // create popup menu for the send-email-button
-            final JPopupMenu popup = new JPopupMenu(Resources.getString("PerspectiveSend.popupMenuTitle"));
+            final JPopupMenu popUp = new JPopupMenu(Resources.getString("PerspectiveSend.popupMenuTitle"));
             
             // manual sending
             JMenuItem manualSend = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuSendManually"));
@@ -382,7 +382,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
 	                actionSendMailManual(list);
 				}
 			});
-            popup.add(manualSend);
+            popUp.add(manualSend);
             
             // automatic sending
             JMenuItem automaticSend = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuSendAutomatically"));
@@ -399,27 +399,16 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             if (!isAutomaticProcessingEnabled()) {
             	automaticSend.setEnabled(false);
             }
-            popup.add(automaticSend);
-            
-            // copying content, when the mailto-link doesn't work
-            JMenuItem copy = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuCopy"));
-            copy.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					//TODO push email content into clipboard
-				}
-			});
-            copy.setEnabled(false); // TODO delete after implementation of the stub above
-            popup.add(copy);
+            popUp.add(automaticSend);
             
             // add popup menu to the button
             entry.setButtonListener(new ActionListener() {
 			    @Override
 			    public void actionPerformed(ActionEvent e) {
-			        // retrieve the right component, which is the last in entry
+			        // retrieve the right sub-component, which is the last in entry
 			    	Component right = entry.getComponent(entry.getComponentCount() - 1);
 			    	// position the popup menu; right-align the menu
-			        popup.show(entry, right.getBounds().x + right.getBounds().width - popup.getPreferredSize().width, right.getBounds().y + right.getBounds().height);
+			        popUp.show(entry, right.getBounds().x + right.getBounds().width - popUp.getPreferredSize().width, right.getBounds().y + right.getBounds().height);
 			    }
 			});
             
