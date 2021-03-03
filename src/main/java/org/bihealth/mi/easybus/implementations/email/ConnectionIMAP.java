@@ -114,7 +114,7 @@ public class ConnectionIMAP extends ConnectionEmail {
     }
 
     @Override
-    protected synchronized List<ConnectionEmailMessage> list() throws BusException {
+    protected List<ConnectionEmailMessage> list() throws BusException {
         
         // Make sure we are ready to go
         Folder folder = null;
