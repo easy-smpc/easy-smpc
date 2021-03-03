@@ -400,6 +400,17 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             	automaticSend.setEnabled(false);
             }
             popUp.add(automaticSend);
+
+            // copy content to clipboard, when the mailto-link doesn't work
+            JMenuItem copy = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuCopy"));
+            copy.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					//TODO push email content into clipboard
+				}
+			});
+            copy.setEnabled(false); // TODO delete after implementation of the stub above
+            popUp.add(copy);
             
             // add popup menu to the button
             entry.setButtonListener(new ActionListener() {
