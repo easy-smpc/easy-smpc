@@ -26,11 +26,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
@@ -41,6 +44,7 @@ import javax.swing.event.ChangeListener;
 import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Scope;
+import org.bihealth.mi.easysmpc.components.ComponentEntryOneButton;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantSendMail;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
@@ -112,8 +116,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
 
          // Check buttons clickable
          for (Component c : this.participants.getComponents()) {
-                 ((EntryParticipantSendMail) c).setButton1Enabled(isAutomaticProcessingEnabled() && isMailButtonClickable(c)); // Button 1 is for automatic sending
-                 ((EntryParticipantSendMail) c).setButton2Enabled(isMailButtonClickable(c));
+                 ((EntryParticipantSendMail) c).setButtonEnabled(isMailButtonClickable(c));
              }
      }
     
@@ -365,22 +368,61 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                                           currentParticipant.emailAddress,
                                                                           i != getApp().getModel().ownId);
             participants.add(entry);
-            entry.setButton1Listener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    List<EntryParticipantSendMail> list = new ArrayList<>();
-                    list.add(entry);
-                    actionSendMailAutomatic(list);
-                }
-            });
-            entry.setButton2Listener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    List<EntryParticipantSendMail> list = new ArrayList<>();
-                    list.add(entry);
-                    actionSendMailManual(list);
-                }
-            });
+            
+            // create popup menu for the send-email-button
+            final JPopupMenu popup = new JPopupMenu(Resources.getString("PerspectiveSend.popupMenuTitle"));
+            
+            // manual sending
+            JMenuItem manualSend = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuSendManually"));
+            manualSend.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					List<EntryParticipantSendMail> list = new ArrayList<>();
+	                list.add(entry);
+	                actionSendMailManual(list);
+				}
+			});
+            popup.add(manualSend);
+            
+            // automatic sending
+            JMenuItem automaticSend = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuSendAutomatically"));
+            automaticSend.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					List<EntryParticipantSendMail> list = new ArrayList<>();
+	                list.add(entry);
+	                actionSendMailAutomatic(list);
+				}
+			});
+            
+            // disable the automatic sending entry in the popup menu, when it's not configured
+            if (!isAutomaticProcessingEnabled()) {
+            	automaticSend.setEnabled(false);
+            }
+            popup.add(automaticSend);
+            
+            // copying content, when the mailto-link doesn't work
+            JMenuItem copy = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuCopy"));
+            copy.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					//TODO push email content into clipboard
+				}
+			});
+            copy.setEnabled(false); // TODO delete after implementation of the stub above
+            popup.add(copy);
+            
+            // add popup menu to the button
+            entry.setButtonListener(new ActionListener() {
+			    @Override
+			    public void actionPerformed(ActionEvent e) {
+			        // retrieve the right component, which is the last in entry
+			    	Component right = entry.getComponent(entry.getComponentCount() - 1);
+			    	// position the popup menu; right-align the menu
+			        popup.show(entry, right.getBounds().x + right.getBounds().width - popup.getPreferredSize().width, right.getBounds().y + right.getBounds().height);
+			    }
+			});
+            
             i++;
         }
         

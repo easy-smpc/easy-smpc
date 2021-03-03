@@ -13,16 +13,17 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
+import javax.swing.JButton;
+
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
  * Display participants for sending mail only
  * 
  * @author Felix Wirth
- * @author Armin Müller
  *
  */
-public class EntryParticipantSendMail extends ComponentEntryTwoButtons {
+public class EntryParticipantSendMail extends ComponentEntryOneButton {
 
     /** SVID */
     private static final long serialVersionUID = 3947342543992289608L;
@@ -49,29 +50,20 @@ public class EntryParticipantSendMail extends ComponentEntryTwoButtons {
               email,
               buttonEnabled);
     }
-
     
     /**
-     * Disables button 1
+     * Disables the button
      */
-    public void setButton1Enabled(boolean enabled) {
-        this.button1.setEnabled(enabled);
+    public void setButtonEnabled(boolean enabled) {
+        this.button.setEnabled(enabled);
     }
     
     /**
-     * Disables button 2
+     * Gives access to the button element
+     * @return the button element 
      */
-    public void setButton2Enabled(boolean enabled) {
-        this.button2.setEnabled(enabled);
-    }
-    
-    /**
-     * Returns text for button (label)
-     * @return button text
-     */
-    @Override
-    protected String getButton1Text() {
-        return Resources.getString("PerspectiveSend.sendEmailAutomaticButton");
+    JButton getButtonElement() {
+    	return this.button;
     }
     
     /**
@@ -79,7 +71,7 @@ public class EntryParticipantSendMail extends ComponentEntryTwoButtons {
      * @return button text
      */
     @Override
-    protected String getButton2Text() {
-        return Resources.getString("PerspectiveSend.sendEmailManualButton");
+    protected String getText() {
+        return Resources.getString("PerspectiveSend.sendEmailButton");
     }
 }

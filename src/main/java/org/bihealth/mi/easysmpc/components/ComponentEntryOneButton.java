@@ -118,7 +118,7 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
         
         // Done
         return panel;
-    }
+    }    
     
     /**
      * Implement this to return the text for the button
