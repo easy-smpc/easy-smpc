@@ -63,7 +63,7 @@ public class IMAPTest {
         if (!gmailLogin.guess()) {
             throw new IllegalStateException("Could not guess connection settings");
         }
-        yandexLogin = new ConnectionIMAPSettings("easysmpc.dev@gmail.com").setPassword("3a$ySMPC!")
+        yandexLogin = new ConnectionIMAPSettings("easysmpc.dev@yandex.com").setPassword("3a$ySMPC!")
                                                                           .setIMAPServer("imap.yandex.com")
                                                                           .setSMTPServer("smtp.yandex.com");
         insutecLogin = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")

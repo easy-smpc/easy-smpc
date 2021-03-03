@@ -19,12 +19,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.prefs.Preferences;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -43,7 +37,6 @@ import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
-import org.bihealth.mi.easysmpc.resources.Resources.HashMapStringConnectionIMAPSettings;
 
 /**
  * Dialog for entering details of a e-mail box
@@ -62,8 +55,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private EntryServerPorts serverPortsEntry;
     /** Button*/
     private JButton buttonOK;
-    /** Button */
-    private JButton buttonLoadPrevious;
     /** Result */
     private ConnectionIMAPSettings result;
     /** Parent frame */
@@ -108,15 +99,13 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         
         // Buttons        
         JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(3, 1));      
+        buttonsPane.setLayout(new GridLayout(2, 1));      
         JPanel okCancelPane = new JPanel();
         okCancelPane.setLayout(new GridLayout(1, 2));
         JButton buttonGuessConfig = new JButton(Resources.getString("EmailConfig.8"));
-        buttonLoadPrevious = new JButton(Resources.getString("EmailConfig.17"));
         this.buttonOK = new JButton(Resources.getString("EmailConfig.6"));
         JButton buttonCancel = new JButton(Resources.getString("EmailConfig.7"));
         // Add
-        buttonsPane.add(buttonLoadPrevious);
         buttonsPane.add(buttonGuessConfig);
         okCancelPane.add(buttonCancel);
         okCancelPane.add(buttonOK);
@@ -129,13 +118,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionGuessConfig();
-            }
-        });
-        
-        buttonLoadPrevious.addActionListener(new ActionListener() {            
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionLoadPreviousConfig();
             }
         });
         
@@ -160,17 +142,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                 DialogEmailConfig.this.result = null;
             }
         });
-    }
-    
-    /**
-     * Sets fields from previous configurations
-     */
-    protected void actionLoadPreviousConfig() {
-        try {
-            setFieldsFromConnectionSettings(new DialogEmailConfigPrevious(parent).showDialog());
-        } catch (ClassNotFoundException | IOException e) {
-            JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.18"), Resources.getString("EmailConfig.17"), JOptionPane.ERROR_MESSAGE);
-        }
     }
 
     /**
@@ -215,15 +186,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     @Override
     public void stateChanged(ChangeEvent e) {
         this.buttonOK.setEnabled(areValuesValid());
-        this.buttonLoadPrevious.setEnabled((arePreviousConfigsExisting()));
-    }
-      
-    /**
-     * Check if previous configuration exist
-     * @return
-     */
-    private boolean arePreviousConfigsExisting() {
-        return DialogEmailConfigPrevious.getConnectionSettingFromPreferences() != null ? true : false;
     }
 
     /**
@@ -240,56 +202,12 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private void actionCheckAndProceed() {
         try {
             new ConnectionIMAP(connectionSettingsFromEntries(), true).checkConnection();
-            buttonOK.setEnabled(true);
+            this.result = connectionSettingsFromEntries();
+            this.dispose();
         } catch (BusException e) {
             JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.14"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
             return;
-        }   
-        
-        try {
-            this.result = connectionSettingsFromEntries();
-            storeConnectionSettingsInPreferences(this.result);
-            DialogEmailConfig.this.dispose();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.13"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    /**
-     * Stores the settings in a map in the Preferences
-     * 
-     * @param connectionSettings
-     * @throws IOException 
-     * @throws ClassNotFoundException 
-     */
-    private void storeConnectionSettingsInPreferences(ConnectionIMAPSettings connectionSettings) throws ClassNotFoundException, IOException {
-        // Prepare
-        Preferences userPreferences = Preferences.userRoot().node(this.getClass().getPackage().getName());
-        HashMapStringConnectionIMAPSettings connectionSettingsMap;
-        // TODO remove password?
-        
-        // Load connectionSettingsMap from preference or create
-        if (DialogEmailConfigPrevious.getConnectionSettingFromPreferences() != null) {
-            ByteArrayInputStream in = new ByteArrayInputStream(userPreferences.getByteArray(Resources.CONNECTION_SETTINGS_MAP, null));
-            Object o = new ObjectInputStream(in).readObject();
-            if (!(o instanceof HashMapStringConnectionIMAPSettings)) {
-                throw new IOException("Existing connection settings map can not be read");
-            }
-            connectionSettingsMap = (HashMapStringConnectionIMAPSettings) o;
-        }
-        else {
-            connectionSettingsMap = new HashMapStringConnectionIMAPSettings();
-        }
-        
-        // Put connection settings
-        connectionSettingsMap.put(connectionSettings.getEmailAddress(), connectionSettings);
-        
-        // Save in preferences
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bos);
-        oos.writeObject(connectionSettingsMap);
-        oos.flush();
-        userPreferences.putByteArray(Resources.CONNECTION_SETTINGS_MAP , bos.toByteArray());
+        }        
     }
 
     /**
