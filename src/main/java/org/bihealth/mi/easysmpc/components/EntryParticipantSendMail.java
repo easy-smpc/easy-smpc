@@ -13,8 +13,6 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
-import javax.swing.JButton;
-
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**

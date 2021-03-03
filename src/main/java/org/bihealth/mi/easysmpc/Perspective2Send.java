@@ -280,7 +280,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         List<EntryParticipantSendMail> list = new ArrayList<>();
         for (Component c : participants.getComponents()) {
             if (!isOwnEntry(c) && unsentMessages(c) ) {
-                list.add((EntryParticipantSendMail)  c);                        
+                list.add((EntryParticipantSendMail)  c);
             }
         }
         return list;
@@ -315,7 +315,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                                            Resources.getString("PerspectiveSend.participants"),
                                                                            TitledBorder.LEFT,
                                                                            TitledBorder.DEFAULT_POSITION));
-        panel.add(pane, BorderLayout.CENTER);    
+        panel.add(pane, BorderLayout.CENTER);
            
         // Send all e-mails button manually
         JPanel buttonsPane = new JPanel();
@@ -373,23 +373,23 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             // Manual sending
             JMenuItem manualSend = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuSendManually"));
             manualSend.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					List<EntryParticipantSendMail> list = Arrays.asList(entry);
-					actionSendMailManual(list);
-				}
-			});
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    List<EntryParticipantSendMail> list = Arrays.asList(entry);
+                    actionSendMailManual(list);
+                }
+            });
             popUp.add(manualSend);
             
             // Automatic sending
             JMenuItem automaticSend = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuSendAutomatically"));
             automaticSend.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					List<EntryParticipantSendMail> list = Arrays.asList(entry);
-					actionSendMailAutomatic(list);
-				}
-			});
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    List<EntryParticipantSendMail> list = Arrays.asList(entry);
+                    actionSendMailAutomatic(list);
+                }
+            });
             
             // Disable the automatic sending entry in the popup menu, when it's not configured
             automaticSend.setEnabled(isAutomaticProcessingEnabled());
@@ -398,13 +398,13 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             
             // Add popup menu to the button
             entry.setButtonListener(new ActionListener() {
-            	@Override
-            	public void actionPerformed(ActionEvent e) {
-            		// Retrieve the right sub-component, which is the last in entry
-            		Component right = entry.getComponent(entry.getComponentCount() - 1);
-            		// Position the popup menu; right-align the menu
-            		popUp.show(entry, right.getBounds().x + right.getBounds().width - popUp.getPreferredSize().width, right.getBounds().y + right.getBounds().height);
-            	}
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // Retrieve the right sub-component, which is the last in entry
+                    Component right = entry.getComponent(entry.getComponentCount() - 1);
+                    // Position the popup menu; right-align the menu
+                    popUp.show(entry, right.getBounds().x + right.getBounds().width - popUp.getPreferredSize().width, right.getBounds().y + right.getBounds().height);
+                }
             });
             
             i++;
@@ -416,7 +416,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 public void run() {
                     actionSendMailAutomatic(listUnsent());
                 }
-              });            
+              });
         }
         
         // Update GUI

@@ -78,7 +78,6 @@ public abstract class ComponentEntryTwoButtons extends ComponentEntry {
               );
     }
     
-
     /**
      * Sets a change listener for the first button
      * @param listener
