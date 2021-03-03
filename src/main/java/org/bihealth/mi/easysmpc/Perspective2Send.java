@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -44,7 +43,6 @@ import javax.swing.event.ChangeListener;
 import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Scope;
-import org.bihealth.mi.easysmpc.components.ComponentEntryOneButton;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantSendMail;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
@@ -343,7 +341,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             }
         });
         buttonsPane.add(resendAllAutomatic, 0, 1);
-        // proceed button
+        // Proceed button
         proceed = new JButton(Resources.getString("PerspectiveSend.proceed"));
         proceed.addActionListener(new ActionListener() {
             @Override
@@ -369,48 +367,45 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                                           i != getApp().getModel().ownId);
             participants.add(entry);
             
-            // create popup menu for the send-email-button
+            // Create popup menu for the send-email-button
             final JPopupMenu popUp = new JPopupMenu(Resources.getString("PerspectiveSend.popupMenuTitle"));
             
-            // manual sending
+            // Manual sending
             JMenuItem manualSend = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuSendManually"));
             manualSend.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					List<EntryParticipantSendMail> list = new ArrayList<>();
-	                list.add(entry);
-	                actionSendMailManual(list);
+					List<EntryParticipantSendMail> list = Arrays.asList(entry);
+					actionSendMailManual(list);
 				}
 			});
             popUp.add(manualSend);
             
-            // automatic sending
+            // Automatic sending
             JMenuItem automaticSend = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuSendAutomatically"));
             automaticSend.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					List<EntryParticipantSendMail> list = new ArrayList<>();
-	                list.add(entry);
-	                actionSendMailAutomatic(list);
+					List<EntryParticipantSendMail> list = Arrays.asList(entry);
+					actionSendMailAutomatic(list);
 				}
 			});
             
-            // disable the automatic sending entry in the popup menu, when it's not configured
-            if (!isAutomaticProcessingEnabled()) {
-            	automaticSend.setEnabled(false);
-            }
+            // Disable the automatic sending entry in the popup menu, when it's not configured
+            automaticSend.setEnabled(isAutomaticProcessingEnabled());
+            
             popUp.add(automaticSend);
             
-            // add popup menu to the button
+            // Add popup menu to the button
             entry.setButtonListener(new ActionListener() {
-			    @Override
-			    public void actionPerformed(ActionEvent e) {
-			        // retrieve the right sub-component, which is the last in entry
-			    	Component right = entry.getComponent(entry.getComponentCount() - 1);
-			    	// position the popup menu; right-align the menu
-			        popUp.show(entry, right.getBounds().x + right.getBounds().width - popUp.getPreferredSize().width, right.getBounds().y + right.getBounds().height);
-			    }
-			});
+            	@Override
+            	public void actionPerformed(ActionEvent e) {
+            		// Retrieve the right sub-component, which is the last in entry
+            		Component right = entry.getComponent(entry.getComponentCount() - 1);
+            		// Position the popup menu; right-align the menu
+            		popUp.show(entry, right.getBounds().x + right.getBounds().width - popUp.getPreferredSize().width, right.getBounds().y + right.getBounds().height);
+            	}
+            });
             
             i++;
         }

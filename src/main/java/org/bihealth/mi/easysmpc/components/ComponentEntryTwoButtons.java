@@ -13,7 +13,6 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
-import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,20 +26,20 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * Display participants with two buttons
  * 
  * @author Armin Müller
- *
  */
-
 public abstract class ComponentEntryTwoButtons extends ComponentEntry {
 
 	/** SVID */
 	private static final long serialVersionUID = -1068258367945180263L;
 
-    /** Buttons */
+    /** Button 1 */
     protected JButton           button1;
+    /** Button 2 */
     protected JButton           button2;
     
-    /** Change listener */
+    /** Change listener for button 1*/
     private ActionListener    listener1;
+    /** Change listener for button 2*/
     private ActionListener    listener2;
 
 

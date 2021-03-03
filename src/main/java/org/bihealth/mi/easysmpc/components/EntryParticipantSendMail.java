@@ -59,14 +59,6 @@ public class EntryParticipantSendMail extends ComponentEntryOneButton {
     }
     
     /**
-     * Gives access to the button element
-     * @return the button element 
-     */
-    JButton getButtonElement() {
-    	return this.button;
-    }
-    
-    /**
      * Returns text for button (label)
      * @return button text
      */
