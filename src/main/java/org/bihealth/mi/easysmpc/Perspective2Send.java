@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -44,7 +43,6 @@ import javax.swing.event.ChangeListener;
 import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Scope;
-import org.bihealth.mi.easysmpc.components.ComponentEntryOneButton;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantSendMail;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
