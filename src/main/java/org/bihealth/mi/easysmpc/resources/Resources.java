@@ -40,23 +40,19 @@ import javax.swing.border.Border;
 public class Resources {
 
     /** Bundle name */
-    private static final String   BUNDLE_NAME                     = "org.bihealth.mi.easysmpc.resources.messages"; //$NON-NLS-1$
+    private static final String   BUNDLE_NAME                         = "org.bihealth.mi.easysmpc.resources.messages"; //$NON-NLS-1$
 
     /** Bundle */
-    private static ResourceBundle resource_bundle                 = ResourceBundle.getBundle(BUNDLE_NAME);
+    private static ResourceBundle resource_bundle                     = ResourceBundle.getBundle(BUNDLE_NAME);
 
     /** Invalid border */
-    public static final Border    INVALID_BORDER                  = BorderFactory.createLineBorder(new Color(255,
-                                                                                                             69,
-                                                                                                             0));
+    public static final Border    INVALID_BORDER                      = BorderFactory.createLineBorder(new Color(255, 69, 0));
 
     /** Default border */
-    public static final Border    DEFAULT_BORDER                  = UIManager.getLookAndFeel()
-                                                                             .getDefaults()
-                                                                             .getBorder("TextField.border");      //$NON-NLS-1$
+    public static final Border    DEFAULT_BORDER                      = UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border");       //$NON-NLS-1$
 
     /** Row gap */
-    public static final int       ROW_GAP                         = 2;
+    public static final int       ROW_GAP                             = 2;
 
     /** X-size of small dialog */
     public static final int       SIZE_DIALOG_SMALL_X                 = 450;
@@ -65,75 +61,78 @@ public class Resources {
     public static final int       SIZE_DIALOG_SMALL_Y                 = 185;
 
     /** String indicating start of exchange string */
-    public static final String    MESSAGE_START_TAG               = "BEGIN_PAYLOAD";                              //$NON-NLS-1$
+    public static final String    MESSAGE_START_TAG                   = "BEGIN_PAYLOAD";                               //$NON-NLS-1$
 
     /** String indicating end of exchange string */
-    public static final String    MESSAGE_END_TAG                 = "END_PAYLOAD";                                //$NON-NLS-1$
+    public static final String    MESSAGE_END_TAG                     = "END_PAYLOAD";                                 //$NON-NLS-1$
 
     /** Char length for exchange before line break */
-    public static final int       MESSAGE_LINE_WIDTH              = 150;
+    public static final int       MESSAGE_LINE_WIDTH                  = 150;
 
     /** Preferred height for the progress container */
-    public static final int       PROGRESS_PREFERRED_HEIGHT       = 50;
+    public static final int       PROGRESS_PREFERRED_HEIGHT           = 50;
 
     /** Ending for project files */
-    public static final String    FILE_ENDING                     = "smpc";                                       //$NON-NLS-1$
+    public static final String    FILE_ENDING                         = "smpc";                                        //$NON-NLS-1$
 
     /** About dialog size x */
-    public static final int       SIZE_DIALOG_X                   = 500;
+    public static final int       SIZE_DIALOG_X                       = 500;
 
     /** About dialog size y */
-    public static final int       SIZE_DIALOG_Y                   = 300;
+    public static final int       SIZE_DIALOG_Y                       = 300;
 
     /** The charset used to read the license text */
-    private final static Charset  CHARSET                         = StandardCharsets.UTF_8;
+    private final static Charset  CHARSET                             = StandardCharsets.UTF_8;
 
     /** Size of checkmark clipart x */
-    public static final int       SIZE_CHECKMARK_X                = 15;
+    public static final int       SIZE_CHECKMARK_X                    = 15;
 
     /** Size of checkmark clipart y */
-    public static final int       SIZE_CHECKMARK_Y                = 12;
+    public static final int       SIZE_CHECKMARK_Y                    = 12;
     /** Available languages */
-    private static final Locale[] AVAILABLE_LANGUAGES             = { Locale.ENGLISH,
-                                                                      Locale.GERMAN };
+    private static final Locale[] AVAILABLE_LANGUAGES                 = { Locale.ENGLISH, Locale.GERMAN };
+    
     /** Interval schedule for tasks in background */
-    public static final long      INTERVAL_SCHEDULER_MILLISECONDS = 200;
-    
+    public static final long      INTERVAL_SCHEDULER_MILLISECONDS     = 200;
+
     /** File ending for CSV-files */
-    public static final String    FILE_ENDING_CSV                 = "csv"; //$NON-NLS-1$
-    
+    public static final String    FILE_ENDING_CSV                     = "csv";                                         //$NON-NLS-1$
+
     /** File ending for Excel-2007-files */
-    public static final String    FILE_ENDING_EXCEL_XLSX          = "xlsx"; //$NON-NLS-1$
-    
+    public static final String    FILE_ENDING_EXCEL_XLSX              = "xlsx";                                        //$NON-NLS-1$
+
     /** File ending for Excel-97-files */
-    public static final String    FILE_ENDING_EXCEL_XLS           = "xls"; //$NON-NLS-1$
-    
+    public static final String    FILE_ENDING_EXCEL_XLS               = "xls";                                         //$NON-NLS-1$
+
     /** Maximal rows considered */
-    public static final int       MAX_COUNT_ROWS                  = 250000;
-    
+    public static final int       MAX_COUNT_ROWS                      = 250000;
+
     /** Maximal columns considered */
-    public static final int       MAX_COUNT_COLUMNS               = 250000;
-    
+    public static final int       MAX_COUNT_COLUMNS                   = 250000;
+
     /** Delimiters considered for CSV files */
-    public static final char[]    DELIMITERS                      = { ';', ',', '|', '\t' }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$  
-    
-    /** Maximum number of lines to be loaded for preview purposes for CSV file detection. */
-    public static final int       PREVIEW_MAX_LINES               = 25;
-    
-    /** Maximum number of chars to be loaded for detecting separators for CSV file detection. */
-    public static final int       DETECT_MAX_CHARS                = 100000;
-    
-    /** Name of connectionSettingsMap in user preferences */
-    public static final String       CONNECTION_SETTINGS_MAP      = "CONNECTION_SETTINGS_MAP";
-    
+    public static final char[]    DELIMITERS                          = { ';', ',', '|', '\t' };                       // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+
+    /**
+     * Maximum number of lines to be loaded for preview purposes for CSV file
+     * detection.
+     */
+    public static final int       PREVIEW_MAX_LINES                   = 25;
+
+    /**
+     * Maximum number of chars to be loaded for detecting separators for CSV
+     * file detection.
+     */
+    public static final int       DETECT_MAX_CHARS                    = 100000;
+
     /** Interval to check mail box automatically */
-    public static final int INTERVAL_CHECK_MAILBOX_MILLISECONDS   = 1000;
-    
+    public static final int       INTERVAL_CHECK_MAILBOX_MILLISECONDS = 30000;
+
     /** Step 1 identifier */
-    public static final String ROUND_1                             = "_round1";
-    
+    public static final String    ROUND_1                             = "_round1";
+
     /** Step 2 identifier */
-    public static final String ROUND_2                             = "_round2";
+    public static final String    ROUND_2                             = "_round2";
     
     /**
      * Returns all available languages
