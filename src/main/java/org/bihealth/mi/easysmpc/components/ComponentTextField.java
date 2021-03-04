@@ -13,6 +13,8 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -58,7 +60,8 @@ public class ComponentTextField extends JPanel {
     public ComponentTextField(ComponentTextFieldValidator validator, boolean password) {
         this.validator = validator;
         this.field = password ? new JPasswordField() : new JTextField();
-        this.add(field);
+        this.setLayout(new BorderLayout());
+        this.add(field, BorderLayout.CENTER);
         this.validateValue();
         this.field.getDocument().addDocumentListener(new DocumentListener() {
             @Override
