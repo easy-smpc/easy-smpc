@@ -220,7 +220,27 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             bin.shareValue(new BigInteger(((EntryBin)entry).getRightValue().trim()));
             bins.add(bin);
         }
+        
+        // Check whether there are duplicates
+        for (int i = 0; i < bins.size(); i++) {
+            for (int j = i + 1; j < bins.size(); j++) {
+                if (bins.get(i).name.equals(bins.get(j).name)) {
+                    JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.DuplicateBins"));
+                    return;
+                }
+            }
+        }
 
+        // Check whether there are duplicates
+        for (int i = 0; i < participants.size(); i++) {
+            for (int j = i + 1; j < participants.size(); j++) {
+                if (participants.get(i).name.equals(participants.get(j).name) ||
+                    participants.get(i).emailAddress.equals(participants.get(j).emailAddress)) {
+                    JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.DuplicateParticipants"));
+                    return;
+                }
+            }
+        }
         // Initialize study
         getApp().actionCreateDone(this.title.getText(), participants.toArray(new Participant[participants.size()]), bins.toArray(new Bin[bins.size()]), (ConnectionIMAPSettings) selectMailboxCombo.getSelectedItem());
     }
@@ -540,7 +560,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     /**
      * Adds an e-mail configuration
      */
-    protected void actionAddEMailConf() {
+    private void actionAddEMailConf() {
         ConnectionIMAPSettings settings = new DialogEmailConfig(null, getApp()).showDialog();
         if(settings != null) {
             ImportPreferences.setConnectionIMAPSetting(settings);
@@ -553,7 +573,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     /**
      * Edits an e-mail configuration
      */
-    protected void actionEditEMailConf() {
+    private void actionEditEMailConf() {
         ConnectionIMAPSettings settings = new DialogEmailConfig((ConnectionIMAPSettings) this.selectMailboxCombo.getSelectedItem(), getApp()).showDialog();
         if(settings != null) {
             ImportPreferences.setConnectionIMAPSetting(settings);
@@ -566,7 +586,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     /**
      * Removes an e-mail configuration
      */
-    protected void actionRemoveEMailConf() {
+    private void actionRemoveEMailConf() {
         try {
             ImportPreferences.removeConnectionIMAPSetting((ConnectionIMAPSettings) this.selectMailboxCombo.getSelectedItem());
             this.selectMailboxCombo.removeItem(this.selectMailboxCombo.getSelectedItem());
