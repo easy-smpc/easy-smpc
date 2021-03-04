@@ -47,20 +47,20 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  */
 public class DialogEmailConfig extends JDialog implements ChangeListener {
 
-    /** SVID */
-    private static final long serialVersionUID = -5892937473681272650L;          
-    /** E-Mail and password entry*/
-    private EntryEMailPassword emailPasswordEntry;   
+    /** SVUID */
+    private static final long      serialVersionUID = -5892937473681272650L;
+    /** E-Mail and password entry */
+    private EntryEMailPassword     emailPasswordEntry;
     /** E-mail server entry */
-    private EntryServers serversEntry;
+    private EntryServers           serversEntry;
     /** Port of e-mail servers entry */
-    private EntryServerPorts serverPortsEntry;
-    /** Button*/
-    private JButton buttonOK;
+    private EntryServerPorts       serverPortsEntry;
+    /** Button */
+    private JButton                buttonOK;
     /** Result */
     private ConnectionIMAPSettings result;
     /** Parent frame */
-    private JFrame parent;
+    private JFrame                 parent;
 
         
     /**
@@ -112,6 +112,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         JButton buttonGuessConfig = new JButton(Resources.getString("EmailConfig.8"));
         this.buttonOK = new JButton(Resources.getString("EmailConfig.6"));
         JButton buttonCancel = new JButton(Resources.getString("EmailConfig.7"));
+        
         // Add
         buttonsPane.add(buttonGuessConfig);
         okCancelPane.add(buttonCancel);

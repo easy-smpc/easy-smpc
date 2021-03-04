@@ -63,6 +63,36 @@ public abstract class ComponentEntry extends JPanel {
                          boolean rightEnabled, 
                          ComponentTextFieldValidator rightValidator,
                          boolean additionalControlsEnabled) {
+        this (leftString, leftValue, leftEnabled, leftValidator, false,
+              rightString, rightValue, rightEnabled, rightValidator, false,
+              additionalControlsEnabled);
+    }
+    
+    /**
+     * Creates a new instance
+     * @param leftString
+     * @param leftValue
+     * @param leftEnabled
+     * @param leftValidator
+     * @param leftIsPassword
+     * @param rightString
+     * @param rightValue
+     * @param rightEnabled
+     * @param rightValidator
+     * @param rightIsPassword
+     * @param additionalControlsEnabled
+     */
+    public ComponentEntry(String leftString,
+                         String leftValue,
+                         boolean leftEnabled, 
+                         ComponentTextFieldValidator leftValidator,
+                         boolean leftIsPassword,
+                         String rightString, 
+                         String rightValue,
+                         boolean rightEnabled, 
+                         ComponentTextFieldValidator rightValidator,
+                         boolean rightIsPassword,
+                         boolean additionalControlsEnabled) {
         
         // Layout
         this.setBorder(new EmptyBorder(Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP));
@@ -74,7 +104,7 @@ public abstract class ComponentEntry extends JPanel {
         this.add(left);
         
         JLabel labelLeft = new JLabel(leftString); //$NON-NLS-1$
-        fieldLeft = new ComponentTextField(leftValidator);
+        fieldLeft = new ComponentTextField(leftValidator, leftIsPassword);
         
         // Value
         if (leftValue != null) {
@@ -96,7 +126,7 @@ public abstract class ComponentEntry extends JPanel {
         this.add(right);
         
         JLabel labelRight = new JLabel(rightString); //$NON-NLS-1$
-        this.fieldRight = new ComponentTextField(rightValidator);
+        this.fieldRight = new ComponentTextField(rightValidator, rightIsPassword);
 
         // Value
         if (rightValue != null) {
