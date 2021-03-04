@@ -115,7 +115,7 @@ public class Study implements Serializable, Cloneable {
     private Message[] unsentMessages;
 
     /** The filename. */
-    public File filename;
+    public transient File filename;
     
     /** The e-mail connection details */
     public ConnectionIMAPSettings connectionIMAPSettings;
