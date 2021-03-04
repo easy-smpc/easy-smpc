@@ -50,19 +50,18 @@ import org.bihealth.mi.easybus.BusException;
 public class ConnectionIMAP extends ConnectionEmail {
 
     /** File name of the attached message */
-    private static final String FILENAME_MESSAGE  = "message";
+    private static final String FILENAME_MESSAGE = "message";
 
     /** Properties */
-    private Properties         propertiesReceiving;
+    private final Properties    propertiesReceiving;
     /** Properties */
-    private Properties         propertiesSending;
+    private final Properties    propertiesSending;
     /** Store object to access e-mail server */
-    private Store              store;
+    private Store               store;
     /** Session to send e-mails */
-    private Session            session;
+    private Session             session;
     /** Password of the user */
-    private String             password;
-
+    private String              password;
 
     /**
      * Create a new instance
@@ -114,111 +113,116 @@ public class ConnectionIMAP extends ConnectionEmail {
     }
 
     @Override
-    protected synchronized List<ConnectionEmailMessage> list() throws BusException {
+    protected List<ConnectionEmailMessage> list() throws BusException {
         
-        // Make sure we are ready to go
-        Folder folder = null;
-        try {
-    
-            // Create store
-            if (store == null) {
-                Session sessionReceiving = Session.getInstance(propertiesReceiving);
-                store = sessionReceiving.getStore("imap");
-            }
-            
-            // Connect store
-            if (!store.isConnected()) {
-                store.connect(getEmailAddress(), password);
-            }
-            
-            // Create folder new for every call to get latest state
-            folder = store.getFolder("INBOX");
-            if (!folder.exists()) {
-                throw new BusException("Unable to identify inbox folder of mail box");
-            }
-            
-            // Open folder
-            folder.open(Folder.READ_WRITE);
-
-        } catch (Exception e) {
-            throw new BusException("Error establishing or keeping alive connection to mail server", e);
-        }
+        synchronized (propertiesReceiving) {
+                
+            // Make sure we are ready to go
+            Folder folder = null;
+            try {
         
-        // Init
-        List<ConnectionEmailMessage> result = new ArrayList<>();
-        
-        try {
-            
-            // Load messages
-            for (Message message : folder.getMessages()) {
-
-                // Select relevant messages
-                try {
-                    if (message.getSubject().startsWith(EMAIL_SUBJECT_PREFIX)) {
-                        result.add(new ConnectionEmailMessage(message, folder));   
-                    }
-                } catch (Exception e) {
-                    // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+                // Create store
+                if (store == null) {
+                    Session sessionReceiving = Session.getInstance(propertiesReceiving);
+                    store = sessionReceiving.getStore("imap");
                 }
+                
+                // Connect store
+                if (!store.isConnected()) {
+                    store.connect(getEmailAddress(), password);
+                }
+                
+                // Create folder new for every call to get latest state
+                folder = store.getFolder("INBOX");
+                if (!folder.exists()) {
+                    throw new BusException("Unable to identify inbox folder of mail box");
+                }
+                
+                // Open folder
+                folder.open(Folder.READ_WRITE);
+    
+            } catch (Exception e) {
+                throw new BusException("Error establishing or keeping alive connection to mail server", e);
             }
             
-        } catch (MessagingException e) {
-            throw new BusException("Cannot read messages", e);
+            // Init
+            List<ConnectionEmailMessage> result = new ArrayList<>();
+            
+            try {
+                
+                // Load messages
+                for (Message message : folder.getMessages()) {
+    
+                    // Select relevant messages
+                    try {
+                        if (message.getSubject().startsWith(EMAIL_SUBJECT_PREFIX)) {
+                            result.add(new ConnectionEmailMessage(message, folder));   
+                        }
+                    } catch (Exception e) {
+                        // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+                    }
+                }
+                
+            } catch (MessagingException e) {
+                throw new BusException("Cannot read messages", e);
+            }
+            
+            // Done
+            return result;
         }
-        
-        // Done
-        return result;
     }
 
     @Override
     protected synchronized void send(String recipient, String subject, String body, Object attachment) throws BusException {
 
-
-        // Make sure we are ready to go
-        try {
-            if (session == null) {
-                session = Session.getInstance(propertiesSending, new Authenticator() {
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(getEmailAddress(), password);
-                    }
-                });
+        synchronized(propertiesSending) {
+    
+            // Make sure we are ready to go
+            try {
+                if (session == null) {
+                    session = Session.getInstance(propertiesSending, new Authenticator() {
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            return new PasswordAuthentication(getEmailAddress(), password);
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                throw new BusException("Error establishing or keeping alive connection to mail server", e);
             }
-        } catch (Exception e) {
-            throw new BusException("Error establishing or keeping alive connection to mail server", e);
-        }
-
-        try {
-            
-            // Create message
-            MimeMessage email = new MimeMessage(session);
-           
-            // Add sender and recipient
-            email.setRecipient(RecipientType.TO, new InternetAddress(recipient));
-            email.setSender(new InternetAddress(getEmailAddress()));
-            email.setSubject(subject);
-            
-            // Add body
-            MimeBodyPart mimeBodyPart = new MimeBodyPart();
-            mimeBodyPart.setDisposition(MimeBodyPart.INLINE);
-            mimeBodyPart.setContent(body, "text/plain");
-            Multipart multipart = new MimeMultipart();
-            multipart.addBodyPart(mimeBodyPart);
-
-            // Add attachment
-            mimeBodyPart = new MimeBodyPart();
-            mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
-            mimeBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(getByteArrayOutputStream(attachment),"application/octet-stream")));
-            mimeBodyPart.setFileName(FILENAME_MESSAGE);
-            multipart.addBodyPart(mimeBodyPart);
-            
-            // Compose message
-            email.setContent(multipart);
-
-            // Send
-            Transport.send(email);
-            
-        } catch (Exception e) {
-            throw new BusException("Unable to send message", e);
+    
+            try {
+                
+                // Create message
+                MimeMessage email = new MimeMessage(session);
+               
+                // Add sender and recipient
+                email.setRecipient(RecipientType.TO, new InternetAddress(recipient));
+                email.setSender(new InternetAddress(getEmailAddress()));
+                email.setSubject(subject);
+                
+                // Add body
+                MimeBodyPart mimeBodyPart = new MimeBodyPart();
+                mimeBodyPart.setDisposition(MimeBodyPart.INLINE);
+                mimeBodyPart.setContent(body, "text/plain");
+                Multipart multipart = new MimeMultipart();
+                multipart.addBodyPart(mimeBodyPart);
+    
+                // Add attachment
+                mimeBodyPart = new MimeBodyPart();
+                mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
+                mimeBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(getByteArrayOutputStream(attachment),"application/octet-stream")));
+                mimeBodyPart.setFileName(FILENAME_MESSAGE);
+                multipart.addBodyPart(mimeBodyPart);
+                
+                // Compose message
+                email.setContent(multipart);
+    
+                // Send
+                Transport.send(email);
+                
+            } catch (Exception e) {
+                throw new BusException("Unable to send message", e);
+            }
         }
     }
     

@@ -24,16 +24,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.prefs.BackingStoreException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -46,6 +48,7 @@ import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryBin;
 import org.bihealth.mi.easysmpc.components.EntryParticipant;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
+import org.bihealth.mi.easysmpc.dataimport.ImportPreferences;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -71,15 +74,43 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     /** Save button */
     private JButton            save;
     
-    /** Configure e-mail box*/
-    private JButton configEmailboxButton;
+    /** Add configuration e-mail box*/
+    private JButton addEmailboxButton;
     
-    /** Automated, separate e-mail box*/
-    private JCheckBox automatedEmailbox;
+    /** Combo box to select mail box configuration */
+    private JComboBox<ConnectionIMAPSettings> selectMailboxCombo;
     
-    /** Details to connect to e-mail servers */
-    private ConnectionIMAPSettings emailConnectionSettings = null;
+    /** Add configuration e-mail box */
+    private JButton removeEmailboxButton;
+    
+    /** Edit configuration e-mail box */
+    private JButton editEmailboxButton;
+    
+    /** Allows to set a custom text for each object in the list */
+    private class CustomRenderer extends DefaultListCellRenderer {
+        /** SVUID */
+        private static final long serialVersionUID = 1L;
 
+        @Override
+        public Component getListCellRendererComponent(JList<?> list,
+                                                      Object value,
+                                                      int index,
+                                                      boolean isSelected,
+                                                      boolean cellHasFocus) {
+            JLabel label = (JLabel) super.getListCellRendererComponent(list,
+                                                                       value,
+                                                                       index,
+                                                                       isSelected,
+                                                                       cellHasFocus);
+            if (value != null) {
+                label.setText(((ConnectionIMAPSettings) value).getEmailAddress());
+            }
+            else {
+                label.setText(Resources.getString("EmailConfig.19"));
+            }
+            return label;
+        }
+    };
     
     /**
      * Creates the perspective
@@ -93,10 +124,16 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      * Reacts on all changes in any components
      */
     public void stateChanged(ChangeEvent e) {
+        // Is saving possible?
         this.save.setEnabled(this.areValuesValid());
-        
-        // If it is necessary to configure an e-mail box enable button
-        this.configEmailboxButton.setEnabled(this.automatedEmailbox.isSelected());                    
+        // Can a mailbox be added or removed
+        if (this.selectMailboxCombo.getSelectedItem() != null) {
+            this.editEmailboxButton.setEnabled(true);
+            this.removeEmailboxButton.setEnabled(true);
+        } else {
+            this.editEmailboxButton.setEnabled(false);
+            this.removeEmailboxButton.setEnabled(false);
+        }               
     }
 
     /**
@@ -167,12 +204,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             return;
         }
         
-        // Check e-mail config if automated e-mail is selected
-        if (automatedEmailbox.isSelected() && emailConnectionSettings == null) {
-            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.setMailboxProperties"));
-            return;
-        }
-        
         // Collect participants
         List<Participant> participants = new ArrayList<>();
         for (Component entry : this.participants.getComponents()) {
@@ -191,7 +222,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         }
 
         // Initialize study
-        getApp().actionCreateDone(this.title.getText(), participants.toArray(new Participant[participants.size()]), bins.toArray(new Bin[bins.size()]), this.emailConnectionSettings);
+        getApp().actionCreateDone(this.title.getText(), participants.toArray(new Participant[participants.size()]), bins.toArray(new Bin[bins.size()]), (ConnectionIMAPSettings) selectMailboxCombo.getSelectedItem());
     }
 
     /**
@@ -374,33 +405,55 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.title.setChangeListener(this);
         titlePanel.add(this.title, BorderLayout.CENTER);
         
+        // Panel for automatic e-mail config
+        JPanel automaticEMailPanel = new JPanel();
+        automaticEMailPanel.setLayout(new BoxLayout(automaticEMailPanel, BoxLayout.X_AXIS));
+       
         // Check box to use mail box automatically
-        JPanel checkBoxAutomatedEmailboxPanel = new JPanel();
-        checkBoxAutomatedEmailboxPanel.setBorder(new EmptyBorder(0,20,0,0));
-        checkBoxAutomatedEmailboxPanel.setLayout(new BorderLayout());        
-        automatedEmailbox = new JCheckBox(Resources.getString("PerspectiveCreate.AutomatedMailbox"));
-        automatedEmailbox.setSelected(true);
-        automatedEmailbox.addActionListener(new ActionListener() {            
+        selectMailboxCombo = new JComboBox<>(getEmailConfig());
+        selectMailboxCombo.setRenderer(new CustomRenderer());
+        selectMailboxCombo.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
                 stateChanged(new ChangeEvent(this));
             }
         });
         
-        // Button to configure e-mail
-        configEmailboxButton = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfig"));
-        configEmailboxButton.addActionListener(new ActionListener() {
+        // Button to add e-mail config
+        addEmailboxButton = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigAdd"));
+        addEmailboxButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                emailConnectionSettings = new DialogEmailConfig(emailConnectionSettings, getApp()).showDialog();
+               actionAddEMailConf();
+            }
+        });
+        
+        // Button to edit e-mail config
+        editEmailboxButton = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigEdit"));
+        editEmailboxButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionEditEMailConf();
+            }
+        });
+        
+        // Button to remove e-mail config
+        removeEmailboxButton = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigRemove"));
+        removeEmailboxButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionRemoveEMailConf();
             }
         });
         
         // Add
         generalDataPanel.add(titlePanel);       
-        checkBoxAutomatedEmailboxPanel.add(automatedEmailbox);
-        generalDataPanel.add(checkBoxAutomatedEmailboxPanel);
-        generalDataPanel.add(configEmailboxButton);
+        automaticEMailPanel.add(new JLabel(Resources.getString("PerspectiveCreate.AutomatedMailbox")));
+        automaticEMailPanel.add(selectMailboxCombo);
+        automaticEMailPanel.add(addEmailboxButton);
+        automaticEMailPanel.add(editEmailboxButton);
+        automaticEMailPanel.add(removeEmailboxButton);
+        generalDataPanel.add(automaticEMailPanel);
         
         // Central panel
         JPanel central = new JPanel();
@@ -463,6 +516,64 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         });
         buttonsPane.add(save, 0, 2);
         panel.add(buttonsPane, BorderLayout.SOUTH);
+    }
+
+
+    /**
+     * Returns previous configurations
+     * 
+     * @return
+     */
+    private ConnectionIMAPSettings[] getEmailConfig() {
+        try {
+            // Read from preferences
+            ArrayList<ConnectionIMAPSettings> configFromPreferences = ImportPreferences.getConnectionIMAPSettings();
+            // Add null for non-automatic
+            configFromPreferences.add(0, null);
+            return configFromPreferences.toArray(new ConnectionIMAPSettings[configFromPreferences.size()]);
+        } catch (BackingStoreException e) {
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorLoadingPreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+    }
+    
+    /**
+     * Adds an e-mail configuration
+     */
+    protected void actionAddEMailConf() {
+        ConnectionIMAPSettings settings = new DialogEmailConfig(null, getApp()).showDialog();
+        if(settings != null) {
+            ImportPreferences.setConnectionIMAPSetting(settings);
+            this.selectMailboxCombo.addItem(settings);
+            this.selectMailboxCombo.setSelectedItem(settings);
+        }
+        this.stateChanged(new ChangeEvent(this));
+    }
+    
+    /**
+     * Edits an e-mail configuration
+     */
+    protected void actionEditEMailConf() {
+        ConnectionIMAPSettings settings = new DialogEmailConfig((ConnectionIMAPSettings) this.selectMailboxCombo.getSelectedItem(), getApp()).showDialog();
+        if(settings != null) {
+            ImportPreferences.setConnectionIMAPSetting(settings);
+            this.selectMailboxCombo.addItem(settings);
+            this.selectMailboxCombo.setSelectedItem(settings);
+        }
+        this.stateChanged(new ChangeEvent(this));        
+    }
+
+    /**
+     * Removes an e-mail configuration
+     */
+    protected void actionRemoveEMailConf() {
+        try {
+            ImportPreferences.removeConnectionIMAPSetting((ConnectionIMAPSettings) this.selectMailboxCombo.getSelectedItem());
+            this.selectMailboxCombo.removeItem(this.selectMailboxCombo.getSelectedItem());
+        } catch (BackingStoreException e) {
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+        }
+        this.stateChanged(new ChangeEvent(this));  
     }
 
     /**
