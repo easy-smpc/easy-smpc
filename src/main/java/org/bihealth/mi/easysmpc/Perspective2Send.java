@@ -392,8 +392,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             manualSend.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    List<EntryParticipantSendMail> list = Arrays.asList(entry);
-                    actionSendMailManual(list);
+                    actionSendMailManual(Arrays.asList(entry));
                 }
             });
             popUp.add(manualSend);
@@ -403,8 +402,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             automaticSend.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    List<EntryParticipantSendMail> list = Arrays.asList(entry);
-                    actionSendMailAutomatic(list);
+                    actionSendMailAutomatic(Arrays.asList(entry));
                 }
             });
             
