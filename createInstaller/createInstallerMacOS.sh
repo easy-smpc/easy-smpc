@@ -12,9 +12,10 @@ APPLICATION_NAME="easySMPC"
 DESCRIPTION_TEXT="Tool to add sums in a secure manner"
 VENDOR="Medical Informatics Group@Berlin Institute of Health and University of Technical University of Darmstadt"
 COPYRIGHT="Licensed under the Apache License, Version 2.0 (the License); you may not use this file except in compliance with the License. You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0"
-#add file associations
+ICONPATH="../src/main/resources/org/bihealth/mi/easysmpc/resources/icon.icns"
+#add file associations?
 LICENSE_FILE="../LICENSE"
-#create a desktop shortcut?
+
 
 PACKAGE_COMMAND="jpackage 	--input $BUILD_PATH\
 							--main-jar $MAIN_JAR\
@@ -29,5 +30,6 @@ PACKAGE_COMMAND="jpackage 	--input $BUILD_PATH\
 							--license-file $LICENSE_FILE\
 							--mac-package-identifier $APPLICATION_NAME\
 							--mac-package-name $APPLICATION_NAME"
+							--icon %ICONPATH%
 
 eval $PACKAGE_COMMAND
