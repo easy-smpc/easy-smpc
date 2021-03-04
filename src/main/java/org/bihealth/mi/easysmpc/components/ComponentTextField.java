@@ -57,8 +57,8 @@ public class ComponentTextField extends JComponent {
      */
     public ComponentTextField(ComponentTextFieldValidator validator, boolean password) {
         this.validator = validator;
-        this.validateValue();
         this.field = password ? new JPasswordField() : new JTextField();
+        this.validateValue();
         this.field.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void changedUpdate(DocumentEvent e) {
@@ -114,7 +114,7 @@ public class ComponentTextField extends JComponent {
      */
     private void validateValue() {
         boolean isValid;
-        if (validator != null) {
+        if (validator != null && this.field != null) {
             isValid = validator.validate(this.field.getText());
         } else {
             isValid = true;
