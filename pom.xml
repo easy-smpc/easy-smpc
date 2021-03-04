@@ -62,9 +62,9 @@
 			<version>4.5.13</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.carrotsearch</groupId>
-		    <artifactId>hppc</artifactId>
-		    <version>0.6.0</version>
+			<groupId>com.carrotsearch</groupId>
+			<artifactId>hppc</artifactId>
+			<version>0.6.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -76,5 +76,26 @@
 			<artifactId>commons-csv</artifactId>
 			<version>1.8</version>
 		</dependency>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.8.0-M1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.8.0-M1</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
 </project>

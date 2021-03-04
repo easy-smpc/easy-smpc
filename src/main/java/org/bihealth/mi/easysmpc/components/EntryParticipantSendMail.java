@@ -48,10 +48,9 @@ public class EntryParticipantSendMail extends ComponentEntryOneButton {
               email,
               buttonEnabled);
     }
-
     
     /**
-     * Disables button
+     * Disables the button
      */
     public void setButtonEnabled(boolean enabled) {
         this.button.setEnabled(enabled);

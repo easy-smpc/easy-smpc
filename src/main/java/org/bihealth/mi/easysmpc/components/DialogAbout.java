@@ -21,9 +21,11 @@ import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.bihealth.mi.easysmpc.App;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -50,6 +52,7 @@ public class DialogAbout extends JDialog {
 
         // Texts
         central.setLayout(new BorderLayout());
+        central.add(new JLabel(String.format(Resources.getString("About.NameWithVersion"), App.VERSION)), BorderLayout.NORTH);
         try {
             central.add(new JPanel().add(new ComponentTextAreaNoEntry(Resources.getLicenseText(), this)), BorderLayout.CENTER);
         } catch (IOException e1) {

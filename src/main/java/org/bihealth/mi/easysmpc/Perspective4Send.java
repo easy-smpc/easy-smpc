@@ -22,7 +22,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Felix Wirth
  */
 public class Perspective4Send extends Perspective2Send {
-
+    
     /**
      * Creates a new instance
      * @param app
@@ -31,10 +31,13 @@ public class Perspective4Send extends Perspective2Send {
         super(app, Resources.getString("PerspectiveSend.send2nd") , 4);
     }
 
-    /**
-     * Save action
-     */
+    @Override
     protected void actionProceed() {
         getApp().actionSecondSendingDone();
+    }
+    
+    @Override
+    protected String getRoundIdentifier() {
+        return Resources.ROUND_2;
     }
 }

@@ -36,14 +36,17 @@ public class ImportClipboard implements Runnable {
      * @return
      */
     public static String getStrippedExchangeMessage(String text) {
-        text = text.replaceAll("\n", "").trim();
-        if (text.contains(Resources.MESSAGE_START_TAG)) {
-            text = text.substring(text.indexOf(Resources.MESSAGE_START_TAG) + Resources.MESSAGE_START_TAG.length(), text.length());
+        if (text != null) {
+            text = text.replaceAll("\n", "").trim();
+            if (text.contains(Resources.MESSAGE_START_TAG)) {
+                text = text.substring(text.indexOf(Resources.MESSAGE_START_TAG) + Resources.MESSAGE_START_TAG.length(), text.length());
+            }
+            if (text.contains(Resources.MESSAGE_END_TAG)) {
+                text = text.substring(0, text.indexOf(Resources.MESSAGE_END_TAG));
+            }
+            return text;
         }
-        if (text.contains(Resources.MESSAGE_END_TAG)) {
-            text = text.substring(0, text.indexOf(Resources.MESSAGE_END_TAG));
-        }
-        return text;
+        return null;
     }
     
     /**

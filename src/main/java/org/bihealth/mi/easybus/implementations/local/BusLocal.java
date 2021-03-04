@@ -11,32 +11,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.bihealth.mi.easysmpc.components;
+package org.bihealth.mi.easybus.implementations.local;
 
-import java.awt.Component;
-
-import javax.swing.JPopupMenu;
+import org.bihealth.mi.easybus.Bus;
+import org.bihealth.mi.easybus.Message;
+import org.bihealth.mi.easybus.Participant;
+import org.bihealth.mi.easybus.Scope;
 
 /**
+ * An easy, minimal Bus implementation
+ * 
  * @author Felix Wirth
  */
-public class ComponentTextAreaNoEntry extends ComponentTextArea{
-
-    /** SVID */
-    private static final long serialVersionUID = -409784899589033224L;
-
+public class BusLocal extends Bus{
+    
     /**
      * Creates a new instance
-     * @param text
-     * @param parent
      */
-    ComponentTextAreaNoEntry(String text, Component parent) {
-        super(text, null);
-        this.setComponentPopupMenu(new JPopupMenu());
-        this.setLineWrap(true);
-        this.setEditable(false);
-        this.setBackground(parent.getBackground());
-        
+    public BusLocal(){
+        // Empty by design
     }
 
+    @Override
+    public void send(Message message, Scope scope, Participant participant) {
+        receiveInternal(message, scope, participant);
+    }
+
+    @Override
+    public void stop() {
+        // Empty by design
+    }
+
+    @Override
+    public boolean isAlive() {
+        return true;
+    }
 }

@@ -11,32 +11,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.bihealth.mi.easysmpc.components;
+package org.bihealth.mi.easybus;
 
-import java.awt.Component;
-
-import javax.swing.JPopupMenu;
+import java.io.Serializable;
 
 /**
+ * The message a party is sending
+ * 
  * @author Felix Wirth
+ *
  */
-public class ComponentTextAreaNoEntry extends ComponentTextArea{
-
-    /** SVID */
-    private static final long serialVersionUID = -409784899589033224L;
-
+public class Message implements Serializable {
+    
+    /** SVUID */
+    private static final long serialVersionUID = 1557145500504512577L;
+    
+    /** The message content*/
+    private Object messageContent;
+    
     /**
      * Creates a new instance
-     * @param text
-     * @param parent
      */
-    ComponentTextAreaNoEntry(String text, Component parent) {
-        super(text, null);
-        this.setComponentPopupMenu(new JPopupMenu());
-        this.setLineWrap(true);
-        this.setEditable(false);
-        this.setBackground(parent.getBackground());
-        
+    public Message(Object messageContent){
+        this.messageContent = messageContent;
     }
-
+    
+    /**
+     * Returns the message
+     */
+    public Object getMessage(){
+        return this.messageContent;
+    }
 }

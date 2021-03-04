@@ -13,6 +13,8 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
+import javax.swing.JComponent;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -26,7 +28,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * 
  * @author Fabian Prasser
  */
-public class ComponentTextField extends JTextField {
+public class ComponentTextField extends JComponent {
 
     /** SVUID */
     private static final long           serialVersionUID = 5588848051841828428L;
@@ -37,14 +39,27 @@ public class ComponentTextField extends JTextField {
     /** Listener */
     private ChangeListener              listener;
 
+    /** Text field */
+    private JTextField                  field;
+
     /**
      * Creates a new instance
      * @param validator
      */
     public ComponentTextField(ComponentTextFieldValidator validator) {
+        this(validator, false);
+    }
+    
+    /**
+     * Creates a new instance
+     * @param validator
+     * @param password
+     */
+    public ComponentTextField(ComponentTextFieldValidator validator, boolean password) {
         this.validator = validator;
         this.validateValue();
-        this.getDocument().addDocumentListener(new DocumentListener() {
+        this.field = password ? new JPasswordField() : new JTextField();
+        this.field.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void changedUpdate(DocumentEvent e) {
                 validateValue();
@@ -67,7 +82,7 @@ public class ComponentTextField extends JTextField {
      * @return
      */
     public boolean isValueValid() {
-        return this.validator.validate(this.getText());
+        return this.validator.validate(this.field.getText());
     }
 
     /**
@@ -77,15 +92,20 @@ public class ComponentTextField extends JTextField {
     public void setChangeListener(ChangeListener listener) {
         this.listener = listener;
     }
-
+    
+    /**
+     * Gets text
+     */
+    public String getText() {
+        return this.field.getText();
+    }
     
     /**
      * Sets text for button
      * @param text
      */
-    @Override
     public void setText(String t) {
-        super.setText(t);
+        this.field.setText(t);
         this.validateValue();
     }
     
@@ -95,7 +115,7 @@ public class ComponentTextField extends JTextField {
     private void validateValue() {
         boolean isValid;
         if (validator != null) {
-            isValid = validator.validate(this.getText());
+            isValid = validator.validate(this.field.getText());
         } else {
             isValid = true;
         }

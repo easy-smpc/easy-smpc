@@ -11,32 +11,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.bihealth.mi.easysmpc.components;
-
-import java.awt.Component;
-
-import javax.swing.JPopupMenu;
+package org.bihealth.mi.easybus;
 
 /**
+ * Exception to handle errors in the bus
+ * 
  * @author Felix Wirth
  */
-public class ComponentTextAreaNoEntry extends ComponentTextArea{
+public class BusException extends Exception {
 
     /** SVID */
-    private static final long serialVersionUID = -409784899589033224L;
-
+    private static final long serialVersionUID = 5462783962126095816L;
+    
     /**
      * Creates a new instance
-     * @param text
-     * @param parent
+     * 
+     * @param message
      */
-    ComponentTextAreaNoEntry(String text, Component parent) {
-        super(text, null);
-        this.setComponentPopupMenu(new JPopupMenu());
-        this.setLineWrap(true);
-        this.setEditable(false);
-        this.setBackground(parent.getBackground());
-        
+    public BusException(String message) {
+        super(message);
     }
-
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param message
+     * @param cause
+     */
+    public BusException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

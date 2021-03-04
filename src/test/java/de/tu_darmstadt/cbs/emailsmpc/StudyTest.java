@@ -52,7 +52,7 @@ public class StudyTest {
             bins[i].shareValue(BigInteger.valueOf(3 * i + 7));
         }
         testmodel.toStarting();
-        testmodel.toInitialSending("Teststudy", part, bins);
+        testmodel.toInitialSending("Teststudy", part, bins, null);
         return testmodel;
     }
 
@@ -79,7 +79,7 @@ public class StudyTest {
             bins[i].shareValue(array[i]);
         }
         testmodel.toStarting();
-        testmodel.toInitialSending("Teststudy", part, bins);
+        testmodel.toInitialSending("Teststudy", part, bins, null);
         return testmodel;
     }
     

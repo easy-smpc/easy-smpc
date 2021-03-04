@@ -26,9 +26,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * Display participants with one button only
  * 
  * @author Felix Wirth
- *
  */
-
 public abstract class ComponentEntryOneButton extends ComponentEntry {
 
     /** SVID */

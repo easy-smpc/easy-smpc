@@ -37,6 +37,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
@@ -49,8 +50,8 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 import com.formdev.flatlaf.FlatLightLaf;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
-import de.tu_darmstadt.cbs.emailsmpc.MessageInitial;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
+import de.tu_darmstadt.cbs.emailsmpc.MessageInitial;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 import de.tu_darmstadt.cbs.emailsmpc.Study;
 import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
@@ -62,6 +63,8 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  * @author Fabian Prasser
  */
 public class App extends JFrame {
+    
+    public static final String VERSION = "1.0.0";
 
     /** SVUID */
     private static final long serialVersionUID = 8047583915796168387L;
@@ -446,6 +449,10 @@ public class App extends JFrame {
      * @param perspective
      */
     private void showPerspective(Perspective perspective) {
+        // Stop the bus for automatic processing if running
+        if (this.model != null) {
+            this.model.stopBus();
+        }
         perspective.initialize();
         CardLayout cl = (CardLayout) (cards.getLayout());
         cl.show(cards, perspective.getTitle());
@@ -514,13 +521,14 @@ public class App extends JFrame {
      * Called when action create is done
      * @param participants
      * @param bins
+     * @param connectionSettings 
      */
-    protected void actionCreateDone(String title, Participant[] participants, Bin[] bins) {
+    protected void actionCreateDone(String title, Participant[] participants, Bin[] bins, ConnectionIMAPSettings connectionIMAPSettings) {
 
         // Pass over bins and participants
         Study snapshot = this.beginTransaction();
         try {
-            model.toInitialSending(title, participants, bins);
+            model.toInitialSending(title, participants, bins, connectionIMAPSettings);
             if (actionSave()) {
                 this.showPerspective(Perspective2Send.class);
             } else {
@@ -750,11 +758,11 @@ public class App extends JFrame {
         try {
             this.model.toFinished();
             this.model.saveProgram();
+            this.showPerspective(Perspective6Result.class);
         } catch (Exception e) {
             this.rollback(snapshot);
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
         }
-        this.showPerspective(Perspective6Result.class);
     }
 
     /**
