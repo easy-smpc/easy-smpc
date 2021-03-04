@@ -20,7 +20,6 @@ import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -29,17 +28,6 @@ import org.junit.jupiter.api.Test;
  * @author Felix Wirth
  */
 public class IMAPTest {
-    
-    /** Login*/
-    private static ConnectionIMAPSettings gmailLogin;
-    /** Login*/
-    private static ConnectionIMAPSettings yandexLogin;
-    /** Login*/
-    private static ConnectionIMAPSettings insutecLogin;
-    /** Login*/
-    private static ConnectionIMAPSettings login1;
-    /** Login*/
-    private static ConnectionIMAPSettings login2;
    
     /** Listener*/
     MessageListener ListenerImplPositive = new MessageListener() {                
@@ -57,28 +45,16 @@ public class IMAPTest {
         }
     };
     
-    @BeforeAll
-    public static void setup() throws Exception {
-        gmailLogin = new ConnectionIMAPSettings("easysmpc.dev@gmail.com").setPassword("3a$ySMPC!");
-        if (!gmailLogin.guess()) {
-            throw new IllegalStateException("Could not guess connection settings");
-        }
-        yandexLogin = new ConnectionIMAPSettings("easysmpc.dev@yandex.com").setPassword("3a$ySMPC!")
-                                                                          .setIMAPServer("imap.yandex.com")
-                                                                          .setSMTPServer("smtp.yandex.com");
-        insutecLogin = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
-                                                                            .setIMAPServer("imap.ionos.de")
-                                                                            .setSMTPServer("smtp.ionos.de");
-        // Which login to use
-        login1 = gmailLogin;
-        login2 = insutecLogin;
-    }
-    
     @Test
     public void testSharedMailbox() throws Exception {
         
+        ConnectionIMAPSettings login = new ConnectionIMAPSettings("easysmpc.dev@gmail.com").setPassword("3a$ySMPC!");
+        if (!login.guess()) {
+            throw new IllegalStateException("Could not guess connection settings");
+        }
+        
         // Create bus
-        BusEmail bus = new BusEmail(new ConnectionIMAP(login2,
+        BusEmail bus = new BusEmail(new ConnectionIMAP(login,
                                                        true), 1000);
 
         // Positive test receiver
@@ -99,36 +75,5 @@ public class IMAPTest {
         // Wait for test to pass
         Thread.sleep(5000);
     }
-    
-    @Test
-    public void testDistributedMailbox() throws Exception {   
 
-        // Create bus
-        BusEmail busSender = new BusEmail(new ConnectionIMAP(login1,
-                                                             false), 1000);
-        BusEmail busReceiver = new BusEmail(new ConnectionIMAP(login2,
-                                                               false), 1000);
-
-        // Positive test receiver
-        busReceiver.receive(new Scope("scope1"),
-                            new Participant("part1", login2.getEmailAddress()),
-                            ListenerImplPositive);
-
-        // Negative test receiver
-        busReceiver.receive(new Scope("noMessagesToScope"),
-                            new Participant("part1", login2.getEmailAddress()),
-                            ListenerImplNegative);
-        // Positive test
-        busSender.send(new Message("My distributed mailbox message"),
-                       new Scope("scope1"),
-                       new Participant("part1", login2.getEmailAddress()));
-        // Negative test
-        busSender.send(new Message("This message should not appear"),
-                       new Scope("no subscribed scope"),
-                       new Participant("part1", login2.getEmailAddress()));
-
-        // Wait for test to pass
-        Thread.sleep(15000);
-
-    }
 }
