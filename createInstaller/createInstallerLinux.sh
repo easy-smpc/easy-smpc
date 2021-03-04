@@ -3,7 +3,7 @@
 #Create an EasySMPC installer for Linux
 #Usually only the version variable and the type (RPM or DEB) needs to be adapted
 #==================================
-VERSION="0.8.0"
+VERSION="1.0.0"
 TYPE="deb"
 BUILD_PATH="../target"
 MAIN_JAR="easysmpc.jar"

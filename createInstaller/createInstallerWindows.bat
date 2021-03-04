@@ -3,7 +3,7 @@ REM	Create an EasySMPC installer for Windows
 REM Usually only the version variable needs to be adapted
 REM Before executing the batch file the WIX toolset needs to be obtained and installed from https://wixtoolset.org/
 REM ==================================
-set version="0.8.0"
+set version="1.0.0"
 set buildPath="..\target"
 set mainJar="EasySMPC.jar"
 set mainClass=org.bihealth.mi.easysmpc.App
