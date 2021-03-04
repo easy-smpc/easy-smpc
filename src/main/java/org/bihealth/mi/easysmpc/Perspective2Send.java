@@ -200,7 +200,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * 
      * @param list
      */
-    protected void actionSendMailAutomatic(List<EntryParticipantSendMail> list) {
+    protected void actionSendMailAutomatically(List<EntryParticipantSendMail> list) {
+        
         // Deactivate buttons at start
         resendAllAutomatic.setEnabled(false);
         sendAllManual.setEnabled(false);
@@ -210,36 +211,43 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         
         // Create async task
         new SwingWorker<Void, Void>() {
+            
             @Override
             protected Void doInBackground() throws Exception {
+                
                 try {
+                    
                     // Loop over messages
                     boolean messageSent = false;
                     for (EntryParticipantSendMail entry : list) {
+                        
                         // Send message
-                        getApp().getModel()
-                                .getEMailBus()
-                                .send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
-                                      new Scope(getApp().getModel().studyUID +
-                                                getRoundIdentifier()),
-                                      new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
-                                                                              entry.getRightValue()));
+                        getApp().getModel().getEMailBus().send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
+                                      new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
+                                      new org.bihealth.mi.easybus.Participant(entry.getLeftValue(), entry.getRightValue()));
 
+                        
                         // Mark message sent
                         int index = Arrays.asList(participants.getComponents()).indexOf(entry);
                         getApp().actionMarkMessageSent(index);
                         messageSent = true;
                     }
+                    
                     // Persist changes
                     if (messageSent) {
                         getApp().actionSave();
                     }
+                    
                 } catch (BusException | IOException e) {
+                    
+                    // Error
                     JOptionPane.showMessageDialog(getPanel(),
                                                   Resources.getString("PerspectiveSend.sendAutomaticError"),
                                                   Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
                                                   JOptionPane.ERROR_MESSAGE);
                 }
+                
+                // Done
                 stateChanged(new ChangeEvent(this));
                 return null;
             }
@@ -252,6 +260,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @param list
      */
     protected void actionSendMailManual(List<EntryParticipantSendMail> list) {
+        
         try {
             
             // For each entry
@@ -261,8 +270,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 String subject = String.format(Resources.getString("PerspectiveSend.mailSubject"),
                                                getApp().getModel().name,
                                                getApp().getModel().state == StudyState.SENDING_RESULT ? 2 : 1);
+                
                 String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
                 exchangeString = exchangeString.replaceAll("(.{" + Resources.MESSAGE_LINE_WIDTH + "})", "$1\n");
+                
                 String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
                                             entry.getLeftValue(), // Name of participant
                                             getApp().getModel().state == StudyState.SENDING_RESULT ? 5 : 3, // Step number
@@ -271,9 +282,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 
                 // Build URI
                 URIBuilder builder = new URIBuilder().setScheme("mailto");
-                builder.setPath(entry.getRightValue()) // E-mail address
-                       .addParameter("subject", subject)
-                       .addParameter("body", body);
+                builder.setPath(entry.getRightValue()).addParameter("subject", subject).addParameter("body", body);
                 
                 // Open email
                 Desktop.getDesktop().mail(new URI(builder.toString().replace("+", "%20").replace(":/", ":")));
@@ -281,10 +290,12 @@ public class Perspective2Send extends Perspective implements ChangeListener {
 
             // Send a dialog to confirm mail sending
             if (JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendMailGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
+                
                 for (EntryParticipantSendMail entry : list) {
                     int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
                     getApp().actionMarkMessageSent(index);
                 }
+                
                 // Persist changes
                 getApp().actionSave();
             }
@@ -344,7 +355,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             public void actionPerformed(ActionEvent e) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        actionSendMailAutomatic(listUnsent());
+                        actionSendMailAutomatically(listUnsent());
                     }
                   });
             }
@@ -377,13 +388,15 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     @Override
     protected void initialize() {
+        
         this.title.setText(getApp().getModel().name);
         this.participants.removeAll();
+        
         int i = 0; // Index count for participants to access messages
         for (Participant currentParticipant : getApp().getModel().participants) {
-            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name,
-                                                                          currentParticipant.emailAddress,
-                                                                          i != getApp().getModel().ownId);
+            
+            // Add participant
+            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, currentParticipant.emailAddress, i != getApp().getModel().ownId);
             participants.add(entry);
             
             // Create popup menu for the send-email-button
@@ -404,20 +417,19 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             automaticSend.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    actionSendMailAutomatic(Arrays.asList(entry));
+                    actionSendMailAutomatically(Arrays.asList(entry));
                 }
             });
-            
-            // Disable the automatic sending entry in the popup menu, when it's not configured
             automaticSend.setEnabled(isAutomaticProcessingEnabled());
-            
             popUp.add(automaticSend);
             
-            // Copy content to clipboard, when the mailto-link doesn't work
+            // Copy content to clip board, when the mailto-link doesn't work
             JMenuItem copy = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuCopy"));
             copy.addActionListener(new ActionListener() {
+                
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                
                     // Push email body into clipboard
                     try {
                         String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
@@ -427,10 +439,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                 exchangeString,
                                 getApp().getModel().participants[getApp().getModel().ownId].name);
                         
-                        // Fill clipboard. Do this only if getExchangeString() was successful to avoid overwriting the users clipboard with nothing
+                        // Fill clip board. Do this only if getExchangeString() was successful to avoid overwriting the users clipboard with nothing
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(body), null);
+                    
                     } catch (IOException exception) {
-                        // Notify user that message-retrieval was unsuccessful
                         JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.copyToClipboardError"));
                     }
                 }
@@ -441,21 +453,22 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             entry.setButtonListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    // Retrieve the right sub-component, which is the last in entry
                     Component right = entry.getComponent(entry.getComponentCount() - 1);
-                    // Position the popup menu; right-align the menu
-                    popUp.show(entry, right.getBounds().x + right.getBounds().width - popUp.getPreferredSize().width, right.getBounds().y + right.getBounds().height);
+                    popUp.show(entry, right.getBounds().x + right.getBounds().width -
+                                      popUp.getPreferredSize().width, right.getBounds().y + right.getBounds().height);
                 }
             });
             
+            // Next element
             i++;
         }
+        
         // Update state
         this.stateChanged(new ChangeEvent(this));
         
         // Send e-mails automatically if enabled 
         if (isAutomaticProcessingEnabled()) {            
-            actionSendMailAutomatic(listUnsent());
+            actionSendMailAutomatically(listUnsent());
         }
         
         // Update GUI

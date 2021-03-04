@@ -56,15 +56,15 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
 
     /** Panel for bins */
     private ScrollablePanel    bins;
-    
+
     /** Text field containing title of study */
     private ComponentTextField title;
-    
+
     /** Save button */
     private JButton            save;
-    
+
     /** Central panel */
-    private JPanel central;
+    private JPanel             central;
 
     /**
      * Creates the perspective

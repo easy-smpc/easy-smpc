@@ -61,8 +61,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private ConnectionIMAPSettings result;
     /** Parent frame */
     private JFrame                 parent;
-
-        
+     
     /**
      * Create a new instance
      * 

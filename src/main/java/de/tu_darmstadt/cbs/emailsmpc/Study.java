@@ -44,26 +44,26 @@ public class Study implements Serializable, Cloneable {
      * @author Tobias Kussel
      */
     public enum StudyState {
-     /** The none. */
-     NONE, 
-     /** The starting. */
-     STARTING, 
-     /** The participating. */
-     PARTICIPATING, 
-     /** The entering values. */
-     ENTERING_VALUES, 
-     /** The initial sending. */
-     INITIAL_SENDING, 
-     /** The sending share. */
-     SENDING_SHARE, 
-     /** The recieving share. */
-     RECIEVING_SHARE, 
-     /** The sending result. */
-     SENDING_RESULT, 
-     /** The recieving result. */
-     RECIEVING_RESULT, 
-     /** The finished. */
-     FINISHED
+         /** The none. */
+         NONE, 
+         /** The starting. */
+         STARTING, 
+         /** The participating. */
+         PARTICIPATING, 
+         /** The entering values. */
+         ENTERING_VALUES, 
+         /** The initial sending. */
+         INITIAL_SENDING, 
+         /** The sending share. */
+         SENDING_SHARE, 
+         /** The recieving share. */
+         RECIEVING_SHARE, 
+         /** The sending result. */
+         SENDING_RESULT, 
+         /** The recieving result. */
+         RECIEVING_RESULT, 
+         /** The finished. */
+         FINISHED
     }
     
     /** The Constant serialVersionUID. */
@@ -78,50 +78,49 @@ public class Study implements Serializable, Cloneable {
      * @throws ClassNotFoundException the class not found exception
      * @throws IllegalArgumentException the illegal argument exception
      */
-    public static Study loadModel(File filename)
-            throws IOException, ClassNotFoundException, IllegalArgumentException {
+    public static Study loadModel(File filename) throws IOException, ClassNotFoundException, IllegalArgumentException {
         ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename));
         Object o = ois.readObject();
         ois.close();
         if (!(o instanceof Study))
-            throw new IllegalArgumentException("Invalid Save file");
+            throw new IllegalArgumentException("Invalid project file");
         Study model = (Study) o;
         model.filename = filename;
         return model;
     }
-    
+
     /** The study UID. */
-    public String studyUID;
-    
+    public String                 studyUID;
+
     /** The number of participants. */
-    public int numParticipants;
-    
+    public int                    numParticipants;
+
     /** The own id. */
-    public int ownId;
-    
+    public int                    ownId;
+
     /** The state. */
-    public StudyState state;
-    
+    public StudyState             state;
+
     /** The bins. */
-    public Bin[] bins;
-    
+    public Bin[]                  bins;
+
     /** The participants. */
-    public Participant[] participants;
-    
+    public Participant[]          participants;
+
     /** The name. */
-    public String name;
-    
+    public String                 name;
+
     /** The unsent messages. */
-    private Message[] unsentMessages;
+    private Message[]             unsentMessages;
 
     /** The filename. */
-    public transient File filename;
-    
+    public transient File         filename;
+
     /** The e-mail connection details */
     public ConnectionIMAPSettings connectionIMAPSettings;
-    
+
     /** Bus for automatic e-mail processing */
-    private transient BusEmail bus;
+    private transient BusEmail    bus;
 
     /**
      * Instantiates a new app model.
@@ -272,8 +271,7 @@ public class Study implements Serializable, Cloneable {
      * @throws BusException 
      */
     public BusEmail getEMailBus() throws BusException {
-        if ((this.bus == null || !this.bus.isAlive()) &&
-            this.connectionIMAPSettings != null) {
+        if ((this.bus == null || !this.bus.isAlive()) && this.connectionIMAPSettings != null) {
             this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true),
                                     Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
         }
@@ -371,7 +369,6 @@ public class Study implements Serializable, Cloneable {
         unsentMessages = new Message[numParticipants];
         for (Bin bin : bins) {
             if (!(bin.isInitialized())) {
-                // throw new IllegalStateException("Unable to initialize bin " + bin.name);
                 bin.initialize(numParticipants);
             }
         }

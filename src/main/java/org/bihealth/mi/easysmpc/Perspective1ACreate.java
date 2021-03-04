@@ -48,7 +48,7 @@ import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryBin;
 import org.bihealth.mi.easysmpc.components.EntryParticipant;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
-import org.bihealth.mi.easysmpc.dataimport.ImportPreferences;
+import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -142,7 +142,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void actionAddEMailConf() {
         ConnectionIMAPSettings settings = new DialogEmailConfig(null, getApp()).showDialog();
         if(settings != null) {
-            ImportPreferences.setConnectionIMAPSetting(settings);
+            Connections.add(settings);
             this.selectMailboxCombo.addItem(settings);
             this.selectMailboxCombo.setSelectedItem(settings);
         }
@@ -155,7 +155,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void actionEditEMailConf() {
         ConnectionIMAPSettings settings = new DialogEmailConfig((ConnectionIMAPSettings) this.selectMailboxCombo.getSelectedItem(), getApp()).showDialog();
         if(settings != null) {
-            ImportPreferences.setConnectionIMAPSetting(settings);
+            Connections.add(settings);
             this.selectMailboxCombo.addItem(settings);
             this.selectMailboxCombo.setSelectedItem(settings);
         }
@@ -188,7 +188,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      */
     private void actionRemoveEMailConf() {
         try {
-            ImportPreferences.removeConnectionIMAPSetting((ConnectionIMAPSettings) this.selectMailboxCombo.getSelectedItem());
+            Connections.remove((ConnectionIMAPSettings) this.selectMailboxCombo.getSelectedItem());
             this.selectMailboxCombo.removeItem(this.selectMailboxCombo.getSelectedItem());
         } catch (BackingStoreException e) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
@@ -405,7 +405,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private ConnectionIMAPSettings[] getEmailConfig() {
         try {
             // Read from preferences
-            ArrayList<ConnectionIMAPSettings> configFromPreferences = ImportPreferences.getConnectionIMAPSettings();
+            ArrayList<ConnectionIMAPSettings> configFromPreferences = Connections.list();
             // Add null for non-automatic
             configFromPreferences.add(0, null);
             return configFromPreferences.toArray(new ConnectionIMAPSettings[configFromPreferences.size()]);

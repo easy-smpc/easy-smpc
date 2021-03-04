@@ -49,16 +49,16 @@ public class Perspective6Result extends Perspective {
 
     /** Panel for participants */
     private ScrollablePanel    participants;
-    
+
     /** Panel for bins */
     private JPanel             bins;
-    
+
     /** Text field containing title of study */
     private ComponentTextField title;
-    
+
     /** Export data button */
-    private JButton export;    
-    
+    private JButton            export;
+
     /**
      * Creates the perspective
      * @param app
