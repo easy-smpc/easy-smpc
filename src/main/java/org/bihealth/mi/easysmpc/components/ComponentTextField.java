@@ -13,7 +13,7 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
-import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
@@ -28,7 +28,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * 
  * @author Fabian Prasser
  */
-public class ComponentTextField extends JComponent {
+public class ComponentTextField extends JPanel {
 
     /** SVUID */
     private static final long           serialVersionUID = 5588848051841828428L;
@@ -58,6 +58,7 @@ public class ComponentTextField extends JComponent {
     public ComponentTextField(ComponentTextFieldValidator validator, boolean password) {
         this.validator = validator;
         this.field = password ? new JPasswordField() : new JTextField();
+        this.add(field);
         this.validateValue();
         this.field.getDocument().addDocumentListener(new DocumentListener() {
             @Override
