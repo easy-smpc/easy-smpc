@@ -56,17 +56,17 @@ public abstract class ExportFile {
     }
     
     /**
-     * @return the file
-     */
-    protected File getFile() {
-        return file;
-    }
-    
-    /**
      * Exports the data
      * @param data 
      * 
      * @throws IOException 
      */
     public abstract void exportData(List<List<String>> data) throws IOException;
+    
+    /**
+     * @return the file
+     */
+    protected File getFile() {
+        return file;
+    }
 }

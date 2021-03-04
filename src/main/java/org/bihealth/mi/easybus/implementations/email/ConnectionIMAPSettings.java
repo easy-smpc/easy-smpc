@@ -46,6 +46,24 @@ public class ConnectionIMAPSettings implements Serializable {
     private static final Pattern regexDNS = Pattern.compile("^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]))*$");
 
 
+    /**
+     * Check server name
+     * @param text
+     */
+    public static void checkDNSName(String text) {
+        if (!regexDNS.matcher(text).matches()) {
+            throw new IllegalArgumentException("DNS name invalid");
+        }        
+    }
+    /**
+     * Check
+     * @param object
+     */
+    public static void checkPort(int object) {
+        if (object < 1 || object > 65535) {
+            throw new IllegalArgumentException("Port must not be between 1 and 65535");
+        }
+    }
     /** E-mail address */
     private String               emailAddress;
     /** Password */
@@ -54,8 +72,10 @@ public class ConnectionIMAPSettings implements Serializable {
     private String               imapServer;
     /** Port of IMAP server */
     private int                  imapPort                 = DEFAULT_PORT_IMAP;
+
     /** SMTP server dns */
     private String               smtpServer;
+        
     /** Port of SMTP server */
     private int                  smtpPort                 = DEFAULT_PORT_SMTP;
 
@@ -74,7 +94,7 @@ public class ConnectionIMAPSettings implements Serializable {
         // Store
         this.emailAddress = emailAddress;
     }
-        
+
     /**
      * Checks whether fields are empty
      * 
@@ -316,7 +336,7 @@ public class ConnectionIMAPSettings implements Serializable {
         // Done
         return this;
     }
-
+    
     /**
      * Check
      * @param object
@@ -325,25 +345,5 @@ public class ConnectionIMAPSettings implements Serializable {
         if (object == null) {
             throw new IllegalArgumentException("Parameter must not be null");
         }
-    }
-
-    /**
-     * Check
-     * @param object
-     */
-    public static void checkPort(int object) {
-        if (object < 1 || object > 65535) {
-            throw new IllegalArgumentException("Port must not be between 1 and 65535");
-        }
-    }
-    
-    /**
-     * Check server name
-     * @param text
-     */
-    public static void checkDNSName(String text) {
-        if (!regexDNS.matcher(text).matches()) {
-            throw new IllegalArgumentException("DNS name invalid");
-        }        
     }
 }

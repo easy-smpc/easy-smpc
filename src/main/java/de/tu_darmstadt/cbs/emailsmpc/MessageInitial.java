@@ -115,6 +115,24 @@ public class MessageInitial implements Serializable {
         }
     }
     
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        MessageInitial other = (MessageInitial) obj;
+        if (!Arrays.equals(bins, other.bins)) return false;
+        if (connectionIMAPSettings == null) {
+            if (other.connectionIMAPSettings != null) return false;
+        } else if (!connectionIMAPSettings.equals(other.connectionIMAPSettings)) return false;
+        if (name == null) {
+            if (other.name != null) return false;
+        } else if (!name.equals(other.name)) return false;
+        if (!Arrays.equals(participants, other.participants)) return false;
+        if (recipientId != other.recipientId) return false;
+        return true;
+    }
+
     /**
      * Gets the message.
      *
@@ -140,23 +158,5 @@ public class MessageInitial implements Serializable {
         result = prime * result + Arrays.hashCode(participants);
         result = prime * result + recipientId;
         return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        MessageInitial other = (MessageInitial) obj;
-        if (!Arrays.equals(bins, other.bins)) return false;
-        if (connectionIMAPSettings == null) {
-            if (other.connectionIMAPSettings != null) return false;
-        } else if (!connectionIMAPSettings.equals(other.connectionIMAPSettings)) return false;
-        if (name == null) {
-            if (other.name != null) return false;
-        } else if (!name.equals(other.name)) return false;
-        if (!Arrays.equals(participants, other.participants)) return false;
-        if (recipientId != other.recipientId) return false;
-        return true;
     }
 }

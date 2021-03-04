@@ -266,6 +266,21 @@ public class Study implements Serializable, Cloneable {
     }
 
     /**
+     * Returns the bus
+     * 
+     * @return the bus
+     * @throws BusException 
+     */
+    public BusEmail getEMailBus() throws BusException {
+        if ((this.bus == null || !this.bus.isAlive()) &&
+            this.connectionIMAPSettings != null) {
+            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true),
+                                    Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
+        }
+        return this.bus;
+    }
+
+    /**
      * Gets the participant from id.
      *
      * @param p the p
@@ -465,7 +480,7 @@ public class Study implements Serializable, Cloneable {
           b.clearOutSharesExceptId(ownId);
         }
     }
-
+    
     /**
      * Populate result messages.
      *
@@ -490,7 +505,7 @@ public class Study implements Serializable, Cloneable {
         b.clearInSharesExceptId(ownId);
       }
     }
-    
+
     /**
      * Populate share messages.
      *
@@ -583,6 +598,15 @@ public class Study implements Serializable, Cloneable {
         } else {
             throw new IllegalArgumentException("Message invalid");
         }
+    }
+
+    /**
+     * Stops the bus
+     */
+    public void stopBus() {
+        if (this.bus != null) {
+            this.bus.stop();
+        } 
     }
 
     /**
@@ -875,7 +899,7 @@ public class Study implements Serializable, Cloneable {
         }
 
     }
-
+    
     /**
      * Gets the initial message.
      *
@@ -888,7 +912,7 @@ public class Study implements Serializable, Cloneable {
         Participant recipient = this.participants[recipientId];
         return new Message(ownId, recipient, data.getMessage());
     }
-
+    
     /**
      * Gets the share message.
      *
@@ -900,29 +924,5 @@ public class Study implements Serializable, Cloneable {
         MessageShare data = new MessageShare(this, recipientId);
         Participant recipient = this.participants[recipientId];
         return new Message(ownId, recipient, data.getMessage());
-    }
-    
-    /**
-     * Returns the bus
-     * 
-     * @return the bus
-     * @throws BusException 
-     */
-    public BusEmail getEMailBus() throws BusException {
-        if ((this.bus == null || !this.bus.isAlive()) &&
-            this.connectionIMAPSettings != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true),
-                                    Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
-        }
-        return this.bus;
-    }
-    
-    /**
-     * Stops the bus
-     */
-    public void stopBus() {
-        if (this.bus != null) {
-            this.bus.stop();
-        } 
     }
 }

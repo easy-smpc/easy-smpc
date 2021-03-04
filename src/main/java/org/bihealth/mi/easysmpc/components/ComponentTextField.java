@@ -78,26 +78,26 @@ public class ComponentTextField extends JComponent {
     }
 
     /**
+     * Gets text
+     */
+    public String getText() {
+        return this.field.getText();
+    }
+
+    /**
      * Returns whether the value is valid
      * @return
      */
     public boolean isValueValid() {
         return this.validator.validate(this.field.getText());
     }
-
+    
     /**
      * Sets a change listener
      * @param listener
      */
     public void setChangeListener(ChangeListener listener) {
         this.listener = listener;
-    }
-    
-    /**
-     * Gets text
-     */
-    public String getText() {
-        return this.field.getText();
     }
     
     /**

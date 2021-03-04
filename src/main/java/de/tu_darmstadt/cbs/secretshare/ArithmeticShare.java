@@ -67,6 +67,11 @@ public class ArithmeticShare implements Serializable, Cloneable {
     }
 
     @Override
+    public Object clone() {
+        return new ArithmeticShare(this.value, this.prime);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == this)
             return true;
@@ -82,13 +87,8 @@ public class ArithmeticShare implements Serializable, Cloneable {
         result = 31 * result + prime.hashCode();
         return result;
     }
-
     @Override
     public String toString() {
         return value + " mod " + prime;
-    }
-    @Override
-    public Object clone() {
-        return new ArithmeticShare(this.value, this.prime);
     }
 }

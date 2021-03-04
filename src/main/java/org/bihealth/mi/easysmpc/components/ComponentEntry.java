@@ -48,32 +48,6 @@ public abstract class ComponentEntry extends JPanel {
      * @param leftValue
      * @param leftEnabled
      * @param leftValidator
-     * @param rightString
-     * @param rightValue
-     * @param rightEnabled
-     * @param rightValidator
-     * @param additionalControlsEnabled
-     */
-    public ComponentEntry(String leftString,
-                         String leftValue,
-                         boolean leftEnabled, 
-                         ComponentTextFieldValidator leftValidator,
-                         String rightString, 
-                         String rightValue,
-                         boolean rightEnabled, 
-                         ComponentTextFieldValidator rightValidator,
-                         boolean additionalControlsEnabled) {
-        this (leftString, leftValue, leftEnabled, leftValidator, false,
-              rightString, rightValue, rightEnabled, rightValidator, false,
-              additionalControlsEnabled);
-    }
-    
-    /**
-     * Creates a new instance
-     * @param leftString
-     * @param leftValue
-     * @param leftEnabled
-     * @param leftValidator
      * @param leftIsPassword
      * @param rightString
      * @param rightValue
@@ -155,6 +129,32 @@ public abstract class ComponentEntry extends JPanel {
         this.setMaximumSize(new Dimension(Integer.MAX_VALUE, this.fieldLeft.getPreferredSize().height + Resources.ROW_GAP * 2));
         this.setMinimumSize(new Dimension(0, this.fieldLeft.getPreferredSize().height + Resources.ROW_GAP * 2));
     }
+    
+    /**
+     * Creates a new instance
+     * @param leftString
+     * @param leftValue
+     * @param leftEnabled
+     * @param leftValidator
+     * @param rightString
+     * @param rightValue
+     * @param rightEnabled
+     * @param rightValidator
+     * @param additionalControlsEnabled
+     */
+    public ComponentEntry(String leftString,
+                         String leftValue,
+                         boolean leftEnabled, 
+                         ComponentTextFieldValidator leftValidator,
+                         String rightString, 
+                         String rightValue,
+                         boolean rightEnabled, 
+                         ComponentTextFieldValidator rightValidator,
+                         boolean additionalControlsEnabled) {
+        this (leftString, leftValue, leftEnabled, leftValidator, false,
+              rightString, rightValue, rightEnabled, rightValidator, false,
+              additionalControlsEnabled);
+    }
 
     /**
      * Returns whether the settings are valid
@@ -195,19 +195,19 @@ public abstract class ComponentEntry extends JPanel {
     }
 
     /**
-     * Sets the right value
-     * @return
-     */
-    public void setRightValue(String text) {
-        this.fieldRight.setText(text);
-    }
-    
-    /**
      * Sets the left value
      * @return
      */
     public void setLeftValue(String text) {
         this.fieldLeft.setText(text);
+    }
+    
+    /**
+     * Sets the right value
+     * @return
+     */
+    public void setRightValue(String text) {
+        this.fieldRight.setText(text);
     }
     
     /** Creates an additional control panel

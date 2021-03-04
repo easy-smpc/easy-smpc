@@ -52,6 +52,11 @@ public class ImportPreferences {
         return result;
     }
     
+    public static void removeConnectionIMAPSetting(ConnectionIMAPSettings settings) throws BackingStoreException {
+        Preferences.userRoot().node(ImportPreferences.class.getPackage().getName())
+                                       .node(settings.getEmailAddress()).removeNode();
+    }
+    
     public static void setConnectionIMAPSetting(ConnectionIMAPSettings settings) {
         // Get child node
         Preferences childNode = Preferences.userRoot()
@@ -64,10 +69,5 @@ public class ImportPreferences {
         childNode.putInt(IMAP_PORT_KEY, settings.getIMAPPort());
         childNode.put(SMTP_SERVER_KEY, settings.getSMTPServer());
         childNode.putInt(SMTP_PORT_KEY, settings.getSMTPPort());
-    }
-    
-    public static void removeConnectionIMAPSetting(ConnectionIMAPSettings settings) throws BackingStoreException {
-        Preferences.userRoot().node(ImportPreferences.class.getPackage().getName())
-                                       .node(settings.getEmailAddress()).removeNode();
     }    
 }

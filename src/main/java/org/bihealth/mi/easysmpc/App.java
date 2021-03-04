@@ -250,6 +250,25 @@ public class App extends JFrame {
     }
 
     /**
+     * Writes data to a file
+     * 
+     * @param data
+     */
+    public void exportData(List<List<String>> data) {
+        // Get file
+        File file = getFile(false, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX),
+                                  new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
+        
+        if (file != null) {
+            try {
+                ExportFile.toFile(file).exportData(data);       
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+            }
+        }
+    }
+    
+    /**
      * Reads data from a file
      * @return List of data
      */
@@ -270,7 +289,7 @@ public class App extends JFrame {
             }
         }
         return null;
-    }
+    }    
     
     /**
      * Opens a file chooser
@@ -317,7 +336,7 @@ public class App extends JFrame {
         
         // Should work
         return file;
-    }    
+    }
     
     /**
      * Get model state
@@ -369,7 +388,7 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.messageError"), Resources.getString("PerspectiveReceive.messageErrorTitle"), JOptionPane.ERROR_MESSAGE);
         }        
     }
-    
+
     /**
      * Adds a new perspective
      * 
@@ -408,7 +427,7 @@ public class App extends JFrame {
             return false;
         }
     }
-
+    
     /**
      * Rolls back a transaction
      * @param snapshot
@@ -418,7 +437,7 @@ public class App extends JFrame {
             this.model.update(snapshot);
         }
     }
-    
+
     /**
      * Shows a perspective
      * 
@@ -433,7 +452,7 @@ public class App extends JFrame {
             index++;
         }
     }
-
+    
     /**
      * Shows the perspective with the given index
      * 
@@ -442,7 +461,7 @@ public class App extends JFrame {
     private void showPerspective(int index) {
         showPerspective(perspectives.get(index));
     }
-    
+
     /**
      * Shows a certain perspective
      * 
@@ -539,7 +558,7 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("App.15"), Resources.getString("App.22"), JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     /**
      * Shows the exit dialog
      */
@@ -551,7 +570,7 @@ public class App extends JFrame {
                                           System.exit(0);
                                       }
     }
-    
+
     /**
      * Action performed when first receiving done
      */
@@ -699,7 +718,7 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("App.15"), Resources.getString("App.22"), JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     /**
      * Action to receive a message
      * 
@@ -724,7 +743,7 @@ public class App extends JFrame {
             setMessageShare(ImportClipboard.getStrippedExchangeMessage(message));           
         }  
     }
-    
+
     /**
      * Saves the project
      */
@@ -764,7 +783,7 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     /**
      * Second sending done
      */
@@ -786,7 +805,7 @@ public class App extends JFrame {
      */
     protected void actionStart() {
         this.showPerspective(Perspective0Start.class);
-    }
+    }    
     
     /**
      * Returns the model
@@ -794,8 +813,8 @@ public class App extends JFrame {
      */
     protected Study getModel() {
         return this.model;
-    }    
-    
+    }
+
     /**
      * Returns a perspective
      * 
@@ -811,24 +830,5 @@ public class App extends JFrame {
             }
         }
         return returnPerspective;
-    }
-
-    /**
-     * Writes data to a file
-     * 
-     * @param data
-     */
-    public void exportData(List<List<String>> data) {
-        // Get file
-        File file = getFile(false, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX),
-                                  new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
-        
-        if (file != null) {
-            try {
-                ExportFile.toFile(file).exportData(data);       
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
-            }
-        }
     }
 }

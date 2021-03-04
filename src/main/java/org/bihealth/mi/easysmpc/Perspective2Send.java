@@ -122,17 +122,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      }
     
     /**
-     * Indicates whether the automatic processing enabled
-     * 
-     * @return enabled
-     */
-    private boolean isAutomaticProcessingEnabled() {
-        // Return if automatic connection is enabled and it is not initial sending of study creator
-        return getApp().getModel().connectionIMAPSettings != null &&
-               !(getApp().getModelState() == StudyState.INITIAL_SENDING);
-    }
-
-    /**
      * Returns the exchange string for the given entry
      * 
      * @param entry
@@ -141,6 +130,17 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     private String getExchangeString(EntryParticipantSendMail entry) throws IOException {
         int index = Arrays.asList(participants.getComponents()).indexOf(entry);
         return Message.serializeMessage(getApp().getModel().getUnsentMessageFor(index));
+    }
+
+    /**
+     * Indicates whether the automatic processing enabled
+     * 
+     * @return enabled
+     */
+    private boolean isAutomaticProcessingEnabled() {
+        // Return if automatic connection is enabled and it is not initial sending of study creator
+        return getApp().getModel().connectionIMAPSettings != null &&
+               !(getApp().getModelState() == StudyState.INITIAL_SENDING);
     }
 
     /**
@@ -165,6 +165,21 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     }
     
     /**
+     * List all participants with unsent messages
+     * 
+     * @return list of participants
+     */
+    private List<EntryParticipantSendMail> listUnsent() {
+        List<EntryParticipantSendMail> list = new ArrayList<>();
+        for (Component c : participants.getComponents()) {
+            if (!isOwnEntry(c) && unsentMessages(c) ) {
+                list.add((EntryParticipantSendMail)  c);
+            }
+        }
+        return list;
+    }
+     
+    /**
      * Returns whether there are unsent message for the entry
      * @param entry
      * @return
@@ -172,61 +187,12 @@ public class Perspective2Send extends Perspective implements ChangeListener {
    private boolean unsentMessages(Component entry) {
        return getApp().getModel().getUnsentMessageFor(Arrays.asList(participants.getComponents()).indexOf(entry)) != null;                     
    }
-     
-    /**
+    
+     /**
      * Proceed action
      */
     protected void actionProceed() {
         getApp().actionFirstSendingDone();
-    }
-    
-     /**
-     * Sends an e-mail to the participant entry
-     * 
-     * @param list
-     */
-    protected void actionSendMailManual(List<EntryParticipantSendMail> list) {
-        try {
-            
-            // For each entry
-            for (EntryParticipantSendMail entry : list) {
-                
-                // Prepare URI parts
-                String subject = String.format(Resources.getString("PerspectiveSend.mailSubject"),
-                                               getApp().getModel().name,
-                                               getApp().getModel().state == StudyState.SENDING_RESULT ? 2 : 1);
-                String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
-                exchangeString = exchangeString.replaceAll("(.{" + Resources.MESSAGE_LINE_WIDTH + "})", "$1\n");
-                String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
-                                            entry.getLeftValue(), // Name of participant
-                                            getApp().getModel().state == StudyState.SENDING_RESULT ? 5 : 3, // Step number
-                                            exchangeString,
-                                            getApp().getModel().participants[getApp().getModel().ownId].name);
-                
-                // Build URI
-                URIBuilder builder = new URIBuilder().setScheme("mailto");
-                builder.setPath(entry.getRightValue()) // E-mail address
-                       .addParameter("subject", subject)
-                       .addParameter("body", body);
-                
-                // Open email
-                Desktop.getDesktop().mail(new URI(builder.toString().replace("+", "%20").replace(":/", ":")));
-            }
-
-            // Send a dialog to confirm mail sending
-            if (JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendMailGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
-                for (EntryParticipantSendMail entry : list) {
-                    int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
-                    getApp().actionMarkMessageSent(index);
-                }
-                // Persist changes
-                getApp().actionSave();
-            }
-
-        } catch (IOException | URISyntaxException e) {
-            JOptionPane.showMessageDialog(this.getPanel(), Resources.getString("PerspectiveSend.mailToError"), Resources.getString("PerspectiveSend.mailToErrorTitle"), JOptionPane.ERROR_MESSAGE);
-        }
-        this.stateChanged(new ChangeEvent(this));
     }
     
     /**
@@ -281,28 +247,52 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     }
     
     /**
-     * Returns an identifier for the current round of EasySMPC 
-     * This is needed to make sure the correct message are sent to the correct receivers
+     * Sends an e-mail to the participant entry
      * 
-     * @return round
+     * @param list
      */
-    protected String getRoundIdentifier() {
-        return Resources.ROUND_1;
-    }
-
-    /**
-     * List all participants with unsent messages
-     * 
-     * @return list of participants
-     */
-    private List<EntryParticipantSendMail> listUnsent() {
-        List<EntryParticipantSendMail> list = new ArrayList<>();
-        for (Component c : participants.getComponents()) {
-            if (!isOwnEntry(c) && unsentMessages(c) ) {
-                list.add((EntryParticipantSendMail)  c);
+    protected void actionSendMailManual(List<EntryParticipantSendMail> list) {
+        try {
+            
+            // For each entry
+            for (EntryParticipantSendMail entry : list) {
+                
+                // Prepare URI parts
+                String subject = String.format(Resources.getString("PerspectiveSend.mailSubject"),
+                                               getApp().getModel().name,
+                                               getApp().getModel().state == StudyState.SENDING_RESULT ? 2 : 1);
+                String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
+                exchangeString = exchangeString.replaceAll("(.{" + Resources.MESSAGE_LINE_WIDTH + "})", "$1\n");
+                String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
+                                            entry.getLeftValue(), // Name of participant
+                                            getApp().getModel().state == StudyState.SENDING_RESULT ? 5 : 3, // Step number
+                                            exchangeString,
+                                            getApp().getModel().participants[getApp().getModel().ownId].name);
+                
+                // Build URI
+                URIBuilder builder = new URIBuilder().setScheme("mailto");
+                builder.setPath(entry.getRightValue()) // E-mail address
+                       .addParameter("subject", subject)
+                       .addParameter("body", body);
+                
+                // Open email
+                Desktop.getDesktop().mail(new URI(builder.toString().replace("+", "%20").replace(":/", ":")));
             }
+
+            // Send a dialog to confirm mail sending
+            if (JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendMailGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
+                for (EntryParticipantSendMail entry : list) {
+                    int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
+                    getApp().actionMarkMessageSent(index);
+                }
+                // Persist changes
+                getApp().actionSave();
+            }
+
+        } catch (IOException | URISyntaxException e) {
+            JOptionPane.showMessageDialog(this.getPanel(), Resources.getString("PerspectiveSend.mailToError"), Resources.getString("PerspectiveSend.mailToErrorTitle"), JOptionPane.ERROR_MESSAGE);
         }
-        return list;
+        this.stateChanged(new ChangeEvent(this));
     }
 
     /**
@@ -370,6 +360,16 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         });
         buttonsPane.add(proceed, 0, 2);
         panel.add(buttonsPane, BorderLayout.SOUTH);
+    }
+
+    /**
+     * Returns an identifier for the current round of EasySMPC 
+     * This is needed to make sure the correct message are sent to the correct receivers
+     * 
+     * @return round
+     */
+    protected String getRoundIdentifier() {
+        return Resources.ROUND_1;
     }
 
     /**

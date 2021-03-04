@@ -68,6 +68,25 @@ public class Perspective6Result extends Perspective {
     }
     
     /**
+     * Initialize perspective based on model
+     */
+    @Override
+    public void initialize() {
+        participants.removeAll();
+        bins.removeAll();
+        this.title.setText(getApp().getModel().name);
+        for (Participant currentParticipant : getApp().getModel().participants) {
+            participants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress));
+        }
+        for (BinResult binResult : getApp().getModel().getAllResults()) {
+            bins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
+        }
+        // Update GUI
+        getPanel().revalidate();
+        getPanel().repaint(); 
+    }
+    
+    /**
      * 
      * @param Exports data
      */
@@ -80,7 +99,7 @@ public class Perspective6Result extends Perspective {
         }
         getApp().exportData(list);
     }
-    
+
     /**
      *Creates and adds UI elements
      */
@@ -141,24 +160,5 @@ public class Perspective6Result extends Perspective {
         });
         buttonsPane.add(export, BorderLayout.CENTER);        
         panel.add(buttonsPane, BorderLayout.SOUTH);
-    }
-
-    /**
-     * Initialize perspective based on model
-     */
-    @Override
-    public void initialize() {
-        participants.removeAll();
-        bins.removeAll();
-        this.title.setText(getApp().getModel().name);
-        for (Participant currentParticipant : getApp().getModel().participants) {
-            participants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress));
-        }
-        for (BinResult binResult : getApp().getModel().getAllResults()) {
-            bins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
-        }
-        // Update GUI
-        getPanel().revalidate();
-        getPanel().repaint(); 
     }
 }

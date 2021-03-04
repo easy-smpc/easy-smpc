@@ -89,6 +89,76 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         new ImportClipboard(this);
     }    
     
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        getApp().actionReceiveMessage();
+        this.stateChanged(new ChangeEvent(this));
+    }
+    
+    @Override
+    public void receive(Message message) {
+        String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
+        if (getApp().isMessageShareResultValid(messageStripped)) {
+            getApp().setMessageShare(messageStripped);
+            stateChanged(new ChangeEvent(this));
+            getApp().actionSave();
+        }
+    }
+
+    /**
+     * Reacts on all changes in any components
+     */
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        checkmarkParticipantEntries();
+        this.proceed.setEnabled(this.areSharesComplete());
+    }
+     
+    /**
+     * Checks if all bins are complete
+     * @return
+     */
+    private boolean areSharesComplete() {
+        for (Bin b : getApp().getModel().bins) {
+            if (!b.isComplete()) return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Checks if all bins for a certain user id are complete
+     * @return
+     */
+    private boolean areSharesCompleteForParticipantId(int participantId) {
+        for (Bin b : getApp().getModel().bins) {
+            if (!b.isCompleteForParticipantId(participantId)) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Check participant entries visually if complete
+     */
+    private void checkmarkParticipantEntries() {
+        int i=0;
+        for (Component c : this.participants.getComponents()) {
+            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(i == getApp().getModel().ownId || //Always mark own id as "received"
+                                                                (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  i == 0) || //Mark first entry in first round as received
+                                                                areSharesCompleteForParticipantId(i)); //Mark if share complete
+            i++;
+        }
+    }
+    
+    /**
+     * Indicates whether the automatic processing enabled
+     * 
+     * @return enabled
+     */
+    private boolean isAutomaticProcessingEnabled() {
+        // Return if automatic connection is enabled
+        return getApp().getModel().connectionIMAPSettings != null;
+    }
+    
     /**
      * Start the automatic import of e-mails if necessary
      */
@@ -106,76 +176,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                           Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
                                           Resources.getString("PerspectiveReceive.AutomaticEmail"),
                                           JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
-    /**
-     * Returns an identifier for the current round of EasySMPC 
-     * This is needed to make sure the correct message are sent to the correct receivers
-     * 
-     * @return round
-     */
-    protected String getRoundIdentifier() {
-        return Resources.ROUND_1;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        getApp().actionReceiveMessage();
-        this.stateChanged(new ChangeEvent(this));
-    }
-     
-    /**
-     * Reacts on all changes in any components
-     */
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        checkmarkParticipantEntries();
-        this.proceed.setEnabled(this.areSharesComplete());
-    }
-    
-    /**
-     * Checks if all bins are complete
-     * @return
-     */
-    private boolean areSharesComplete() {
-        for (Bin b : getApp().getModel().bins) {
-            if (!b.isComplete()) return false;
-        }
-        return true;
-    }
-
-    /**
-     * Checks if all bins for a certain user id are complete
-     * @return
-     */
-    private boolean areSharesCompleteForParticipantId(int participantId) {
-        for (Bin b : getApp().getModel().bins) {
-            if (!b.isCompleteForParticipantId(participantId)) return false;
-        }
-        return true;
-    }
-    
-    /**
-     * Indicates whether the automatic processing enabled
-     * 
-     * @return enabled
-     */
-    private boolean isAutomaticProcessingEnabled() {
-        // Return if automatic connection is enabled
-        return getApp().getModel().connectionIMAPSettings != null;
-    }
-    
-    /**
-     * Check participant entries visually if complete
-     */
-    private void checkmarkParticipantEntries() {
-        int i=0;
-        for (Component c : this.participants.getComponents()) {
-            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(i == getApp().getModel().ownId || //Always mark own id as "received"
-                                                                (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  i == 0) || //Mark first entry in first round as received
-                                                                areSharesCompleteForParticipantId(i)); //Mark if share complete
-            i++;
         }
     }
 
@@ -238,6 +238,16 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     }
 
     /**
+     * Returns an identifier for the current round of EasySMPC 
+     * This is needed to make sure the correct message are sent to the correct receivers
+     * 
+     * @return round
+     */
+    protected String getRoundIdentifier() {
+        return Resources.ROUND_1;
+    }
+
+    /**
      * Initialize perspective based on model
      */
     @Override
@@ -260,15 +270,5 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();
         getPanel().repaint(); 
-    }
-
-    @Override
-    public void receive(Message message) {
-        String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
-        if (getApp().isMessageShareResultValid(messageStripped)) {
-            getApp().setMessageShare(messageStripped);
-            stateChanged(new ChangeEvent(this));
-            getApp().actionSave();
-        }
     } 
 }
