@@ -155,7 +155,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @return enabled
      */
     private boolean isAutomaticProcessingEnabled() {
-        // Return if automatic connection is enabled
         return getApp().getModel().connectionIMAPSettings != null;
     }
     
@@ -164,12 +163,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     private void startAutomatedMailImport() {        
         try {
-            // Add listener to process message from e-mail
             getApp().getModel().getEMailBus().receive(new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
-                        new org.bihealth.mi.easybus.Participant(getApp().getModel()
-                                                                        .getParticipantFromId(getApp().getModel().ownId).name,
-                                                                getApp().getModel()
-                                                                        .getParticipantFromId(getApp().getModel().ownId).emailAddress),
+                        new org.bihealth.mi.easybus.Participant(getApp().getModel().getParticipantFromId(getApp().getModel().ownId).name,
+                                                                getApp().getModel().getParticipantFromId(getApp().getModel().ownId).emailAddress),
                                                                 this);
         } catch (IllegalArgumentException | BusException e) {
             JOptionPane.showMessageDialog(getPanel(),
