@@ -17,6 +17,9 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -411,6 +414,30 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             
             popUp.add(automaticSend);
             
+            // Copy content to clipboard, when the mailto-link doesn't work
+            JMenuItem copy = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuCopy"));
+            copy.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // Push email body into clipboard
+                    try {
+                        String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
+                        String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
+                                entry.getLeftValue(), // Name of participant
+                                getApp().getModel().state == StudyState.SENDING_RESULT ? 5 : 3, // Step number
+                                exchangeString,
+                                getApp().getModel().participants[getApp().getModel().ownId].name);
+                        
+                        // Fill clipboard. Do this only if getExchangeString() was successful to avoid overwriting the users clipboard with nothing
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(body), null);
+                    } catch (IOException exception) {
+                        // Notify user that message-retrieval was unsuccessful
+                        JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.copyToClipboardError"));
+                    }
+                }
+            });
+            popUp.add(copy);
+
             // Add popup menu to the button
             entry.setButtonListener(new ActionListener() {
                 @Override
