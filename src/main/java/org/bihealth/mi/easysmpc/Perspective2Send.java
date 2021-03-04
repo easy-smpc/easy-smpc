@@ -109,16 +109,17 @@ public class Perspective2Send extends Perspective implements ChangeListener {
       */
      @Override
      public void stateChanged(ChangeEvent e) {
-         // Check clickable send all mails button and save button
+         
+         // Check click able send all mails button and save button
          boolean messagesUnsent = getApp().getModel().messagesUnsent();
          this.proceed.setEnabled(!messagesUnsent);
          this.sendAllManual.setEnabled(messagesUnsent);
          this.resendAllAutomatic.setEnabled(messagesUnsent && isAutomaticProcessingEnabled());
 
-         // Check buttons clickable
-         for (Component c : this.participants.getComponents()) {
-                 ((EntryParticipantSendMail) c).setButtonEnabled(isMailButtonClickable(c));
-             }
+        // Check buttons clickable
+        for (Component c : this.participants.getComponents()) {
+            ((EntryParticipantSendMail) c).setButtonEnabled(isMailButtonClickable(c));
+        }
      }
     
     /**
@@ -202,14 +203,14 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     protected void actionSendMailAutomatically(List<EntryParticipantSendMail> list) {
         
-        // Deactivate buttons at start
+        // Deactivate buttons at start: Will be re-enabled if needed by the thread spawned below
         resendAllAutomatic.setEnabled(false);
         sendAllManual.setEnabled(false);
         for (Component c : this.participants.getComponents()) {
             ((EntryParticipantSendMail) c).setButtonEnabled(false);
         }
         
-        // Create async task
+        // Spawn async task
         new SwingWorker<Void, Void>() {
             
             @Override
@@ -231,6 +232,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                         int index = Arrays.asList(participants.getComponents()).indexOf(entry);
                         getApp().actionMarkMessageSent(index);
                         messageSent = true;
+
+                        // Activate all buttons
+                        stateChanged(new ChangeEvent(this));
+                        
                     }
                     
                     // Persist changes
@@ -246,9 +251,11 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                   Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
                                                   JOptionPane.ERROR_MESSAGE);
                 }
+
+                // Activate all buttons
+                stateChanged(new ChangeEvent(this));
                 
                 // Done
-                stateChanged(new ChangeEvent(this));
                 return null;
             }
         }.execute();
