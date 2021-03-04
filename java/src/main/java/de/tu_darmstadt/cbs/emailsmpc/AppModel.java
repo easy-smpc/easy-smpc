@@ -82,7 +82,7 @@ public class AppModel implements Serializable, Cloneable {
     private Message[] unsentMessages;
 
     /** The filename. */
-    public File filename;
+    public transient File filename;
 
     /**
      * Instantiates a new app model.
