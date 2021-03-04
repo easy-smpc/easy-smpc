@@ -17,6 +17,9 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -35,6 +38,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -232,34 +236,50 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @param list
      */
     protected void actionSendMailAutomatic(List<EntryParticipantSendMail> list) {
-        try {
-            boolean messageSent = false;
-            for (EntryParticipantSendMail entry : list) {
-                // Send message
-                getApp().getModel().getEMailBus()
-                        .send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
-                              new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
-                              new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
-                                                                      entry.getRightValue()));
-
-                // Mark message sent
-                int index = Arrays.asList(participants.getComponents()).indexOf(entry);
-                getApp().actionMarkMessageSent(index);
-                messageSent = true;
-            }
-            // Persist changes
-            if (messageSent) {
-                getApp().actionSave();
-                }
-        } catch (BusException | IOException e) {
-            JOptionPane.showMessageDialog(getPanel(),
-                                          Resources.getString("PerspectiveSend.sendAutomaticError"),
-                                          Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
-                                          JOptionPane.ERROR_MESSAGE);
+        // Deactivate buttons at start
+        resendAllAutomatic.setEnabled(false);
+        sendAllManual.setEnabled(false);
+        for (Component c : this.participants.getComponents()) {
+            ((EntryParticipantSendMail) c).setButtonEnabled(false);
         }
-        stateChanged(new ChangeEvent(this));
-    }
+        
+        // Create async task
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    // Loop over messages
+                    boolean messageSent = false;
+                    for (EntryParticipantSendMail entry : list) {
+                        // Send message
+                        getApp().getModel()
+                                .getEMailBus()
+                                .send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
+                                      new Scope(getApp().getModel().studyUID +
+                                                getRoundIdentifier()),
+                                      new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
+                                                                              entry.getRightValue()));
 
+                        // Mark message sent
+                        int index = Arrays.asList(participants.getComponents()).indexOf(entry);
+                        getApp().actionMarkMessageSent(index);
+                        messageSent = true;
+                    }
+                    // Persist changes
+                    if (messageSent) {
+                        getApp().actionSave();
+                    }
+                } catch (BusException | IOException e) {
+                    JOptionPane.showMessageDialog(getPanel(),
+                                                  Resources.getString("PerspectiveSend.sendAutomaticError"),
+                                                  Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
+                                                  JOptionPane.ERROR_MESSAGE);
+                }
+                stateChanged(new ChangeEvent(this));
+                return null;
+            }
+        }.execute();
+    }
     
     /**
      * Returns an identifier for the current round of EasySMPC 
@@ -280,7 +300,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         List<EntryParticipantSendMail> list = new ArrayList<>();
         for (Component c : participants.getComponents()) {
             if (!isOwnEntry(c) && unsentMessages(c) ) {
-                list.add((EntryParticipantSendMail)  c);                        
+                list.add((EntryParticipantSendMail)  c);
             }
         }
         return list;
@@ -315,7 +335,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                                            Resources.getString("PerspectiveSend.participants"),
                                                                            TitledBorder.LEFT,
                                                                            TitledBorder.DEFAULT_POSITION));
-        panel.add(pane, BorderLayout.CENTER);    
+        panel.add(pane, BorderLayout.CENTER);
            
         // Send all e-mails button manually
         JPanel buttonsPane = new JPanel();
@@ -341,7 +361,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             }
         });
         buttonsPane.add(resendAllAutomatic, 0, 1);
-        // proceed button
+        // Proceed button
         proceed = new JButton(Resources.getString("PerspectiveSend.proceed"));
         proceed.addActionListener(new ActionListener() {
             @Override
@@ -367,74 +387,79 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                                           i != getApp().getModel().ownId);
             participants.add(entry);
             
-            // create popup menu for the send-email-button
+            // Create popup menu for the send-email-button
             final JPopupMenu popUp = new JPopupMenu(Resources.getString("PerspectiveSend.popupMenuTitle"));
             
-            // manual sending
+            // Manual sending
             JMenuItem manualSend = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuSendManually"));
             manualSend.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					List<EntryParticipantSendMail> list = new ArrayList<>();
-	                list.add(entry);
-	                actionSendMailManual(list);
-				}
-			});
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    actionSendMailManual(Arrays.asList(entry));
+                }
+            });
             popUp.add(manualSend);
             
-            // automatic sending
+            // Automatic sending
             JMenuItem automaticSend = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuSendAutomatically"));
             automaticSend.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					List<EntryParticipantSendMail> list = new ArrayList<>();
-	                list.add(entry);
-	                actionSendMailAutomatic(list);
-				}
-			});
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    actionSendMailAutomatic(Arrays.asList(entry));
+                }
+            });
             
-            // disable the automatic sending entry in the popup menu, when it's not configured
-            if (!isAutomaticProcessingEnabled()) {
-            	automaticSend.setEnabled(false);
-            }
+            // Disable the automatic sending entry in the popup menu, when it's not configured
+            automaticSend.setEnabled(isAutomaticProcessingEnabled());
+            
             popUp.add(automaticSend);
-
-            // copy content to clipboard, when the mailto-link doesn't work
+            
+            // Copy content to clipboard, when the mailto-link doesn't work
             JMenuItem copy = new JMenuItem(Resources.getString("PerspectiveSend.popupMenuCopy"));
             copy.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					//TODO push email content into clipboard
-				}
-			});
-            copy.setEnabled(false); // TODO delete after implementation of the stub above
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // Push email body into clipboard
+                    try {
+                        String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
+                        String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
+                                entry.getLeftValue(), // Name of participant
+                                getApp().getModel().state == StudyState.SENDING_RESULT ? 5 : 3, // Step number
+                                exchangeString,
+                                getApp().getModel().participants[getApp().getModel().ownId].name);
+                        
+                        // Fill clipboard. Do this only if getExchangeString() was successful to avoid overwriting the users clipboard with nothing
+                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(body), null);
+                    } catch (IOException exception) {
+                        // Notify user that message-retrieval was unsuccessful
+                        JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.copyToClipboardError"));
+                    }
+                }
+            });
             popUp.add(copy);
             
-            // add popup menu to the button
+            // Add popup menu to the button
             entry.setButtonListener(new ActionListener() {
-			    @Override
-			    public void actionPerformed(ActionEvent e) {
-			        // retrieve the right sub-component, which is the last in entry
-			    	Component right = entry.getComponent(entry.getComponentCount() - 1);
-			    	// position the popup menu; right-align the menu
-			        popUp.show(entry, right.getBounds().x + right.getBounds().width - popUp.getPreferredSize().width, right.getBounds().y + right.getBounds().height);
-			    }
-			});
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // Retrieve the right sub-component, which is the last in entry
+                    Component right = entry.getComponent(entry.getComponentCount() - 1);
+                    // Position the popup menu; right-align the menu
+                    popUp.show(entry, right.getBounds().x + right.getBounds().width - popUp.getPreferredSize().width, right.getBounds().y + right.getBounds().height);
+                }
+            });
             
             i++;
         }
+        // Update state
+        this.stateChanged(new ChangeEvent(this));
         
         // Send e-mails automatically if enabled 
-        if (isAutomaticProcessingEnabled()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    actionSendMailAutomatic(listUnsent());
-                }
-              });            
+        if (isAutomaticProcessingEnabled()) {            
+            actionSendMailAutomatic(listUnsent());
         }
         
         // Update GUI
-        this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();
         getPanel().repaint();    
     }
