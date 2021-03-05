@@ -113,9 +113,18 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     @Override
     public void stateChanged(ChangeEvent e) {
-        checkmarkParticipantEntries();
-        this.receive.setEnabled(!this.areSharesComplete());
+        // Check receive clickable
         this.proceed.setEnabled(this.areSharesComplete());
+        
+        // If no more messages and automatic processing proceed automatically
+        if (this.areSharesComplete()) {
+            this.proceed.doClick();
+            return;
+        }
+        
+        // Check other buttons clickable
+        this.receive.setEnabled(!this.areSharesComplete());
+        checkmarkParticipantEntries();
     }
      
     /**
