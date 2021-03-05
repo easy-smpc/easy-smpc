@@ -102,7 +102,7 @@ public class ConnectionIMAP extends ConnectionEmail {
      * Checks if connections are working
      * @throws BusException
      */
-    public void checkConnection() throws BusException {
+    public boolean checkConnection() throws BusException {
         
         try {
             
@@ -119,12 +119,14 @@ public class ConnectionIMAP extends ConnectionEmail {
             // Create folder new for every call to get latest state
             folder = store.getFolder("INBOX");
             if (!folder.exists()) {
-                throw new BusException("Unable to identify inbox folder of mail box");
+                return false;
             }
 
             // Open folder
             folder.open(Folder.READ_WRITE);
-            
+
+            // Close
+            store.close();
             
             // Check sending e-mails 
             session = Session.getInstance(propertiesSending, new Authenticator() {
@@ -132,9 +134,12 @@ public class ConnectionIMAP extends ConnectionEmail {
                     return new PasswordAuthentication(getEmailAddress(), password);
                 }
             });
-            // TODO check sending
-        } catch (MessagingException | BusException e) {
-            throw new BusException("Check for connections was not successful");
+            
+            // Done
+            return true;
+            
+        } catch (Exception e) {
+            return false;
         }
     }
 

@@ -185,9 +185,13 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * Action close
      */
     private void actionCheckAndProceed() {
+        
         try {
-            new ConnectionIMAP(connectionSettingsFromEntries(), true).checkConnection();
-            this.result = connectionSettingsFromEntries();
+            ConnectionIMAPSettings settings = getConnectionSettings();
+            if (!new ConnectionIMAP(settings, true).checkConnection()) {
+                throw new BusException("Connection error");
+            }
+            this.result = settings;
             this.dispose();
         } catch (BusException e) {
             JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.14"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
@@ -237,7 +241,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * @return connection settings
      * @throws BusException
      */
-    private ConnectionIMAPSettings connectionSettingsFromEntries() throws BusException {
+    private ConnectionIMAPSettings getConnectionSettings() throws BusException {
         return new ConnectionIMAPSettings(emailPasswordEntry.getLeftValue()).setPassword(emailPasswordEntry.getRightValue())
                                                                             .setIMAPServer(serversEntry.getLeftValue())
                                                                             .setIMAPPort(Integer.valueOf(serverPortsEntry.getLeftValue()))
