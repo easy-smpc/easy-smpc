@@ -15,6 +15,7 @@ package org.bihealth.mi.easysmpc;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -28,9 +29,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.accessibility.AccessibleContext;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -223,6 +227,14 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                               Resources.getString("PerspectiveSend.ProgressNote"),
                                                               0, list.size());
 
+                //  Disable cancel button
+                AccessibleContext ac = monitor.getAccessibleContext();
+                JDialog dialog = (JDialog)ac.getAccessibleParent();
+                java.util.List<JButton> components = getDescendantsOfType(JButton.class, dialog, true);
+                JButton button = components.get(0);
+                button.setVisible(false);
+                dialog.setModal(true);
+                
                 try {
                     
                     // Timing
@@ -502,5 +514,26 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         if (isAutomaticProcessingEnabled()) {
             actionSendMailAutomatically(listUnsent());
         }
+    }
+
+    /**
+     * Return all descendants of a certain type
+     * @param <T>
+     * @param clazz
+     * @param container
+     * @param nested
+     * @return
+     */
+    public static <T extends JComponent> List<T> getDescendantsOfType(Class<T> clazz, Container container, boolean nested) {
+        List<T> tList = new ArrayList<T>();
+        for (Component component : container.getComponents()) {
+            if (clazz.isAssignableFrom(component.getClass())) {
+                tList.add(clazz.cast(component));
+            }
+            if (nested || !clazz.isAssignableFrom(component.getClass())) {
+                tList.addAll(getDescendantsOfType(clazz, (Container) component, nested));
+            }
+        }
+        return tList;
     }
 }
