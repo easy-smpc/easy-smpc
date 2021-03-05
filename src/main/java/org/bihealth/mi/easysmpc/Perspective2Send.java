@@ -273,14 +273,21 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 // Prepare URI parts
                 String subject = String.format(Resources.getString("PerspectiveSend.mailSubject"),
                                                getApp().getModel().name,
-                                               getApp().getModel().state == StudyState.SENDING_RESULT ? 2 : 1);
+                                               getApp().getModel().state == StudyState.INITIAL_SENDING
+                                                       ? 0
+                                                       : getApp().getModel().state == StudyState.SENDING_RESULT
+                                                               ? 2
+                                                               : 1);
                 
                 String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
                 exchangeString = exchangeString.replaceAll("(.{" + Resources.MESSAGE_LINE_WIDTH + "})", "$1\n");
                 
                 String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
                                             entry.getLeftValue(), // Name of participant
-                                            getApp().getModel().state == StudyState.SENDING_RESULT ? 5 : 3, // Step number
+                                            getApp().getModel().state == StudyState.INITIAL_SENDING
+                                                    ? Resources.getString("PerspectiveSend.mailBodyParticipateStartFragement")
+                                                    : String.format(Resources.getString("PerspectiveSend.mailBodyParticapteProceedFragement"),
+                                                                    getApp().getModel().state == StudyState.SENDING_RESULT? 5: 3), // Step number
                                             exchangeString,
                                             getApp().getModel().participants[getApp().getModel().ownId].name);
                 
@@ -438,10 +445,13 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                     try {
                         String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
                         String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
-                                entry.getLeftValue(), // Name of participant
-                                getApp().getModel().state == StudyState.SENDING_RESULT ? 5 : 3, // Step number
-                                exchangeString,
-                                getApp().getModel().participants[getApp().getModel().ownId].name);
+                                                    entry.getLeftValue(), // Name of participant
+                                                    getApp().getModel().state == StudyState.INITIAL_SENDING
+                                                            ? Resources.getString("PerspectiveSend.mailBodyParticipateStartFragement")
+                                                            : String.format(Resources.getString("PerspectiveSend.mailBodyParticapteProceedFragement"),
+                                                                            getApp().getModel().state == StudyState.SENDING_RESULT? 5: 3), // Step number
+                                                    exchangeString,
+                                                    getApp().getModel().participants[getApp().getModel().ownId].name);
                         
                         // Fill clip board. Do this only if getExchangeString() was successful to avoid overwriting the users clipboard with nothing
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(body), null);
