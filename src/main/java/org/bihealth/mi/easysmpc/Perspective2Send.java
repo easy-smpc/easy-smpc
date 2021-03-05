@@ -29,12 +29,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.accessibility.AccessibleContext;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -228,12 +226,12 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                               0, list.size());
 
                 //  Disable cancel button
-                AccessibleContext ac = monitor.getAccessibleContext();
-                JDialog dialog = (JDialog)ac.getAccessibleParent();
-                java.util.List<JButton> components = getDescendantsOfType(JButton.class, dialog, true);
-                JButton button = components.get(0);
-                button.setVisible(false);
-                dialog.setModal(true);
+                // TODO: AccessibleContext ac = monitor.getAccessibleContext();
+                // TODO: JDialog dialog = (JDialog)ac.getAccessibleParent();
+                // TODO: java.util.List<JButton> components = getDescendantsOfType(JButton.class, dialog, true);
+                // TODO: JButton button = components.get(0);
+                // TODO: button.setVisible(false);
+                // TODO: dialog.setModal(true);
                 
                 try {
                     
