@@ -36,6 +36,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.ProgressMonitor;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
@@ -215,11 +216,23 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             
             @Override
             protected Void doInBackground() throws Exception {
-                
+
+                // Create progress monitor
+                ProgressMonitor monitor = new ProgressMonitor(Perspective2Send.this.getPanel(), 
+                                                              Resources.getString("PerspectiveSend.ProgressTitle"),
+                                                              Resources.getString("PerspectiveSend.ProgressNote"),
+                                                              0, list.size());
+
                 try {
+                    
+                    // Timing
+                    monitor.setMillisToDecideToPopup(100);
+                    monitor.setMillisToPopup(100);
+                    monitor.setProgress(0);
                     
                     // Loop over messages
                     boolean messageSent = false;
+                    int workDone = 0;
                     for (EntryParticipantSendMail entry : list) {
                         
                         // Send message
@@ -232,7 +245,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                         int index = Arrays.asList(participants.getComponents()).indexOf(entry);
                         getApp().actionMarkMessageSent(index);
                         messageSent = true;
-                        
+                        monitor.setProgress(++workDone);
                     }
                     
                     // Persist changes
@@ -243,6 +256,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 } catch (BusException | IOException e) {
                     
                     // Error
+                    monitor.setProgress(list.size());
                     JOptionPane.showMessageDialog(getPanel(),
                                                   Resources.getString("PerspectiveSend.sendAutomaticError"),
                                                   Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
@@ -250,6 +264,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 }
 
                 // Activate all buttons
+                monitor.setProgress(list.size());
                 stateChanged(new ChangeEvent(this));
                 
                 // Done
