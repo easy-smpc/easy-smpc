@@ -468,11 +468,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                     exchangeString,
                                                     getApp().getModel().participants[getApp().getModel().ownId].name);
                         
-                        // Fill clip board. Do this only if getExchangeString() was successful to avoid overwriting the users clipboard with nothing
+                        // Fill clipboard. Do this only if getExchangeString() was successful to avoid overwriting the users clipboard with nothing
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(body), null);
-                    
                     } catch (IOException exception) {
-                        JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveSend.copyToClipboardError"));
+                        JOptionPane.showMessageDialog(null,Resources.getString("PerspectiveSend.copyToClipboardError"), Resources.getString("PerspectiveSend.copyToClipboardErrorTitle"), JOptionPane.ERROR_MESSAGE);
                     }
                 }
             });
