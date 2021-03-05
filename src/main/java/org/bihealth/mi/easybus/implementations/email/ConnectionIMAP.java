@@ -111,7 +111,7 @@ public class ConnectionIMAP extends ConnectionEmail {
 
             // Create store
             Session sessionReceiving = Session.getInstance(propertiesReceiving);
-            store = sessionReceiving.getStore("imap");
+            Store store = sessionReceiving.getStore("imap");
 
             // Connect store
             store.connect(getEmailAddress(), password);
@@ -129,7 +129,7 @@ public class ConnectionIMAP extends ConnectionEmail {
             store.close();
             
             // Check sending e-mails 
-            session = Session.getInstance(propertiesSending, new Authenticator() {
+            Session.getInstance(propertiesSending, new Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(getEmailAddress(), password);
                 }
