@@ -24,7 +24,7 @@ import org.bihealth.mi.easysmpc.Perspective3Receive;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
- * A class to poll the clipboard periodically for messages
+ * A class to poll the clip board periodically for messages
  * 
  * @author Felix Wirth
  * @author Fabian Prasser
@@ -58,7 +58,7 @@ public class ImportClipboard implements Runnable {
             try {
                 return (String) Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null).getTransferData(DataFlavor.stringFlavor);              
             } catch (Exception e) {
-                // No error message to user necessary
+                // Ignore
             }
         }
         return null;
@@ -80,9 +80,7 @@ public class ImportClipboard implements Runnable {
      */
     @Override
     public void run() {
-        // If app is in state to receive a message
-        if (this.parent.isVisible()) {            
-            // Set message if valid
+        if (this.parent.isVisible()) {
             String message = getStrippedExchangeMessage(getTextFromClipBoard());         
             if (parent.getApp().isMessageShareResultValid(message)) {
                 parent.getApp().setMessageShare(message);

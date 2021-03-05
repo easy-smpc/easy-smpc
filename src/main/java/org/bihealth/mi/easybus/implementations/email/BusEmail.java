@@ -109,19 +109,36 @@ public class BusEmail extends Bus {
     
     @Override
     public void stop() {
+        
+        // Stop thread
         this.thread.interrupt();
+        
+        // Wait for thread to stop
+        while (thread != null && thread.isAlive()) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+        }
     }
     
     /**
      * Receives e-mails
      * @throws BusException 
+     * @throws InterruptedException 
      */
-    private synchronized void receiveEmails() throws BusException {
+    private synchronized void receiveEmails() throws BusException, InterruptedException {
         
         // Get mails
         BusEmail.BusEmailMessage deleted = null;
         for (BusEmail.BusEmailMessage message : connection.receive()) {
-         
+
+            // Check for interrupt
+            if (Thread.interrupted()) { 
+                throw new InterruptedException();
+            }
+
             // Mark
             boolean received = false;
             

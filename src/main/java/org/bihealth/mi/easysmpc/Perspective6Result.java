@@ -49,22 +49,41 @@ public class Perspective6Result extends Perspective {
 
     /** Panel for participants */
     private ScrollablePanel    participants;
-    
+
     /** Panel for bins */
     private JPanel             bins;
-    
+
     /** Text field containing title of study */
     private ComponentTextField title;
-    
+
     /** Export data button */
-    private JButton export;    
-    
+    private JButton            export;
+
     /**
      * Creates the perspective
      * @param app
      */
     protected Perspective6Result(App app) {
         super(app, Resources.getString("PerspectiveResult.0"), 6, false); //$NON-NLS-1$
+    }
+    
+    /**
+     * Initialize perspective based on model
+     */
+    @Override
+    public void initialize() {
+        participants.removeAll();
+        bins.removeAll();
+        this.title.setText(getApp().getModel().name);
+        for (Participant currentParticipant : getApp().getModel().participants) {
+            participants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress));
+        }
+        for (BinResult binResult : getApp().getModel().getAllResults()) {
+            bins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
+        }
+        // Update GUI
+        getPanel().revalidate();
+        getPanel().repaint(); 
     }
     
     /**
@@ -80,7 +99,7 @@ public class Perspective6Result extends Perspective {
         }
         getApp().exportData(list);
     }
-    
+
     /**
      *Creates and adds UI elements
      */
@@ -141,24 +160,5 @@ public class Perspective6Result extends Perspective {
         });
         buttonsPane.add(export, BorderLayout.CENTER);        
         panel.add(buttonsPane, BorderLayout.SOUTH);
-    }
-
-    /**
-     * Initialize perspective based on model
-     */
-    @Override
-    public void initialize() {
-        participants.removeAll();
-        bins.removeAll();
-        this.title.setText(getApp().getModel().name);
-        for (Participant currentParticipant : getApp().getModel().participants) {
-            participants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress));
-        }
-        for (BinResult binResult : getApp().getModel().getAllResults()) {
-            bins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
-        }
-        // Update GUI
-        getPanel().revalidate();
-        getPanel().repaint(); 
     }
 }

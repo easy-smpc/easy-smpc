@@ -95,6 +95,13 @@ public abstract class Perspective {
     }
     
     /**
+     * Does perspective allow interim saving
+     */
+    protected boolean canSave() {
+        return canSave;
+    }
+    
+    /**
      * Creates the contents
      * 
      * @param panel
@@ -113,11 +120,4 @@ public abstract class Perspective {
      * Initialize perspective based on model
      */
     protected abstract void initialize();
-    
-    /**
-     * Does perspective allow interim saving
-     */
-    protected boolean canSave() {
-        return canSave;
-    }
 }

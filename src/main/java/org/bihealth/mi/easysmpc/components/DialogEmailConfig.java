@@ -47,22 +47,32 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  */
 public class DialogEmailConfig extends JDialog implements ChangeListener {
 
-    /** SVID */
-    private static final long serialVersionUID = -5892937473681272650L;          
-    /** E-Mail and password entry*/
-    private EntryEMailPassword emailPasswordEntry;   
+    /** SVUID */
+    private static final long      serialVersionUID = -5892937473681272650L;
+    /** E-Mail and password entry */
+    private EntryEMailPassword     emailPasswordEntry;
     /** E-mail server entry */
-    private EntryServers serversEntry;
+    private EntryServers           serversEntry;
     /** Port of e-mail servers entry */
-    private EntryServerPorts serverPortsEntry;
-    /** Button*/
-    private JButton buttonOK;
+    private EntryServerPorts       serverPortsEntry;
+    /** Button */
+    private JButton                buttonOK;
     /** Result */
     private ConnectionIMAPSettings result;
     /** Parent frame */
-    private JFrame parent;
+    private JFrame                 parent;
+     
+    /**
+     * Create a new instance
+     * 
+     * @param connectionsSettings to fill as default in the fields
+     * @param parent Component to set the location of JDialog relative to
+     */
+    public DialogEmailConfig(ConnectionIMAPSettings connectionsSettings, JFrame parent) {
+        this(parent);
+        setFieldsFromConnectionSettings(connectionsSettings);
+    }
 
-        
     /**
      * Create a new instance
      * 
@@ -112,6 +122,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         JButton buttonGuessConfig = new JButton(Resources.getString("EmailConfig.8"));
         this.buttonOK = new JButton(Resources.getString("EmailConfig.6"));
         JButton buttonCancel = new JButton(Resources.getString("EmailConfig.7"));
+        
         // Add
         buttonsPane.add(buttonGuessConfig);
         okCancelPane.add(buttonCancel);
@@ -152,33 +163,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     }
 
     /**
-     * Create a new instance
-     * 
-     * @param connectionsSettings to fill as default in the fields
-     * @param parent Component to set the location of JDialog relative to
-     */
-    public DialogEmailConfig(ConnectionIMAPSettings connectionsSettings, JFrame parent) {
-        this(parent);
-        setFieldsFromConnectionSettings(connectionsSettings);
-    }
-
-    /**
-     * Sets fields in the dialog from a connection settings object
-     * 
-     * @param connectionsSettings
-     */
-    private void setFieldsFromConnectionSettings(ConnectionIMAPSettings connectionsSettings) {
-        if (connectionsSettings != null) {
-            emailPasswordEntry.setLeftValue(connectionsSettings.getEmailAddress());
-            emailPasswordEntry.setRightValue(connectionsSettings.getPassword());
-            serversEntry.setLeftValue(connectionsSettings.getIMAPServer());
-            serversEntry.setRightValue(connectionsSettings.getSMTPServer());
-            serverPortsEntry.setLeftValue(Integer.toString(connectionsSettings.getIMAPPort()));
-            serverPortsEntry.setRightValue(Integer.toString(connectionsSettings.getSMTPPort()));
-        }
-    }
-
-    /**
      * Show this dialog
      */
     public ConnectionIMAPSettings showDialog(){        
@@ -188,7 +172,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         this.setVisible(true);
         return this.result;
     }
-    
+
     /**
      * Reacts to changes
      */
@@ -196,22 +180,18 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     public void stateChanged(ChangeEvent e) {
         this.buttonOK.setEnabled(areValuesValid());
     }
-
-    /**
-     * Checks string for validity
-     * @return
-     */
-    private boolean areValuesValid() {
-        return this.emailPasswordEntry.areValuesValid() && this.serversEntry.areValuesValid() && this.serverPortsEntry.areValuesValid();
-    }
     
     /**
      * Action close
      */
     private void actionCheckAndProceed() {
+        
         try {
-            new ConnectionIMAP(connectionSettingsFromEntries(), true).checkConnection();
-            this.result = connectionSettingsFromEntries();
+            ConnectionIMAPSettings settings = getConnectionSettings();
+            if (!new ConnectionIMAP(settings, true).checkConnection()) {
+                throw new BusException("Connection error");
+            }
+            this.result = settings;
             this.dispose();
         } catch (BusException e) {
             JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.14"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
@@ -219,20 +199,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         }        
     }
 
-    /**
-     * Create a new connection settings object from data entries
-     * 
-     * @return connection settings
-     * @throws BusException
-     */
-    private ConnectionIMAPSettings connectionSettingsFromEntries() throws BusException {
-        return new ConnectionIMAPSettings(emailPasswordEntry.getLeftValue()).setPassword(emailPasswordEntry.getRightValue())
-                                                                            .setIMAPServer(serversEntry.getLeftValue())
-                                                                            .setIMAPPort(Integer.valueOf(serverPortsEntry.getLeftValue()))
-                                                                            .setSMTPServer(serversEntry.getRightValue())
-                                                                            .setSMTPPort(Integer.valueOf(serverPortsEntry.getRightValue()));
-    }
-    
     /**
      * Action determine e-mail configuration
      */
@@ -258,6 +224,44 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             }
         } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.11"), Resources.getString("EmailConfig.10"), JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
+    /**
+     * Checks string for validity
+     * @return
+     */
+    private boolean areValuesValid() {
+        return this.emailPasswordEntry.areValuesValid() && this.serversEntry.areValuesValid() && this.serverPortsEntry.areValuesValid();
+    }
+
+    /**
+     * Create a new connection settings object from data entries
+     * 
+     * @return connection settings
+     * @throws BusException
+     */
+    private ConnectionIMAPSettings getConnectionSettings() throws BusException {
+        return new ConnectionIMAPSettings(emailPasswordEntry.getLeftValue()).setPassword(emailPasswordEntry.getRightValue())
+                                                                            .setIMAPServer(serversEntry.getLeftValue())
+                                                                            .setIMAPPort(Integer.valueOf(serverPortsEntry.getLeftValue()))
+                                                                            .setSMTPServer(serversEntry.getRightValue())
+                                                                            .setSMTPPort(Integer.valueOf(serverPortsEntry.getRightValue()));
+    }
+    
+    /**
+     * Sets fields in the dialog from a connection settings object
+     * 
+     * @param connectionsSettings
+     */
+    private void setFieldsFromConnectionSettings(ConnectionIMAPSettings connectionsSettings) {
+        if (connectionsSettings != null) {
+            emailPasswordEntry.setLeftValue(connectionsSettings.getEmailAddress());
+            emailPasswordEntry.setRightValue(connectionsSettings.getPassword());
+            serversEntry.setLeftValue(connectionsSettings.getIMAPServer());
+            serversEntry.setRightValue(connectionsSettings.getSMTPServer());
+            serverPortsEntry.setLeftValue(Integer.toString(connectionsSettings.getIMAPPort()));
+            serverPortsEntry.setRightValue(Integer.toString(connectionsSettings.getSMTPPort()));
         }
     } 
 }

@@ -255,14 +255,16 @@ public abstract class ConnectionEmail {
      * 
      * @return relevant e-mails
      * @throws BusException 
+     * @throws InterruptedException 
      */
-    protected abstract List<ConnectionEmailMessage> list() throws BusException;
+    protected abstract List<ConnectionEmailMessage> list() throws BusException, InterruptedException;
 
     /**
      * Receives a list of potentially relevant messages
      * @return
+     * @throws InterruptedException 
      */
-    protected List<BusEmail.BusEmailMessage> receive() throws BusException {
+    protected List<BusEmail.BusEmailMessage> receive() throws BusException, InterruptedException {
         
         // Prepare
         List<BusEmail.BusEmailMessage> result = new ArrayList<>();
@@ -271,9 +273,20 @@ public abstract class ConnectionEmail {
             
             // Receive messages
             for (ConnectionEmailMessage message : list()) {
-                
+
+                // Check for interrupt
+                if (Thread.interrupted()) { 
+                    throw new InterruptedException();
+                }
+
                 // Get content
                 String text = message.getText();
+
+                // Check for interrupt
+                if (Thread.interrupted()) { 
+                    throw new InterruptedException();
+                }
+
                 Object attachment = message.getAttachment();
                 
                 // TODO: Is this a good idea? Delete malformed messages
@@ -284,8 +297,18 @@ public abstract class ConnectionEmail {
                 
                 // Extract scope and participant
                 Scope scope = getScope(text);
+
+                // Check for interrupt
+                if (Thread.interrupted()) { 
+                    throw new InterruptedException();
+                }
+
                 Participant participant = getParticipant(text);
-                        
+
+                // Check for interrupt
+                if (Thread.interrupted()) { 
+                    throw new InterruptedException();
+                }                        
     
                 // TODO: Is this a good idea? Delete malformed messages
                 if (scope == null || participant == null) {
@@ -307,6 +330,8 @@ public abstract class ConnectionEmail {
                 });
             }
 
+        } catch (InterruptedException e) {
+            throw e;
         } catch (Exception e) {
             throw new BusException("Error receiving message", e);
         }

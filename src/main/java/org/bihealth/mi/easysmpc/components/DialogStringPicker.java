@@ -59,7 +59,6 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
 
         // Dialog properties
         this.setSize(Resources.SIZE_DIALOG_SMALL_X, Resources.SIZE_DIALOG_SMALL_Y);
-        this.setLocationRelativeTo(parent);
         this.setTitle(Resources.getString("PerspectiveParticipate.PickerTitle"));
         this.getContentPane().setLayout(new BorderLayout());
         this.setIconImage(parent.getIconImage());
@@ -106,12 +105,15 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
                 DialogStringPicker.this.result = null;
             }
         });
+        
+        // Pack and set location
+        this.setLocationRelativeTo(parent);
     }
 
     /**
      * Show this dialog
      */
-    public String showDialog(){        
+    public String showDialog(){
         this.setModal(true);
         this.setVisible(true);
         return this.result;

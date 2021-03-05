@@ -13,6 +13,10 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
+import java.awt.BorderLayout;
+
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -26,7 +30,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * 
  * @author Fabian Prasser
  */
-public class ComponentTextField extends JTextField {
+public class ComponentTextField extends JPanel {
 
     /** SVUID */
     private static final long           serialVersionUID = 5588848051841828428L;
@@ -37,14 +41,29 @@ public class ComponentTextField extends JTextField {
     /** Listener */
     private ChangeListener              listener;
 
+    /** Text field */
+    private JTextField                  field;
+
     /**
      * Creates a new instance
      * @param validator
      */
     public ComponentTextField(ComponentTextFieldValidator validator) {
+        this(validator, false);
+    }
+    
+    /**
+     * Creates a new instance
+     * @param validator
+     * @param password
+     */
+    public ComponentTextField(ComponentTextFieldValidator validator, boolean password) {
         this.validator = validator;
+        this.field = password ? new JPasswordField() : new JTextField();
+        this.setLayout(new BorderLayout());
+        this.add(field, BorderLayout.CENTER);
         this.validateValue();
-        this.getDocument().addDocumentListener(new DocumentListener() {
+        this.field.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void changedUpdate(DocumentEvent e) {
                 validateValue();
@@ -63,13 +82,20 @@ public class ComponentTextField extends JTextField {
     }
 
     /**
+     * Gets text
+     */
+    public String getText() {
+        return this.field.getText();
+    }
+
+    /**
      * Returns whether the value is valid
      * @return
      */
     public boolean isValueValid() {
-        return this.validator.validate(this.getText());
+        return this.validator.validate(this.field.getText());
     }
-
+    
     /**
      * Sets a change listener
      * @param listener
@@ -77,15 +103,13 @@ public class ComponentTextField extends JTextField {
     public void setChangeListener(ChangeListener listener) {
         this.listener = listener;
     }
-
     
     /**
      * Sets text for button
      * @param text
      */
-    @Override
     public void setText(String t) {
-        super.setText(t);
+        this.field.setText(t);
         this.validateValue();
     }
     
@@ -94,8 +118,8 @@ public class ComponentTextField extends JTextField {
      */
     private void validateValue() {
         boolean isValid;
-        if (validator != null) {
-            isValid = validator.validate(this.getText());
+        if (validator != null && this.field != null) {
+            isValid = validator.validate(this.field.getText());
         } else {
             isValid = true;
         }
@@ -103,5 +127,13 @@ public class ComponentTextField extends JTextField {
         if (listener != null) {
             listener.stateChanged(new ChangeEvent(this));
         }
+    }
+    
+    /**
+     * Enables the text field
+     */
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.field.setEnabled(enabled);
     }
 }

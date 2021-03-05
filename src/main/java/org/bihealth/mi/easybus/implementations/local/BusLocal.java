@@ -33,17 +33,21 @@ public class BusLocal extends Bus{
     }
 
     @Override
+    public boolean isAlive() {
+        return true;
+    }
+
+    @Override
     public void send(Message message, Scope scope, Participant participant) {
-        receiveInternal(message, scope, participant);
+        try {
+            receiveInternal(message, scope, participant);
+        } catch (InterruptedException e) {
+            // Nothing to do
+        }
     }
 
     @Override
     public void stop() {
         // Empty by design
-    }
-
-    @Override
-    public boolean isAlive() {
-        return true;
     }
 }

@@ -113,16 +113,10 @@ public class Resources {
     /** Delimiters considered for CSV files */
     public static final char[]    DELIMITERS                          = { ';', ',', '|', '\t' };                       // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
-    /**
-     * Maximum number of lines to be loaded for preview purposes for CSV file
-     * detection.
-     */
+    /** Maximum number of lines to be loaded for preview purposes for CSV file detection. */
     public static final int       PREVIEW_MAX_LINES                   = 25;
 
-    /**
-     * Maximum number of chars to be loaded for detecting separators for CSV
-     * file detection.
-     */
+    /** Maximum number of chars to be loaded for detecting separators for CSV file detection. */
     public static final int       DETECT_MAX_CHARS                    = 100000;
 
     /** Interval to check mail box automatically */
@@ -133,6 +127,13 @@ public class Resources {
 
     /** Step 2 identifier */
     public static final String    ROUND_2                             = "_round2";
+
+    /**
+     * No instantiation
+     */
+    private Resources() {
+        // Empty by design
+    }
     
     /**
      * Returns all available languages
@@ -239,12 +240,5 @@ public class Resources {
     public static void setResourceBundleLocale(Locale locale) {
         Locale.setDefault(Locale.ENGLISH);
         resource_bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
-    }
-
-    /**
-     * No instantiation
-     */
-    private Resources() {
-        // Empty by design
     }
 }

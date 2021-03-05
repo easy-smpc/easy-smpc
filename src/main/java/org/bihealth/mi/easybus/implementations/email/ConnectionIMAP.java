@@ -99,6 +99,51 @@ public class ConnectionIMAP extends ConnectionEmail {
     }
 
     /**
+     * Checks if connections are working
+     * @throws BusException
+     */
+    public boolean checkConnection() throws BusException {
+        
+        try {
+            
+            // Check receiving e-mails 
+            Folder folder = null;
+
+            // Create store
+            Session sessionReceiving = Session.getInstance(propertiesReceiving);
+            store = sessionReceiving.getStore("imap");
+
+            // Connect store
+            store.connect(getEmailAddress(), password);
+
+            // Create folder new for every call to get latest state
+            folder = store.getFolder("INBOX");
+            if (!folder.exists()) {
+                return false;
+            }
+
+            // Open folder
+            folder.open(Folder.READ_WRITE);
+
+            // Close
+            store.close();
+            
+            // Check sending e-mails 
+            session = Session.getInstance(propertiesSending, new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(getEmailAddress(), password);
+                }
+            });
+            
+            // Done
+            return true;
+            
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
      * Transforms an object into a byte stream array
      * 
      * @param object
@@ -113,7 +158,7 @@ public class ConnectionIMAP extends ConnectionEmail {
     }
 
     @Override
-    protected List<ConnectionEmailMessage> list() throws BusException {
+    protected List<ConnectionEmailMessage> list() throws BusException, InterruptedException {
         
         synchronized (propertiesReceiving) {
                 
@@ -152,7 +197,12 @@ public class ConnectionIMAP extends ConnectionEmail {
                 
                 // Load messages
                 for (Message message : folder.getMessages()) {
-    
+
+                    // Check for interrupt
+                    if (Thread.interrupted()) { 
+                        throw new InterruptedException();
+                    }
+
                     // Select relevant messages
                     try {
                         if (message.getSubject().startsWith(EMAIL_SUBJECT_PREFIX)) {
@@ -171,7 +221,7 @@ public class ConnectionIMAP extends ConnectionEmail {
             return result;
         }
     }
-
+    
     @Override
     protected synchronized void send(String recipient, String subject, String body, Object attachment) throws BusException {
 
@@ -223,46 +273,6 @@ public class ConnectionIMAP extends ConnectionEmail {
             } catch (Exception e) {
                 throw new BusException("Unable to send message", e);
             }
-        }
-    }
-    
-    /**
-     * Checks if connections are working
-     * @throws BusException
-     */
-    public void checkConnection() throws BusException {
-        
-        try {
-            
-            // Check receiving e-mails 
-            Folder folder = null;
-
-            // Create store
-            Session sessionReceiving = Session.getInstance(propertiesReceiving);
-            store = sessionReceiving.getStore("imap");
-
-            // Connect store
-            store.connect(getEmailAddress(), password);
-
-            // Create folder new for every call to get latest state
-            folder = store.getFolder("INBOX");
-            if (!folder.exists()) {
-                throw new BusException("Unable to identify inbox folder of mail box");
-            }
-
-            // Open folder
-            folder.open(Folder.READ_WRITE);
-            
-            
-            // Check sending e-mails 
-            session = Session.getInstance(propertiesSending, new Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(getEmailAddress(), password);
-                }
-            });
-            // TODO check sending
-        } catch (MessagingException | BusException e) {
-            throw new BusException("Check for connections was not successful");
         }
     }
 }

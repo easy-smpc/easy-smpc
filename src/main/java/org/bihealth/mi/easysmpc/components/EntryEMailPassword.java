@@ -27,16 +27,9 @@ public class EntryEMailPassword extends ComponentEntry {
     
     /** SVUID*/
     private static final long serialVersionUID = -7858252891350611757L;
+    
     /**
-     * @param leftString
-     * @param leftValue
-     * @param leftEnabled
-     * @param leftValidator
-     * @param rightString
-     * @param rightValue
-     * @param rightEnabled
-     * @param rightValidator
-     * @param additionalControlsEnabled
+     * Creates a new instance
      */
     public EntryEMailPassword() {
         super(Resources.getString("EmailConfig.1"),
@@ -48,6 +41,7 @@ public class EntryEMailPassword extends ComponentEntry {
                         return Participant.isEmailValid(text);
                     }
                 }, 
+              false,
               Resources.getString("EmailConfig.2"), 
               "",
               true,
@@ -57,6 +51,7 @@ public class EntryEMailPassword extends ComponentEntry {
                     return !text.isBlank();
                 }
               },
+              true,
               false);
     }
 

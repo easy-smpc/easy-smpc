@@ -60,6 +60,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     
     /** Proceed button */
     private JButton            proceed;
+    
+    /** Receive button */
+    private JButton receive;
 
     /**
      * Creates the perspective
@@ -89,51 +92,32 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         new ImportClipboard(this);
     }    
     
-    /**
-     * Start the automatic import of e-mails if necessary
-     */
-    private void startAutomatedMailImport() {        
-        try {
-            // Add listener to process message from e-mail
-            getApp().getModel().getEMailBus().receive(new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
-                        new org.bihealth.mi.easybus.Participant(getApp().getModel()
-                                                                        .getParticipantFromId(getApp().getModel().ownId).name,
-                                                                getApp().getModel()
-                                                                        .getParticipantFromId(getApp().getModel().ownId).emailAddress),
-                                                                this);
-        } catch (IllegalArgumentException | BusException e) {
-            JOptionPane.showMessageDialog(getPanel(),
-                                          Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
-                                          Resources.getString("PerspectiveReceive.AutomaticEmail"),
-                                          JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
-    /**
-     * Returns an identifier for the current round of EasySMPC 
-     * This is needed to make sure the correct message are sent to the correct receivers
-     * 
-     * @return round
-     */
-    protected String getRoundIdentifier() {
-        return Resources.ROUND_1;
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
         getApp().actionReceiveMessage();
         this.stateChanged(new ChangeEvent(this));
     }
-     
+    
+    @Override
+    public void receive(Message message) {
+        String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
+        if (getApp().isMessageShareResultValid(messageStripped)) {
+            getApp().setMessageShare(messageStripped);
+            stateChanged(new ChangeEvent(this));
+            getApp().actionSave();
+        }
+    }
+
     /**
      * Reacts on all changes in any components
      */
     @Override
     public void stateChanged(ChangeEvent e) {
         checkmarkParticipantEntries();
+        this.receive.setEnabled(!this.areSharesComplete());
         this.proceed.setEnabled(this.areSharesComplete());
     }
-    
+     
     /**
      * Checks if all bins are complete
      * @return
@@ -144,7 +128,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         }
         return true;
     }
-
+    
     /**
      * Checks if all bins for a certain user id are complete
      * @return
@@ -155,17 +139,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         }
         return true;
     }
-    
-    /**
-     * Indicates whether the automatic processing enabled
-     * 
-     * @return enabled
-     */
-    private boolean isAutomaticProcessingEnabled() {
-        // Return if automatic connection is enabled
-        return getApp().getModel().connectionIMAPSettings != null;
-    }
-    
+
     /**
      * Check participant entries visually if complete
      */
@@ -176,6 +150,32 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                                                 (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  i == 0) || //Mark first entry in first round as received
                                                                 areSharesCompleteForParticipantId(i)); //Mark if share complete
             i++;
+        }
+    }
+    
+    /**
+     * Indicates whether the automatic processing enabled
+     * 
+     * @return enabled
+     */
+    private boolean isAutomaticProcessingEnabled() {
+        return getApp().getModel().connectionIMAPSettings != null;
+    }
+    
+    /**
+     * Start the automatic import of e-mails if necessary
+     */
+    private void startAutomatedMailImport() {        
+        try {
+            getApp().getModel().getBus().receive(new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
+                        new org.bihealth.mi.easybus.Participant(getApp().getModel().getParticipantFromId(getApp().getModel().ownId).name,
+                                                                getApp().getModel().getParticipantFromId(getApp().getModel().ownId).emailAddress),
+                                                                this);
+        } catch (IllegalArgumentException | BusException e) {
+            JOptionPane.showMessageDialog(getPanel(),
+                                          Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
+                                          Resources.getString("PerspectiveReceive.AutomaticEmail"),
+                                          JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -222,7 +222,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         // Receive button and save button
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
-        JButton receive = new JButton(Resources.getString("PerspectiveReceive.receive"));
+        receive = new JButton(Resources.getString("PerspectiveReceive.receive"));
         receive.addActionListener(this);       
         buttonsPane.add(receive, 0, 0);
         
@@ -238,6 +238,16 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     }
 
     /**
+     * Returns an identifier for the current round of EasySMPC 
+     * This is needed to make sure the correct message are sent to the correct receivers
+     * 
+     * @return round
+     */
+    protected String getRoundIdentifier() {
+        return Resources.ROUND_1;
+    }
+
+    /**
      * Initialize perspective based on model
      */
     @Override
@@ -250,7 +260,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             participants.add(entry);
         }
         
-        // TODO probably add de-initalization to shut-down once resp. receive perspective is closed
         // Start import reading e-mails automatically if enabled 
         if (isAutomaticProcessingEnabled()) {
             startAutomatedMailImport();
@@ -260,15 +269,5 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();
         getPanel().repaint(); 
-    }
-
-    @Override
-    public void receive(Message message) {
-        String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
-        if (getApp().isMessageShareResultValid(messageStripped)) {
-            getApp().setMessageShare(messageStripped);
-            stateChanged(new ChangeEvent(this));
-            getApp().actionSave();
-        }
     } 
 }

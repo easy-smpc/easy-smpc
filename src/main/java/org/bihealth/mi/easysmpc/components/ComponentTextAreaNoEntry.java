@@ -19,7 +19,6 @@ import javax.swing.JPopupMenu;
 
 /**
  * @author Felix Wirth
- *
  */
 public class ComponentTextAreaNoEntry extends ComponentTextArea{
 

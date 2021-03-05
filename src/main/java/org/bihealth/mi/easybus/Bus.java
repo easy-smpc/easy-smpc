@@ -90,8 +90,9 @@ public abstract class Bus {
      * @param message
      * @param scope
      * @param participant
+     * @throws InterruptedException 
      */
-    protected boolean receiveInternal(Message message, Scope scope, Participant participant) {
+    protected boolean receiveInternal(Message message, Scope scope, Participant participant) throws InterruptedException {
         
         // Mark received
         boolean received = false;
@@ -99,6 +100,12 @@ public abstract class Bus {
         // Send to subscribers
         if (subscriptions.get(scope) != null && subscriptions.get(scope).get(participant) != null) {
             for (MessageListener messageListener : subscriptions.get(scope).get(participant)) {
+
+                // Check for interrupt
+                if (Thread.interrupted()) { 
+                    throw new InterruptedException();
+                }
+
                 messageListener.receive(message);
                 received = true;
             }
