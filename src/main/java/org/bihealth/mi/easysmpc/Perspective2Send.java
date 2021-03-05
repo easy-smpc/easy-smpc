@@ -480,13 +480,13 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         // Update state
         this.stateChanged(new ChangeEvent(this));
         
-        // Send e-mails automatically if enabled 
-        if (isAutomaticProcessingEnabled()) {            
-            actionSendMailAutomatically(listUnsent());
-        }
-        
         // Update GUI
         getPanel().revalidate();
-        getPanel().repaint();    
+        getPanel().repaint();
+
+        // Send e-mails automatically if enabled
+        if (isAutomaticProcessingEnabled()) {
+            actionSendMailAutomatically(listUnsent());
+        }
     }
 }
