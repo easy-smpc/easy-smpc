@@ -38,6 +38,7 @@ import javax.mail.internet.MimeMessage.RecipientType;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
+import org.apache.commons.math3.util.Pair;
 import org.bihealth.mi.easybus.BusException;
 
 /**
@@ -78,24 +79,40 @@ public class ConnectionIMAP extends ConnectionEmail {
         // Check
         settings.check();
         
+        // Store
         this.password = settings.getPassword();
+        
+        // Search for proxy
+        Pair<String, Integer> proxy = ConnectionIMAPProxy.getProxy(settings);
         
         // Create properties of receiving connection
         this.propertiesReceiving = new Properties();
-        propertiesReceiving.put("mail.imap.host", settings.getIMAPServer());
-        propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));
-        propertiesReceiving.put("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        propertiesReceiving.put("mail.imap.socketFactory.fallback", "false");
-        propertiesReceiving.put("mail.imap.socketFactory.port", String.valueOf(settings.getIMAPPort()));
+        this.propertiesReceiving.put("mail.imap.host", settings.getIMAPServer());
+        this.propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));
+        this.propertiesReceiving.put("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        this.propertiesReceiving.put("mail.imap.socketFactory.fallback", "false");
+        this.propertiesReceiving.put("mail.imap.socketFactory.port", String.valueOf(settings.getIMAPPort()));
+        
+        // Set proxy
+        if (proxy != null) {
+            this.propertiesReceiving.setProperty("mail.imap.proxy.host", proxy.getFirst());
+            this.propertiesReceiving.setProperty("mail.imap.proxy.port", String.valueOf(proxy.getSecond()));
+        }
         
         // Create properties of sending connection
         this.propertiesSending = new Properties();
-        propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
-        propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
-        propertiesSending.put("mail.smtp.socketFactory.port", String.valueOf(settings.getSMTPPort()));
-        propertiesSending.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        propertiesSending.put("mail.smtp.socketFactory.fallback", "false");
-        propertiesSending.put("mail.smtp.auth", "true");
+        this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
+        this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
+        this.propertiesSending.put("mail.smtp.socketFactory.port", String.valueOf(settings.getSMTPPort()));
+        this.propertiesSending.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        this.propertiesSending.put("mail.smtp.socketFactory.fallback", "false");
+        this.propertiesSending.put("mail.smtp.auth", "true");
+
+        // Set proxy
+        if (proxy != null) {
+            this.propertiesSending.setProperty("mail.smtp.proxy.host", proxy.getFirst());
+            this.propertiesSending.setProperty("mail.smtp.proxy.port", String.valueOf(proxy.getSecond()));
+        }
     }
 
     /**
