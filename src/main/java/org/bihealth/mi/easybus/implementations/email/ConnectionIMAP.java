@@ -96,13 +96,21 @@ public class ConnectionIMAP extends ConnectionEmail {
         propertiesSending.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         propertiesSending.put("mail.smtp.socketFactory.fallback", "false");
         propertiesSending.put("mail.smtp.auth", "true");
+        
+        // Send a ping to the imap protocol to test the connection
+        // TODO Use the information: maybe inform the user
+        if (!checkConnection()) {
+            // IMAP and/or SMTP are not reachable
+            
+        }
+        
     }
 
     /**
      * Checks if connections are working
      * @throws BusException
      */
-    public boolean checkConnection() throws BusException {
+    public boolean checkConnection() {
         
         try {
             

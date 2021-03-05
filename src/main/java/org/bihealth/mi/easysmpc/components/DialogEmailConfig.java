@@ -189,7 +189,9 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         try {
             ConnectionIMAPSettings settings = getConnectionSettings();
             if (!new ConnectionIMAP(settings, true).checkConnection()) {
-                throw new BusException("Connection error");
+                // Check for connection with IMAP was unsuccessful. Inform the user and abort.
+                JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.22"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
+                return;
             }
             this.result = settings;
             this.dispose();
