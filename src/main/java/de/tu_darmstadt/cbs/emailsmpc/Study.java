@@ -270,7 +270,7 @@ public class Study implements Serializable, Cloneable {
      * @return the bus
      * @throws BusException 
      */
-    public BusEmail getEMailBus() throws BusException {
+    public BusEmail getBus() throws BusException {
         if ((this.bus == null || !this.bus.isAlive()) && this.connectionIMAPSettings != null) {
             this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true),
                                     Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
