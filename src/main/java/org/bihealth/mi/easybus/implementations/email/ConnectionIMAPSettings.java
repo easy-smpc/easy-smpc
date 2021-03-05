@@ -15,6 +15,7 @@ package org.bihealth.mi.easybus.implementations.email;
 
 import java.io.Serializable;
 import java.net.HttpURLConnection;
+import java.net.ProxySelector;
 import java.net.URL;
 import java.util.regex.Pattern;
 
@@ -24,6 +25,8 @@ import org.bihealth.mi.easybus.Participant;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import com.github.markusbernhardt.proxy.ProxySearch;
 
 /**
  * Settings for IMAP connections
@@ -182,7 +185,9 @@ public class ConnectionIMAPSettings implements Serializable {
      * @param Whether settings could be guessed successfully
      */
     public boolean guess() {
-
+        // Auto discovery for proxy connections
+        ProxySelector.setDefault(ProxySearch.getDefaultProxySearch().getProxySelector());
+        
         // Initialize
         String mozillaConfEndpoint = MOZILLA_AUTOCONF + emailAddress.substring(emailAddress.indexOf("@") + 1, emailAddress.length());
 
