@@ -16,14 +16,17 @@ package org.bihealth.mi.easysmpc.components;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 import org.bihealth.mi.easysmpc.App;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -43,22 +46,39 @@ public class DialogAbout extends JDialog {
      * Create a new instance
      * @param parent Component to set the location of JDialog relative to
      */
-    public DialogAbout(JFrame parent)
-    {
+    public DialogAbout(JFrame parent) {
+        
         this.setTitle(Resources.getString("About.AboutTitle"));
         this.getContentPane().setLayout(new BorderLayout());
         this.setIconImage(parent.getIconImage());
         JPanel central = new JPanel();
 
-        // Texts
+        // Version
         central.setLayout(new BorderLayout());
-        central.add(new JLabel(String.format(Resources.getString("About.NameWithVersion"), App.VERSION)), BorderLayout.NORTH);
+        central.add(new JLabel(String.format(Resources.getString("About.NameWithVersion"), App.VERSION), SwingConstants.CENTER), BorderLayout.NORTH);
+
+        // Load license
+        String license = null;
         try {
-            central.add(new JPanel().add(new ComponentTextAreaNoEntry(Resources.getLicenseText(), this)), BorderLayout.CENTER);
-        } catch (IOException e1) {
-            JOptionPane.showMessageDialog(null, Resources.getString("Resources.ErrorLicenseLoading"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE);
+            license = Resources.getLicenseText();
+        } catch (Exception e) {
+            // Ignore
         }
-        central.add(new JPanel().add(new ComponentTextAreaNoEntry(Resources.getString("About.Contributors"), this)), BorderLayout.SOUTH);
+        
+        // Add license
+        if (license != null) {
+            JTextPane pane = new JTextPane();
+            pane.setText("\n" + license);
+            pane.setEditable(false);
+            StyledDocument doc = pane.getStyledDocument();
+            SimpleAttributeSet center = new SimpleAttributeSet();
+            StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+            doc.setParagraphAttributes(0, doc.getLength(), center, false);
+            central.add(pane, BorderLayout.CENTER);
+        }
+        
+        // Authors
+        central.add(new JLabel(Resources.getString("About.Contributors"), SwingConstants.CENTER), BorderLayout.SOUTH);
         this.getContentPane().add(central, BorderLayout.CENTER);
 
         // Buttons
@@ -76,6 +96,7 @@ public class DialogAbout extends JDialog {
         this.setSize(Resources.SIZE_DIALOG_X, Resources.SIZE_DIALOG_Y);
         this.setLocationRelativeTo(parent);
         this.setModal(true);
+        this.setResizable(false);
         this.setVisible(true);
     }
 }
