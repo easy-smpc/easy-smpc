@@ -158,6 +158,17 @@ public class ConnectionIMAP extends ConnectionEmail {
     }
 
     @Override
+    protected void close() {
+        try {
+            if (store != null && store.isConnected()) {
+                store.close();
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+    }
+    
+    @Override
     protected List<ConnectionEmailMessage> list() throws BusException, InterruptedException {
         
         synchronized (propertiesReceiving) {
@@ -221,7 +232,7 @@ public class ConnectionIMAP extends ConnectionEmail {
             return result;
         }
     }
-    
+
     @Override
     protected synchronized void send(String recipient, String subject, String body, Object attachment) throws BusException {
 

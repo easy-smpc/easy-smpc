@@ -242,6 +242,11 @@ public abstract class ConnectionEmail {
         }
     }
     
+    /** 
+     * Close connection
+     */
+    protected abstract void close();
+    
     /**
      * Returns the associated email address
      * @return
@@ -275,7 +280,7 @@ public abstract class ConnectionEmail {
             for (ConnectionEmailMessage message : list()) {
 
                 // Check for interrupt
-                if (Thread.interrupted()) { 
+                if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }
 
@@ -283,7 +288,7 @@ public abstract class ConnectionEmail {
                 String text = message.getText();
 
                 // Check for interrupt
-                if (Thread.interrupted()) { 
+                if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }
 
@@ -299,14 +304,14 @@ public abstract class ConnectionEmail {
                 Scope scope = getScope(text);
 
                 // Check for interrupt
-                if (Thread.interrupted()) { 
+                if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }
 
                 Participant participant = getParticipant(text);
 
                 // Check for interrupt
-                if (Thread.interrupted()) { 
+                if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }                        
     
@@ -331,6 +336,7 @@ public abstract class ConnectionEmail {
             }
 
         } catch (InterruptedException e) {
+            close();
             throw e;
         } catch (Exception e) {
             throw new BusException("Error receiving message", e);

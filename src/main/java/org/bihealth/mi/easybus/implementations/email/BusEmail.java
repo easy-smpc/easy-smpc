@@ -89,6 +89,7 @@ public class BusEmail extends Bus {
                         Thread.sleep(millis);
                     }
                 } catch (InterruptedException e) {
+                    connection.close();
                     // Die silently
                 }
             }
@@ -135,7 +136,8 @@ public class BusEmail extends Bus {
         for (BusEmail.BusEmailMessage message : connection.receive()) {
 
             // Check for interrupt
-            if (Thread.interrupted()) { 
+            if (Thread.interrupted()) {
+                connection.close();
                 throw new InterruptedException();
             }
 
@@ -143,7 +145,12 @@ public class BusEmail extends Bus {
             boolean received = false;
             
             // Send to scope and participant
-            received |= receiveInternal(message.message, message.scope, message.receiver);
+            try {
+                received |= receiveInternal(message.message, message.scope, message.receiver);
+            } catch (InterruptedException e) {
+                connection.close();
+                throw e;
+            }
 
             // Delete 
             if (received) {
