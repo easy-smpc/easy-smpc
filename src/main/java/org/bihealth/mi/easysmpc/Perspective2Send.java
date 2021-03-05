@@ -232,9 +232,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                         int index = Arrays.asList(participants.getComponents()).indexOf(entry);
                         getApp().actionMarkMessageSent(index);
                         messageSent = true;
-
-                        // Activate all buttons
-                        stateChanged(new ChangeEvent(this));
                         
                     }
                     
