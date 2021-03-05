@@ -109,7 +109,22 @@ public class BusEmail extends Bus {
     
     @Override
     public void stop() {
+        
+        // Stop thread
         this.thread.interrupt();
+        
+        // TODO: Enforce stopping
+        // TODO: Fix in future versions by introducing stop flag
+        this.thread.stop();
+        
+        // Wait for thread to stop
+        while (thread != null && thread.isAlive()) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+        }
     }
     
     /**
