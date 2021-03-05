@@ -479,24 +479,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                
-                    // Push email body into clipboard
-                    try {
-                        String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
-                        String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
-                                                    entry.getLeftValue(), // Name of participant
-                                                    getApp().getModel().state == StudyState.INITIAL_SENDING
-                                                            ? Resources.getString("PerspectiveSend.mailBodyParticipateStartFragement")
-                                                            : String.format(Resources.getString("PerspectiveSend.mailBodyParticapteProceedFragement"),
-                                                                            getApp().getModel().state == StudyState.SENDING_RESULT? 5: 3), // Step number
-                                                    exchangeString,
-                                                    getApp().getModel().participants[getApp().getModel().ownId].name);
-                        
-                        // Fill clipboard. Do this only if getExchangeString() was successful to avoid overwriting the users clipboard with nothing
-                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(body), null);
-                    } catch (IOException exception) {
-                        JOptionPane.showMessageDialog(null,Resources.getString("PerspectiveSend.copyToClipboardError"), Resources.getString("PerspectiveSend.copyToClipboardErrorTitle"), JOptionPane.ERROR_MESSAGE);
-                    }
+                    actionCopyButton(entry);
                 }
             });
             popUp.add(copy);
@@ -529,6 +512,42 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         if (isAutomaticProcessingEnabled()) {
             actionSendMailAutomatically(listUnsent());
         }
+    }
+
+    /**
+     * @param entry
+     */
+    protected void actionCopyButton(EntryParticipantSendMail entry) {
+        // Push email body into clipboard
+        try {
+            String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
+            String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
+                                        entry.getLeftValue(), // Name of participant
+                                        getApp().getModel().state == StudyState.INITIAL_SENDING
+                                                ? Resources.getString("PerspectiveSend.mailBodyParticipateStartFragement")
+                                                : String.format(Resources.getString("PerspectiveSend.mailBodyParticapteProceedFragement"),
+                                                                getApp().getModel().state == StudyState.SENDING_RESULT? 5: 3), // Step number
+                                        exchangeString,
+                                        getApp().getModel().participants[getApp().getModel().ownId].name);
+            
+            // Fill clipboard. Do this only if getExchangeString() was successful to avoid overwriting the users clipboard with nothing
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(body), null);
+            
+            // Send a dialog to confirm copying
+            if (JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendCopyGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
+                int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
+                getApp().actionMarkMessageSent(index);
+                
+                // Persist changes
+                getApp().actionSave();
+                
+                // Update status
+                this.stateChanged(new ChangeEvent(this));
+            }
+            
+        } catch (IOException exception) {
+            JOptionPane.showMessageDialog(null,Resources.getString("PerspectiveSend.copyToClipboardError"), Resources.getString("PerspectiveSend.copyToClipboardErrorTitle"), JOptionPane.ERROR_MESSAGE);
+        }        
     }
 
     /**
