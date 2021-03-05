@@ -60,6 +60,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     
     /** Proceed button */
     private JButton            proceed;
+    
+    /** Receive button */
+    private JButton receive;
 
     /**
      * Creates the perspective
@@ -111,6 +114,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     @Override
     public void stateChanged(ChangeEvent e) {
         checkmarkParticipantEntries();
+        this.receive.setEnabled(!this.areSharesComplete());
         this.proceed.setEnabled(this.areSharesComplete());
     }
      
@@ -218,7 +222,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         // Receive button and save button
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
-        JButton receive = new JButton(Resources.getString("PerspectiveReceive.receive"));
+        receive = new JButton(Resources.getString("PerspectiveReceive.receive"));
         receive.addActionListener(this);       
         buttonsPane.add(receive, 0, 0);
         
@@ -256,7 +260,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             participants.add(entry);
         }
         
-        // TODO probably add de-initalization to shut-down once resp. receive perspective is closed
         // Start import reading e-mails automatically if enabled 
         if (isAutomaticProcessingEnabled()) {
             startAutomatedMailImport();
