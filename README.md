@@ -1,4 +1,4 @@
-# EasySMPC - No-Code Secure Multi-Party Computation (SMPC)
+# EasySMPC - No-Code Secure Multi-Party Computation
 
 > EasySMPC is an app for securely summing up distributed confidential data 
 > using Secure Multi-Party Computation (SMPC). It is designed to enable 
