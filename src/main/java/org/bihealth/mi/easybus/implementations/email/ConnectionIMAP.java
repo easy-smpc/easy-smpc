@@ -153,7 +153,7 @@ public class ConnectionIMAP extends ConnectionEmail {
     }
 
     @Override
-    protected List<ConnectionEmailMessage> list() throws BusException {
+    protected List<ConnectionEmailMessage> list() throws BusException, InterruptedException {
         
         synchronized (propertiesReceiving) {
                 
@@ -192,7 +192,12 @@ public class ConnectionIMAP extends ConnectionEmail {
                 
                 // Load messages
                 for (Message message : folder.getMessages()) {
-    
+
+                    // Check for interrupt
+                    if (Thread.interrupted()) { 
+                        throw new InterruptedException();
+                    }
+
                     // Select relevant messages
                     try {
                         if (message.getSubject().startsWith(EMAIL_SUBJECT_PREFIX)) {

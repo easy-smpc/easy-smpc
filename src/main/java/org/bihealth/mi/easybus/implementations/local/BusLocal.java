@@ -39,7 +39,11 @@ public class BusLocal extends Bus{
 
     @Override
     public void send(Message message, Scope scope, Participant participant) {
-        receiveInternal(message, scope, participant);
+        try {
+            receiveInternal(message, scope, participant);
+        } catch (InterruptedException e) {
+            // Nothing to do
+        }
     }
 
     @Override
