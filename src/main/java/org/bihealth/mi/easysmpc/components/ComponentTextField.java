@@ -128,4 +128,12 @@ public class ComponentTextField extends JPanel {
             listener.stateChanged(new ChangeEvent(this));
         }
     }
+    
+    /**
+     * Enables the text field
+     */
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.field.setEnabled(enabled);
+    }
 }
