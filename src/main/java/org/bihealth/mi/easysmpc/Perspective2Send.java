@@ -81,6 +81,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     /** Send button automatic */
     private JButton            resendAllAutomatic;
 
+    /** Buttons pane */
+    private JPanel buttonsPane;
+
     /**
      * Creates the perspective
      * @param app
@@ -383,9 +386,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                                            TitledBorder.LEFT,
                                                                            TitledBorder.DEFAULT_POSITION));
         panel.add(pane, BorderLayout.CENTER);
-           
+        
+        
         // Send all e-mails automatically button
-        JPanel buttonsPane = new JPanel();
+        buttonsPane = new JPanel();
         resendAllAutomatic = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButtonAutomatic"));
         resendAllAutomatic.addActionListener(new ActionListener() {            
             @Override
@@ -397,10 +401,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                   });
             }
         });
-        buttonsPane.add(resendAllAutomatic, 0, 0);
         
         // Send all e-mails button manually
-        buttonsPane.setLayout(new GridLayout(3, 1));
         sendAllManual = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButtonManual"));
         sendAllManual.addActionListener(new ActionListener() {            
             @Override
@@ -408,7 +410,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 actionSendMailManual(listUnsent());
             }
         });
-        buttonsPane.add(sendAllManual, 0, 1);
         
         // Proceed button
         proceed = new JButton(Resources.getString("PerspectiveSend.proceed"));
@@ -418,7 +419,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 actionProceed();
             }
         });
-        buttonsPane.add(proceed, 0, 2);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
@@ -499,7 +499,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         }
         
         // Hide or show button to send automatically
-        resendAllAutomatic.setVisible(isAutomaticProcessingDisplayed());
+        buttonsPaneWithResendButton(isAutomaticProcessingDisplayed());
+        
         
         // Update state
         this.stateChanged(new ChangeEvent(this));
@@ -511,6 +512,29 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         // Send e-mails automatically if enabled
         if (isAutomaticProcessingEnabled()) {
             actionSendMailAutomatically(listUnsent());
+        }
+    }
+
+    /**
+     * Draws the buttons pane with or withaout the automatic resend button
+     * 
+     * @param showResend
+     */
+    private void buttonsPaneWithResendButton(boolean showResend) {
+        // Remove
+        this.buttonsPane.removeAll();
+        
+        // Create with two or three rows and add resend button of necessary
+        if (showResend) {
+            this.buttonsPane.setLayout(new GridLayout(3, 1));
+            this.buttonsPane.add(this.resendAllAutomatic, 0, 0);
+            this.buttonsPane.add(this.sendAllManual, 0, 1);
+            this.buttonsPane.add(this.proceed, 0, 2);
+            
+        } else {
+            this.buttonsPane.setLayout(new GridLayout(2, 1));
+            this.buttonsPane.add(this.sendAllManual, 0, 0);
+            this.buttonsPane.add(this.proceed, 0, 1);
         }
     }
 
