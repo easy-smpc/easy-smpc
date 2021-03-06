@@ -25,6 +25,8 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -102,9 +104,15 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     public void receive(Message message) {
         String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
         if (getApp().isMessageShareResultValid(messageStripped)) {
-            getApp().setMessageShare(messageStripped);
-            stateChanged(new ChangeEvent(this));
+            getApp().setMessageShare(messageStripped);            
             getApp().actionSave();
+            new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    stateChanged(new ChangeEvent(this));
+                    return null;
+                }                
+            };
         }
     }
 
@@ -116,15 +124,19 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         // Check receive clickable
         this.proceed.setEnabled(this.areSharesComplete());
         
-        // If no more messages and automatic processing proceed automatically
-        if (this.areSharesComplete()) {
-            this.proceed.doClick();
-            return;
-        }
-        
         // Check other buttons clickable
         this.receive.setEnabled(!this.areSharesComplete());
         checkmarkParticipantEntries();
+        
+        // If no more messages and automatic processing proceed automatically
+        if (this.areSharesComplete() && isAutomaticProcessingEnabled()) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    proceed.doClick();
+                }
+            });
+        }
     }
      
     /**

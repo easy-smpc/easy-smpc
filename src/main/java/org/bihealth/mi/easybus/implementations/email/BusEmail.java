@@ -130,7 +130,7 @@ public class BusEmail extends Bus {
      * @throws InterruptedException 
      */
     private synchronized void receiveEmails() throws BusException, InterruptedException {
-        
+        System.out.println("I am receiving");
         // Get mails
         BusEmail.BusEmailMessage deleted = null;
         for (BusEmail.BusEmailMessage message : connection.receive()) {

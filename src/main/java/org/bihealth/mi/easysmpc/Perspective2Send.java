@@ -118,12 +118,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         // Check clickable proceed button
         this.proceed.setEnabled(!messagesUnsent);
 
-        // If no more messages and automatic processing proceed automatically
-        if (!messagesUnsent && isAutomaticProcessingEnabled()) {
-            this.proceed.doClick();
-            return;
-        }
-
         // Set other buttons clickable
         this.sendAllManual.setEnabled(messagesUnsent);
         this.resendAllAutomatic.setEnabled(messagesUnsent && isAutomaticProcessingEnabled());
@@ -131,6 +125,15 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             ((EntryParticipantSendMail) c).setButtonEnabled(isMailButtonClickable(c));
         }
         
+        // If no more messages and automatic processing proceed automatically
+        if (!messagesUnsent && isAutomaticProcessingEnabled()) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    proceed.doClick();
+                }
+            });
+        }
      }
     
     /**
@@ -150,7 +153,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @return enabled
      */
     private boolean isAutomaticProcessingDisplayed() {
-        // It is not initial sending of study creator
+        // Return if it is not initial sending of study creator
         return !(getApp().getModelState() == StudyState.INITIAL_SENDING);
     }
     
