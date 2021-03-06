@@ -25,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -264,6 +265,19 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         if (isAutomaticProcessingEnabled()) {
             startAutomatedMailImport();
         }
+        
+        // start automated proceed clicking
+        new SwingWorker<Void, Void>() {
+
+            @Override
+            protected Void doInBackground() throws Exception {
+                while (!proceed.isEnabled()) {
+                    this.wait(1000);
+                }
+                proceed.doClick();
+                return null;
+            }
+        }.execute();
         
         // Update GUI
         this.stateChanged(new ChangeEvent(this));

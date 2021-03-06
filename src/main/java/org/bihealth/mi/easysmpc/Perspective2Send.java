@@ -498,6 +498,20 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             i++;
         }
         
+        // start automated proceed clicking
+        
+        new SwingWorker<Void, Void>() {
+
+            @Override
+            protected Void doInBackground() throws Exception {
+                while (!proceed.isEnabled()) {
+                    this.wait(1000);
+                }
+                proceed.doClick();
+                return null;
+            }
+        }.execute();
+        
         // Hide or show button to send automatically
         resendAllAutomatic.setVisible(isAutomaticProcessingDisplayed());
         
