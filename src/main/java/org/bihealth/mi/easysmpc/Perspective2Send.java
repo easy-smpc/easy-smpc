@@ -112,25 +112,17 @@ public class Perspective2Send extends Perspective implements ChangeListener {
       */
      @Override
      public void stateChanged(ChangeEvent e) {
-        // Prepare
-        boolean messagesUnsent = getApp().getModel().messagesUnsent();
+         
+         // Check click able send all mails button and save button
+         boolean messagesUnsent = getApp().getModel().messagesUnsent();
+         this.proceed.setEnabled(!messagesUnsent);
+         this.sendAllManual.setEnabled(messagesUnsent);
+         this.resendAllAutomatic.setEnabled(messagesUnsent && isAutomaticProcessingEnabled());
 
-        // Check clickable proceed button
-        this.proceed.setEnabled(!messagesUnsent);
-
-        // If no more messages and automatic processing proceed automatically
-        if (!messagesUnsent && isAutomaticProcessingEnabled()) {
-            this.proceed.doClick();
-            return;
-        }
-
-        // Set other buttons clickable
-        this.sendAllManual.setEnabled(messagesUnsent);
-        this.resendAllAutomatic.setEnabled(messagesUnsent && isAutomaticProcessingEnabled());
+        // Check buttons clickable
         for (Component c : this.participants.getComponents()) {
             ((EntryParticipantSendMail) c).setButtonEnabled(isMailButtonClickable(c));
         }
-        
      }
     
     /**
