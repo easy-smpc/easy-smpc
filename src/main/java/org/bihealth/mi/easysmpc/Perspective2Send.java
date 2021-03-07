@@ -148,6 +148,11 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         for (Component c : this.panelParticipants.getComponents()) {
             ((EntryParticipantSendMail) c).setButtonEnabled(isMailButtonClickable(c));
         }
+        
+        // If no more messages and automatic processing proceed automatically
+        if (!messagesUnsent && isAutomaticProcessingEnabled()) {
+            actionProceed();
+        }
      }
     
     /**

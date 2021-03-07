@@ -65,8 +65,10 @@ public class BusEmail extends Bus {
 
     /** Connection */
     private ConnectionEmail connection;
-    /** Thread*/
+    /** Thread */
     private Thread          thread;
+    /** Stop flag */
+    private boolean         stop = false;
   
     /**
      * Creates a new instance
@@ -79,7 +81,7 @@ public class BusEmail extends Bus {
             @Override
             public void run() {
                 try {
-                    while (true) {
+                    while (!stop) {
                         try {
                             receiveEmails();
                         } catch (BusException e) {
@@ -111,15 +113,26 @@ public class BusEmail extends Bus {
     @Override
     public void stop() {
         
-        // Stop thread
-        this.thread.interrupt();
+        // Set stop flag
+        this.stop = true;
         
-        // Wait for thread to stop
-        while (thread != null && thread.isAlive()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                // Ignore
+        // If on the same thread, just return
+        if (Thread.currentThread().equals(this.thread)) {
+            return;
+        
+        // If on another thread, interrupt and wait for thread to die
+        } else {
+            
+            // Stop thread
+            this.thread.interrupt();
+            
+            // Wait for thread to stop
+            while (thread != null && thread.isAlive()) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
             }
         }
     }

@@ -581,7 +581,7 @@ public class App extends JFrame {
             this.model.saveProgram();
             this.showPerspective(Perspective4Send.class);
         } catch (Exception e) {
-            this.rollback(snapshot);    
+            this.rollback(snapshot);
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
         }        
     }

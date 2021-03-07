@@ -103,16 +103,24 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
         if (getApp().isMessageShareResultValid(messageStripped)) {
             getApp().setMessageShare(messageStripped);
-            stateChanged(new ChangeEvent(this));
             getApp().actionSave();
+            stateChanged(new ChangeEvent(this));
         }
     }
 
     @Override
     public void stateChanged(ChangeEvent e) {
+        
+        // Update
         updateCheckmarks();
-        this.buttonReceive.setEnabled(!this.areSharesComplete());
-        this.buttonProceed.setEnabled(this.areSharesComplete());
+        boolean sharesComplete = this.areSharesComplete();
+        this.buttonReceive.setEnabled(!sharesComplete);
+        this.buttonProceed.setEnabled(sharesComplete);
+        
+        // If no more messages and automatic processing proceed automatically
+        if (sharesComplete && isAutomaticProcessingEnabled()) {
+            actionProceed();
+        }
     }
      
     /**
@@ -169,9 +177,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     private void updateCheckmarks() {
         int i=0;
         for (Component c : this.panelParticipants.getComponents()) {
-            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(i == getApp().getModel().ownId || //Always mark own id as "received"
-                                                                (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  i == 0) || //Mark first entry in first round as received
-                                                                areSharesCompleteForParticipantId(i)); //Mark if share complete
+            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(i == getApp().getModel().ownId || // Always mark own id as "received"
+                                                                (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  i == 0) || // Mark first entry in first round as received
+                                                                areSharesCompleteForParticipantId(i)); // Mark if share complete
             i++;
         }
     }
@@ -219,7 +227,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         // Receive button and save button
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
-        buttonReceive = new JButton(Resources.getString("PerspectiveReceive.receive"));
+        buttonReceive = new JButton(Resources.getString("PerspectiveReceive.receiveButton"));
         buttonReceive.addActionListener(this);       
         buttonsPane.add(buttonReceive, 0, 0);
         
