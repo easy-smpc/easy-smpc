@@ -105,6 +105,14 @@ public class ComponentTextField extends JPanel {
     }
     
     /**
+     * Enables the text field
+     */
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.field.setEnabled(enabled);
+    }
+    
+    /**
      * Sets text for button
      * @param text
      */
@@ -127,13 +135,5 @@ public class ComponentTextField extends JPanel {
         if (listener != null) {
             listener.stateChanged(new ChangeEvent(this));
         }
-    }
-    
-    /**
-     * Enables the text field
-     */
-    @Override
-    public void setEnabled(boolean enabled) {
-        this.field.setEnabled(enabled);
     }
 }

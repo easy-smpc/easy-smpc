@@ -66,6 +66,27 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  */
 public class Perspective2Send extends Perspective implements ChangeListener {
     
+    /**
+     * Return all descendants of a certain type
+     * @param <T>
+     * @param clazz
+     * @param container
+     * @param nested
+     * @return
+     */
+    public static <T extends JComponent> List<T> getDescendantsOfType(Class<T> clazz, Container container, boolean nested) {
+        List<T> tList = new ArrayList<T>();
+        for (Component component : container.getComponents()) {
+            if (clazz.isAssignableFrom(component.getClass())) {
+                tList.add(clazz.cast(component));
+            }
+            if (nested || !clazz.isAssignableFrom(component.getClass())) {
+                tList.addAll(getDescendantsOfType(clazz, (Container) component, nested));
+            }
+        }
+        return tList;
+    }
+
     /** Panel for participants */
     private ScrollablePanel    participants;
 
@@ -74,10 +95,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
 
     /** Proceed button */
     private JButton            proceed;
-
+    
     /** Send button manual */
     private JButton            sendAllManual;
-    
+
     /** Send button automatic */
     private JButton            resendAllAutomatic;
 
@@ -91,7 +112,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     protected Perspective2Send(App app) {
         super(app, Resources.getString("PerspectiveSend.send"), 2, true); //$NON-NLS-1$
     }
-
+    
     /**
      * Creates the perspective
      * @param app
@@ -129,6 +150,30 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      }
     
     /**
+     * Draws the buttons pane with or withaout the automatic resend button
+     * 
+     * @param showResend
+     */
+    private void buttonsPaneWithResendButton(boolean showResend) {
+        // Remove
+        this.buttonsPane.removeAll();
+        
+        // Create with two or three rows and add resend button of necessary
+        if (showResend) {
+            this.buttonsPane.setLayout(new GridLayout(3, 1));
+            this.buttonsPane.add(this.resendAllAutomatic, 0, 0);
+            this.buttonsPane.add(this.sendAllManual, 0, 1);
+            this.buttonsPane.add(this.proceed, 0, 2);
+            
+        } else {
+            this.buttonsPane.setLayout(new GridLayout(2, 1));
+            this.buttonsPane.add(this.sendAllManual, 0, 0);
+            this.buttonsPane.add(this.proceed, 0, 1);
+        }
+    }
+    
+    
+    /**
      * Returns the exchange string for the given entry
      * 
      * @param entry
@@ -138,7 +183,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         int index = Arrays.asList(participants.getComponents()).indexOf(entry);
         return Message.serializeMessage(getApp().getModel().getUnsentMessageFor(index));
     }
-    
+
     /**
      * Indicates whether the automatic processing is displayed
      * 
@@ -149,8 +194,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         return !(getApp().getModelState() == StudyState.INITIAL_SENDING);
     }
     
-    
-    /**
+     /**
      * Indicates whether the automatic processing enabled
      * 
      * @return enabled
@@ -160,7 +204,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         return getApp().getModel().connectionIMAPSettings != null &&
                !(getApp().getModelState() == StudyState.INITIAL_SENDING);
     }
-
+    
     /**
      * Validates each send mail button whether it should be clickable
      */
@@ -172,8 +216,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         }
         return true;
     }
-    
-     /**
+     
+    /**
       * Returns whether this is the own entry
       * @param entry
       * @return
@@ -182,7 +226,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         return Arrays.asList(participants.getComponents()).indexOf(entry) == getApp().getModel().ownId;
     }
     
-    /**
+     /**
      * List all participants with unsent messages
      * 
      * @return list of participants
@@ -196,7 +240,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         }
         return list;
     }
-     
+    
     /**
      * Returns whether there are unsent message for the entry
      * @param entry
@@ -206,13 +250,49 @@ public class Perspective2Send extends Perspective implements ChangeListener {
        return getApp().getModel().getUnsentMessageFor(Arrays.asList(participants.getComponents()).indexOf(entry)) != null;                     
    }
     
-     /**
+    /**
+     * @param entry
+     */
+    protected void actionCopyButton(EntryParticipantSendMail entry) {
+        // Push email body into clipboard
+        try {
+            String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
+            String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
+                                        entry.getLeftValue(), // Name of participant
+                                        getApp().getModel().state == StudyState.INITIAL_SENDING
+                                                ? Resources.getString("PerspectiveSend.mailBodyParticipateStartFragement")
+                                                : String.format(Resources.getString("PerspectiveSend.mailBodyParticapteProceedFragement"),
+                                                                getApp().getModel().state == StudyState.SENDING_RESULT? 5: 3), // Step number
+                                        exchangeString,
+                                        getApp().getModel().participants[getApp().getModel().ownId].name);
+            
+            // Fill clipboard. Do this only if getExchangeString() was successful to avoid overwriting the users clipboard with nothing
+            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(body), null);
+            
+            // Send a dialog to confirm copying
+            if (JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendCopyGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
+                int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
+                getApp().actionMarkMessageSent(index);
+                
+                // Persist changes
+                getApp().actionSave();
+                
+                // Update status
+                this.stateChanged(new ChangeEvent(this));
+            }
+            
+        } catch (IOException exception) {
+            JOptionPane.showMessageDialog(null,Resources.getString("PerspectiveSend.copyToClipboardError"), Resources.getString("PerspectiveSend.copyToClipboardErrorTitle"), JOptionPane.ERROR_MESSAGE);
+        }        
+    }
+
+    /**
      * Proceed action
      */
     protected void actionProceed() {
         getApp().actionFirstSendingDone();
     }
-    
+
     /**
      * Sends an e-mail to the participant entry automatically
      * 
@@ -296,7 +376,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             }
         }.execute();
     }
-    
+
     /**
      * Sends an e-mail to the participant entry
      * 
@@ -513,85 +593,5 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         if (isAutomaticProcessingEnabled()) {
             actionSendMailAutomatically(listUnsent());
         }
-    }
-
-    /**
-     * Draws the buttons pane with or withaout the automatic resend button
-     * 
-     * @param showResend
-     */
-    private void buttonsPaneWithResendButton(boolean showResend) {
-        // Remove
-        this.buttonsPane.removeAll();
-        
-        // Create with two or three rows and add resend button of necessary
-        if (showResend) {
-            this.buttonsPane.setLayout(new GridLayout(3, 1));
-            this.buttonsPane.add(this.resendAllAutomatic, 0, 0);
-            this.buttonsPane.add(this.sendAllManual, 0, 1);
-            this.buttonsPane.add(this.proceed, 0, 2);
-            
-        } else {
-            this.buttonsPane.setLayout(new GridLayout(2, 1));
-            this.buttonsPane.add(this.sendAllManual, 0, 0);
-            this.buttonsPane.add(this.proceed, 0, 1);
-        }
-    }
-
-    /**
-     * @param entry
-     */
-    protected void actionCopyButton(EntryParticipantSendMail entry) {
-        // Push email body into clipboard
-        try {
-            String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
-            String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
-                                        entry.getLeftValue(), // Name of participant
-                                        getApp().getModel().state == StudyState.INITIAL_SENDING
-                                                ? Resources.getString("PerspectiveSend.mailBodyParticipateStartFragement")
-                                                : String.format(Resources.getString("PerspectiveSend.mailBodyParticapteProceedFragement"),
-                                                                getApp().getModel().state == StudyState.SENDING_RESULT? 5: 3), // Step number
-                                        exchangeString,
-                                        getApp().getModel().participants[getApp().getModel().ownId].name);
-            
-            // Fill clipboard. Do this only if getExchangeString() was successful to avoid overwriting the users clipboard with nothing
-            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(body), null);
-            
-            // Send a dialog to confirm copying
-            if (JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendCopyGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
-                int index = Arrays.asList(this.participants.getComponents()).indexOf(entry);
-                getApp().actionMarkMessageSent(index);
-                
-                // Persist changes
-                getApp().actionSave();
-                
-                // Update status
-                this.stateChanged(new ChangeEvent(this));
-            }
-            
-        } catch (IOException exception) {
-            JOptionPane.showMessageDialog(null,Resources.getString("PerspectiveSend.copyToClipboardError"), Resources.getString("PerspectiveSend.copyToClipboardErrorTitle"), JOptionPane.ERROR_MESSAGE);
-        }        
-    }
-
-    /**
-     * Return all descendants of a certain type
-     * @param <T>
-     * @param clazz
-     * @param container
-     * @param nested
-     * @return
-     */
-    public static <T extends JComponent> List<T> getDescendantsOfType(Class<T> clazz, Container container, boolean nested) {
-        List<T> tList = new ArrayList<T>();
-        for (Component component : container.getComponents()) {
-            if (clazz.isAssignableFrom(component.getClass())) {
-                tList.add(clazz.cast(component));
-            }
-            if (nested || !clazz.isAssignableFrom(component.getClass())) {
-                tList.addAll(getDescendantsOfType(clazz, (Container) component, nested));
-            }
-        }
-        return tList;
     }
 }

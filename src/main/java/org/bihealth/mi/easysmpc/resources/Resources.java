@@ -129,13 +129,6 @@ public class Resources {
     public static final String    ROUND_2                             = "_round2";
 
     /**
-     * No instantiation
-     */
-    private Resources() {
-        // Empty by design
-    }
-    
-    /**
      * Returns all available languages
      * 
      * @return
@@ -143,7 +136,7 @@ public class Resources {
     public static Locale[] getAvailableLanguages() {
         return AVAILABLE_LANGUAGES;
     }
-
+    
     /**
      * Icon
      * 
@@ -154,7 +147,7 @@ public class Resources {
         InputStream stream = Resources.class.getResourceAsStream("checkmark.png"); //$NON-NLS-1$
         return ImageIO.read(stream).getScaledInstance(Resources.SIZE_CHECKMARK_X, Resources.SIZE_CHECKMARK_Y,  java.awt.Image.SCALE_SMOOTH);
     }
-    
+
     /**
      * Icon
      * 
@@ -217,7 +210,7 @@ public class Resources {
     public static Locale getResourceBundleLocale() {
         return resource_bundle.getLocale();
     }
-
+    
     /**
      * Returns a message
      * 
@@ -231,7 +224,7 @@ public class Resources {
             return '!' + key + '!';
         }
     }
-    
+
     /**
      * Set locale of resource bundle
      * 
@@ -240,5 +233,12 @@ public class Resources {
     public static void setResourceBundleLocale(Locale locale) {
         Locale.setDefault(Locale.ENGLISH);
         resource_bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
+    }
+    
+    /**
+     * No instantiation
+     */
+    private Resources() {
+        // Empty by design
     }
 }
