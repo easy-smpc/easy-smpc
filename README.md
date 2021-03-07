@@ -22,7 +22,7 @@ system](https://maven.apache.org/) is required.
 ### Get binary installer
 
 Check out [our releases
-page](https://github.com/prasser/email-smpc-histogram/releases) for Windows,
+page](https://github.com/prasser/easy-smpc/releases) for Windows,
 Linux and MacOS executables.
 
 ### Build from Source
@@ -41,6 +41,8 @@ Lots of stuff! Automatic mailbox detection! Secretshare all the things!
 * Support for integral and decimal values
 
 ## Examples
+
+![Screenshot](doc/screenshot.png)
 
 Nothing here, yet.
 * Age distribution of singular distribution
