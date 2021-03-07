@@ -25,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -100,12 +101,17 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     
     @Override
     public void receive(Message message) {
-        String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
-        if (getApp().isMessageShareResultValid(messageStripped)) {
-            getApp().setMessageShare(messageStripped);
-            getApp().actionSave();
-            stateChanged(new ChangeEvent(this));
-        }
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
+                if (getApp().isMessageShareResultValid(messageStripped)) {
+                    getApp().setMessageShare(messageStripped);
+                    getApp().actionSave();
+                    stateChanged(new ChangeEvent(this));
+                } 
+            }
+        });
     }
 
     @Override
