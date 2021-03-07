@@ -48,16 +48,16 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class Perspective6Result extends Perspective {
 
     /** Panel for participants */
-    private ScrollablePanel    participants;
+    private ScrollablePanel    panelParticipants;
 
     /** Panel for bins */
-    private JPanel             bins;
+    private JPanel             panelBins;
 
     /** Text field containing title of study */
-    private ComponentTextField title;
+    private ComponentTextField fieldTitle;
 
     /** Export data button */
-    private JButton            export;
+    private JButton            buttonExport;
 
     /**
      * Creates the perspective
@@ -72,14 +72,14 @@ public class Perspective6Result extends Perspective {
      */
     @Override
     public void initialize() {
-        participants.removeAll();
-        bins.removeAll();
-        this.title.setText(getApp().getModel().name);
+        panelParticipants.removeAll();
+        panelBins.removeAll();
+        this.fieldTitle.setText(getApp().getModel().name);
         for (Participant currentParticipant : getApp().getModel().participants) {
-            participants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress));
+            panelParticipants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress));
         }
         for (BinResult binResult : getApp().getModel().getAllResults()) {
-            bins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
+            panelBins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
         }
         // Update GUI
         getPanel().revalidate();
@@ -93,7 +93,7 @@ public class Perspective6Result extends Perspective {
     protected void actionExportData() {
         // Create list from bins
         List<List<String>> list = new ArrayList<>();
-        for (Component c : bins.getComponents()) {
+        for (Component c : panelBins.getComponents()) {
             list.add(new ArrayList<String>(Arrays.asList(((EntryBinNoButton) c).getLeftValue(),
                                                          ((EntryBinNoButton) c).getRightValue())));
         }
@@ -118,9 +118,9 @@ public class Perspective6Result extends Perspective {
                                                          TitledBorder.LEFT,
                                                          TitledBorder.DEFAULT_POSITION));
         
-        this.title = new ComponentTextField(null); // No validation
-        this.title.setEnabled(false);
-        title.add(this.title, BorderLayout.CENTER);
+        this.fieldTitle = new ComponentTextField(null); // No validation
+        this.fieldTitle.setEnabled(false);
+        title.add(this.fieldTitle, BorderLayout.CENTER);
         
         // Central panel
         JPanel central = new JPanel();
@@ -128,9 +128,9 @@ public class Perspective6Result extends Perspective {
         panel.add(central, BorderLayout.CENTER);        
         
         // Participants
-        this.participants = new ScrollablePanel();
-        this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
-        JScrollPane pane = new JScrollPane(participants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        this.panelParticipants = new ScrollablePanel();
+        this.panelParticipants.setLayout(new BoxLayout(this.panelParticipants, BoxLayout.Y_AXIS));
+        JScrollPane pane = new JScrollPane(panelParticipants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                            Resources.getString("PerspectiveParticipate.participants"),
                                                                            TitledBorder.LEFT,
@@ -138,9 +138,9 @@ public class Perspective6Result extends Perspective {
         central.add(pane, BorderLayout.NORTH);    
                         
         // Bins
-        this.bins = new JPanel();
-        this.bins.setLayout(new BoxLayout(this.bins, BoxLayout.Y_AXIS));
-        pane = new JScrollPane(bins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        this.panelBins = new JPanel();
+        this.panelBins.setLayout(new BoxLayout(this.panelBins, BoxLayout.Y_AXIS));
+        pane = new JScrollPane(panelBins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                              Resources.getString("PerspectiveParticipate.bins"),
                                                              TitledBorder.LEFT,
@@ -151,14 +151,14 @@ public class Perspective6Result extends Perspective {
         // Export button
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new BorderLayout());
-        export = new JButton(Resources.getString("PerspectiveResult.1"));
-        export.addActionListener(new ActionListener() {            
+        buttonExport = new JButton(Resources.getString("PerspectiveResult.1"));
+        buttonExport.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionExportData();
             }
         });
-        buttonsPane.add(export, BorderLayout.CENTER);        
+        buttonsPane.add(buttonExport, BorderLayout.CENTER);        
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 }

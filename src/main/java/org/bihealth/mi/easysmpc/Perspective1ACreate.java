@@ -89,29 +89,29 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     }
 
     /** Panel for participants */
-    private ScrollablePanel    participants;
+    private ScrollablePanel                   panelParticipants;
 
     /** Panel for bins */
-    private ScrollablePanel    bins;
+    private ScrollablePanel                   panelBins;
 
     /** Text field containing title of study */
-    private ComponentTextField title;
-    
+    private ComponentTextField                fieldTitle;
+
     /** Save button */
-    private JButton            save;
-    
-    /** Add configuration e-mail box*/
-    private JButton addEmailboxButton;
-    
-    /** Combo box to select mail box configuration */
-    private JComboBox<ConnectionIMAPSettings> selectMailboxCombo;
-    
+    private JButton                           buttonSave;
+
     /** Add configuration e-mail box */
-    private JButton removeEmailboxButton;
-    
+    private JButton                           buttonAddMailbox;
+
+    /** Combo box to select mail box configuration */
+    private JComboBox<ConnectionIMAPSettings> comboSelectMailbox;
+
+    /** Add configuration e-mail box */
+    private JButton                           buttonRemoveMailbox;
+
     /** Edit configuration e-mail box */
-    private JButton editEmailboxButton;;
-    
+    private JButton                           buttonEditMailbox;;
+
     /**
      * Creates the perspective
      * @param app
@@ -125,14 +125,14 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      */
     public void stateChanged(ChangeEvent e) {
         // Is saving possible?
-        this.save.setEnabled(this.areValuesValid());
+        this.buttonSave.setEnabled(this.areValuesValid());
         // Can a mailbox be added or removed
-        if (this.selectMailboxCombo.getSelectedItem() != null) {
-            this.editEmailboxButton.setEnabled(true);
-            this.removeEmailboxButton.setEnabled(true);
+        if (this.comboSelectMailbox.getSelectedItem() != null) {
+            this.buttonEditMailbox.setEnabled(true);
+            this.buttonRemoveMailbox.setEnabled(true);
         } else {
-            this.editEmailboxButton.setEnabled(false);
-            this.removeEmailboxButton.setEnabled(false);
+            this.buttonEditMailbox.setEnabled(false);
+            this.buttonRemoveMailbox.setEnabled(false);
         }               
     }
 
@@ -143,8 +143,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         ConnectionIMAPSettings settings = new DialogEmailConfig(null, getApp()).showDialog();
         if(settings != null) {
             Connections.add(settings);
-            this.selectMailboxCombo.addItem(settings);
-            this.selectMailboxCombo.setSelectedItem(settings);
+            this.comboSelectMailbox.addItem(settings);
+            this.comboSelectMailbox.setSelectedItem(settings);
         }
         this.stateChanged(new ChangeEvent(this));
     }
@@ -153,11 +153,11 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      * Edits an e-mail configuration
      */
     private void actionEditEMailConf() {
-        ConnectionIMAPSettings settings = new DialogEmailConfig((ConnectionIMAPSettings) this.selectMailboxCombo.getSelectedItem(), getApp()).showDialog();
+        ConnectionIMAPSettings settings = new DialogEmailConfig((ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem(), getApp()).showDialog();
         if(settings != null) {
             Connections.add(settings);
-            this.selectMailboxCombo.addItem(settings);
-            this.selectMailboxCombo.setSelectedItem(settings);
+            this.comboSelectMailbox.addItem(settings);
+            this.comboSelectMailbox.setSelectedItem(settings);
         }
         this.stateChanged(new ChangeEvent(this));        
     }
@@ -168,7 +168,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void actionLoadFromFile() {
         Map<String, String> data = getApp().getDataFromFile();
         if (data != null) {
-            this.bins.removeAll();
+            this.panelBins.removeAll();
             EntryBin previousBin = null;
             List<String> names = new ArrayList<>();
             List<String> values = new ArrayList<>();
@@ -188,8 +188,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      */
     private void actionRemoveEMailConf() {
         try {
-            Connections.remove((ConnectionIMAPSettings) this.selectMailboxCombo.getSelectedItem());
-            this.selectMailboxCombo.removeItem(this.selectMailboxCombo.getSelectedItem());
+            Connections.remove((ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem());
+            this.comboSelectMailbox.removeItem(this.comboSelectMailbox.getSelectedItem());
         } catch (BackingStoreException e) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
         }
@@ -202,7 +202,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void actionRemoveEmptyLines() {
         // Collect to remove
         List<EntryParticipant> participantsToRemove = new ArrayList<>();
-        for (Component entry : this.participants.getComponents()) {
+        for (Component entry : this.panelParticipants.getComponents()) {
                 // Remove participants if both fields empty
                 if (((EntryParticipant) entry).isEmpty()) {
                     participantsToRemove.add((EntryParticipant) entry);
@@ -210,14 +210,14 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         }
         // Actually remove
         for (EntryParticipant entry : participantsToRemove) {
-            if (this.participants.getComponentCount() > 1) {
+            if (this.panelParticipants.getComponentCount() > 1) {
                 removeParticipant(entry);
             }
         }
         
         // Collect to remove
         List<EntryBin> binsToRemove = new ArrayList<>();
-        for (Component entry : this.bins.getComponents()) {
+        for (Component entry : this.panelBins.getComponents()) {
                 // Remove bin if left field empty and right field empty or zero
                 if (((EntryBin) entry).isEmpty()) {
                     binsToRemove.add((EntryBin) entry);
@@ -226,7 +226,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Actually remove
         for (EntryBin entry : binsToRemove) {
-            if (this.bins.getComponentCount() > 1) {
+            if (this.panelBins.getComponentCount() > 1) {
                 removeBin((EntryBin) entry);
             }
         }
@@ -238,14 +238,14 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void actionSave() {
        
         // Check whether at least three participants
-        if (this.participants.getComponents().length < 3) {
+        if (this.panelParticipants.getComponents().length < 3) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.notEnoughParticipants"));
             return;
         }
         
         // Collect participants
         List<Participant> participants = new ArrayList<>();
-        for (Component entry : this.participants.getComponents()) {
+        for (Component entry : this.panelParticipants.getComponents()) {
             Participant participant = new Participant(((EntryParticipant)entry).getLeftValue(),
                                                       ((EntryParticipant)entry).getRightValue());
             participants.add(participant);
@@ -253,7 +253,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Collect bins
         List<Bin> bins = new ArrayList<>();
-        for (Component entry : this.bins.getComponents()) {
+        for (Component entry : this.panelBins.getComponents()) {
             Bin bin = new Bin(((EntryBin)entry).getLeftValue());
             bin.initialize(participants.size());
             bin.shareValue(new BigInteger(((EntryBin)entry).getRightValue().trim()));
@@ -281,7 +281,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             }
         }
         // Initialize study
-        getApp().actionCreateDone(this.title.getText(), participants.toArray(new Participant[participants.size()]), bins.toArray(new Bin[bins.size()]), (ConnectionIMAPSettings) selectMailboxCombo.getSelectedItem());
+        getApp().actionCreateDone(this.fieldTitle.getText(), participants.toArray(new Participant[participants.size()]), bins.toArray(new Bin[bins.size()]), (ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem());
     }
 
     /**
@@ -295,7 +295,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private EntryBin addBin(EntryBin previous, List<String> names, List<String> values, List<Boolean> enabled) {
 
         // Find index
-        int index = Arrays.asList(this.bins.getComponents()).indexOf(previous);
+        int index = Arrays.asList(this.panelBins.getComponents()).indexOf(previous);
         index = index == -1 ? 0 : index + 1;
         
         // Create and add entries
@@ -316,13 +316,13 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                     removeBin(_entry);
                 }
             });
-            this.bins.add(entry, index);
+            this.panelBins.add(entry, index);
             index++;
         }
         
         // Update GUI
-        this.bins.revalidate();
-        this.bins.repaint();
+        this.panelBins.revalidate();
+        this.panelBins.repaint();
         this.stateChanged(new ChangeEvent(this));
         return entry;
     }
@@ -343,7 +343,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void addParticipant(EntryParticipant previous, boolean enabled) {
         
         // Find index
-        int index = Arrays.asList(this.participants.getComponents()).indexOf(previous);
+        int index = Arrays.asList(this.panelParticipants.getComponents()).indexOf(previous);
         index = index == -1 ? 0 : index + 1;
         
         // Create and add entry
@@ -361,9 +361,9 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 removeParticipant(entry);
             }
         });
-        this.participants.add(entry, index);
-        this.participants.revalidate();
-        this.participants.repaint();
+        this.panelParticipants.add(entry, index);
+        this.panelParticipants.revalidate();
+        this.panelParticipants.repaint();
         this.stateChanged(new ChangeEvent(this));
     }
 
@@ -374,21 +374,21 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private boolean areValuesValid() {
         
         // Check participants
-        for (Component c : this.participants.getComponents()) {
+        for (Component c : this.panelParticipants.getComponents()) {
             if (!((EntryParticipant) c).areValuesValid()) {
                 return false;
             }
         }
         
         // Check bins
-        for (Component c : this.bins.getComponents()) {
+        for (Component c : this.panelBins.getComponents()) {
             if (!((EntryBin) c).areValuesValid()) { 
                 return false; 
             }
         }
       
         // Check title
-        if (!title.isValueValid()) {
+        if (!fieldTitle.isValueValid()) {
             return false;
         }       
         
@@ -422,16 +422,16 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void removeBin(EntryBin entry) {
         
         // Check whether it's the last entry
-        if (this.bins.getComponentCount() == 1) {
+        if (this.panelBins.getComponentCount() == 1) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.errorTooFewEntries"));
             return;
         }
         
         // Remove and update
-        this.bins.remove(entry);
+        this.panelBins.remove(entry);
         this.stateChanged(new ChangeEvent(this));
-        this.bins.revalidate();
-        this.bins.repaint();
+        this.panelBins.revalidate();
+        this.panelBins.repaint();
     }
     
     /**
@@ -441,16 +441,16 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void removeParticipant(EntryParticipant entry) {
         
         // Check whether it's the last entry
-        if (this.participants.getComponentCount() == 1) {
+        if (this.panelParticipants.getComponentCount() == 1) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.errorTooFewEntries"));
             return;
         }
         
         // Remove and update
-        this.participants.remove(entry);
+        this.panelParticipants.remove(entry);
         this.stateChanged(new ChangeEvent(this));
-        this.participants.revalidate();    
-        this.participants.repaint();
+        this.panelParticipants.revalidate();    
+        this.panelParticipants.repaint();
     }
 
     /**
@@ -474,23 +474,23 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         JPanel titlePanel = new JPanel();
         titlePanel.setLayout(new BorderLayout());
         titlePanel.add(new JLabel(Resources.getString("PerspectiveCreate.studyTitle")), BorderLayout.WEST);
-        this.title = new ComponentTextField(new ComponentTextFieldValidator() {
+        this.fieldTitle = new ComponentTextField(new ComponentTextFieldValidator() {
             @Override
             public boolean validate(String text) {
                 return !text.trim().isEmpty();
             }
         });
-        this.title.setChangeListener(this);
-        titlePanel.add(this.title, BorderLayout.CENTER);
+        this.fieldTitle.setChangeListener(this);
+        titlePanel.add(this.fieldTitle, BorderLayout.CENTER);
         
         // Panel for automatic e-mail config
         JPanel automaticEMailPanel = new JPanel();
         automaticEMailPanel.setLayout(new BoxLayout(automaticEMailPanel, BoxLayout.X_AXIS));
        
         // Check box to use mail box automatically
-        selectMailboxCombo = new JComboBox<>(getEmailConfig());
-        selectMailboxCombo.setRenderer(new CustomRenderer());
-        selectMailboxCombo.addActionListener(new ActionListener() {            
+        comboSelectMailbox = new JComboBox<>(getEmailConfig());
+        comboSelectMailbox.setRenderer(new CustomRenderer());
+        comboSelectMailbox.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
                 stateChanged(new ChangeEvent(this));
@@ -498,8 +498,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         });
         
         // Button to add e-mail config
-        addEmailboxButton = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigAdd"));
-        addEmailboxButton.addActionListener(new ActionListener() {
+        buttonAddMailbox = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigAdd"));
+        buttonAddMailbox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                actionAddEMailConf();
@@ -507,8 +507,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         });
         
         // Button to edit e-mail config
-        editEmailboxButton = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigEdit"));
-        editEmailboxButton.addActionListener(new ActionListener() {
+        buttonEditMailbox = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigEdit"));
+        buttonEditMailbox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionEditEMailConf();
@@ -516,8 +516,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         });
         
         // Button to remove e-mail config
-        removeEmailboxButton = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigRemove"));
-        removeEmailboxButton.addActionListener(new ActionListener() {
+        buttonRemoveMailbox = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigRemove"));
+        buttonRemoveMailbox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionRemoveEMailConf();
@@ -527,10 +527,10 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         // Add
         generalDataPanel.add(titlePanel);       
         automaticEMailPanel.add(new JLabel(Resources.getString("PerspectiveCreate.AutomatedMailbox")));
-        automaticEMailPanel.add(selectMailboxCombo);
-        automaticEMailPanel.add(addEmailboxButton);
-        automaticEMailPanel.add(editEmailboxButton);
-        automaticEMailPanel.add(removeEmailboxButton);
+        automaticEMailPanel.add(comboSelectMailbox);
+        automaticEMailPanel.add(buttonAddMailbox);
+        automaticEMailPanel.add(buttonEditMailbox);
+        automaticEMailPanel.add(buttonRemoveMailbox);
         generalDataPanel.add(automaticEMailPanel);
         
         // Central panel
@@ -539,9 +539,9 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         panel.add(central, BorderLayout.CENTER);
         
         // Participants
-        this.participants = new ScrollablePanel();
-        this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));     
-        JScrollPane pane = new JScrollPane(participants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        this.panelParticipants = new ScrollablePanel();
+        this.panelParticipants.setLayout(new BoxLayout(this.panelParticipants, BoxLayout.Y_AXIS));     
+        JScrollPane pane = new JScrollPane(panelParticipants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                            Resources.getString("PerspectiveCreate.participants"),
                                                                            TitledBorder.LEFT,
@@ -549,9 +549,9 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         central.add(pane, BorderLayout.NORTH);
 
         // Bins
-        this.bins = new ScrollablePanel();
-        this.bins.setLayout(new BoxLayout(this.bins, BoxLayout.Y_AXIS));
-        pane = new JScrollPane(bins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        this.panelBins = new ScrollablePanel();
+        this.panelBins.setLayout(new BoxLayout(this.panelBins, BoxLayout.Y_AXIS));
+        pane = new JScrollPane(panelBins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                     Resources.getString("PerspectiveCreate.bins"),
                                                                     TitledBorder.LEFT,
@@ -584,15 +584,15 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         buttonsPane.add(removeEmptylines, 0, 1);
         
         // Save button
-        save = new JButton(Resources.getString("PerspectiveCreate.save"));
-        save.setEnabled(this.areValuesValid());
-        save.addActionListener(new ActionListener() {
+        buttonSave = new JButton(Resources.getString("PerspectiveCreate.save"));
+        buttonSave.setEnabled(this.areValuesValid());
+        buttonSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionSave();
             }
         });
-        buttonsPane.add(save, 0, 2);
+        buttonsPane.add(buttonSave, 0, 2);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
@@ -603,9 +603,9 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     protected void initialize() {
         
         // Clear
-        this.participants.removeAll();
-        this.bins.removeAll();
-        this.title.setText("");
+        this.panelParticipants.removeAll();
+        this.panelBins.removeAll();
+        this.fieldTitle.setText("");
 
         // Add initial
         this.addParticipant(null, true);

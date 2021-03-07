@@ -51,18 +51,18 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  * @author Felix Wirth
  */
 public class Perspective3Receive extends Perspective implements ChangeListener, ActionListener, MessageListener {
-    
+
     /** Panel for participants */
-    private ScrollablePanel    participants;
-    
+    private ScrollablePanel    panelParticipants;
+
     /** Text field containing title of study */
-    private ComponentTextField title;
-    
+    private ComponentTextField fieldTitle;
+
     /** Proceed button */
-    private JButton            proceed;
-    
+    private JButton            buttonProceed;
+
     /** Receive button */
-    private JButton receive;
+    private JButton            buttonReceive;
 
     /**
      * Creates the perspective
@@ -108,14 +108,11 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         }
     }
 
-    /**
-     * Reacts on all changes in any components
-     */
     @Override
     public void stateChanged(ChangeEvent e) {
-        checkmarkParticipantEntries();
-        this.receive.setEnabled(!this.areSharesComplete());
-        this.proceed.setEnabled(this.areSharesComplete());
+        updateCheckmarks();
+        this.buttonReceive.setEnabled(!this.areSharesComplete());
+        this.buttonProceed.setEnabled(this.areSharesComplete());
     }
      
     /**
@@ -141,19 +138,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     }
 
     /**
-     * Check participant entries visually if complete
-     */
-    private void checkmarkParticipantEntries() {
-        int i=0;
-        for (Component c : this.participants.getComponents()) {
-            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(i == getApp().getModel().ownId || //Always mark own id as "received"
-                                                                (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  i == 0) || //Mark first entry in first round as received
-                                                                areSharesCompleteForParticipantId(i)); //Mark if share complete
-            i++;
-        }
-    }
-    
-    /**
      * Indicates whether the automatic processing enabled
      * 
      * @return enabled
@@ -176,6 +160,19 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                           Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
                                           Resources.getString("PerspectiveReceive.AutomaticEmail"),
                                           JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    /**
+     * Check participant entries visually if complete
+     */
+    private void updateCheckmarks() {
+        int i=0;
+        for (Component c : this.panelParticipants.getComponents()) {
+            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(i == getApp().getModel().ownId || //Always mark own id as "received"
+                                                                (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  i == 0) || //Mark first entry in first round as received
+                                                                areSharesCompleteForParticipantId(i)); //Mark if share complete
+            i++;
         }
     }
 
@@ -204,14 +201,14 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                                          Resources.getString("PerspectiveCreate.studyTitle"),
                                                          TitledBorder.LEFT,
                                                          TitledBorder.DEFAULT_POSITION));
-        this.title = new ComponentTextField(null); //no validation necessary
-        this.title.setEnabled(false);
-        title.add(this.title, BorderLayout.CENTER);
+        this.fieldTitle = new ComponentTextField(null); //no validation necessary
+        this.fieldTitle.setEnabled(false);
+        title.add(this.fieldTitle, BorderLayout.CENTER);
         
         // Participants
-        this.participants = new ScrollablePanel();
-        this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
-        JScrollPane pane = new JScrollPane(participants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        this.panelParticipants = new ScrollablePanel();
+        this.panelParticipants.setLayout(new BoxLayout(this.panelParticipants, BoxLayout.Y_AXIS));
+        JScrollPane pane = new JScrollPane(panelParticipants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                      Resources.getString("PerspectiveReceive.participants"),
                                                                      TitledBorder.LEFT,
@@ -222,18 +219,18 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         // Receive button and save button
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
-        receive = new JButton(Resources.getString("PerspectiveReceive.receive"));
-        receive.addActionListener(this);       
-        buttonsPane.add(receive, 0, 0);
+        buttonReceive = new JButton(Resources.getString("PerspectiveReceive.receive"));
+        buttonReceive.addActionListener(this);       
+        buttonsPane.add(buttonReceive, 0, 0);
         
-        proceed = new JButton(Resources.getString("PerspectiveReceive.proceed"));
-        proceed.addActionListener(new ActionListener() {
+        buttonProceed = new JButton(Resources.getString("PerspectiveReceive.proceed"));
+        buttonProceed.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionProceed();
             }
         });
-        buttonsPane.add(proceed, 0, 1);
+        buttonsPane.add(buttonProceed, 0, 1);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
@@ -252,12 +249,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     @Override
     protected void initialize() {
-        this.title.setText(getApp().getModel().name);
-        this.participants.removeAll();
+        this.fieldTitle.setText(getApp().getModel().name);
+        this.panelParticipants.removeAll();
         for (Participant currentParticipant : getApp().getModel().participants) {
             EntryParticipantCheckmark entry = new EntryParticipantCheckmark(currentParticipant.name,
                                                                             currentParticipant.emailAddress);
-            participants.add(entry);
+            panelParticipants.add(entry);
         }
         
         // Start import reading e-mails automatically if enabled 

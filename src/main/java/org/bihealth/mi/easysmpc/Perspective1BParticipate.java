@@ -52,19 +52,19 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class Perspective1BParticipate extends Perspective implements ChangeListener {
 
     /** Panel for participants */
-    private ScrollablePanel    participants;
+    private ScrollablePanel    panelParticipants;
 
     /** Panel for bins */
-    private ScrollablePanel    bins;
+    private ScrollablePanel    panelBins;
 
     /** Text field containing title of study */
-    private ComponentTextField title;
+    private ComponentTextField fieldTitle;
 
     /** Save button */
-    private JButton            save;
+    private JButton            buttonSave;
 
     /** Central panel */
-    private JPanel             central;
+    private JPanel             panelCentral;
 
     /**
      * Creates the perspective
@@ -79,7 +79,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      */
     @Override
     public void stateChanged(ChangeEvent e) {
-        this.save.setEnabled(this.areValuesValid());
+        this.buttonSave.setEnabled(this.areValuesValid());
     }
 
     /**
@@ -89,7 +89,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         Map<String, String> data = getApp().getDataFromFile();
         List<String> binsWithoutValue = new ArrayList<>();
         if (data != null) {
-            for (Component c : this.bins.getComponents()) {
+            for (Component c : this.panelBins.getComponents()) {
                 String value = data.get(((EntryBin) c).getLeftValue());
                 if (value == null) {
                     binsWithoutValue.add(((EntryBin) c).getLeftValue());
@@ -116,8 +116,8 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      */
     private void actionSave() {
         BigInteger[] secret = new BigInteger[getApp().getModel().bins.length];
-        for (int i = 0; i < this.bins.getComponents().length; i++) {
-            secret[i] = new BigInteger(((EntryBin) this.bins.getComponents()[i]).getRightValue());
+        for (int i = 0; i < this.panelBins.getComponents().length; i++) {
+            secret[i] = new BigInteger(((EntryBin) this.panelBins.getComponents()[i]).getRightValue());
         }
         getApp().actionParticipateDone(secret);
     }
@@ -128,7 +128,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      */
     private boolean areValuesValid() {
         // Check bins
-        for (Component c : this.bins.getComponents()) {
+        for (Component c : this.panelBins.getComponents()) {
             if (!((EntryBin) c).isFieldRightValueValid()) { 
                 return false; 
             }
@@ -154,34 +154,34 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
                                                          Resources.getString("PerspectiveCreate.studyTitle"),
                                                          TitledBorder.LEFT,
                                                          TitledBorder.DEFAULT_POSITION));
-        this.title = new ComponentTextField(null); //no validation
-        this.title.setEnabled(false);
-        title.add(this.title, BorderLayout.CENTER);
+        this.fieldTitle = new ComponentTextField(null); //no validation
+        this.fieldTitle.setEnabled(false);
+        title.add(this.fieldTitle, BorderLayout.CENTER);
         
         // Central panel
-        central = new JPanel();
-        central.setLayout(new GridLayout(2, 1));
-        panel.add(central, BorderLayout.CENTER);        
+        panelCentral = new JPanel();
+        panelCentral.setLayout(new GridLayout(2, 1));
+        panel.add(panelCentral, BorderLayout.CENTER);        
         
         // Participants
-        this.participants = new ScrollablePanel();
-        this.participants.setLayout(new BoxLayout(this.participants, BoxLayout.Y_AXIS));
-        JScrollPane pane = new JScrollPane(participants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        this.panelParticipants = new ScrollablePanel();
+        this.panelParticipants.setLayout(new BoxLayout(this.panelParticipants, BoxLayout.Y_AXIS));
+        JScrollPane pane = new JScrollPane(panelParticipants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                         Resources.getString("PerspectiveParticipate.participants"),
                                                         TitledBorder.LEFT,
                                                         TitledBorder.DEFAULT_POSITION));
-        central.add(pane, BorderLayout.NORTH);    
+        panelCentral.add(pane, BorderLayout.NORTH);    
                         
         // Bins
-        this.bins = new ScrollablePanel();
-        this.bins.setLayout(new BoxLayout(this.bins, BoxLayout.Y_AXIS));
-        pane = new JScrollPane(bins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        this.panelBins = new ScrollablePanel();
+        this.panelBins.setLayout(new BoxLayout(this.panelBins, BoxLayout.Y_AXIS));
+        pane = new JScrollPane(panelBins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                         Resources.getString("PerspectiveParticipate.bins"),
                                                         TitledBorder.LEFT,
                                                         TitledBorder.DEFAULT_POSITION));
-        central.add(pane, BorderLayout.SOUTH);
+        panelCentral.add(pane, BorderLayout.SOUTH);
 
         // Buttons pane
         JPanel buttonsPane = new JPanel();
@@ -198,14 +198,14 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         buttonsPane.add(loadFromFile, 0, 0);   
 
         // Save button
-        save = new JButton(Resources.getString("PerspectiveParticipate.save"));
-        save.addActionListener(new ActionListener() {
+        buttonSave = new JButton(Resources.getString("PerspectiveParticipate.save"));
+        buttonSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 actionSave();
             }
         });
-        buttonsPane.add(save, 0, 1);
+        buttonsPane.add(buttonSave, 0, 1);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
@@ -216,21 +216,21 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     protected void initialize() {
 
         // Clear
-        participants.removeAll();
-        bins.removeAll();
+        panelParticipants.removeAll();
+        panelBins.removeAll();
         
         // Title
-        this.title.setText(getApp().getModel().name);
+        this.fieldTitle.setText(getApp().getModel().name);
         
         // Add participants
         for (Participant currentParticipant : getApp().getModel().participants) {
             EntryParticipant newNameEmailParticipantEntry = new EntryParticipant(currentParticipant.name, currentParticipant.emailAddress, false, false);
-            participants.add(newNameEmailParticipantEntry);
+            panelParticipants.add(newNameEmailParticipantEntry);
         }
         for (Bin currentBin : getApp().getModel().bins) {
             EntryBin newBin = new EntryBin(currentBin.name, false, "", true, false);
             newBin.setChangeListener(this);
-            bins.add(newBin);
+            panelBins.add(newBin);
         }     
         // Update GUI
         this.stateChanged(new ChangeEvent(this));
