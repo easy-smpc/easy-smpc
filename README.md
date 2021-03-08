@@ -8,16 +8,25 @@
 
 ---
 
-### [Prerequisites](#prerequisites) ⚫ [Installation](#installation) ⚫ [Getting Started](#getting-started) ⚫ [Features](#features) ⚫ [Examples](#examples) ⚫ [Contact](#contact) ⚫ [License](#license) ⚫ [Acknowledgements](#acknowledgments)
+### [Prerequisites](#prerequisites) ⚫ [Installation](#installation) ⚫ [Features](#features) ⚫ [Screenshot](#screenshot) ⚫ [Contact](#contact) ⚫ [License](#license) ⚫ [Acknowledgements](#acknowledgments)
 
 ---
 
 ## Prerequisites
 
-EasySMPC requires [Java](https://www.java.com), at least in version 13.
+EasySMPC requires [Java](https://www.java.com), at least in version 13. The Java
+runtime is bundled in our Installer package.
 
 To compile the app from source in addition to the Java JDK the [Maven build
 system](https://maven.apache.org/) is required.
+
+## Installation
+
+EasySMPC does not need an installation and can be used as a Java jar package.
+However, to increase portability we packaged the nessecary Java runtime with our
+application in an installer to build an executable for Linux, Windows and Mac
+OSX. This installer does not need any administrator priviledges and should be
+run as a user.
 
 ### Get binary installer
 
@@ -32,21 +41,46 @@ maven  (```mvn package```). The assembled executable should be in the target
 directory. At present time some tests occasionaly fail. We're looking into that.
 Until those tests are passing please compile with ```mvn package -DskipTests```.
 
+To build the installer please build the jar package as described above and then
+use the supplied scripts for your target platform. E.g.:
+```
+cd installer && ./linux.sh
+```
+
 ## Features
 
-Lots of stuff! Automatic mailbox detection! Secretshare all the things! 
+EasySMPC was built to allow non-technical personell in medical research perform
+simple analysis without sharing their input data. We tried to achieve a very low
+threshold of technical prerequisites by using email as an, in most cases,
+already established and configured communication medium.
+
 * Easy to use
 * Communication using established channels, e.g. emails
 * Excel and CSV import and export
-* Support for integral and decimal values
+* Automation of the protocol using a shared IMAP-Mailbox
+* Automatic Proxy-Detection
 
-## Examples
+### Security
+
+EasySMPC uses Arithmetic Secret Sharing
+[\[DZS15\]](https://www.ndss-symposium.org/ndss2015/ndss-2015-programme/aby---framework-efficient-mixed-protocol-secure-two-party-computation/),
+the arithmetic extension of the GMW-Protocol
+[\[GMW87\]](https://dl.acm.org/doi/10.1145/28395.28420) to achieve the private
+computation of the sums. It uses a ring of size ![Ring size formula](http://latex.codecogs.com/gif.latex?p%3D2%5E%7B127%7D-1), the 12th Mersenne
+prime.
+
+### We are working on
+
+  - Differential Privacy
+  - Automate email communication with private mailboxes
+  - Support for decimal numbers
+  - Use EasySMPC with Slack/Mattermost/IRC/...
+  - Examples and Getting Started guides
+  - Further Documentation
+
+## Screenshot
 
 ![Screenshot](doc/screenshot.png)
-
-Nothing here, yet.
-* Age distribution of singular distribution
-* Mean age
 
 ## Contact
 
@@ -79,22 +113,6 @@ EasySMPC uses the following dependencies:
  - [jUnit](https://github.com/junit-team/junit5) (Unit tests only) - Eclipse Public License v2.0
  - [Proxy Vole](https://github.com/akuhtz/proxy-vole) - Apache License 2.0
 
-### Security
-
-EasySMPC uses Arithmetic Secret Sharing
-[\[DZS15\]](https://www.ndss-symposium.org/ndss2015/ndss-2015-programme/aby---framework-efficient-mixed-protocol-secure-two-party-computation/),
-the arithmetic extension of the GMW-Protocol
-[\[GMW87\]](https://dl.acm.org/doi/10.1145/28395.28420) to achieve the private
-computation of the sums. It uses a ring of size ![Ring size formula](http://latex.codecogs.com/gif.latex?p%3D2%5E%7B127%7D-1), the 12th Mersenne
-prime, and represents decimal values with a 32bit fractional part. That leaves
-94 bit for the (signed) integral part. This ought to be sufficient for nearly
-all real world applications (although these are famous last words).
-
-### We are working on
-
-  - Differential Privacy
-  - Automate email communication with private mailboxes
-  - Use EasySMPC with Slack/Mattermost/IRC/...
 
 ## Acknowledgements
 
