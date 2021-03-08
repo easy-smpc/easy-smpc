@@ -13,8 +13,7 @@ DESCRIPTION_TEXT="No-Code Approach to Secure Multi-Party Computation"
 VENDOR="Berlin Institute of Health and Technical University of Darmstadt"
 COPYRIGHT="Licensed under the Apache License, Version 2.0 (the License); you may not use this file except in compliance with the License. You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0"
 LICENSE_FILE="../LICENSE"
-# Todo resize png
-# ICONPATH="../src/main/resources/org/bihealth/mi/easysmpc/resources/icon.png"
+ICONPATH="../src/main/resources/org/bihealth/mi/easysmpc/resources/icon256.png"
 #add file associations?
 
 PACKAGE_COMMAND="jpackage 	--input $BUILD_PATH\
@@ -29,6 +28,7 @@ PACKAGE_COMMAND="jpackage 	--input $BUILD_PATH\
 							--copyright \"$COPYRIGHT\"\
 							--license-file $LICENSE_FILE\
 							--linux-menu-group\
-							--linux-shortcut\"
+							--linux-shortcut\
+							--icon \"$ICONPATH\""
 
 eval $PACKAGE_COMMAND
