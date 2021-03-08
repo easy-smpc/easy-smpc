@@ -14,7 +14,7 @@
 
 ## Prerequisites
 
-EasySMPC requires [Java](https://www.java.com), at least in version 13. The Java
+EasySMPC requires [Java](https://adoptopenjdk.net/), at least in version 13. The Java
 runtime is bundled in our Installer package.
 
 To compile the app from source in addition to the Java JDK the [Maven build
