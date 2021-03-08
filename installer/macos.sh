@@ -30,6 +30,6 @@ PACKAGE_COMMAND="jpackage 	--input $BUILD_PATH\
 							--license-file $LICENSE_FILE\
 							--mac-package-identifier $APPLICATION_NAME\
 							--mac-package-name $APPLICATION_NAME
-							--icon %ICONPATH%"
+							--icon $ICONPATH"
 
 eval $PACKAGE_COMMAND
