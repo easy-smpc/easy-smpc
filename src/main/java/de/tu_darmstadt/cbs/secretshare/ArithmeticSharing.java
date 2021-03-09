@@ -75,7 +75,7 @@ public class ArithmeticSharing {
         shares[numParties - 1] = secret;
         for (int i = 0; i != numParties - 1; i++) {
             shares[i] = getSignedBlind(127);
-            shares[numParties - 1] = shares[numParties - 1].subtract(shares[i]).remainder(prime);
+            shares[numParties - 1] = shares[numParties - 1].add(prime).subtract(shares[i]);
         }
         ArithmeticShare[] result = new ArithmeticShare[numParties];
         for (int i = 0; i != numParties; i++) {
