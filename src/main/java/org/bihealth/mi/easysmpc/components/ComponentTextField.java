@@ -85,7 +85,7 @@ public class ComponentTextField extends JPanel {
      * Gets text
      */
     public String getText() {
-        return this.field.getText();
+        return this.field.getText().trim();
     }
 
     /**
@@ -93,7 +93,7 @@ public class ComponentTextField extends JPanel {
      * @return
      */
     public boolean isValueValid() {
-        return this.validator.validate(this.field.getText());
+        return this.validator.validate(getText());
     }
     
     /**
@@ -127,7 +127,7 @@ public class ComponentTextField extends JPanel {
     private void validateValue() {
         boolean isValid;
         if (validator != null && this.field != null) {
-            isValid = validator.validate(this.field.getText());
+            isValid = validator.validate(getText());
         } else {
             isValid = true;
         }
