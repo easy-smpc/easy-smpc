@@ -27,6 +27,19 @@ public class EntryBin extends ComponentEntryAddRemove {
     
     /** SVUID*/
     private static final long serialVersionUID = 950691229934119178L;
+    /** Lower*/
+    private static final BigInteger LOWER = ((BigInteger.valueOf(2).pow(126)).add(BigInteger.ONE)).negate(); // -2^126-1
+    /** Upper*/
+    private static final BigInteger UPPER = ((BigInteger.valueOf(2).pow(126)).subtract(BigInteger.ONE)); // 2^126-1
+    
+    /**
+     * Checks whether the value is within range [-2^126-1, 2^126-1]
+     * @param value
+     * @return
+     */
+    private static final boolean isInRange(BigInteger value) {
+        return (value.compareTo(LOWER) >= 0) && (value.compareTo(UPPER) <= 0);
+    }
 
     /**
      * Creates a new instance
@@ -42,7 +55,7 @@ public class EntryBin extends ComponentEntryAddRemove {
     public EntryBin(boolean enabled) {
         this("", enabled, "", enabled, enabled);
     }
-
+    
     /**
      * Creates a new instance
      * @param name
@@ -72,8 +85,7 @@ public class EntryBin extends ComponentEntryAddRemove {
                   @Override
                   public boolean validate(String text) {
                       try {
-                          new BigInteger(text.trim());
-                          return true;
+                          return isInRange(new BigInteger(text.trim()));
                       } catch (Exception e) {
                           return false;
                       }
@@ -81,8 +93,7 @@ public class EntryBin extends ComponentEntryAddRemove {
               },              
               additionalControlsEnabled);
     }
-    
-    
+
     /**
      * Creates a new instance
      * @param name
@@ -105,8 +116,7 @@ public class EntryBin extends ComponentEntryAddRemove {
                   @Override
                   public boolean validate(String text) {
                       try {
-                          new BigInteger(text);
-                          return true;
+                          return isInRange(new BigInteger(text.trim()));
                       } catch (Exception e) {
                           return false;
                       }
@@ -114,7 +124,7 @@ public class EntryBin extends ComponentEntryAddRemove {
               },
               false);
     }
-
+    
     /**
      * Returns true if left value is empty and right value is empty or "0"
      */
