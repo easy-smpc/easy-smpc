@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -83,7 +84,10 @@ public class Resources {
 
     /** The charset used to read the license text */
     private final static Charset  CHARSET                             = StandardCharsets.UTF_8;
-
+    
+    /** Size of loading animation */
+    public static final int       SIZE_LOADING_ANIMATION              = 25;
+    
     /** Size of checkmark clipart x */
     public static final int       SIZE_CHECKMARK_X                    = 15;
 
@@ -158,6 +162,18 @@ public class Resources {
         InputStream stream = Resources.class.getResourceAsStream("icon.png"); //$NON-NLS-1$
         return ImageIO.read(stream);
     }
+    
+    /**
+     * Loading animation
+     * 
+     * @return
+     * @throws IOException
+     */
+    public static ImageIcon getLoadingAnimation() throws IOException {        
+        URL url = Resources.class.getResource("loading.gif"); //$NON-NLS-1$
+        Image image = new ImageIcon(url).getImage().getScaledInstance(SIZE_LOADING_ANIMATION, SIZE_LOADING_ANIMATION, Image.SCALE_DEFAULT);
+        return new ImageIcon(image);
+      }
     
     /**
      * Reads the content from the file license.txt and returns the content as string.

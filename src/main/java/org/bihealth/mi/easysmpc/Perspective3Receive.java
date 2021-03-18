@@ -18,6 +18,7 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -27,6 +28,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -36,6 +38,7 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
+import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmark;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
@@ -65,6 +68,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
 
     /** Receive button */
     private JButton            buttonReceive;
+    
+    /** Loading visualization panel */
+    private JPanel loadingVisualizationPanel;
 
     /**
      * Creates the perspective
@@ -210,7 +216,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
 
         // General data data of study
         JPanel generalDataPanel = new JPanel();
-        generalDataPanel.setLayout(new GridLayout(1, 1, Resources.ROW_GAP, Resources.ROW_GAP));
+        generalDataPanel.setLayout(new GridLayout(1 , 1, Resources.ROW_GAP, Resources.ROW_GAP));
         panel.add(generalDataPanel, BorderLayout.NORTH);
         generalDataPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                     Resources.getString("PerspectiveCreate.General"),
@@ -224,6 +230,10 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         this.fieldTitle.setEnabled(false);
         this.fieldTitle.setChangeListener(this);
         titlePanel.add(this.fieldTitle, BorderLayout.CENTER);
+        
+        // Add loading visualization
+        loadingVisualizationPanel = new JPanel();
+        titlePanel.add(loadingVisualizationPanel, BorderLayout.SOUTH);
         generalDataPanel.add(titlePanel);
         
         // Participants
@@ -278,9 +288,32 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             panelParticipants.add(entry);
         }
         
-        // Start import reading e-mails automatically if enabled 
+        // Remove loading visualization
+        loadingVisualizationPanel.removeAll();
+        
         if (isAutomaticProcessingEnabled()) {
+            // Start import reading e-mails automatically if enabled 
             startAutomatedMailImport();
+            try {
+                ComponentLoadingVisual loadingVisual =  new ComponentLoadingVisual(Resources.getString("PerspectiveReceive.LoadingInProgress"), Resources.getString("PerspectiveReceive.ErrorLoadingInProgress"));
+                loadingVisualizationPanel.add(loadingVisual);
+                 new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        while(!areSharesComplete()) {
+                            if( getApp().getModel().getBus().isAlive()) {
+                                loadingVisual.setLoadingProgress();
+                            } else {
+                                loadingVisual.setLoadingError();
+                            }
+                            Thread.sleep(1000);
+                        }
+                        return null;
+                    }
+                }.execute();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveReceive.ErrorLoadingAnimation"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE);
+            }            
         }
         
         // Update GUI
