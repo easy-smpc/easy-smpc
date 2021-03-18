@@ -4,6 +4,7 @@
 #Usually only the version variable and the type (RPM or DEB) needs to be adapted
 #==================================
 VERSION="1.0.0"
+MINOR_VERSION="alpha" # if left out for deb packages a "1" is added
 TYPE="deb"
 BUILD_PATH="../target"
 MAIN_JAR="easysmpc.jar"
@@ -29,6 +30,7 @@ PACKAGE_COMMAND="jpackage 	--input $BUILD_PATH\
 							--license-file $LICENSE_FILE\
 							--linux-menu-group\
 							--linux-shortcut\
-							--icon \"$ICONPATH\""
+							--icon \"$ICONPATH\"
+							--linux-app-release \"$MINOR_VERSION\""
 
 eval $PACKAGE_COMMAND
