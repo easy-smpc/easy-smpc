@@ -22,6 +22,7 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -207,17 +208,23 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         // Layout
         panel.setLayout(new BorderLayout());
 
-        // Study title
-        JPanel title = new JPanel();
-        panel.add(title, BorderLayout.NORTH);
-        title.setLayout(new BorderLayout());
-        title.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                         Resources.getString("PerspectiveCreate.studyTitle"),
-                                                         TitledBorder.LEFT,
-                                                         TitledBorder.DEFAULT_POSITION));
-        this.fieldTitle = new ComponentTextField(null); //no validation necessary
+        // General data data of study
+        JPanel generalDataPanel = new JPanel();
+        generalDataPanel.setLayout(new GridLayout(1, 1, Resources.ROW_GAP, Resources.ROW_GAP));
+        panel.add(generalDataPanel, BorderLayout.NORTH);
+        generalDataPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                                    Resources.getString("PerspectiveCreate.General"),
+                                                                    TitledBorder.LEFT,
+                                                                    TitledBorder.DEFAULT_POSITION));
+        
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new BorderLayout());
+        titlePanel.add(new JLabel(Resources.getString("PerspectiveCreate.studyTitle")), BorderLayout.WEST);
+        this.fieldTitle = new ComponentTextField(null);
         this.fieldTitle.setEnabled(false);
-        title.add(this.fieldTitle, BorderLayout.CENTER);
+        this.fieldTitle.setChangeListener(this);
+        titlePanel.add(this.fieldTitle, BorderLayout.CENTER);
+        generalDataPanel.add(titlePanel);
         
         // Participants
         this.panelParticipants = new ScrollablePanel();
