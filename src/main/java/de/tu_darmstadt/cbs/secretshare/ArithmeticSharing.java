@@ -13,7 +13,9 @@
  */
 package de.tu_darmstadt.cbs.secretshare;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.security.SecureRandom;
 
 /**
@@ -38,6 +40,33 @@ public class ArithmeticSharing {
             reconstruction = reconstruction.add(shares[i].value).remainder(shares[i].prime);
         }
         return reconstruction;
+    }
+
+    /**
+     * Reconstruct secret from shares
+     * @param shares Array of all arithmetic shares (containing decimal values)
+     * @param fractionalBits Number of bits for fractional part during construction of shares
+     * @return Clear text BigDecimal
+     * @throws IllegalArgumentException Incompatible primes
+     */
+    public static BigDecimal reconstruct(ArithmeticShare[] shares, int fractionalBits) throws IllegalArgumentException {
+      final BigDecimal scaleFactor = BigDecimal.valueOf(2).pow(fractionalBits);
+      BigDecimal result = new BigDecimal(reconstruct(shares));
+      return result.divide(scaleFactor);
+    }
+
+    /**
+     * Reconstruct secret from shares
+     * @param shares Array of all arithmetic shares (containing decimal values)
+     * @param fractionalBits Number of bits for fractional part during construction of shares
+     * @param roundingMode Rounding mode for final rescaling
+     * @return Clear text BigDecimal
+     * @throws IllegalArgumentException Incompatible primes
+     */
+    public static BigDecimal reconstruct(ArithmeticShare[] shares, int fractionalBits, RoundingMode roundingMode) throws IllegalArgumentException {
+      final BigDecimal scaleFactor = BigDecimal.valueOf(2).pow(fractionalBits);
+      BigDecimal result = new BigDecimal(reconstruct(shares));
+      return result.divide(scaleFactor, roundingMode);
     }
     
     /** Prime*/
@@ -91,6 +120,31 @@ public class ArithmeticSharing {
      */
     public ArithmeticShare[] share(int secret) {
         return share(BigInteger.valueOf(secret));
+    }
+
+    /**
+     * Share a secret
+     * @param secret Secret BigDecimal value to share
+     * @param fractionalBits number of bits for fixed point scaling. Must be positive
+     * @return Array of arithmetic shares
+     * @throws IllegalArgumentException Negative fractionalBits
+    */
+    public ArithmeticShare[] share(BigDecimal secret, int fractionalBits) throws IllegalArgumentException {
+      if (fractionalBits < 0)
+        throw new IllegalArgumentException("FractionalBits must be positive");
+      final BigDecimal scaleFactor = BigDecimal.valueOf(2).pow(fractionalBits);
+      return share(secret.multiply(scaleFactor).toBigInteger());
+    }
+
+    /**
+     * Share a secret
+     * @param secret Secret double value to share
+     * @param fractionalBits number of bits for fixed point scaling. Must be positive
+     * @return Array of arithmetic shares
+     * @throws IllegalArgumentException Negative fractionalBits
+    */
+    public ArithmeticShare[] share(double secret, int fractionalBits) throws IllegalArgumentException {
+      return share(BigDecimal.valueOf(secret), fractionalBits);
     }
 
     /**
