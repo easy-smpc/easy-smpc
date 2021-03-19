@@ -21,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -116,6 +117,9 @@ public class Study implements Serializable, Cloneable {
     /** The filename. */
     public transient File         filename;
 
+    /** Number of fractional bits for decimal representation */
+    public int                    fractionalBits;
+
     /** The e-mail connection details */
     public ConnectionIMAPSettings connectionIMAPSettings;
 
@@ -135,6 +139,7 @@ public class Study implements Serializable, Cloneable {
         participants = null;
         unsentMessages = null;
         filename = null;
+        fractionalBits = 32;
     }
 
     /**
@@ -164,7 +169,8 @@ public class Study implements Serializable, Cloneable {
         newModel.ownId = this.ownId;
         newModel.studyUID = this.studyUID;
         newModel.state = this.state;
-        newModel.filename = this.filename;     
+        newModel.filename = this.filename;
+        newModel.fractionalBits = this.fractionalBits;
         if (this.bins != null) {
             newModel.bins = new Bin[this.bins.length];
             for (int i = 0; i < newModel.bins.length; i++) {
@@ -211,6 +217,7 @@ public class Study implements Serializable, Cloneable {
           result = result && (m.filename.equals(filename));
         else
           result = result && (filename == null);
+        result = result && m.fractionalBits == fractionalBits;
         result = result && (m.bins.length == bins.length);
         result = result && (m.participants.length == participants.length);
         result = result && (m.unsentMessages.length == unsentMessages.length);
@@ -240,7 +247,9 @@ public class Study implements Serializable, Cloneable {
      *
      * @return the all results
      * @throws IllegalStateException the illegal state exception
+     * @deprecated Will get replaced by detAllDecResults()
      */
+    @Deprecated
     public BinResult[] getAllResults() throws IllegalStateException {
         if (state != StudyState.FINISHED)
             throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
@@ -252,18 +261,51 @@ public class Study implements Serializable, Cloneable {
     }
 
     /**
+     * Gets the all results.
+     *
+     * @return the all results
+     * @throws IllegalStateException the illegal state exception
+     */
+    public BinResult[] getAllDecResults() throws IllegalStateException, IllegalArgumentException {
+        if (state != StudyState.FINISHED)
+            throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
+        BinResult[] result = new BinResult[bins.length];
+        for (int i = 0; i < bins.length; i++) {
+            result[i] = getBinDecResult(i);
+        }
+        return result;
+    }
+
+    /**
      * Gets the bin result.
      *
      * @param binId the bin id
      * @return the bin result
      * @throws IllegalStateException the illegal state exception
+     * @deprecated Will get replaced by getBinDecResult
      */
+    @Deprecated
     public BinResult getBinResult(int binId) throws IllegalStateException {
         if (state != StudyState.FINISHED)
             throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
         return new BinResult(bins[binId].name, bins[binId].reconstructBin());
     }
 
+    /**
+     * Gets the bin result.
+     *
+     * @param binId the bin id
+     * @return the bin result
+     * @throws IllegalStateException the illegal state exception
+     * @throws IllegalArgumentException fractionalBits must be positive
+     */
+    public BinResult getBinDecResult(int binId) throws IllegalStateException, IllegalArgumentException {
+        if (fractionalBits < 0)
+          throw new IllegalArgumentException("fractionalBits must be positive");
+        if (state != StudyState.FINISHED)
+            throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
+        return new BinResult(bins[binId].name, bins[binId].reconstructBin(fractionalBits));
+    }
     /**
      * Returns the bus
      * 
@@ -328,6 +370,7 @@ public class Study implements Serializable, Cloneable {
         result = 31 * result + studyUID.hashCode();
         result = 31 * result + state.hashCode();
         result = 31 * result + name.hashCode();
+        result = 31 * result + fractionalBits;
         if (filename != null)
             result = 31 * result + filename.hashCode();
         for (Bin b : bins) {
@@ -694,7 +737,9 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalArgumentException the illegal argument exception
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
+     * @deprecated Deprecated, replace BigInteger values with BigDecimal values
      */
+    @Deprecated
     public void toSendingShares(BigInteger[] values) throws IllegalArgumentException, IllegalStateException, IOException {
         if (values.length != bins.length)
             throw new IllegalArgumentException("Number of values not equal number of bins");
@@ -704,6 +749,24 @@ public class Study implements Serializable, Cloneable {
         advanceState(StudyState.SENDING_SHARE);
     }
 
+    /**
+     * To sending shares.
+     *
+     * @param values the values
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws IllegalStateException the illegal state exception
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public void toSendingShares(BigDecimal[] values) throws IllegalArgumentException, IllegalStateException, IOException {
+        if (values.length != bins.length)
+            throw new IllegalArgumentException("Number of values not equal number of bins");
+        if (fractionalBits < 0)
+            throw new IllegalArgumentException("fractionalBits must be positive");
+        for (int i = 0; i < bins.length; i++) {
+            bins[i].shareValue(values[i], fractionalBits);
+        }
+        advanceState(StudyState.SENDING_SHARE);
+    }
     /**
      * Legal State Transitions:
      * +-----------------+     +------------------+
@@ -784,6 +847,7 @@ public class Study implements Serializable, Cloneable {
         participants = model.participants;
         name = model.name;
         state = model.state;
+        fractionalBits = model.fractionalBits;
     }
 
     /**
