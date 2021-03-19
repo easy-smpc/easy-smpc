@@ -26,9 +26,9 @@ public class ArithmeticSharing {
     
     /**
      * Reconstruct secret from shares
-     * @param shares
-     * @return
-     * @throws IllegalArgumentException
+     * @param shares Array of all arithmetic shares
+     * @return Clear text BigInteger
+     * @throws IllegalArgumentException Incompatible primes
      */
     public static BigInteger reconstruct(ArithmeticShare[] shares) throws IllegalArgumentException {
         BigInteger reconstruction = BigInteger.ZERO;
@@ -96,8 +96,8 @@ public class ArithmeticSharing {
 
     /**
      * Share a secret
-     * @param secret
-     * @return
+     * @param secret BigInteger secret value to share
+     * @return Array of arithmetic shares
      */
     public ArithmeticShare[] share(BigInteger secret) {
         BigInteger[] shares = new BigInteger[numParties];
@@ -115,8 +115,8 @@ public class ArithmeticSharing {
 
     /**
      * Share a secret
-     * @param secret
-     * @return
+     * @param secret Secret integral value to share
+     * @return Array of arithmetic shares
      */
     public ArithmeticShare[] share(int secret) {
         return share(BigInteger.valueOf(secret));
