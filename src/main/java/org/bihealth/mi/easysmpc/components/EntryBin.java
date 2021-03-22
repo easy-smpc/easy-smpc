@@ -99,7 +99,7 @@ public class EntryBin extends ComponentEntryAddRemove {
                   @Override
                   public boolean validate(String text) {
                       try {
-                          return isInRange(new BigInteger(text.trim()));
+                          return isInRange(new BigDecimal(text.trim().replace(',', '.')));
                       } catch (Exception e) {
                           return false;
                       }
@@ -130,7 +130,7 @@ public class EntryBin extends ComponentEntryAddRemove {
                   @Override
                   public boolean validate(String text) {
                       try {
-                          return isInRange(new BigInteger(text.trim()));
+                          return isInRange(new BigDecimal(text.trim().replace(',', '.')));
                       } catch (Exception e) {
                           return false;
                       }
