@@ -747,7 +747,7 @@ public class App extends JFrame {
     /**
      * Saves the project
      */
-    protected boolean actionSave() {
+    public boolean actionSave() {
         
         if (model.filename == null) {    
             // Open dialog

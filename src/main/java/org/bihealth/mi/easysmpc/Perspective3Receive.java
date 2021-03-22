@@ -103,6 +103,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     @Override
     public void actionPerformed(ActionEvent e) {
         getApp().actionReceiveMessage();
+        getApp().actionSave();
         this.stateChanged(new ChangeEvent(this));
     }
     
