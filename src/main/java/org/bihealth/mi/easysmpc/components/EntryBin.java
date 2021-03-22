@@ -13,6 +13,7 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -27,18 +28,31 @@ public class EntryBin extends ComponentEntryAddRemove {
     
     /** SVUID*/
     private static final long serialVersionUID = 950691229934119178L;
-    /** Lower*/
-    private static final BigInteger LOWER = ((BigInteger.valueOf(2).pow(126)).add(BigInteger.ONE)).negate(); // -2^126-1
-    /** Upper*/
-    private static final BigInteger UPPER = ((BigInteger.valueOf(2).pow(126)).subtract(BigInteger.ONE)); // 2^126-1
+    /** LowerInt*/
+    private static final BigInteger LOWERINT = ((BigInteger.valueOf(2).pow(126)).negate()).add(BigInteger.ONE); // -2^126+1
+    /** UpperInt*/
+    private static final BigInteger UPPERINT = ((BigInteger.valueOf(2).pow(126)).subtract(BigInteger.ONE)); // 2^126-1
+    /** LowerDec*/
+    private static final BigDecimal LOWERDEC = ((BigDecimal.valueOf(2).pow(93)).negate()).add(BigDecimal.ONE); // -2^93+1
+    /** UpperDec*/
+    private static final BigDecimal UPPERDEC = ((BigDecimal.valueOf(2).pow(93)).subtract(BigDecimal.ONE)); // 2^93-1
     
     /**
-     * Checks whether the value is within range [-2^126-1, 2^126-1]
+     * Checks whether the integral value is within range [-2^126+1, 2^126-1]
      * @param value
      * @return
      */
     private static final boolean isInRange(BigInteger value) {
-        return (value.compareTo(LOWER) >= 0) && (value.compareTo(UPPER) <= 0);
+        return (value.compareTo(LOWERINT) >= 0) && (value.compareTo(UPPERINT) <= 0);
+    }
+
+    /**
+     * Checks whether the decimal value is within range [-2^93+1, 2^93-1]
+     * @param value
+     * @return
+     */
+    private static final boolean isInRange(BigDecimal value) {
+        return (value.compareTo(LOWERDEC) >= 0) && (value.compareTo(UPPERDEC) <= 0);
     }
 
     /**
