@@ -463,7 +463,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                                     TitledBorder.DEFAULT_POSITION));
         
         JPanel titlePanel = new JPanel();
-        titlePanel.setLayout(new BorderLayout());
+        titlePanel.setLayout(new BorderLayout(Resources.ROW_GAP, Resources.ROW_GAP));
         titlePanel.add(new JLabel(Resources.getString("PerspectiveCreate.studyTitle")), BorderLayout.WEST);
         this.fieldTitle = new ComponentTextField(null);
         this.fieldTitle.setEnabled(false);

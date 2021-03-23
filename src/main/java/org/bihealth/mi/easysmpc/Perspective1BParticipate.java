@@ -147,16 +147,16 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         panel.setLayout(new BorderLayout());
 
         // Study title
-        JPanel title = new JPanel();
-        panel.add(title, BorderLayout.NORTH);
-        title.setLayout(new BorderLayout());
-        title.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+        JPanel titlePanel = new JPanel();
+        panel.add(titlePanel, BorderLayout.NORTH);
+        titlePanel.setLayout(new BorderLayout(Resources.ROW_GAP, Resources.ROW_GAP));
+        titlePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                          Resources.getString("PerspectiveCreate.studyTitle"),
                                                          TitledBorder.LEFT,
                                                          TitledBorder.DEFAULT_POSITION));
         this.fieldTitle = new ComponentTextField(null); //no validation
         this.fieldTitle.setEnabled(false);
-        title.add(this.fieldTitle, BorderLayout.CENTER);
+        titlePanel.add(this.fieldTitle, BorderLayout.CENTER);
         
         // Central panel
         panelCentral = new JPanel();

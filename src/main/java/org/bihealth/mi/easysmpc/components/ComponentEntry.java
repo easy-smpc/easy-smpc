@@ -74,7 +74,7 @@ public abstract class ComponentEntry extends JPanel {
 
         // Left
         JPanel left = new JPanel();
-        left.setLayout(new BorderLayout());
+        left.setLayout(new BorderLayout(Resources.ROW_GAP, Resources.ROW_GAP));
         this.add(left);
         
         JLabel labelLeft = new JLabel(leftString); //$NON-NLS-1$
@@ -96,7 +96,7 @@ public abstract class ComponentEntry extends JPanel {
 
         // Right
         JPanel right = new JPanel();
-        right.setLayout(new BorderLayout());
+        right.setLayout(new BorderLayout(Resources.ROW_GAP, Resources.ROW_GAP));
         this.add(right);
         
         JLabel labelRight = new JLabel(rightString); //$NON-NLS-1$
