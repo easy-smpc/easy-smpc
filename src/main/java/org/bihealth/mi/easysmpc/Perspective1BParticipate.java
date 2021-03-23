@@ -26,6 +26,7 @@ import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -146,17 +147,24 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         // Layout
         panel.setLayout(new BorderLayout());
 
-        // Study title
+        // General data data of study
+        JPanel generalDataPanel = new JPanel();
+        generalDataPanel.setLayout(new GridLayout(1 , 1, Resources.ROW_GAP, Resources.ROW_GAP));
+        panel.add(generalDataPanel, BorderLayout.NORTH);
+        generalDataPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                                    Resources.getString("PerspectiveCreate.General"),
+                                                                    TitledBorder.LEFT,
+                                                                    TitledBorder.DEFAULT_POSITION));
+        
         JPanel titlePanel = new JPanel();
-        panel.add(titlePanel, BorderLayout.NORTH);
         titlePanel.setLayout(new BorderLayout(Resources.ROW_GAP, Resources.ROW_GAP));
-        titlePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                         Resources.getString("PerspectiveCreate.studyTitle"),
-                                                         TitledBorder.LEFT,
-                                                         TitledBorder.DEFAULT_POSITION));
-        this.fieldTitle = new ComponentTextField(null); //no validation
+        titlePanel.add(new JLabel(Resources.getString("PerspectiveCreate.studyTitle")), BorderLayout.WEST);
+        this.fieldTitle = new ComponentTextField(null);
         this.fieldTitle.setEnabled(false);
+        this.fieldTitle.setChangeListener(this);
         titlePanel.add(this.fieldTitle, BorderLayout.CENTER);
+        generalDataPanel.add(titlePanel);
+
         
         // Central panel
         panelCentral = new JPanel();
