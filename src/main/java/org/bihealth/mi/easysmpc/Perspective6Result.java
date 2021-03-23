@@ -161,4 +161,9 @@ public class Perspective6Result extends Perspective {
         buttonsPane.add(buttonExport, BorderLayout.CENTER);        
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
+    
+    @Override
+    protected void uninitialize() {
+        // Empty by design  
+    }
 }

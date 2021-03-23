@@ -71,6 +71,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     
     /** Loading visualization panel */
     private JPanel loadingVisualizationPanel;
+    
+    /** Background thread to show loading visualization */
+    private SwingWorker<Void, Void> loadingVisualWorker;
 
     /**
      * Creates the perspective
@@ -298,7 +301,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             try {
                 ComponentLoadingVisual loadingVisual =  new ComponentLoadingVisual(Resources.getString("PerspectiveReceive.LoadingInProgress"), Resources.getString("PerspectiveReceive.ErrorLoadingInProgress"));
                 loadingVisualizationPanel.add(loadingVisual);
-                 new SwingWorker<Void, Void>() {
+                loadingVisualWorker = new SwingWorker<Void, Void>() {
                     @Override
                     protected Void doInBackground() throws Exception {
                         while(!areSharesComplete()) {
@@ -311,7 +314,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                         }
                         return null;
                     }
-                }.execute();
+                };
+                loadingVisualWorker.execute();
+                
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveReceive.ErrorLoadingAnimation"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE);
             }            
@@ -321,5 +326,18 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();
         getPanel().repaint(); 
-    } 
+    }
+    
+    @Override
+    protected void uninitialize() {
+        // Stop the bus for automatic processing if running
+        if (getApp().getModel() != null) {
+            getApp().getModel().stopBus();
+        }
+        
+        // Stop the thread to display loading visual if running
+        if (loadingVisualWorker != null) {
+            loadingVisualWorker.cancel(true);
+        }
+    }
 }

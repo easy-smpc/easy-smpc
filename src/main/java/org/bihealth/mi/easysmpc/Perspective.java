@@ -120,4 +120,9 @@ public abstract class Perspective {
      * Initialize perspective based on model
      */
     protected abstract void initialize();
+    
+    /**
+     * Call when before other perspective is shown
+     */
+    protected abstract void uninitialize();
 }

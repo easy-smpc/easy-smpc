@@ -106,6 +106,8 @@ public class App extends JFrame {
     private List<Perspective> perspectives = new ArrayList<Perspective>();
     /** Interim save menu item */
     private JMenuItem jmiInterimSave;
+    /** Stores reference to currently displayed perspective */
+    private Perspective currentPerspective;
 
     /**
      * Creates a new instance
@@ -468,13 +470,16 @@ public class App extends JFrame {
      * @param perspective
      */
     private void showPerspective(Perspective perspective) {
-        // Stop the bus for automatic processing if running
-        if (this.model != null) {
-            this.model.stopBus();
+        // Uninitalizes currently displayed perspective
+        if (currentPerspective != null) {
+            currentPerspective.uninitialize();
         }
-        perspective.initialize();
+        
+        // Initalize and show requested perspective
         CardLayout cl = (CardLayout) (cards.getLayout());
+        perspective.initialize();
         cl.show(cards, perspective.getTitle());
+        currentPerspective = perspective;
         progress.setProgress(perspective.getProgress());
         jmiInterimSave.setEnabled(perspective.canSave());
         progress.repaint();

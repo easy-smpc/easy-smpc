@@ -237,4 +237,9 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         getPanel().revalidate();
         getPanel().repaint();        
     }
+    
+    @Override
+    protected void uninitialize() {
+        // Empty by design  
+    }
 }
