@@ -277,6 +277,19 @@ public class Study implements Serializable, Cloneable {
         }
         return this.bus;
     }
+    
+    /**
+     * Is the e-mail bus thread alive?
+     * 
+     * @return
+     */
+    public boolean isBusAlive() {
+        if (this.bus != null) {
+            return this.bus.isAlive();
+        }
+        
+        return false;
+    }
 
     /**
      * Gets the participant from id.

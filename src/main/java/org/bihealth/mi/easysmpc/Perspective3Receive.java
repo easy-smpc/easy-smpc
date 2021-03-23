@@ -305,7 +305,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                     @Override
                     protected Void doInBackground() throws Exception {
                         while(!areSharesComplete()) {
-                            if( getApp().getModel().getBus().isAlive()) {
+                            if( getApp().getModel().isBusAlive()) {
                                 loadingVisual.setLoadingProgress();
                             } else {
                                 loadingVisual.setLoadingError();
