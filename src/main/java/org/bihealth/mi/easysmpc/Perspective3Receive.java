@@ -14,6 +14,7 @@
 package org.bihealth.mi.easysmpc;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -74,6 +75,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     
     /** Background thread to show loading visualization */
     private SwingWorker<Void, Void> loadingVisualWorker;
+    
+    /** Label to show text indicating successful entering a message */
+    private JLabel toastLabel;
 
     /**
      * Creates the perspective
@@ -119,10 +123,36 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                 if (getApp().isMessageShareResultValid(messageStripped)) {
                     getApp().setMessageShare(messageStripped);
                     getApp().actionSave();
+                    showToastMessageSuccessful(messageStripped);
                     stateChanged(new ChangeEvent(this));
                 } 
             }
         });
+    }
+
+    /**
+     * Shows a text indicating the successful import of a message
+     * 
+     * @param messageStripped
+     */
+    public void showToastMessageSuccessful(String messageStripped) {        
+        // Prepare
+        String text;
+        
+        if (messageStripped != null) {
+            // Try get sender name for display text
+            try {
+                text = String.format(Resources.getString("PerspectiveReceive.DisplaySuccessWithName"),
+                                     getApp().getModel().participants[de.tu_darmstadt.cbs.emailsmpc.Message.deserializeMessage(messageStripped).senderID].name);
+            } catch (ClassNotFoundException | IOException e) {
+                // Or use generic text
+                text = Resources.getString("PerspectiveReceive.DisplaySuccess");
+            }
+        } else {
+            text = "";
+        }
+        // Display text
+        this.toastLabel.setText(text);
     }
 
     @Override
@@ -250,6 +280,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                                                      TitledBorder.DEFAULT_POSITION));
         panel.add(pane, BorderLayout.CENTER);
         
+        // Toast label
+        JPanel southPanel = new JPanel();
+        southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.Y_AXIS));
+        toastLabel = new JLabel();
+        toastLabel.setForeground(new Color(82, 153, 75));
+        southPanel.add(toastLabel);
         
         // Receive button and save button
         JPanel buttonsPane = new JPanel();
@@ -266,7 +302,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             }
         });
         buttonsPane.add(buttonProceed, 0, 1);
-        panel.add(buttonsPane, BorderLayout.SOUTH);
+        //panel.add(buttonsPane, BorderLayout.SOUTH);
+        southPanel.add(buttonsPane);
+        panel.add(southPanel, BorderLayout.SOUTH);
     }
 
     /**

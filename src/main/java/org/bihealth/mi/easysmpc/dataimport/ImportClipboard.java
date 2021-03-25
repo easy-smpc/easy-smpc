@@ -89,6 +89,7 @@ public class ImportClipboard implements Runnable {
             if (message != lastSaveMessage && parent.getApp().isMessageShareResultValid(message)) {
                 parent.getApp().setMessageShare(message);
                 parent.getApp().actionSave();
+                parent.showToastMessageSuccessful(message);
                 lastSaveMessage = message;
                 parent.stateChanged(new ChangeEvent(this));
             }

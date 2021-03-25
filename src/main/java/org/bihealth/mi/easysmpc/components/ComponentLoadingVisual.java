@@ -25,7 +25,7 @@ import javax.swing.SwingConstants;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
- * Displays a loading visulation and a respective text
+ * Displays a loading visualization and a respective text
  * 
  * @author Felix Wirth
  *
