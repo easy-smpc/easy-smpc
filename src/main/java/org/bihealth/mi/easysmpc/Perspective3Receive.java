@@ -28,6 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
@@ -78,6 +79,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     
     /** Label to show text indicating successful entering a message */
     private JLabel toastLabel;
+    
+    /** Buttons pane */
+    private JPanel buttonsPane;
+    
+    /** Button poll manually*/
+    private JButton buttonPollManually;
 
     /**
      * Creates the perspective
@@ -149,7 +156,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                 text = Resources.getString("PerspectiveReceive.DisplaySuccess");
             }
         } else {
-            text = "";
+            text = " ";
         }
         // Display text
         this.toastLabel.setText(text);
@@ -266,8 +273,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         titlePanel.add(this.fieldTitle, BorderLayout.CENTER);
         
         // Add loading visualization
-        loadingVisualizationPanel = new JPanel();
-        titlePanel.add(loadingVisualizationPanel, BorderLayout.SOUTH);
         generalDataPanel.add(titlePanel);
         
         // Participants
@@ -280,19 +285,34 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                                                      TitledBorder.DEFAULT_POSITION));
         panel.add(pane, BorderLayout.CENTER);
         
-        // Toast label
+        // South panel
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.Y_AXIS));
-        toastLabel = new JLabel();
-        toastLabel.setForeground(new Color(82, 153, 75));
-        southPanel.add(toastLabel);
         
-        // Receive button and save button
-        JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(2, 1));
+        // Loading visualization panel
+        loadingVisualizationPanel = new JPanel();
+        
+        // Toast panel
+        JPanel toastPanel = new JPanel();
+        toastPanel.setLayout(new BorderLayout());
+        toastLabel = new JLabel("",  SwingConstants.CENTER);
+        toastLabel.setForeground(new Color(82, 153, 75));
+        toastPanel.add(toastLabel, BorderLayout.CENTER);
+        
+        // Buttons pane
+        buttonsPane = new JPanel();
+
+        buttonPollManually = new JButton(Resources.getString("PerspectiveReceive.PollManually"));
+        buttonPollManually.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getApp().getModel().stopBus();
+                startAutomatedMailImport();
+            }
+        });
+        
         buttonReceive = new JButton(Resources.getString("PerspectiveReceive.receiveButton"));
         buttonReceive.addActionListener(this);       
-        buttonsPane.add(buttonReceive, 0, 0);
         
         buttonProceed = new JButton(Resources.getString("PerspectiveReceive.proceed"));
         buttonProceed.addActionListener(new ActionListener() {
@@ -301,8 +321,10 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                 actionProceed();
             }
         });
-        buttonsPane.add(buttonProceed, 0, 1);
-        //panel.add(buttonsPane, BorderLayout.SOUTH);
+        
+        // Adds for south panel
+        southPanel.add(loadingVisualizationPanel);
+        southPanel.add(toastPanel);
         southPanel.add(buttonsPane);
         panel.add(southPanel, BorderLayout.SOUTH);
     }
@@ -333,12 +355,16 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         // Remove loading visualization
         loadingVisualizationPanel.removeAll();
         
+        // Add elements and actions if automatic processing is enabled
         if (isAutomaticProcessingEnabled()) {
+            
             // Start import reading e-mails automatically if enabled 
             startAutomatedMailImport();
+            
+            // Add a visualization animation
             try {
                 ComponentLoadingVisual loadingVisual =  new ComponentLoadingVisual(Resources.getString("PerspectiveReceive.LoadingInProgress"), Resources.getString("PerspectiveReceive.ErrorLoadingInProgress"));
-                loadingVisualizationPanel.add(loadingVisual);
+                loadingVisualizationPanel.add(loadingVisual, BorderLayout.CENTER);
                 loadingVisualWorker = new SwingWorker<Void, Void>() {
                     @Override
                     protected Void doInBackground() throws Exception {
@@ -360,12 +386,38 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             }            
         }
         
+        // Hide or show button to receive automatically
+        updateButtonsPane(isAutomaticProcessingEnabled());
+        
         // Update GUI
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();
         getPanel().repaint(); 
     }
     
+    /**
+     * Draws the buttons pane with or without the poll button to receive e-mail automatically
+     * 
+     * @param automaticProcessingEnabled
+     */
+    private void updateButtonsPane(boolean showPollManually) {
+        // Remove
+        this.buttonsPane.removeAll();
+        
+        // Create with two or three rows and add resend button if necessary
+        if (showPollManually) {
+            this.buttonsPane.setLayout(new GridLayout(3, 1));
+            this.buttonsPane.add(this.buttonPollManually, 0, 0);
+            this.buttonsPane.add(this.buttonReceive, 0, 1);
+            this.buttonsPane.add(this.buttonProceed, 0, 2);
+            
+        } else {
+            this.buttonsPane.setLayout(new GridLayout(2, 1));
+            this.buttonsPane.add(this.buttonReceive, 0, 0);
+            this.buttonsPane.add(this.buttonProceed, 0, 1);
+        }
+    }
+
     @Override
     protected void uninitialize() {
         // Stop the bus for automatic processing if running

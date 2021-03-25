@@ -105,7 +105,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     private JButton            buttonSendAllAutomatically;
 
     /** Buttons pane */
-    private JPanel             panelButtons;
+    private JPanel             buttonsPane;
 
     /**
      * Creates the perspective
@@ -421,19 +421,19 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     private void updateButtonsPane(boolean showResend) {
         
         // Remove
-        this.panelButtons.removeAll();
+        this.buttonsPane.removeAll();
         
         // Create with two or three rows and add resend button if necessary
         if (showResend) {
-            this.panelButtons.setLayout(new GridLayout(3, 1));
-            this.panelButtons.add(this.buttonSendAllAutomatically, 0, 0);
-            this.panelButtons.add(this.buttonSendAllManually, 0, 1);
-            this.panelButtons.add(this.buttonProceed, 0, 2);
+            this.buttonsPane.setLayout(new GridLayout(3, 1));
+            this.buttonsPane.add(this.buttonSendAllAutomatically, 0, 0);
+            this.buttonsPane.add(this.buttonSendAllManually, 0, 1);
+            this.buttonsPane.add(this.buttonProceed, 0, 2);
             
         } else {
-            this.panelButtons.setLayout(new GridLayout(2, 1));
-            this.panelButtons.add(this.buttonSendAllManually, 0, 0);
-            this.panelButtons.add(this.buttonProceed, 0, 1);
+            this.buttonsPane.setLayout(new GridLayout(2, 1));
+            this.buttonsPane.add(this.buttonSendAllManually, 0, 0);
+            this.buttonsPane.add(this.buttonProceed, 0, 1);
         }
     }
 
@@ -445,7 +445,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         buttonProceed.setEnabled(false);
         
         // Execute action
-        getApp().actionFirstSendingDone();        
+        getApp().actionFirstSendingDone();
+        
+        // Reenable proceed button
+        buttonProceed.setEnabled(true);
     }
 
     /**
@@ -487,7 +490,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         
         
         // Send all e-mails automatically button
-        panelButtons = new JPanel();
+        buttonsPane = new JPanel();
         buttonSendAllAutomatically = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButtonAutomatic"));
         buttonSendAllAutomatically.addActionListener(new ActionListener() {            
             @Override
@@ -517,7 +520,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 actionProceed();
             }
         });
-        panel.add(panelButtons, BorderLayout.SOUTH);
+        panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
     /**

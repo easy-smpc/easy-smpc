@@ -38,6 +38,9 @@ public class Perspective4Send extends Perspective2Send {
         
         // Execute action
         getApp().actionSecondSendingDone();
+        
+        // Reenable proceed button
+        buttonProceed.setEnabled(true);
     }
     
     @Override
