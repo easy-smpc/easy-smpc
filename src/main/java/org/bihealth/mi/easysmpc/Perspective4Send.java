@@ -33,6 +33,10 @@ public class Perspective4Send extends Perspective2Send {
 
     @Override
     protected void actionProceed() {
+        // Prevent a second click on proceed button
+        buttonProceed.setEnabled(false);
+        
+        // Execute action
         getApp().actionSecondSendingDone();
     }
     

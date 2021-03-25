@@ -96,7 +96,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     private ComponentTextField fieldTitle;
 
     /** Proceed button */
-    private JButton            buttonProceed;
+    protected JButton            buttonProceed;
 
     /** Send button manual */
     private JButton            buttonSendAllManually;
@@ -414,7 +414,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     }
 
     /**
-     * Draws the buttons pane with or withaout the automatic resend button
+     * Draws the buttons pane with or without the automatic resend button
      * 
      * @param showResend
      */
@@ -423,7 +423,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         // Remove
         this.panelButtons.removeAll();
         
-        // Create with two or three rows and add resend button of necessary
+        // Create with two or three rows and add resend button if necessary
         if (showResend) {
             this.panelButtons.setLayout(new GridLayout(3, 1));
             this.panelButtons.add(this.buttonSendAllAutomatically, 0, 0);
@@ -441,7 +441,11 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * Proceed action
      */
     protected void actionProceed() {
-        getApp().actionFirstSendingDone();
+        // Prevent a second click on proceed button
+        buttonProceed.setEnabled(false);
+        
+        // Execute action
+        getApp().actionFirstSendingDone();        
     }
 
     /**
