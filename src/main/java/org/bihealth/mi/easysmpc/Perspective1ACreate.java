@@ -41,6 +41,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
@@ -110,7 +112,10 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private JButton                           buttonRemoveMailbox;
 
     /** Edit configuration e-mail box */
-    private JButton                           buttonEditMailbox;;
+    private JButton                           buttonEditMailbox;
+    
+    /** Has e-mail config been checked? */
+    private boolean                           emailconfigCheck;
 
     /**
      * Creates the perspective
@@ -145,6 +150,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             Connections.add(settings);
             this.comboSelectMailbox.addItem(settings);
             this.comboSelectMailbox.setSelectedItem(settings);
+            this.emailconfigCheck = true;
         }
         this.stateChanged(new ChangeEvent(this));
     }
@@ -241,6 +247,18 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         if (this.panelParticipants.getComponents().length < 3) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.notEnoughParticipants"));
             return;
+        }
+        
+        // Check e-mail configuration if not done so far
+        if (!emailconfigCheck) {
+            try {
+                if (!new ConnectionIMAP((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem(), true).checkConnection()) {
+                    throw new BusException("Connection error");
+                }
+            } catch (BusException e) {
+                JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.emailConnectionNotWorking"));
+                return;
+            }
         }
         
         // Collect participants
@@ -606,6 +624,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.panelParticipants.removeAll();
         this.panelBins.removeAll();
         this.fieldTitle.setText("");
+        this.emailconfigCheck = false;
 
         // Add initial
         this.addParticipant(null, true);
