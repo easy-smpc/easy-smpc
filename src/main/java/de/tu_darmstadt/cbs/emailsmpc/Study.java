@@ -290,6 +290,19 @@ public class Study implements Serializable, Cloneable {
         
         return false;
     }
+    
+    /**
+     * Is the e-mail bus connected to receive e-mails?
+     * 
+     * @return
+     */
+    public boolean isBusConectedReceiving() {
+        if (this.bus != null) {
+            return this.bus.isReceivingConnected();
+        }
+        
+        return false;
+    }
 
     /**
      * Gets the participant from id.

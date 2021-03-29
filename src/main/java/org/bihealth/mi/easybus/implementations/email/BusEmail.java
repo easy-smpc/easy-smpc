@@ -177,4 +177,17 @@ public class BusEmail extends Bus {
             deleted.expunge();
         }
     }
+    
+    /**
+     * Is there an working connection to receive?
+     * 
+     * @return
+     */
+    public boolean isReceivingConnected() {
+        if(this.connection != null) {
+            return this.connection.isReceivingConnected();
+        }
+        
+        return false;
+    };
 }

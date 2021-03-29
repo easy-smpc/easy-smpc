@@ -131,6 +131,9 @@ public class Resources {
 
     /** Step 2 identifier */
     public static final String    ROUND_2                             = "_round2";
+    
+    /** Interval to check existing mailbox connection */
+    public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED = 3000;
 
     /**
      * Returns all available languages

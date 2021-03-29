@@ -308,6 +308,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             public void actionPerformed(ActionEvent e) {
                 getApp().getModel().stopBus();
                 startAutomatedMailImport();
+                startReceivingVisulization();
             }
         });
         
@@ -361,29 +362,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             // Start import reading e-mails automatically if enabled 
             startAutomatedMailImport();
             
-            // Add a visualization animation
-            try {
-                ComponentLoadingVisual loadingVisual =  new ComponentLoadingVisual(Resources.getString("PerspectiveReceive.LoadingInProgress"), Resources.getString("PerspectiveReceive.ErrorLoadingInProgress"));
-                loadingVisualizationPanel.add(loadingVisual, BorderLayout.CENTER);
-                loadingVisualWorker = new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        while(!areSharesComplete()) {
-                            if( getApp().getModel().isBusAlive()) {
-                                loadingVisual.setLoadingProgress();
-                            } else {
-                                loadingVisual.setLoadingError();
-                            }
-                            Thread.sleep(1000);
-                        }
-                        return null;
-                    }
-                };
-                loadingVisualWorker.execute();
-                
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveReceive.ErrorLoadingAnimation"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE);
-            }            
+            // Add a receiving visualization
+            startReceivingVisulization();            
         }
         
         // Hide or show button to receive automatically
@@ -393,6 +373,44 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();
         getPanel().repaint(); 
+    }
+
+    /**
+     * Add an animation visualization loading/receiving
+     */
+    private void startReceivingVisulization() {
+        
+        try {
+            // Remove thread and component if existing
+            if (loadingVisualWorker != null) {
+                loadingVisualWorker.cancel(true);
+            }
+            loadingVisualizationPanel.removeAll();
+            
+            // Add component to panel
+            ComponentLoadingVisual loadingVisual =  new ComponentLoadingVisual(Resources.getString("PerspectiveReceive.LoadingInProgress"), Resources.getString("PerspectiveReceive.ErrorLoadingInProgress"));
+            loadingVisualizationPanel.add(loadingVisual, BorderLayout.CENTER);
+            
+            // Add a thread to change visualization if necessary
+            loadingVisualWorker = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    while(!areSharesComplete()) {
+                        if( getApp().getModel().isBusAlive() && getApp().getModel().isBusConectedReceiving()) {
+                            loadingVisual.setLoadingProgress();
+                        } else {
+                            loadingVisual.setLoadingError();
+                        }
+                        Thread.sleep(Resources.INTERVAL_CHECK_MAILBOX_CONNECTED);
+                    }
+                    return null;
+                }
+            };
+            loadingVisualWorker.execute();
+            
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveReceive.ErrorLoadingAnimation"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     /**
