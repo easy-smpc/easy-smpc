@@ -32,27 +32,47 @@ public class EntryBin extends ComponentEntryAddRemove {
     private static final BigInteger LOWERINT = ((BigInteger.valueOf(2).pow(126)).negate()).add(BigInteger.ONE); // -2^126+1
     /** UpperInt*/
     private static final BigInteger UPPERINT = ((BigInteger.valueOf(2).pow(126)).subtract(BigInteger.ONE)); // 2^126-1
-    /** LowerDec*/
-    private static final BigDecimal LOWERDEC = ((BigDecimal.valueOf(2).pow(93)).negate()).add(BigDecimal.ONE); // -2^93+1
-    /** UpperDec*/
-    private static final BigDecimal UPPERDEC = ((BigDecimal.valueOf(2).pow(93)).subtract(BigDecimal.ONE)); // 2^93-1
+    /** LowerDec of integral part */
+    private static final BigInteger LOWER_DEC_INTEGRAL = ((BigInteger.valueOf(2).pow(93)).negate()).add(BigInteger.ONE); // -2^93+1
+    /** UpperDec of integral part*/
+    private static final BigInteger UPPER_DEC_INTEGRAL = ((BigInteger.valueOf(2).pow(93)).subtract(BigInteger.ONE)); // 2^93-1
+    /** LowerDec of integral part */
+    private static final BigInteger LOWER_DEC_FRACTIONAL= ((BigInteger.valueOf(2).pow(32)).negate()).add(BigInteger.ONE); // -2^32+1
+    /** UpperDec of integral part*/
+    private static final BigInteger UPPER_DEC_FRACTIONAL = ((BigInteger.valueOf(2).pow(32)).subtract(BigInteger.ONE)); // 2^32-1
     
     /**
-     * Checks whether the integral value is within range [-2^126+1, 2^126-1]
-     * @param value
-     * @return
-     */
-    private static final boolean isInRange(BigInteger value) {
-        return (value.compareTo(LOWERINT) >= 0) && (value.compareTo(UPPERINT) <= 0);
-    }
-
-    /**
-     * Checks whether the decimal value is within range [-2^93+1, 2^93-1]
+     * Checks whether the integral value is within ranges before and after the point
      * @param value
      * @return
      */
     private static final boolean isInRange(BigDecimal value) {
-        return (value.compareTo(LOWERDEC) >= 0) && (value.compareTo(UPPERDEC) <= 0);
+        // Get fractional and integral parts each as Big Integers
+        BigInteger integral = value.toBigInteger();
+        BigInteger fractional = value.remainder(BigDecimal.ONE)
+                                     .movePointRight(value.scale())
+                                     .toBigInteger();
+        
+        // Check ranges
+        return (isInRangeIntegral(integral) && isInRangeFractional(fractional));
+    }
+
+    /**
+     * Checks whether the integral value is within range [-2^93+1, 2^93-1]
+     * @param value
+     * @return
+     */
+    private static final boolean isInRangeIntegral(BigInteger value) {
+        return (value.compareTo(LOWER_DEC_INTEGRAL) >= 0 ) && (value.compareTo(UPPER_DEC_INTEGRAL) <= 0);
+    }
+    
+    /**
+     * Checks whether the fractional value is within range [-2^32+1, 2^32-1]
+     * @param value
+     * @return
+     */
+    private static final boolean isInRangeFractional(BigInteger value) {
+        return (value.compareTo(LOWER_DEC_FRACTIONAL) >= 0 ) && (value.compareTo(UPPER_DEC_FRACTIONAL) <= 0);
     }
 
     /**
