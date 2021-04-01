@@ -255,19 +255,27 @@ public class App extends JFrame {
      * Writes data to a file
      * 
      * @param data
+     * @return successfully written?
      */
-    public void exportData(List<List<String>> data) {
+    public boolean exportData(List<List<String>> data) {
+        // Prepare
+        boolean success = false;
+        
         // Get file
         File file = getFile(false, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX),
                                   new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
         
         if (file != null) {
             try {
-                ExportFile.toFile(file).exportData(data);       
+                ExportFile.toFile(file).exportData(data);
+                success = true;
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
             }
         }
+        
+        // Return
+        return success;
     }
     
     /**
