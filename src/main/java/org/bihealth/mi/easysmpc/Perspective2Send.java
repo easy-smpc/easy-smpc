@@ -218,14 +218,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                               Resources.getString("PerspectiveSend.ProgressTitle"),
                                                               Resources.getString("PerspectiveSend.ProgressNote"),
                                                               0, list.size());
-
-                //  Disable cancel button
-                // TODO: AccessibleContext ac = monitor.getAccessibleContext();
-                // TODO: JDialog dialog = (JDialog)ac.getAccessibleParent();
-                // TODO: java.util.List<JButton> components = getDescendantsOfType(JButton.class, dialog, true);
-                // TODO: JButton button = components.get(0);
-                // TODO: button.setVisible(false);
-                // TODO: dialog.setModal(true);
                 
                 try {
                     
