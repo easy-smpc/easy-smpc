@@ -14,7 +14,6 @@
 package org.bihealth.mi.easysmpc;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -26,10 +25,8 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
@@ -61,9 +58,6 @@ public class Perspective6Result extends Perspective {
 
     /** Export data button */
     private JButton            buttonExport;
-    
-    /** Label to show text indicating successful entering a message */
-    private JLabel toastLabel;
 
     /**
      * Creates the perspective
@@ -81,7 +75,6 @@ public class Perspective6Result extends Perspective {
         // Remove previous content
         panelParticipants.removeAll();
         panelBins.removeAll();
-        toastLabel.setText("");
         
         // Set new content
         this.fieldTitle.setText(getApp().getModel().name);
@@ -110,9 +103,7 @@ public class Perspective6Result extends Perspective {
         }
         
         // Export and write toast when success
-        if (getApp().exportData(list)) {
-            toastLabel.setText(Resources.getString("PerspectiveResult.2"));
-        }
+        getApp().exportData(list);
     }
     
     /**
@@ -172,17 +163,6 @@ public class Perspective6Result extends Perspective {
 
         central.add(pane, BorderLayout.SOUTH);
         
-        // South panel
-        JPanel southPanel = new JPanel();
-        southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.Y_AXIS));
-        
-        // Toast panel
-        JPanel toastPane = new JPanel();
-        toastPane.setLayout(new BorderLayout());
-        toastLabel = new JLabel("",  SwingConstants.CENTER);
-        toastLabel.setForeground(new Color(82, 153, 75));
-        toastPane.add(toastLabel, BorderLayout.CENTER);
-        
         // Export button
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new BorderLayout());
@@ -194,12 +174,7 @@ public class Perspective6Result extends Perspective {
             }
         });
         buttonsPane.add(buttonExport, BorderLayout.CENTER);        
-       
-        
-        // Adds for south panel
-        southPanel.add(toastPane);
-        southPanel.add(buttonsPane);
-        panel.add(southPanel, BorderLayout.SOUTH);
+        panel.add(buttonsPane, BorderLayout.SOUTH);
     }
     
     @Override
