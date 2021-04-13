@@ -607,12 +607,4 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             actionSendMailAutomatically(getParticipantsWithUnsentMessages());
         }
     }
-    
-    @Override
-    protected void uninitialize() {
-        // Stop the bus for automatic processing if running
-        if (getApp().getModel() != null) {
-            getApp().getModel().stopBus();
-        }
-    }
 }

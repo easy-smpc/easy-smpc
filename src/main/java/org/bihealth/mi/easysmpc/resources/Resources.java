@@ -132,6 +132,9 @@ public class Resources {
     /** Step 2 identifier */
     public static final String    ROUND_2                             = "_round2";
     
+    /** Light green color */
+    public static final Color COLOR_LIGHT_GREEN = new Color(82, 153, 75);
+    
     /** Interval to check existing mailbox connection */
     public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED = 3000;
 

@@ -88,9 +88,4 @@ public class Perspective0Start extends Perspective {
     @Override
     protected void initialize() {
     }
-
-    @Override
-    protected void uninitialize() {
-        // Empty by design  
-    }
 }

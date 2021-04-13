@@ -15,6 +15,7 @@ package org.bihealth.mi.easysmpc;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -26,18 +27,22 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.swing.Box;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
@@ -108,6 +113,12 @@ public class App extends JFrame {
     private JMenuItem jmiInterimSave;
     /** Stores reference to currently displayed perspective */
     private Perspective currentPerspective;
+    /** Label for status messages */
+    private JLabel statusMessageLabel;
+    /** Thread for visual worker*/
+    private SwingWorker<Void, Void> loadingVisualWorker;
+    /** Component loadingVisual */
+    private ComponentLoadingVisual loadingVisual = null;
 
     /**
      * Creates a new instance
@@ -232,8 +243,22 @@ public class App extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 actionAbout();
             }
-        });       
-
+        });    
+        
+        // Message panel in menu
+        JPanel menuPanel = new JPanel();
+        menuPanel.setLayout(new BorderLayout());
+        JPanel messagesPanel = new JPanel();
+        messagesPanel.setLayout(new BorderLayout());
+        menuPanel.add(messagesPanel, BorderLayout.EAST);
+        statusMessageLabel = new JLabel("");
+        messagesPanel.add(statusMessageLabel, BorderLayout.CENTER);
+        loadingVisual = new ComponentLoadingVisual(Resources.getLoadingAnimation());
+        loadingVisual.deactivate();
+        messagesPanel.add(loadingVisual, BorderLayout.EAST);
+        jmb.add(Box.createHorizontalGlue());
+        jmb.add(menuPanel);
+        
         // Add perspectives
         addPerspective(new Perspective6Result(this));
         addPerspective(new Perspective5Receive(this));
@@ -817,6 +842,7 @@ public class App extends JFrame {
      * Start action
      */
     protected void actionStart() {
+        this.setStatusMessage("mytext", false, false);
         this.showPerspective(Perspective0Start.class);
     }    
     
@@ -824,7 +850,7 @@ public class App extends JFrame {
      * Returns the model
      * @return
      */
-    protected Study getModel() {
+    public Study getModel() {
         return this.model;
     }
 
@@ -843,5 +869,47 @@ public class App extends JFrame {
             }
         }
         return returnPerspective;
+    }
+    
+    /**
+     * Sets a status message
+     * 
+     * @param text
+     * @param errorMessage (text will be red)
+     * @param showLoadingAnimation 
+     */
+    public void setStatusMessage(String text, boolean errorMessage, boolean showLoadingAnimation) {
+        
+        // Add text
+        statusMessageLabel.setText(text);
+        statusMessageLabel.setForeground(errorMessage ? Color.RED : Resources.COLOR_LIGHT_GREEN);
+        
+        // If no animation deactivate and return
+        if (!showLoadingAnimation) {
+            loadingVisual.deactivate();
+            if (loadingVisualWorker != null) {
+                loadingVisualWorker.cancel(true);
+            }
+            return;
+        }
+        
+        // Activate animation create thread if not existing
+        if (loadingVisualWorker == null) {
+                loadingVisualWorker = new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        while (true) {
+                            if (getModel().isBusAlive() && getModel().isBusConectedReceiving()) {
+                                loadingVisual.activate();
+                            } else {
+                                loadingVisual.deactivate();
+                                setStatusMessage(Resources.getString("App.24"), true, true);
+                            }
+                            Thread.sleep(Resources.INTERVAL_CHECK_MAILBOX_CONNECTED);
+                        }
+                    }
+                };
+                loadingVisualWorker.execute();
+        }    
     }
 }

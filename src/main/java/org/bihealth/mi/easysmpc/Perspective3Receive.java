@@ -14,12 +14,10 @@
 package org.bihealth.mi.easysmpc;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -28,9 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -40,7 +36,6 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
-import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmark;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
@@ -70,15 +65,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
 
     /** Receive button */
     private JButton            buttonReceive;
-    
-    /** Loading visualization panel */
-    private JPanel loadingVisualizationPanel;
-    
-    /** Background thread to show loading visualization */
-    private SwingWorker<Void, Void> loadingVisualWorker;
-    
-    /** Label to show text indicating successful entering a message */
-    private JLabel toastLabel;
     
     /** Buttons pane */
     private JPanel buttonsPane;
@@ -118,6 +104,11 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     public void actionPerformed(ActionEvent e) {
         getApp().actionReceiveMessage();
         getApp().actionSave();
+        getApp().setStatusMessage( String.format(Resources.getString("PerspectiveReceive.displaySuccess")
+                                                        , numberSharesComplete()
+                                                        , numberExpectedMessages())
+                                          , false, true);
+
         this.stateChanged(new ChangeEvent(this));
     }
     
@@ -130,36 +121,14 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                 if (getApp().isMessageShareResultValid(messageStripped)) {
                     getApp().setMessageShare(messageStripped);
                     getApp().actionSave();
-                    showToastMessageSuccessful(messageStripped);
+                    getApp().setStatusMessage( String.format(Resources.getString("PerspectiveReceive.displaySuccess")
+                                                                    , numberSharesComplete()
+                                                                    , numberExpectedMessages())
+                                                      , false, true);
                     stateChanged(new ChangeEvent(this));
-                } 
+                }
             }
         });
-    }
-
-    /**
-     * Shows a text indicating the successful import of a message
-     * 
-     * @param messageStripped
-     */
-    public void showToastMessageSuccessful(String messageStripped) {        
-        // Prepare
-        String text;
-        
-        if (messageStripped != null) {
-            // Try get sender name for display text
-            try {
-                text = String.format(Resources.getString("PerspectiveReceive.DisplaySuccessWithName"),
-                                     getApp().getModel().participants[de.tu_darmstadt.cbs.emailsmpc.Message.deserializeMessage(messageStripped).senderID].name);
-            } catch (ClassNotFoundException | IOException e) {
-                // Or use generic text
-                text = Resources.getString("PerspectiveReceive.DisplaySuccess");
-            }
-        } else {
-            text = " ";
-        }
-        // Display text
-        this.toastLabel.setText(text);
     }
 
     @Override
@@ -188,6 +157,31 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         return true;
     }
     
+    /**
+     * Checks the number of complete messages
+     * 
+     * @return
+     */
+    public int numberSharesComplete() {
+        int numberComplete = 0;
+        for (int i = 0; i < getApp().getModel().numParticipants; i++) {
+            if (areSharesCompleteForParticipantId(i)) numberComplete++;
+        }
+        return numberComplete - 1;
+        }
+    
+    /**
+     * Returns number of expected external messages
+     * 
+     * @return
+     */
+    public int numberExpectedMessages() {
+        // Deduct one for own participation
+        int numberExpected = getApp().getModel().numParticipants - 1;
+        
+        return numberExpected;
+    }
+        
     /**
      * Checks if all bins for a certain user id are complete
      * @return
@@ -284,21 +278,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                                                      TitledBorder.LEFT,
                                                                      TitledBorder.DEFAULT_POSITION));
         panel.add(pane, BorderLayout.CENTER);
-        
-        // South panel
-        JPanel southPanel = new JPanel();
-        southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.Y_AXIS));
-        
-        // Loading visualization panel
-        loadingVisualizationPanel = new JPanel();
-        
-        // Toast panel
-        JPanel toastPanel = new JPanel();
-        toastPanel.setLayout(new BorderLayout());
-        toastLabel = new JLabel("",  SwingConstants.CENTER);
-        toastLabel.setForeground(new Color(82, 153, 75));
-        toastPanel.add(toastLabel, BorderLayout.CENTER);
-        
+                
         // Buttons pane
         buttonsPane = new JPanel();
 
@@ -308,7 +288,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             public void actionPerformed(ActionEvent e) {
                 getApp().getModel().stopBus();
                 startAutomatedMailImport();
-                startReceivingVisulization();
             }
         });
         
@@ -324,10 +303,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         });
         
         // Adds for south panel
-        southPanel.add(loadingVisualizationPanel);
-        southPanel.add(toastPanel);
-        southPanel.add(buttonsPane);
-        panel.add(southPanel, BorderLayout.SOUTH);
+        panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
     /**
@@ -353,17 +329,14 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             panelParticipants.add(entry);
         }
         
-        // Remove loading visualization
-        loadingVisualizationPanel.removeAll();
-        
         // Add elements and actions if automatic processing is enabled
         if (isAutomaticProcessingEnabled()) {
             
             // Start import reading e-mails automatically if enabled 
             startAutomatedMailImport();
             
-            // Add a receiving visualization
-            startReceivingVisulization();            
+            // Set message accordingly
+            getApp().setStatusMessage(Resources.getString("PerspectiveReceive.LoadingInProgress"), false, true);
         }
         
         // Hide or show button to receive automatically
@@ -373,44 +346,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();
         getPanel().repaint(); 
-    }
-
-    /**
-     * Add an animation visualization loading/receiving
-     */
-    private void startReceivingVisulization() {
-        
-        try {
-            // Remove thread and component if existing
-            if (loadingVisualWorker != null) {
-                loadingVisualWorker.cancel(true);
-            }
-            loadingVisualizationPanel.removeAll();
-            
-            // Add component to panel
-            ComponentLoadingVisual loadingVisual =  new ComponentLoadingVisual(Resources.getString("PerspectiveReceive.LoadingInProgress"), Resources.getString("PerspectiveReceive.ErrorLoadingInProgress"));
-            loadingVisualizationPanel.add(loadingVisual, BorderLayout.CENTER);
-            
-            // Add a thread to change visualization if necessary
-            loadingVisualWorker = new SwingWorker<Void, Void>() {
-                @Override
-                protected Void doInBackground() throws Exception {
-                    while(!areSharesComplete()) {
-                        if( getApp().getModel().isBusAlive() && getApp().getModel().isBusConectedReceiving()) {
-                            loadingVisual.setLoadingProgress();
-                        } else {
-                            loadingVisual.setLoadingError();
-                        }
-                        Thread.sleep(Resources.INTERVAL_CHECK_MAILBOX_CONNECTED);
-                    }
-                    return null;
-                }
-            };
-            loadingVisualWorker.execute();
-            
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, Resources.getString("PerspectiveReceive.ErrorLoadingAnimation"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE);
-        }
     }
     
     /**
@@ -433,19 +368,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             this.buttonsPane.setLayout(new GridLayout(2, 1));
             this.buttonsPane.add(this.buttonReceive, 0, 0);
             this.buttonsPane.add(this.buttonProceed, 0, 1);
-        }
-    }
-
-    @Override
-    protected void uninitialize() {
-        // Stop the bus for automatic processing if running
-        if (getApp().getModel() != null) {
-            getApp().getModel().stopBus();
-        }
-        
-        // Stop the thread to display loading visual if running
-        if (loadingVisualWorker != null) {
-            loadingVisualWorker.cancel(true);
         }
     }
 }

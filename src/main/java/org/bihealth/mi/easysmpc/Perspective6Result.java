@@ -102,17 +102,8 @@ public class Perspective6Result extends Perspective {
                                                          ((EntryBinNoButton) c).getRightValue())));
         }
         
-        // Export and write toast when success
+        // Export data
         getApp().exportData(list);
-    }
-    
-    /**
-     * Shows a text indicating the successful import of a message
-     * 
-     * @param messageStripped
-     */
-    public void showToastMessageSuccessful(String messageStripped) {
-        
     }
 
     /**
@@ -175,10 +166,5 @@ public class Perspective6Result extends Perspective {
         });
         buttonsPane.add(buttonExport, BorderLayout.CENTER);        
         panel.add(buttonsPane, BorderLayout.SOUTH);
-    }
-    
-    @Override
-    protected void uninitialize() {
-        // Empty by design  
     }
 }

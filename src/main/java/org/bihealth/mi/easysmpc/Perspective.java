@@ -124,5 +124,14 @@ public abstract class Perspective {
     /**
      * Call when before other perspective is shown
      */
-    protected abstract void uninitialize();
+    protected void uninitialize() {
+        // Stop the bus for automatic processing if running
+        if (getApp().getModel() != null) {
+            getApp().getModel().stopBus();
+        }
+        
+        
+        // Reset status message and loading visual
+        getApp().setStatusMessage("", false, false);
+    }
 }

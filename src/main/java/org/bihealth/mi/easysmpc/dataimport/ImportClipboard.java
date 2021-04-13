@@ -32,7 +32,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class ImportClipboard implements Runnable {
     
     /** Last message which was saved */
-    String lastSaveMessage = null;
+    String lastSavedMessage = null;
     
     /**
      * Convenience method to remove exchange message tags
@@ -86,11 +86,14 @@ public class ImportClipboard implements Runnable {
     public void run() {
         if (this.parent.isVisible()) {
             String message = getStrippedExchangeMessage(getTextFromClipBoard());
-            if (message != lastSaveMessage && parent.getApp().isMessageShareResultValid(message)) {
+            if (message != lastSavedMessage && parent.getApp().isMessageShareResultValid(message)) {
                 parent.getApp().setMessageShare(message);
                 parent.getApp().actionSave();
-                parent.showToastMessageSuccessful(message);
-                lastSaveMessage = message;
+                parent.getApp().setStatusMessage( String.format(Resources.getString("PerspectiveReceive.displaySuccess")
+                                                                , parent.numberSharesComplete()
+                                                                , parent.numberExpectedMessages())
+                                                  , false, false);
+                lastSavedMessage = message;
                 parent.stateChanged(new ChangeEvent(this));
             }
         }
