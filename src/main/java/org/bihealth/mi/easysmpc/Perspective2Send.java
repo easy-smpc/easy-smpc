@@ -538,7 +538,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         for (Participant currentParticipant : getApp().getModel().participants) {
             
             // Add participant
-            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, currentParticipant.emailAddress, i != getApp().getModel().ownId);
+            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, currentParticipant.emailAddress, i != getApp().getModel().ownId, i == getApp().getModel().ownId);
             panelParticipants.add(entry);
             
             // Create popup menu for the send-email-button

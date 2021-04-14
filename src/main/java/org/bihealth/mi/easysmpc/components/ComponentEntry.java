@@ -14,7 +14,9 @@
 package org.bihealth.mi.easysmpc.components;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 
@@ -66,12 +68,13 @@ public abstract class ComponentEntry extends JPanel {
                          boolean rightEnabled, 
                          ComponentTextFieldValidator rightValidator,
                          boolean rightIsPassword,
-                         boolean additionalControlsEnabled) {
+                         boolean additionalControlsEnabled,
+                         boolean isOwnParticipant) {
         
         // Layout
         this.setBorder(new EmptyBorder(Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP));
-        this.setLayout(new GridLayout(1, 2, Resources.ROW_GAP, Resources.ROW_GAP));
-
+        this.setLayout(new GridLayout(1, 2, Resources.ROW_GAP, Resources.ROW_GAP));        
+        
         // Left
         JPanel left = new JPanel();
         left.setLayout(new BorderLayout(Resources.ROW_GAP, Resources.ROW_GAP));
@@ -128,8 +131,24 @@ public abstract class ComponentEntry extends JPanel {
         // Set size to fix layout issues
         this.setMaximumSize(new Dimension(Integer.MAX_VALUE, this.fieldLeft.getPreferredSize().height + Resources.ROW_GAP * 2));
         this.setMinimumSize(new Dimension(0, this.fieldLeft.getPreferredSize().height + Resources.ROW_GAP * 2));
+        
+        // Set background
+        if (isOwnParticipant) {
+            setBackgroundAllSubComponents(this);
+        }
     }
     
+    /**
+     * @param componentEntry
+     */
+    private void setBackgroundAllSubComponents(Component c) {
+        c.setBackground(new Color(223,223,223));
+        if (c instanceof Container)
+        for(Component childComponent : ((Container) c).getComponents()) {
+            setBackgroundAllSubComponents(childComponent);
+        }
+    }
+
     /**
      * Creates a new instance
      * @param leftString
@@ -150,10 +169,11 @@ public abstract class ComponentEntry extends JPanel {
                          String rightValue,
                          boolean rightEnabled, 
                          ComponentTextFieldValidator rightValidator,
-                         boolean additionalControlsEnabled) {
+                         boolean additionalControlsEnabled,
+                         boolean isOwnParticipant) {
         this (leftString, leftValue, leftEnabled, leftValidator, false,
               rightString, rightValue, rightEnabled, rightValidator, false,
-              additionalControlsEnabled);
+              additionalControlsEnabled, isOwnParticipant);
     }
 
     /**

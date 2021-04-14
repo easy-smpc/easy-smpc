@@ -176,10 +176,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @return
      */
     public int numberExpectedMessages() {
-        // Deduct one for own participation
-        int numberExpected = getApp().getModel().numParticipants - 1;
-        
-        return numberExpected;
+        return getApp().getModel().numParticipants - 1;
     }
         
     /**
@@ -323,10 +320,13 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     protected void initialize() {
         this.fieldTitle.setText(getApp().getModel().name);
         this.panelParticipants.removeAll();
+        int i = 0;
         for (Participant currentParticipant : getApp().getModel().participants) {
             EntryParticipantCheckmark entry = new EntryParticipantCheckmark(currentParticipant.name,
-                                                                            currentParticipant.emailAddress);
+                                                                            currentParticipant.emailAddress,
+                                                                            i == getApp().getModel().ownId);
             panelParticipants.add(entry);
+            i++;
         }
         
         // Add elements and actions if automatic processing is enabled

@@ -30,23 +30,15 @@ public class EntryParticipantSendMail extends ComponentEntryOneButton {
      * Creates a new instance
      * @param name
      * @param email
-     */
-    public EntryParticipantSendMail(String name, String email) {
-        this(name, email, false);
-    }
-    
-    /**
-     * Creates a new instance
-     * @param name
-     * @param email
      * @param buttonEnabled
      */
-    public EntryParticipantSendMail(String name, String email, boolean buttonEnabled) {
+    public EntryParticipantSendMail(String name, String email, boolean buttonEnabled, boolean isOwnParticipant) {
         super(Resources.getString("Participant.0"),
               name,
               Resources.getString("Participant.1"),
               email,
-              buttonEnabled);
+              buttonEnabled,
+              isOwnParticipant);
     }
     
     /**

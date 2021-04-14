@@ -78,8 +78,10 @@ public class Perspective6Result extends Perspective {
         
         // Set new content
         this.fieldTitle.setText(getApp().getModel().name);
+        int i = 0;
         for (Participant currentParticipant : getApp().getModel().participants) {
-            panelParticipants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress));
+            panelParticipants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress, i == getApp().getModel().ownId));
+            i++;
         }
         for (BinResult binResult : getApp().getModel().getAllResults()) {
             panelBins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));

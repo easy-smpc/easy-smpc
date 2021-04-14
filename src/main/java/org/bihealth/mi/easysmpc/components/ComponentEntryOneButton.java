@@ -51,7 +51,8 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
                                    String leftValue,
                                    String rightString,
                                    String rightValue,
-                                   boolean additionalControlsEnabled) {
+                                   boolean additionalControlsEnabled,
+                                   boolean isOwnParticipant) {
         super(leftString, //$NON-NLS-1$
               leftValue,
               false,
@@ -70,7 +71,8 @@ public abstract class ComponentEntryOneButton extends ComponentEntry {
                       return Participant.validEmail(text);
                   }
                 },
-              additionalControlsEnabled
+              additionalControlsEnabled,
+              isOwnParticipant
               );        
     }
     

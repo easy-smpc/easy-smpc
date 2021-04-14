@@ -231,9 +231,11 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         this.fieldTitle.setText(getApp().getModel().name);
         
         // Add participants
+        int i = 0;
         for (Participant currentParticipant : getApp().getModel().participants) {
-            EntryParticipant newNameEmailParticipantEntry = new EntryParticipant(currentParticipant.name, currentParticipant.emailAddress, false, false);
+            EntryParticipant newNameEmailParticipantEntry = new EntryParticipant(currentParticipant.name, currentParticipant.emailAddress, false, false, i == getApp().getModel().ownId);
             panelParticipants.add(newNameEmailParticipantEntry);
+            i++;
         }
         for (Bin currentBin : getApp().getModel().bins) {
             EntryBin newBin = new EntryBin(currentBin.name, false, "", true, false);
