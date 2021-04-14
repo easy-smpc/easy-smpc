@@ -39,7 +39,7 @@ public class Perspective4Send extends Perspective2Send {
         // Execute action
         getApp().actionSecondSendingDone();
         
-        // Reenable proceed button
+        // Re-enable proceed button
         buttonProceed.setEnabled(true);
     }
     

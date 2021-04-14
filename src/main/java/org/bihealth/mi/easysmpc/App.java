@@ -697,10 +697,18 @@ public class App extends JFrame {
     }
 
     /**
+     * Marks a message as retrieved
+     * @param index
+     */
+    protected void actionMarkMessageRetrieved(int index) {
+        this.model.markMessageRetrieved(index);
+    }
+    
+    /**
      * Marks a message as sent
      * @param index
      */
-    protected void actionMarkMessageSent(int index) {
+    protected void actionMarkMessageSend(int index) {
         this.model.markMessageSent(index);
     }
 
@@ -842,7 +850,6 @@ public class App extends JFrame {
      * Start action
      */
     protected void actionStart() {
-        this.setStatusMessage("mytext", false, false);
         this.showPerspective(Perspective0Start.class);
     }    
     

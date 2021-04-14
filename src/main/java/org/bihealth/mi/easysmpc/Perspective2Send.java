@@ -140,18 +140,13 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      public void stateChanged(ChangeEvent e) {
          
          // Check click able send all mails button and save button
-         boolean messagesUnsent = getApp().getModel().messagesUnsent();
-         this.buttonProceed.setEnabled(!messagesUnsent);
-         this.buttonSendAllManually.setEnabled(messagesUnsent);
-         this.buttonSendAllAutomatically.setEnabled(messagesUnsent && isAutomaticProcessingEnabled());
-
-        // Check buttons clickable
-        for (Component c : this.panelParticipants.getComponents()) {
-            ((EntryParticipantSendMail) c).setButtonEnabled(isMailButtonClickable(c));
-        }
+         boolean allMessagesRetrieved = getApp().getModel().areAllMessagesRetrieved();
+         this.buttonProceed.setEnabled(allMessagesRetrieved);
+         this.buttonSendAllManually.setEnabled(!allMessagesRetrieved);
+         this.buttonSendAllAutomatically.setEnabled(!allMessagesRetrieved && isAutomaticProcessingEnabled());
         
         // If no more messages and automatic processing proceed automatically
-        if (!messagesUnsent && isAutomaticProcessingEnabled()) {
+        if (allMessagesRetrieved && isAutomaticProcessingEnabled()) {
             actionProceed();
         }
      }
@@ -176,9 +171,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(body), null);
             
             // Send a dialog to confirm copying
-            if (JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendCopyGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
+            if (!wasMessageretrieved(entry) && JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendCopyGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
                 int index = Arrays.asList(this.panelParticipants.getComponents()).indexOf(entry);
-                getApp().actionMarkMessageSent(index);
+                getApp().actionMarkMessageRetrieved(index);
                 
                 // Persist changes
                 getApp().actionSave();
@@ -239,7 +234,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                         
                         // Mark message sent
                         int index = Arrays.asList(panelParticipants.getComponents()).indexOf(entry);
-                        getApp().actionMarkMessageSent(index);
+                        getApp().actionMarkMessageRetrieved(index);
                         messageSent = true;
                         monitor.setProgress(++workDone);
                     }
@@ -309,13 +304,22 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 // Open email
                 Desktop.getDesktop().mail(new URI(builder.toString().replace("+", "%20").replace(":/", ":")));
             }
-
+            
+            // Check at lest one message not marked as retrieved
+            boolean retrieved = true;
+            for (EntryParticipantSendMail entry : list) {
+                if(!wasMessageretrieved(entry)) {
+                    retrieved = false;
+                    break;
+                }
+            }
+            
             // Send a dialog to confirm mail sending
-            if (JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendMailGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
+            if (!retrieved && JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendMailGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
                 
                 for (EntryParticipantSendMail entry : list) {
                     int index = Arrays.asList(this.panelParticipants.getComponents()).indexOf(entry);
-                    getApp().actionMarkMessageSent(index);
+                    getApp().actionMarkMessageRetrieved(index);
                 }
                 
                 // Persist changes
@@ -344,10 +348,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * 
      * @return list of participants
      */
-    private List<EntryParticipantSendMail> getParticipantsWithUnsentMessages() {
+    private List<EntryParticipantSendMail> getAllParticipants() {
         List<EntryParticipantSendMail> list = new ArrayList<>();
         for (Component c : panelParticipants.getComponents()) {
-            if (!isOwnEntry(c) && isMessagesUnsent(c) ) {
+            if (!isOwnEntry(c)) {
                 list.add((EntryParticipantSendMail)  c);
             }
         }
@@ -360,7 +364,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @return enabled
      */
     private boolean isAutomaticProcessingDisplayed() {
-        // It is not initial sending of study creator
+        // If is not initial sending of study creator
         return !(getApp().getModelState() == StudyState.INITIAL_SENDING);
     }
     
@@ -376,24 +380,12 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     }
     
     /**
-     * Validates each send mail button whether it should be clickable
-     */
-    private boolean isMailButtonClickable(Component c) {
-        int index = Arrays.asList(panelParticipants.getComponents()).indexOf(c);
-        if (index == getApp().getModel().ownId ||
-            getApp().getModel().getUnsentMessageFor(index) == null) {
-            return false;
-        }
-        return true;
-    }
-    
-    /**
-     * Returns whether there are unsent message for the entry
+     * Returns whether a message was already retrieved
      * @param entry
      * @return
      */
-   private boolean isMessagesUnsent(Component entry) {
-       return getApp().getModel().getUnsentMessageFor(Arrays.asList(panelParticipants.getComponents()).indexOf(entry)) != null;                     
+   private boolean wasMessageretrieved(Component entry) {
+       return getApp().getModel().wasMessageRetrieved(Arrays.asList(panelParticipants.getComponents()).indexOf(entry));                     
    }
 
     /**
@@ -436,10 +428,17 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         // Prevent a second click on proceed button
         buttonProceed.setEnabled(false);
         
+        // Mark all messages as sent
+        for (int index = 0; index < panelParticipants.getComponentCount(); index++) {
+            if (index != getApp().getModel().ownId) {
+                getApp().actionMarkMessageSend(index);
+            }
+        }
+        
         // Execute action
         getApp().actionFirstSendingDone();
         
-        // Reenable proceed button
+        // Re-enable proceed button
         buttonProceed.setEnabled(true);
     }
 
@@ -489,7 +488,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             public void actionPerformed(ActionEvent e) {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
-                        actionSendMailAutomatically(getParticipantsWithUnsentMessages());
+                        actionSendMailAutomatically(getAllParticipants());
                     }
                   });
             }
@@ -500,7 +499,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         buttonSendAllManually.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionSendMailManual(getParticipantsWithUnsentMessages());
+                actionSendMailManual(getAllParticipants());
             }
         });
         
@@ -604,7 +603,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
 
         // Send e-mails automatically if enabled
         if (isAutomaticProcessingEnabled()) {
-            actionSendMailAutomatically(getParticipantsWithUnsentMessages());
+            actionSendMailAutomatically(getAllParticipants());
         }
     }
 }
