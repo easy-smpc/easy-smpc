@@ -220,12 +220,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * Check participant entries visually if complete
      */
     private void updateCheckmarks() {
-        int i=0;
+        int index = 0;
         for (Component c : this.panelParticipants.getComponents()) {
-            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(i == getApp().getModel().ownId || // Always mark own id as "received"
-                                                                (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  i == 0) || // Mark first entry in first round as received
-                                                                areSharesCompleteForParticipantId(i)); // Mark if share complete
-            i++;
+            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(index == getApp().getModel().ownId || // Always mark own id as "received"
+                                                                (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  index == 0) || // Mark first entry in first round as received
+                                                                areSharesCompleteForParticipantId(index)); // Mark if share complete
+            index++;
         }
     }
 

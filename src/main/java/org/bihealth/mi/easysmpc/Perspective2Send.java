@@ -15,7 +15,6 @@ package org.bihealth.mi.easysmpc;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -32,7 +31,6 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -51,7 +49,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
-import org.bihealth.mi.easysmpc.components.EntryParticipantSendMail;
+import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmarkSendMail;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -67,28 +65,6 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  */
 public class Perspective2Send extends Perspective implements ChangeListener {
     
-    /**
-     * Return all descendants of a certain type
-     * @param <T>
-     * @param clazz
-     * @param container
-     * @param nested
-     * @return
-     */
-    @SuppressWarnings("unused")
-    private static <T extends JComponent> List<T> getDescendantsOfType(Class<T> clazz, Container container, boolean nested) {
-        List<T> tList = new ArrayList<T>();
-        for (Component component : container.getComponents()) {
-            if (clazz.isAssignableFrom(component.getClass())) {
-                tList.add(clazz.cast(component));
-            }
-            if (nested || !clazz.isAssignableFrom(component.getClass())) {
-                tList.addAll(getDescendantsOfType(clazz, (Container) component, nested));
-            }
-        }
-        return tList;
-    }
-
     /** Panel for participants */
     private ScrollablePanel    panelParticipants;
 
@@ -138,6 +114,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
       */
      @Override
      public void stateChanged(ChangeEvent e) {
+         // Update checkmarks
+         updateCheckmarks();
          
          // Check click able send all mails button and save button
          boolean allMessagesRetrieved = getApp().getModel().areAllMessagesRetrieved();
@@ -154,7 +132,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     /**
      * @param entry
      */
-   private void actionCopyButton(EntryParticipantSendMail entry) {
+   private void actionCopyButton(EntryParticipantCheckmarkSendMail entry) {
         // Push email body into clipboard
         try {
             String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
@@ -193,13 +171,13 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * 
      * @param list
      */
-    private void actionSendMailAutomatically(List<EntryParticipantSendMail> list) {
+    private void actionSendMailAutomatically(List<EntryParticipantCheckmarkSendMail> list) {
         
         // Deactivate buttons at start: Will be re-enabled if needed by the thread spawned below
         buttonSendAllAutomatically.setEnabled(false);
         buttonSendAllManually.setEnabled(false);
         for (Component c : this.panelParticipants.getComponents()) {
-            ((EntryParticipantSendMail) c).setButtonEnabled(false);
+            ((EntryParticipantCheckmarkSendMail) c).setButtonEnabled(false);
         }
         
         // Spawn async task
@@ -224,7 +202,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                     // Loop over messages
                     boolean messageSent = false;
                     int workDone = 0;
-                    for (EntryParticipantSendMail entry : list) {
+                    for (EntryParticipantCheckmarkSendMail entry : list) {
                         
                         // Send message
                         getApp().getModel().getBus().send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
@@ -269,12 +247,12 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * 
      * @param list
      */
-    private void actionSendMailManual(List<EntryParticipantSendMail> list) {
+    private void actionSendMailManual(List<EntryParticipantCheckmarkSendMail> list) {
         
         try {
             
             // For each entry
-            for (EntryParticipantSendMail entry : list) {
+            for (EntryParticipantCheckmarkSendMail entry : list) {
                 
                 // Prepare URI parts
                 String subject = String.format(Resources.getString("PerspectiveSend.mailSubject"),
@@ -307,7 +285,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             
             // Check at lest one message not marked as retrieved
             boolean retrieved = true;
-            for (EntryParticipantSendMail entry : list) {
+            for (EntryParticipantCheckmarkSendMail entry : list) {
                 if(!wasMessageretrieved(entry)) {
                     retrieved = false;
                     break;
@@ -317,7 +295,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             // Send a dialog to confirm mail sending
             if (!retrieved && JOptionPane.showConfirmDialog(this.getPanel(), String.format(Resources.getString("PerspectiveSend.confirmSendMailGeneric")), "", JOptionPane.OK_CANCEL_OPTION) == 0) {
                 
-                for (EntryParticipantSendMail entry : list) {
+                for (EntryParticipantCheckmarkSendMail entry : list) {
                     int index = Arrays.asList(this.panelParticipants.getComponents()).indexOf(entry);
                     getApp().actionMarkMessageRetrieved(index);
                 }
@@ -338,7 +316,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @param entry
      * @throws IOException
      */
-    private String getExchangeString(EntryParticipantSendMail entry) throws IOException {
+    private String getExchangeString(EntryParticipantCheckmarkSendMail entry) throws IOException {
         int index = Arrays.asList(panelParticipants.getComponents()).indexOf(entry);
         return Message.serializeMessage(getApp().getModel().getUnsentMessageFor(index));
     }
@@ -348,11 +326,11 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * 
      * @return list of participants
      */
-    private List<EntryParticipantSendMail> getAllParticipants() {
-        List<EntryParticipantSendMail> list = new ArrayList<>();
+    private List<EntryParticipantCheckmarkSendMail> getAllParticipants() {
+        List<EntryParticipantCheckmarkSendMail> list = new ArrayList<>();
         for (Component c : panelParticipants.getComponents()) {
             if (!isOwnEntry(c)) {
-                list.add((EntryParticipantSendMail)  c);
+                list.add((EntryParticipantCheckmarkSendMail)  c);
             }
         }
         return list;
@@ -513,6 +491,19 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         });
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
+    
+    /**
+     * Check participant entries visually if complete
+     */
+    private void updateCheckmarks() {
+        int index = 0;
+        for (Component c : this.panelParticipants.getComponents()) {
+            EntryParticipantCheckmarkSendMail entry = (EntryParticipantCheckmarkSendMail) c;
+            entry.setCheckmarkEnabled(index == getApp().getModel().ownId || // Always mark own id as "received"
+                                                                wasMessageretrieved(entry)); // Mark if share complete
+            index++;
+        }
+    }
 
     /**
      * Returns an identifier for the current round of EasySMPC 
@@ -537,7 +528,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         for (Participant currentParticipant : getApp().getModel().participants) {
             
             // Add participant
-            EntryParticipantSendMail entry = new EntryParticipantSendMail(currentParticipant.name, currentParticipant.emailAddress, i != getApp().getModel().ownId, i == getApp().getModel().ownId);
+            EntryParticipantCheckmarkSendMail entry = new EntryParticipantCheckmarkSendMail(currentParticipant.name, currentParticipant.emailAddress, i == getApp().getModel().ownId);
             panelParticipants.add(entry);
             
             // Create popup menu for the send-email-button
