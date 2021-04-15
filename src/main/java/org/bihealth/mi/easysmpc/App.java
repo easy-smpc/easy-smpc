@@ -119,6 +119,8 @@ public class App extends JFrame {
     private SwingWorker<Void, Void> loadingVisualWorker;
     /** Component loadingVisual */
     private ComponentLoadingVisual loadingVisual = null;
+    /** Stop flag visual*/
+    private boolean stopFlagVisual = false;
 
     /**
      * Creates a new instance
@@ -893,19 +895,17 @@ public class App extends JFrame {
         
         // If no animation deactivate and return
         if (!showLoadingAnimation) {
-            loadingVisual.deactivate();
-            if (loadingVisualWorker != null) {
-                loadingVisualWorker.cancel(true);
-            }
+            stopFlagVisual = true;
             return;
         }
         
         // Activate animation create thread if not existing
-        if (loadingVisualWorker == null) {
-                loadingVisualWorker = new SwingWorker<Void, Void>() {
+        if (loadingVisualWorker == null || loadingVisualWorker.isCancelled() || loadingVisualWorker.isDone()) {
+            stopFlagVisual = false;
+            loadingVisualWorker = new SwingWorker<Void, Void>() {
                     @Override
                     protected Void doInBackground() throws Exception {
-                        while (true) {
+                        while (!stopFlagVisual) {
                             if (getModel().isBusAlive() && getModel().isBusConectedReceiving()) {
                                 loadingVisual.activate();
                             } else {
@@ -914,6 +914,8 @@ public class App extends JFrame {
                             }
                             Thread.sleep(Resources.INTERVAL_CHECK_MAILBOX_CONNECTED);
                         }
+                        loadingVisual.deactivate();
+                        return null;
                     }
                 };
                 loadingVisualWorker.execute();

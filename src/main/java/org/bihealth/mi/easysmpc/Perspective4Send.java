@@ -36,6 +36,9 @@ public class Perspective4Send extends Perspective2Send {
         // Prevent a second click on proceed button
         buttonProceed.setEnabled(false);
         
+        // Mark all messages as sent
+        markAllMessagesSent();
+        
         // Execute action
         getApp().actionSecondSendingDone();
         

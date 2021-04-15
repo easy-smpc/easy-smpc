@@ -407,17 +407,24 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         buttonProceed.setEnabled(false);
         
         // Mark all messages as sent
-        for (int index = 0; index < panelParticipants.getComponentCount(); index++) {
-            if (index != getApp().getModel().ownId) {
-                getApp().actionMarkMessageSend(index);
-            }
-        }
+        markAllMessagesSent();
         
         // Execute action
         getApp().actionFirstSendingDone();
         
         // Re-enable proceed button
         buttonProceed.setEnabled(true);
+    }
+
+    /**
+     * Marks all messages as sent
+     */
+    protected void markAllMessagesSent() {
+        for (int index = 0; index < panelParticipants.getComponentCount(); index++) {
+            if (index != getApp().getModel().ownId) {
+                getApp().actionMarkMessageSend(index);
+            }
+        }
     }
 
     /**
@@ -514,7 +521,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     protected String getRoundIdentifier() {
         return Resources.ROUND_1;
     }
-
+    
     /**
      * Initialize perspective based on model
      */
