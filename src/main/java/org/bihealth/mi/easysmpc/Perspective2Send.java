@@ -135,15 +135,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
    private void actionCopyButton(EntryParticipantCheckmarkSendMail entry) {
         // Push email body into clipboard
         try {
-            String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
-            String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
-                                        entry.getLeftValue(), // Name of participant
-                                        getApp().getModel().state == StudyState.INITIAL_SENDING
-                                                ? Resources.getString("PerspectiveSend.mailBodyParticipateStartFragement")
-                                                : String.format(Resources.getString("PerspectiveSend.mailBodyParticapteProceedFragement"),
-                                                                getApp().getModel().state == StudyState.SENDING_RESULT? 5: 3), // Step number
-                                        exchangeString,
-                                        getApp().getModel().participants[getApp().getModel().ownId].name);
+            String body = generateEMailBody(entry, generateFormatedExchangeString(entry));
             
             // Fill clipboard. Do this only if getExchangeString() was successful to avoid overwriting the users clipboard with nothing
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(body), null);
@@ -204,11 +196,17 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                     int workDone = 0;
                     for (EntryParticipantCheckmarkSendMail entry : list) {
                         
-                        // Send message
-                        getApp().getModel().getBus().send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
+                        if(!isInitialSending()) {
+                            // Send message in bus mode
+                            getApp().getModel().getBus().send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
                                       new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
                                       new org.bihealth.mi.easybus.Participant(entry.getLeftValue(), entry.getRightValue()));
-
+                        } else {
+                            // Send message as regular e-mail
+                            getApp().getModel().getBus().sendPlain(entry.getRightValue(),
+                                                                   generateEMailSubject(),
+                                                                   generateEMailBody(entry, generateFormatedExchangeString(entry)));
+                        }
                         
                         // Mark message sent
                         int index = Arrays.asList(panelParticipants.getComponents()).indexOf(entry);
@@ -252,32 +250,13 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         try {
             
             // For each entry
-            for (EntryParticipantCheckmarkSendMail entry : list) {
-                
-                // Prepare URI parts
-                String subject = String.format(Resources.getString("PerspectiveSend.mailSubject"),
-                                               getApp().getModel().name,
-                                               getApp().getModel().state == StudyState.INITIAL_SENDING
-                                                       ? 0
-                                                       : getApp().getModel().state == StudyState.SENDING_RESULT
-                                                               ? 2
-                                                               : 1);
-                
-                String exchangeString = Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
-                exchangeString = exchangeString.replaceAll("(.{" + Resources.MESSAGE_LINE_WIDTH + "})", "$1\n");
-                
-                String body = String.format(Resources.getString("PerspectiveSend.mailBody"),
-                                            entry.getLeftValue(), // Name of participant
-                                            getApp().getModel().state == StudyState.INITIAL_SENDING
-                                                    ? Resources.getString("PerspectiveSend.mailBodyParticipateStartFragement")
-                                                    : String.format(Resources.getString("PerspectiveSend.mailBodyParticapteProceedFragement"),
-                                                                    getApp().getModel().state == StudyState.SENDING_RESULT? 5: 3), // Step number
-                                            exchangeString,
-                                            getApp().getModel().participants[getApp().getModel().ownId].name);
+            for (EntryParticipantCheckmarkSendMail entry : list) {              
                 
                 // Build URI
                 URIBuilder builder = new URIBuilder().setScheme("mailto");
-                builder.setPath(entry.getRightValue()).addParameter("subject", subject).addParameter("body", body);
+                builder.setPath(entry.getRightValue()).addParameter("subject", generateEMailSubject())
+                                                      .addParameter("body",
+                                                                    generateEMailBody(entry, generateFormatedExchangeString(entry)));
                 
                 // Open email
                 Desktop.getDesktop().mail(new URI(builder.toString().replace("+", "%20").replace(":/", ":")));
@@ -309,6 +288,54 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         }
         this.stateChanged(new ChangeEvent(this));
     }
+
+    /**
+     * Generate formated e-mail body
+     * 
+     * @param entry
+     * @param exchangeString
+     * @return
+     */
+    protected String generateEMailBody(EntryParticipantCheckmarkSendMail entry,
+                                       String exchangeString) {
+        return String.format(Resources.getString("PerspectiveSend.mailBody"),
+                                    entry.getLeftValue(), // Name of participant
+                                    getApp().getModel().state == StudyState.INITIAL_SENDING
+                                            ? Resources.getString("PerspectiveSend.mailBodyParticipateStartFragement")
+                                            : String.format(Resources.getString("PerspectiveSend.mailBodyParticapteProceedFragement"),
+                                                            getApp().getModel().state == StudyState.SENDING_RESULT? 5: 3), // Step number
+                                    exchangeString,
+                                    getApp().getModel().participants[getApp().getModel().ownId].name);
+    }
+
+    /**
+     * Generates the formated exchange string
+     * 
+     * @param entry
+     * @return
+     * @throws IOException
+     */
+    protected String generateFormatedExchangeString(EntryParticipantCheckmarkSendMail entry) throws IOException {
+        // Get exchange string and add start/end tags
+        String exchangeString =  Resources.MESSAGE_START_TAG + "\n" + getExchangeString(entry) + "\n" + Resources.MESSAGE_END_TAG;
+        
+        // Add line breaks
+        return exchangeString.replaceAll("(.{" + Resources.MESSAGE_LINE_WIDTH + "})", "$1\n");
+    }
+
+    /**
+     * Generates the formated e-mail subject
+     * @return
+     */
+    protected String generateEMailSubject() {
+        return String.format(Resources.getString("PerspectiveSend.mailSubject"),
+                                       getApp().getModel().name,
+                                       getApp().getModel().state == StudyState.INITIAL_SENDING
+                                               ? 0
+                                               : getApp().getModel().state == StudyState.SENDING_RESULT
+                                                       ? 2
+                                                       : 1);
+    }
     
      /**
      * Returns the exchange string for the given entry
@@ -337,13 +364,12 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     }
      
     /**
-     * Indicates whether the automatic processing is displayed
+     * Indicates whether it is the initial sending of the creator
      * 
      * @return enabled
      */
-    private boolean isAutomaticProcessingDisplayed() {
-        // If is not initial sending of study creator
-        return !(getApp().getModelState() == StudyState.INITIAL_SENDING);
+    private boolean isInitialSending() {
+        return getApp().getModelState() == StudyState.INITIAL_SENDING;
     }
     
      /**
@@ -352,9 +378,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @return enabled
      */
     private boolean isAutomaticProcessingEnabled() {
-        // Return if automatic connection is enabled and it is not initial sending of study creator
-        return getApp().getModel().connectionIMAPSettings != null &&
-               !(getApp().getModelState() == StudyState.INITIAL_SENDING);
+        return getApp().getModel().connectionIMAPSettings != null;
     }
     
     /**
@@ -559,7 +583,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                     actionSendMailAutomatically(Arrays.asList(entry));
                 }
             });
-            automaticSend.setVisible(isAutomaticProcessingDisplayed());
+            automaticSend.setVisible(isInitialSending());
             automaticSend.setEnabled(isAutomaticProcessingEnabled());
             popUp.add(automaticSend);
             
@@ -589,7 +613,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         }
         
         // Hide or show button to send automatically
-        updateButtonsPane(isAutomaticProcessingDisplayed());
+        updateButtonsPane(isAutomaticProcessingEnabled());
         
         
         // Update state

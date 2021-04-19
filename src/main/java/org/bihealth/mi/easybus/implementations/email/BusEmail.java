@@ -190,4 +190,17 @@ public class BusEmail extends Bus {
         
         return false;
     };
+    
+    
+    /**
+     * Send a plain e-mail (no bus functionality)
+     * 
+     * @param recipient
+     * @param subject
+     * @param body
+     * @throws BusException
+     */
+    public void sendPlain(String recipient, String subject, String body) throws BusException {
+        this.connection.send(recipient, subject, body, null);
+    }
 }

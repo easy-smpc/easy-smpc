@@ -255,11 +255,13 @@ public class ConnectionIMAP extends ConnectionEmail {
                 multipart.addBodyPart(mimeBodyPart);
     
                 // Add attachment
-                mimeBodyPart = new MimeBodyPart();
-                mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
-                mimeBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(getByteArrayOutputStream(attachment),"application/octet-stream")));
-                mimeBodyPart.setFileName(FILENAME_MESSAGE);
-                multipart.addBodyPart(mimeBodyPart);
+                if (attachment != null) {
+                    mimeBodyPart = new MimeBodyPart();
+                    mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
+                    mimeBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(getByteArrayOutputStream(attachment), "application/octet-stream")));
+                    mimeBodyPart.setFileName(FILENAME_MESSAGE);
+                    multipart.addBodyPart(mimeBodyPart);
+                }
                 
                 // Compose message
                 email.setContent(multipart);
