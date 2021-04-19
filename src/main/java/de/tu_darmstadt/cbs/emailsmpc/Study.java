@@ -396,8 +396,7 @@ public class Study implements Serializable, Cloneable {
         this.connectionIMAPSettings = connectionIMAPSettings;
         numParticipants = participants.length;
         unsentMessages = new Message[numParticipants];
-        retrievedMessages = new boolean[numParticipants];
-        retrievedMessages[ownId] = true;
+        retrievedMessages = new boolean[numParticipants];       
         for (Bin bin : bins) {
             if (!(bin.isInitialized())) {
                 bin.initialize(numParticipants);
@@ -405,6 +404,7 @@ public class Study implements Serializable, Cloneable {
         }
         this.bins = bins;
         this.ownId = 0; // unneeded but for verbosity...
+        retrievedMessages[ownId] = true;
         this.participants = participants;
         if (state == StudyState.NONE)
             state = StudyState.STARTING;
