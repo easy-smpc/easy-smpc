@@ -138,6 +138,9 @@ public class Resources {
     /** Interval to check existing mailbox connection */
     public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED = 3000;
 
+    /** Size of diplayed table */
+    public static final int TABLE_SIZE = 24;
+
     /**
      * Returns all available languages
      * 
