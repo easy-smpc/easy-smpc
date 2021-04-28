@@ -27,6 +27,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Study;
+import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 
 /**
  * A user in an EasySMPC process
@@ -39,7 +40,9 @@ public abstract class User implements MessageListener {
     public final int FIXED_LENGTH_STRING = 10;
     /** The length of a generated big integer */
     public final int FIXED_LENGTH_BIT_BIGINTEGER = 127;
-    
+    /** Round for initial e-mails */
+    public final String ROUND_0 = "_round0"; 
+            
     /** The study model */
     private Study model = new Study();
     /** The random object */
@@ -105,7 +108,8 @@ public abstract class User implements MessageListener {
      * @param roundIdentifier
      */
     private void sendMessages(String roundIdentifier) {
-        // Loop over particpants
+        
+        // Loop over participants
         for (int index = 0; index < getModel().numParticipants; index++) {
             // Do not proceed if own user
             if (index != getModel().ownId) {
@@ -113,7 +117,7 @@ public abstract class User implements MessageListener {
                 try {
                     // Retrieve and send message
                     getModel().getBus().send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
-                                    new Scope(getModel().studyUID + roundIdentifier),
+                                    new Scope(getModel().studyUID + (getModel().state == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().participants[index].name,
                                                                             getModel().participants[index].emailAddress));
                     // Mark message as sent

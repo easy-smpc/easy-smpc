@@ -18,7 +18,6 @@ import java.io.IOException;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
-import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
@@ -57,6 +56,7 @@ public class CreatingUser extends User {
         createParticipants(FIXED_LENGTH_BIT_BIGINTEGER);
         
         // Spawns the common steps in an own thread
+        // TODO not necessary here?
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -74,32 +74,9 @@ public class CreatingUser extends User {
     private void createParticipants(int lengthBitBigInteger) {
         // Loop over participants
         for(int index = 1; index < getModel().numParticipants; index++) {
-            // Proceed common process steps
-            new Thread(new Runnable() {
-                /** Index */
-                private int index;
-                
-                /** Set index
-                 * @param index
-                 * @return
-                 */
-                public Runnable setIndex(int index) {
-                    this.index = index;
-                    return this;
-                }
-                
-                @Override
-                public void run() {
-                    
-                    try {
-                        // Create participant with initial message
-                        new ParticipatingUser(Message.serializeMessage(getModel().getUnsentMessageFor(index)),
-                                              lengthBitBigInteger);
-                    } catch (IllegalStateException | IOException | IllegalArgumentException e) {
-                        throw new IllegalStateException("Unable to spawn participating user!", e);
-                    }
-                }
-            }.setIndex(index)).start();            
+            
+            // Create user
+            new ParticipatingUser(getModel().studyUID, getModel().participants[index], getModel().connectionIMAPSettings, lengthBitBigInteger);
         }
     }
 

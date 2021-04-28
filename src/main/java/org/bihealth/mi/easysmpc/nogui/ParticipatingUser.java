@@ -16,8 +16,17 @@ package org.bihealth.mi.easysmpc.nogui;
 import java.io.IOException;
 import java.math.BigInteger;
 
+import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.MessageListener;
+import org.bihealth.mi.easybus.Scope;
+import org.bihealth.mi.easybus.implementations.email.BusEmail;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easysmpc.resources.Resources;
+
 import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.MessageInitial;
+import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
  * A participant in an EasySMPC process
@@ -26,17 +35,54 @@ import de.tu_darmstadt.cbs.emailsmpc.MessageInitial;
  *
  */
 public class ParticipatingUser extends User {
+    /** Stores the bit length of the big integer */
+    private int lengthBitBigInteger;
+    
 
     /**
-     * Create a new instance
+     * Creates a new instance
      * 
-     * @param serializeMessage initial message
-     * @param lengthBitBigInteger size of generated big integers
+     * @param studyUID
+     * @param ownParticipant
+     * @param connectionIMAPSettings
+     * @param lengthBitBigInteger
      */
-    public ParticipatingUser(String serializeMessage, int lengthBitBigInteger) {
+    public ParticipatingUser(String studyUID,
+                             Participant ownParticipant,
+                             ConnectionIMAPSettings connectionIMAPSettings,
+                             int lengthBitBigInteger) {
+        this.lengthBitBigInteger = lengthBitBigInteger;
+        
+        try {
+            // Register for initial e-mail
+            new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true),
+                         Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS).receive(new Scope(studyUID + ROUND_0),
+                                        new org.bihealth.mi.easybus.Participant(ownParticipant.name,
+                                                                                ownParticipant.emailAddress),
+                                        new MessageListener() {
+                                            @Override
+                                            public void receive(org.bihealth.mi.easybus.Message message) {
+                                                // Spawns the following steps in an own thread
+                                                Thread thread = new Thread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        receiveInitialEMail(message);
+                                                    }
+                                                });
+                                                thread.setDaemon(false);
+                                                thread.start();
+                                            }
+                                        });
+        } catch (BusException e) {
+            throw new IllegalStateException("Unable to send initial e-mails", e);
+        }
+    }
+
+    private void receiveInitialEMail(org.bihealth.mi.easybus.Message message) {
+        
         try {
             // Get data
-            String data = Message.deserializeMessage(serializeMessage).data;
+            String data = Message.deserializeMessage((String) message.getMessage()).data;
 
             // Init model
             setModel(MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data))));
@@ -53,8 +99,8 @@ public class ParticipatingUser extends User {
         } catch (ClassNotFoundException | IllegalArgumentException | IllegalStateException | IOException e) {
             throw new IllegalStateException("Unable to execute particpating users steps" , e);
         }
+        
     }
-
     /**
      * Fills the bins with random numbers
      * 
