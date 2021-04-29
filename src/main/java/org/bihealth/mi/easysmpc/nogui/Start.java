@@ -13,27 +13,37 @@
  */
 package org.bihealth.mi.easysmpc.nogui;
 
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 
+import java.io.IOException;
+import java.util.logging.Logger;
+
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 /**
  * Starts a no gui performance test
  * 
  * @author Felix Wirth
  *
  */
-public class Start {
+public class Start {    
+    
+    public static final String LOGGING_START_MESSAGE = "%s; started; %s; participants; %s; bins";
+    public static final String LOGGING_FINISH_MESSAGE = "%s; finished; %s; id; %s; result of first bin";
 
     /**
      * 
-     * 
+     * Starts the performance test
+     *
      * @param args
      */
-    public static void main(String[] args) {
-        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@gmail.com").setPassword("3a$ySMPC!")
-                                                                                                            .setSMTPServer("smtp.gmail.com")
-                                                                                                            .setIMAPServer("imap.gmail.com");   
+    public static void main(String[] args)  {
+        System.setProperty( "java.util.logging.config.file", "logging.properties" );
+                System.setProperty( "java.util.logging.config.file", "logging.properties" );
+        final Logger log = Logger.getLogger( Start.class.getName() );
         
+        log.info( "Start process" );
+        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@gmail.com").setPassword("3a$ySMPC!")
+                .setSMTPServer("smtp.gmail.com")
+                .setIMAPServer("imap.gmail.com");   
         new CreatingUser(3, 1, connectionIMAPSettings, 1000);
     }
-
 }

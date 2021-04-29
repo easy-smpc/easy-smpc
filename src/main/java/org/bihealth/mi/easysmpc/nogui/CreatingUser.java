@@ -41,10 +41,12 @@ public class CreatingUser extends User {
                  ConnectionIMAPSettings connectionIMAPSettings,
                  int mailBoxCheckInterval) throws IllegalStateException {
         super(mailBoxCheckInterval);
+
         
         try {          
             // Set model to starting
             getModel().toStarting();
+            logger.info(String.format(Start.LOGGING_START_MESSAGE, getModel().studyUID, numberParticipants, numberBins));
             
             // Init model with generated study name, participants and bins 
             getModel().toInitialSending(generateRandomString(FIXED_LENGTH_STRING),

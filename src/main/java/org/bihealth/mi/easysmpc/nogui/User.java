@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.MessageListener;
@@ -41,7 +42,9 @@ public abstract class User implements MessageListener {
     /** The length of a generated big integer */
     public final int FIXED_LENGTH_BIT_BIGINTEGER = 127;
     /** Round for initial e-mails */
-    public final String ROUND_0 = "_round0"; 
+    public final String ROUND_0 = "_round0";
+    /** Logger */
+    public static final Logger logger = Logger.getLogger(User.class.getName());
             
     /** The study model */
     private Study model = new Study();
@@ -81,8 +84,7 @@ public abstract class User implements MessageListener {
          // Receives the messages for the second round and finalizes the model
             receiveMessages(Resources.ROUND_2);
             this.model.toFinished();
-            
-            System.out.println("User " + model.ownId + " with result of first bin " + getModel().getAllResults()[0].value);
+            logger.info(String.format(Start.LOGGING_FINISH_MESSAGE, getModel().studyUID, model.ownId, getModel().getAllResults()[0].value));
             
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
             throw new IllegalStateException("Unable to process common process steps", e);
