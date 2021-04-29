@@ -37,6 +37,8 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class ParticipatingUser extends User {
     /** Stores the bit length of the big integer */
     private int lengthBitBigInteger;
+    /**  */
+    private BusEmail interimBus;
     
 
     /**
@@ -55,8 +57,9 @@ public class ParticipatingUser extends User {
         
         try {
             // Register for initial e-mail
-            new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true),
-                         Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS).receive(new Scope(studyUID + ROUND_0),
+            interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true),
+                         Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
+            interimBus.receive(new Scope(studyUID + ROUND_0),
                                         new org.bihealth.mi.easybus.Participant(ownParticipant.name,
                                                                                 ownParticipant.emailAddress),
                                         new MessageListener() {
@@ -71,10 +74,13 @@ public class ParticipatingUser extends User {
                                                 });
                                                 thread.setDaemon(false);
                                                 thread.start();
+                                                
+                                                // Stop interim bus
+                                                interimBus.stop();
                                             }
                                         });
         } catch (BusException e) {
-            throw new IllegalStateException("Unable to send initial e-mails", e);
+            throw new IllegalStateException("Unable to register to receive initial e-mails", e);
         }
     }
 
