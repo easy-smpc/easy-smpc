@@ -46,7 +46,7 @@ public class CreatingUser extends User {
         try {          
             // Set model to starting
             getModel().toStarting();
-            logger.info(String.format(Start.LOGGING_START_MESSAGE, getModel().studyUID, numberParticipants, numberBins));
+            RecordTimeDifferences.start(getModel().studyUID, numberParticipants, numberBins, System.nanoTime());
             
             // Init model with generated study name, participants and bins 
             getModel().toInitialSending(generateRandomString(FIXED_LENGTH_STRING),
@@ -60,7 +60,6 @@ public class CreatingUser extends User {
         createParticipants(FIXED_LENGTH_BIT_BIGINTEGER);
         
         // Spawns the common steps in an own thread
-        // TODO not necessary here?
         new Thread(new Runnable() {
             @Override
             public void run() {

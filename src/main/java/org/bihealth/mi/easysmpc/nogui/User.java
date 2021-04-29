@@ -84,8 +84,7 @@ public abstract class User implements MessageListener {
          // Receives the messages for the second round and finalizes the model
             receiveMessages(Resources.ROUND_2);
             this.model.toFinished();
-            logger.info(String.format(Start.LOGGING_FINISH_MESSAGE, getModel().studyUID, model.ownId, getModel().getAllResults()[0].value));
-            
+            RecordTimeDifferences.finished(getModel().studyUID, System.nanoTime());
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
             throw new IllegalStateException("Unable to process common process steps", e);
         }
