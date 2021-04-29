@@ -198,12 +198,12 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                         
                         if(!isInitialSending()) {
                             // Send message in bus mode
-                            getApp().getModel().getBus().send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
+                            getApp().getModel().getBus(0).send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
                                       new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
                                       new org.bihealth.mi.easybus.Participant(entry.getLeftValue(), entry.getRightValue()));
                         } else {
                             // Send message as regular e-mail
-                            getApp().getModel().getBus().sendPlain(entry.getRightValue(),
+                            getApp().getModel().getBus(0).sendPlain(entry.getRightValue(),
                                                                    generateEMailSubject(),
                                                                    generateEMailBody(entry, generateFormatedExchangeString(entry)));
                         }

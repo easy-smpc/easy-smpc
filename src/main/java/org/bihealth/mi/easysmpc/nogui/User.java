@@ -47,6 +47,18 @@ public abstract class User implements MessageListener {
     private Study model = new Study();
     /** The random object */
     private final Random random = new Random();
+    /** The mailbox check interval in  milliseconds */
+    private final int mailBoxCheckInterval;
+    
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param mailBoxCheckInterval
+     */
+    User(int mailBoxCheckInterval) {
+        this.mailBoxCheckInterval = mailBoxCheckInterval;
+    }
     
     /**
      * Proceeds the SMPC steps which are the same for participating and creating user
@@ -86,7 +98,7 @@ public abstract class User implements MessageListener {
      */
     private void receiveMessages(String roundIdentifier) throws IllegalArgumentException,
                                                          BusException {
-        getModel().getBus().receive(new Scope(getModel().studyUID + roundIdentifier),
+        getModel().getBus(this.mailBoxCheckInterval).receive(new Scope(getModel().studyUID + roundIdentifier),
                            new org.bihealth.mi.easybus.Participant(getModel().getParticipantFromId(getModel().ownId).name,
                                                                    getModel().getParticipantFromId(getModel().ownId).emailAddress),
                            this);
@@ -116,7 +128,7 @@ public abstract class User implements MessageListener {
 
                 try {
                     // Retrieve and send message
-                    getModel().getBus().send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
+                    getModel().getBus(this.mailBoxCheckInterval).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
                                     new Scope(getModel().studyUID + (getModel().state == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().participants[index].name,
                                                                             getModel().participants[index].emailAddress));
@@ -225,5 +237,12 @@ public abstract class User implements MessageListener {
             if (!b.isComplete()) return false;
         }
         return true;
+    }
+
+    /**
+     * @return the mailBoxCheckInterval
+     */
+    public int getMailBoxCheckInterval() {
+        return mailBoxCheckInterval;
     }
 }

@@ -270,13 +270,14 @@ public class Study implements Serializable, Cloneable {
     /**
      * Returns the bus
      * 
+     * @param millis milliseconds interval to check for new mails - default value if zero
      * @return the bus
      * @throws BusException 
      */
-    public BusEmail getBus() throws BusException {
+    public BusEmail getBus(int millis) throws BusException {
         if ((this.bus == null || !this.bus.isAlive()) && this.connectionIMAPSettings != null) {
             this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true),
-                                    Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
+                                    millis != 0 ? millis : Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
         }
         return this.bus;
     }

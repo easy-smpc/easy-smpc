@@ -22,7 +22,6 @@ import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
-import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Message;
 import de.tu_darmstadt.cbs.emailsmpc.MessageInitial;
@@ -37,7 +36,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class ParticipatingUser extends User {
     /** Stores the bit length of the big integer */
     private int lengthBitBigInteger;
-    /**  */
+    /** Interim bus for initial e-mail receiving  */
     private BusEmail interimBus;
     
 
@@ -52,13 +51,16 @@ public class ParticipatingUser extends User {
     public ParticipatingUser(String studyUID,
                              Participant ownParticipant,
                              ConnectionIMAPSettings connectionIMAPSettings,
-                             int lengthBitBigInteger) {
+                             int lengthBitBigInteger,
+                             int mailBoxCheckInterval) {
+        super(mailBoxCheckInterval);
+        
         this.lengthBitBigInteger = lengthBitBigInteger;
         
         try {
             // Register for initial e-mail
             interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true),
-                         Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
+                                      mailBoxCheckInterval);
             interimBus.receive(new Scope(studyUID + ROUND_0),
                                         new org.bihealth.mi.easybus.Participant(ownParticipant.name,
                                                                                 ownParticipant.emailAddress),

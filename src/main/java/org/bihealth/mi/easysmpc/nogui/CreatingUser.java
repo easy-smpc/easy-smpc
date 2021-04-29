@@ -38,8 +38,10 @@ public class CreatingUser extends User {
      */
     CreatingUser(int numberParticipants,
                  int numberBins,
-                 ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException {
-
+                 ConnectionIMAPSettings connectionIMAPSettings,
+                 int mailBoxCheckInterval) throws IllegalStateException {
+        super(mailBoxCheckInterval);
+        
         try {          
             // Set model to starting
             getModel().toStarting();
@@ -76,7 +78,11 @@ public class CreatingUser extends User {
         for(int index = 1; index < getModel().numParticipants; index++) {
             
             // Create user
-            new ParticipatingUser(getModel().studyUID, getModel().participants[index], getModel().connectionIMAPSettings, lengthBitBigInteger);
+            new ParticipatingUser(getModel().studyUID,
+                                  getModel().participants[index],
+                                  getModel().connectionIMAPSettings,
+                                  lengthBitBigInteger,
+                                  getMailBoxCheckInterval());
         }
     }
 

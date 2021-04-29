@@ -33,7 +33,7 @@ public class Start {
                                                                                                             .setSMTPServer("smtp.gmail.com")
                                                                                                             .setIMAPServer("imap.gmail.com");   
         
-        new CreatingUser(3, 1, connectionIMAPSettings);
+        new CreatingUser(3, 1, connectionIMAPSettings, 1000);
     }
 
 }
