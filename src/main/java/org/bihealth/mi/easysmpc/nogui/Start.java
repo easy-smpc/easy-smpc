@@ -40,9 +40,9 @@ public class Start {
                 System.setProperty( "java.util.logging.config.file", "logging.properties" );
 
         // Create connection settings
-        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@gmail.com").setPassword("3a$ySMPC!")
-                .setSMTPServer("smtp.gmail.com")
-                .setIMAPServer("imap.gmail.com");
+        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
+                .setSMTPServer("smtp.ionos.de")
+                .setIMAPServer("imap.ionos.de");
         
         // Start a EasySMPC process
         new CreatingUser(3, 1, connectionIMAPSettings, 1000);

@@ -50,12 +50,14 @@ public class ParticipatingUser extends User {
      */
     public ParticipatingUser(String studyUID,
                              Participant ownParticipant,
+                             int participantId,
                              ConnectionIMAPSettings connectionIMAPSettings,
                              int lengthBitBigInteger,
                              int mailBoxCheckInterval) {
         super(mailBoxCheckInterval);
-        
         this.lengthBitBigInteger = lengthBitBigInteger;
+        
+        RecordTimeDifferences.addStartValue(studyUID, participantId, System.nanoTime());
         
         try {
             // Register for initial e-mail

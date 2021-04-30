@@ -14,6 +14,7 @@
 package org.bihealth.mi.easysmpc.nogui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,24 +30,25 @@ public class RecordTimeDifferences {
     /** Logger */
     private static final Logger logger = Logger.getLogger(User.class.getName());
     /** Stores measurements */
-    private static final Map<String, RecordTimeDifferences> measurements = new HashMap<>();
-    /** Number of participants in a measurements*/
-    private int numberParticipants;
-    /** Start time of measurements*/
-    private long startTime;
-    /** Durations*/
-    private List<Long> durations;
+    private static final Map<String, List<Pair<Long, Long>>> measurements = new HashMap<>();
+    /** Durations
+     * @return */
     
     /**
-     * Create a new instance
+     * Creates a list with entries are all null
      * 
      * @param numberParticipants
-     * @param startTime
+     * @return
      */
-    private RecordTimeDifferences(int numberParticipants, long startTime) {
-        this.numberParticipants = numberParticipants;
-        this.startTime = startTime;
-        this.durations = new ArrayList<>();
+    private static List<Pair<Long, Long>> createEmptyList(int numberParticipants) {
+        // Create list
+        List<Pair<Long, Long>>  result = new ArrayList<>();
+        for(int i = 0; i < numberParticipants ; i++) {
+            result.add(null);
+        }
+        
+        // Return
+        return result;
     }
     
     /**
@@ -57,46 +59,132 @@ public class RecordTimeDifferences {
      * @param numberBins
      * @param startTime
      */
-    public static void start(String studyUID, int numberParticipants, int numberBins, long startTime) {        
-        measurements.put(studyUID, new RecordTimeDifferences(numberParticipants, startTime));
+    public static void init(String studyUID, int participantId, int numberParticipants, int numberBins, long startTime) {        
+        // Create a new entry in measurements
+        measurements.put(studyUID, createEmptyList(numberParticipants));
+        
+        // add and log the starting value 
+        addStartValue(studyUID, participantId, startTime);
         logger.info(String.format(Start.LOGGING_START_MESSAGE, studyUID, numberParticipants, numberBins));
     }
      
     /**
-     * Add a result time
+     * Records the start of a user's participation 
+     * 
+     * @param studyUID
+     * @param participantId
+     * @param startTime
+     */
+    public static void addStartValue(String studyUID,
+                                       int participantId,
+                                       long startTime) {
+        measurements.get(studyUID).set(participantId, new Pair<Long, Long>(startTime));
+    }
+
+    /**
+     * Add finished time
+     * If all values are finished calculates final results
      * 
      * @param studyUID
      * @param finishedTime
      */
-    public static void finished(String studyUID, long finishedTime) {
-        // Get the measurement and add the duration
-        RecordTimeDifferences measurement = measurements.get(studyUID);
-        Long duration = finishedTime - measurement.startTime;
-        measurement.durations.add(duration);
+    public static void finished(String studyUID, int participantId, long finishedTime) {
+        // Set finished time
+        measurements.get(studyUID).get(participantId).setSecondValue(finishedTime);
         
-        // If first finished entry => log
-        if (measurement.durations.size() == 1) {
-            logger.info(String.format(Start.LOGGING_FINISH_MESSAGE, studyUID, "first", duration, 0.0));
+        // Proceed only if result can be calculated 
+        if(!isProcossFinished(measurements.get(studyUID))) {
             return;
         }
+            // Calculate execution times
+            Long[] timeDifferences = new Long[measurements.get(studyUID).size()];
+            int index = 0;
+            for(Pair<Long, Long> duration: measurements.get(studyUID)) {
+                timeDifferences[index] = duration.getSecondValue() - duration.getFirstValue();
+                index++;
+            }
+            
+            // Sort execution times
+            Arrays.sort(timeDifferences);
+            
+            // Fastest finished entry => log
+            logger.info(String.format(Start.LOGGING_FINISH_MESSAGE, studyUID, "first", timeDifferences[0], 0.0));
+            
+            // Slowest finished entry => log
+            logger.info(String.format(Start.LOGGING_FINISH_MESSAGE, studyUID, "last", timeDifferences[timeDifferences.length - 1], calculateMean(timeDifferences)));
+        }
+
+
+    /**
+     * Checks if all values for start and finish are set
+     * 
+     * @param durations
+     * @return
+     */
+    private static boolean isProcossFinished(List<Pair<Long, Long>> durations) {
+        for(Pair<Long, Long> duration : durations) {
+            if(duration.getFirstValue() == null || duration.getSecondValue() == null) {
+                return false;
+            }
+        }
         
-        // If last finished entry => log
-        if (measurement.durations.size() == measurement.numberParticipants) {
-            logger.info(String.format(Start.LOGGING_FINISH_MESSAGE, studyUID, "last", duration, calculateMean(measurement.durations)));
-        }        
+        return true;
     }
 
     /**
      * Calculates a mean
      * 
-     * @param durations
+     * @param timeDifferences
      * @return
      */
-    private static double calculateMean(List<Long> durations) {
+    private static double calculateMean(Long[] timeDifferences) {
         long sum = 0; 
-        for(long duration : durations) {
-            sum = sum + duration;
+        for(long timeDifference : timeDifferences) {
+            sum = sum + timeDifference;
         }
-        return sum / durations.size();
-    }    
+        return sum / timeDifferences.length;
+    }
+    
+    /**
+     * Class for pairs
+     * 
+     * @author Felix Wirth
+     *
+     */
+    private static class Pair<K,V> {
+        /**First value */
+        private K firstValue;
+        /** Second value*/
+        private V secondValue;
+        
+        /**
+         * Creates a new instance
+         * 
+         * @param firstValue
+         */
+        Pair(K firstValue) {
+            this.firstValue = firstValue;
+        }
+
+        /**
+         * @return the secondValue
+         */
+        public V getSecondValue() {
+            return secondValue;
+        }
+
+        /**
+         * @param secondValue the secondValue to set
+         */
+        public void setSecondValue(V secondValue) {
+            this.secondValue = secondValue;
+        }
+
+        /**
+         * @return the firstValue
+         */
+        public K getFirstValue() {
+            return firstValue;
+        }     
+    }
 }

@@ -84,7 +84,7 @@ public abstract class User implements MessageListener {
          // Receives the messages for the second round and finalizes the model
             receiveMessages(Resources.ROUND_2);
             this.model.toFinished();
-            RecordTimeDifferences.finished(getModel().studyUID, System.nanoTime());
+            RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
             throw new IllegalStateException("Unable to process common process steps", e);
         }
@@ -105,12 +105,7 @@ public abstract class User implements MessageListener {
                            this);
 
         while (!areSharesComplete()) {
-            // TODO Rather not sleeping?
-            try {
-                Thread.sleep(Resources.INTERVAL_SCHEDULER_MILLISECONDS);
-            } catch (InterruptedException e) {
-                // Ignore
-            }
+            // Proceed of shares complete
         }
 
     }
