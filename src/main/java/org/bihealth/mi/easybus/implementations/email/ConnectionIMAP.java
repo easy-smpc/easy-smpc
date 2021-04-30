@@ -19,6 +19,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
 import javax.activation.DataHandler;
@@ -40,6 +41,7 @@ import javax.mail.util.ByteArrayDataSource;
 
 import org.apache.commons.math3.util.Pair;
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
  * Defines the connection using IMAP to receive and SMTP to send e-mails
@@ -258,9 +260,22 @@ public class ConnectionIMAP extends ConnectionEmail {
                 if (attachment != null) {
                     mimeBodyPart = new MimeBodyPart();
                     mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
-                    mimeBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(getByteArrayOutputStream(attachment), "application/octet-stream")));
+                    byte[] attachmentBytes = getByteArrayOutputStream(attachment);                    
+                    mimeBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(attachmentBytes, "application/octet-stream")));
                     mimeBodyPart.setFileName(FILENAME_MESSAGE);
                     multipart.addBodyPart(mimeBodyPart);
+                    
+                    // Log message size
+                    // TODO remove?
+                    String studyUID;
+                    if (subject.contains("\"") && subject.contains("_")) {
+                        studyUID = subject.substring(subject.indexOf("\"") + 1, subject.indexOf("_"));
+                    }
+                    else {
+                        studyUID = subject; 
+                    }
+                    int sizeInBytes = recipient.getBytes().length + subject.getBytes().length + body.getBytes().length + attachmentBytes.length;
+                    Logger.getLogger(ConnectionIMAP.class.getName()).info(String.format(Resources.LOGGING_MESSAGE_SIZE, studyUID, sizeInBytes));
                 }
                 
                 // Compose message
