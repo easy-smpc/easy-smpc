@@ -24,7 +24,7 @@ import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 public class Start {    
     
     /** The string part of the logging when starting */
-    public static final String LOGGING_START_MESSAGE = "%s; started; %s; participants; %s; bins";
+    public static final String LOGGING_START_MESSAGE = "%s; started; %s; participants; %s; bins; %d ; mailbox check interval";
     /** The string part of the logging when finishing */
     public static final String LOGGING_FINISH_MESSAGE = "%s; finished; %s ;%d; duration ; %f; mean";
 
@@ -44,6 +44,6 @@ public class Start {
                 .setIMAPServer("imap.ionos.de");
         
         // Start a EasySMPC process
-        new CreatingUser(3, 1, connectionIMAPSettings, 1000);
+        new CreatingUser(3, 10, connectionIMAPSettings, 1000);
     }
 }

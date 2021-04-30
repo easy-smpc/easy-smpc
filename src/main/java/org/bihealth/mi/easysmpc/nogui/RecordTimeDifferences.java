@@ -59,13 +59,13 @@ public class RecordTimeDifferences {
      * @param numberBins
      * @param startTime
      */
-    public static void init(String studyUID, int participantId, int numberParticipants, int numberBins, long startTime) {        
+    public static void init(String studyUID, int participantId, int numberParticipants, int numberBins, int mailBoxCheckInterval, long startTime) {        
         // Create a new entry in measurements
         measurements.put(studyUID, createEmptyList(numberParticipants));
         
-        // add and log the starting value 
+        // Add and log the starting value 
         addStartValue(studyUID, participantId, startTime);
-        logger.info(String.format(Start.LOGGING_START_MESSAGE, studyUID, numberParticipants, numberBins));
+        logger.info(String.format(Start.LOGGING_START_MESSAGE, studyUID, numberParticipants, numberBins, mailBoxCheckInterval));
     }
      
     /**

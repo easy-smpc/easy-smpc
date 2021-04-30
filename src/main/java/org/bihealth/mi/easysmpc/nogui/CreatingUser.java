@@ -46,7 +46,7 @@ public class CreatingUser extends User {
         try {          
             // Set model to starting
             getModel().toStarting();
-            RecordTimeDifferences.init(getModel().studyUID, 0, numberParticipants, numberBins, System.nanoTime());
+            RecordTimeDifferences.init(getModel().studyUID, 0, numberParticipants, numberBins, mailBoxCheckInterval, System.nanoTime());
             
             // Init model with generated study name, participants and bins 
             getModel().toInitialSending(generateRandomString(FIXED_LENGTH_STRING),
