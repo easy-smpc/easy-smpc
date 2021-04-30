@@ -36,8 +36,7 @@ public class Start {
      */
     public static void main(String[] args)  {
         // Set logging properties from file
-        System.setProperty( "java.util.logging.config.file", "logging.properties" );
-                System.setProperty( "java.util.logging.config.file", "logging.properties" );
+        System.setProperty( "java.util.logging.config.file", "src/main/resources/org/bihealth/mi/easysmpc/nogui/logging.properties");
 
         // Create connection settings
         ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
