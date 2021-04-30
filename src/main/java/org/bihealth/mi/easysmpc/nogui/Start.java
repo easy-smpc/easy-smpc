@@ -27,6 +27,8 @@ public class Start {
     public static final String LOGGING_START_MESSAGE = "%s; started; %s; participants; %s; bins; %d ; mailbox check interval";
     /** The string part of the logging when finishing */
     public static final String LOGGING_FINISH_MESSAGE = "%s; finished; %s ;%d; duration ; %f; mean";
+    /** The string part of the logging result */
+    public static final String LOGGING_RESULT = "%s; result; %d ; paticipantid; %s ; result name; %d ; result";
 
     /**
      * 
@@ -37,13 +39,14 @@ public class Start {
     public static void main(String[] args)  {
         // Set logging properties from file
         System.setProperty( "java.util.logging.config.file", "src/main/resources/org/bihealth/mi/easysmpc/nogui/logging.properties");
-
+        
+        
         // Create connection settings
         ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
                 .setSMTPServer("smtp.ionos.de")
                 .setIMAPServer("imap.ionos.de");
         
         // Start a EasySMPC process
-        new CreatingUser(3, 10, connectionIMAPSettings, 1000);
+        new CreatingUser(3, 1, connectionIMAPSettings, 1000);
     }
 }

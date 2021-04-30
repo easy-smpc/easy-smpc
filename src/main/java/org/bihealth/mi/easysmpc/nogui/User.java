@@ -85,6 +85,7 @@ public abstract class User implements MessageListener {
             receiveMessages(Resources.ROUND_2);
             this.model.toFinished();
             RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());
+            logger.info(String.format(Start.LOGGING_RESULT , getModel().studyUID, getModel().ownId, getModel().getAllResults()[0].name, getModel().getAllResults()[0].value));
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
             throw new IllegalStateException("Unable to process common process steps", e);
         }
@@ -134,6 +135,13 @@ public abstract class User implements MessageListener {
                     throw new IllegalStateException("Unable to send e-mail!", e);
                 }
             }
+        }
+        
+        // Stop bus
+        try {
+            getModel().getBus(0).stop();
+        } catch (BusException e) {
+            throw new IllegalStateException("Unable to stop bus", e);
         }
     }
 

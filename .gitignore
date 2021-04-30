@@ -36,3 +36,5 @@ testing.dat
 /.settings/
 /.settings/*
 /.DS_Store
+/log.log.lck
+/log.log.1
