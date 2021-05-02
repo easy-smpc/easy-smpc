@@ -13,6 +13,10 @@
  */
 package org.bihealth.mi.easybus.implementations.email;
 
+import java.util.Date;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
@@ -26,7 +30,9 @@ import org.bihealth.mi.easybus.Scope;
  * @author Fabian Prasser
  */
 public class BusEmail extends Bus {
-    
+    /** Logger */
+    private static final Logger logger = LogManager.getLogger(ConnectionIMAP.class);
+
     /**
      * Internal message used by email-based implementations
      * 
@@ -92,6 +98,7 @@ public class BusEmail extends Bus {
                     }
                 } catch (InterruptedException e) {
                     connection.close();
+                    logger.debug("", new Date(), "Receive thread stopped", e.getMessage());
                     // Die silently
                 }
             }

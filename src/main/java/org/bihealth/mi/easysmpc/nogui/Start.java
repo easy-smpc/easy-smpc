@@ -22,13 +22,6 @@ import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
  *
  */
 public class Start {    
-    
-    /** The string part of the logging when starting */
-    public static final String LOGGING_START_MESSAGE = "%s; started; %s; participants; %s; bins; %d ; mailbox check interval";
-    /** The string part of the logging when finishing */
-    public static final String LOGGING_FINISH_MESSAGE = "%s; finished; %s ;%d; duration ; %f; mean";
-    /** The string part of the logging result */
-    public static final String LOGGING_RESULT = "%s; result; %d ; paticipantid; %s ; result name; %d ; result";
 
     /**
      * 
@@ -37,9 +30,8 @@ public class Start {
      * @param args
      */
     public static void main(String[] args)  {
-        // Set logging properties from file
-        System.setProperty( "java.util.logging.config.file", "src/main/resources/org/bihealth/mi/easysmpc/nogui/logging.properties");
-        
+        // Set logging properties from file      
+        System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");
         
         // Create connection settings
         ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
@@ -47,6 +39,6 @@ public class Start {
                 .setIMAPServer("imap.ionos.de");
         
         // Start a EasySMPC process
-        new CreatingUser(3, 1, connectionIMAPSettings, 1000);
+        //new CreatingUser(3, 1, connectionIMAPSettings, 1000);
     }
 }

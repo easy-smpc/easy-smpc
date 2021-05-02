@@ -17,9 +17,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
 import javax.activation.DataHandler;
@@ -40,8 +40,9 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
 import org.apache.commons.math3.util.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
  * Defines the connection using IMAP to receive and SMTP to send e-mails
@@ -51,7 +52,10 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Fabian Prasser
  */
 public class ConnectionIMAP extends ConnectionEmail {
-
+    
+    /** Logger */
+    private static final Logger logger = LogManager.getLogger(ConnectionIMAP.class);
+    
     /** File name of the attached message */
     private static final String FILENAME_MESSAGE = "message";
 
@@ -257,26 +261,27 @@ public class ConnectionIMAP extends ConnectionEmail {
                 multipart.addBodyPart(mimeBodyPart);
     
                 // Add attachment
+                int attachmentSize= 0;
                 if (attachment != null) {
                     mimeBodyPart = new MimeBodyPart();
                     mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
-                    byte[] attachmentBytes = getByteArrayOutputStream(attachment);                    
+                    byte[] attachmentBytes = getByteArrayOutputStream(attachment);
+                    attachmentSize = attachmentBytes.length;
                     mimeBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(attachmentBytes, "application/octet-stream")));
                     mimeBodyPart.setFileName(FILENAME_MESSAGE);
-                    multipart.addBodyPart(mimeBodyPart);
-                    
-                    // Log message size
-                    // TODO remove?
-                    String studyUID;
-                    if (subject.contains("\"") && subject.contains("_")) {
-                        studyUID = subject.substring(subject.indexOf("\"") + 1, subject.indexOf("_"));
-                    }
-                    else {
-                        studyUID = subject; 
-                    }
-                    int sizeInBytes = recipient.getBytes().length + subject.getBytes().length + body.getBytes().length + attachmentBytes.length;
-                    Logger.getLogger(ConnectionIMAP.class.getName()).info(String.format(Resources.LOGGING_MESSAGE_SIZE, studyUID, sizeInBytes));
+                    multipart.addBodyPart(mimeBodyPart);                    
                 }
+                
+                // Log message size
+                String studyUID;
+                if (subject.contains("\"") && subject.contains("_")) {
+                    studyUID = subject.substring(subject.indexOf("\"") + 1, subject.indexOf("_"));
+                }
+                else {
+                    studyUID = subject; 
+                }
+                int sizeInBytes = recipient.getBytes().length + subject.getBytes().length + body.getBytes().length + attachmentSize;
+                logger.info("", new Date(), studyUID, sizeInBytes, "message size bytes");
                 
                 // Compose message
                 email.setContent(multipart);

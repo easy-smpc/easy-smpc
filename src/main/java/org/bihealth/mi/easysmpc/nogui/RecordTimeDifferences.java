@@ -15,10 +15,13 @@ package org.bihealth.mi.easysmpc.nogui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Calculates time differences and logs them 
@@ -28,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class RecordTimeDifferences {
     /** Logger */
-    private static final Logger logger = Logger.getLogger(User.class.getName());
+    private static final Logger  logger = LogManager.getLogger(RecordTimeDifferences.class);
     /** Stores measurements */
     private static final Map<String, List<Pair<Long, Long>>> measurements = new HashMap<>();
     /** Durations
@@ -64,8 +67,8 @@ public class RecordTimeDifferences {
         measurements.put(studyUID, createEmptyList(numberParticipants));
         
         // Add and log the starting value 
-        addStartValue(studyUID, participantId, startTime);
-        logger.info(String.format(Start.LOGGING_START_MESSAGE, studyUID, numberParticipants, numberBins, mailBoxCheckInterval));
+        addStartValue(studyUID, participantId, startTime);       
+        logger.info("", new Date(), studyUID, "started", numberParticipants, "participants", numberBins, "bins", mailBoxCheckInterval, "mailbox check interval"); 
     }
      
     /**
@@ -107,11 +110,11 @@ public class RecordTimeDifferences {
             // Sort execution times
             Arrays.sort(timeDifferences);
             
-            // Fastest finished entry => log
-            logger.info(String.format(Start.LOGGING_FINISH_MESSAGE, studyUID, "first", timeDifferences[0], 0.0));
+            // Fastest finished entry => log            
+            logger.info("", new Date(),studyUID, "finished", "first", timeDifferences[0], "duration"); 
             
             // Slowest finished entry => log
-            logger.info(String.format(Start.LOGGING_FINISH_MESSAGE, studyUID, "last", timeDifferences[timeDifferences.length - 1], calculateMean(timeDifferences)));
+            logger.info("", new Date(),studyUID, "finished", "last", timeDifferences[timeDifferences.length - 1], "duration", calculateMean(timeDifferences), calculateMean(timeDifferences));
         }
 
 

@@ -138,8 +138,6 @@ public class Resources {
     /** Interval to check existing mailbox connection */
     public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED = 3000;
     
-    /** The string part of the logging message sizes*/
-    public static final String LOGGING_MESSAGE_SIZE = "%s; message size bytes; %d";
 
     /**
      * Returns all available languages

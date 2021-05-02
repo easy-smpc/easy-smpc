@@ -16,9 +16,11 @@ package org.bihealth.mi.easysmpc.nogui;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 import java.util.Random;
-import java.util.logging.Logger;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
@@ -44,7 +46,7 @@ public abstract class User implements MessageListener {
     /** Round for initial e-mails */
     public final String ROUND_0 = "_round0";
     /** Logger */
-    public static final Logger logger = Logger.getLogger(User.class.getName());
+    private static final Logger logger = LogManager.getLogger(User.class);
             
     /** The study model */
     private Study model = new Study();
@@ -84,8 +86,8 @@ public abstract class User implements MessageListener {
          // Receives the messages for the second round and finalizes the model
             receiveMessages(Resources.ROUND_2);
             this.model.toFinished();
-            RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());
-            logger.info(String.format(Start.LOGGING_RESULT , getModel().studyUID, getModel().ownId, getModel().getAllResults()[0].name, getModel().getAllResults()[0].value));
+            RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());            
+            logger.debug("", new Date(), getModel().studyUID, "result", getModel().ownId, "participantid", getModel().getAllResults()[0].name, "result name", getModel().getAllResults()[0].value, "result");
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
             throw new IllegalStateException("Unable to process common process steps", e);
         }
