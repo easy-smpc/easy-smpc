@@ -43,6 +43,7 @@ import org.apache.commons.math3.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
  * Defines the connection using IMAP to receive and SMTP to send e-mails
@@ -98,6 +99,8 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesReceiving.put("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         this.propertiesReceiving.put("mail.imap.socketFactory.fallback", "false");
         this.propertiesReceiving.put("mail.imap.socketFactory.port", String.valueOf(settings.getIMAPPort()));
+        this.propertiesReceiving.put("mail.imap.partialfetch", "false");
+        this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
         
         // Set proxy
         if (proxy != null) {
@@ -281,7 +284,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                     studyUID = subject; 
                 }
                 int sizeInBytes = recipient.getBytes().length + subject.getBytes().length + body.getBytes().length + attachmentSize;
-                logger.info("", new Date(), studyUID, sizeInBytes, "message size bytes");
+                logger.info("Message size logged", new Date(), studyUID, sizeInBytes, "message size bytes");
                 
                 // Compose message
                 email.setContent(multipart);

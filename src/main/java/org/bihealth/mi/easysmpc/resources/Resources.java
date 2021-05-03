@@ -137,6 +137,9 @@ public class Resources {
     
     /** Interval to check existing mailbox connection */
     public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED = 3000;
+
+    /** Fetch size for messages with IMAP */
+    public static final int FETCH_SIZE_IMAP = 1048576;
     
 
     /**
