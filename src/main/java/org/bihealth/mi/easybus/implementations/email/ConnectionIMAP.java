@@ -285,7 +285,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 }
                 int sizeInBytes = recipient.getBytes().length + subject.getBytes().length + body.getBytes().length + attachmentSize;
                 logger.info("Message size logged", new Date(), studyUID, sizeInBytes, "message size bytes");
-                
+
                 // Compose message
                 email.setContent(multipart);
     
