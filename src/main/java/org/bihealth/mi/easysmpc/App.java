@@ -15,6 +15,7 @@ package org.bihealth.mi.easysmpc;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -26,18 +27,22 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.swing.Box;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
@@ -106,6 +111,16 @@ public class App extends JFrame {
     private List<Perspective> perspectives = new ArrayList<Perspective>();
     /** Interim save menu item */
     private JMenuItem jmiInterimSave;
+    /** Stores reference to currently displayed perspective */
+    private Perspective currentPerspective;
+    /** Label for status messages */
+    private JLabel statusMessageLabel;
+    /** Thread for visual worker*/
+    private SwingWorker<Void, Void> loadingVisualWorker;
+    /** Component loadingVisual */
+    private ComponentLoadingVisual loadingVisual = null;
+    /** Stop flag visual*/
+    private boolean stopFlagVisual = false;
 
     /**
      * Creates a new instance
@@ -230,8 +245,22 @@ public class App extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 actionAbout();
             }
-        });       
-
+        });    
+        
+        // Message panel in menu
+        JPanel menuPanel = new JPanel();
+        menuPanel.setLayout(new BorderLayout());
+        JPanel messagesPanel = new JPanel();
+        messagesPanel.setLayout(new BorderLayout());
+        menuPanel.add(messagesPanel, BorderLayout.EAST);
+        statusMessageLabel = new JLabel("");
+        messagesPanel.add(statusMessageLabel, BorderLayout.CENTER);
+        loadingVisual = new ComponentLoadingVisual(Resources.getLoadingAnimation());
+        loadingVisual.deactivate();
+        messagesPanel.add(loadingVisual, BorderLayout.EAST);
+        jmb.add(Box.createHorizontalGlue());
+        jmb.add(menuPanel);
+        
         // Add perspectives
         addPerspective(new Perspective6Result(this));
         addPerspective(new Perspective5Receive(this));
@@ -253,19 +282,27 @@ public class App extends JFrame {
      * Writes data to a file
      * 
      * @param data
+     * @return successfully written?
      */
-    public void exportData(List<List<String>> data) {
+    public boolean exportData(List<List<String>> data) {
+        // Prepare
+        boolean success = false;
+        
         // Get file
         File file = getFile(false, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX),
                                   new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
         
         if (file != null) {
             try {
-                ExportFile.toFile(file).exportData(data);       
+                ExportFile.toFile(file).exportData(data);
+                success = true;
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
             }
         }
+        
+        // Return
+        return success;
     }
     
     /**
@@ -468,13 +505,16 @@ public class App extends JFrame {
      * @param perspective
      */
     private void showPerspective(Perspective perspective) {
-        // Stop the bus for automatic processing if running
-        if (this.model != null) {
-            this.model.stopBus();
+        // Uninitalizes currently displayed perspective
+        if (currentPerspective != null) {
+            currentPerspective.uninitialize();
         }
-        perspective.initialize();
+        
+        // Initalize and show requested perspective
         CardLayout cl = (CardLayout) (cards.getLayout());
+        perspective.initialize();
         cl.show(cards, perspective.getTitle());
+        currentPerspective = perspective;
         progress.setProgress(perspective.getProgress());
         jmiInterimSave.setEnabled(perspective.canSave());
         progress.repaint();
@@ -659,10 +699,18 @@ public class App extends JFrame {
     }
 
     /**
+     * Marks a message as retrieved
+     * @param index
+     */
+    protected void actionMarkMessageRetrieved(int index) {
+        this.model.markMessageRetrieved(index);
+    }
+    
+    /**
      * Marks a message as sent
      * @param index
      */
-    protected void actionMarkMessageSent(int index) {
+    protected void actionMarkMessageSend(int index) {
         this.model.markMessageSent(index);
     }
 
@@ -747,7 +795,7 @@ public class App extends JFrame {
     /**
      * Saves the project
      */
-    protected boolean actionSave() {
+    public boolean actionSave() {
         
         if (model.filename == null) {    
             // Open dialog
@@ -811,7 +859,7 @@ public class App extends JFrame {
      * Returns the model
      * @return
      */
-    protected Study getModel() {
+    public Study getModel() {
         return this.model;
     }
 
@@ -830,5 +878,47 @@ public class App extends JFrame {
             }
         }
         return returnPerspective;
+    }
+    
+    /**
+     * Sets a status message
+     * 
+     * @param text
+     * @param errorMessage (text will be red)
+     * @param showLoadingAnimation 
+     */
+    public void setStatusMessage(String text, boolean errorMessage, boolean showLoadingAnimation) {
+        
+        // Add text
+        statusMessageLabel.setText(text);
+        statusMessageLabel.setForeground(errorMessage ? Color.RED : Resources.COLOR_LIGHT_GREEN);
+        
+        // If no animation deactivate and return
+        if (!showLoadingAnimation) {
+            stopFlagVisual = true;
+            return;
+        }
+        
+        // Activate animation create thread if not existing
+        if (loadingVisualWorker == null || loadingVisualWorker.isCancelled() || loadingVisualWorker.isDone()) {
+            stopFlagVisual = false;
+            loadingVisualWorker = new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        while (!stopFlagVisual) {
+                            if (getModel().isBusAlive() && getModel().isBusConectedReceiving()) {
+                                loadingVisual.activate();
+                            } else {
+                                loadingVisual.deactivate();
+                                setStatusMessage(Resources.getString("App.24"), true, true);
+                            }
+                            Thread.sleep(Resources.INTERVAL_CHECK_MAILBOX_CONNECTED);
+                        }
+                        loadingVisual.deactivate();
+                        return null;
+                    }
+                };
+                loadingVisualWorker.execute();
+        }    
     }
 }

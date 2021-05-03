@@ -31,8 +31,8 @@ public class EntryParticipantNoButton extends EntryParticipant {
      * @param name
      * @param value
      */
-    public EntryParticipantNoButton(String name, String value){
-        super(name, value, false, false);
+    public EntryParticipantNoButton(String name, String value, boolean isOwnEntry){
+        super(name, value, false, false, isOwnEntry);
     }
 
     /**

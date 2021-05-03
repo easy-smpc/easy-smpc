@@ -52,6 +52,7 @@ public class EntryEMailPassword extends ComponentEntry {
                 }
               },
               true,
+              false,
               false);
     }
 

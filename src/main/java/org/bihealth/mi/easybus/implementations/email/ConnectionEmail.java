@@ -379,4 +379,19 @@ public abstract class ConnectionEmail {
      * @throws BusException
      */
     protected abstract void send(String recipient, String subject, String body, Object attachment) throws BusException;
+    
+    
+    /**
+     * Is there an working connection to receive?
+     * 
+     * @return
+     */
+    protected abstract boolean isReceivingConnected();
+    
+    /**
+     * Is there an working connection to send?
+     * 
+     * @return
+     */
+    protected abstract boolean isSendingConnected();
 }

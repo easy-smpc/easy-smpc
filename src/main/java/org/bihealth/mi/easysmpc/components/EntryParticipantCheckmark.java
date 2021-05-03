@@ -43,8 +43,8 @@ public class EntryParticipantCheckmark extends EntryParticipant {
      * @param name
      * @param value
      */
-    public EntryParticipantCheckmark(String name, String value){
-        super(name, value, false, true);
+    public EntryParticipantCheckmark(String name, String value, boolean isOwnParticpant){
+        super(name, value, false, true, isOwnParticpant);
     }
 
     /**

@@ -72,15 +72,21 @@ public class Perspective6Result extends Perspective {
      */
     @Override
     public void initialize() {
+        // Remove previous content
         panelParticipants.removeAll();
         panelBins.removeAll();
+        
+        // Set new content
         this.fieldTitle.setText(getApp().getModel().name);
+        int i = 0;
         for (Participant currentParticipant : getApp().getModel().participants) {
-            panelParticipants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress));
+            panelParticipants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress, i == getApp().getModel().ownId));
+            i++;
         }
         for (BinResult binResult : getApp().getModel().getAllResults()) {
             panelBins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
         }
+        
         // Update GUI
         getPanel().revalidate();
         getPanel().repaint(); 
@@ -97,6 +103,8 @@ public class Perspective6Result extends Perspective {
             list.add(new ArrayList<String>(Arrays.asList(((EntryBinNoButton) c).getLeftValue(),
                                                          ((EntryBinNoButton) c).getRightValue())));
         }
+        
+        // Export data
         getApp().exportData(list);
     }
 
