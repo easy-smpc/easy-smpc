@@ -74,20 +74,23 @@ public abstract class User implements MessageListener {
             // Sends the messages for the first round and proceeds the model
             sendMessages(Resources.ROUND_1);
             this.model.toRecievingShares();
+            logger.debug("1. round sending finished logged", new Date(), getModel().studyUID, "1. round sending finished for", getModel().ownId);
             
             // Receives the messages for the first round and proceeds the model
             receiveMessages(Resources.ROUND_1);
             this.model.toSendingResult();
+            logger.debug("1. round receiving finished logged", new Date(), getModel().studyUID, "1. round receiving finished for", getModel().ownId);
             
             // Sends the messages for the second round and proceeds the model
             sendMessages(Resources.ROUND_2);
             this.model.toRecievingResult();
+            logger.debug("2. round sending finished logged", new Date(), getModel().studyUID, "2. round sending finished for", getModel().ownId);
             
          // Receives the messages for the second round and finalizes the model
             receiveMessages(Resources.ROUND_2);
             this.model.toFinished();
             RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());            
-            logger.debug("", new Date(), getModel().studyUID, "result", getModel().ownId, "participantid", getModel().getAllResults()[0].name, "result name", getModel().getAllResults()[0].value, "result");
+            logger.debug("Result logged", new Date(), getModel().studyUID, "result", getModel().ownId, "participantid", getModel().getAllResults()[0].name, "result name", getModel().getAllResults()[0].value, "result");
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
             throw new IllegalStateException("Unable to process common process steps", e);
         }
@@ -188,20 +191,21 @@ public abstract class User implements MessageListener {
      * @throws IllegalArgumentException
      */
     protected BigInteger generateRandomBigInteger(int bitLength) throws IllegalArgumentException {
-        // Check
-        if (bitLength < 2) throw new IllegalArgumentException("Bitlength must be larger than 2");
-        
-        // Random integer
-        BigInteger value = new BigInteger(bitLength - 1, random);
-        
-        // Swap sign? 
-        byte[] randomByte = new byte[1];
-        random.nextBytes(randomByte);
-        int signum = Byte.valueOf(randomByte[0]).intValue() & 0x01;
-        if (signum == 1) value = value.negate();
-        
-        // Return
-        return value;
+//        // Check
+//        if (bitLength < 2) throw new IllegalArgumentException("Bitlength must be larger than 2");
+//        
+//        // Random integer
+//        BigInteger value = new BigInteger(bitLength - 1, random);
+//        
+//        // Swap sign? 
+//        byte[] randomByte = new byte[1];
+//        random.nextBytes(randomByte);
+//        int signum = Byte.valueOf(randomByte[0]).intValue() & 0x01;
+//        if (signum == 1) value = value.negate();
+//        
+//        // Return
+//        return value;
+        return BigInteger.valueOf(5);
       }
     
 @Override

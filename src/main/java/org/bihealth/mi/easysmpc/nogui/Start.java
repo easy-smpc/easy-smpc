@@ -39,6 +39,6 @@ public class Start {
                 .setIMAPServer("imap.ionos.de");
         
         // Start a EasySMPC process
-        //new CreatingUser(3, 1, connectionIMAPSettings, 1000);
+        new CreatingUser(3, 10000, connectionIMAPSettings, 1000);
     }
 }

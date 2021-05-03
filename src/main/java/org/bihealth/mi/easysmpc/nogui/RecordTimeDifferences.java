@@ -68,7 +68,7 @@ public class RecordTimeDifferences {
         
         // Add and log the starting value 
         addStartValue(studyUID, participantId, startTime);       
-        logger.info("", new Date(), studyUID, "started", numberParticipants, "participants", numberBins, "bins", mailBoxCheckInterval, "mailbox check interval"); 
+        logger.info("Started", new Date(), studyUID, "started", numberParticipants, "participants", numberBins, "bins", mailBoxCheckInterval, "mailbox check interval"); 
     }
      
     /**
@@ -111,10 +111,10 @@ public class RecordTimeDifferences {
             Arrays.sort(timeDifferences);
             
             // Fastest finished entry => log            
-            logger.info("", new Date(),studyUID, "finished", "first", timeDifferences[0], "duration"); 
+            logger.info("Fastest entry logged", new Date(),studyUID, "finished", "first", timeDifferences[0], "duration"); 
             
             // Slowest finished entry => log
-            logger.info("", new Date(),studyUID, "finished", "last", timeDifferences[timeDifferences.length - 1], "duration", calculateMean(timeDifferences), calculateMean(timeDifferences));
+            logger.info("Slowest entry logged", new Date(),studyUID, "finished", "last", timeDifferences[timeDifferences.length - 1], "duration", calculateMean(timeDifferences), calculateMean(timeDifferences));
         }
 
 

@@ -98,7 +98,7 @@ public class BusEmail extends Bus {
                     }
                 } catch (InterruptedException e) {
                     connection.close();
-                    logger.debug("", new Date(), "Receive thread stopped", e.getMessage());
+                    logger.debug("Receive thread stopped logged", new Date(), "Receive thread stopped", e.getMessage());
                     // Die silently
                 }
             }
