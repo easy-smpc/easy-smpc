@@ -266,18 +266,30 @@ public class Study implements Serializable, Cloneable {
             throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
         return new BinResult(bins[binId].name, bins[binId].reconstructBin());
     }
+    
+    /**
+     * Returns the bus with standard interval length
+     * 
+     * @return the bus
+     * @throws BusException 
+     */
+    public BusEmail getBus() throws BusException {
+        return getBus(Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
+    }
 
     /**
      * Returns the bus
      * 
-     * @param millis milliseconds interval to check for new mails - default value if zero
+     * @param millis milliseconds interval to check for new mails
      * @return the bus
      * @throws BusException 
      */
     public BusEmail getBus(int millis) throws BusException {
+        if (millis <= 0) {
+            throw new IllegalArgumentException("Interval must be a positive number");
+        }
         if ((this.bus == null || !this.bus.isAlive()) && this.connectionIMAPSettings != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true),
-                                    millis != 0 ? millis : Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
+            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true), millis);
         }
         return this.bus;
     }
