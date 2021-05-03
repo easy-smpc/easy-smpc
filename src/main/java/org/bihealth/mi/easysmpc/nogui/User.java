@@ -42,7 +42,7 @@ public abstract class User implements MessageListener {
     /** The length of a generated string */
     public final int FIXED_LENGTH_STRING = 10;
     /** The length of a generated big integer */
-    public final int FIXED_LENGTH_BIT_BIGINTEGER = 127;
+    public final int FIXED_LENGTH_BIT_BIGINTEGER = 31;
     /** Round for initial e-mails */
     public final String ROUND_0 = "_round0";
     /** Logger */
@@ -86,8 +86,9 @@ public abstract class User implements MessageListener {
             this.model.toRecievingResult();
             logger.debug("2. round sending finished logged", new Date(), getModel().studyUID, "2. round sending finished for", getModel().ownId);
             
-         // Receives the messages for the second round and finalizes the model
+            // Receives the messages for the second round and finalizes the model
             receiveMessages(Resources.ROUND_2);
+            this.model.stopBus();
             this.model.toFinished();
             RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());            
             logger.debug("Result logged", new Date(), getModel().studyUID, "result", getModel().ownId, "participantid", getModel().getAllResults()[0].name, "result name", getModel().getAllResults()[0].value, "result");
@@ -191,21 +192,20 @@ public abstract class User implements MessageListener {
      * @throws IllegalArgumentException
      */
     protected BigInteger generateRandomBigInteger(int bitLength) throws IllegalArgumentException {
-//        // Check
-//        if (bitLength < 2) throw new IllegalArgumentException("Bitlength must be larger than 2");
-//        
-//        // Random integer
-//        BigInteger value = new BigInteger(bitLength - 1, random);
-//        
-//        // Swap sign? 
-//        byte[] randomByte = new byte[1];
-//        random.nextBytes(randomByte);
-//        int signum = Byte.valueOf(randomByte[0]).intValue() & 0x01;
-//        if (signum == 1) value = value.negate();
-//        
-//        // Return
-//        return value;
-        return BigInteger.valueOf(5);
+        // Check
+        if (bitLength < 2) throw new IllegalArgumentException("Bitlength must be larger than 2");
+        
+        // Random integer
+        BigInteger value = new BigInteger(bitLength - 1, random);
+        
+        // Swap sign? 
+        byte[] randomByte = new byte[1];
+        random.nextBytes(randomByte);
+        int signum = Byte.valueOf(randomByte[0]).intValue() & 0x01;
+        if (signum == 1) value = value.negate();
+        
+        // Return
+        return value;
       }
     
 @Override
@@ -254,5 +254,14 @@ public abstract class User implements MessageListener {
      */
     public int getMailBoxCheckInterval() {
         return mailBoxCheckInterval;
+    }
+    
+    /**
+     * Is the process finished?
+     * 
+     * @return
+     */
+    public boolean isProcessFinished() {
+        return getModel().state == StudyState.FINISHED;
     }
 }

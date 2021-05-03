@@ -15,6 +15,7 @@ package org.bihealth.mi.easysmpc.nogui;
 
 
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easysmpc.resources.Resources;
 /**
  * Starts a performance test without GUI
  * 
@@ -39,6 +40,15 @@ public class Start {
                 .setIMAPServer("imap.ionos.de");
         
         // Start a EasySMPC process
-        new CreatingUser(3, 10000, connectionIMAPSettings, 1000);
+        CreatingUser user = new CreatingUser(3, 10, connectionIMAPSettings, 1000);
+        
+        while(!user.areAllUsersFinished()) {
+            // Wait to finish
+            try {
+                Thread.sleep(Resources.INTERVAL_SCHEDULER_MILLISECONDS);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+        }
     }
 }

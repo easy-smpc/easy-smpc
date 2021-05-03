@@ -14,6 +14,8 @@
 package org.bihealth.mi.easysmpc.nogui;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 
@@ -27,7 +29,10 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  *
  */
 public class CreatingUser extends User {
-
+    
+    /** All participating users */
+    private final List<User> participatingUsers = new ArrayList<>(); 
+    
     /**
      * Create a new instance
      * 
@@ -79,12 +84,12 @@ public class CreatingUser extends User {
         for(int index = 1; index < getModel().numParticipants; index++) {
             
             // Create user
-            new ParticipatingUser(getModel().studyUID,
+            participatingUsers.add(new ParticipatingUser(getModel().studyUID,
                                   getModel().participants[index],
                                   index,
                                   getModel().connectionIMAPSettings,
                                   lengthBitBigInteger,
-                                  getMailBoxCheckInterval());
+                                  getMailBoxCheckInterval()));
         }
     }
 
@@ -133,5 +138,27 @@ public class CreatingUser extends User {
         
         // Return
         return result;
+    }
+    
+    /**
+     * Are all users finished?
+     * 
+     * @return
+     */
+    public boolean areAllUsersFinished() {
+        // Check for this creating users
+        if (!isProcessFinished()) {
+            return false;
+        }
+        
+        // Check for all participating users
+        for(User user : participatingUsers) {
+            if(!user.isProcessFinished()) {
+                return false;
+            }
+        }
+        
+        // Return all
+        return true;
     }
 }
