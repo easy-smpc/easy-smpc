@@ -26,7 +26,8 @@ EasySMPC does not need an installation and can be used as a Java jar package.
 However, to increase portability we packaged the nessecary Java runtime with our
 application in an installer to build an executable for Linux, Windows and Mac
 OSX. This installer does not need any administrator priviledges and should be
-run as a user.
+run as a user. The installers for Windows and MacOS are not signed.
+Thus a respective message while installing must be confirmed.
 
 ### Get binary installer
 

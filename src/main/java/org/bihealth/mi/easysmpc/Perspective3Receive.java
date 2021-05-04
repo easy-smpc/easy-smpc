@@ -204,7 +204,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     private void startAutomatedMailImport() {        
         try {
-            getApp().getModel().getBus(0).receive(new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
+            getApp().getModel().getBus().receive(new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
                         new org.bihealth.mi.easybus.Participant(getApp().getModel().getParticipantFromId(getApp().getModel().ownId).name,
                                                                 getApp().getModel().getParticipantFromId(getApp().getModel().ownId).emailAddress),
                                                                 this);

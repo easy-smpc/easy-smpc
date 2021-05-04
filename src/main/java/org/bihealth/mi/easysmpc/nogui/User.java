@@ -145,7 +145,7 @@ public abstract class User implements MessageListener {
         
         // Stop bus
         try {
-            getModel().getBus(0).stop();
+            getModel().getBus().stop();
         } catch (BusException e) {
             throw new IllegalStateException("Unable to stop bus", e);
         }
