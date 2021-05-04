@@ -13,6 +13,7 @@
  */
 package org.bihealth.mi.easysmpc.nogui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -22,6 +23,8 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import de.tu_darmstadt.cbs.emailsmpc.Study;
 
 /**
  * Calculates time differences and logs them 
@@ -33,9 +36,22 @@ public class RecordTimeDifferences {
     /** Logger */
     private static final Logger  logger = LogManager.getLogger(RecordTimeDifferences.class);
     /** Stores measurements */
-    private static final Map<String, List<Pair<Long, Long>>> measurements = new HashMap<>();
-    /** Durations
-     * @return */
+    private static final Map<String, RecordTimeDifferences> timeDifferencesMap = new HashMap<>();
+
+
+    /** Measurements */
+    private final List<Pair<Long, Long>> measurements;
+    /** Mailbox check interval */
+    private int mailBoxCheckInterval;
+    /** Model */
+    private Study model;
+
+    
+    private RecordTimeDifferences(Study model, int mailBoxCheckInterval, long startTime) {
+        this.mailBoxCheckInterval = mailBoxCheckInterval;
+        this.model = model;
+        this.measurements = createEmptyList(model.numParticipants);
+    }
     
     /**
      * Creates a list with entries are all null
@@ -62,26 +78,24 @@ public class RecordTimeDifferences {
      * @param numberBins
      * @param startTime
      */
-    public static void init(String studyUID, int participantId, int numberParticipants, int numberBins, int mailBoxCheckInterval, long startTime) {        
+    public static void init(Study model, int mailBoxCheckInterval, long startTime) {        
         // Create a new entry in measurements
-        measurements.put(studyUID, createEmptyList(numberParticipants));
+        timeDifferencesMap.put(model.studyUID, new RecordTimeDifferences(model, mailBoxCheckInterval, startTime));
         
         // Add and log the starting value 
-        addStartValue(studyUID, participantId, startTime);       
-        logger.info("Started", new Date(), studyUID, "started", numberParticipants, "participants", numberBins, "bins", mailBoxCheckInterval, "mailbox check interval"); 
+        addStartValue(model.studyUID, model.ownId, startTime);       
+        logger.info("Started", new Date(), model.studyUID, "started", model.numParticipants, "participants", model.bins.length, "bins", mailBoxCheckInterval, "mailbox check interval"); 
     }
      
     /**
-     * Records the start of a user's participation 
+     * Records the start of a user's participation
      * 
      * @param studyUID
      * @param participantId
      * @param startTime
      */
-    public static void addStartValue(String studyUID,
-                                       int participantId,
-                                       long startTime) {
-        measurements.get(studyUID).set(participantId, new Pair<Long, Long>(startTime));
+    public static void addStartValue(String studyUID, int participantId, long startTime) {
+        timeDifferencesMap.get(studyUID).measurements.set(participantId, new Pair<Long, Long>(startTime));
     }
 
     /**
@@ -92,31 +106,64 @@ public class RecordTimeDifferences {
      * @param finishedTime
      */
     public static void finished(String studyUID, int participantId, long finishedTime) {
-        // Set finished time
-        measurements.get(studyUID).get(participantId).setSecondValue(finishedTime);
+        // Init
+        List<Pair<Long, Long>> measurements = timeDifferencesMap.get(studyUID).measurements;
         
-        // Proceed only if result can be calculated 
-        if(!isProcossFinished(measurements.get(studyUID))) {
+        // Set finished time
+        measurements.get(participantId).setSecondValue(finishedTime);
+        
+        // Proceed only if result can be calculated
+        if (!isProcessFinished(measurements)) {
             return;
+        }        
+        
+        // Calculate execution times
+        Long[] timeDifferences = new Long[measurements.size()];
+        int index = 0;
+        for (Pair<Long, Long> duration : measurements) {
+            timeDifferences[index] = duration.getSecondValue() - duration.getFirstValue();
+            index++;
         }
-            // Calculate execution times
-            Long[] timeDifferences = new Long[measurements.get(studyUID).size()];
-            int index = 0;
-            for(Pair<Long, Long> duration: measurements.get(studyUID)) {
-                timeDifferences[index] = duration.getSecondValue() - duration.getFirstValue();
-                index++;
-            }
             
-            // Sort execution times
-            Arrays.sort(timeDifferences);
-            
-            // Fastest finished entry => log            
-            logger.info("Fastest entry logged", new Date(),studyUID, "finished", "first", timeDifferences[0], "duration"); 
-            
-            // Slowest finished entry => log
-            logger.info("Slowest entry logged", new Date(),studyUID, "finished", "last", timeDifferences[timeDifferences.length - 1], "duration", calculateMean(timeDifferences), calculateMean(timeDifferences));
+        // Sort execution times
+        Arrays.sort(timeDifferences);
+        
+        // Write performance results
+        try {
+            Start.csvPrinter.printRecord(new Date(),
+                                         timeDifferencesMap.get(studyUID).model.studyUID,
+                                         timeDifferencesMap.get(studyUID).model.numParticipants,
+                                         timeDifferencesMap.get(studyUID).model.bins.length,
+                                         timeDifferencesMap.get(studyUID).mailBoxCheckInterval,
+                                         timeDifferences[0],
+                                         timeDifferences[timeDifferences.length - 1],
+                                         calculateMean(timeDifferences));
+            Start.csvPrinter.flush();
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to write performance results", e);
         }
-
+        
+        
+        // Fastest finished entry => log            
+        logger.info("Entry logged",
+                    new Date(),
+                    studyUID,
+                    "finished",
+                    "first",
+                    timeDifferences[0],
+                    "duration");
+            
+        // Slowest finished entry => log
+        logger.info("Slowest entry logged",
+                    new Date(),
+                    studyUID,
+                    "finished",
+                    "last",
+                    timeDifferences[timeDifferences.length - 1],
+                    "duration",
+                    calculateMean(timeDifferences)
+                    );
+        }
 
     /**
      * Checks if all values for start and finish are set
@@ -124,7 +171,7 @@ public class RecordTimeDifferences {
      * @param durations
      * @return
      */
-    private static boolean isProcossFinished(List<Pair<Long, Long>> durations) {
+    private static boolean isProcessFinished(List<Pair<Long, Long>> durations) {
         for(Pair<Long, Long> duration : durations) {
             if(duration.getFirstValue() == null || duration.getSecondValue() == null) {
                 return false;

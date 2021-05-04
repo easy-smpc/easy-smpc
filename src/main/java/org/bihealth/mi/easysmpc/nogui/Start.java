@@ -14,6 +14,12 @@
 package org.bihealth.mi.easysmpc.nogui;
 
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
 /**
@@ -22,15 +28,31 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Felix Wirth
  *
  */
-public class Start {    
+public class Start {
+    
+    public static final String FILEPATH = "performanceEvaluation";
+    
+    public static CSVPrinter csvPrinter;
 
     /**
      * 
      * Starts the performance test
      *
      * @param args
+     * @throws IOException 
      */
-    public static void main(String[] args)  {
+    public static void main(String[] args) throws IOException  {
+        // Create csv printer
+        csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(FILEPATH)), CSVFormat.DEFAULT
+                                                     .withHeader("Date",
+                                                                 "StudyUID",
+                                                                 "Number participants",
+                                                                 "Number bins",
+                                                                 "Mailbox check interval",
+                                                                 "Fastest processing time",
+                                                                 "Slowest processing time",
+                                                                 "Mean processing time"));
+        
         // Set logging properties from file      
         System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");
         

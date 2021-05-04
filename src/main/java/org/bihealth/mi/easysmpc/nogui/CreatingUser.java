@@ -51,12 +51,12 @@ public class CreatingUser extends User {
         try {          
             // Set model to starting
             getModel().toStarting();
-            RecordTimeDifferences.init(getModel().studyUID, 0, numberParticipants, numberBins, mailBoxCheckInterval, System.nanoTime());
             
             // Init model with generated study name, participants and bins 
             getModel().toInitialSending(generateRandomString(FIXED_LENGTH_STRING),
                                         generateParticpants(numberParticipants, FIXED_LENGTH_STRING),
                                         generateBins(numberBins,numberParticipants, FIXED_LENGTH_STRING, FIXED_LENGTH_BIT_BIGINTEGER), connectionIMAPSettings);
+            RecordTimeDifferences.init(getModel(), mailBoxCheckInterval, System.nanoTime());
         } catch (IOException | IllegalStateException e) {
             throw new IllegalStateException("Unable to init study!", e);
         }
