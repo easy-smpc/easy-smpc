@@ -22,6 +22,7 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -64,6 +65,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
 
     /** Receive button */
     private JButton            buttonReceive;
+    
+    /** Buttons pane */
+    private JPanel buttonsPane;
+    
+    /** Button poll manually*/
+    private JButton buttonPollManually;
 
     /**
      * Creates the perspective
@@ -96,6 +103,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     @Override
     public void actionPerformed(ActionEvent e) {
         getApp().actionReceiveMessage();
+        getApp().actionSave();
+        getApp().setStatusMessage( String.format(Resources.getString("PerspectiveReceive.displaySuccess")
+                                                        , numberSharesComplete()
+                                                        , numberExpectedMessages())
+                                          , false, true);
+
         this.stateChanged(new ChangeEvent(this));
     }
     
@@ -108,8 +121,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                 if (getApp().isMessageShareResultValid(messageStripped)) {
                     getApp().setMessageShare(messageStripped);
                     getApp().actionSave();
+                    getApp().setStatusMessage( String.format(Resources.getString("PerspectiveReceive.displaySuccess")
+                                                                    , numberSharesComplete()
+                                                                    , numberExpectedMessages())
+                                                      , false, true);
                     stateChanged(new ChangeEvent(this));
-                } 
+                }
             }
         });
     }
@@ -140,6 +157,28 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         return true;
     }
     
+    /**
+     * Checks the number of complete messages
+     * 
+     * @return
+     */
+    public int numberSharesComplete() {
+        int numberComplete = 0;
+        for (int i = 0; i < getApp().getModel().numParticipants; i++) {
+            if (areSharesCompleteForParticipantId(i)) numberComplete++;
+        }
+        return numberComplete - 1;
+        }
+    
+    /**
+     * Returns number of expected external messages
+     * 
+     * @return
+     */
+    public int numberExpectedMessages() {
+        return getApp().getModel().numParticipants - 1;
+    }
+        
     /**
      * Checks if all bins for a certain user id are complete
      * @return
@@ -181,12 +220,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * Check participant entries visually if complete
      */
     private void updateCheckmarks() {
-        int i=0;
+        int index = 0;
         for (Component c : this.panelParticipants.getComponents()) {
-            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(i == getApp().getModel().ownId || // Always mark own id as "received"
-                                                                (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  i == 0) || // Mark first entry in first round as received
-                                                                areSharesCompleteForParticipantId(i)); // Mark if share complete
-            i++;
+            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(index == getApp().getModel().ownId || // Always mark own id as "received"
+                                                                (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  index == 0) || // Mark first entry in first round as received
+                                                                areSharesCompleteForParticipantId(index)); // Mark if share complete
+            index++;
         }
     }
 
@@ -207,17 +246,25 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         // Layout
         panel.setLayout(new BorderLayout());
 
-        // Study title
-        JPanel title = new JPanel();
-        panel.add(title, BorderLayout.NORTH);
-        title.setLayout(new BorderLayout());
-        title.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                         Resources.getString("PerspectiveCreate.studyTitle"),
-                                                         TitledBorder.LEFT,
-                                                         TitledBorder.DEFAULT_POSITION));
-        this.fieldTitle = new ComponentTextField(null); //no validation necessary
+        // General data data of study
+        JPanel generalDataPanel = new JPanel();
+        generalDataPanel.setLayout(new GridLayout(1 , 1, Resources.ROW_GAP, Resources.ROW_GAP));
+        panel.add(generalDataPanel, BorderLayout.NORTH);
+        generalDataPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                                    Resources.getString("PerspectiveCreate.General"),
+                                                                    TitledBorder.LEFT,
+                                                                    TitledBorder.DEFAULT_POSITION));
+        
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new BorderLayout(Resources.ROW_GAP, Resources.ROW_GAP));
+        titlePanel.add(new JLabel(Resources.getString("PerspectiveCreate.studyTitle")), BorderLayout.WEST);
+        this.fieldTitle = new ComponentTextField(null);
         this.fieldTitle.setEnabled(false);
-        title.add(this.fieldTitle, BorderLayout.CENTER);
+        this.fieldTitle.setChangeListener(this);
+        titlePanel.add(this.fieldTitle, BorderLayout.CENTER);
+        
+        // Add loading visualization
+        generalDataPanel.add(titlePanel);
         
         // Participants
         this.panelParticipants = new ScrollablePanel();
@@ -228,14 +275,21 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                                                      TitledBorder.LEFT,
                                                                      TitledBorder.DEFAULT_POSITION));
         panel.add(pane, BorderLayout.CENTER);
+                
+        // Buttons pane
+        buttonsPane = new JPanel();
+
+        buttonPollManually = new JButton(Resources.getString("PerspectiveReceive.PollManually"));
+        buttonPollManually.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getApp().getModel().stopBus();
+                startAutomatedMailImport();
+            }
+        });
         
-        
-        // Receive button and save button
-        JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(2, 1));
         buttonReceive = new JButton(Resources.getString("PerspectiveReceive.receiveButton"));
         buttonReceive.addActionListener(this);       
-        buttonsPane.add(buttonReceive, 0, 0);
         
         buttonProceed = new JButton(Resources.getString("PerspectiveReceive.proceed"));
         buttonProceed.addActionListener(new ActionListener() {
@@ -244,7 +298,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                 actionProceed();
             }
         });
-        buttonsPane.add(buttonProceed, 0, 1);
+        
+        // Adds for south panel
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
@@ -265,20 +320,54 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     protected void initialize() {
         this.fieldTitle.setText(getApp().getModel().name);
         this.panelParticipants.removeAll();
+        int i = 0;
         for (Participant currentParticipant : getApp().getModel().participants) {
             EntryParticipantCheckmark entry = new EntryParticipantCheckmark(currentParticipant.name,
-                                                                            currentParticipant.emailAddress);
+                                                                            currentParticipant.emailAddress,
+                                                                            i == getApp().getModel().ownId);
             panelParticipants.add(entry);
+            i++;
         }
         
-        // Start import reading e-mails automatically if enabled 
+        // Add elements and actions if automatic processing is enabled
         if (isAutomaticProcessingEnabled()) {
+            
+            // Start import reading e-mails automatically if enabled 
             startAutomatedMailImport();
+            
+            // Set message accordingly
+            getApp().setStatusMessage(Resources.getString("PerspectiveReceive.LoadingInProgress"), false, true);
         }
+        
+        // Hide or show button to receive automatically
+        updateButtonsPane(isAutomaticProcessingEnabled());
         
         // Update GUI
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();
         getPanel().repaint(); 
-    } 
+    }
+    
+    /**
+     * Draws the buttons pane with or without the poll button to receive e-mail automatically
+     * 
+     * @param automaticProcessingEnabled
+     */
+    private void updateButtonsPane(boolean showPollManually) {
+        // Remove
+        this.buttonsPane.removeAll();
+        
+        // Create with two or three rows and add resend button if necessary
+        if (showPollManually) {
+            this.buttonsPane.setLayout(new GridLayout(3, 1));
+            this.buttonsPane.add(this.buttonPollManually, 0, 0);
+            this.buttonsPane.add(this.buttonReceive, 0, 1);
+            this.buttonsPane.add(this.buttonProceed, 0, 2);
+            
+        } else {
+            this.buttonsPane.setLayout(new GridLayout(2, 1));
+            this.buttonsPane.add(this.buttonReceive, 0, 0);
+            this.buttonsPane.add(this.buttonProceed, 0, 1);
+        }
+    }
 }

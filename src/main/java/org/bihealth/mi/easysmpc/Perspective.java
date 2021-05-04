@@ -120,4 +120,18 @@ public abstract class Perspective {
      * Initialize perspective based on model
      */
     protected abstract void initialize();
+    
+    /**
+     * Call when before other perspective is shown
+     */
+    protected void uninitialize() {
+        // Stop the bus for automatic processing if running
+        if (getApp().getModel() != null) {
+            getApp().getModel().stopBus();
+        }
+        
+        
+        // Reset status message and loading visual
+        getApp().setStatusMessage("", false, false);
+    }
 }

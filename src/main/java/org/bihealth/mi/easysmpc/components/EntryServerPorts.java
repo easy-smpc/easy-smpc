@@ -66,6 +66,7 @@ public class EntryServerPorts extends ComponentEntry {
                     }
                 }
               },
+              false,
               false);
     }
 

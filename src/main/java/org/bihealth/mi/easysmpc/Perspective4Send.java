@@ -33,7 +33,17 @@ public class Perspective4Send extends Perspective2Send {
 
     @Override
     protected void actionProceed() {
+        // Prevent a second click on proceed button
+        buttonProceed.setEnabled(false);
+        
+        // Mark all messages as sent
+        markAllMessagesSent();
+        
+        // Execute action
         getApp().actionSecondSendingDone();
+        
+        // Re-enable proceed button
+        buttonProceed.setEnabled(true);
     }
     
     @Override

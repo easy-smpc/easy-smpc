@@ -121,47 +121,16 @@ public class ConnectionIMAP extends ConnectionEmail {
 
     /**
      * Checks if connections are working
-     * @throws BusException
      */
-    public boolean checkConnection() throws BusException {
+    public boolean checkConnection() {
         
-        try {
-            
-            // Check receiving e-mails 
-            Folder folder = null;
-
-            // Create store
-            Session sessionReceiving = Session.getInstance(propertiesReceiving);
-            Store store = sessionReceiving.getStore("imap");
-
-            // Connect store
-            store.connect(getEmailAddress(), password);
-
-            // Create folder new for every call to get latest state
-            folder = store.getFolder("INBOX");
-            if (!folder.exists()) {
-                return false;
-            }
-
-            // Open folder
-            folder.open(Folder.READ_WRITE);
-
-            // Close
-            store.close();
-            
-            // Check sending e-mails 
-            Session.getInstance(propertiesSending, new Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(getEmailAddress(), password);
-                }
-            });
-            
-            // Done
-            return true;
-            
-        } catch (Exception e) {
+        // Check sending
+        if (!isSendingConnected()) {
             return false;
         }
+        
+        // Check receiving
+        return isReceivingConnected();
     }
 
     /**
@@ -290,11 +259,13 @@ public class ConnectionIMAP extends ConnectionEmail {
                 multipart.addBodyPart(mimeBodyPart);
     
                 // Add attachment
-                mimeBodyPart = new MimeBodyPart();
-                mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
-                mimeBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(getByteArrayOutputStream(attachment),"application/octet-stream")));
-                mimeBodyPart.setFileName(FILENAME_MESSAGE);
-                multipart.addBodyPart(mimeBodyPart);
+                if (attachment != null) {
+                    mimeBodyPart = new MimeBodyPart();
+                    mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
+                    mimeBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(getByteArrayOutputStream(attachment), "application/octet-stream")));
+                    mimeBodyPart.setFileName(FILENAME_MESSAGE);
+                    multipart.addBodyPart(mimeBodyPart);
+                }
                 
                 // Compose message
                 email.setContent(multipart);
@@ -305,6 +276,55 @@ public class ConnectionIMAP extends ConnectionEmail {
             } catch (Exception e) {
                 throw new BusException("Unable to send message", e);
             }
+        }
+    }
+
+    @Override
+    protected synchronized boolean isReceivingConnected() {
+        try {
+
+            // Prepare
+            Folder folder = null;
+
+            // Create store
+            Session sessionReceiving = Session.getInstance(propertiesReceiving);
+            Store store = sessionReceiving.getStore("imap");
+
+            // Connect store
+            store.connect(getEmailAddress(), password);
+
+            // Create folder new for every call to get latest state
+            folder = store.getFolder("INBOX");
+            if (!folder.exists()) { return false; }
+
+            // Open folder
+            folder.open(Folder.READ_WRITE);
+
+            // Close
+            store.close();
+
+            // Done
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    protected synchronized boolean isSendingConnected() {
+        try {
+            // Check sending e-mails
+            Session.getInstance(propertiesSending, new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(getEmailAddress(), password);
+                }
+            });
+
+            // Done
+            return true;
+
+        } catch (Exception e) {
+            return false;
         }
     }
 }

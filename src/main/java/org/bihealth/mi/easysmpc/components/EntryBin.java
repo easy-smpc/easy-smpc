@@ -91,7 +91,8 @@ public class EntryBin extends ComponentEntryAddRemove {
                       }
                   }
               },              
-              additionalControlsEnabled);
+              additionalControlsEnabled,
+              false);
     }
 
     /**
@@ -122,6 +123,7 @@ public class EntryBin extends ComponentEntryAddRemove {
                       }
                   }
               },
+              false,
               false);
     }
     

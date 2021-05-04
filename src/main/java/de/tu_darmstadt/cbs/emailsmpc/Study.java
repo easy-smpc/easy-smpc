@@ -121,6 +121,9 @@ public class Study implements Serializable, Cloneable {
 
     /** Bus for automatic e-mail processing */
     private transient BusEmail    bus;
+    
+    /** Store whether messages have been retrieved */
+    private boolean[] retrievedMessages;
 
     /**
      * Instantiates a new app model.
@@ -277,6 +280,32 @@ public class Study implements Serializable, Cloneable {
         }
         return this.bus;
     }
+    
+    /**
+     * Is the e-mail bus thread alive?
+     * 
+     * @return
+     */
+    public boolean isBusAlive() {
+        if (this.bus != null) {
+            return this.bus.isAlive();
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Is the e-mail bus connected to receive e-mails?
+     * 
+     * @return
+     */
+    public boolean isBusConectedReceiving() {
+        if (this.bus != null) {
+            return this.bus.isReceivingConnected();
+        }
+        
+        return false;
+    }
 
     /**
      * Gets the participant from id.
@@ -367,6 +396,7 @@ public class Study implements Serializable, Cloneable {
         this.connectionIMAPSettings = connectionIMAPSettings;
         numParticipants = participants.length;
         unsentMessages = new Message[numParticipants];
+        retrievedMessages = new boolean[numParticipants];       
         for (Bin bin : bins) {
             if (!(bin.isInitialized())) {
                 bin.initialize(numParticipants);
@@ -374,6 +404,7 @@ public class Study implements Serializable, Cloneable {
         }
         this.bins = bins;
         this.ownId = 0; // unneeded but for verbosity...
+        retrievedMessages[ownId] = true;
         this.participants = participants;
         if (state == StudyState.NONE)
             state = StudyState.STARTING;
@@ -441,6 +472,38 @@ public class Study implements Serializable, Cloneable {
             throw new IllegalArgumentException("Message " + recipientId + " nonexistent");
         unsentMessages[recipientId] = null;
     }
+    
+    /**
+     * Mark a message as retrieved (one time or more).
+     *
+     * @param recipientId the recipient id
+     */
+    public void markMessageRetrieved(int recipientId) {
+        retrievedMessages[recipientId] = true;
+    }
+    
+    /**
+     * Was a message already retrieved (one time or more).
+     *
+     * @param recipientId the recipient id
+     * @return message retrieved
+     */
+    public boolean wasMessageRetrieved(int recipientId) {
+        return retrievedMessages[recipientId];
+    }
+    
+    /**
+     * Have all messages been retrieved
+     *
+     * @return messages retrieved
+     */
+    public boolean areAllMessagesRetrieved() {
+        for(int index = 0; index < retrievedMessages.length; index++) {
+            if (!retrievedMessages[index]) return false;
+        }
+        
+        return true;
+    }
 
     /**
      * Messages unsent.
@@ -492,6 +555,9 @@ public class Study implements Serializable, Cloneable {
         if (i != ownId) {
           Participant recipient = this.participants[i];
           unsentMessages[i] = new Message(ownId, recipient, data.getMessage());
+          // Reset the retrieved messages array
+          retrievedMessages[i] = false;
+          retrievedMessages[ownId] = true;
         } else {
           for (Bin b : bins) {
             b.setInShare(b.getSumShare(), ownId);
@@ -618,7 +684,9 @@ public class Study implements Serializable, Cloneable {
     public void toEnteringValues(String initialMessage) throws IllegalStateException, IOException, IllegalArgumentException, ClassNotFoundException{
         setModelFromMessage(initialMessage);
         unsentMessages = new Message[numParticipants];
-      advanceState(StudyState.ENTERING_VALUES);
+        retrievedMessages = new boolean[numParticipants];
+        retrievedMessages[ownId] = true;
+        advanceState(StudyState.ENTERING_VALUES);
     }
 
     /**

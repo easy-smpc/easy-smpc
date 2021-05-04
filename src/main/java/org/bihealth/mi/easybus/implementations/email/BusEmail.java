@@ -177,4 +177,30 @@ public class BusEmail extends Bus {
             deleted.expunge();
         }
     }
+    
+    /**
+     * Is there an working connection to receive?
+     * 
+     * @return
+     */
+    public boolean isReceivingConnected() {
+        if(this.connection != null) {
+            return this.connection.isReceivingConnected();
+        }
+        
+        return false;
+    };
+    
+    
+    /**
+     * Send a plain e-mail (no bus functionality)
+     * 
+     * @param recipient
+     * @param subject
+     * @param body
+     * @throws BusException
+     */
+    public void sendPlain(String recipient, String subject, String body) throws BusException {
+        this.connection.send(recipient, subject, body, null);
+    }
 }
