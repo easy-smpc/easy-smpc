@@ -13,6 +13,7 @@
  */
 package org.bihealth.mi.easybus.implementations.email;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,8 +102,9 @@ public abstract class ConnectionEmail {
          * @throws ClassNotFoundException 
          */
         private Object getObject(InputStream inputStream) throws IOException, ClassNotFoundException {
-            ByteArrayInputStream bos = new ByteArrayInputStream(inputStream.readAllBytes());
-            ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(bos));
+            BufferedInputStream bufferedis = new BufferedInputStream(inputStream);
+            ByteArrayInputStream bis = new ByteArrayInputStream(bufferedis.readAllBytes());
+            ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(bis));
             Object result = ois.readObject();
             ois.close();
             return result;
