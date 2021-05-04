@@ -29,11 +29,12 @@ import org.apache.commons.lang3.math.NumberUtils;
  */
 public class SpreadsheetCell {
     
+    /** Type */
     private SpreadsheetCellType type;
     /** Value if in big decimal */
     private BigDecimal valueBigDecimal;
+    /** Value if in text */
     private String valueText;
-    
     
     /**
      * Empty default constructor
@@ -98,6 +99,19 @@ public class SpreadsheetCell {
         case SCRIPT: return "";
         default: return "";
         }
+    }
+    
+    /**
+     * Can the cell be calculated?
+     * 
+     * @return
+     */
+    public boolean iscalculable() {
+        if (type == SpreadsheetCellType.TEXT || type == SpreadsheetCellType.SCRIPT) {
+            return false;
+        }
+        
+        return true;
     }
     
     /**
@@ -171,37 +185,4 @@ public class SpreadsheetCell {
             textField.addActionListener(delegate);
         }
     }
-//    public static class SpreadsheetCellEditor extends AbstractCellEditor implements TableCellEditor, ActionListener {
-//
-//        /** SVUID */
-//        private static final long serialVersionUID = -481445718325994247L;
-//        private JTextField textField;
-//        
-//        @Override
-//        /**
-//         * Create Spreadsheet object from input data
-//         */
-//        public SpreadsheetCell getCellEditorValue() {
-//            String text = textField.getText();
-//            return text == null || text.length() > 0 ? new SpreadsheetCell(text) : null;
-//        }
-//        
-//        @Override
-//        public void actionPerformed(ActionEvent e) {
-//            System.out.println("hallo");
-//            stopCellEditing();
-//        }
-//
-//        @Override
-//        public Component getTableCellEditorComponent(JTable table,
-//                                                     Object value,
-//                                                     boolean isSelected,
-//                                                     int row,
-//                                                     int column) {
-//            SpreadsheetCell cell = (SpreadsheetCell) table.getModel().getValueAt(row, column);
-//            this.textField = new JTextField(cell != null ? cell.getDisplayedText() : "");
-//            this.textField.addActionListener(this);
-//            return textField;
-//        }     
-//    }
 }
