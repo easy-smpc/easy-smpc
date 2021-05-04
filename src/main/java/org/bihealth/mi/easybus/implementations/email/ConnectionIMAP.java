@@ -17,7 +17,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
@@ -42,6 +41,7 @@ import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.math3.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -264,27 +264,18 @@ public class ConnectionIMAP extends ConnectionEmail {
                 multipart.addBodyPart(mimeBodyPart);
     
                 // Add attachment
-                int attachmentSize= 0;
                 if (attachment != null) {
                     mimeBodyPart = new MimeBodyPart();
                     mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
                     byte[] attachmentBytes = getByteArrayOutputStream(attachment);
-                    attachmentSize = attachmentBytes.length;
                     mimeBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(attachmentBytes, "application/octet-stream")));
                     mimeBodyPart.setFileName(FILENAME_MESSAGE);
-                    multipart.addBodyPart(mimeBodyPart);                    
+                    multipart.addBodyPart(mimeBodyPart);
+                    
+                    // Add statistics
+                    Bus.numberMessagesSent.incrementAndGet();
+                    Bus.totalSizeMessagesSent.addAndGet(attachmentBytes.length);
                 }
-                
-                // Log message size
-                String studyUID;
-                if (subject.contains("\"") && subject.contains("_")) {
-                    studyUID = subject.substring(subject.indexOf("\"") + 1, subject.indexOf("_"));
-                }
-                else {
-                    studyUID = subject; 
-                }
-                int sizeInBytes = recipient.getBytes().length + subject.getBytes().length + body.getBytes().length + attachmentSize;
-                logger.info("Message size logged", new Date(), studyUID, sizeInBytes, "message size bytes");
                 
                 // Compose message
                 email.setContent(multipart);

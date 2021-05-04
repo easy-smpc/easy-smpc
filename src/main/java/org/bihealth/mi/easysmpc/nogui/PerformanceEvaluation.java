@@ -14,9 +14,11 @@
 package org.bihealth.mi.easysmpc.nogui;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -28,7 +30,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Felix Wirth
  *
  */
-public class Start {
+public class PerformanceEvaluation {
     
     public static final String FILEPATH = "performanceEvaluation";
     
@@ -43,7 +45,8 @@ public class Start {
      */
     public static void main(String[] args) throws IOException  {
         // Create csv printer
-        csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(FILEPATH)), CSVFormat.DEFAULT
+        boolean skipHeader = new File(FILEPATH).exists();
+        csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(FILEPATH),StandardOpenOption.APPEND, StandardOpenOption.CREATE), CSVFormat.DEFAULT
                                                      .withHeader("Date",
                                                                  "StudyUID",
                                                                  "Number participants",
@@ -51,7 +54,12 @@ public class Start {
                                                                  "Mailbox check interval",
                                                                  "Fastest processing time",
                                                                  "Slowest processing time",
-                                                                 "Mean processing time"));
+                                                                 "Mean processing time",
+                                                                 "Number messages received",
+                                                                 "Total size messages received",
+                                                                 "Number messages sent",
+                                                                 "Total size messages sent")
+                                                     .withSkipHeaderRecord(skipHeader));
         
         // Set logging properties from file      
         System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");

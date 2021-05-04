@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bihealth.mi.easybus.Bus;
 
 import de.tu_darmstadt.cbs.emailsmpc.Study;
 
@@ -84,7 +85,7 @@ public class RecordTimeDifferences {
         
         // Add and log the starting value 
         addStartValue(model.studyUID, model.ownId, startTime);       
-        logger.info("Started", new Date(), model.studyUID, "started", model.numParticipants, "participants", model.bins.length, "bins", mailBoxCheckInterval, "mailbox check interval"); 
+        logger.debug("Started", new Date(), model.studyUID, "started", model.numParticipants, "participants", model.bins.length, "bins", mailBoxCheckInterval, "mailbox check interval"); 
     }
      
     /**
@@ -130,22 +131,26 @@ public class RecordTimeDifferences {
         
         // Write performance results
         try {
-            Start.csvPrinter.printRecord(new Date(),
+            PerformanceEvaluation.csvPrinter.printRecord(new Date(),
                                          timeDifferencesMap.get(studyUID).model.studyUID,
                                          timeDifferencesMap.get(studyUID).model.numParticipants,
                                          timeDifferencesMap.get(studyUID).model.bins.length,
                                          timeDifferencesMap.get(studyUID).mailBoxCheckInterval,
                                          timeDifferences[0],
                                          timeDifferences[timeDifferences.length - 1],
-                                         calculateMean(timeDifferences));
-            Start.csvPrinter.flush();
+                                         calculateMean(timeDifferences),
+                                         Bus.numberMessagesReceived,
+                                         Bus.totalSizeMessagesReceived,
+                                         Bus.numberMessagesSent,
+                                         Bus.totalSizeMessagesSent);
+            PerformanceEvaluation.csvPrinter.flush();
         } catch (IOException e) {
             throw new IllegalStateException("Unable to write performance results", e);
         }
         
         
         // Fastest finished entry => log            
-        logger.info("Entry logged",
+        logger.debug("Entry logged",
                     new Date(),
                     studyUID,
                     "finished",
@@ -154,7 +159,7 @@ public class RecordTimeDifferences {
                     "duration");
             
         // Slowest finished entry => log
-        logger.info("Slowest entry logged",
+        logger.debug("Slowest entry logged",
                     new Date(),
                     studyUID,
                     "finished",

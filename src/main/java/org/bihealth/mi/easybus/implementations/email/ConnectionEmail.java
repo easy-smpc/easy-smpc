@@ -29,6 +29,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
 
+import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.Participant;
@@ -85,6 +86,9 @@ public abstract class ConnectionEmail {
                             text = (String)((MimeBodyPart)part).getContent();
                         } else if (part != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.ATTACHMENT)) {
                             attachment = getObject(((MimeBodyPart)part).getInputStream());
+                            
+                            // Add statistics
+                            Bus.totalSizeMessagesReceived.addAndGet(((MimeBodyPart)part).getSize());
                         }
                     }
                 }
@@ -105,7 +109,7 @@ public abstract class ConnectionEmail {
             BufferedInputStream bufferedis = new BufferedInputStream(inputStream);
             ByteArrayInputStream bis = new ByteArrayInputStream(bufferedis.readAllBytes());
             ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(bis));
-            Object result = ois.readObject();
+            Object result = ois.readObject();           
             ois.close();
             return result;
         }
@@ -322,7 +326,10 @@ public abstract class ConnectionEmail {
                     message.delete();
                     continue;
                 }
-                        
+                
+                // Add statistics
+                Bus.numberMessagesReceived.incrementAndGet();
+                
                 // Pass on
                 ConnectionEmailMessage _message = message;
                 result.add(new BusEmail.BusEmailMessage(participant, scope, (Message) attachment) {
