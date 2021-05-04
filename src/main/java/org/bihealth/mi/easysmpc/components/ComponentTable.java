@@ -49,6 +49,9 @@ public class ComponentTable extends JTable {
      * @return
      */
     public SpreadsheetCell currentSelectedCellData() {
+        if(this.getSelectedRow() < 0 || this.getSelectedColumn() < 0 ) {
+            return null;
+        } 
         return (SpreadsheetCell) this.getModel().getValueAt(this.getSelectedRow(), this.getSelectedColumn());
     }
 }
