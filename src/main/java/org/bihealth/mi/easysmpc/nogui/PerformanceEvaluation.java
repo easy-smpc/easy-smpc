@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
 /**
@@ -52,9 +53,9 @@ public class PerformanceEvaluation {
 //        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10, 100, 1000, 10000}));
 //        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 3000, 5000, 10000}));
         
-          List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5}));
-          List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10, 100}));
-          List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 3000}));
+          List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3}));
+          List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10}));
+          List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000}));
 
         
         // Create connection settings
@@ -96,6 +97,7 @@ public class PerformanceEvaluation {
                             // Ignore
                         }
                     }
+                    Bus.resetStatistics();
                 }
             }
         }

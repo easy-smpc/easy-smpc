@@ -192,7 +192,7 @@ public class RecordTimeDifferences {
      * @param timeDifferences
      * @return
      */
-    private static double calculateMean(Long[] timeDifferences) {
+    private static long calculateMean(Long[] timeDifferences) {
         long sum = 0; 
         for(long timeDifference : timeDifferences) {
             sum = sum + timeDifference;

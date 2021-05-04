@@ -39,8 +39,6 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
 import org.apache.commons.math3.util.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -53,9 +51,6 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Fabian Prasser
  */
 public class ConnectionIMAP extends ConnectionEmail {
-    
-    /** Logger */
-    private static final Logger logger = LogManager.getLogger(ConnectionIMAP.class);
     
     /** File name of the attached message */
     private static final String FILENAME_MESSAGE = "message";

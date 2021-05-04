@@ -74,7 +74,9 @@ public abstract class ConnectionEmail {
             this.folder = folder;
     
             try {
-    
+                // Add statistics
+                Bus.numberMessagesReceived.incrementAndGet();
+                
                 // Extract parts
                 Multipart multipart = (Multipart) message.getContent();
                 if (multipart.getCount() == 2) {
@@ -325,10 +327,7 @@ public abstract class ConnectionEmail {
                 if (scope == null || participant == null) {
                     message.delete();
                     continue;
-                }
-                
-                // Add statistics
-                Bus.numberMessagesReceived.incrementAndGet();
+                }               
                 
                 // Pass on
                 ConnectionEmailMessage _message = message;

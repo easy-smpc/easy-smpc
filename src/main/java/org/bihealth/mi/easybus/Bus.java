@@ -27,13 +27,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class Bus {
     
-    /** Total number of messages received */
+    /** Total number of messages started to receive */
     public static final AtomicInteger numberMessagesReceived = new AtomicInteger();
-    /** Total size of messages received */
+    /** Total attachment size of messages started to receive */
     public static final AtomicInteger totalSizeMessagesReceived = new AtomicInteger();
     /** Total number of messages sent */
     public static final AtomicInteger numberMessagesSent = new AtomicInteger();
-    /** Total size of messages sent */
+    /** Total attachment size of messages sent */
     public static final AtomicInteger totalSizeMessagesSent = new AtomicInteger();
     /** Stores the subscriptions with  known participants*/    
     private final Map<Scope, Map<Participant, List<MessageListener>>> subscriptions;
