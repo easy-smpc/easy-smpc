@@ -43,8 +43,8 @@ public class CreatingUser extends User {
      */
     CreatingUser(int numberParticipants,
                  int numberBins,
-                 ConnectionIMAPSettings connectionIMAPSettings,
-                 int mailBoxCheckInterval) throws IllegalStateException {
+                 int mailBoxCheckInterval,
+                 ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException {
         super(mailBoxCheckInterval);
 
         

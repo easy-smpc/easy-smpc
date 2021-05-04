@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -35,7 +38,7 @@ public class PerformanceEvaluation {
     public static final String FILEPATH = "performanceEvaluation";
     
     public static CSVPrinter csvPrinter;
-
+    
     /**
      * 
      * Starts the performance test
@@ -43,7 +46,67 @@ public class PerformanceEvaluation {
      * @param args
      * @throws IOException 
      */
-    public static void main(String[] args) throws IOException  {
+    public static void main(String[] args) throws IOException  {        
+        // Create parameters
+//        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 20}));
+//        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10, 100, 1000, 10000}));
+//        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 3000, 5000, 10000}));
+        
+          List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5}));
+          List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10, 100}));
+          List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 3000}));
+
+        
+        // Create connection settings
+        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
+                .setSMTPServer("smtp.ionos.de")
+                .setIMAPServer("imap.ionos.de");
+        
+        new PerformanceEvaluation(participants, bins, mailboxCheckInterval, connectionIMAPSettings);       
+    }
+
+    /**
+     * Creates a new instance
+     * 
+     * @param participants
+     * @param bins
+     * @param mailboxCheckInterval
+     * @param connectionIMAPSettings 
+     * @throws IOException 
+     */
+    public PerformanceEvaluation(List<Integer> participants,
+                                 List<Integer> bins,
+                                 List<Integer> mailboxCheckIntervals, ConnectionIMAPSettings connectionIMAPSettings) throws IOException {
+        // Prepare
+        prepare();              
+        
+        // Permutation of parameters
+        for (int participantNumber : participants) {
+            for (int binNumber : bins) {
+                for (int mailboxCheckInterval : mailboxCheckIntervals) {
+                    
+                    // Start a EasySMPC process
+                    CreatingUser user = new CreatingUser(participantNumber, binNumber, mailboxCheckInterval, connectionIMAPSettings);
+                    
+                    // Wait to finish
+                    while (!user.areAllUsersFinished()) {                        
+                        try {
+                            Thread.sleep(Resources.INTERVAL_SCHEDULER_MILLISECONDS);
+                        } catch (InterruptedException e) {
+                            // Ignore
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Prepare evaluation
+     * 
+     * @throws IOException 
+     */
+    private void prepare() throws IOException {
         // Create csv printer
         boolean skipHeader = new File(FILEPATH).exists();
         csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(FILEPATH),StandardOpenOption.APPEND, StandardOpenOption.CREATE), CSVFormat.DEFAULT
@@ -62,23 +125,6 @@ public class PerformanceEvaluation {
                                                      .withSkipHeaderRecord(skipHeader));
         
         // Set logging properties from file      
-        System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");
-        
-        // Create connection settings
-        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
-                .setSMTPServer("smtp.ionos.de")
-                .setIMAPServer("imap.ionos.de");
-        
-        // Start a EasySMPC process
-        CreatingUser user = new CreatingUser(3, 10, connectionIMAPSettings, 1000);
-        
-        while(!user.areAllUsersFinished()) {
-            // Wait to finish
-            try {
-                Thread.sleep(Resources.INTERVAL_SCHEDULER_MILLISECONDS);
-            } catch (InterruptedException e) {
-                // Ignore
-            }
-        }
+        System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");        
     }
 }
