@@ -151,37 +151,42 @@ public class BusEmail extends Bus {
      */
     private synchronized void receiveEmails() throws BusException, InterruptedException {
         
-        // Get mails
-        BusEmail.BusEmailMessage deleted = null;
-        for (BusEmail.BusEmailMessage message : connection.receive()) {
+        try {
+            // Get mails
+            BusEmail.BusEmailMessage deleted = null;
+            for (BusEmail.BusEmailMessage message : connection.receive()) {
 
-            // Check for interrupt
-            if (Thread.interrupted()) {
-                connection.close();
-                throw new InterruptedException();
+                // Check for interrupt
+                if (Thread.interrupted()) {
+                    connection.close();
+                    throw new InterruptedException();
+                }
+
+                // Mark
+                boolean received = false;
+                
+                // Send to scope and participant
+                try {
+                    received |= receiveInternal(message.message, message.scope, message.receiver);
+                } catch (InterruptedException e) {
+                    connection.close();
+                    throw e;
+                }
+
+                // Delete 
+                if (received) {
+                    message.delete();
+                    deleted = message;
+                }
             }
-
-            // Mark
-            boolean received = false;
             
-            // Send to scope and participant
-            try {
-                received |= receiveInternal(message.message, message.scope, message.receiver);
-            } catch (InterruptedException e) {
-                connection.close();
-                throw e;
+            // Expunge
+            if (deleted != null) {
+                deleted.expunge();
             }
-
-            // Delete 
-            if (received) {
-                message.delete();
-                deleted = message;
-            }
-        }
-        
-        // Expunge
-        if (deleted != null) {
-            deleted.expunge();
+        } catch (Exception e) {
+            e.printStackTrace();
+            LogManager.getLogger(BusEmail.class).debug("", new Date(), e.getMessage());
         }
     }
     
