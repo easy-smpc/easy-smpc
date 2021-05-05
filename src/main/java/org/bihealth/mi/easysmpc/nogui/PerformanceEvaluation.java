@@ -49,13 +49,13 @@ public class PerformanceEvaluation {
      */
     public static void main(String[] args) throws IOException  {        
         // Create parameters
-//        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 20}));
-//        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10, 100, 1000, 10000}));
-//        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 3000, 5000, 10000}));
+        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 20}));
+        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10, 100, 1000, 10000}));
+        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 3000, 5000, 10000}));
         
-          List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3}));
-          List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10}));
-          List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000}));
+//          List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3}));
+//          List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10}));
+//          List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000}));
 
         
         // Create connection settings
