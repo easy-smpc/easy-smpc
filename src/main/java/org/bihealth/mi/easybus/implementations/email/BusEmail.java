@@ -15,6 +15,7 @@ package org.bihealth.mi.easybus.implementations.email;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
@@ -31,7 +32,7 @@ import org.bihealth.mi.easybus.Scope;
  */
 public class BusEmail extends Bus {
     /** Logger */
-    private static final Logger logger = LogManager.getLogger(ConnectionIMAP.class);
+    private static final Logger logger = LogManager.getLogger(BusEmail.class);
 
     /**
      * Internal message used by email-based implementations
@@ -88,17 +89,12 @@ public class BusEmail extends Bus {
             public void run() {
                 try {
                     while (!stop) {
-                        try {
-                            receiveEmails();
-                        } catch (BusException e) {
-                            // Stop thread
-                            throw new RuntimeException(e);
-                        }
+                        receiveEmails();                     
                         Thread.sleep(millis);
                     }
                 } catch (InterruptedException e) {
                     connection.close();
-                    logger.debug("Receive thread stopped logged", new Date(), "Receive thread stopped", e.getMessage());
+                    logger.debug("Receive thread stopped logged", new Date(), "Receive thread stopped", ExceptionUtils.getStackTrace(e));
                     // Die silently
                 }
             }
@@ -149,7 +145,7 @@ public class BusEmail extends Bus {
      * @throws BusException 
      * @throws InterruptedException 
      */
-    private synchronized void receiveEmails() throws BusException, InterruptedException {
+    private synchronized void receiveEmails() throws InterruptedException {
         
         try {
             // Get mails
@@ -184,9 +180,8 @@ public class BusEmail extends Bus {
             if (deleted != null) {
                 deleted.expunge();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            LogManager.getLogger(BusEmail.class).debug("", new Date(), e.getMessage());
+        } catch (BusException e) {
+            logger.debug("ReceiveEmails() failed logged", new Date(), "ReciveEmails() failed", ExceptionUtils.getStackTrace(e));
         }
     }
     
@@ -214,5 +209,26 @@ public class BusEmail extends Bus {
      */
     public void sendPlain(String recipient, String subject, String body) throws BusException {
         this.connection.send(recipient, subject, body, null);
+    }
+    
+    /**
+     * Deletes all e-mails in inbox
+     * @throws BusException 
+     * @throws InterruptedException 
+     */
+    public void purgeEmails() throws BusException, InterruptedException {
+
+            // Get mails
+            BusEmail.BusEmailMessage deleted = null;
+            for (BusEmail.BusEmailMessage message : connection.receive()) {
+                // Delete
+                message.delete();
+                deleted = message;
+            }
+            
+            // Expunge
+            if (deleted != null) {
+                deleted.expunge();
+            }
     }
 }

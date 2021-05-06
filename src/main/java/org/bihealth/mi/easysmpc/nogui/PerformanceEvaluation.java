@@ -21,11 +21,17 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
+import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.implementations.email.BusEmail;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
 /**
@@ -35,10 +41,13 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  *
  */
 public class PerformanceEvaluation {
-    
+    /** File path */
     public static final String FILEPATH = "performanceEvaluation";
-    
+    /** CSV printer */
     public static CSVPrinter csvPrinter;
+    
+    /** Logger */
+    private static Logger logger;
     
     /**
      * 
@@ -79,7 +88,11 @@ public class PerformanceEvaluation {
                                  List<Integer> bins,
                                  List<Integer> mailboxCheckIntervals, ConnectionIMAPSettings connectionIMAPSettings) throws IOException {
         // Prepare
-        prepare();              
+        try {
+            prepare(connectionIMAPSettings);
+        } catch (IOException | BusException | InterruptedException e) {
+            throw new IllegalStateException("Unable to prepare performance evaluation", e);
+        }                
         
         // Permutation of parameters
         for (int participantNumber : participants) {
@@ -105,10 +118,22 @@ public class PerformanceEvaluation {
 
     /**
      * Prepare evaluation
+     * @param connectionIMAPSettings 
      * 
      * @throws IOException 
+     * @throws BusException 
+     * @throws InterruptedException 
      */
-    private void prepare() throws IOException {
+    private void prepare(ConnectionIMAPSettings connectionIMAPSettings) throws IOException, BusException, InterruptedException {
+        // Set logging properties from file      
+        System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");
+        logger = LogManager.getLogger(PerformanceEvaluation.class);
+        
+        // Delete existing e-mails      
+        BusEmail bus = new BusEmail( new ConnectionIMAP(connectionIMAPSettings, true), 0);
+        bus.purgeEmails();
+        bus.stop();
+        
         // Create csv printer
         boolean skipHeader = new File(FILEPATH).exists();
         csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(FILEPATH),StandardOpenOption.APPEND, StandardOpenOption.CREATE), CSVFormat.DEFAULT
@@ -126,7 +151,6 @@ public class PerformanceEvaluation {
                                                                  "Total size messages sent")
                                                      .withSkipHeaderRecord(skipHeader));
         
-        // Set logging properties from file      
-        System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");        
+        logger.debug("Finished preparation logged", new Date(), "Finished preparation");
     }
 }
