@@ -128,6 +128,9 @@ public class Resources {
     /** Step 2 identifier */
     public static final String    ROUND_2                             = "_round2";
 
+    /** Fractional bits for decimal values */
+    public static final int FRACTIONAL_BITS = 32;
+        
     /**
      * Returns all available languages
      * 

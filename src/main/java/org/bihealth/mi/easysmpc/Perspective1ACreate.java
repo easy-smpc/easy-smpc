@@ -112,9 +112,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     /** Edit configuration e-mail box */
     private JButton                           buttonEditMailbox;;
 
-    /** Fractional bits for decimal values */
-    final static private int                  fractionalBits = 32;
-
     /**
      * Creates the perspective
      * @param app
@@ -259,7 +256,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         for (Component entry : this.panelBins.getComponents()) {
             Bin bin = new Bin(((EntryBin)entry).getLeftValue());
             bin.initialize(participants.size());
-            bin.shareValue(new BigDecimal(((EntryBin)entry).getRightValue().trim().replace(',','.')), fractionalBits);
+            bin.shareValue(new BigDecimal(((EntryBin)entry).getRightValue().trim().replace(',','.')), Resources.FRACTIONAL_BITS);
             bins.add(bin);
         }
         
