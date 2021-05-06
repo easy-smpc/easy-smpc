@@ -140,6 +140,9 @@ public class Resources {
     
     /** Interval to check existing mailbox connection */
     public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED = 3000;
+    
+    /** Maximal trys sending an e-mail */
+    public static final int MAX_TRY_SEND_MAIL = 20;
 
     /**
      * Returns all available languages

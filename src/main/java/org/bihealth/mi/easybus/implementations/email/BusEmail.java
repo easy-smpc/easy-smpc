@@ -18,6 +18,7 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
+import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
  * Bus implementation by email
@@ -69,7 +70,9 @@ public class BusEmail extends Bus {
     private Thread          thread;
     /** Stop flag */
     private boolean         stop = false;
-  
+    /** Sleep time a thread waits to send an e-mail */
+    private int threadSleepTime;
+ 
     /**
      * Creates a new instance
      * @param connection
@@ -77,17 +80,13 @@ public class BusEmail extends Bus {
      */
     public BusEmail(ConnectionEmail connection, int millis) {
         this.connection = connection;
+        this.threadSleepTime = millis;
         this.thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     while (!stop) {
-                        try {
-                            receiveEmails();
-                        } catch (BusException e) {
-                            // Stop thread
-                            throw new RuntimeException(e);
-                        }
+                        receiveEmails();
                         Thread.sleep(millis);
                     }
                 } catch (InterruptedException e) {
@@ -107,7 +106,33 @@ public class BusEmail extends Bus {
 
     @Override
     public void send(Message message, Scope scope, Participant participant) throws BusException {
-        this.connection.send(message, scope, participant);
+        // Init
+        boolean sent = false;
+        int tryCounter = 1;
+        
+        // Try to send e-mail
+        while (!sent) {
+            try {
+                this.connection.send(message, scope, participant);
+                sent = true;
+            } catch (BusException e) {
+
+                // Throw exception after threshold
+                if (tryCounter == Resources.MAX_TRY_SEND_MAIL) {
+                    throw new BusException("Unable to send e-mail", e);
+                }
+
+                // Add counter
+                tryCounter++;
+
+                // Sleep
+                try {
+                    Thread.sleep(threadSleepTime);
+                } catch (InterruptedException e1) {
+                    throw new BusException("Unable to send e-mail due to interrupted thread", e1);
+                }
+            }
+        }
     }
     
     @Override
@@ -139,42 +164,44 @@ public class BusEmail extends Bus {
     
     /**
      * Receives e-mails
-     * @throws BusException 
      * @throws InterruptedException 
      */
-    private synchronized void receiveEmails() throws BusException, InterruptedException {
-        
-        // Get mails
-        BusEmail.BusEmailMessage deleted = null;
-        for (BusEmail.BusEmailMessage message : connection.receive()) {
+    private synchronized void receiveEmails() throws InterruptedException {
+        try {
+            // Get mails
+            BusEmail.BusEmailMessage deleted = null;
+            for (BusEmail.BusEmailMessage message : connection.receive()) {
 
-            // Check for interrupt
-            if (Thread.interrupted()) {
-                connection.close();
-                throw new InterruptedException();
+                // Check for interrupt
+                if (Thread.interrupted()) {
+                    connection.close();
+                    throw new InterruptedException();
+                }
+
+                // Mark
+                boolean received = false;
+
+                // Send to scope and participant
+                try {
+                    received |= receiveInternal(message.message, message.scope, message.receiver);
+                } catch (InterruptedException e) {
+                    connection.close();
+                    throw e;
+                }
+
+                // Delete
+                if (received) {
+                    message.delete();
+                    deleted = message;
+                }
             }
 
-            // Mark
-            boolean received = false;
-            
-            // Send to scope and participant
-            try {
-                received |= receiveInternal(message.message, message.scope, message.receiver);
-            } catch (InterruptedException e) {
-                connection.close();
-                throw e;
+            // Expunge
+            if (deleted != null) {
+                deleted.expunge();
             }
-
-            // Delete 
-            if (received) {
-                message.delete();
-                deleted = message;
-            }
-        }
-        
-        // Expunge
-        if (deleted != null) {
-            deleted.expunge();
+        } catch (BusException e) {
+            // Ignore
         }
     }
     
