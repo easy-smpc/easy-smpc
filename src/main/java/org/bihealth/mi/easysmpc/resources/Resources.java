@@ -140,6 +140,9 @@ public class Resources {
 
     /** Fetch size for messages with IMAP */
     public static final int       FETCH_SIZE_IMAP                     = 1048576;
+    
+    /** Maximal trys sending an e-mail */
+    public static final int MAX_TRY_SEND_MAIL = 20;
 
     /**
      * Returns all available languages

@@ -23,6 +23,7 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
+import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
  * Bus implementation by email
@@ -76,6 +77,8 @@ public class BusEmail extends Bus {
     private Thread          thread;
     /** Stop flag */
     private boolean         stop = false;
+    /** Sleep time a thread waits to send an e-mail */
+    private int threadSleepTime;
   
     /**
      * Creates a new instance
@@ -84,6 +87,7 @@ public class BusEmail extends Bus {
      */
     public BusEmail(ConnectionEmail connection, int millis) {
         this.connection = connection;
+        this.threadSleepTime = millis;
         this.thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -110,7 +114,33 @@ public class BusEmail extends Bus {
 
     @Override
     public void send(Message message, Scope scope, Participant participant) throws BusException {
-        this.connection.send(message, scope, participant);
+        // Init
+        boolean sent = false;
+        int tryCounter = 1;
+        
+        // Try to send e-mail
+        while (!sent) {
+            try {
+                this.connection.send(message, scope, participant);
+                sent = true;
+            } catch (BusException e) {
+
+                // Throw exception after threshold
+                if (tryCounter == Resources.MAX_TRY_SEND_MAIL) {
+                    throw new BusException("Unable to send e-mail", e);
+                }
+                
+                // Add counter
+                tryCounter++;
+
+                // Sleep
+                try {
+                    Thread.sleep(threadSleepTime);
+                } catch (InterruptedException e1) {
+                    throw new BusException("Unable to send e-mail due to interrupted thread", e1);
+                }
+            }
+        }     
     }
     
     @Override
