@@ -130,10 +130,7 @@ public class ArithmeticSharing {
      * @throws IllegalArgumentException Negative fractionalBits
     */
     public ArithmeticShare[] share(BigDecimal secret, int fractionalBits) throws IllegalArgumentException {
-      if (fractionalBits < 0)
-        throw new IllegalArgumentException("FractionalBits must be positive");
-      final BigDecimal scaleFactor = BigDecimal.valueOf(2).pow(fractionalBits);
-      return share(secret.multiply(scaleFactor).toBigInteger());
+      return share(ArithmeticSharing.convertToFixedPoint(secret, fractionalBits));
     }
 
     /**
@@ -145,6 +142,21 @@ public class ArithmeticSharing {
     */
     public ArithmeticShare[] share(double secret, int fractionalBits) throws IllegalArgumentException {
       return share(BigDecimal.valueOf(secret), fractionalBits);
+    }
+
+    /**
+     * Convert a BigDecimal to a fixed point representation
+     * @param value Value as (unscaled) BigDecimal
+     * @param fractionalBits number of bits for fixed point scaling. Must be positive
+     * @return Fixed point represented value
+     * @throws IllegalArgumentException Negative fractionalBits
+    */
+
+    public static BigInteger convertToFixedPoint(BigDecimal value, int fractionalBits) throws IllegalArgumentException {
+      if (fractionalBits < 0)
+        throw new IllegalArgumentException("FractionalBits must be positive");
+      final BigDecimal scaleFactor = BigDecimal.valueOf(2).pow(fractionalBits);
+      return value.multiply(scaleFactor).toBigInteger();
     }
 
     /**
