@@ -111,7 +111,10 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesSending.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         this.propertiesSending.put("mail.smtp.socketFactory.fallback", "false");
         this.propertiesSending.put("mail.smtp.auth", "true");
+        this.propertiesReceiving.put("mail.imap.partialfetch", "false");
+        this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
 
+        
         // Set proxy
         if (proxy != null) {
             this.propertiesSending.setProperty("mail.smtp.proxy.host", proxy.getFirst());
