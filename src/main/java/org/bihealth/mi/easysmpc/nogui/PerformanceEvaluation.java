@@ -43,6 +43,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class PerformanceEvaluation {
     /** File path */
     public static final String FILEPATH = "performanceEvaluation";
+    private static final long WAIT_BETWEEN_PROCESES_MILLISECONDS = 10*60*1000;
     /** CSV printer */
     public static CSVPrinter csvPrinter;
     
@@ -111,6 +112,12 @@ public class PerformanceEvaluation {
                         }
                     }
                     Bus.resetStatistics();
+                    logger.debug("Wait logged", new Date(), "Started waiting for", WAIT_BETWEEN_PROCESES_MILLISECONDS);
+                    try {
+                        Thread.sleep(WAIT_BETWEEN_PROCESES_MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        throw new IllegalStateException("Unable to wait between processed");
+                    }
                 }
             }
         }
