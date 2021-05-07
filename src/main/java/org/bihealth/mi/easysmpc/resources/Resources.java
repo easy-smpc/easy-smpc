@@ -86,7 +86,7 @@ public class Resources {
     private final static Charset  CHARSET                             = StandardCharsets.UTF_8;
     
     /** Size of loading animation */
-    public static final int       SIZE_LOADING_ANIMATION              = 25;
+    public static final int       SIZE_LOADING_ANIMATION              = 20;
     
     /** Size of checkmark clipart x */
     public static final int       SIZE_CHECKMARK_X                    = 15;
