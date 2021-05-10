@@ -17,10 +17,10 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
-import org.bihealth.mi.easysmpc.dataimport.SpreadsheetCell;
-import org.bihealth.mi.easysmpc.dataimport.SpreadsheetCell.SpreadsheetCellEditor;
-import org.bihealth.mi.easysmpc.dataimport.SpreadsheetCell.SpreadsheetCellRenderer;
-import org.bihealth.mi.easysmpc.dataimport.SpreadsheetTableModel;
+import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell;
+import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetTableModel;
+import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell.SpreadsheetCellEditor;
+import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell.SpreadsheetCellRenderer;
 
 /**
  * A component to display a table

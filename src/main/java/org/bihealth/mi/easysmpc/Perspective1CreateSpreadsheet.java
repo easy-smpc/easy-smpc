@@ -76,6 +76,7 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
         table.getColumnModel().getSelectionModel().addListSelectionListener(this);
         JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         
+        // Split pane
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, formularField, scrollPane);
         splitPane.setDividerLocation(20);
         panel.add(splitPane, BorderLayout.CENTER);

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.bihealth.mi.easysmpc.dataimport;
+package org.bihealth.mi.easysmpc.spreadsheet;
 
 import java.math.BigDecimal;
 
@@ -35,6 +35,7 @@ public class SpreadsheetCell {
     private BigDecimal valueBigDecimal;
     /** Value if in text */
     private String valueText;
+    private ScriptFunction function;
     
     /**
      * Empty default constructor
@@ -59,7 +60,7 @@ public class SpreadsheetCell {
         if (value.charAt(0) == '=') {
             this.type = SpreadsheetCellType.SCRIPT;
             this.valueText = value;
-            // TODO Validate script
+            this.function = ScriptFunction.createFunction(value);
         }
         
 
@@ -114,6 +115,13 @@ public class SpreadsheetCell {
         return true;
     }
     
+    /**
+     * @return the type
+     */
+    public SpreadsheetCellType getType() {
+        return type;
+    }
+
     /**
      * Data types for a spreadsheet cell
      * 
