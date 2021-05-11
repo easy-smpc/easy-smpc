@@ -64,7 +64,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Seriali
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        return new SpreadsheetCell().getClass();
+        return SpreadsheetCell.getClassStatic();
     }
 
     @Override
@@ -89,7 +89,6 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Seriali
     
 
     private SpreadsheetCell getCell(int rowIndex, int columnIndex) {
-        
         // If row does not exist create
         if (data.size() - 1  < rowIndex) {
             for (int indexRows = data.size(); indexRows <= rowIndex; indexRows++) {

@@ -13,14 +13,48 @@
  */
 package org.bihealth.mi.easysmpc.spreadsheet;
 
+import java.math.BigDecimal;
+
+import javax.swing.table.TableModel;
+
 /**
  * @author Felix Wirth
  *
  */
 public class ScriptMean extends ScriptFunction {
     
-    ScriptMean(String values) {
-        super(values);
+    ScriptMean(String values, TableModel tableModel) {
+        super(values, tableModel, true);
+    }
+    
+    /**
+     * Can the script be calculated?
+     * 
+     * @return
+     */
+    public boolean isCaluable() {
+        for(SpreadsheetCell cell : getRelevantCells()) {
+            if (!cell.isCalculable()) {
+                return false;
+            }
+        }        
+        return true;
     }
 
+    @Override
+    public BigDecimal calculate() {
+        // Check
+        if (!isCaluable()) {
+            return null;
+        }
+        
+        // Calculate mean
+        BigDecimal sum = BigDecimal.valueOf(0);
+        int index = 0;
+        for(SpreadsheetCell cell : getRelevantCells()) {
+            sum.add(cell.getContentBigDecimal());
+            index++;
+        }
+        return sum.divide(BigDecimal.valueOf(index));
+    }
 }

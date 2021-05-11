@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableModel;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -31,49 +32,14 @@ public class SpreadsheetCell {
     
     /** Type */
     private SpreadsheetCellType type;
-    /** Value if in big decimal */
-    private BigDecimal valueBigDecimal;
-    /** Value if in text */
-    private String valueText;
-    private ScriptFunction function;
-    
-    /**
-     * Empty default constructor
-     */
-    public SpreadsheetCell() {
-        
-    }
     
     /**
      * Creates a new instance
      * 
      * @param value
      */
-    SpreadsheetCell(String value) {
-        
-        // Check
-        if (value == null) {
-            throw new IllegalArgumentException("Value must not be null");
-        }
-        
-        // Set as script if applicable 
-        if (value.charAt(0) == '=') {
-            this.type = SpreadsheetCellType.SCRIPT;
-            this.valueText = value;
-            this.function = ScriptFunction.createFunction(value);
-        }
-        
-
-        try {
-            // Set as decimal if applicable
-            this.valueBigDecimal = NumberUtils.createBigDecimal(value);
-            this.type = SpreadsheetCellType.NUMBER;
-            
-        } catch (Exception e) {
-            // Set as text if applicable
-            this.type = SpreadsheetCellType.TEXT;
-            this.valueText = value;
-        }
+    SpreadsheetCell(SpreadsheetCellType type) {
+        this.type = type;
     }
     
     /**
@@ -82,24 +48,23 @@ public class SpreadsheetCell {
      * @return
      */
     public String getContentDefinition() {
-        switch(this.type) {
-        case TEXT: return valueText;
-        case NUMBER: return valueBigDecimal.toPlainString();
-        case SCRIPT: return valueText;
-        default: return "";
-        }
+        return null;
     }
     
     /**
      * @return
      */
     public String getDisplayedText() {
-        switch(this.type) {
-        case TEXT: return valueText;
-        case NUMBER: return valueBigDecimal.toPlainString();
-        case SCRIPT: return "";
-        default: return "";
-        }
+        return null;
+    }
+    
+    /**
+     * Gets the content of the cell as big decimal
+     * 
+     * @return
+     */
+    public BigDecimal getContentBigDecimal() {
+        return null;
     }
     
     /**
@@ -107,12 +72,8 @@ public class SpreadsheetCell {
      * 
      * @return
      */
-    public boolean iscalculable() {
-        if (type == SpreadsheetCellType.TEXT || type == SpreadsheetCellType.SCRIPT) {
-            return false;
-        }
-        
-        return true;
+    public boolean isCalculable() {
+        return false;
     }
     
     /**
@@ -121,6 +82,40 @@ public class SpreadsheetCell {
     public SpreadsheetCellType getType() {
         return type;
     }
+    
+    public static Class<SpreadsheetCell> getClassStatic() {
+        return SpreadsheetCell.class;
+    }
+    
+    /**
+     * Create a new, suitable sub class
+     * 
+     * @param value
+     * @param tableModel
+     * @return
+     */
+    public static SpreadsheetCell createSpreadsheetCell(String value, TableModel tableModel) {
+        
+        // Check
+        if (value == null) {
+            throw new IllegalArgumentException("Value must not be null");
+        }
+        
+        // Set as script if applicable 
+        if (value.charAt(0) == '=') {
+            return new SpreadsheetCellFunction(value, tableModel);            
+        }
+        
+        try {
+            // Set as decimal if applicable
+            BigDecimal valueBigDecimal = NumberUtils.createBigDecimal(value);
+            return new SpreadsheetCellNumber(valueBigDecimal);  
+            
+        } catch (Exception e) {
+            // Set as text if applicable
+            return new SpreadsheetCellText(value);  
+        }
+    }
 
     /**
      * Data types for a spreadsheet cell
@@ -128,8 +123,10 @@ public class SpreadsheetCell {
      * @author Felix Wirth
      *
      */
-    public enum SpreadsheetCellType {
-        TEXT, NUMBER, SCRIPT
+    public static enum SpreadsheetCellType {
+                                            TEXT,
+                                            NUMBER,
+                                            SCRIPT
     }
     
     /**
@@ -174,9 +171,13 @@ public class SpreadsheetCell {
         
         /** SVUID */
         private static final long serialVersionUID = -3934596706570236505L;
+        /** Table model */
+        private TableModel tableModel;
 
-        public SpreadsheetCellEditor(final JTextField textField) {
+        public SpreadsheetCellEditor(final JTextField textField, TableModel tableModel) {
             super(textField);
+            this.tableModel = tableModel;
+            
             delegate = new EditorDelegate() {
                 /** SVUID */
                 private static final long serialVersionUID = 2088491318086396011L;
@@ -187,7 +188,7 @@ public class SpreadsheetCell {
 
                 public Object getCellEditorValue() {
                     String text = textField.getText();
-                    return text == null || text.length() > 0 ? new SpreadsheetCell(text) : null;
+                    return text == null || text.length() > 0 ? SpreadsheetCell.createSpreadsheetCell(text, tableModel) : null;
                 }
             };
             textField.addActionListener(delegate);

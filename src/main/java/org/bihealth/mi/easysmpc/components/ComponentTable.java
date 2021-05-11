@@ -18,9 +18,9 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
 import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell;
-import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetTableModel;
 import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell.SpreadsheetCellEditor;
 import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell.SpreadsheetCellRenderer;
+import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetTableModel;
 
 /**
  * A component to display a table
@@ -38,8 +38,8 @@ public class ComponentTable extends JTable {
         super(new SpreadsheetTableModel(true, numRows, numColumns));
         this.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         this.setCellSelectionEnabled(true);
-        this.setDefaultRenderer(new SpreadsheetCell().getClass(), new SpreadsheetCellRenderer());
-        this.setDefaultEditor(new SpreadsheetCell().getClass(), new SpreadsheetCellEditor(new JTextField()));
+        this.setDefaultRenderer(SpreadsheetCell.getClassStatic(), new SpreadsheetCellRenderer());
+        this.setDefaultEditor(SpreadsheetCell.getClassStatic(), new SpreadsheetCellEditor(new JTextField(), this.getModel()));
     }
 
 
