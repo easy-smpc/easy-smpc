@@ -59,13 +59,14 @@ public class PerformanceEvaluation {
      */
     public static void main(String[] args) throws IOException  {        
         // Create parameters
+        int rounds = 10;
         List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 20}));
         List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10, 100, 1000, 10000}));
-        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 3000, 5000, 10000}));
+        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 20000}));
         
-//          List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3}));
-//          List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10}));
-//          List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000}));
+//          List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {20}));
+//          List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10000}));
+//          List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 3000, 5000, 10000}));
 
         
         // Create connection settings
@@ -73,7 +74,9 @@ public class PerformanceEvaluation {
                 .setSMTPServer("smtp.ionos.de")
                 .setIMAPServer("imap.ionos.de");
         
-        new PerformanceEvaluation(participants, bins, mailboxCheckInterval, connectionIMAPSettings);       
+        for(int i = 0; i < rounds; i++) {
+            new PerformanceEvaluation(participants, bins, mailboxCheckInterval, connectionIMAPSettings);   
+        }
     }
 
     /**
@@ -114,7 +117,7 @@ public class PerformanceEvaluation {
                     Bus.resetStatistics();
                     logger.debug("Wait logged", new Date(), "Started waiting for", WAIT_BETWEEN_PROCESES_MILLISECONDS);
                     try {
-                        Thread.sleep(WAIT_BETWEEN_PROCESES_MILLISECONDS);
+                        Thread.sleep((20 * 1000 * 60) / 4);
                     } catch (InterruptedException e) {
                         throw new IllegalStateException("Unable to wait between processed");
                     }
