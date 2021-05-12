@@ -21,40 +21,42 @@ import javax.swing.table.TableModel;
  * @author Felix Wirth
  *
  */
-public class ScriptMean extends ScriptFunction {
+public class SpreadsheetCellFunctionMean extends SpreadsheetCellFunction {
     
-    ScriptMean(String values, TableModel tableModel) {
+    /**
+     * Create a new instance
+     * 
+     * @param values
+     * @param tableModel
+     */
+    SpreadsheetCellFunctionMean(String values, TableModel tableModel) {
         super(values, tableModel, true);
     }
     
-    /**
-     * Can the script be calculated?
-     * 
-     * @return
-     */
-    public boolean isCaluable() {
-        for(SpreadsheetCell cell : getRelevantCells()) {
-            if (!cell.isCalculable()) {
-                return false;
-            }
-        }        
-        return true;
-    }
-
     @Override
     public BigDecimal calculate() {
         // Check
-        if (!isCaluable()) {
+        if (!isCalculable()) {
             return null;
         }
-        
+
         // Calculate mean
-        BigDecimal sum = BigDecimal.valueOf(0);
+        BigDecimal sum = new BigDecimal(0);
         int index = 0;
-        for(SpreadsheetCell cell : getRelevantCells()) {
-            sum.add(cell.getContentBigDecimal());
+        for (SpreadsheetCell cell : getRelevantCells()) {
+            sum = sum.add(cell.getContentBigDecimal());
             index++;
         }
         return sum.divide(BigDecimal.valueOf(index));
+    }
+
+    @Override
+    public boolean isCalculable() {
+        for (SpreadsheetCell cell : getRelevantCells()) {
+            if (cell == null || !cell.isCalculable()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

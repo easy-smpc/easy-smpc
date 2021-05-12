@@ -22,8 +22,6 @@ import java.math.BigDecimal;
 public class SpreadsheetCellText extends SpreadsheetCell {
     /** Value if in text */
     private String value;
-    /** Function to calculate if applicable */
-    private ScriptFunction function;
     
     /**
      * Create a new instance

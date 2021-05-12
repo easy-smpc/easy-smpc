@@ -28,7 +28,7 @@ import org.apache.commons.lang3.math.NumberUtils;
  * @author Felix Wirth
  *
  */
-public class SpreadsheetCell {
+public abstract class SpreadsheetCell {
     
     /** Type */
     private SpreadsheetCellType type;
@@ -47,34 +47,28 @@ public class SpreadsheetCell {
      * 
      * @return
      */
-    public String getContentDefinition() {
-        return null;
-    }
+    public abstract String getContentDefinition();
     
     /**
+     * Returns the displayed text
+     * 
      * @return
      */
-    public String getDisplayedText() {
-        return null;
-    }
+    public abstract String getDisplayedText();
     
     /**
      * Gets the content of the cell as big decimal
      * 
      * @return
      */
-    public BigDecimal getContentBigDecimal() {
-        return null;
-    }
+    public abstract BigDecimal getContentBigDecimal();
     
     /**
      * Can the cell be calculated?
      * 
      * @return
      */
-    public boolean isCalculable() {
-        return false;
-    }
+    public abstract boolean isCalculable();
     
     /**
      * @return the type
@@ -94,7 +88,7 @@ public class SpreadsheetCell {
      * @param tableModel
      * @return
      */
-    public static SpreadsheetCell createSpreadsheetCell(String value, TableModel tableModel) {
+    public static SpreadsheetCell createNew(String value, TableModel tableModel) {
         
         // Check
         if (value == null) {
@@ -103,7 +97,7 @@ public class SpreadsheetCell {
         
         // Set as script if applicable 
         if (value.charAt(0) == '=') {
-            return new SpreadsheetCellFunction(value, tableModel);            
+            return SpreadsheetCellFunction.createNew(value, tableModel);            
         }
         
         try {
@@ -156,7 +150,8 @@ public class SpreadsheetCell {
             }
             
             // Set text
-            setText(((SpreadsheetCell) value).getDisplayedText());
+            String text = ((SpreadsheetCell) value).getDisplayedText();
+            setText(text != null? text : "");
         }
     }
     
@@ -176,7 +171,8 @@ public class SpreadsheetCell {
 
         public SpreadsheetCellEditor(final JTextField textField, TableModel tableModel) {
             super(textField);
-            this.tableModel = tableModel;
+            /** Table model */
+            //this.tableModel = tableModel;
             
             delegate = new EditorDelegate() {
                 /** SVUID */
@@ -188,7 +184,7 @@ public class SpreadsheetCell {
 
                 public Object getCellEditorValue() {
                     String text = textField.getText();
-                    return text == null || text.length() > 0 ? SpreadsheetCell.createSpreadsheetCell(text, tableModel) : null;
+                    return text == null || text.length() > 0 ? SpreadsheetCell.createNew(text, tableModel) : null;
                 }
             };
             textField.addActionListener(delegate);
