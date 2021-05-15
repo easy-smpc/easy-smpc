@@ -24,7 +24,7 @@ import javax.swing.table.TableModel;
  *
  */
 public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
-    /** Value if in text */
+    /** Formular definition text */
     private String value;
     /** Regex for cell reference */
     private static final String CELL_REFERENCE = "(([A-Z]){1,3}([0-9]){1,7})";
@@ -33,7 +33,7 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
     /** Regex for cell reference or range */
     private static final String CELL_REFERENCE_RANGE ="((" + CELL_RANGE + "|" + CELL_REFERENCE + ");)+";
     /** Regex for function name with cell references */
-    private static final String FUNCTION_WITH_CELL = "=([a-z]*)(\\(){1}" + CELL_REFERENCE_RANGE + "(\\)){1}";
+    private static final String FUNCTION_WITH_CELL = "=([a-zA-Z]*)(\\(){1}" + CELL_REFERENCE_RANGE + "(\\)){1}";
     /** Base for column letters to numbers and v.v. */
     public static String BASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     /** Table model */
@@ -50,13 +50,14 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
      * 
      * @param value
      */
-    public SpreadsheetCellFunction(String values, TableModel tableModel, boolean isSecret) {
+    public SpreadsheetCellFunction(String text, TableModel tableModel, boolean isSecret) {
         super(SpreadsheetCellType.SCRIPT);
 
         // Prepare
         this.tableModel = tableModel;
         this.isSecret = isSecret;
-        String[] splitValues = values.split(";");
+        this.value = text;
+        String[] splitValues = text.substring(text.indexOf("(") + 1, text.length() - 2).split(";");
 
         // Obtain table coordinates out of string
         for (String valuePart : splitValues) {
@@ -82,18 +83,19 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
     }
 
     public static SpreadsheetCellFunction createNew(String text, TableModel tableModel) {
-        // TODO Fix semicolon
+        // TODO Fix this semicolon hack
+        text = text.substring(0, text.length() - 1) + ";" + text.substring(text.length() - 1, text.length());
         if (!text.matches(FUNCTION_WITH_CELL)) {
             throw new IllegalArgumentException("Script does not start with the correct sign!");
         }
-
+        
+        // Create a respective sub class from function name
         String functionName = text.substring(1, text.indexOf("(")).toUpperCase();
-
         try {
             ScriptFunctionType function = ScriptFunctionType.valueOf(functionName);
             switch (function) {
             case MEAN:
-                return new SpreadsheetCellFunctionMean(text.substring(text.indexOf("(") + 1, text.length() - 2), tableModel);
+                return new SpreadsheetCellFunctionMean(text, tableModel);
             default:
                 throw new IllegalArgumentException(String.format("Unknown script function %s",
                                                                  functionName));
@@ -149,7 +151,7 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
     }
     
     /**
-     * Converts a colum letter to a number
+     * Converts a column letter to a number
      * 
      * @param columnAlpha
      * @return number

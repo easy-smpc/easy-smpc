@@ -14,16 +14,23 @@
 package org.bihealth.mi.easysmpc;
 
 import java.awt.BorderLayout;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.bihealth.mi.easysmpc.components.ComponentTable;
-import org.bihealth.mi.easysmpc.components.ComponentTextArea;
 import org.bihealth.mi.easysmpc.resources.Resources;
+import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell.SpreadsheetCellEditor;
 
 /**
  * A perspective
@@ -34,7 +41,8 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class Perspective1CreateSpreadsheet extends Perspective implements ListSelectionListener {
     
     /** The formula field */
-    private ComponentTextArea formularField;
+    private JTextField formulaField;
+    /** The table */
     private ComponentTable table;
 
     /**
@@ -51,7 +59,6 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
     @Override
     public void initialize() {
      
-        
         // Update GUI
         getPanel().revalidate();
         getPanel().repaint(); 
@@ -66,9 +73,62 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
         // Layout
         panel.setLayout(new BorderLayout());
         
-        // Formular field        
-        formularField = new ComponentTextArea(null);
-        
+        // Formula field        
+        formulaField = new JTextField();
+        formulaField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                table.editCellAt(table.getSelectedRow(), table.getSelectedColumn()); 
+            }
+            
+            @Override
+            public void keyReleased(KeyEvent e) {
+                // Empty
+            }
+            
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                    table.editingCanceled(null);
+                    return;
+                }
+                
+                if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    table.editingStopped(null);
+                }
+            }
+        });
+        formulaField.getDocument().addDocumentListener(new DocumentListener() {            
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                ((SpreadsheetCellEditor) table.getCellEditor(table.getSelectedRow(), table.getSelectedColumn())).setTextField(formulaField.getText());                 
+            }
+            
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                ((SpreadsheetCellEditor) table.getCellEditor(table.getSelectedRow(), table.getSelectedColumn())).setTextField(formulaField.getText());
+            }
+            
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                ((SpreadsheetCellEditor) table.getCellEditor(table.getSelectedRow(), table.getSelectedColumn())).setTextField(formulaField.getText());
+            }
+        });
+        formulaField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                table.editingCanceled(null);
+            }
+            
+            @Override
+            public void focusGained(FocusEvent e) {
+                // Check
+                if(table.getSelectedRow() < 0 || table.getSelectedColumn() < 0 ) {
+                    return;
+                }
+                table.editCellAt(table.getSelectedRow(), table.getSelectedColumn());          
+            }
+        });
         
         // Table
         table = new ComponentTable(Resources.TABLE_SIZE, Resources.TABLE_SIZE);
@@ -77,7 +137,7 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
         JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         
         // Split pane
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, formularField, scrollPane);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, formulaField, scrollPane);
         splitPane.setDividerLocation(20);
         panel.add(splitPane, BorderLayout.CENTER);
     }
@@ -95,9 +155,9 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
         
         // Check
         if (table.currentSelectedCellData() == null) {
-            formularField.setText("");
+            formulaField.setText("");
             return;
         }
-        formularField.setText(table.currentSelectedCellData().getContentDefinition());        
+        formulaField.setText(table.currentSelectedCellData().getContentDefinition());        
     }
 }
