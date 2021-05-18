@@ -31,6 +31,7 @@ import javax.mail.internet.MimeBodyPart;
 
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
+import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 
@@ -75,17 +76,16 @@ public abstract class ConnectionEmail {
             try {
     
                 // Extract parts
+                text = message.getSubject();
                 Multipart multipart = (Multipart) message.getContent();
                 if (multipart.getCount() == 2) {
                     
                     // Obtain body and attachment
                     for (int i = 0; i < 2; i++) {
                         BodyPart part = multipart.getBodyPart(i);
-                        if (part != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.INLINE)) {
-                            text = (String)((MimeBodyPart)part).getContent();
-                        } else if (part != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.ATTACHMENT)) {
-                            attachment = getObject(((MimeBodyPart)part).getInputStream());
-                        }
+                        if (part != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.ATTACHMENT)) {
+                          attachment = getObject(((MimeBodyPart)part).getInputStream());
+                      }                        
                     }
                 }
             } catch (Exception e) {
@@ -196,10 +196,9 @@ public abstract class ConnectionEmail {
      * Create participant from body
      * 
      * @param body
-     * @return participant
-     * @throws BusException 
+     * @return participant 
      */
-    private Participant getParticipant(String body) throws BusException {
+    public static Participant getParticipant(String body) {
 
         // Check
         if(!body.contains(PARTICIPANT_NAME_END_TAG) || !body.contains(PARTICIPANT_NAME_END_TAG) ||
@@ -215,7 +214,11 @@ public abstract class ConnectionEmail {
         if (name.isEmpty() || email.isEmpty() || !Participant.isEmailValid(email)) {
             return null;
         } else {
-            return new Participant(name, email);
+            try {
+                return new Participant(name, email);
+            } catch (BusException e) {
+                return null;
+            }
         }
     }
     
@@ -224,9 +227,8 @@ public abstract class ConnectionEmail {
      * 
      * @param body
      * @return scope
-     * @throws BusException 
      */
-    private Scope getScope(String body) throws BusException {
+    public static Scope getScope(String body) {
 
         // Check
         if(!body.contains(SCOPE_NAME_START_TAG) || !body.contains(SCOPE_NAME_END_TAG)){
@@ -259,19 +261,21 @@ public abstract class ConnectionEmail {
 
     /**
      * Lists all relevant e-mails
+     * @param filter 
      * 
      * @return relevant e-mails
      * @throws BusException 
      * @throws InterruptedException 
      */
-    protected abstract List<ConnectionEmailMessage> list() throws BusException, InterruptedException;
+    protected abstract List<ConnectionEmailMessage> list(MessageFilter filter) throws BusException, InterruptedException;
 
     /**
-     * Receives a list of potentially relevant messages
+     * Receives a list of relevant messages
+     * @param filter 
      * @return
      * @throws InterruptedException 
      */
-    protected List<BusEmail.BusEmailMessage> receive() throws BusException, InterruptedException {
+    protected List<BusEmail.BusEmailMessage> receive(MessageFilter filter) throws BusException, InterruptedException {
         
         // Prepare
         List<BusEmail.BusEmailMessage> result = new ArrayList<>();
@@ -279,7 +283,7 @@ public abstract class ConnectionEmail {
         try {
             
             // Receive messages
-            for (ConnectionEmailMessage message : list()) {
+            for (ConnectionEmailMessage message : list(filter)) {
 
                 // Check for interrupt
                 if (Thread.interrupted()) {
@@ -361,8 +365,10 @@ public abstract class ConnectionEmail {
         String recipient = sharedMailbox ? getEmailAddress() : participant.getEmailAddress();
         
         // Subject
-        String subject = String.format(EMAIL_SUBJECT_RECEIVER, scope.getName(), participant.getName());
-        
+        String subject = EMAIL_SUBJECT_PREFIX + SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + " " + 
+                PARTICIPANT_NAME_START_TAG + participant.getName() + PARTICIPANT_NAME_END_TAG + " " + 
+                PARTICIPANT_EMAIL_START_TAG + participant.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG;
+  
         // Body
         String body = SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + "\n" + 
                       PARTICIPANT_NAME_START_TAG + participant.getName() + PARTICIPANT_NAME_END_TAG + "\n" + 
