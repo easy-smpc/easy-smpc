@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
+import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -175,12 +176,21 @@ public class BusEmail extends Bus {
      * @throws BusException 
      * @throws InterruptedException 
      */
-    private synchronized void receiveEmails() throws InterruptedException {
-        
+    private synchronized void receiveEmails() throws InterruptedException {        
         try {
+            // Create filter for relevant messages
+            MessageFilter filter = new MessageFilter() {
+                @Override
+                public boolean accepts(String messageDescription) {
+                    // Check if participant and scope is registered
+                    return isParticipantScopeRegistered(ConnectionEmail.getScope(messageDescription),
+                                                        ConnectionEmail.getParticipant(messageDescription));
+                }
+            };
+
             // Get mails
             BusEmail.BusEmailMessage deleted = null;
-            for (BusEmail.BusEmailMessage message : connection.receive()) {
+            for (BusEmail.BusEmailMessage message : connection.receive(filter)) {
 
                 // Check for interrupt
                 if (Thread.interrupted()) {
@@ -190,7 +200,7 @@ public class BusEmail extends Bus {
 
                 // Mark
                 boolean received = false;
-                
+
                 // Send to scope and participant
                 try {
                     received |= receiveInternal(message.message, message.scope, message.receiver);
@@ -199,13 +209,13 @@ public class BusEmail extends Bus {
                     throw e;
                 }
 
-                // Delete 
+                // Delete
                 if (received) {
                     message.delete();
                     deleted = message;
                 }
             }
-            
+
             // Expunge
             if (deleted != null) {
                 deleted.expunge();
@@ -250,7 +260,7 @@ public class BusEmail extends Bus {
 
             // Get mails
             BusEmail.BusEmailMessage deleted = null;
-            for (BusEmail.BusEmailMessage message : connection.receive()) {
+            for (BusEmail.BusEmailMessage message : connection.receive(null)) {
                 // Delete
                 message.delete();
                 deleted = message;
