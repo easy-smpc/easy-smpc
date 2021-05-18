@@ -111,7 +111,7 @@ public abstract class ConnectionEmail {
             BufferedInputStream bufferedis = new BufferedInputStream(inputStream);
             ByteArrayInputStream bis = new ByteArrayInputStream(bufferedis.readAllBytes());
             ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(bis));
-            Object result = ois.readObject();           
+            Object result = ois.readObject();
             ois.close();
             return result;
         }

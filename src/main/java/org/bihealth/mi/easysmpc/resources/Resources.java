@@ -86,7 +86,7 @@ public class Resources {
     private final static Charset  CHARSET                             = StandardCharsets.UTF_8;
     
     /** Size of loading animation */
-    public static final int       SIZE_LOADING_ANIMATION              = 25;
+    public static final int       SIZE_LOADING_ANIMATION              = 20;
     
     /** Size of checkmark clipart x */
     public static final int       SIZE_CHECKMARK_X                    = 15;
@@ -125,7 +125,10 @@ public class Resources {
 
     /** Interval to check mail box automatically */
     public static final int       INTERVAL_CHECK_MAILBOX_MILLISECONDS = 30000;
-
+    
+    /** Fetch size for messages with IMAP */
+    public static final int FETCH_SIZE_IMAP = 1048576;
+    
     /** Step 1 identifier */
     public static final String    ROUND_1                             = "_round1";
 
@@ -137,9 +140,6 @@ public class Resources {
 
     /** Interval to check existing mailbox connection */
     public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED    = 3000;
-
-    /** Fetch size for messages with IMAP */
-    public static final int       FETCH_SIZE_IMAP                     = 1048576;
     
     /** Maximal trys sending an e-mail */
     public static final int MAX_TRY_SEND_MAIL = 20;
