@@ -16,6 +16,7 @@ package org.bihealth.mi.easybus.implementations.email;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
+import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 
@@ -144,9 +145,19 @@ public class BusEmail extends Bus {
      */
     private synchronized void receiveEmails() throws BusException, InterruptedException {
         
+        // Create filter for relevant messages
+        MessageFilter filter = new MessageFilter() {
+            @Override
+            public boolean accepts(String messageDescription) {
+                // Check if participant and scope is registered
+                return isParticipantScopeRegistered(ConnectionEmail.getScope(messageDescription),
+                                                    ConnectionEmail.getParticipant(messageDescription));
+            }
+        };
+
         // Get mails
         BusEmail.BusEmailMessage deleted = null;
-        for (BusEmail.BusEmailMessage message : connection.receive()) {
+        for (BusEmail.BusEmailMessage message : connection.receive(filter)) {
 
             // Check for interrupt
             if (Thread.interrupted()) {

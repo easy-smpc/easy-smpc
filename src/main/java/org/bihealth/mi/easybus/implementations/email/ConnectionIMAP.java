@@ -40,6 +40,7 @@ import javax.mail.util.ByteArrayDataSource;
 
 import org.apache.commons.math3.util.Pair;
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -159,7 +160,7 @@ public class ConnectionIMAP extends ConnectionEmail {
     }
     
     @Override
-    protected List<ConnectionEmailMessage> list() throws BusException, InterruptedException {
+    protected List<ConnectionEmailMessage> list(MessageFilter filter) throws BusException, InterruptedException {
         
         synchronized (propertiesReceiving) {
                 
@@ -206,8 +207,9 @@ public class ConnectionIMAP extends ConnectionEmail {
 
                     // Select relevant messages
                     try {
-                        if (message.getSubject().startsWith(EMAIL_SUBJECT_PREFIX)) {
-                            result.add(new ConnectionEmailMessage(message, folder));   
+                        if (message.getSubject().startsWith(EMAIL_SUBJECT_PREFIX) &&
+                                (filter == null || filter.accepts(message.getSubject()))) {                           
+                                result.add(new ConnectionEmailMessage(message, folder));
                         }
                     } catch (Exception e) {
                         // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
@@ -249,7 +251,8 @@ public class ConnectionIMAP extends ConnectionEmail {
                 // Add sender and recipient
                 email.setRecipient(RecipientType.TO, new InternetAddress(recipient));
                 email.setSender(new InternetAddress(getEmailAddress()));
-                email.setSubject(subject);
+                email.setFrom(new InternetAddress(getEmailAddress()));
+                email.setSubject(subject);                
                 
                 // Add body
                 MimeBodyPart mimeBodyPart = new MimeBodyPart();
