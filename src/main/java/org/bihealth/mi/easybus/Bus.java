@@ -68,7 +68,7 @@ public abstract class Bus {
      * @param participant
      * @param messageListener
      */
-    public void receive(Scope scope, Participant participant, MessageListener messageListener) {
+    public synchronized void receive(Scope scope, Participant participant, MessageListener messageListener) {
         
         // Get or create scope
         Map<Participant,List<MessageListener>> subscriptionsForScope = subscriptions.get(scope);        
@@ -111,7 +111,7 @@ public abstract class Bus {
      * @param participant
      * @throws InterruptedException 
      */
-    protected boolean receiveInternal(Message message, Scope scope, Participant participant) throws InterruptedException {
+    protected synchronized boolean receiveInternal(Message message, Scope scope, Participant participant) throws InterruptedException {
         
         // Mark received
         boolean received = false;
