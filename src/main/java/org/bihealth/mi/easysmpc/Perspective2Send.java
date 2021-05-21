@@ -120,8 +120,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
          // Check click able send all mails button and save button
          boolean allMessagesRetrieved = getApp().getModel().areAllMessagesRetrieved();
          this.buttonProceed.setEnabled(allMessagesRetrieved);
-         this.buttonSendAllManually.setEnabled(!allMessagesRetrieved);
-         this.buttonSendAllAutomatically.setEnabled(!allMessagesRetrieved && isAutomaticProcessingEnabled());
         
         // If no more messages and automatic processing proceed automatically
         if (allMessagesRetrieved && isAutomaticProcessingEnabled()) {
@@ -228,9 +226,18 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                   Resources.getString("PerspectiveSend.sendAutomaticError"),
                                                   Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
                                                   JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    // Re-activate buttons
+                    buttonSendAllAutomatically.setEnabled(true);
+                    buttonSendAllManually.setEnabled(true);
+                    for (Component c : panelParticipants.getComponents()) {
+                        if (!isOwnEntry(c)) {
+                            ((EntryParticipantCheckmarkSendMail) c).setButtonEnabled(true);
+                        }
+                    }
                 }
-
-                // Activate all buttons
+                
+                // Finalize
                 monitor.setProgress(list.size());
                 stateChanged(new ChangeEvent(this));
                 
