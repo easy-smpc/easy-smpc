@@ -168,6 +168,8 @@ public class RecordTimeDifferences {
                     "duration",
                     calculateMean(timeDifferences)
                     );
+        
+        timeDifferencesMap.remove(studyUID);        
         }
 
     /**
