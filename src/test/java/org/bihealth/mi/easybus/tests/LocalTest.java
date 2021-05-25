@@ -13,6 +13,8 @@
  */
 package org.bihealth.mi.easybus.tests;
 
+import java.util.concurrent.ExecutionException;
+
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
@@ -49,8 +51,8 @@ public class LocalTest {
         try {
             bus.send(new Message("message specific to part1"),
                      scope1ForPart3,
-                     new Participant("number 1", "hello@number1.de"));
-        } catch (BusException e) {
+                     new Participant("number 1", "hello@number1.de")).get();
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     
@@ -58,8 +60,8 @@ public class LocalTest {
         try {
             bus.send(new Message("message for non existing scope"),
                      new Scope("9999"),
-                     new Participant("number 1", "hello@number1.de"));
-        } catch (BusException e) {
+                     new Participant("number 1", "hello@number1.de")).get();
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }

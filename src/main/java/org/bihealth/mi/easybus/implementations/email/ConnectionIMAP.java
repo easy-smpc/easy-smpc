@@ -41,7 +41,7 @@ import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.math3.util.Pair;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.MessageFilter;
-import org.bihealth.mi.easysmpc.resources.Resources;
+import org.bihealth.mi.easybus.Defaults;
 
 /**
  * Defines the connection using IMAP to receive and SMTP to send e-mails
@@ -110,7 +110,7 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesSending.put("mail.smtp.socketFactory.fallback", "false");
         this.propertiesSending.put("mail.smtp.auth", "true");
         this.propertiesReceiving.put("mail.imap.partialfetch", "false");
-        this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
+        this.propertiesReceiving.put("mail.imap.fetchsize", Defaults.FETCH_SIZE_IMAP);
 
 
         // Set proxy

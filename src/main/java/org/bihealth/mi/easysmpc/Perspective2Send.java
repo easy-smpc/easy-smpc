@@ -27,6 +27,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -46,7 +48,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.http.client.utils.URIBuilder;
-import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmarkSendMail;
@@ -180,67 +181,83 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 ProgressMonitor monitor = new ProgressMonitor(Perspective2Send.this.getPanel(), 
                                                               Resources.getString("PerspectiveSend.ProgressTitle"),
                                                               Resources.getString("PerspectiveSend.ProgressNote"),
-                                                              0, list.size());
-                
-                try {
+                                                              0, list.size());      
+                // Timing
+                monitor.setMillisToDecideToPopup(100);
+                monitor.setMillisToPopup(100);
+                monitor.setProgress(0);
+
+                // Init loop
+                boolean messageSent = false;
+                boolean error = false;
+                int workDone = 0;
                     
-                    // Timing
-                    monitor.setMillisToDecideToPopup(100);
-                    monitor.setMillisToPopup(100);
-                    monitor.setProgress(0);
+                // Loop over messages
+                for (EntryParticipantCheckmarkSendMail entry : list) {
+                    // Init
+                    FutureTask<Void> future;
+
+                    if (!isInitialSending()) {
+                        // Send message in bus mode
+                        future = getApp().getModel()
+                                         .getBus()
+                                         .send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
+                                               new Scope(getApp().getModel().studyUID +
+                                                         getRoundIdentifier()),
+                                               new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
+                                                                                       entry.getRightValue()));
+                    } else {
+                        // Send message as regular e-mail
+                        future = getApp().getModel()
+                                         .getBus()
+                                         .sendPlain(entry.getRightValue(),
+                                                    generateEMailSubject(),
+                                                    generateEMailBody(entry,
+                                                                      generateFormatedExchangeString(entry)));
+                    }
+
                     
-                    // Loop over messages
-                    boolean messageSent = false;
-                    int workDone = 0;
-                    for (EntryParticipantCheckmarkSendMail entry : list) {
-                        
-                        if(!isInitialSending()) {
-                            // Send message in bus mode
-                            getApp().getModel().getBus().send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
-                                      new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
-                                      new org.bihealth.mi.easybus.Participant(entry.getLeftValue(), entry.getRightValue()));
-                        } else {
-                            // Send message as regular e-mail
-                            getApp().getModel().getBus().sendPlain(entry.getRightValue(),
-                                                                   generateEMailSubject(),
-                                                                   generateEMailBody(entry, generateFormatedExchangeString(entry)));
-                        }
-                        
+                    try {
+                        // Wait for result with a timeout time
+                        future.get(Resources.TIMEOUT_SEND_EMAILS, TimeUnit.MILLISECONDS);
+
                         // Mark message sent
                         int index = Arrays.asList(panelParticipants.getComponents()).indexOf(entry);
                         getApp().actionMarkMessageRetrieved(index);
                         messageSent = true;
-                        monitor.setProgress(++workDone);
+                    } catch (Exception e) {
+                        // TODO: Differentiate between errors by different exceptions? 
+                        error = true;
                     }
-                    
-                    // Persist changes
-                    if (messageSent) {
-                        getApp().actionSave();
-                    }
-                    
-                } catch (BusException | IOException e) {
-                    
-                    // Error
-                    monitor.setProgress(list.size());
+                    monitor.setProgress(++workDone);
+                }
+
+                // Persist changes
+                if (messageSent) {
+                    getApp().actionSave();
+                }
+
+                // Display error message if applicable
+                if (error) {                   
                     JOptionPane.showMessageDialog(getPanel(),
                                                   Resources.getString("PerspectiveSend.sendAutomaticError"),
                                                   Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
                                                   JOptionPane.ERROR_MESSAGE);
-                } finally {
-                    // Re-activate buttons
-                    buttonSendAllAutomatically.setEnabled(true);
-                    buttonSendAllManually.setEnabled(true);
-                    for (Component c : panelParticipants.getComponents()) {
-                        if (!isOwnEntry(c)) {
-                            ((EntryParticipantCheckmarkSendMail) c).setButtonEnabled(true);
-                        }
-                    }
                 }
                 
+                // Re-activate buttons
+                buttonSendAllAutomatically.setEnabled(true);
+                buttonSendAllManually.setEnabled(true);
+                for (Component c : panelParticipants.getComponents()) {
+                    if (!isOwnEntry(c)) {
+                        ((EntryParticipantCheckmarkSendMail) c).setButtonEnabled(true);
+                    }
+                }
+
                 // Finalize
                 monitor.setProgress(list.size());
                 stateChanged(new ChangeEvent(this));
-                
+
                 // Done
                 return null;
             }

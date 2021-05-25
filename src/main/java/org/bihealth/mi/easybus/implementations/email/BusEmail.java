@@ -13,6 +13,8 @@
  */
 package org.bihealth.mi.easybus.implementations.email;
 
+import java.util.concurrent.FutureTask;
+
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
@@ -26,7 +28,7 @@ import org.bihealth.mi.easybus.Scope;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class BusEmail extends Bus {
+public class BusEmail extends Bus<Void> {
     
     /**
      * Internal message used by email-based implementations
@@ -71,13 +73,25 @@ public class BusEmail extends Bus {
     private Thread          thread;
     /** Stop flag */
     private boolean         stop = false;
-  
+    
     /**
      * Creates a new instance
      * @param connection
      * @param millis - interval in milliseconds in which messages are polled
      */
     public BusEmail(ConnectionEmail connection, int millis) {
+        this(connection, millis, 0);
+    }
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param connection
+     * @param millis
+     * @param sizeThreadpool
+     */
+    public BusEmail(ConnectionEmail connection, int millis, int sizeThreadpool) {
+        super(sizeThreadpool);
         this.connection = connection;
         this.thread = new Thread(new Runnable() {
             @Override
@@ -100,7 +114,7 @@ public class BusEmail extends Bus {
         });
         thread.setDaemon(true);
         thread.start();
-    }    
+    }
     
     @Override
     public boolean isAlive() {
@@ -108,8 +122,9 @@ public class BusEmail extends Bus {
     }
 
     @Override
-    public void send(Message message, Scope scope, Participant participant) throws BusException {
+    public Void sendInternal(Message message, Scope scope, Participant participant) throws BusException {
         this.connection.send(message, scope, participant);
+        return null;
     }
     
     @Override
@@ -217,9 +232,31 @@ public class BusEmail extends Bus {
      * @param recipient
      * @param subject
      * @param body
+     * @return 
      * @throws BusException
      */
-    public void sendPlain(String recipient, String subject, String body) throws BusException {
-        this.connection.send(recipient, subject, body, null);
+    public FutureTask<Void> sendPlain(String recipient, String subject, String body) throws BusException {
+        // Create future task
+        FutureTask<Void> task = new FutureTask<>(new Runnable() {
+            @Override
+            public void run() {
+                // Init
+                boolean sent = false;
+                
+                // Retry until sent successful
+                while(!sent) {
+                    try {
+                        connection.send(recipient, subject, body, null);
+                        sent = true;
+                    } catch (BusException e) {
+                        // Ignore and repeat
+                    }
+                }
+            }
+        }, null);
+        
+        // Start and return
+        getExecutor().execute(task);
+        return task;
     }
 }

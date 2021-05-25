@@ -68,7 +68,7 @@ public class IMAPTest {
                     ListenerImplNegative);
 
         // Send message
-        bus.send(new Message("My shared mailbox message"),
+        bus.sendInternal(new Message("My shared mailbox message"),
                  new Scope("scope1"),
                  new Participant("part1", "hello@number1.de"));
 
