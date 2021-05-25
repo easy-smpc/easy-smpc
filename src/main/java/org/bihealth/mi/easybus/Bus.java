@@ -27,13 +27,16 @@ import java.util.Map;
 public abstract class Bus {
     
     /** Stores the subscriptions with  known participants*/    
-    private final Map<Scope, Map<Participant, List<MessageListener>>> subscriptions;
-    
+    private final Map<Scope, Map<Participant, List<MessageListener>>> subscriptions;   
+    /** Error listener */    
+    private final List<ErrorListener> errorListener;
+
     /**
      * Creates a new instance
      */
     public Bus(){
         this.subscriptions = new HashMap<>();
+        this.errorListener = new ArrayList<>();
     }
     
     /**
@@ -142,5 +145,28 @@ public abstract class Bus {
         
         // At least one is listener is registered for scope and participant tuple
         return true;     
+    }
+    
+    /**
+     * Subscribes in the case of an error
+     *  
+     * @param messageListener
+     */
+    public synchronized void receiveError(ErrorListener errorListener) {
+        if (errorListener != null) {
+            this.errorListener.add(errorListener);
+        }
+    }
+    
+    /**
+     * Sends error messages
+     *  
+     * @param messageListener
+     */
+    public synchronized void receiveErrorInternal(Exception exception) {
+        // TODO synchronize error methods over error list and message methods over subscription map? 
+        for(ErrorListener listener : this.errorListener) {
+            listener.receive(exception);
+        }
     }
 }

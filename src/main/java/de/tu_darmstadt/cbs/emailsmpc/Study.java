@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.ErrorListener;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
@@ -268,16 +269,46 @@ public class Study implements Serializable, Cloneable {
     }
 
     /**
-     * Returns the bus
+     * Returns the bus with standard interval length
      * 
      * @return the bus
      * @throws BusException 
      */
     public BusEmail getBus() throws BusException {
-        if ((this.bus == null || !this.bus.isAlive()) && this.connectionIMAPSettings != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true),
-                                    Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
+        return getBus(Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS, null);
+    }
+    
+    /**
+     * Returns the bus with standard interval length
+     * 
+     * @param errorListener
+     * @return the bus
+     * @throws BusException 
+     */    
+    public BusEmail getBus(ErrorListener errorListener) throws BusException {
+        return getBus(Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS, errorListener);
+    }
+
+    /**
+     * Returns the bus
+     * 
+     * @param millis milliseconds interval to check for new mails
+     * @return the bus
+     * @throws BusException 
+     */
+    public BusEmail getBus(int millis, ErrorListener errorListener) throws BusException {
+        // Check millis
+        if (millis <= 0) {
+            throw new IllegalArgumentException("Interval must be a positive number");
         }
+        
+        // Check or create bus
+        if ((this.bus == null || !this.bus.isAlive()) && this.connectionIMAPSettings != null) {
+            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true), millis);
+            this.bus.receiveError(errorListener);
+        }
+        
+        // Return 
         return this.bus;
     }
     

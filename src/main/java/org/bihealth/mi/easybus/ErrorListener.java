@@ -14,15 +14,15 @@
 package org.bihealth.mi.easybus;
 
 /**
- * An interface allowing the receiving of a message
+ * An interface to process errors in the receiving process
  * 
  * @author Felix Wirth
  *
  */
-public interface MessageListener {
+public interface ErrorListener {
     
     /**
-     * Needs to be implemented in order to receive a message
+     * Needs to be implemented in order to process an error
      */
-    public void receive(Message message);
+    public void receive(Exception exception);
 }

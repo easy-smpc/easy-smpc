@@ -42,6 +42,7 @@ public class BusEmail extends Bus {
         /** Message */
         protected final Message     message;
         
+        
         /**
          * Message
          * @param receiver
@@ -155,37 +156,44 @@ public class BusEmail extends Bus {
             }
         };
 
-        // Get mails
-        BusEmail.BusEmailMessage deleted = null;
-        for (BusEmail.BusEmailMessage message : connection.receive(filter)) {
+        try {
+            // Get mails
+            BusEmail.BusEmailMessage deleted = null;
+            for (BusEmail.BusEmailMessage message : connection.receive(filter)) {
 
-            // Check for interrupt
-            if (Thread.interrupted()) {
-                connection.close();
-                throw new InterruptedException();
+                // Check for interrupt
+                if (Thread.interrupted()) {
+                    connection.close();
+                    throw new InterruptedException();
+                }
+
+                // Mark
+                boolean received = false;
+                
+                // Send to scope and participant
+                try {
+                    received |= receiveInternal(message.message, message.scope, message.receiver);
+                } catch (InterruptedException e) {
+                    connection.close();
+                    throw e;
+                }
+
+                // Delete 
+                if (received) {
+                    message.delete();
+                    deleted = message;
+                }
             }
-
-            // Mark
-            boolean received = false;
             
-            // Send to scope and participant
-            try {
-                received |= receiveInternal(message.message, message.scope, message.receiver);
-            } catch (InterruptedException e) {
-                connection.close();
-                throw e;
+            // Expunge
+            if (deleted != null) {
+                deleted.expunge();
             }
-
-            // Delete 
-            if (received) {
-                message.delete();
-                deleted = message;
-            }
-        }
-        
-        // Expunge
-        if (deleted != null) {
-            deleted.expunge();
+        } catch (BusException e) {
+            // Pass error over
+            this.receiveErrorInternal(e);
+            // Re-throw exception
+            throw e;
         }
     }
     
