@@ -128,11 +128,10 @@ public abstract class Perspective {
         // Stop the bus for automatic processing if running
         if (getApp().getModel() != null) {
             getApp().getModel().stopBus();
-        }
-        
+        }      
         
         // Reset status message and loading visual
         getApp().setStatusMessage("", false);
-        getApp().setAnimation(null);
+        getApp().stopAnimation();
     }
 }

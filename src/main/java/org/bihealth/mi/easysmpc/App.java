@@ -894,13 +894,12 @@ public class App extends JFrame {
         statusMessageLabel.setForeground(errorMessage ? Color.RED : Resources.COLOR_LIGHT_GREEN);   
     }
     
+    /**
+     * Sets the animation
+     * 
+     * @param loadingAnimationCheck
+     */
     public void setAnimation(ComponentLoadingVisualCheck loadingAnimationCheck) {
-        // If no animation deactivate and return
-        if (loadingAnimationCheck == null) {
-            stopFlagVisual = true;
-            return;
-        }
-
         // Activate animation create thread if not existing
         if (loadingVisualWorker == null || loadingVisualWorker.isCancelled() ||
             loadingVisualWorker.isDone()) {
@@ -924,6 +923,21 @@ public class App extends JFrame {
                 }
             };
             loadingVisualWorker.execute();
+        }
+    }
+    
+    /**
+     * Stops the animation
+     */
+    public void stopAnimation() {
+        // Cancel thread if not null
+        if(loadingVisualWorker != null) {
+            loadingVisualWorker.cancel(true);
+        }
+        
+        // Stop animation
+        if(loadingVisual != null) {
+            loadingVisual.deactivate();
         }
     }
 }
