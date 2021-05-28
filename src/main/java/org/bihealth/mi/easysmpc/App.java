@@ -43,6 +43,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
+import org.bihealth.mi.easysmpc.components.ComponentLoadingVisualCheck;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
@@ -251,7 +252,7 @@ public class App extends JFrame {
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BorderLayout());
         JPanel messagesPanel = new JPanel();
-        messagesPanel.setLayout(new BorderLayout());
+        messagesPanel.setLayout(new BorderLayout(Resources.ROW_GAP_LARGE, 0));
         menuPanel.add(messagesPanel, BorderLayout.EAST);
         statusMessageLabel = new JLabel("");
         messagesPanel.add(statusMessageLabel, BorderLayout.CENTER);
@@ -887,38 +888,42 @@ public class App extends JFrame {
      * @param errorMessage (text will be red)
      * @param showLoadingAnimation 
      */
-    public void setStatusMessage(String text, boolean errorMessage, boolean showLoadingAnimation) {
-        
-        // Add text
+    public void setStatusMessage(String text, boolean errorMessage) {
+        // Set text
         statusMessageLabel.setText(text);
-        statusMessageLabel.setForeground(errorMessage ? Color.RED : Resources.COLOR_LIGHT_GREEN);
-        
+        statusMessageLabel.setForeground(errorMessage ? Color.RED : Resources.COLOR_LIGHT_GREEN);   
+    }
+    
+    public void setAnimation(ComponentLoadingVisualCheck loadingAnimationCheck) {
         // If no animation deactivate and return
-        if (!showLoadingAnimation) {
+        if (loadingAnimationCheck == null) {
             stopFlagVisual = true;
             return;
         }
-        
+
         // Activate animation create thread if not existing
-        if (loadingVisualWorker == null || loadingVisualWorker.isCancelled() || loadingVisualWorker.isDone()) {
+        if (loadingVisualWorker == null || loadingVisualWorker.isCancelled() ||
+            loadingVisualWorker.isDone()) {
             stopFlagVisual = false;
             loadingVisualWorker = new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        while (!stopFlagVisual) {
-                            if (getModel().isBusAlive() && getModel().isBusConectedReceiving()) {
-                                loadingVisual.activate();
-                            } else {
-                                loadingVisual.deactivate();
-                                setStatusMessage(Resources.getString("App.24"), true, true);
-                            }
-                            Thread.sleep(Resources.INTERVAL_CHECK_MAILBOX_CONNECTED);
+                @Override
+                protected Void doInBackground() throws Exception {
+                    while (!stopFlagVisual) {
+                        if (loadingAnimationCheck.isDisplayed()) {
+                            loadingVisual.activate();
+                            loadingAnimationCheck.actionSuccess();
+                        } else {
+                            loadingVisual.deactivate();
+                            loadingAnimationCheck.actionError();
+                            stopFlagVisual = true;
                         }
-                        loadingVisual.deactivate();
-                        return null;
+                        Thread.sleep(Resources.INTERVAL_CHECK_MAILBOX_CONNECTED);
                     }
-                };
-                loadingVisualWorker.execute();
-        }    
+                    loadingVisual.deactivate();
+                    return null;
+                }
+            };
+            loadingVisualWorker.execute();
+        }
     }
 }

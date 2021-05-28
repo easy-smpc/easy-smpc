@@ -132,6 +132,7 @@ public abstract class Perspective {
         
         
         // Reset status message and loading visual
-        getApp().setStatusMessage("", false, false);
+        getApp().setStatusMessage("", false);
+        getApp().setAnimation(null);
     }
 }

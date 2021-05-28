@@ -36,6 +36,7 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
+import org.bihealth.mi.easysmpc.components.ComponentLoadingVisualCheck;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmark;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
@@ -104,10 +105,10 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     public void actionPerformed(ActionEvent e) {
         getApp().actionReceiveMessage();
         getApp().actionSave();
-        getApp().setStatusMessage( String.format(Resources.getString("PerspectiveReceive.displaySuccess")
-                                                        , numberSharesComplete()
-                                                        , numberExpectedMessages())
-                                          , false, true);
+        getApp().setStatusMessage(String.format(Resources.getString("PerspectiveReceive.displaySuccess"),
+                                                numberSharesComplete(),
+                                                numberExpectedMessages()),
+                                  false);
 
         this.stateChanged(new ChangeEvent(this));
     }
@@ -124,7 +125,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                     getApp().setStatusMessage( String.format(Resources.getString("PerspectiveReceive.displaySuccess")
                                                                     , numberSharesComplete()
                                                                     , numberExpectedMessages())
-                                                      , false, true);
+                                                      , false);
                     stateChanged(new ChangeEvent(this));
                 }
             }
@@ -204,10 +205,29 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     private void startAutomatedMailImport() {        
         try {
+            // Start receiving
             getApp().getModel().getBus().receive(new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
                         new org.bihealth.mi.easybus.Participant(getApp().getModel().getParticipantFromId(getApp().getModel().ownId).name,
                                                                 getApp().getModel().getParticipantFromId(getApp().getModel().ownId).emailAddress),
-                                                                this);
+                                                                this);            
+            // Set message accordingly
+            getApp().setAnimation(new ComponentLoadingVisualCheck() {
+                                        @Override
+                                        public boolean isDisplayed() {
+                                            // Check if bus is still receiving
+                                            return getApp().getModel().isBusAlive() && getApp().getModel().isBusConectedReceiving();
+                                        }
+                                        
+                                        @Override
+                                        public void actionError() {
+                                            getApp().setStatusMessage(Resources.getString("App.24"), true);
+                                        }
+
+                                        @Override
+                                        public void actionSuccess() {
+                                            getApp().setStatusMessage(Resources.getString("PerspectiveReceive.LoadingInProgress"), false);                                            
+                                        }
+                                    });
         } catch (IllegalArgumentException | BusException e) {
             JOptionPane.showMessageDialog(getPanel(),
                                           Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
@@ -248,7 +268,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
 
         // General data data of study
         JPanel generalDataPanel = new JPanel();
-        generalDataPanel.setLayout(new GridLayout(1 , 1, Resources.ROW_GAP, Resources.ROW_GAP));
+        generalDataPanel.setLayout(new GridLayout(1, 1, Resources.ROW_GAP, Resources.ROW_GAP));
         panel.add(generalDataPanel, BorderLayout.NORTH);
         generalDataPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                     Resources.getString("PerspectiveCreate.General"),
@@ -334,9 +354,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             
             // Start import reading e-mails automatically if enabled 
             startAutomatedMailImport();
-            
-            // Set message accordingly
-            getApp().setStatusMessage(Resources.getString("PerspectiveReceive.LoadingInProgress"), false, true);
         }
         
         // Hide or show button to receive automatically

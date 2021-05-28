@@ -92,7 +92,7 @@ public class ImportClipboard implements Runnable {
                 parent.getApp().setStatusMessage( String.format(Resources.getString("PerspectiveReceive.displaySuccess")
                                                                 , parent.numberSharesComplete()
                                                                 , parent.numberExpectedMessages())
-                                                  , false, false);
+                                                  , false);
                 lastSavedMessage = message;
                 parent.stateChanged(new ChangeEvent(this));
             }
