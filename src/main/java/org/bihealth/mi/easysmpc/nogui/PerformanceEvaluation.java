@@ -59,7 +59,7 @@ public class PerformanceEvaluation {
     public static void main(String[] args) throws IOException  {        
         // Create parameters
         int rounds = 10;
-        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 20}));
+        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10}));
         List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {100, 1000, 10000}));
         List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 20000}));
         
@@ -68,10 +68,14 @@ public class PerformanceEvaluation {
 //          List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 3000, 5000, 10000}));
 
         
-        // Create connection settings
+//        // Create connection settings
         ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
                 .setSMTPServer("smtp.ionos.de")
                 .setIMAPServer("imap.ionos.de");
+//        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@outlook.de").setPassword("3a$ySMPC!")
+//                .setSMTPServer("smtp-mail.outlook.com")
+//                .setIMAPServer("outlook.office365.com")
+//                .setSMTPPort(587);
         
         for(int i = 0; i < rounds; i++) {
             new PerformanceEvaluation(participants, bins, mailboxCheckInterval, connectionIMAPSettings);   
