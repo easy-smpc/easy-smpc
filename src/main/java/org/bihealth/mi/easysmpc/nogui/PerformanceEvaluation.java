@@ -33,6 +33,7 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easysmpc.nogui.RandomCombinator.Combination;
 import org.bihealth.mi.easysmpc.resources.Resources;
 /**
  * Starts a performance test without GUI
@@ -58,27 +59,28 @@ public class PerformanceEvaluation {
      */
     public static void main(String[] args) throws IOException  {        
         // Create parameters
-        int rounds = 10;
-        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10}));
-        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {100, 1000, 10000}));
+        int rounds = 1000;
+        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10, 20}));
+        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 10000}));
         List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 20000}));
         
+        RandomCombinator combinator = new RandomCombinator(participants, bins, mailboxCheckInterval);
 //          List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {20}));
 //          List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10000}));
 //          List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 3000, 5000, 10000}));
 
         
-//        // Create connection settings
+        // Create connection settings
         ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
                 .setSMTPServer("smtp.ionos.de")
                 .setIMAPServer("imap.ionos.de");
-//        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@outlook.de").setPassword("3a$ySMPC!")
-//                .setSMTPServer("smtp-mail.outlook.com")
-//                .setIMAPServer("outlook.office365.com")
-//                .setSMTPPort(587);
+//        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@yahoo.de").setPassword("jjyhafmgqazaawge")
+//                .setSMTPServer("imap.mail.yahoo.com")
+//                .setIMAPServer("smtp.mail.yahoo.com");
         
         for(int i = 0; i < rounds; i++) {
-            new PerformanceEvaluation(participants, bins, mailboxCheckInterval, connectionIMAPSettings);   
+            Combination combination = combinator.getNewCombination();
+            new PerformanceEvaluation(combination.getParticpants(), combination.getBins(), combination.getMailboxCheckInterval(), connectionIMAPSettings);   
         }
     }
 
@@ -93,7 +95,8 @@ public class PerformanceEvaluation {
      */
     public PerformanceEvaluation(List<Integer> participants,
                                  List<Integer> bins,
-                                 List<Integer> mailboxCheckIntervals, ConnectionIMAPSettings connectionIMAPSettings) throws IOException {
+                                 List<Integer> mailboxCheckIntervals,
+                                 ConnectionIMAPSettings connectionIMAPSettings) throws IOException {
         // Prepare
         try {
             prepare(connectionIMAPSettings);
@@ -118,7 +121,7 @@ public class PerformanceEvaluation {
                         }
                     }
                     Bus.resetStatistics();
-                    int waitTime = (participantNumber * 1000 * 60) / 4;
+                    int waitTime = (participantNumber * 1000 * 60) / 2;
                     logger.debug("Wait logged", new Date(), "Started waiting for",  waitTime);
                     try {
                         Thread.sleep(waitTime);
