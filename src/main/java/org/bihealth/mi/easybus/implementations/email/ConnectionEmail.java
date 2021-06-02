@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
@@ -29,6 +30,9 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
@@ -62,6 +66,9 @@ public abstract class ConnectionEmail {
 
         /** Attachment */
         private Object                   attachment = null;
+        
+        /** Logger */
+        private static final Logger logger = LogManager.getLogger(ConnectionEmail.class);
     
         /**
          * Creates a new instance
@@ -96,6 +103,7 @@ public abstract class ConnectionEmail {
                 }
             } catch (Exception e) {
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+                logger.debug("load message failed logged", new Date(), "message.getSubject() failed", ExceptionUtils.getStackTrace(e));
             }
         }
     
@@ -123,6 +131,7 @@ public abstract class ConnectionEmail {
             try {
                 message.setFlag(Flag.DELETED, true);
             } catch (MessagingException e) {
+                logger.debug("delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
         }
@@ -137,6 +146,7 @@ public abstract class ConnectionEmail {
                     folder.close(true);
                 }
             } catch (MessagingException e) {
+                logger.debug("expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
         }

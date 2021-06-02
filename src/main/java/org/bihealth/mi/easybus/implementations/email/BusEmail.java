@@ -220,7 +220,7 @@ public class BusEmail extends Bus {
                 deleted.expunge();
             }
         } catch (BusException e) {
-            logger.debug("ReceiveEmails() failed logged", new Date(), "ReciveEmails() failed", ExceptionUtils.getStackTrace(e));
+            logger.debug("ReceiveEmails() failed logged", new Date(), "ReceiveEmails() failed", ExceptionUtils.getStackTrace(e));
         }
     }
     

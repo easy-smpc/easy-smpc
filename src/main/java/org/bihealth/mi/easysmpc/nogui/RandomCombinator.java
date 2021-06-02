@@ -54,8 +54,7 @@ public class RandomCombinator {
      * 
      * @return
      */
-    public Combination getNewCombination() {
-        
+    public Combination getNewCombination() {        
         return new Combination(particpants.get(random.nextInt(particpants.size())),
                                bins.get(random.nextInt(bins.size())),
                                mailboxCheckInterval.get(random.nextInt(mailboxCheckInterval.size())));

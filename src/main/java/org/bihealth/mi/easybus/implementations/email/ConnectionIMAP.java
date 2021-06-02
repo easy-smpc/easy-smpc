@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
@@ -38,7 +39,10 @@ import javax.mail.internet.MimeMessage.RecipientType;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.math3.util.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.MessageFilter;
@@ -66,6 +70,8 @@ public class ConnectionIMAP extends ConnectionEmail {
     private Session             session;
     /** Password of the user */
     private String              password;
+    /** Logger */
+    private static final Logger logger = LogManager.getLogger(ConnectionIMAP.class);
 
     /**
      * Create a new instance
@@ -157,7 +163,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 store.close();
             }
         } catch (Exception e) {
-            // Ignore
+            // Ignore           
         }
     }
     
@@ -215,6 +221,8 @@ public class ConnectionIMAP extends ConnectionEmail {
                         }
                     } catch (Exception e) {
                         // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+                        logger.debug("message.getSubject() failed logged", new Date(), "message.getSubject() failed", ExceptionUtils.getStackTrace(e));
+                        break;
                     }
                 }
                 
@@ -321,6 +329,10 @@ public class ConnectionIMAP extends ConnectionEmail {
         }
     }
     
+    /**
+     * Is sending connected?
+     * @return
+     */
     protected synchronized boolean isSendingConnected() {
         try {
             // Check sending e-mails

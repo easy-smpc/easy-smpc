@@ -63,13 +63,9 @@ public class PerformanceEvaluation {
         List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10, 20}));
         List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 10000}));
         List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 20000}));
-        
-        RandomCombinator combinator = new RandomCombinator(participants, bins, mailboxCheckInterval);
-//          List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {20}));
-//          List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10000}));
-//          List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 3000, 5000, 10000}));
 
-        
+        RandomCombinator combinator = new RandomCombinator(participants, bins, mailboxCheckInterval);
+
         // Create connection settings
         ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
                 .setSMTPServer("smtp.ionos.de")
@@ -102,7 +98,7 @@ public class PerformanceEvaluation {
             prepare(connectionIMAPSettings);
         } catch (IOException | BusException | InterruptedException e) {
             throw new IllegalStateException("Unable to prepare performance evaluation", e);
-        }                
+        }              
         
         // Permutation of parameters
         for (int participantNumber : participants) {
