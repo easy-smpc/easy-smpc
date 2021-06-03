@@ -60,9 +60,9 @@ public class PerformanceEvaluation {
     public static void main(String[] args) throws IOException  {        
         // Create parameters
         int rounds = 1000;
-        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10, 20}));
+        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10}));
         List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 10000}));
-        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 20000}));
+        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {5000, 10000}));
 
         RandomCombinator combinator = new RandomCombinator(participants, bins, mailboxCheckInterval);
 
@@ -117,7 +117,7 @@ public class PerformanceEvaluation {
                         }
                     }
                     Bus.resetStatistics();
-                    int waitTime = (participantNumber * 1000 * 60) / 2;
+                    int waitTime = (participantNumber * 1000 * 60) / 4;
                     logger.debug("Wait logged", new Date(), "Started waiting for",  waitTime);
                     try {
                         Thread.sleep(waitTime);
