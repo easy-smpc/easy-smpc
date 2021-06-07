@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
@@ -45,10 +46,11 @@ public class PerformanceEvaluation {
     /** File path */
     public static final String FILEPATH = "performanceEvaluation";
     /** CSV printer */
-    public static CSVPrinter csvPrinter;
-    
+    public static CSVPrinter csvPrinter;    
     /** Logger */
     private static Logger logger;
+    /** Was preparation executed*/
+    private static boolean prepared = false;
     
     /**
      * 
@@ -93,12 +95,15 @@ public class PerformanceEvaluation {
                                  List<Integer> bins,
                                  List<Integer> mailboxCheckIntervals,
                                  ConnectionIMAPSettings connectionIMAPSettings) throws IOException {
-        // Prepare
+        // Prepare if necessary
+        if(!prepared) {
         try {
             prepare(connectionIMAPSettings);
+            prepared = true;
         } catch (IOException | BusException | InterruptedException e) {
+            logger.error("Preparation failed logged", new Date(), "Preparation failed", ExceptionUtils.getStackTrace(e));
             throw new IllegalStateException("Unable to prepare performance evaluation", e);
-        }              
+        }}              
         
         // Permutation of parameters
         for (int participantNumber : participants) {
@@ -113,7 +118,7 @@ public class PerformanceEvaluation {
                         try {
                             Thread.sleep(Resources.INTERVAL_SCHEDULER_MILLISECONDS);
                         } catch (InterruptedException e) {
-                            // Ignore
+                            logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged", ExceptionUtils.getStackTrace(e));
                         }
                     }
                     Bus.resetStatistics();
@@ -122,7 +127,7 @@ public class PerformanceEvaluation {
                     try {
                         Thread.sleep(waitTime);
                     } catch (InterruptedException e) {
-                        throw new IllegalStateException("Unable to wait between processed");
+                        logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged", ExceptionUtils.getStackTrace(e));                        
                     }
                 }
             }

@@ -15,7 +15,9 @@ package org.bihealth.mi.easysmpc.nogui;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Date;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
@@ -84,6 +86,7 @@ public class ParticipatingUser extends User {
                                             }
                                         });
         } catch (BusException e) {
+            logger.error("Unable to register to receive initial e-mails logged", new Date(), "Unable to register to receive initial e-mails", ExceptionUtils.getStackTrace(e));
             throw new IllegalStateException("Unable to register to receive initial e-mails", e);
         }
     }
@@ -107,6 +110,7 @@ public class ParticipatingUser extends User {
             proceedCommonProcessSteps();
             
         } catch (ClassNotFoundException | IllegalArgumentException | IllegalStateException | IOException e) {
+            logger.error("Unable to execute particpating users steps logged", new Date(), "Unable to execute particpating users steps", ExceptionUtils.getStackTrace(e));
             throw new IllegalStateException("Unable to execute particpating users steps" , e);
         }
         

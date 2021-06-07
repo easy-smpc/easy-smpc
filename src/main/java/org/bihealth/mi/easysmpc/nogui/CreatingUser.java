@@ -15,8 +15,12 @@ package org.bihealth.mi.easysmpc.nogui;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -31,7 +35,9 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class CreatingUser extends User {
     
     /** All participating users */
-    private final List<User> participatingUsers = new ArrayList<>(); 
+    private final List<User> participatingUsers = new ArrayList<>();
+    /** Logger */
+    Logger logger = LogManager.getLogger(CreatingUser.class);
     
     /**
      * Create a new instance
@@ -58,6 +64,7 @@ public class CreatingUser extends User {
                                         generateBins(numberBins,numberParticipants, FIXED_LENGTH_STRING, FIXED_LENGTH_BIT_BIGINTEGER), connectionIMAPSettings);
             RecordTimeDifferences.init(getModel(), mailBoxCheckInterval, System.nanoTime());
         } catch (IOException | IllegalStateException e) {
+            logger.error("Unable to init logged", new Date(), "Unable to init", ExceptionUtils.getStackTrace(e));
             throw new IllegalStateException("Unable to init study!", e);
         }
         

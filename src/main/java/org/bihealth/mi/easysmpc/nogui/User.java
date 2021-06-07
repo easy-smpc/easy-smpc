@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Random;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
@@ -46,7 +47,7 @@ public abstract class User implements MessageListener {
     /** Round for initial e-mails */
     public final String ROUND_0 = "_round0";
     /** Logger */
-    private static final Logger logger = LogManager.getLogger(User.class);
+    protected static final Logger logger = LogManager.getLogger(User.class);
             
     /** The study model */
     private Study model = new Study();
@@ -93,6 +94,7 @@ public abstract class User implements MessageListener {
             RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());            
             logger.debug("Result logged", new Date(), getModel().studyUID, "result", getModel().ownId, "participantid", getModel().getAllResults()[0].name, "result name", getModel().getAllResults()[0].value, "result");
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
+            logger.error("Unable to process common process steps logged", new Date(), "Unable to process common process steps", ExceptionUtils.getStackTrace(e));
             throw new IllegalStateException("Unable to process common process steps", e);
         }
     }
@@ -138,6 +140,7 @@ public abstract class User implements MessageListener {
                     // Mark message as sent
                     model.markMessageSent(index);
                 } catch (BusException | IOException e) {
+                    logger.error("Unable to send e-mail logged", new Date(), "Unable to send e-mail", ExceptionUtils.getStackTrace(e));
                     throw new IllegalStateException("Unable to send e-mail!", e);
                 }
             }
@@ -147,6 +150,7 @@ public abstract class User implements MessageListener {
         try {
             getModel().getBus().stop();
         } catch (BusException e) {
+            logger.error("Unable to stop bus logged", new Date(), "Unable to stop bus", ExceptionUtils.getStackTrace(e));
             throw new IllegalStateException("Unable to stop bus", e);
         }
     }
@@ -208,7 +212,7 @@ public abstract class User implements MessageListener {
         return value;
       }
     
-@Override
+    @Override
     public void receive(org.bihealth.mi.easybus.Message message) {
         String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
 
@@ -216,8 +220,7 @@ public abstract class User implements MessageListener {
             try {
                 model.setShareFromMessage(Message.deserializeMessage(messageStripped));
             } catch (IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException | IOException e) {
-                // TODO Leave only stack trace here?
-                e.printStackTrace();
+                logger.error("Unable to digest message logged", new Date(), "Unable to digest message", ExceptionUtils.getStackTrace(e));
             }
         }
     }
