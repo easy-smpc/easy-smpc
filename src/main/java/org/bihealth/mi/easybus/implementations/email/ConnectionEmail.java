@@ -94,7 +94,7 @@ public abstract class ConnectionEmail {
                     for (int i = 0; i < 2; i++) {
                         BodyPart part = multipart.getBodyPart(i);
 
-                        if (part != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.ATTACHMENT)) {
+                        if (part != null && part.getDisposition() != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.ATTACHMENT)) {
                           attachment = getObject(((MimeBodyPart)part).getInputStream());
                           // Add statistics
                           Bus.totalSizeMessagesReceived.addAndGet(((MimeBodyPart)part).getSize());
@@ -103,7 +103,7 @@ public abstract class ConnectionEmail {
                 }
             } catch (Exception e) {
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-                logger.debug("load message failed logged", new Date(), "message.getSubject() failed", ExceptionUtils.getStackTrace(e));
+                logger.debug("load message failed logged", new Date(), "load message failed", ExceptionUtils.getStackTrace(e));
             }
         }
     

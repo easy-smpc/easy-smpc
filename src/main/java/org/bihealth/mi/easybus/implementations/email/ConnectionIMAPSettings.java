@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.bihealth.mi.easybus.Participant;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -90,9 +89,9 @@ public class ConnectionIMAPSettings implements Serializable {
         
         // Checks
         checkNonNull(emailAddress);
-        if (!Participant.isEmailValid(emailAddress)) {
-            throw new IllegalArgumentException("Invalid e-mail address");
-        }
+//        if (!Participant.isEmailValid(emailAddress)) {
+//            throw new IllegalArgumentException("Invalid e-mail address");
+//        }
         
         // Store
         this.emailAddress = emailAddress;

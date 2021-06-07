@@ -59,7 +59,6 @@ public class ConnectionIMAP extends ConnectionEmail {
     
     /** File name of the attached message */
     private static final String FILENAME_MESSAGE = "message";
-
     /** Properties */
     private final Properties    propertiesReceiving;
     /** Properties */
@@ -98,8 +97,8 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesReceiving = new Properties();
         this.propertiesReceiving.put("mail.imap.host", settings.getIMAPServer());
         this.propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));
-        this.propertiesReceiving.put("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        this.propertiesReceiving.put("mail.imap.socketFactory.fallback", "false");
+        //this.propertiesReceiving.put("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        //this.propertiesReceiving.put("mail.imap.socketFactory.fallback", "false");
         this.propertiesReceiving.put("mail.imap.socketFactory.port", String.valueOf(settings.getIMAPPort()));
         this.propertiesReceiving.put("mail.imap.partialfetch", "false");
         this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
@@ -115,8 +114,8 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
         this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
         this.propertiesSending.put("mail.smtp.socketFactory.port", String.valueOf(settings.getSMTPPort()));
-        this.propertiesSending.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        this.propertiesSending.put("mail.smtp.socketFactory.fallback", "false");
+        //this.propertiesSending.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        //this.propertiesSending.put("mail.smtp.socketFactory.fallback", "false");
         this.propertiesSending.put("mail.smtp.auth", "true");
         this.propertiesReceiving.put("mail.imap.partialfetch", "false");
         this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
@@ -222,7 +221,6 @@ public class ConnectionIMAP extends ConnectionEmail {
                     } catch (Exception e) {
                         // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
                         logger.debug("message.getSubject() failed logged", new Date(), "message.getSubject() failed", ExceptionUtils.getStackTrace(e));
-                        break;
                     }
                 }
                 
@@ -262,7 +260,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 email.setRecipient(RecipientType.TO, new InternetAddress(recipient));
                 email.setSender(new InternetAddress(getEmailAddress()));
                 email.setFrom(new InternetAddress(getEmailAddress()));
-                email.setSubject(subject);                
+                email.setSubject(subject);              
                 
                 // Add body
                 MimeBodyPart mimeBodyPart = new MimeBodyPart();
