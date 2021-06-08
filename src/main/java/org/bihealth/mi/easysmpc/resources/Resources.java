@@ -127,7 +127,7 @@ public class Resources {
     public static final int       INTERVAL_CHECK_MAILBOX_MILLISECONDS = 30000;
     
     /** Fetch size for messages with IMAP */
-    public static final int FETCH_SIZE_IMAP = 1048576;
+    public static final int FETCH_SIZE_IMAP = 36700160;
     
     /** Step 1 identifier */
     public static final String    ROUND_1                             = "_round1";

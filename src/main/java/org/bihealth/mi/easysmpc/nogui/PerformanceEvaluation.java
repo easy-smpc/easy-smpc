@@ -62,24 +62,29 @@ public class PerformanceEvaluation {
     public static void main(String[] args) throws IOException  {        
         // Create parameters
         int rounds = 1000;
-        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {20}));
-        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10000}));
-        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000}));
+        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {4}));
+        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000}));
+        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {10000}));
 
         RandomCombinator combinator = new RandomCombinator(participants, bins, mailboxCheckInterval);
 
         // Create connection settings
-        //ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
+//        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
 //                .setSMTPServer("smtp.ionos.de")
 //                .setIMAPServer("imap.ionos.de");
 //        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@yahoo.de").setPassword("jjyhafmgqazaawge")
 //                .setSMTPServer("imap.mail.yahoo.com")
 //                .setIMAPServer("smtp.mail.yahoo.com");
-      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc@localhost").setPassword("12345")
-      .setSMTPServer("localhost")
-      .setIMAPServer("localhost")
+//      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc@localhost").setPassword("12345")
+//      .setSMTPServer("localhost")
+//      .setIMAPServer("localhost")
+//      .setIMAPPort(143)
+//      .setSMTPPort(587);
+      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easy@easysmpc.org").setPassword("12345")
+      .setSMTPServer("easysmpc.org")
+      .setIMAPServer("easysmpc.org")
       .setIMAPPort(143)
-      .setSMTPPort(587);
+      .setSMTPPort(25);
         
         for(int i = 0; i < rounds; i++) {
             Combination combination = combinator.getNewCombination();
@@ -128,7 +133,8 @@ public class PerformanceEvaluation {
                         }
                     }
                     Bus.resetStatistics();
-                    int waitTime = (participantNumber * 1000 * 60) / 4;
+                    //int waitTime = (participantNumber * 1000 * 60) / 4;
+                    int waitTime = 10000;
                     logger.debug("Wait logged", new Date(), "Started waiting for",  waitTime);
                     try {
                         Thread.sleep(waitTime);
