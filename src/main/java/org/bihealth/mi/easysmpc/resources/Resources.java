@@ -54,6 +54,9 @@ public class Resources {
 
     /** Row gap */
     public static final int       ROW_GAP                             = 2;
+    
+    /** Row gap large */
+    public static final int       ROW_GAP_LARGE                       = 5;
 
     /** X-size of small dialog */
     public static final int       SIZE_DIALOG_SMALL_X                 = 450;
@@ -86,7 +89,7 @@ public class Resources {
     private final static Charset  CHARSET                             = StandardCharsets.UTF_8;
     
     /** Size of loading animation */
-    public static final int       SIZE_LOADING_ANIMATION              = 20;
+    public static final int       SIZE_LOADING_ANIMATION              = 15;
     
     /** Size of checkmark clipart x */
     public static final int       SIZE_CHECKMARK_X                    = 15;

@@ -38,7 +38,7 @@ public class ComponentLoadingVisual extends JPanel {
      * @throws IOException 
      */
     public ComponentLoadingVisual(ImageIcon image) throws IOException{
-        // Initalize
+        // Initialize
         this.imageIcon = image;
         
         // Create layout and add panel
