@@ -22,18 +22,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import javax.mail.BodyPart;
-import javax.mail.Flags.Flag;
-import javax.mail.Folder;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.internet.MimeBodyPart;
-
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
+
+import jakarta.mail.BodyPart;
+import jakarta.mail.Flags.Flag;
+import jakarta.mail.Folder;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.internet.MimeBodyPart;
 
 /**
  * Abstract class for e-mail connections
@@ -51,7 +51,7 @@ public abstract class ConnectionEmail {
     protected static class ConnectionEmailMessage {
 
         /** Message */
-        private final javax.mail.Message message;
+        private final jakarta.mail.Message message;
 
         /** Folder */
         private final Folder             folder;
@@ -67,7 +67,7 @@ public abstract class ConnectionEmail {
          * @param message
          * @param folder
          */
-        public ConnectionEmailMessage(javax.mail.Message message, Folder folder) {
+        public ConnectionEmailMessage(jakarta.mail.Message message, Folder folder) {
             
             // Store
             this.message = message;
