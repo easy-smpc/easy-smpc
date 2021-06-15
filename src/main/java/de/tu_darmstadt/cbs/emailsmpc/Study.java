@@ -247,10 +247,8 @@ public class Study implements Serializable, Cloneable {
      *
      * @return the all results
      * @throws IllegalStateException the illegal state exception
-     * @deprecated Will get replaced by detAllDecResults()
      */
-    @Deprecated
-    public BinResult[] getAllResults() throws IllegalStateException {
+    public BinResult[] getAllResults() throws IllegalStateException, IllegalArgumentException {
         if (state != StudyState.FINISHED)
             throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
         BinResult[] result = new BinResult[bins.length];
@@ -261,37 +259,6 @@ public class Study implements Serializable, Cloneable {
     }
 
     /**
-     * Gets the all results.
-     *
-     * @return the all results
-     * @throws IllegalStateException the illegal state exception
-     */
-    public BinResult[] getAllDecResults() throws IllegalStateException, IllegalArgumentException {
-        if (state != StudyState.FINISHED)
-            throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
-        BinResult[] result = new BinResult[bins.length];
-        for (int i = 0; i < bins.length; i++) {
-            result[i] = getBinDecResult(i);
-        }
-        return result;
-    }
-
-    /**
-     * Gets the bin result.
-     *
-     * @param binId the bin id
-     * @return the bin result
-     * @throws IllegalStateException the illegal state exception
-     * @deprecated Will get replaced by getBinDecResult
-     */
-    @Deprecated
-    public BinResult getBinResult(int binId) throws IllegalStateException {
-        if (state != StudyState.FINISHED)
-            throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
-        return new BinResult(bins[binId].name, bins[binId].reconstructBin());
-    }
-
-    /**
      * Gets the bin result.
      *
      * @param binId the bin id
@@ -299,7 +266,7 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IllegalArgumentException fractionalBits must be positive
      */
-    public BinResult getBinDecResult(int binId) throws IllegalStateException, IllegalArgumentException {
+    public BinResult getBinResult(int binId) throws IllegalStateException, IllegalArgumentException {
         if (fractionalBits < 0)
           throw new IllegalArgumentException("fractionalBits must be positive");
         if (state != StudyState.FINISHED)
@@ -728,25 +695,6 @@ public class Study implements Serializable, Cloneable {
      */
     public void toSendingResult() throws IllegalStateException, IOException{
         advanceState(StudyState.SENDING_RESULT);
-    }
-
-    /**
-     * To sending shares.
-     *
-     * @param values the values
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws IllegalStateException the illegal state exception
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @deprecated Deprecated, replace BigInteger values with BigDecimal values
-     */
-    @Deprecated
-    public void toSendingShares(BigInteger[] values) throws IllegalArgumentException, IllegalStateException, IOException {
-        if (values.length != bins.length)
-            throw new IllegalArgumentException("Number of values not equal number of bins");
-        for (int i = 0; i < bins.length; i++) {
-            bins[i].shareValue(values[i]);
-        }
-        advanceState(StudyState.SENDING_SHARE);
     }
 
     /**

@@ -14,7 +14,7 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
 import static org.junit.Assert.assertTrue;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import org.junit.Test;
 
 /**
@@ -30,7 +30,7 @@ public class BinTest {
    */
   private static Bin getInitializedBin() {
     Bin bin = new Bin("Testbin", 4);
-    bin.shareValue(BigInteger.valueOf(5));
+    bin.shareValue(BigDecimal.valueOf(5), 32);
     return bin;
   }
 
