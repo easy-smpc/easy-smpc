@@ -250,7 +250,7 @@ public class Study implements Serializable, Cloneable {
      */
     public BinResult[] getAllResults() throws IllegalStateException, IllegalArgumentException {
         if (state != StudyState.FINISHED)
-            throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
+            throw new IllegalStateException("Forbidden action (getAllResults) at current state " + state);
         BinResult[] result = new BinResult[bins.length];
         for (int i = 0; i < bins.length; i++) {
             result[i] = getBinResult(i);
