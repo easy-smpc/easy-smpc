@@ -265,14 +265,7 @@ public class Bin implements Serializable, Cloneable {
      *
      * @return the big integer
      * @throws IllegalStateException the illegal state exception
-     * @deprecated Deprecated, please use reconstructBin(frationalBits)
      */
-    @Deprecated
-    public BigInteger reconstructBin() throws IllegalStateException {
-        if (!isComplete())
-            throw new IllegalStateException("Can not reconstruct incomplete shares");
-        return ArithmeticSharing.reconstruct(inShares);
-    }
     public BigDecimal reconstructBin(int fractionalBits) throws IllegalStateException, IllegalArgumentException {
         if (fractionalBits < 0)
           throw new IllegalArgumentException("fractionalBits must be positive");
@@ -302,21 +295,6 @@ public class Bin implements Serializable, Cloneable {
             throw new IllegalArgumentException("Number of shares not compatible with number of parties");
         }
         inShares = shares;
-    }
-
-    /**
-     * Share value.
-     *
-     * @param value the value
-     * @throws IllegalStateException the illegal state exception
-     * @deprecated Deprecated, please use shareValue(BigDecimal, frationalBits)
-     */
-    @Deprecated
-    public void shareValue(BigInteger value) throws IllegalStateException {
-        if (!isInitialized())
-            throw new IllegalStateException("Unable to share value in unititialized bin");
-        ArithmeticSharing as = new ArithmeticSharing(outShares.length);
-        outShares = as.share(value);
     }
 
     /**

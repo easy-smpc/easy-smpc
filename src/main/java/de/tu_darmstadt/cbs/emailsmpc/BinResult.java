@@ -13,7 +13,6 @@
  */
 package de.tu_darmstadt.cbs.emailsmpc;
 
-import java.math.BigInteger;
 import java.math.BigDecimal;
 
 /**
@@ -26,25 +25,17 @@ public class BinResult{
     public String name;
     
     /** The value. */
-    @Deprecated
-    public BigInteger value;
-    public BigDecimal valueDec;
+    public BigDecimal value;
 
     /**
      * Instantiates a new bin result.
      *
      * @param name the name
      * @param value the value
-     * @deprecated Deprecated, please use BinResult(String, BigDecimal)
      */
-    @Deprecated
-    BinResult(String name, BigInteger value) {
-        this.name = name;
-        this.value = value;
-    }
     BinResult(String name, BigDecimal value) {
         this.name = name;
-        this.valueDec = value;
+        this.value = value;
     }
 
     /**
@@ -63,8 +54,8 @@ public class BinResult{
         boolean result = br.name.equals(name);
         if (value != null && br.value != null)
           result &= br.value.equals(value);
-        if (valueDec != null && br.valueDec != null)
-          result &= br.valueDec.equals(valueDec);
+        if (value != null && br.value != null)
+          result &= br.value.equals(value);
         return result;
     }
 
@@ -78,8 +69,8 @@ public class BinResult{
         int result = 0;
         if (value != null)
           result += value.hashCode();
-        if (valueDec != null)
-          result += valueDec.hashCode();
+        if (value != null)
+          result += value.hashCode();
         return 31 * result + name.hashCode();
     }
 
@@ -93,8 +84,8 @@ public class BinResult{
       String result = new String(name);
       if (value != null)
         result += ": " + value.toString();
-      if (valueDec != null)
-        result += ": " + valueDec.toString();
+      if (value != null)
+        result += ": " + value.toString();
       return result;
     }
 }

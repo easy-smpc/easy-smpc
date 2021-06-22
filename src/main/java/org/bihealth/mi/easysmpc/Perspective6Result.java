@@ -83,8 +83,8 @@ public class Perspective6Result extends Perspective {
             panelParticipants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress, i == getApp().getModel().ownId));
             i++;
         }
-        for (BinResult binResult : getApp().getModel().getAllDecResults()) {
-            panelBins.add(new EntryBinNoButton(binResult.name, binResult.valueDec.toString()));
+        for (BinResult binResult : getApp().getModel().getAllResults()) {
+            panelBins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
         }
         
         // Update GUI
