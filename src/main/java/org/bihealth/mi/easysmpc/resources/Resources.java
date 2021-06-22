@@ -144,6 +144,9 @@ public class Resources {
     /** Interval to check existing mailbox connection */
     public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED = 3000;
 
+    /** Fractional bits for decimal values */
+    public static final int FRACTIONAL_BITS = 32;
+        
     /**
      * Returns all available languages
      * 

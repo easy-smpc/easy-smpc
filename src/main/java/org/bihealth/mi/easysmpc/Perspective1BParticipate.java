@@ -18,7 +18,7 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -116,9 +116,9 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      * @return Saving actually performed?
      */
     private void actionSave() {
-        BigInteger[] secret = new BigInteger[getApp().getModel().bins.length];
+        BigDecimal[] secret = new BigDecimal[getApp().getModel().bins.length];
         for (int i = 0; i < this.panelBins.getComponents().length; i++) {
-            secret[i] = new BigInteger(((EntryBin) this.panelBins.getComponents()[i]).getRightValue());
+            secret[i] = new BigDecimal(((EntryBin) this.panelBins.getComponents()[i]).getRightValue().trim().replace(',', '.'));
         }
         getApp().actionParticipateDone(secret);
     }

@@ -14,6 +14,7 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
 import java.math.BigInteger;
+import java.math.BigDecimal;
 
 /**
  * Result for a bin
@@ -25,17 +26,25 @@ public class BinResult{
     public String name;
     
     /** The value. */
+    @Deprecated
     public BigInteger value;
+    public BigDecimal valueDec;
 
     /**
      * Instantiates a new bin result.
      *
      * @param name the name
      * @param value the value
+     * @deprecated Deprecated, please use BinResult(String, BigDecimal)
      */
+    @Deprecated
     BinResult(String name, BigInteger value) {
         this.name = name;
         this.value = value;
+    }
+    BinResult(String name, BigDecimal value) {
+        this.name = name;
+        this.valueDec = value;
     }
 
     /**
@@ -51,7 +60,12 @@ public class BinResult{
         if (!(o instanceof BinResult))
             return false;
         BinResult br = (BinResult) o;
-        return br.value.equals(value) && br.name.equals(name);
+        boolean result = br.name.equals(name);
+        if (value != null && br.value != null)
+          result &= br.value.equals(value);
+        if (valueDec != null && br.valueDec != null)
+          result &= br.valueDec.equals(valueDec);
+        return result;
     }
 
     /**
@@ -61,7 +75,11 @@ public class BinResult{
      */
     @Override
     public int hashCode() {
-        int result = value.hashCode();
+        int result = 0;
+        if (value != null)
+          result += value.hashCode();
+        if (valueDec != null)
+          result += valueDec.hashCode();
         return 31 * result + name.hashCode();
     }
 
@@ -72,6 +90,11 @@ public class BinResult{
      */
     @Override
     public String toString() {
-        return name + ": " + value.toString();
+      String result = new String(name);
+      if (value != null)
+        result += ": " + value.toString();
+      if (valueDec != null)
+        result += ": " + valueDec.toString();
+      return result;
     }
 }

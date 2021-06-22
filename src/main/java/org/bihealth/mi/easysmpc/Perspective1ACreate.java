@@ -18,7 +18,7 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -274,7 +274,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         for (Component entry : this.panelBins.getComponents()) {
             Bin bin = new Bin(((EntryBin)entry).getLeftValue());
             bin.initialize(participants.size());
-            bin.shareValue(new BigInteger(((EntryBin)entry).getRightValue().trim()));
+            bin.shareValue(new BigDecimal(((EntryBin)entry).getRightValue().trim().replace(',','.')), Resources.FRACTIONAL_BITS);
             bins.add(bin);
         }
         
