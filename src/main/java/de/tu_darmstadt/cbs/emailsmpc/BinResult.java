@@ -13,7 +13,6 @@
  */
 package de.tu_darmstadt.cbs.emailsmpc;
 
-import java.math.BigInteger;
 import java.math.BigDecimal;
 
 /**
@@ -26,7 +25,6 @@ public class BinResult{
     public String name;
     
     /** The value. */
-    @Deprecated
     public BigDecimal value;
 
     /**
