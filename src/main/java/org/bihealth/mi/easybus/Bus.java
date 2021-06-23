@@ -96,7 +96,7 @@ public abstract class Bus {
      * @param participant
      * @throws BusException
      */
-    public abstract void send(Message message, Scope scope, Participant participant) throws BusException;
+    public abstract void send(Message message, Scope scope, Participant participant, Participant sender) throws BusException;
    
     /**
      * Stops all backend services that might be running

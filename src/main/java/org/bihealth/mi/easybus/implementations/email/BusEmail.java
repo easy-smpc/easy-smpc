@@ -49,6 +49,8 @@ public class BusEmail extends Bus {
         protected final Scope       scope;
         /** Message */
         protected final Message     message;
+        /** Subject */
+        protected final String     subject;
         
         /**
          * Message
@@ -56,10 +58,11 @@ public class BusEmail extends Bus {
          * @param scope
          * @param message
          */
-        BusEmailMessage(Participant receiver, Scope scope, Message message) {
+        BusEmailMessage(Participant receiver, Scope scope, Message message, String subject) {
             this.receiver = receiver;
             this.scope = scope;
             this.message = message;
+            this.subject = subject;
         }
     
         /** Deletes the message on the server
@@ -98,7 +101,8 @@ public class BusEmail extends Bus {
                         Thread.sleep(millis);
                     }
                 } catch (InterruptedException e) {
-                    connection.close();
+                    logger.error("Interrupted exception logged", new Date(), ExceptionUtils.getStackTrace(e));
+                    connection.close();                    
                     // Die silently
                 }
             }
@@ -113,7 +117,7 @@ public class BusEmail extends Bus {
     }
 
     @Override
-    public void send(Message message, Scope scope, Participant participant) throws BusException {
+    public void send(Message message, Scope scope, Participant participant, Participant sender) throws BusException {
         // Init
         boolean sent = false;
         int tryCounter = 1;
@@ -121,7 +125,7 @@ public class BusEmail extends Bus {
         // Try to send e-mail
         while (!sent) {
             try {
-                this.connection.send(message, scope, participant);
+                this.connection.send(message, scope, participant, sender);
                 sent = true;
             } catch (BusException e) {
 
@@ -210,7 +214,12 @@ public class BusEmail extends Bus {
 
                 // Delete
                 if (received) {
-                    message.delete();
+                    try {
+                        message.delete();
+                    } catch (Exception e) {
+                        logger.error("Deletion error logged", new Date(), message.scope.getName(), message.receiver.getName(), message.subject);
+                    }                  
+                    logger.debug("Message deleted logged", new Date(),"Message deleted", message.scope.getName(),  message.receiver.getName(), message.subject);
                     deleted = message;
                 }
             }

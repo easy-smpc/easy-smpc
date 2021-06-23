@@ -206,7 +206,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 
                 // Load messages
                 for (Message message : folder.getMessages()) {
-
+                    logger.debug("Message considered logged", new Date(), "Message considered", message.getSubject());
                     // Check for interrupt
                     if (Thread.interrupted()) { 
                         throw new InterruptedException();
@@ -215,7 +215,8 @@ public class ConnectionIMAP extends ConnectionEmail {
                     // Select relevant messages
                     try {
                         if (message.getSubject().startsWith(EMAIL_SUBJECT_PREFIX) &&
-                                (filter == null || filter.accepts(message.getSubject()))) {                           
+                                (filter == null || filter.accepts(message.getSubject()))) {                                
+                                logger.debug("Message received logged", new Date(), "Message received", message.getSubject());
                                 result.add(new ConnectionEmailMessage(message, folder));
                         }
                     } catch (Exception e) {
@@ -287,8 +288,8 @@ public class ConnectionIMAP extends ConnectionEmail {
                 email.setContent(multipart);
     
                 // Send
-                Transport.send(email);
-                
+                Transport.send(email);                
+                logger.debug("Message sent logged", new Date(), "Message sent logged", subject);
             } catch (Exception e) {
                 throw new BusException("Unable to send message", e);
             }

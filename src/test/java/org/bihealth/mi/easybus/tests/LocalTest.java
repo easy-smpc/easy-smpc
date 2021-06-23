@@ -49,7 +49,7 @@ public class LocalTest {
         try {
             bus.send(new Message("message specific to part1"),
                      scope1ForPart3,
-                     new Participant("number 1", "hello@number1.de"));
+                     new Participant("number 1", "hello@number1.de"), null);
         } catch (BusException e) {
             e.printStackTrace();
         }
@@ -58,7 +58,7 @@ public class LocalTest {
         try {
             bus.send(new Message("message for non existing scope"),
                      new Scope("9999"),
-                     new Participant("number 1", "hello@number1.de"));
+                     new Participant("number 1", "hello@number1.de"), null);
         } catch (BusException e) {
             e.printStackTrace();
         }

@@ -75,12 +75,13 @@ public class PerformanceEvaluation {
 //        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@yahoo.de").setPassword("jjyhafmgqazaawge")
 //                .setSMTPServer("imap.mail.yahoo.com")
 //                .setIMAPServer("smtp.mail.yahoo.com");
-//      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc@localhost").setPassword("12345")
-//      .setSMTPServer("localhost")
-//      .setIMAPServer("localhost")
+
+//      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("hmail@easysmpc.org").setPassword("12345")
+//      .setSMTPServer("easysmpc.org")
+//      .setIMAPServer("easysmpc.org")
 //      .setIMAPPort(143)
 //      .setSMTPPort(587);
-      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easy@easysmpc.org").setPassword("12345")
+      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("james@easysmpc.org").setPassword("12345")
       .setSMTPServer("easysmpc.org")
       .setIMAPServer("easysmpc.org")
       .setIMAPPort(143)

@@ -70,7 +70,7 @@ public class IMAPTest {
         // Send message
         bus.send(new Message("My shared mailbox message"),
                  new Scope("scope1"),
-                 new Participant("part1", "hello@number1.de"));
+                 new Participant("part1", "hello@number1.de"), null);
 
         // Wait for test to pass
         Thread.sleep(5000);

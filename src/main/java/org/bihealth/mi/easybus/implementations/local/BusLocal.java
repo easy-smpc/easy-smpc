@@ -38,7 +38,7 @@ public class BusLocal extends Bus{
     }
 
     @Override
-    public void send(Message message, Scope scope, Participant participant) {
+    public void send(Message message, Scope scope, Participant participant, Participant sender) {
         try {
             receiveInternal(message, scope, participant);
         } catch (InterruptedException e) {

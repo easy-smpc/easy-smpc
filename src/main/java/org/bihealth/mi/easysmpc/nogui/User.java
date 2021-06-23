@@ -136,7 +136,9 @@ public abstract class User implements MessageListener {
                     getModel().getBus(this.mailBoxCheckInterval).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
                                     new Scope(getModel().studyUID + (getModel().state == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().participants[index].name,
-                                                                            getModel().participants[index].emailAddress));
+                                                                            getModel().participants[index].emailAddress),
+                                    new org.bihealth.mi.easybus.Participant(getModel().participants[getModel().ownId].name,
+                                                                            getModel().participants[getModel().ownId].emailAddress));
                     // Mark message as sent
                     model.markMessageSent(index);
                 } catch (BusException | IOException e) {

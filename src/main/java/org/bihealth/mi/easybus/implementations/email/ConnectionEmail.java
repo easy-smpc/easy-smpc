@@ -68,7 +68,7 @@ public abstract class ConnectionEmail {
         private Object                   attachment = null;
         
         /** Logger */
-        private static final Logger logger = LogManager.getLogger(ConnectionEmail.class);
+        private static final Logger logger = LogManager.getLogger(ConnectionEmailMessage.class);
     
         /**
          * Creates a new instance
@@ -185,7 +185,10 @@ public abstract class ConnectionEmail {
     /** String indicating start of participant e-mail address */
     public static final String PARTICIPANT_EMAIL_START_TAG = "BEGIN_EMAIL_PARTICIPANT";
     /** String indicating end of participant address */
-    public static final String PARTICIPANT_EMAIL_END_TAG   = "END_EMAIL_PARTICIPANT";
+    public static final String PARTICIPANT_EMAIL_END_TAG   = "END_EMAIL_PARTICIPANT";    
+    /** Logger */
+    private static final Logger logger = LogManager.getLogger(ConnectionEmail.class);
+
 
     /** Use several or exactly one mail box for the bus */
     private boolean sharedMailbox;
@@ -318,6 +321,7 @@ public abstract class ConnectionEmail {
                 
                 // TODO: Is this a good idea? Delete malformed messages
                 if (text == null || attachment == null) {
+                    logger.debug("Malformated message deleted logged", new Date(), "Malformated message deleted");
                     message.delete();
                     continue;
                 }
@@ -344,8 +348,8 @@ public abstract class ConnectionEmail {
                 }               
                 
                 // Pass on
-                ConnectionEmailMessage _message = message;
-                result.add(new BusEmail.BusEmailMessage(participant, scope, (Message) attachment) {
+                final ConnectionEmailMessage _message = message;
+                result.add(new BusEmail.BusEmailMessage(participant, scope, (Message) attachment, message.text) {
                     @Override
                     protected void delete() throws BusException {
                         _message.delete();
@@ -373,9 +377,10 @@ public abstract class ConnectionEmail {
      * @param message
      * @param scope
      * @param participant
+     * @param sender 
      * @throws BusException 
      */
-    protected void send(Message message, Scope scope, Participant participant) throws BusException {
+    protected void send(Message message, Scope scope, Participant participant, Participant sender) throws BusException {
         
         // Recipient
         String recipient = sharedMailbox ? getEmailAddress() : participant.getEmailAddress();
@@ -383,7 +388,11 @@ public abstract class ConnectionEmail {
         // Subject
         String subject = EMAIL_SUBJECT_PREFIX + SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + " " + 
                 PARTICIPANT_NAME_START_TAG + participant.getName() + PARTICIPANT_NAME_END_TAG + " " + 
-                PARTICIPANT_EMAIL_START_TAG + participant.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG;
+                PARTICIPANT_EMAIL_START_TAG + participant.getEmailAddress();
+        if (sender != null) {
+            subject = subject + PARTICIPANT_EMAIL_END_TAG + " " + "SENDER_START" +
+                      sender.getName() + "SENDER_END";
+        }
   
         // Body
         String body = SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + "\n" + 
