@@ -10,6 +10,7 @@
 			 <Policies>
                 <SizeBasedTriggeringPolicy size="50MB" />
             </Policies>
+           <DefaultRolloverStrategy max="50"/>
 		</RollingFile>
 
 		<Console name="console" target="SYSTEM_OUT">
