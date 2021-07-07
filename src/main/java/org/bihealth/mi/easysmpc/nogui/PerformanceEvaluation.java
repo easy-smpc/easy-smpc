@@ -61,7 +61,7 @@ public class PerformanceEvaluation {
         // Create parameters
         int rounds = 1000;
         List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10}));
-        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 10000, 100000}));
+        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {100, 1000, 10000}));
         List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {2000, 5000, 10000, 20000}));
 
         RandomCombinator combinator = new RandomCombinator(participants, bins, mailboxCheckInterval);
