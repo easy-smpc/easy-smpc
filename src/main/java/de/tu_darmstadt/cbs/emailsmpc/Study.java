@@ -289,7 +289,7 @@ public class Study implements Serializable, Cloneable {
             throw new IllegalArgumentException("Interval must be a positive number");
         }
         if ((this.bus == null || !this.bus.isAlive()) && this.connectionIMAPSettings != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true), millis);
+            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, false), millis);
         }
         return this.bus;
     }

@@ -37,7 +37,8 @@ public class ConnectionIMAPSettings implements Serializable {
 
     /** SVUID */
     private static final long serialVersionUID = 3880443185633907293L;
-    
+    /** Replace this by index */
+    public static final String INDEX_REPLACE = "REPLACE";
     /** End-point for Mozilla auto-configuration service */
     public static final String   MOZILLA_AUTOCONF = "https://autoconfig.thunderbird.net/v1.1/";
     /** Standard port for IMAP */
@@ -350,4 +351,29 @@ public class ConnectionIMAPSettings implements Serializable {
             throw new IllegalArgumentException("Parameter must not be null");
         }
     }
+    
+
+    /**
+     * Creates a new ConnectionIMAPSettings with the current one as a template
+     * 
+     * @param index
+     * @return
+     */
+    public ConnectionIMAPSettings createFromTemplate(int index) {
+        // Check
+        if(!this.emailAddress.contains(INDEX_REPLACE)) {
+           return null;
+        }
+        
+        // Replace        
+        String newEmail = this.emailAddress.replaceFirst(INDEX_REPLACE, String.valueOf(index));
+        
+        // Return object with new mail address
+        return new ConnectionIMAPSettings(newEmail).setPassword(password)
+                                                   .setIMAPPort(imapPort)
+                                                   .setIMAPServer(imapServer)
+                                                   .setSMTPPort(smtpPort)
+                                                   .setSMTPServer(smtpServer);
+    }
+    
 }

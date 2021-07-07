@@ -44,23 +44,26 @@ public class CreatingUser extends User {
      * 
      * @param numberParticipants
      * @param numberBins
-     * @param connectionIMAPSettings
+     * @param connectionIMAPSettingsTemplate
      * @throws IllegalStateException
      */
     CreatingUser(int numberParticipants,
                  int numberBins,
                  int mailBoxCheckInterval,
-                 ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException {
+                 ConnectionIMAPSettings connectionIMAPSettingsTemplate) throws IllegalStateException {
         super(mailBoxCheckInterval);
-
         
         try {          
             // Set model to starting
             getModel().toStarting();
             
+            
+            // Create index for mail address
+            ConnectionIMAPSettings connectionIMAPSettings = connectionIMAPSettingsTemplate.createFromTemplate(0);
+            
             // Init model with generated study name, participants and bins 
             getModel().toInitialSending(generateRandomString(FIXED_LENGTH_STRING),
-                                        generateParticpants(numberParticipants, FIXED_LENGTH_STRING),
+                                        generateParticpants(numberParticipants, connectionIMAPSettingsTemplate, FIXED_LENGTH_STRING),
                                         generateBins(numberBins,numberParticipants, FIXED_LENGTH_STRING, FIXED_LENGTH_BIT_BIGINTEGER), connectionIMAPSettings);
             RecordTimeDifferences.init(getModel(), mailBoxCheckInterval, System.nanoTime());
         } catch (IOException | IllegalStateException e) {
@@ -69,7 +72,7 @@ public class CreatingUser extends User {
         }
         
         // Spawn all participating users
-        createParticipants(FIXED_LENGTH_BIT_BIGINTEGER);
+        createParticipants(FIXED_LENGTH_BIT_BIGINTEGER, connectionIMAPSettingsTemplate);
         
         // Spawns the common steps in an own thread
         new Thread(new Runnable() {
@@ -85,16 +88,20 @@ public class CreatingUser extends User {
      * Create participants
      * 
      * @param lengthBitBigInteger
+     * @param connectionIMAPSettings 
      */
-    private void createParticipants(int lengthBitBigInteger) {
+    private void createParticipants(int lengthBitBigInteger, ConnectionIMAPSettings connectionIMAPSettingsTemplate) {
         // Loop over participants
         for(int index = 1; index < getModel().numParticipants; index++) {
+            
+            // Create connections
+            ConnectionIMAPSettings connectionIMAPSettings = connectionIMAPSettingsTemplate.createFromTemplate(index); 
             
             // Create user
             participatingUsers.add(new ParticipatingUser(getModel().studyUID,
                                   getModel().participants[index],
                                   index,
-                                  getModel().connectionIMAPSettings,
+                                  connectionIMAPSettings,
                                   lengthBitBigInteger,
                                   getMailBoxCheckInterval()));
         }
@@ -105,17 +112,19 @@ public class CreatingUser extends User {
      * Generate the involved participants
      * 
      * @param numberParticipants
+     * @param connectionIMAPSettings 
      * @param stringLength length of names and e-mail address parts
      * @return
      */
-    private Participant[] generateParticpants(int numberParticipants, int stringLength) {
+    private Participant[] generateParticpants(int numberParticipants, ConnectionIMAPSettings connectionIMAPSettingsTemplate, int stringLength) {
         // Init result
         Participant[] result = new Participant[numberParticipants];
         
         // Init each participant with a generated name and generated mail address
-        for(int index = 0; index < numberParticipants; index++) {
-            result[index] = new Participant(generateRandomString(stringLength),
-                                            generateRandomString(stringLength) + "@" + generateRandomString(stringLength) + ".de");
+        for(int index = 0; index < numberParticipants; index++) {            
+            ConnectionIMAPSettings connectionIMAPSettings = connectionIMAPSettingsTemplate.createFromTemplate(index);
+            result[index] = new Participant(connectionIMAPSettings.getEmailAddress(),
+                                            connectionIMAPSettings.getEmailAddress());
         }
         return result;
     }

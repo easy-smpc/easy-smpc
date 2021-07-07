@@ -40,6 +40,8 @@ public class ParticipatingUser extends User {
     private int lengthBitBigInteger;
     /** Interim bus for initial e-mail receiving  */
     private BusEmail interimBus;
+    /** ConnectionIMAPSettings */
+    private ConnectionIMAPSettings connectionIMAPSettings;
     
 
     /**
@@ -58,12 +60,14 @@ public class ParticipatingUser extends User {
                              int mailBoxCheckInterval) {
         super(mailBoxCheckInterval);
         this.lengthBitBigInteger = lengthBitBigInteger;
+        // TODO Improve 
+        this.connectionIMAPSettings = connectionIMAPSettings;
         
         RecordTimeDifferences.addStartValue(studyUID, participantId, System.nanoTime());
         
         try {
             // Register for initial e-mail
-            interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true),
+            interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false),
                                       mailBoxCheckInterval);
             interimBus.receive(new Scope(studyUID + ROUND_0),
                                         new org.bihealth.mi.easybus.Participant(ownParticipant.name,
@@ -99,7 +103,8 @@ public class ParticipatingUser extends User {
 
             // Init model
             setModel(MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data))));
-
+            getModel().connectionIMAPSettings = this.connectionIMAPSettings;
+            
             // Proceed to entering value
             getModel().toEnteringValues(data);
 
