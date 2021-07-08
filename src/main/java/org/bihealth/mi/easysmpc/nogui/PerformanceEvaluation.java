@@ -31,6 +31,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.implementations.email.BusEmail;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.nogui.RandomCombinator.Combination;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -59,34 +61,45 @@ public class PerformanceEvaluation {
      */
     public static void main(String[] args) throws IOException  {        
         // Create parameters
-        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10}));
-        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {100, 1000, 10000}));
-        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {20000}));
-
+        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3}));
+        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10}));
+        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {2000}));
+        boolean isSharedMailbox = false;
         RandomCombinator combinator = new RandomCombinator(participants, bins, mailboxCheckInterval);
 
         // Create connection settings
-//        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
+//      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
 //                .setSMTPServer("smtp.ionos.de")
 //                .setIMAPServer("imap.ionos.de");
 //        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@yahoo.de").setPassword("jjyhafmgqazaawge")
 //                .setSMTPServer("imap.mail.yahoo.com")
 //                .setIMAPServer("smtp.mail.yahoo.com");
-
-      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("hmail" + ConnectionIMAPSettings.INDEX_REPLACE + "@easysmpc.org").setPassword("12345")
-      .setSMTPServer("easysmpc.org")
-      .setIMAPServer("easysmpc.org")
-      .setIMAPPort(143)
-      .setSMTPPort(587);
+        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("hmail" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org").setPassword("12345")
+          .setSMTPServer("easysmpc.org")
+          .setIMAPServer("easysmpc.org")
+          .setIMAPPort(143)
+          .setSMTPPort(587);
+//        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("hmail@easysmpc.org").setPassword("12345")
+//                .setSMTPServer("easysmpc.org")
+//                .setIMAPServer("easysmpc.org")
+//                .setIMAPPort(143)
+//                .setSMTPPort(587);
 //      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("james" + ConnectionIMAPSettings.INDEX_REPLACE + "@easysmpc.org").setPassword("12345")
 //      .setSMTPServer("easysmpc.org")
 //      .setIMAPServer("easysmpc.org")
 //      .setIMAPPort(143)
 //      .setSMTPPort(25);
         
-        while(true) {
+        // Create mailbox details
+        MailboxDetails mailBoxDetails = new MailboxDetails(isSharedMailbox, connectionIMAPSettings, participants);
+        
+        // Repeat endless
+        while (true) {
             Combination combination = combinator.getNewCombination();
-            new PerformanceEvaluation(combination.getParticpants(), combination.getBins(), combination.getMailboxCheckInterval(), connectionIMAPSettings);   
+            new PerformanceEvaluation(combination.getParticpants(),
+                                      combination.getBins(),
+                                      combination.getMailboxCheckInterval(),
+                                      mailBoxDetails);
         }
     }
 
@@ -96,17 +109,17 @@ public class PerformanceEvaluation {
      * @param participants
      * @param bins
      * @param mailboxCheckInterval
-     * @param connectionIMAPSettings 
+     * @param mailBoxDetails 
      * @throws IOException 
      */
     public PerformanceEvaluation(List<Integer> participants,
                                  List<Integer> bins,
                                  List<Integer> mailboxCheckIntervals,
-                                 ConnectionIMAPSettings connectionIMAPSettings) throws IOException {
+                                 MailboxDetails mailBoxDetails) throws IOException {
         // Prepare if necessary
         if (!prepared) {
             try {
-                prepare(connectionIMAPSettings);
+                prepare(mailBoxDetails);
                 prepared = true;
             } catch (IOException | BusException | InterruptedException e) {
                 logger.error("Preparation failed logged", new Date(), "Preparation failed", ExceptionUtils.getStackTrace(e));
@@ -120,7 +133,7 @@ public class PerformanceEvaluation {
                 for (int mailboxCheckInterval : mailboxCheckIntervals) {
                     
                     // Start a EasySMPC process
-                    CreatingUser user = new CreatingUser(participantNumber, binNumber, mailboxCheckInterval, connectionIMAPSettings);
+                    CreatingUser user = new CreatingUser(participantNumber, binNumber, mailboxCheckInterval, mailBoxDetails);
                     
                     // Wait to finish
                     while (!user.areAllUsersFinished()) {                        
@@ -149,21 +162,23 @@ public class PerformanceEvaluation {
 
     /**
      * Prepare evaluation
-     * @param connectionIMAPSettings 
+     * @param mailBoxDetails 
      * 
      * @throws IOException 
      * @throws BusException 
      * @throws InterruptedException 
      */
-    private void prepare(ConnectionIMAPSettings connectionIMAPSettings) throws IOException, BusException, InterruptedException {
+    private void prepare(MailboxDetails mailBoxDetails) throws IOException, BusException, InterruptedException {
         // Set logging properties from file      
         System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");
         logger = LogManager.getLogger(PerformanceEvaluation.class);
         
-        // Delete existing e-mails      
-//        BusEmail bus = new BusEmail( new ConnectionIMAP(connectionIMAPSettings, true), 0);
-//        bus.purgeEmails();
-//        bus.stop();
+        // Delete existing e-mails
+        for (ConnectionIMAPSettings connectionIMAPSettings : mailBoxDetails.getAllConnections()) {
+            BusEmail bus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true), 0);
+            bus.purgeEmails();
+            bus.stop();
+        }
         
         // Create CSV printer
         boolean skipHeader = new File(FILEPATH).exists();

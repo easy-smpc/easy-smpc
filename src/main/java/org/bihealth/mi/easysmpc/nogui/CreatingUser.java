@@ -21,7 +21,6 @@ import java.util.List;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
@@ -44,27 +43,23 @@ public class CreatingUser extends User {
      * 
      * @param numberParticipants
      * @param numberBins
-     * @param connectionIMAPSettingsTemplate
+     * @param mailBoxDetails
      * @throws IllegalStateException
      */
     CreatingUser(int numberParticipants,
                  int numberBins,
                  int mailBoxCheckInterval,
-                 ConnectionIMAPSettings connectionIMAPSettingsTemplate) throws IllegalStateException {
-        super(mailBoxCheckInterval);
+                 MailboxDetails mailBoxDetails) throws IllegalStateException {
+        super(mailBoxCheckInterval, mailBoxDetails.isSharedMailbox());
         
         try {          
             // Set model to starting
-            getModel().toStarting();
-            
-            
-            // Create index for mail address
-            ConnectionIMAPSettings connectionIMAPSettings = connectionIMAPSettingsTemplate.createFromTemplate(0);
+            getModel().toStarting();          
             
             // Init model with generated study name, participants and bins 
             getModel().toInitialSending(generateRandomString(FIXED_LENGTH_STRING),
-                                        generateParticpants(numberParticipants, connectionIMAPSettingsTemplate, FIXED_LENGTH_STRING),
-                                        generateBins(numberBins,numberParticipants, FIXED_LENGTH_STRING, FIXED_LENGTH_BIT_BIGINTEGER), connectionIMAPSettings);
+                                        generateParticpants(numberParticipants, mailBoxDetails, FIXED_LENGTH_STRING),
+                                        generateBins(numberBins,numberParticipants, FIXED_LENGTH_STRING, FIXED_LENGTH_BIT_BIGINTEGER), mailBoxDetails.getConnection(0));
             // Init recoding
             RecordTimeDifferences.init(getModel(), mailBoxCheckInterval, System.nanoTime());
         } catch (IOException | IllegalStateException e) {
@@ -73,7 +68,7 @@ public class CreatingUser extends User {
         }
         
         // Spawn all participating users
-        createParticipants(FIXED_LENGTH_BIT_BIGINTEGER, connectionIMAPSettingsTemplate);
+        createParticipants(FIXED_LENGTH_BIT_BIGINTEGER, mailBoxDetails);
         
         // Spawns the common steps in an own thread
         new Thread(new Runnable() {
@@ -91,23 +86,20 @@ public class CreatingUser extends User {
      * @param lengthBitBigInteger
      * @param connectionIMAPSettings 
      */
-    private void createParticipants(int lengthBitBigInteger, ConnectionIMAPSettings connectionIMAPSettingsTemplate) {
+    private void createParticipants(int lengthBitBigInteger, MailboxDetails mailBoxDetails) {
         // Loop over participants
         for(int index = 1; index < getModel().numParticipants; index++) {
-            
-            // Create connections
-            ConnectionIMAPSettings connectionIMAPSettings = connectionIMAPSettingsTemplate.createFromTemplate(index); 
             
             // Create user
             participatingUsers.add(new ParticipatingUser(getModel().studyUID,
                                   getModel().participants[index],
                                   index,
-                                  connectionIMAPSettings,
+                                  mailBoxDetails.getConnection(index),
                                   lengthBitBigInteger,
-                                  getMailBoxCheckInterval()));
+                                  getMailboxCheckInterval(),
+                                  mailBoxDetails.isSharedMailbox()));
         }
     }
-
 
     /**
      * Generate the involved participants
@@ -117,15 +109,20 @@ public class CreatingUser extends User {
      * @param stringLength length of names and e-mail address parts
      * @return
      */
-    private Participant[] generateParticpants(int numberParticipants, ConnectionIMAPSettings connectionIMAPSettingsTemplate, int stringLength) {
+    private Participant[] generateParticpants(int numberParticipants, MailboxDetails mailBoxDetails, int stringLength) {
         // Init result
         Participant[] result = new Participant[numberParticipants];
         
         // Init each participant with a generated name and generated mail address
-        for(int index = 0; index < numberParticipants; index++) {            
-            ConnectionIMAPSettings connectionIMAPSettings = connectionIMAPSettingsTemplate.createFromTemplate(index);
-            result[index] = new Participant(connectionIMAPSettings.getEmailAddress(),
-                                            connectionIMAPSettings.getEmailAddress());
+        for(int index = 0; index < numberParticipants; index++) {
+            
+            // Generate either am email address or use an actual address 
+            String emailAddress = isSharedMailbox()
+                    ? generateRandomString(15) + "@" + generateRandomString(10) + ".org"
+                    : mailBoxDetails.getConnection(index).getEmailAddress();
+            
+            // Create participant   
+            result[index] = new Participant(generateRandomString(15), emailAddress);
         }
         
         // Return

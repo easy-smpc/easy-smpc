@@ -54,6 +54,8 @@ public abstract class User implements MessageListener {
     private final Random random = new Random();
     /** The mailbox check interval in  milliseconds */
     private final int mailBoxCheckInterval;
+    /** Is shared mailbox used? */
+    private boolean isSharedMailbox;
     
     
     /**
@@ -61,9 +63,10 @@ public abstract class User implements MessageListener {
      * 
      * @param mailBoxCheckInterval
      */
-    User(int mailBoxCheckInterval) {
+    User(int mailBoxCheckInterval, boolean isSharedMailbox) {
         this.mailBoxCheckInterval = mailBoxCheckInterval;
-    }
+        this.isSharedMailbox = isSharedMailbox;
+     }
     
     /**
      * Proceeds the SMPC steps which are the same for participating and creating user
@@ -107,7 +110,7 @@ public abstract class User implements MessageListener {
      */
     private void receiveMessages(String roundIdentifier) throws IllegalArgumentException,
                                                          BusException {
-        getModel().getBus(this.mailBoxCheckInterval).receive(new Scope(getModel().studyUID + roundIdentifier),
+        getModel().getBus(this.mailBoxCheckInterval, this.isSharedMailbox).receive(new Scope(getModel().studyUID + roundIdentifier),
                            new org.bihealth.mi.easybus.Participant(getModel().getParticipantFromId(getModel().ownId).name,
                                                                    getModel().getParticipantFromId(getModel().ownId).emailAddress),
                            this);
@@ -132,7 +135,7 @@ public abstract class User implements MessageListener {
 
                 try {
                     // Retrieve bus and send message
-                    getModel().getBus(this.mailBoxCheckInterval).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
+                    getModel().getBus(this.mailBoxCheckInterval, this.isSharedMailbox).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
                                     new Scope(getModel().studyUID + (getModel().state == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().participants[index].name,
                                                                             getModel().participants[index].emailAddress),
@@ -256,8 +259,15 @@ public abstract class User implements MessageListener {
     /**
      * @return the mailBoxCheckInterval
      */
-    public int getMailBoxCheckInterval() {
+    public int getMailboxCheckInterval() {
         return mailBoxCheckInterval;
+    }
+    
+    /**
+     * @return is a shared mailbox used?
+     */
+    public boolean isSharedMailbox() {
+        return isSharedMailbox;
     }
     
     /**

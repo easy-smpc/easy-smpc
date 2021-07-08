@@ -56,10 +56,10 @@ public class ParticipatingUser extends User {
                              int participantId,
                              ConnectionIMAPSettings connectionIMAPSettings,
                              int lengthBitBigInteger,
-                             int mailBoxCheckInterval) {
-        super(mailBoxCheckInterval);
+                             int mailBoxCheckInterval,
+                             boolean isSharedMailbox) {
+        super(mailBoxCheckInterval, isSharedMailbox);
         this.lengthBitBigInteger = lengthBitBigInteger;
-        // TODO Improve 
         this.connectionIMAPSettings = connectionIMAPSettings;
         
         RecordTimeDifferences.addStartValue(studyUID, participantId, System.nanoTime());
