@@ -27,7 +27,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
- * A creator in an EasySMPC process
+ * A creating user in an EasySMPC process
  * 
  * @author Felix Wirth
  *
@@ -65,6 +65,7 @@ public class CreatingUser extends User {
             getModel().toInitialSending(generateRandomString(FIXED_LENGTH_STRING),
                                         generateParticpants(numberParticipants, connectionIMAPSettingsTemplate, FIXED_LENGTH_STRING),
                                         generateBins(numberBins,numberParticipants, FIXED_LENGTH_STRING, FIXED_LENGTH_BIT_BIGINTEGER), connectionIMAPSettings);
+            // Init recoding
             RecordTimeDifferences.init(getModel(), mailBoxCheckInterval, System.nanoTime());
         } catch (IOException | IllegalStateException e) {
             logger.error("Unable to init logged", new Date(), "Unable to init", ExceptionUtils.getStackTrace(e));
@@ -126,6 +127,8 @@ public class CreatingUser extends User {
             result[index] = new Participant(connectionIMAPSettings.getEmailAddress(),
                                             connectionIMAPSettings.getEmailAddress());
         }
+        
+        // Return
         return result;
     }
 

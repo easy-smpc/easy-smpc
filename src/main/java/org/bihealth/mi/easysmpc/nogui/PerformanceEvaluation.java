@@ -59,10 +59,9 @@ public class PerformanceEvaluation {
      */
     public static void main(String[] args) throws IOException  {        
         // Create parameters
-        int rounds = 1000;
         List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10}));
         List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {100, 1000, 10000}));
-        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {2000, 5000, 10000, 20000}));
+        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {20000}));
 
         RandomCombinator combinator = new RandomCombinator(participants, bins, mailboxCheckInterval);
 
@@ -74,18 +73,18 @@ public class PerformanceEvaluation {
 //                .setSMTPServer("imap.mail.yahoo.com")
 //                .setIMAPServer("smtp.mail.yahoo.com");
 
-//      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("hmail@easysmpc.org").setPassword("12345")
-//      .setSMTPServer("easysmpc.org")
-//      .setIMAPServer("easysmpc.org")
-//      .setIMAPPort(143)
-//      .setSMTPPort(587);
-      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("james" + ConnectionIMAPSettings.INDEX_REPLACE + "@easysmpc.org").setPassword("12345")
+      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("hmail" + ConnectionIMAPSettings.INDEX_REPLACE + "@easysmpc.org").setPassword("12345")
       .setSMTPServer("easysmpc.org")
       .setIMAPServer("easysmpc.org")
       .setIMAPPort(143)
-      .setSMTPPort(25);
+      .setSMTPPort(587);
+//      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("james" + ConnectionIMAPSettings.INDEX_REPLACE + "@easysmpc.org").setPassword("12345")
+//      .setSMTPServer("easysmpc.org")
+//      .setIMAPServer("easysmpc.org")
+//      .setIMAPPort(143)
+//      .setSMTPPort(25);
         
-        for(int i = 0; i < rounds; i++) {
+        while(true) {
             Combination combination = combinator.getNewCombination();
             new PerformanceEvaluation(combination.getParticpants(), combination.getBins(), combination.getMailboxCheckInterval(), connectionIMAPSettings);   
         }
@@ -131,8 +130,11 @@ public class PerformanceEvaluation {
                             logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged", ExceptionUtils.getStackTrace(e));
                         }
                     }
+                    
+                    // Reset statistics
                     Bus.resetStatistics();
-                    //int waitTime = (participantNumber * 1000 * 60) / 4;
+                    
+                    // Wait
                     int waitTime = 10000;
                     logger.debug("Wait logged", new Date(), "Started waiting for",  waitTime);
                     try {
@@ -163,7 +165,7 @@ public class PerformanceEvaluation {
 //        bus.purgeEmails();
 //        bus.stop();
         
-        // Create csv printer
+        // Create CSV printer
         boolean skipHeader = new File(FILEPATH).exists();
         csvPrinter = new CSVPrinter(Files.newBufferedWriter(Paths.get(FILEPATH),StandardOpenOption.APPEND, StandardOpenOption.CREATE), CSVFormat.DEFAULT
                                                      .withHeader("Date",

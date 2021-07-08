@@ -38,8 +38,6 @@ public class RecordTimeDifferences {
     private static final Logger  logger = LogManager.getLogger(RecordTimeDifferences.class);
     /** Stores measurements */
     private static final Map<String, RecordTimeDifferences> timeDifferencesMap = new HashMap<>();
-
-
     /** Measurements */
     private final List<Pair<Long, Long>> measurements;
     /** Mailbox check interval */
@@ -48,6 +46,13 @@ public class RecordTimeDifferences {
     private Study model;
 
     
+    /**
+     * Creates a new instance
+     * 
+     * @param model
+     * @param mailBoxCheckInterval
+     * @param startTime
+     */
     private RecordTimeDifferences(Study model, int mailBoxCheckInterval, long startTime) {
         this.mailBoxCheckInterval = mailBoxCheckInterval;
         this.model = model;
@@ -169,8 +174,9 @@ public class RecordTimeDifferences {
                     calculateMean(timeDifferences)
                     );
         
-        timeDifferencesMap.remove(studyUID);        
-        }
+        // Remove from map
+        timeDifferencesMap.remove(studyUID);
+    }
 
     /**
      * Checks if all values for start and finish are set
@@ -179,12 +185,14 @@ public class RecordTimeDifferences {
      * @return
      */
     private static boolean isProcessFinished(List<Pair<Long, Long>> durations) {
+        // Check for null in each entry
         for(Pair<Long, Long> duration : durations) {
             if(duration.getFirstValue() == null || duration.getSecondValue() == null) {
                 return false;
             }
         }
         
+        // Return
         return true;
     }
 
@@ -195,10 +203,15 @@ public class RecordTimeDifferences {
      * @return
      */
     private static long calculateMean(Long[] timeDifferences) {
-        long sum = 0; 
+        // Init
+        long sum = 0;
+        
+        // Sum
         for(long timeDifference : timeDifferences) {
             sum = sum + timeDifference;
         }
+        
+        // Divide and return
         return sum / timeDifferences.length;
     }
     
@@ -211,7 +224,7 @@ public class RecordTimeDifferences {
     private static class Pair<K,V> {
         /**First value */
         private K firstValue;
-        /** Second value*/
+        /** Second value */
         private V secondValue;
         
         /**

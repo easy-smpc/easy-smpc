@@ -41,8 +41,7 @@ public class ParticipatingUser extends User {
     /** Interim bus for initial e-mail receiving  */
     private BusEmail interimBus;
     /** ConnectionIMAPSettings */
-    private ConnectionIMAPSettings connectionIMAPSettings;
-    
+    private ConnectionIMAPSettings connectionIMAPSettings;    
 
     /**
      * Creates a new instance
@@ -123,7 +122,8 @@ public class ParticipatingUser extends User {
     /**
      * Fills the bins with random numbers
      * 
-     * @return bins
+     * @param lengthBitBigInteger
+     * @return
      */
     private BigInteger[] fillBins(int lengthBitBigInteger) {
         // Init

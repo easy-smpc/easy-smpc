@@ -5,7 +5,7 @@
 	</Properties>
 
 	<Appenders>
-		<RollingFile  name="fileLogger" fileName="logging.log" filePattern="logging.log-%i">
+		<RollingFile  name="fileLogger" fileName="logging.log" filePattern="logging-%i.log">
 			<CsvParameterLayout delimiter=";"/>
 			 <Policies>
                 <SizeBasedTriggeringPolicy size="50MB" />

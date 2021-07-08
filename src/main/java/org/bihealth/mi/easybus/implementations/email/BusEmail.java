@@ -97,7 +97,12 @@ public class BusEmail extends Bus {
             public void run() {
                 try {
                     while (!stop) {
-                        receiveEmails();                     
+                        //try {
+                            receiveEmails();
+//                        } catch (BusException e) {
+//                            // Stop thread
+//                            throw new RuntimeException(e);
+//                        }
                         Thread.sleep(millis);
                     }
                 } catch (InterruptedException e) {

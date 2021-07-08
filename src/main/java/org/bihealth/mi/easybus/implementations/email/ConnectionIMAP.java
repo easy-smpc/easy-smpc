@@ -56,7 +56,7 @@ import jakarta.mail.util.ByteArrayDataSource;
  * @author Fabian Prasser
  */
 public class ConnectionIMAP extends ConnectionEmail {
-    
+
     /** File name of the attached message */
     private static final String FILENAME_MESSAGE = "message";
     /** Properties */
@@ -117,9 +117,7 @@ public class ConnectionIMAP extends ConnectionEmail {
         //this.propertiesSending.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         //this.propertiesSending.put("mail.smtp.socketFactory.fallback", "false");
         this.propertiesSending.put("mail.smtp.auth", "true");
-        this.propertiesReceiving.put("mail.imap.partialfetch", "false");
-        this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
-     
+
         // Set proxy
         if (proxy != null) {
             this.propertiesSending.setProperty("mail.smtp.proxy.host", proxy.getFirst());
@@ -162,7 +160,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 store.close();
             }
         } catch (Exception e) {
-            // Ignore           
+            // Ignore
         }
     }
     
@@ -261,7 +259,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 email.setRecipient(RecipientType.TO, new InternetAddress(recipient));
                 email.setSender(new InternetAddress(getEmailAddress()));
                 email.setFrom(new InternetAddress(getEmailAddress()));
-                email.setSubject(subject);              
+                email.setSubject(subject);
                 
                 // Add body
                 MimeBodyPart mimeBodyPart = new MimeBodyPart();

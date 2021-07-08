@@ -47,8 +47,7 @@ public abstract class User implements MessageListener {
     /** Round for initial e-mails */
     public final String ROUND_0 = "_round0";
     /** Logger */
-    protected static final Logger logger = LogManager.getLogger(User.class);
-            
+    protected static final Logger logger = LogManager.getLogger(User.class);           
     /** The study model */
     private Study model = new Study();
     /** The random object */
@@ -132,7 +131,7 @@ public abstract class User implements MessageListener {
             if (index != getModel().ownId) {
 
                 try {
-                    // Retrieve and send message
+                    // Retrieve bus and send message
                     getModel().getBus(this.mailBoxCheckInterval).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
                                     new Scope(getModel().studyUID + (getModel().state == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().participants[index].name,

@@ -129,7 +129,7 @@ public abstract class Bus {
                 received = true;
             }
         }
-        
+
         // Done
         return received;
     }

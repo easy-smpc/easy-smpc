@@ -43,6 +43,7 @@ public class RandomCombinator {
     public RandomCombinator(List<Integer> participants,
                             List<Integer> bins,
                             List<Integer> mailboxCheckInterval) {
+        // Store
         this.particpants = participants;
         this.bins = bins;
         this.mailboxCheckInterval = mailboxCheckInterval;
@@ -61,7 +62,7 @@ public class RandomCombinator {
     }
     
     /**
-     * A combintion of possible parameters
+     * A combination of possible parameters 
      * @author Felix Wirth
      *
      */
@@ -109,5 +110,4 @@ public class RandomCombinator {
             this.mailboxCheckInterval = mailboxCheckInterval;
         }
     }
-    
 }
