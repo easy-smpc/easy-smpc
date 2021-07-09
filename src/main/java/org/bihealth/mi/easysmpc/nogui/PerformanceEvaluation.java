@@ -64,7 +64,7 @@ public class PerformanceEvaluation {
         List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 20}));
         List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {100, 1000, 10000}));
         List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 20000}));
-        boolean isSharedMailbox = true;
+        boolean isSharedMailbox = false;
         Combinator combinator =
 //                new RandomCombinator(participants, bins, mailboxCheckInterval);
                 new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 2);
@@ -77,8 +77,8 @@ public class PerformanceEvaluation {
 //                .setSMTPServer("imap.mail.yahoo.com")
 //                .setIMAPServer("smtp.mail.yahoo.com");
         ConnectionIMAPSettings connectionIMAPSettings =
-//                new ConnectionIMAPSettings("hmail" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org")
-                new ConnectionIMAPSettings("hmail@easysmpc.org")
+                new ConnectionIMAPSettings("hmail" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org")
+//                new ConnectionIMAPSettings("hmail@easysmpc.org")
           .setPassword("12345")
           .setSMTPServer("easysmpc.org")
           .setIMAPServer("easysmpc.org")
@@ -97,11 +97,11 @@ public class PerformanceEvaluation {
         while (true) {
             Combination combination = combinator.getNextCombination();
             
-            System.out.println(String.format("I call %d participants, %d bins, %d interval", combination.getParticipants(), combination.getBins(), combination.getMailboxCheckInterval()));
-//            new PerformanceEvaluation(combination.getParticipants(),
-//                                      combination.getBins(),
-//                                      combination.getMailboxCheckInterval(),
-//                                      mailBoxDetails);
+            // Call evaluation
+            new PerformanceEvaluation(combination.getParticipants(),
+                                      combination.getBins(),
+                                      combination.getMailboxCheckInterval(),
+                                      mailBoxDetails);
         }
     }
 
