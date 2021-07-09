@@ -13,8 +13,6 @@
  */
 package org.bihealth.mi.easysmpc.nogui;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -24,14 +22,8 @@ import java.util.Random;
  * @author Felix Wirth
  *
  */
-public class RandomCombinator {
+public class RandomCombinator extends Combinator {
     
-    /** Possible participants */
-    private List<Integer> particpants;
-    /** Possible bins */
-    private List<Integer> bins;
-    /** Possible mailboxCheckInterval */
-    private List<Integer> mailboxCheckInterval;
     /** Random */
     private Random random;
 
@@ -43,10 +35,10 @@ public class RandomCombinator {
     public RandomCombinator(List<Integer> participants,
                             List<Integer> bins,
                             List<Integer> mailboxCheckInterval) {
+        // Call super
+        super(participants, bins, mailboxCheckInterval);
+        
         // Store
-        this.particpants = participants;
-        this.bins = bins;
-        this.mailboxCheckInterval = mailboxCheckInterval;
         this.random = new Random();
     }
     
@@ -55,59 +47,9 @@ public class RandomCombinator {
      * 
      * @return
      */
-    public Combination getNewCombination() {        
-        return new Combination(particpants.get(random.nextInt(particpants.size())),
-                               bins.get(random.nextInt(bins.size())),
-                               mailboxCheckInterval.get(random.nextInt(mailboxCheckInterval.size())));
-    }
-    
-    /**
-     * A combination of possible parameters 
-     * @author Felix Wirth
-     *
-     */
-    public class Combination {
-        /** Participant */
-        private final int particpants;
-        /** Bins */
-        private final int bins;
-        /** mailboxCheckInterval */
-        private final int mailboxCheckInterval;
-
-        /**
-         * @return the particpants
-         */
-        protected List<Integer> getParticpants() {
-            return new ArrayList<Integer>(Arrays.asList(particpants));
-        }
-
-        /**
-         * @return the bins
-         */
-        protected List<Integer> getBins() {
-            return new ArrayList<Integer>(Arrays.asList(bins));
-        }
-
-        /**
-         * @return the mailboxCheckInterval
-         */
-        protected List<Integer> getMailboxCheckInterval() {
-            return new ArrayList<Integer>(Arrays.asList(mailboxCheckInterval));
-        }
-
-        /**
-         * Creates a new instance
-         * 
-         * @param participants
-         * @param bins
-         * @param mailboxCheckInterval
-         */
-        public Combination(int participants,
-                           int bins,
-                           int mailboxCheckInterval) {
-            this.particpants = participants;
-            this.bins = bins;
-            this.mailboxCheckInterval = mailboxCheckInterval;
-        }
+    public Combination getNextCombination() {        
+        return new Combination(getParticipants().get(random.nextInt(getParticipants().size())),
+                               getBins().get(random.nextInt(getBins().size())),
+                               getMailboxCheckInterval().get(random.nextInt(getMailboxCheckInterval().size())));
     }
 }

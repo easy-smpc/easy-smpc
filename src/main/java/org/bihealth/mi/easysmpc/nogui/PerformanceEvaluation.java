@@ -34,7 +34,7 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
-import org.bihealth.mi.easysmpc.nogui.RandomCombinator.Combination;
+import org.bihealth.mi.easysmpc.nogui.Combinator.Combination;
 import org.bihealth.mi.easysmpc.resources.Resources;
 /**
  * Starts a performance test without GUI
@@ -61,12 +61,14 @@ public class PerformanceEvaluation {
      */
     public static void main(String[] args) throws IOException  {        
         // Create parameters
-        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3}));
-        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10}));
-        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {2000}));
-        boolean isSharedMailbox = false;
-        RandomCombinator combinator = new RandomCombinator(participants, bins, mailboxCheckInterval);
-
+        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 20}));
+        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {100, 1000, 10000}));
+        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 20000}));
+        boolean isSharedMailbox = true;
+        Combinator combinator =
+//                new RandomCombinator(participants, bins, mailboxCheckInterval);
+                new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 2);
+        
         // Create connection settings
 //      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
 //                .setSMTPServer("smtp.ionos.de")
@@ -74,16 +76,14 @@ public class PerformanceEvaluation {
 //        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@yahoo.de").setPassword("jjyhafmgqazaawge")
 //                .setSMTPServer("imap.mail.yahoo.com")
 //                .setIMAPServer("smtp.mail.yahoo.com");
-        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("hmail" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org").setPassword("12345")
+        ConnectionIMAPSettings connectionIMAPSettings =
+//                new ConnectionIMAPSettings("hmail" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org")
+                new ConnectionIMAPSettings("hmail@easysmpc.org")
+          .setPassword("12345")
           .setSMTPServer("easysmpc.org")
           .setIMAPServer("easysmpc.org")
           .setIMAPPort(143)
           .setSMTPPort(587);
-//        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("hmail@easysmpc.org").setPassword("12345")
-//                .setSMTPServer("easysmpc.org")
-//                .setIMAPServer("easysmpc.org")
-//                .setIMAPPort(143)
-//                .setSMTPPort(587);
 //      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("james" + ConnectionIMAPSettings.INDEX_REPLACE + "@easysmpc.org").setPassword("12345")
 //      .setSMTPServer("easysmpc.org")
 //      .setIMAPServer("easysmpc.org")
@@ -95,11 +95,13 @@ public class PerformanceEvaluation {
         
         // Repeat endless
         while (true) {
-            Combination combination = combinator.getNewCombination();
-            new PerformanceEvaluation(combination.getParticpants(),
-                                      combination.getBins(),
-                                      combination.getMailboxCheckInterval(),
-                                      mailBoxDetails);
+            Combination combination = combinator.getNextCombination();
+            
+            System.out.println(String.format("I call %d participants, %d bins, %d interval", combination.getParticipants(), combination.getBins(), combination.getMailboxCheckInterval()));
+//            new PerformanceEvaluation(combination.getParticipants(),
+//                                      combination.getBins(),
+//                                      combination.getMailboxCheckInterval(),
+//                                      mailBoxDetails);
         }
     }
 
@@ -112,9 +114,9 @@ public class PerformanceEvaluation {
      * @param mailBoxDetails 
      * @throws IOException 
      */
-    public PerformanceEvaluation(List<Integer> participants,
-                                 List<Integer> bins,
-                                 List<Integer> mailboxCheckIntervals,
+    public PerformanceEvaluation(int participants,
+                                 int bins,
+                                 int mailboxCheckIntervals,
                                  MailboxDetails mailBoxDetails) throws IOException {
         // Prepare if necessary
         if (!prepared) {
@@ -125,38 +127,39 @@ public class PerformanceEvaluation {
                 logger.error("Preparation failed logged", new Date(), "Preparation failed", ExceptionUtils.getStackTrace(e));
                 throw new IllegalStateException("Unable to prepare performance evaluation", e);
             }
-        }           
-        
-        // Permutation of parameters
-        for (int participantNumber : participants) {
-            for (int binNumber : bins) {
-                for (int mailboxCheckInterval : mailboxCheckIntervals) {
-                    
-                    // Start a EasySMPC process
-                    CreatingUser user = new CreatingUser(participantNumber, binNumber, mailboxCheckInterval, mailBoxDetails);
-                    
-                    // Wait to finish
-                    while (!user.areAllUsersFinished()) {                        
-                        try {
-                            Thread.sleep(Resources.INTERVAL_SCHEDULER_MILLISECONDS);
-                        } catch (InterruptedException e) {
-                            logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged", ExceptionUtils.getStackTrace(e));
-                        }
-                    }
-                    
-                    // Reset statistics
-                    Bus.resetStatistics();
-                    
-                    // Wait
-                    int waitTime = 10000;
-                    logger.debug("Wait logged", new Date(), "Started waiting for",  waitTime);
-                    try {
-                        Thread.sleep(waitTime);
-                    } catch (InterruptedException e) {
-                        logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged", ExceptionUtils.getStackTrace(e));                        
-                    }
-                }
+        }
+
+        // Start a EasySMPC process
+        CreatingUser user = new CreatingUser(participants,
+                                             bins,
+                                             mailboxCheckIntervals,
+                                             mailBoxDetails);
+
+        // Wait to finish
+        while (!user.areAllUsersFinished()) {
+            try {
+                Thread.sleep(Resources.INTERVAL_SCHEDULER_MILLISECONDS);
+            } catch (InterruptedException e) {
+                logger.error("Interrupted exception logged",
+                             new Date(),
+                             "Interrupted exception logged",
+                             ExceptionUtils.getStackTrace(e));
             }
+        }
+
+        // Reset statistics
+        Bus.resetStatistics();
+
+        // Wait
+        int waitTime = 10000;
+        logger.debug("Wait logged", new Date(), "Started waiting for", waitTime);
+        try {
+            Thread.sleep(waitTime);
+        } catch (InterruptedException e) {
+            logger.error("Interrupted exception logged",
+                         new Date(),
+                         "Interrupted exception logged",
+                         ExceptionUtils.getStackTrace(e));
         }
     }
 
