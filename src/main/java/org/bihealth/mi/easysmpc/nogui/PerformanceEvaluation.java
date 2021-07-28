@@ -61,13 +61,18 @@ public class PerformanceEvaluation {
      */
     public static void main(String[] args) throws IOException  {        
         // Create parameters
-        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 20}));
-        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {100, 1000, 10000}));
-        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 20000}));
+//        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 15, 20}));
+//        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 2500, 5000, 7500, 10000}));
+//        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 15000, 20000}));
+      List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {20, 15, 10, 5, 3}));
+      List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10000, 7500, 5000, 2500, 1000}));
+      List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {20000, 15000, 10000, 5000, 1000}));
+  
+        
         boolean isSharedMailbox = false;
         Combinator combinator =
 //                new RandomCombinator(participants, bins, mailboxCheckInterval);
-                new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 2);
+                new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 12);
         
         // Create connection settings
 //      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
@@ -151,7 +156,7 @@ public class PerformanceEvaluation {
         Bus.resetStatistics();
 
         // Wait
-        int waitTime = 10000;
+        int waitTime = 1000;
         logger.debug("Wait logged", new Date(), "Started waiting for", waitTime);
         try {
             Thread.sleep(waitTime);
@@ -199,7 +204,8 @@ public class PerformanceEvaluation {
                                                                  "Number messages sent",
                                                                  "Total size messages sent")
                                                      .withSkipHeaderRecord(skipHeader));
-        
+        // Reset statistics and log
+        Bus.resetStatistics();
         logger.debug("Finished preparation logged", new Date(), "Finished preparation");
     }
 }
