@@ -13,14 +13,19 @@
  */
 package org.bihealth.mi.easysmpc.nogui;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bihealth.mi.easysmpc.nogui.ParticipatingUser.ParticipatingUserData;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
@@ -35,6 +40,9 @@ public class CreatingUser extends User {
     
     /** All participating users */
     private final List<User> participatingUsers = new ArrayList<>();
+    /** All participating users processes */
+    private final List<Process> participatingUsersProcesses = new ArrayList<>();
+    
     /** Logger */
     Logger logger = LogManager.getLogger(CreatingUser.class);
     
@@ -44,14 +52,15 @@ public class CreatingUser extends User {
      * @param numberParticipants
      * @param numberBins
      * @param mailBoxDetails
+     * @param separatedProcesses 
      * @throws IllegalStateException
      */
     CreatingUser(int numberParticipants,
                  int numberBins,
                  int mailBoxCheckInterval,
-                 MailboxDetails mailBoxDetails) throws IllegalStateException {
+                 MailboxDetails mailBoxDetails, boolean separatedProcesses) throws IllegalStateException {
         super(mailBoxCheckInterval, mailBoxDetails.isSharedMailbox());
-        
+
         try {          
             // Set model to starting
             getModel().toStarting();          
@@ -67,8 +76,8 @@ public class CreatingUser extends User {
             throw new IllegalStateException("Unable to init study!", e);
         }
         
-        // Spawn all participating users
-        createParticipants(FIXED_LENGTH_BIT_BIGINTEGER, mailBoxDetails);
+        // Spawn participants
+        createParticipants(FIXED_LENGTH_BIT_BIGINTEGER, mailBoxDetails, separatedProcesses);
         
         // Spawns the common steps in an own thread
         new Thread(new Runnable() {
@@ -77,27 +86,98 @@ public class CreatingUser extends User {
                 proceedCommonProcessSteps();
             }
         }).start();
+        
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {             
+                    if (new Scanner(System.in).nextLine().equals("s")) {
+                        stopAllProcesses();
+                    }
+                    // Wait
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        logger.error("Interrupted exception logged",
+                                     new Date(),
+                                     "Interrupted exception logged",
+                                     ExceptionUtils.getStackTrace(e));
+                    }
+                }
+            }
+        }).start();
     }
 
+    /**
+     * Stop all processes
+     */
+    protected void stopAllProcesses() {
+        // Init
+        boolean allStopped = false;
+
+        // Repeat until all spawned processes are stopped
+        while (!allStopped) {
+            allStopped = true;
+            for (Process process : participatingUsersProcesses) {
+                if (process.isAlive()) {
+                    allStopped = false;
+                    process.destroy();
+                }
+            }
+        }        
+
+        // Log
+        logger.debug("Stopped all processes logged", new Date(), "Stopped all processes");
+
+        // Stop own process
+        System.exit(0);
+    }
 
     /**
      * Create participants
      * 
      * @param lengthBitBigInteger
+     * @param separatedProcesses
      * @param connectionIMAPSettings 
      */
-    private void createParticipants(int lengthBitBigInteger, MailboxDetails mailBoxDetails) {
+    private void createParticipants(int lengthBitBigInteger,
+                                    MailboxDetails mailBoxDetails,
+                                    boolean separatedProcesses) {
         // Loop over participants
         for(int index = 1; index < getModel().numParticipants; index++) {
-            
-            // Create user
-            participatingUsers.add(new ParticipatingUser(getModel().studyUID,
+            ParticipatingUserData userData =  new ParticipatingUserData(getModel().studyUID,
                                   getModel().participants[index],
                                   index,
                                   mailBoxDetails.getConnection(index),
                                   lengthBitBigInteger,
                                   getMailboxCheckInterval(),
-                                  mailBoxDetails.isSharedMailbox()));
+                                  mailBoxDetails.isSharedMailbox());
+            
+            if (separatedProcesses) {                
+                try {
+                    // Serialize data
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    ObjectOutputStream oos = new ObjectOutputStream(bos);
+                    oos.writeObject(userData);
+                    oos.close();
+                    // Start process
+                    // TODO fix dependencies
+                    ProcessBuilder processBuilder = new ProcessBuilder("java",
+                                                                 "-Xdebug",
+                                                                 "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=500" + index,
+                                                                "-cp", 
+                                                                "./target/classes;./target/dependency/*",
+                                                                "org.bihealth.mi.easysmpc.nogui.ParticipatingUser",
+                                                                Base64.getEncoder().encodeToString(bos.toByteArray()));
+                    participatingUsersProcesses.add(processBuilder.start());
+                } catch (IOException e) {
+                    throw new IllegalStateException("Unable to serialze data!", e);
+                }               
+                
+            } else {
+                // Create user as new thread
+                participatingUsers.add(new ParticipatingUser(userData));
+            }
         }
     }
 
@@ -161,7 +241,8 @@ public class CreatingUser extends User {
      * 
      * @return
      */
-    public boolean areAllUsersFinished() {
+    public boolean areAllUsersFinished() {        
+        
         // Check for this creating users
         if (!isProcessFinished()) {
             return false;
@@ -170,6 +251,13 @@ public class CreatingUser extends User {
         // Check for all participating users
         for(User user : participatingUsers) {
             if(!user.isProcessFinished()) {
+                return false;
+            }
+        }
+        
+        // Check for all participating users
+        for(Process process : participatingUsersProcesses) {
+            if(process.isAlive()) {
                 return false;
             }
         }

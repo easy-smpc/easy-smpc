@@ -55,7 +55,7 @@ public class IMAPTest {
         
         // Create bus
         BusEmail bus = new BusEmail(new ConnectionIMAP(login,
-                                                       true), 1000);
+                                                       true), 1000, true);
 
         // Positive test receiver
         bus.receive(new Scope("scope1"),

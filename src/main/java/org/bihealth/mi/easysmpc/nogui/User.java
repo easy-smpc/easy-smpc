@@ -47,7 +47,7 @@ public abstract class User implements MessageListener {
     /** Round for initial e-mails */
     public final String ROUND_0 = "_round0";
     /** Logger */
-    protected static final Logger logger = LogManager.getLogger(User.class);           
+    protected static Logger logger;       
     /** The study model */
     private Study model = new Study();
     /** The random object */
@@ -66,6 +66,7 @@ public abstract class User implements MessageListener {
     User(int mailBoxCheckInterval, boolean isSharedMailbox) {
         this.mailBoxCheckInterval = mailBoxCheckInterval;
         this.isSharedMailbox = isSharedMailbox;
+        logger = LogManager.getLogger(User.class);
      }
     
     /**
@@ -93,7 +94,7 @@ public abstract class User implements MessageListener {
             receiveMessages(Resources.ROUND_2);
             this.model.stopBus();
             this.model.toFinished();
-            RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());            
+            //RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());            
             logger.debug("Result logged", new Date(), getModel().studyUID, "result", getModel().ownId, "participantid", getModel().getAllResults()[0].name, "result name", getModel().getAllResults()[0].value, "result");
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
             logger.error("Unable to process common process steps logged", new Date(), "Unable to process common process steps", ExceptionUtils.getStackTrace(e));
@@ -110,15 +111,28 @@ public abstract class User implements MessageListener {
      */
     private void receiveMessages(String roundIdentifier) throws IllegalArgumentException,
                                                          BusException {
-        getModel().getBus(this.mailBoxCheckInterval, this.isSharedMailbox).receive(new Scope(getModel().studyUID + roundIdentifier),
+        getModel().getBus(this.mailBoxCheckInterval, this.isSharedMailbox, true).receive(new Scope(getModel().studyUID + roundIdentifier),
                            new org.bihealth.mi.easybus.Participant(getModel().getParticipantFromId(getModel().ownId).name,
                                                                    getModel().getParticipantFromId(getModel().ownId).emailAddress),
                            this);
 
         while (!areSharesComplete()) {
             // Proceed of shares complete
+            if(!getModel().isBusAlive()) {
+                logger.error("Bus is not alive anymore!",
+                             new Date(),
+                             "Bus is not alive anymore!");
+            }
+             // Wait
+             try {
+             Thread.sleep(1000);
+             } catch (InterruptedException e) {
+             logger.error("Interrupted exception logged",
+             new Date(),
+             "Interrupted exception logged",
+             ExceptionUtils.getStackTrace(e));
+             }
         }
-
     }
 
 
@@ -135,7 +149,7 @@ public abstract class User implements MessageListener {
 
                 try {
                     // Retrieve bus and send message
-                    getModel().getBus(this.mailBoxCheckInterval, this.isSharedMailbox).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
+                    getModel().getBus(this.mailBoxCheckInterval, this.isSharedMailbox, false).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
                                     new Scope(getModel().studyUID + (getModel().state == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().participants[index].name,
                                                                             getModel().participants[index].emailAddress),
@@ -151,12 +165,7 @@ public abstract class User implements MessageListener {
         }
         
         // Stop bus
-        try {
-            getModel().getBus().stop();
-        } catch (BusException e) {
-            logger.error("Unable to stop bus logged", new Date(), "Unable to stop bus", ExceptionUtils.getStackTrace(e));
-            throw new IllegalStateException("Unable to stop bus", e);
-        }
+        getModel().stopBus();
     }
 
     /**
@@ -278,4 +287,13 @@ public abstract class User implements MessageListener {
     public boolean isProcessFinished() {
         return getModel().state == StudyState.FINISHED;
     }
+    
+    /**
+     * Is study state none?
+     * 
+     * @return
+     */
+    public boolean isStudyStateNone() {
+        return (getModel() == null || getModel().state == null || getModel().state == StudyState.NONE);
+    }    
 }

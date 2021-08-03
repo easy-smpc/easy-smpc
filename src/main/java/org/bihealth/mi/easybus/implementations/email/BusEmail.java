@@ -89,31 +89,36 @@ public class BusEmail extends Bus {
      * @param connection
      * @param millis - interval in milliseconds in which messages are polled
      */
-    public BusEmail(ConnectionEmail connection, int millis) {
+    public BusEmail(ConnectionEmail connection, int millis, boolean sendAndReceive) {
         this.connection = connection;
-        this.threadSleepTime = millis;
-        this.thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (!stop) {
-                        //try {
+        
+        if (sendAndReceive) {
+            this.threadSleepTime = millis;
+            this.thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        while (!stop) {
+                            // try {
                             receiveEmails();
-//                        } catch (BusException e) {
-//                            // Stop thread
-//                            throw new RuntimeException(e);
-//                        }
-                        Thread.sleep(millis);
+                            // } catch (BusException e) {
+                            // // Stop thread
+                            // throw new RuntimeException(e);
+                            // }
+                            Thread.sleep(millis);
+                        }
+                    } catch (InterruptedException e) {
+                        logger.error("Interrupted exception logged",
+                                     new Date(),
+                                     ExceptionUtils.getStackTrace(e));
+                        connection.close();
+                        // Die silently
                     }
-                } catch (InterruptedException e) {
-                    logger.error("Interrupted exception logged", new Date(), ExceptionUtils.getStackTrace(e));
-                    connection.close();                    
-                    // Die silently
                 }
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
+            });
+            thread.setDaemon(true);
+            thread.start();
+        }
     }    
     
     @Override
@@ -159,7 +164,7 @@ public class BusEmail extends Bus {
         this.stop = true;
         
         // If on the same thread, just return
-        if (Thread.currentThread().equals(this.thread)) {
+        if (this.thread == null || Thread.currentThread().equals(this.thread)) {
             return;
         
         // If on another thread, interrupt and wait for thread to die

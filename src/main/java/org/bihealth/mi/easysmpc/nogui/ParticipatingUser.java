@@ -13,11 +13,18 @@
  */
 package org.bihealth.mi.easysmpc.nogui;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.Base64;
 import java.util.Date;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
@@ -51,29 +58,26 @@ public class ParticipatingUser extends User {
      * @param connectionIMAPSettings
      * @param lengthBitBigInteger
      */
-    public ParticipatingUser(String studyUID,
-                             Participant ownParticipant,
-                             int participantId,
-                             ConnectionIMAPSettings connectionIMAPSettings,
-                             int lengthBitBigInteger,
-                             int mailBoxCheckInterval,
-                             boolean isSharedMailbox) {
-        super(mailBoxCheckInterval, isSharedMailbox);
-        this.lengthBitBigInteger = lengthBitBigInteger;
-        this.connectionIMAPSettings = connectionIMAPSettings;
+    public ParticipatingUser(ParticipatingUserData participatingUserData) {                
+        super(participatingUserData.mailBoxCheckInterval, participatingUserData.isSharedMailbox);
+        this.lengthBitBigInteger = participatingUserData.lengthBitBigInteger;
+        this.connectionIMAPSettings = participatingUserData.connectionIMAPSettings;
         
-        RecordTimeDifferences.addStartValue(studyUID, participantId, System.nanoTime());
+        //RecordTimeDifferences.addStartValue(participatingUserData.studyUID, participatingUserData.participantId, System.nanoTime());
         
         try {
             // Register for initial e-mail
             interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false),
-                                      mailBoxCheckInterval);
-            interimBus.receive(new Scope(studyUID + ROUND_0),
-                                        new org.bihealth.mi.easybus.Participant(ownParticipant.name,
-                                                                                ownParticipant.emailAddress),
+                                      participatingUserData.mailBoxCheckInterval, true);
+            interimBus.receive(new Scope(participatingUserData.studyUID + ROUND_0),
+                                        new org.bihealth.mi.easybus.Participant(participatingUserData.ownParticipant.name,
+                                                                                participatingUserData.ownParticipant.emailAddress),
                                         new MessageListener() {
                                             @Override
                                             public void receive(org.bihealth.mi.easybus.Message message) {
+                                                // Stop interim bus
+                                                interimBus.stop();
+                                                
                                                 // Spawns the following steps in an own thread
                                                 Thread thread = new Thread(new Runnable() {
                                                     @Override
@@ -83,9 +87,6 @@ public class ParticipatingUser extends User {
                                                 });
                                                 thread.setDaemon(false);
                                                 thread.start();
-                                                
-                                                // Stop interim bus
-                                                interimBus.stop();
                                             }
                                         });
         } catch (BusException e) {
@@ -136,5 +137,108 @@ public class ParticipatingUser extends User {
         
         // Return
         return result;
+    }
+    
+    /**
+     * Class containing data to create a participant
+     * 
+     * @author Felix Wirth
+     *
+     */
+    protected static class ParticipatingUserData implements Serializable {
+
+        /** SVUID */
+        private static final long serialVersionUID = -573296130735855246L;
+        /** studyUID */
+        private final String                 studyUID;
+        /** ownParticipant */
+        private final Participant            ownParticipant;
+        /** participantId */
+        private final int                    participantId;
+        /** connectionIMAPSettings */
+        private final ConnectionIMAPSettings connectionIMAPSettings;
+        /** connectionIMAPSettings */
+        private final int                    lengthBitBigInteger;
+        /** connectionIMAPSettings */
+        private final int                    mailBoxCheckInterval;
+        /** connectionIMAPSettings */
+        private final boolean                isSharedMailbox;
+
+        /**
+         * Create a new instance
+         * 
+         * @param studyUID
+         * @param ownParticipant
+         * @param participantId
+         * @param connectionIMAPSettings
+         * @param lengthBitBigInteger
+         * @param mailBoxCheckInterval
+         * @param isSharedMailbox
+         */
+        public ParticipatingUserData(String studyUID,
+                                     Participant ownParticipant,
+                                     int participantId,
+                                     ConnectionIMAPSettings connectionIMAPSettings,
+                                     int lengthBitBigInteger,
+                                     int mailBoxCheckInterval,
+                                     boolean isSharedMailbox) {
+            // Store
+            this.studyUID = studyUID;
+            this.ownParticipant = ownParticipant;
+            this.participantId = participantId;
+            this.connectionIMAPSettings = connectionIMAPSettings;
+            this.lengthBitBigInteger = lengthBitBigInteger;
+            this.mailBoxCheckInterval = mailBoxCheckInterval;
+            this.isSharedMailbox = isSharedMailbox;
+        }
+    }
+    
+    /**
+     * Create process
+     * 
+     * @param args
+     */
+    public static void main(String[] args) { 
+        // Check
+        if (args.length != 1) {
+            throw new IllegalStateException("No data for particpating user provided");
+        }
+                
+        try {
+            // Deserialize data
+            byte[] data = Base64.getDecoder().decode(args[0]);
+            ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
+            ParticipatingUserData userData = (ParticipatingUserData) ois.readObject();
+            ois.close();
+            
+            // Set logging and remove console appender
+            System.setProperty("logFilename", String.format("logging-process-%d", userData.participantId));
+            System.setProperty("log4j2.contextSelector", "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
+            System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");
+            LoggerContext context = LoggerContext.getContext(false);
+            Configuration configuration = context.getConfiguration();
+            LoggerConfig loggerConfig = configuration.getLoggerConfig("org.bihealth");
+            loggerConfig.removeAppender("console");
+            configuration.getRootLogger().removeAppender("console");
+            context.updateLoggers();
+            
+            // Create user
+            ParticipatingUser user = new ParticipatingUser(userData);
+            while(user.isStudyStateNone()) {
+                // Wait until received initial
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    logger.error("Interrupted exception logged",
+                                 new Date(),
+                                 "Interrupted exception logged",
+                                 ExceptionUtils.getStackTrace(e));
+                }
+            }
+        } catch (ClassNotFoundException | IOException e) {
+            throw new IllegalStateException("Unable to deserialize data for particpating user ", e);
+        } catch (Exception e) {
+            logger.error("Participant process stopped logged", new Date(), "Participant process stopped logged", ExceptionUtils.getStackTrace(e));
+        }
     }
 }

@@ -15,7 +15,7 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>3.0.0</version>
 				<configuration>
-					<mainClass>org.bihealth.mi.easysmpc.nogui.PerformanceEvaluation</mainClass>					
+					<mainClass>org.bihealth.mi.easysmpc.nogui.PerformanceEvaluation</mainClass>
 				</configuration>
 			</plugin>
 
@@ -93,7 +93,7 @@
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>jakarta.mail</artifactId>
-			<version>2.0.1</version>
+			<version>1.6.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -121,6 +121,11 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 			<version>2.14.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.lmax</groupId>
+			<artifactId>disruptor</artifactId>
+			<version>3.4.2</version>
 		</dependency>
 	</dependencies>
 	<properties>

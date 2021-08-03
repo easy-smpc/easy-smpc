@@ -284,8 +284,9 @@ public class Study implements Serializable, Cloneable {
      * @return
      * @throws BusException
      */
+    // TODO this must be corrected in future
     public BusEmail getBus(int millis) throws BusException {
-        return getBus(millis, true);
+        return getBus(millis, true, false);
     }
     
     /**
@@ -295,12 +296,12 @@ public class Study implements Serializable, Cloneable {
      * @return the bus
      * @throws BusException 
      */
-    public BusEmail getBus(int millis, boolean isSharedMailbox) throws BusException {
+    public BusEmail getBus(int millis, boolean isSharedMailbox, boolean sendAndReceive) throws BusException {
         if (millis <= 0) {
             throw new IllegalArgumentException("Interval must be a positive number");
         }
         if ((this.bus == null || !this.bus.isAlive()) && this.connectionIMAPSettings != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, isSharedMailbox), millis);
+            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, isSharedMailbox), millis, sendAndReceive);
         }
         return this.bus;
     }
