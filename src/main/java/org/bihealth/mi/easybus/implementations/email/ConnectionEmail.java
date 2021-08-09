@@ -23,13 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import javax.mail.BodyPart;
-import javax.mail.Flags.Flag;
-import javax.mail.Folder;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.internet.MimeBodyPart;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,6 +32,14 @@ import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
+
+import jakarta.mail.BodyPart;
+import jakarta.mail.Flags.Flag;
+import jakarta.mail.Folder;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.Store;
+import jakarta.mail.internet.MimeBodyPart;
 
 /**
  * Abstract class for e-mail connections
@@ -56,7 +57,7 @@ public abstract class ConnectionEmail {
     protected static class ConnectionEmailMessage {
 
         /** Message */
-        private final javax.mail.Message message;
+        private final jakarta.mail.Message message;
 
         /** Folder */
         private final Folder             folder;
@@ -75,7 +76,7 @@ public abstract class ConnectionEmail {
          * @param message
          * @param folder
          */
-        public ConnectionEmailMessage(javax.mail.Message message, Folder folder) {
+        public ConnectionEmailMessage(jakarta.mail.Message message, Folder folder, Store store) {
             
             // Store
             this.message = message;
@@ -134,8 +135,7 @@ public abstract class ConnectionEmail {
                 logger.debug("delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
-        }
-    
+        }    
         /** 
          * Expunges all deleted messages on the server
          */
@@ -322,7 +322,7 @@ public abstract class ConnectionEmail {
                 // TODO: Is this a good idea? Delete malformed messages
                 if (text == null || attachment == null) {
                     logger.debug("Malformated message deleted logged", new Date(), "Malformated message deleted");
-                    message.delete();
+                    //message.delete();
                     continue;
                 }
                 
@@ -343,7 +343,7 @@ public abstract class ConnectionEmail {
     
                 // TODO: Is this a good idea? Delete malformed messages
                 if (scope == null || participant == null) {
-                    message.delete();
+                    //message.delete();
                     continue;
                 }               
                 
@@ -388,11 +388,8 @@ public abstract class ConnectionEmail {
         // Subject
         String subject = EMAIL_SUBJECT_PREFIX + SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + " " + 
                 PARTICIPANT_NAME_START_TAG + participant.getName() + PARTICIPANT_NAME_END_TAG + " " + 
-                PARTICIPANT_EMAIL_START_TAG + participant.getEmailAddress();
-        if (sender != null) {
-            subject = subject + PARTICIPANT_EMAIL_END_TAG + " " + "SENDER_START" +
-                      sender.getName() + "SENDER_END";
-        }
+                PARTICIPANT_EMAIL_START_TAG + participant.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG + " " +
+                "SENDER_START" + sender.getName() + "SENDER_END";       
   
         // Body
         String body = SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + "\n" + 

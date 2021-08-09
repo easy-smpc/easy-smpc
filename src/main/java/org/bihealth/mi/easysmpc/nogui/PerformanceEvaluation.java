@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -58,24 +59,24 @@ public class PerformanceEvaluation {
      * @param args
      * @throws IOException 
      */
-    public static void main(String[] args) throws IOException  {        
+    public static void main(String[] args) throws Exception  {        
         // Create parameters
 //        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 15, 20}));
 //        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 2500, 5000, 7500, 10000}));
 //        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 15000, 20000}));
-      List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10}));
-      List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {100}));
-      List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {2000}));
-  
-        
+      List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 15, 20}));
+      List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 2500, 5000, 7500, 10000}));
+      List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 15000, 20000}));
         boolean isSharedMailbox = false;
         boolean separatedProcesses = false;
-        Combinator combinator =
-//                new RandomCombinator(participants, bins, mailboxCheckInterval);
-                new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 12);
-        
+        Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 12);
+//    new RandomCombinator(participants, bins, mailboxCheckInterval);
+      
+      // Read password
+      String password = new Scanner(new File("password.txt")).nextLine();
+      
         // Create connection settings
-//        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev" + MailboxDetails.INDEX_REPLACE + "@insutec.de").setPassword("3a$ySMPC!")
+//        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev" + MailboxDetails.INDEX_REPLACE + "@insutec.de").setPassword(password)
 ////        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
 //                .setSMTPServer("smtp.ionos.de")
 //                .setIMAPServer("imap.ionos.de");
@@ -189,7 +190,6 @@ public class PerformanceEvaluation {
         System.setProperty("logFilename", "logging-main");
         System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");
         logger = LogManager.getLogger(PerformanceEvaluation.class);
-        
         // Delete existing e-mails
         for (ConnectionIMAPSettings connectionIMAPSettings : mailBoxDetails.getAllConnections()) {
             BusEmail bus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true), 0, true);

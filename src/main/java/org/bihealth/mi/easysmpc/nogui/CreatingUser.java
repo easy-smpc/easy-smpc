@@ -41,8 +41,7 @@ public class CreatingUser extends User {
     /** All participating users */
     private final List<User> participatingUsers = new ArrayList<>();
     /** All participating users processes */
-    private final List<Process> participatingUsersProcesses = new ArrayList<>();
-    
+    private final List<Process> participatingUsersProcesses = new ArrayList<>();   
     /** Logger */
     Logger logger = LogManager.getLogger(CreatingUser.class);
     
@@ -90,8 +89,11 @@ public class CreatingUser extends User {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {             
-                    if (new Scanner(System.in).nextLine().equals("s")) {
+                Scanner scanner = new Scanner(System.in);
+                while (true) {
+                    
+                    if (scanner.nextLine().equals("s")) {
+                        scanner.close();
                         stopAllProcesses();
                     }
                     // Wait
@@ -163,8 +165,8 @@ public class CreatingUser extends User {
                     // Start process
                     // TODO fix dependencies
                     ProcessBuilder processBuilder = new ProcessBuilder("java",
-                                                                 "-Xdebug",
-                                                                 "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=500" + index,
+//                                                                 "-Xdebug",
+//                                                                 "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=500" + index,
                                                                 "-cp", 
                                                                 "./target/classes;./target/dependency/*",
                                                                 "org.bihealth.mi.easysmpc.nogui.ParticipatingUser",

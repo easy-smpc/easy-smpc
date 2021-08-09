@@ -22,6 +22,8 @@ import java.util.Base64;
 import java.util.Date;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
@@ -48,7 +50,9 @@ public class ParticipatingUser extends User {
     /** Interim bus for initial e-mail receiving  */
     private BusEmail interimBus;
     /** ConnectionIMAPSettings */
-    private ConnectionIMAPSettings connectionIMAPSettings;    
+    private ConnectionIMAPSettings connectionIMAPSettings;
+    /** Logger */
+    private static Logger logger = null; 
 
     /**
      * Creates a new instance
@@ -62,8 +66,11 @@ public class ParticipatingUser extends User {
         super(participatingUserData.mailBoxCheckInterval, participatingUserData.isSharedMailbox);
         this.lengthBitBigInteger = participatingUserData.lengthBitBigInteger;
         this.connectionIMAPSettings = participatingUserData.connectionIMAPSettings;
+        if(logger == null) {
+            logger = LogManager.getLogger(ParticipatingUser.class); 
+        }
         
-        //RecordTimeDifferences.addStartValue(participatingUserData.studyUID, participatingUserData.participantId, System.nanoTime());
+        RecordTimeDifferences.addStartValue(participatingUserData.studyUID, participatingUserData.participantId, System.nanoTime());
         
         try {
             // Register for initial e-mail
@@ -221,6 +228,7 @@ public class ParticipatingUser extends User {
             loggerConfig.removeAppender("console");
             configuration.getRootLogger().removeAppender("console");
             context.updateLoggers();
+            logger = LogManager.getLogger(ParticipatingUser.class);
             
             // Create user
             ParticipatingUser user = new ParticipatingUser(userData);
@@ -236,7 +244,7 @@ public class ParticipatingUser extends User {
                 }
             }
         } catch (ClassNotFoundException | IOException e) {
-            throw new IllegalStateException("Unable to deserialize data for particpating user ", e);
+            logger.error("Unable to deserialize data for particpating user logged", new Date(), "Unable to deserialize data for particpating user logged", ExceptionUtils.getStackTrace(e));
         } catch (Exception e) {
             logger.error("Participant process stopped logged", new Date(), "Participant process stopped logged", ExceptionUtils.getStackTrace(e));
         }

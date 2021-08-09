@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
+import org.bihealth.mi.easybus.implementations.email.ConnectionEmail;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -47,7 +48,7 @@ public abstract class User implements MessageListener {
     /** Round for initial e-mails */
     public final String ROUND_0 = "_round0";
     /** Logger */
-    protected static Logger logger;       
+    private static Logger logger;       
     /** The study model */
     private Study model = new Study();
     /** The random object */
@@ -66,7 +67,7 @@ public abstract class User implements MessageListener {
     User(int mailBoxCheckInterval, boolean isSharedMailbox) {
         this.mailBoxCheckInterval = mailBoxCheckInterval;
         this.isSharedMailbox = isSharedMailbox;
-        logger = LogManager.getLogger(User.class);
+        logger = LogManager.getLogger(User.class);        
      }
     
     /**
@@ -94,7 +95,7 @@ public abstract class User implements MessageListener {
             receiveMessages(Resources.ROUND_2);
             this.model.stopBus();
             this.model.toFinished();
-            //RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());            
+            RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());            
             logger.debug("Result logged", new Date(), getModel().studyUID, "result", getModel().ownId, "participantid", getModel().getAllResults()[0].name, "result name", getModel().getAllResults()[0].value, "result");
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
             logger.error("Unable to process common process steps logged", new Date(), "Unable to process common process steps", ExceptionUtils.getStackTrace(e));
@@ -115,7 +116,8 @@ public abstract class User implements MessageListener {
                            new org.bihealth.mi.easybus.Participant(getModel().getParticipantFromId(getModel().ownId).name,
                                                                    getModel().getParticipantFromId(getModel().ownId).emailAddress),
                            this);
-
+        
+        long startTime = System.currentTimeMillis();
         while (!areSharesComplete()) {
             // Proceed of shares complete
             if(!getModel().isBusAlive()) {
@@ -132,6 +134,23 @@ public abstract class User implements MessageListener {
              "Interrupted exception logged",
              ExceptionUtils.getStackTrace(e));
              }
+             
+             if((System.currentTimeMillis() - startTime) > (90*1000)){
+                 startTime = System.currentTimeMillis();                   
+                     if (!getModel().bins[0].isComplete()) {
+                         int index = 0;
+                    for (de.tu_darmstadt.cbs.emailsmpc.Participant participant : getModel().participants) {
+                        if (!getModel().bins[0].isCompleteForParticipantId(index)) {
+                            String subject = ConnectionEmail.EMAIL_SUBJECT_PREFIX + ConnectionEmail.SCOPE_NAME_START_TAG + getModel().studyUID + (getModel().state == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier) + ConnectionEmail.SCOPE_NAME_END_TAG + " " + 
+                                 ConnectionEmail.PARTICIPANT_NAME_START_TAG + getModel().participants[getModel().ownId].name + ConnectionEmail.PARTICIPANT_NAME_END_TAG + " " + 
+                                 ConnectionEmail.PARTICIPANT_EMAIL_START_TAG + getModel().participants[getModel().ownId].emailAddress + ConnectionEmail.PARTICIPANT_EMAIL_END_TAG + " " +
+                                 "SENDER_START" + getModel().participants[index].name + "SENDER_END";
+                            logger.error("Missing mail logged", new Date(), "Missing mail", subject);
+                            }
+                        index++;
+                    }
+                }
+            }
         }
     }
 

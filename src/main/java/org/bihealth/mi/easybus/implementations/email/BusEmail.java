@@ -72,7 +72,7 @@ public class BusEmail extends Bus {
     
         /** Expunges all deleted messages on the server
          * @throws BusException */
-        protected abstract void expunge() throws BusException;
+        protected abstract void expunge() throws BusException;        
     }
 
     /** Connection */
@@ -238,6 +238,7 @@ public class BusEmail extends Bus {
             if (deleted != null) {
                 deleted.expunge();
             }
+            connection.close();
         } catch (BusException e) {
             logger.debug("ReceiveEmails() failed logged", new Date(), "ReceiveEmails() failed", ExceptionUtils.getStackTrace(e));
         }

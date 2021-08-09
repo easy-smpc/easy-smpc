@@ -22,23 +22,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
-import javax.activation.DataHandler;
-import javax.mail.Authenticator;
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.Message.RecipientType;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Store;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.util.ByteArrayDataSource;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.math3.util.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -47,6 +30,24 @@ import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easysmpc.resources.Resources;
+
+import jakarta.activation.DataHandler;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Folder;
+import jakarta.mail.Message;
+import jakarta.mail.Message.RecipientType;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Store;
+import jakarta.mail.Transport;
+import jakarta.mail.UIDFolder;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
 
 /**
  * Defines the connection using IMAP to receive and SMTP to send e-mails
@@ -65,6 +66,8 @@ public class ConnectionIMAP extends ConnectionEmail {
     private final Properties    propertiesSending;
     /** Store object to access e-mail server */
     private Store               store;
+    /** Folde receiving*/
+    private Folder folder;
     /** Session to send e-mails */
     private Session             session;
     /** Password of the user */
@@ -98,7 +101,6 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesReceiving.put("mail.imap.host", settings.getIMAPServer());
         this.propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));
         //this.propertiesReceiving.put("mail.imap.ssl.enable", "true");
-        //this.propertiesReceiving.put("mail.imap.socketFactory.port", String.valueOf(settings.getIMAPPort()));
         this.propertiesReceiving.put("mail.imap.partialfetch", "false");
         this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
         
@@ -112,7 +114,6 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesSending = new Properties();
         this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
         this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
-        //this.propertiesSending.put("mail.smtp.socketFactory.port", String.valueOf(settings.getSMTPPort()));
         //this.propertiesSending.put("mail.smtp.ssl.enable", "true");
         this.propertiesSending.put("mail.smtp.auth", "true");
 
@@ -154,9 +155,13 @@ public class ConnectionIMAP extends ConnectionEmail {
     @Override
     protected void close() {
         try {
+            if (folder != null && folder.isOpen()) {
+                folder.close(false);
+            }
+            
             if (store != null && store.isConnected()) {
                 store.close();
-            }
+            }                        
         } catch (Exception e) {
             // Ignore
         }
@@ -166,21 +171,16 @@ public class ConnectionIMAP extends ConnectionEmail {
     protected List<ConnectionEmailMessage> list(MessageFilter filter) throws BusException, InterruptedException {
         
         synchronized (propertiesReceiving) {
-                
             // Make sure we are ready to go
-            Folder folder = null;
+
             try {
         
                 // Create store
-                if (store == null) {
                     Session sessionReceiving = Session.getInstance(propertiesReceiving);
                     store = sessionReceiving.getStore("imap");
-                }
                 
                 // Connect store
-                if (!store.isConnected()) {
                     store.connect(getEmailAddress(), password);
-                }
                 
                 // Create folder new for every call to get latest state
                 folder = store.getFolder("INBOX");
@@ -202,7 +202,9 @@ public class ConnectionIMAP extends ConnectionEmail {
                 
                 // Load messages
                 for (Message message : folder.getMessages()) {
-                    logger.debug("Message considered logged", new Date(), "Message considered", message.getSubject());
+                    String subject = message.getSubject();
+                    long uid = ((UIDFolder)  folder).getUID(message);
+                    logger.debug("Message considered logged", new Date(), "Message considered", uid, subject);
                     // Check for interrupt
                     if (Thread.interrupted()) { 
                         throw new InterruptedException();
@@ -210,10 +212,10 @@ public class ConnectionIMAP extends ConnectionEmail {
 
                     // Select relevant messages
                     try {
-                        if (message.getSubject().startsWith(EMAIL_SUBJECT_PREFIX) &&
-                                (filter == null || filter.accepts(message.getSubject()))) {                                
-                                logger.debug("Message received logged", new Date(), "Message received", message.getSubject());
-                                result.add(new ConnectionEmailMessage(message, folder));
+                        if (subject.startsWith(EMAIL_SUBJECT_PREFIX) &&
+                                (filter == null || filter.accepts(subject))) {                                
+                                logger.debug("Message received logged", new Date(), "Message received", uid, subject);
+                                result.add(new ConnectionEmailMessage(message, folder, store));
                         }
                     } catch (Exception e) {
                         // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
