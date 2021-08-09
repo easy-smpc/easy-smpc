@@ -98,11 +98,14 @@ public class ConnectionIMAP extends ConnectionEmail {
         
         // Create properties of receiving connection
         this.propertiesReceiving = new Properties();
+        this.propertiesReceiving.put("mail.store.protocol", "imap");
+        this.propertiesReceiving.put("mail.user", getEmailAddress());
+        this.propertiesReceiving.put("mail.from", getEmailAddress());
         this.propertiesReceiving.put("mail.imap.host", settings.getIMAPServer());
-        this.propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));
-        //this.propertiesReceiving.put("mail.imap.ssl.enable", "true");
+        this.propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));        
         this.propertiesReceiving.put("mail.imap.partialfetch", "false");
         this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
+      //this.propertiesReceiving.put("mail.imap.ssl.enable", "true");
         
         // Set proxy
         if (proxy != null) {
@@ -112,10 +115,13 @@ public class ConnectionIMAP extends ConnectionEmail {
         
         // Create properties of sending connection
         this.propertiesSending = new Properties();
+        this.propertiesSending.put("mail.user", getEmailAddress());
+        this.propertiesSending.put("mail.from", getEmailAddress());
+        this.propertiesSending.put("mail.transport.protocol", "stmp");
         this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
         this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
-        //this.propertiesSending.put("mail.smtp.ssl.enable", "true");
         this.propertiesSending.put("mail.smtp.auth", "true");
+        //this.propertiesSending.put("mail.smtp.ssl.enable", "true");
 
         // Set proxy
         if (proxy != null) {
@@ -177,7 +183,7 @@ public class ConnectionIMAP extends ConnectionEmail {
         
                 // Create store
                     Session sessionReceiving = Session.getInstance(propertiesReceiving);
-                    store = sessionReceiving.getStore("imap");
+                    store = sessionReceiving.getStore();
                 
                 // Connect store
                     store.connect(getEmailAddress(), password);
@@ -240,11 +246,7 @@ public class ConnectionIMAP extends ConnectionEmail {
             // Make sure we are ready to go
             try {
                 if (session == null) {
-                    session = Session.getInstance(propertiesSending, new Authenticator() {
-                        protected PasswordAuthentication getPasswordAuthentication() {
-                            return new PasswordAuthentication(getEmailAddress(), password);
-                        }
-                    });
+                    session = Session.getInstance(propertiesSending);
                 }
             } catch (Exception e) {
                 throw new BusException("Error establishing or keeping alive connection to mail server", e);
@@ -286,7 +288,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 email.setContent(multipart);
     
                 // Send
-                Transport.send(email);                
+                Transport.send(email, getEmailAddress(), password);                
                 logger.debug("Message sent logged", new Date(), "Message sent logged", subject);
             } catch (Exception e) {
                 throw new BusException("Unable to send message", e);
@@ -303,7 +305,7 @@ public class ConnectionIMAP extends ConnectionEmail {
 
             // Create store
             Session sessionReceiving = Session.getInstance(propertiesReceiving);
-            Store store = sessionReceiving.getStore("imap");
+            Store store = sessionReceiving.getStore();
 
             // Connect store
             store.connect(getEmailAddress(), password);
@@ -332,6 +334,7 @@ public class ConnectionIMAP extends ConnectionEmail {
      */
     protected synchronized boolean isSendingConnected() {
         try {
+            // TODO Check and remove Authenticator
             // Check sending e-mails
             Session.getInstance(propertiesSending, new Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
