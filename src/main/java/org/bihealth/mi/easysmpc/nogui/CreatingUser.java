@@ -13,14 +13,10 @@
  */
 package org.bihealth.mi.easysmpc.nogui;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -39,9 +35,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class CreatingUser extends User {
     
     /** All participating users */
-    private final List<User> participatingUsers = new ArrayList<>();
-    /** All participating users processes */
-    private final List<Process> participatingUsersProcesses = new ArrayList<>();   
+    private final List<User> participatingUsers = new ArrayList<>(); 
     /** Logger */
     Logger logger = LogManager.getLogger(CreatingUser.class);
     
@@ -57,7 +51,7 @@ public class CreatingUser extends User {
     CreatingUser(int numberParticipants,
                  int numberBins,
                  int mailBoxCheckInterval,
-                 MailboxDetails mailBoxDetails, boolean separatedProcesses) throws IllegalStateException {
+                 MailboxDetails mailBoxDetails) throws IllegalStateException {
         super(mailBoxCheckInterval, mailBoxDetails.isSharedMailbox());
 
         try {          
@@ -76,7 +70,7 @@ public class CreatingUser extends User {
         }
         
         // Spawn participants
-        createParticipants(FIXED_LENGTH_BIT_BIGINTEGER, mailBoxDetails, separatedProcesses);
+        createParticipants(FIXED_LENGTH_BIT_BIGINTEGER, mailBoxDetails);
         
         // Spawns the common steps in an own thread
         new Thread(new Runnable() {
@@ -84,55 +78,7 @@ public class CreatingUser extends User {
             public void run() {
                 proceedCommonProcessSteps();
             }
-        }).start();
-        
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Scanner scanner = new Scanner(System.in);
-                while (true) {
-                    
-                    if (scanner.nextLine().equals("s")) {
-                        scanner.close();
-                        stopAllProcesses();
-                    }
-                    // Wait
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        logger.error("Interrupted exception logged",
-                                     new Date(),
-                                     "Interrupted exception logged",
-                                     ExceptionUtils.getStackTrace(e));
-                    }
-                }
-            }
-        }).start();
-    }
-
-    /**
-     * Stop all processes
-     */
-    protected void stopAllProcesses() {
-        // Init
-        boolean allStopped = false;
-
-        // Repeat until all spawned processes are stopped
-        while (!allStopped) {
-            allStopped = true;
-            for (Process process : participatingUsersProcesses) {
-                if (process.isAlive()) {
-                    allStopped = false;
-                    process.destroy();
-                }
-            }
-        }        
-
-        // Log
-        logger.debug("Stopped all processes logged", new Date(), "Stopped all processes");
-
-        // Stop own process
-        System.exit(0);
+        }).start();             
     }
 
     /**
@@ -143,8 +89,7 @@ public class CreatingUser extends User {
      * @param connectionIMAPSettings 
      */
     private void createParticipants(int lengthBitBigInteger,
-                                    MailboxDetails mailBoxDetails,
-                                    boolean separatedProcesses) {
+                                    MailboxDetails mailBoxDetails) {
         // Loop over participants
         for(int index = 1; index < getModel().numParticipants; index++) {
             ParticipatingUserData userData =  new ParticipatingUserData(getModel().studyUID,
@@ -155,31 +100,8 @@ public class CreatingUser extends User {
                                   getMailboxCheckInterval(),
                                   mailBoxDetails.isSharedMailbox());
             
-            if (separatedProcesses) {                
-                try {
-                    // Serialize data
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    ObjectOutputStream oos = new ObjectOutputStream(bos);
-                    oos.writeObject(userData);
-                    oos.close();
-                    // Start process
-                    // TODO fix dependencies
-                    ProcessBuilder processBuilder = new ProcessBuilder("java",
-//                                                                 "-Xdebug",
-//                                                                 "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=500" + index,
-                                                                "-cp", 
-                                                                "./target/classes;./target/dependency/*",
-                                                                "org.bihealth.mi.easysmpc.nogui.ParticipatingUser",
-                                                                Base64.getEncoder().encodeToString(bos.toByteArray()));
-                    participatingUsersProcesses.add(processBuilder.start());
-                } catch (IOException e) {
-                    throw new IllegalStateException("Unable to serialze data!", e);
-                }               
-                
-            } else {
-                // Create user as new thread
-                participatingUsers.add(new ParticipatingUser(userData));
-            }
+            // Create user as new thread
+            participatingUsers.add(new ParticipatingUser(userData));
         }
     }
 
@@ -255,14 +177,7 @@ public class CreatingUser extends User {
             if(!user.isProcessFinished()) {
                 return false;
             }
-        }
-        
-        // Check for all participating users
-        for(Process process : participatingUsersProcesses) {
-            if(process.isAlive()) {
-                return false;
-            }
-        }
+        }        
         
         // Return all
         return true;

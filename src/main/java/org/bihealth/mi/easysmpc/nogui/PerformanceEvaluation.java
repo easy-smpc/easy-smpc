@@ -69,7 +69,6 @@ public class PerformanceEvaluation {
         List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 2500, 5000, 7500, 10000}));
         List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 15000, 20000}));
         boolean isSharedMailbox = false;
-        boolean separatedProcesses = false;
         int waitTime = 1000;
         Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 12);
       
@@ -114,7 +113,6 @@ public class PerformanceEvaluation {
                                       combination.getBins(),
                                       combination.getMailboxCheckInterval(),
                                       mailBoxDetails,
-                                      separatedProcesses,
                                       waitTime);
         }
     }
@@ -126,14 +124,12 @@ public class PerformanceEvaluation {
      * @param bins
      * @param mailboxCheckInterval
      * @param mailBoxDetails 
-     * @param separatedProcesses 
      * @throws IOException 
      */
     public PerformanceEvaluation(int participants,
                                  int bins,
                                  int mailboxCheckIntervals,
                                  MailboxDetails mailBoxDetails,
-                                 boolean separatedProcesses,
                                  int waitTime) throws IOException {
         // Prepare if necessary
         if (!prepared) {
@@ -150,8 +146,7 @@ public class PerformanceEvaluation {
         CreatingUser user = new CreatingUser(participants,
                                              bins,
                                              mailboxCheckIntervals,
-                                             mailBoxDetails,
-                                             separatedProcesses);
+                                             mailBoxDetails);
 
         // Wait to finish
         while (!user.areAllUsersFinished()) {
