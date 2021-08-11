@@ -66,10 +66,8 @@ public class ConnectionIMAP extends ConnectionEmail {
     private final Properties    propertiesSending;
     /** Store object to access e-mail server */
     private Store               store;
-    /** Folde receiving*/
+    /** Folder receiving*/
     private Folder folder;
-    /** Session to send e-mails */
-    private Session             session;
     /** Password of the user */
     private String              password;
     /** Logger */
@@ -117,7 +115,7 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesSending = new Properties();
         this.propertiesSending.put("mail.user", getEmailAddress());
         this.propertiesSending.put("mail.from", getEmailAddress());
-        this.propertiesSending.put("mail.transport.protocol", "stmp");
+        this.propertiesSending.put("mail.transport.protocol", "smtp");
         this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
         this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
         this.propertiesSending.put("mail.smtp.auth", "true");
@@ -244,10 +242,11 @@ public class ConnectionIMAP extends ConnectionEmail {
         synchronized(propertiesSending) {
     
             // Make sure we are ready to go
+            Transport transport;
+            Session session;
             try {
-                if (session == null) {
-                    session = Session.getInstance(propertiesSending);
-                }
+                session = Session.getInstance(propertiesSending);
+                transport = session.getTransport();
             } catch (Exception e) {
                 throw new BusException("Error establishing or keeping alive connection to mail server", e);
             }
@@ -288,10 +287,19 @@ public class ConnectionIMAP extends ConnectionEmail {
                 email.setContent(multipart);
     
                 // Send
-                Transport.send(email, getEmailAddress(), password);                
+                transport.connect(getEmailAddress(), password);
+                transport.sendMessage(email, new InternetAddress[] {new InternetAddress(recipient)});
                 logger.debug("Message sent logged", new Date(), "Message sent logged", subject);
             } catch (Exception e) {
                 throw new BusException("Unable to send message", e);
+            } finally {
+                if (transport != null && transport.isConnected()) {
+                    try {
+                        transport.close();
+                    } catch (MessagingException e) {
+                        logger.error("Error closing transport logged", new Date(), "Error closing transport", ExceptionUtils.getStackTrace(e));
+                    }   
+                }
             }
         }
     }
