@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.MessageListener;
+import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.email.ConnectionEmail;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
@@ -93,10 +94,10 @@ public abstract class User implements MessageListener {
             
             // Receives the messages for the second round and finalizes the model
             receiveMessages(Resources.ROUND_2);            
-            this.model.stopBus();
             this.model.toFinished();
             RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());            
             logger.debug("Result logged", new Date(), getModel().studyUID, "result", getModel().ownId, "participantid", getModel().getAllResults()[0].name, "result name", getModel().getAllResults()[0].value, "result");
+            
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
             logger.error("Unable to process common process steps logged", new Date(), "Unable to process common process steps", ExceptionUtils.getStackTrace(e));
             throw new IllegalStateException("Unable to process common process steps", e);
@@ -120,21 +121,17 @@ public abstract class User implements MessageListener {
         // Wait for all shares
         long startTime = System.currentTimeMillis();
         while (!areSharesComplete()) {
-            // Proceed of shares complete
+            
+            // Proceed if shares complete
             if(!getModel().isBusAlive()) {
-                logger.error("Bus is not alive anymore!",
-                             new Date(),
-                             "Bus is not alive anymore!");
+                logger.error("Bus is not alive anymore!", new Date(), "Bus is not alive anymore!");
             }
              // Wait
-             try {
-             Thread.sleep(1000);
-             } catch (InterruptedException e) {
-             logger.error("Interrupted exception logged",
-             new Date(),
-             "Interrupted exception logged",
-             ExceptionUtils.getStackTrace(e));
-             }
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged", ExceptionUtils.getStackTrace(e));
+            }
              
              // Log potentially missing messages
              if((System.currentTimeMillis() - startTime) > (120*1000)){
@@ -143,17 +140,23 @@ public abstract class User implements MessageListener {
                          int index = 0;
                     for (de.tu_darmstadt.cbs.emailsmpc.Participant participant : getModel().participants) {
                         if (!getModel().bins[0].isCompleteForParticipantId(index)) {
-                            String subject = ConnectionEmail.EMAIL_SUBJECT_PREFIX + ConnectionEmail.SCOPE_NAME_START_TAG + getModel().studyUID + (getModel().state == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier) + ConnectionEmail.SCOPE_NAME_END_TAG + " " + 
-                                 ConnectionEmail.PARTICIPANT_NAME_START_TAG + getModel().participants[getModel().ownId].name + ConnectionEmail.PARTICIPANT_NAME_END_TAG + " " + 
-                                 ConnectionEmail.PARTICIPANT_EMAIL_START_TAG + getModel().participants[getModel().ownId].emailAddress + ConnectionEmail.PARTICIPANT_EMAIL_END_TAG + " " +
-                                 "SENDER_START" + getModel().participants[index].name + "SENDER_END";
+                            
+                            // Create same subject as the actual e-mail would have
+                            String subject = ConnectionEmail.createSubject( new Scope(getModel().studyUID + (getModel().state == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
+                                                           new Participant(getModel().participants[getModel().ownId].name, getModel().participants[getModel().ownId].emailAddress),
+                                                           new Participant(getModel().participants[index].name , getModel().participants[index].emailAddress));                            
+                            
+                            // Log
                             logger.error("Missing mail logged", new Date(), "Missing mail", subject);
                             }
                         index++;
                     }
                 }
             }
-        }      
+        }
+        
+        // Stop bus
+        getModel().stopBus();        
     }
 
 
@@ -183,9 +186,7 @@ public abstract class User implements MessageListener {
                     throw new IllegalStateException("Unable to send e-mail!", e);
                 }
             }
-        }        
-        // Stop bus
-        getModel().stopBus();
+        }
     }
 
     /**
@@ -265,7 +266,10 @@ public abstract class User implements MessageListener {
    * @return
    */
     public boolean isMessageShareResultValid(String text) {
+        // Check not null or empty
         if (model == null || text == null || text.trim().isEmpty()) { return false; }
+        
+        // Check message
         try {
             return model.isMessageShareResultValid(Message.deserializeMessage(text));
         } catch (Exception e) {

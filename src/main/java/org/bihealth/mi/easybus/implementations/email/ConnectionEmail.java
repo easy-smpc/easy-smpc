@@ -185,10 +185,9 @@ public abstract class ConnectionEmail {
     /** String indicating start of participant e-mail address */
     public static final String PARTICIPANT_EMAIL_START_TAG = "BEGIN_EMAIL_PARTICIPANT";
     /** String indicating end of participant address */
-    public static final String PARTICIPANT_EMAIL_END_TAG   = "END_EMAIL_PARTICIPANT";    
+    public static final String PARTICIPANT_EMAIL_END_TAG   = "END_EMAIL_PARTICIPANT";
     /** Logger */
     private static final Logger logger = LogManager.getLogger(ConnectionEmail.class);
-
 
     /** Use several or exactly one mail box for the bus */
     private boolean sharedMailbox;
@@ -318,11 +317,9 @@ public abstract class ConnectionEmail {
                 }
 
                 Object attachment = message.getAttachment();
-                
-                // TODO: Is this a good idea? Delete malformed messages
+                                
                 if (text == null || attachment == null) {
-                    logger.debug("Malformated message deleted logged", new Date(), "Malformated message deleted");
-                    //message.delete();
+                    logger.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
                     continue;
                 }
                 
@@ -340,12 +337,11 @@ public abstract class ConnectionEmail {
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }                        
-    
-                // TODO: Is this a good idea? Delete malformed messages
+                    
                 if (scope == null || participant == null) {
-                    //message.delete();
+                    logger.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
                     continue;
-                }               
+                }
                 
                 // Pass on
                 final ConnectionEmailMessage _message = message;
@@ -376,28 +372,38 @@ public abstract class ConnectionEmail {
      * Send message to participant
      * @param message
      * @param scope
-     * @param participant
+     * @param receiver
      * @param sender 
      * @throws BusException 
      */
-    protected void send(Message message, Scope scope, Participant participant, Participant sender) throws BusException {
+    protected void send(Message message, Scope scope, Participant receiver, Participant sender) throws BusException {
         
         // Recipient
-        String recipient = sharedMailbox ? getEmailAddress() : participant.getEmailAddress();
+        String recipient = sharedMailbox ? getEmailAddress() : receiver.getEmailAddress();
         
         // Subject
-        String subject = EMAIL_SUBJECT_PREFIX + SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + " " + 
-                PARTICIPANT_NAME_START_TAG + participant.getName() + PARTICIPANT_NAME_END_TAG + " " + 
-                PARTICIPANT_EMAIL_START_TAG + participant.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG + " " +
-                "SENDER_START" + sender.getName() + "SENDER_END";       
+        String subject = createSubject(scope, receiver, sender);       
   
         // Body
         String body = SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + "\n" + 
-                      PARTICIPANT_NAME_START_TAG + participant.getName() + PARTICIPANT_NAME_END_TAG + "\n" + 
-                      PARTICIPANT_EMAIL_START_TAG + participant.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG;
+                      PARTICIPANT_NAME_START_TAG + receiver.getName() + PARTICIPANT_NAME_END_TAG + "\n" + 
+                      PARTICIPANT_EMAIL_START_TAG + receiver.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG;
         
         // Send
         this.send(recipient, subject, body, message);
+    }
+
+    /**
+     * @param scope
+     * @param receiver
+     * @param sender
+     * @return
+     */
+    public static String createSubject(Scope scope, Participant receiver, Participant sender) {
+        return EMAIL_SUBJECT_PREFIX + SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + " " + 
+                PARTICIPANT_NAME_START_TAG + receiver.getName() + PARTICIPANT_NAME_END_TAG + " " + 
+                PARTICIPANT_EMAIL_START_TAG + receiver.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG + " " +
+                "SENDER_START" + sender.getName() + "SENDER_END";
     }
   
     /** 

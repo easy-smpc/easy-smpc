@@ -81,7 +81,7 @@ public class BusEmail extends Bus {
     private Thread          thread;
     /** Stop flag */
     private boolean         stop = false;
-    /** Sleep time a thread waits to send an e-mail */
+    /** Sleep time a thread waits to re-send an e-mail */
     private int threadSleepTime;
   
     /**
@@ -108,9 +108,7 @@ public class BusEmail extends Bus {
                             Thread.sleep(millis);
                         }
                     } catch (InterruptedException e) {
-                        logger.error("Interrupted exception logged",
-                                     new Date(),
-                                     ExceptionUtils.getStackTrace(e));
+                        logger.error("Interrupted exception logged", new Date(), ExceptionUtils.getStackTrace(e));
                         connection.close();
                         // Die silently
                     }
@@ -250,10 +248,12 @@ public class BusEmail extends Bus {
      * @return
      */
     public boolean isReceivingConnected() {
+        // Check if connected
         if(this.connection != null) {
             return this.connection.isReceivingConnected();
         }
         
+        // Return false
         return false;
     };
     

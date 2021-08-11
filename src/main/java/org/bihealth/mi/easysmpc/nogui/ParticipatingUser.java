@@ -47,8 +47,6 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class ParticipatingUser extends User {
     /** Stores the bit length of the big integer */
     private int lengthBitBigInteger;
-    /** Interim bus for initial e-mail receiving  */
-    private BusEmail interimBus;
     /** ConnectionIMAPSettings */
     private ConnectionIMAPSettings connectionIMAPSettings;
     /** Logger */
@@ -76,7 +74,7 @@ public class ParticipatingUser extends User {
         
         try {
             // Register for initial e-mail
-            interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false),
+            final BusEmail interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false),
                                       participatingUserData.mailBoxCheckInterval, true);
             interimBus.receive(new Scope(participatingUserData.studyUID + ROUND_0),
                                         new org.bihealth.mi.easybus.Participant(participatingUserData.ownParticipant.name,

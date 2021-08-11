@@ -59,21 +59,22 @@ public class PerformanceEvaluation {
      * @param args
      * @throws IOException 
      */
-    public static void main(String[] args) throws Exception  {        
+    public static void main(String[] args) throws Exception  {
+        
         // Create parameters
-//        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 15, 20}));
-//        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 2500, 5000, 7500, 10000}));
-//        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 15000, 20000}));
-      List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10, 15, 20}));
-      List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 2500, 5000, 7500, 10000}));
-      List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 15000, 20000}));
+//      List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 15, 20}));
+//      List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 2500, 5000, 7500, 10000}));
+//      List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 15000, 20000}));
+        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10, 15, 20}));
+        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 2500, 5000, 7500, 10000}));
+        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 15000, 20000}));
         boolean isSharedMailbox = false;
         boolean separatedProcesses = false;
+        int waitTime = 1000;
         Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 12);
-//    new RandomCombinator(participants, bins, mailboxCheckInterval);
       
-      // Read password
-      String password = new Scanner(new File("password.txt")).nextLine();
+        // Read password
+        String password = new Scanner(new File("password.txt")).nextLine();
       
         // Create connection settings
 //        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev" + MailboxDetails.INDEX_REPLACE + "@insutec.de").setPassword(password)
@@ -113,7 +114,8 @@ public class PerformanceEvaluation {
                                       combination.getBins(),
                                       combination.getMailboxCheckInterval(),
                                       mailBoxDetails,
-                                      separatedProcesses);
+                                      separatedProcesses,
+                                      waitTime);
         }
     }
 
@@ -130,7 +132,9 @@ public class PerformanceEvaluation {
     public PerformanceEvaluation(int participants,
                                  int bins,
                                  int mailboxCheckIntervals,
-                                 MailboxDetails mailBoxDetails, boolean separatedProcesses) throws IOException {
+                                 MailboxDetails mailBoxDetails,
+                                 boolean separatedProcesses,
+                                 int waitTime) throws IOException {
         // Prepare if necessary
         if (!prepared) {
             try {
@@ -154,26 +158,19 @@ public class PerformanceEvaluation {
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
-                logger.error("Interrupted exception logged",
-                             new Date(),
-                             "Interrupted exception logged",
-                             ExceptionUtils.getStackTrace(e));
+                logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged", ExceptionUtils.getStackTrace(e));
             }
         }
 
         // Reset statistics
         Bus.resetStatistics();
 
-        // Wait
-        int waitTime = 1000;
+        // Wait        
         logger.debug("Wait logged", new Date(), "Started waiting for", waitTime);
         try {
             Thread.sleep(waitTime);
         } catch (InterruptedException e) {
-            logger.error("Interrupted exception logged",
-                         new Date(),
-                         "Interrupted exception logged",
-                         ExceptionUtils.getStackTrace(e));
+            logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged", ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -186,10 +183,12 @@ public class PerformanceEvaluation {
      * @throws InterruptedException 
      */
     private void prepare(MailboxDetails mailBoxDetails) throws IOException, BusException, InterruptedException {
+        
         // Set logging properties from file
         System.setProperty("logFilename", "logging-main");
         System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");
         logger = LogManager.getLogger(PerformanceEvaluation.class);
+        
         // Delete existing e-mails
         for (ConnectionIMAPSettings connectionIMAPSettings : mailBoxDetails.getAllConnections()) {
             BusEmail bus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true), 0, true);
