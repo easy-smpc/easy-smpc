@@ -197,7 +197,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 // Open folder
                 folder.open(Folder.READ_WRITE);
     
-            } catch (Exception e) {
+            } catch (MessagingException e) {
                 throw new BusException("Error establishing or keeping alive connection to mail server", e);
             }
             
