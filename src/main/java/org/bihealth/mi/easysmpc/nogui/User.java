@@ -92,7 +92,7 @@ public abstract class User implements MessageListener {
             logger.debug("2. round sending finished logged", new Date(), getModel().studyUID, "2. round sending finished for", getModel().ownId);
             
             // Receives the messages for the second round and finalizes the model
-            receiveMessages(Resources.ROUND_2);
+            receiveMessages(Resources.ROUND_2);            
             this.model.stopBus();
             this.model.toFinished();
             RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());            
@@ -117,6 +117,7 @@ public abstract class User implements MessageListener {
                                                                    getModel().getParticipantFromId(getModel().ownId).emailAddress),
                            this);
         
+        // Wait for all shares
         long startTime = System.currentTimeMillis();
         while (!areSharesComplete()) {
             // Proceed of shares complete
@@ -135,7 +136,8 @@ public abstract class User implements MessageListener {
              ExceptionUtils.getStackTrace(e));
              }
              
-             if((System.currentTimeMillis() - startTime) > (90*1000)){
+             // Log potentially missing messages
+             if((System.currentTimeMillis() - startTime) > (120*1000)){
                  startTime = System.currentTimeMillis();                   
                      if (!getModel().bins[0].isComplete()) {
                          int index = 0;
@@ -151,7 +153,7 @@ public abstract class User implements MessageListener {
                     }
                 }
             }
-        }
+        }      
     }
 
 
@@ -181,8 +183,7 @@ public abstract class User implements MessageListener {
                     throw new IllegalStateException("Unable to send e-mail!", e);
                 }
             }
-        }
-        
+        }        
         // Stop bus
         getModel().stopBus();
     }

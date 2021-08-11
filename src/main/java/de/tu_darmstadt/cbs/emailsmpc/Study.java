@@ -296,6 +296,7 @@ public class Study implements Serializable, Cloneable {
      * @return the bus
      * @throws BusException 
      */
+    // TODO remove millis if only send and receive
     public BusEmail getBus(int millis, boolean isSharedMailbox, boolean sendAndReceive) throws BusException {
         if (millis <= 0) {
             throw new IllegalArgumentException("Interval must be a positive number");

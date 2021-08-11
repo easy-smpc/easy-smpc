@@ -318,6 +318,7 @@ public class ConnectionIMAP extends ConnectionEmail {
             folder.open(Folder.READ_WRITE);
 
             // Close
+            folder.close(false);
             store.close();
 
             // Done

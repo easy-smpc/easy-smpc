@@ -63,13 +63,15 @@ public class ParticipatingUser extends User {
      * @param lengthBitBigInteger
      */
     public ParticipatingUser(ParticipatingUserData participatingUserData) {                
+        // Store
         super(participatingUserData.mailBoxCheckInterval, participatingUserData.isSharedMailbox);
         this.lengthBitBigInteger = participatingUserData.lengthBitBigInteger;
         this.connectionIMAPSettings = participatingUserData.connectionIMAPSettings;
+        
+        // Log init and first logging
         if(logger == null) {
             logger = LogManager.getLogger(ParticipatingUser.class); 
         }
-        
         RecordTimeDifferences.addStartValue(participatingUserData.studyUID, participatingUserData.participantId, System.nanoTime());
         
         try {
