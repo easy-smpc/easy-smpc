@@ -84,22 +84,22 @@ public class PerformanceEvaluation {
 //                .setSMTPServer("imap.mail.yahoo.com")
 //                .setIMAPServer("smtp.mail.yahoo.com");
         
-        ConnectionIMAPSettings connectionIMAPSettings =
-                new ConnectionIMAPSettings("hmail" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org")
-//                new ConnectionIMAPSettings("hmail@easysmpc.org")
-          .setPassword("12345")
-          .setSMTPServer("easysmpc.org")
-          .setIMAPServer("easysmpc.org")
-          .setIMAPPort(143)
-          .setSMTPPort(25);
+//        ConnectionIMAPSettings connectionIMAPSettings =
+//                new ConnectionIMAPSettings("hmail" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org")
+////                new ConnectionIMAPSettings("hmail@easysmpc.org")
+//          .setPassword("12345")
+//          .setSMTPServer("easysmpc.org")
+//          .setIMAPServer("easysmpc.org")
+//          .setIMAPPort(143)
+//          .setSMTPPort(25);
 
-//        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("james" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org")
-////      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("james" + ConnectionIMAPSettings.INDEX_REPLACE + "@easysmpc.org").setPassword("12345")
-//         .setPassword("12345")
-//         .setSMTPServer("easysmpc.org")
-//         .setIMAPServer("easysmpc.org")
-//         .setIMAPPort(143)
-//         .setSMTPPort(25);
+        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("james" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org")
+//      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("james" + ConnectionIMAPSettings.INDEX_REPLACE + "@easysmpc.org").setPassword("12345")
+         .setPassword("12345")
+         .setSMTPServer("easysmpc.org")
+         .setIMAPServer("easysmpc.org")
+         .setIMAPPort(143)
+         .setSMTPPort(25);
         
         // Create mailbox details
         MailboxDetails mailBoxDetails = new MailboxDetails(isSharedMailbox, connectionIMAPSettings, participants);

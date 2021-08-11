@@ -182,11 +182,11 @@ public class ConnectionIMAP extends ConnectionEmail {
             try {
         
                 // Create store
-                    Session sessionReceiving = Session.getInstance(propertiesReceiving);
-                    store = sessionReceiving.getStore();
+                Session sessionReceiving = Session.getInstance(propertiesReceiving);
+                store = sessionReceiving.getStore();
                 
                 // Connect store
-                    store.connect(getEmailAddress(), password);
+                store.connect(getEmailAddress(), password);
                 
                 // Create folder new for every call to get latest state
                 folder = store.getFolder("INBOX");
