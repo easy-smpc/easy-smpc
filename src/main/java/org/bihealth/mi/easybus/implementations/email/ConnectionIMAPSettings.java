@@ -298,7 +298,7 @@ public class ConnectionIMAPSettings implements Serializable {
     public ConnectionIMAPSettings setPassword(String password) {
 
         // Check
-        checkNonNull(password); // TODO should null be possible for values?
+        checkNonNull(password);
         
         // Set
         this.password = password;

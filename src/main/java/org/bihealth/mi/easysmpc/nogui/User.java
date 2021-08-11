@@ -113,7 +113,7 @@ public abstract class User implements MessageListener {
      */
     private void receiveMessages(String roundIdentifier) throws IllegalArgumentException,
                                                          BusException {
-        getModel().getBus(this.mailBoxCheckInterval, this.isSharedMailbox, true).receive(new Scope(getModel().studyUID + roundIdentifier),
+        getModel().getBus(this.mailBoxCheckInterval, this.isSharedMailbox).receive(new Scope(getModel().studyUID + roundIdentifier),
                            new org.bihealth.mi.easybus.Participant(getModel().getParticipantFromId(getModel().ownId).name,
                                                                    getModel().getParticipantFromId(getModel().ownId).emailAddress),
                            this);
@@ -173,7 +173,7 @@ public abstract class User implements MessageListener {
 
                 try {
                     // Retrieve bus and send message
-                    getModel().getBus(this.mailBoxCheckInterval, this.isSharedMailbox, false).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
+                    getModel().getBus(0, this.isSharedMailbox).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
                                     new Scope(getModel().studyUID + (getModel().state == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().participants[index].name,
                                                                             getModel().participants[index].emailAddress),

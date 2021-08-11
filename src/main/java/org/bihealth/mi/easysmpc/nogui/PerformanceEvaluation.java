@@ -191,7 +191,7 @@ public class PerformanceEvaluation {
         
         // Delete existing e-mails
         for (ConnectionIMAPSettings connectionIMAPSettings : mailBoxDetails.getAllConnections()) {
-            BusEmail bus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true), 0, true);
+            BusEmail bus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true), 1000);
             bus.purgeEmails();
             bus.stop();
         }

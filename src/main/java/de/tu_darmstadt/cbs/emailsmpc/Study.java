@@ -268,7 +268,7 @@ public class Study implements Serializable, Cloneable {
     }
     
     /**
-     * Returns the bus with standard interval length
+     * Returns the bus with standard interval length and shared-mailbox mode
      * 
      * @return the bus
      * @throws BusException 
@@ -284,25 +284,21 @@ public class Study implements Serializable, Cloneable {
      * @return
      * @throws BusException
      */
-    // TODO this must be corrected in future
     public BusEmail getBus(int millis) throws BusException {
-        return getBus(millis, true, false);
+        return getBus(millis, true);
     }
     
     /**
      * Returns the bus
      * 
-     * @param millis milliseconds interval to check for new mails
+     * @param millis milliseconds interval to check for new mails. If zero a send only bus is returned
      * @return the bus
      * @throws BusException 
      */
-    // TODO remove millis if only send and receive
-    public BusEmail getBus(int millis, boolean isSharedMailbox, boolean sendAndReceive) throws BusException {
-        if (millis <= 0) {
-            throw new IllegalArgumentException("Interval must be a positive number");
-        }
+    public BusEmail getBus(int millis, boolean isSharedMailbox) throws BusException {
+
         if ((this.bus == null || !this.bus.isAlive()) && this.connectionIMAPSettings != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, isSharedMailbox), millis, sendAndReceive);
+            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, isSharedMailbox), millis);
         }
         return this.bus;
     }

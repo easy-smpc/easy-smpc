@@ -87,12 +87,19 @@ public class BusEmail extends Bus {
     /**
      * Creates a new instance
      * @param connection
-     * @param millis - interval in milliseconds in which messages are polled
+     * @param millis - interval in milliseconds in which messages are polled. If zero a send only bus is returned
      */
-    public BusEmail(ConnectionEmail connection, int millis, boolean sendAndReceive) {
+    public BusEmail(ConnectionEmail connection, int millis) {
+        // Check
+        if (millis < 0) {
+            throw new IllegalArgumentException("Interval must be a positive number or zero");
+        }
+        
+        // Store
         this.connection = connection;
         
-        if (sendAndReceive) {
+        // Create thread to receive if necessary
+        if (millis > 0) {
             this.threadSleepTime = millis;
             this.thread = new Thread(new Runnable() {
                 @Override

@@ -75,7 +75,7 @@ public class ParticipatingUser extends User {
         try {
             // Register for initial e-mail
             final BusEmail interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false),
-                                      participatingUserData.mailBoxCheckInterval, true);
+                                      participatingUserData.mailBoxCheckInterval);
             interimBus.receive(new Scope(participatingUserData.studyUID + ROUND_0),
                                         new org.bihealth.mi.easybus.Participant(participatingUserData.ownParticipant.name,
                                                                                 participatingUserData.ownParticipant.emailAddress),
