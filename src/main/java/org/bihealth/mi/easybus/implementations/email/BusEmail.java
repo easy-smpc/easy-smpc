@@ -151,10 +151,11 @@ public class BusEmail extends Bus {
                 
                 // Add counter
                 tryCounter++;
-
+                
+                // TODO Improve sleep time or whole method
                 // Sleep
                 try {
-                    Thread.sleep(threadSleepTime);
+                    Thread.sleep(10000);
                 } catch (InterruptedException e1) {
                     throw new BusException("Unable to send e-mail due to interrupted thread", e1);
                 }
