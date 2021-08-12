@@ -73,7 +73,7 @@ public class BusEmail extends Bus<Void> {
     private Thread          thread;
     /** Stop flag */
     private boolean         stop = false;
-    
+   
     /**
      * Creates a new instance
      * @param connection
@@ -82,7 +82,7 @@ public class BusEmail extends Bus<Void> {
     public BusEmail(ConnectionEmail connection, int millis) {
         this(connection, millis, 0);
     }
-    
+
     /**
      * Creates a new instance
      * 
@@ -207,6 +207,7 @@ public class BusEmail extends Bus<Void> {
         } catch (BusException e) {
             // Pass error over
             this.receiveErrorInternal(e);
+            // TODO Is this a good idea? Rather no re-throw and have the client stop the bus manually?
             // Re-throw exception
             throw e;
         }

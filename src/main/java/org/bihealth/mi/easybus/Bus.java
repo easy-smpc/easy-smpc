@@ -88,7 +88,7 @@ public abstract class Bus<T> {
      * @param message
      * @param scope
      * @param participant
-     * @return
+     * @return task
      * @throws Exception
      */
     public abstract T sendInternal(Message message, Scope scope, Participant participant) throws Exception;
@@ -206,12 +206,12 @@ public abstract class Bus<T> {
     }
     
     /**
-     * Sends error messages
+     * Passes on receiving errors
      *  
      * @param messageListener
      */
     public synchronized void receiveErrorInternal(Exception exception) {
-        // TODO synchronize error methods over error list and message methods over subscription map? 
+        // TODO synchronize error handling methods over errorListener list and message sending methods over subscriptions map? 
         for(ErrorListener listener : this.errorListener) {
             listener.receive(exception);
         }

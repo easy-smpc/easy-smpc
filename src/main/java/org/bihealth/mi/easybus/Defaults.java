@@ -25,5 +25,4 @@ public class Defaults {
     public static final int FETCH_SIZE_IMAP = 1048576;
     /** Number of threads in thread pool */
     public static final int SIZE_THREADPOOL = 2;
-
 }
