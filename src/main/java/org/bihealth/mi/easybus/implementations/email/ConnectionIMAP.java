@@ -68,6 +68,8 @@ public class ConnectionIMAP extends ConnectionEmail {
     private Store               store;
     /** Folder receiving*/
     private Folder folder;
+    /** Session to send e-mails */
+    private Session             session;
     /** Password of the user */
     private String              password;
     /** Logger */
@@ -242,10 +244,11 @@ public class ConnectionIMAP extends ConnectionEmail {
         synchronized(propertiesSending) {
     
             // Make sure we are ready to go
-            Transport transport;
-            Session session;
+            Transport transport;  
             try {
-                session = Session.getInstance(propertiesSending);
+                if (session == null) {
+                    session = Session.getInstance(propertiesSending);
+                }                
                 transport = session.getTransport();
             } catch (Exception e) {
                 throw new BusException("Error establishing or keeping alive connection to mail server", e);
@@ -288,7 +291,7 @@ public class ConnectionIMAP extends ConnectionEmail {
     
                 // Send
                 transport.connect(getEmailAddress(), password);
-                transport.sendMessage(email, new InternetAddress[] {new InternetAddress(recipient)});
+                transport.sendMessage(email, email.getAllRecipients());
                 logger.debug("Message sent logged", new Date(), "Message sent logged", subject);
             } catch (Exception e) {
                 throw new BusException("Unable to send message", e);
