@@ -229,11 +229,11 @@ public class BusEmail extends Bus {
                 if (received) {
                     try {
                         message.delete();
+                        logger.debug("Message deleted logged", new Date(),"Message deleted", message.scope.getName(),  message.receiver.getName(), message.subject);
+                        deleted = message;
                     } catch (Exception e) {
                         logger.error("Deletion error logged", new Date(), message.scope.getName(), message.receiver.getName(), message.subject);
-                    }                  
-                    logger.debug("Message deleted logged", new Date(),"Message deleted", message.scope.getName(),  message.receiver.getName(), message.subject);
-                    deleted = message;
+                    }
                 }
             }
 
