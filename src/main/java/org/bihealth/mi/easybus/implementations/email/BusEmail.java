@@ -81,8 +81,6 @@ public class BusEmail extends Bus {
     private Thread          thread;
     /** Stop flag */
     private boolean         stop = false;
-    /** Sleep time a thread waits to re-send an e-mail */
-    private int threadSleepTime;
   
     /**
      * Creates a new instance
@@ -100,7 +98,6 @@ public class BusEmail extends Bus {
         
         // Create thread to receive if necessary
         if (millis > 0) {
-            this.threadSleepTime = millis;
             this.thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -146,18 +143,18 @@ public class BusEmail extends Bus {
 
                 // Throw exception after threshold
                 if (tryCounter == Resources.MAX_TRY_SEND_MAIL) {
-                    throw new BusException("Unable to send e-mail", e);
+                    logger.error("Unable to send e-mail logged", new Date(), "Unable to send e-mail", ExceptionUtils.getStackTrace(e));
+                    throw new RuntimeException("Unable to send e-mail", e);
                 }
                 
                 // Add counter
                 tryCounter++;
                 
-                // TODO Improve sleep time or whole method
                 // Sleep
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(Resources.WAIT_TRY_SEND_MAIL);
                 } catch (InterruptedException e1) {
-                    throw new BusException("Unable to send e-mail due to interrupted thread", e1);
+                    // Ignore
                 }
             }
         }     

@@ -15,6 +15,7 @@ package org.bihealth.mi.easysmpc.nogui;
 
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 import org.apache.commons.csv.CSVFormat;
@@ -71,9 +73,15 @@ public class PerformanceEvaluation {
         boolean isSharedMailbox = false;
         int waitTime = 1000;
         Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 12);
-      
+        
         // Read password
-        String password = new Scanner(new File("password.txt")).nextLine();
+        String password;
+        try {
+            password = new Scanner(new File("password.txt")).nextLine();
+        } catch (FileNotFoundException | NoSuchElementException e) {
+            // Logger not initialized
+            System.out.println("Unable to read password file");
+        };
       
         // Create connection settings
 //        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev" + MailboxDetails.INDEX_REPLACE + "@insutec.de").setPassword(password)
@@ -181,6 +189,7 @@ public class PerformanceEvaluation {
         
         // Set logging properties from file
         System.setProperty("logFilename", "logging-main");
+        System.setProperty("java.util.logging.manager","org.apache.logging.log4j.jul.LogManager");
         System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");
         logger = LogManager.getLogger(PerformanceEvaluation.class);
         

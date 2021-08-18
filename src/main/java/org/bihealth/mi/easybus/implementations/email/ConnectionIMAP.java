@@ -23,7 +23,6 @@ import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.math3.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
@@ -69,7 +68,9 @@ public class ConnectionIMAP extends ConnectionEmail {
     /** Folder receiving*/
     private Folder folder;
     /** Session to send e-mails */
-    private Session             session;
+    private Session             sessionSending;
+    /** Session to receive e-mails */
+    private Session             sessionReceiving;
     /** Password of the user */
     private String              password;
     /** Logger */
@@ -94,7 +95,8 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.password = settings.getPassword();
         
         // Search for proxy
-        Pair<String, Integer> proxy = ConnectionIMAPProxy.getProxy(settings);
+        // TODO Reactivate proxy
+        //Pair<String, Integer> proxy = ConnectionIMAPProxy.getProxy(settings);
         
         // Create properties of receiving connection
         this.propertiesReceiving = new Properties();
@@ -108,10 +110,10 @@ public class ConnectionIMAP extends ConnectionEmail {
       //this.propertiesReceiving.put("mail.imap.ssl.enable", "true");
         
         // Set proxy
-        if (proxy != null) {
-            this.propertiesReceiving.setProperty("mail.imap.proxy.host", proxy.getFirst());
-            this.propertiesReceiving.setProperty("mail.imap.proxy.port", String.valueOf(proxy.getSecond()));
-        }
+//        if (proxy != null) {
+//            this.propertiesReceiving.setProperty("mail.imap.proxy.host", proxy.getFirst());
+//            this.propertiesReceiving.setProperty("mail.imap.proxy.port", String.valueOf(proxy.getSecond()));
+//        }
         
         // Create properties of sending connection
         this.propertiesSending = new Properties();
@@ -124,10 +126,10 @@ public class ConnectionIMAP extends ConnectionEmail {
         //this.propertiesSending.put("mail.smtp.ssl.enable", "true");
 
         // Set proxy
-        if (proxy != null) {
-            this.propertiesSending.setProperty("mail.smtp.proxy.host", proxy.getFirst());
-            this.propertiesSending.setProperty("mail.smtp.proxy.port", String.valueOf(proxy.getSecond()));
-        }
+//        if (proxy != null) {
+//            this.propertiesSending.setProperty("mail.smtp.proxy.host", proxy.getFirst());
+//            this.propertiesSending.setProperty("mail.smtp.proxy.port", String.valueOf(proxy.getSecond()));
+//        }
     }
 
     /**
@@ -244,20 +246,14 @@ public class ConnectionIMAP extends ConnectionEmail {
         synchronized(propertiesSending) {
     
             // Make sure we are ready to go
-            Transport transport;  
-            try {
-                if (session == null) {
-                    session = Session.getInstance(propertiesSending);
-                }                
-                transport = session.getTransport();
-            } catch (Exception e) {
-                throw new BusException("Error establishing or keeping alive connection to mail server", e);
+            if (sessionSending == null) {
+                sessionSending = Session.getInstance(propertiesSending, null);
             }
     
             try {
                 
                 // Create message
-                MimeMessage email = new MimeMessage(session);
+                MimeMessage email = new MimeMessage(sessionSending);
                
                 // Add sender and recipient
                 email.setRecipient(RecipientType.TO, new InternetAddress(recipient));
@@ -290,19 +286,10 @@ public class ConnectionIMAP extends ConnectionEmail {
                 email.setContent(multipart);
     
                 // Send
-                transport.connect(getEmailAddress(), password);
-                transport.sendMessage(email, email.getAllRecipients());
-                logger.debug("Message sent logged", new Date(), "Message sent logged", subject);
+                Transport.send(email, getEmailAddress(), password);
+                logger.debug("Message sent logged", new Date(), "Message sent", subject);
             } catch (Exception e) {
                 throw new BusException("Unable to send message", e);
-            } finally {
-                if (transport != null && transport.isConnected()) {
-                    try {
-                        transport.close();
-                    } catch (MessagingException e) {
-                        logger.error("Error closing transport logged", new Date(), "Error closing transport", ExceptionUtils.getStackTrace(e));
-                    }   
-                }
             }
         }
     }
@@ -311,19 +298,25 @@ public class ConnectionIMAP extends ConnectionEmail {
     protected synchronized boolean isReceivingConnected() {
         try {
 
-            // Prepare
-            Folder folder = null;
-
+            // Make sure we are ready to go
+            Folder folder = null;                      
+            if (sessionReceiving == null) {
+                sessionReceiving = Session.getInstance(propertiesReceiving, null);
+            }
+            
             // Create store
-            Session sessionReceiving = Session.getInstance(propertiesReceiving);
             Store store = sessionReceiving.getStore();
 
             // Connect store
             store.connect(getEmailAddress(), password);
 
-            // Create folder new for every call to get latest state
+            // Create new folder for every call to get latest state
             folder = store.getFolder("INBOX");
-            if (!folder.exists()) { return false; }
+            if (!folder.exists()) {
+                folder.close(false);
+                store.close();
+                return false;
+            }
 
             // Open folder
             folder.open(Folder.READ_WRITE);
@@ -346,7 +339,7 @@ public class ConnectionIMAP extends ConnectionEmail {
      */
     protected synchronized boolean isSendingConnected() {
         try {
-            // TODO Check and remove Authenticator
+            // TODO Replace with an actual check
             // Check sending e-mails
             Session.getInstance(propertiesSending, new Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {

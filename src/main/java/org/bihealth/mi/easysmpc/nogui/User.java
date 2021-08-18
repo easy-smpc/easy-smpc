@@ -160,7 +160,8 @@ public abstract class User implements MessageListener {
     }
 
 
-    /** Sends a message by means of e-mail bus
+    /** 
+     * Sends a message by means of e-mail bus
      * 
      * @param roundIdentifier
      */

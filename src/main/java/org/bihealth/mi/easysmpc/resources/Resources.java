@@ -145,7 +145,10 @@ public class Resources {
     public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED    = 3000;
     
     /** Maximal trys sending an e-mail */
-    public static final int MAX_TRY_SEND_MAIL = 100;
+    public static final int MAX_TRY_SEND_MAIL = 20;
+    
+    /** Maximal trys sending an e-mail */
+    public static final int WAIT_TRY_SEND_MAIL = 10000;
 
     /**
      * Returns all available languages

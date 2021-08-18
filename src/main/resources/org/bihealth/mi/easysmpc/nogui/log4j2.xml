@@ -5,12 +5,14 @@
 	</Properties>
 
 	<Appenders>
-		<RollingFile  name="fileLogger" fileName="${sys:logFilename}.log" filePattern="${sys:logFilename}-%i.log">
+		<RollingFile name="fileLogger"
+			fileName="${sys:logFilename}.log"
+			filePattern="${sys:logFilename}-%i.log">
 			<CsvParameterLayout delimiter=";"/>
-			 <Policies>
-                <SizeBasedTriggeringPolicy size="50MB" />
-            </Policies>
-           <DefaultRolloverStrategy max="50"/>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="50MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="50"/>
 		</RollingFile>
 
 		<Console name="console" target="SYSTEM_OUT">
@@ -24,9 +26,9 @@
 			<appender-ref ref="fileLogger" level="debug" />
 			<appender-ref ref="console" />
 		</Logger>
- 		<Root level="error" additivity="false">
-					<appender-ref ref="fileLogger" level="debug" />
-					<appender-ref ref="console" />
-		</Root> 
+		<Root level="error" additivity="false">
+			<appender-ref ref="fileLogger" level="debug" />
+			<appender-ref ref="console" />
+		</Root>
 	</Loggers>
 </Configuration>
