@@ -113,7 +113,6 @@ public class BusEmail extends Bus {
                         }
                     } catch (InterruptedException e) {
                         logger.error("Interrupted exception logged", new Date(), ExceptionUtils.getStackTrace(e));
-                        connection.close();
                         // Die silently
                     }
                 }
@@ -210,7 +209,6 @@ public class BusEmail extends Bus {
 
                 // Check for interrupt
                 if (Thread.interrupted()) {
-                    connection.close();
                     throw new InterruptedException();
                 }
 
@@ -221,7 +219,6 @@ public class BusEmail extends Bus {
                 try {
                     received |= receiveInternal(message.message, message.scope, message.receiver);
                 } catch (InterruptedException e) {
-                    connection.close();
                     throw e;
                 }
 
@@ -231,7 +228,7 @@ public class BusEmail extends Bus {
                         message.delete();
                         logger.debug("Message deleted logged", new Date(),"Message deleted", message.scope.getName(),  message.receiver.getName(), message.subject);
                         deleted = message;
-                    } catch (Exception e) {
+                    } catch (BusException e) {
                         logger.error("Deletion error logged", new Date(), message.scope.getName(), message.receiver.getName(), message.subject);
                     }
                 }
