@@ -358,8 +358,9 @@ public abstract class ConnectionEmail {
             }
 
         } catch (InterruptedException e) {
+            close();
             throw e;
-        } catch (BusException e) {
+        } catch (Exception e) {
             throw new BusException("Error receiving message", e);
         }
 

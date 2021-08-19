@@ -170,8 +170,8 @@ public class ConnectionIMAP extends ConnectionEmail {
             if (store != null && store.isConnected()) {
                 store.close();
             }                        
-        } catch (MessagingException e) {
-            logger.debug("Closing connection failed logged", new Date(), "Closing connection failed ", ExceptionUtils.getStackTrace(e));
+        } catch (Exception e) {
+            // Ignore
         }
     }
     
@@ -241,7 +241,7 @@ public class ConnectionIMAP extends ConnectionEmail {
     }
 
     @Override
-    protected void send(String recipient, String subject, String body, Object attachment) throws BusException {
+    protected synchronized void send(String recipient, String subject, String body, Object attachment) throws BusException {
 
         synchronized(propertiesSending) {
     
@@ -288,7 +288,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 // Send
                 Transport.send(email, getEmailAddress(), password);
                 logger.debug("Message sent logged", new Date(), "Message sent", subject);
-            } catch (MessagingException | IOException e) {
+            } catch (Exception e) {
                 throw new BusException("Unable to send message", e);
             }
         }
