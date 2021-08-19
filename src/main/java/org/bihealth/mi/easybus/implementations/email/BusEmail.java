@@ -28,7 +28,7 @@ import org.bihealth.mi.easybus.Scope;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class BusEmail extends Bus<Void> {
+public class BusEmail extends Bus {
     
     /**
      * Internal message used by email-based implementations

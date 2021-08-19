@@ -28,7 +28,7 @@ import java.util.concurrent.FutureTask;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public abstract class Bus<T> {
+public abstract class Bus {
     
     /** Stores the subscriptions with  known participants*/    
     private final Map<Scope, Map<Participant, List<MessageListener>>> subscriptions;   
@@ -91,7 +91,7 @@ public abstract class Bus<T> {
      * @return task
      * @throws Exception
      */
-    public abstract T sendInternal(Message message, Scope scope, Participant participant) throws Exception;
+    public abstract Void sendInternal(Message message, Scope scope, Participant participant) throws Exception;
     
     /**
      * Allows to send a message to a participant
@@ -103,11 +103,11 @@ public abstract class Bus<T> {
      * @return 
      * @throws BusException
      */
-    public FutureTask<T> send(Message message, Scope scope, Participant participant) throws BusException {
+    public FutureTask<Void> send(Message message, Scope scope, Participant participant) throws BusException {
         // Create future task 
-        FutureTask<T> task = new FutureTask<>(new Callable<T>() {
+        FutureTask<Void> task = new FutureTask<>(new Callable<Void>() {
             @Override
-            public T call() throws Exception {
+            public Void call() throws Exception {
                 // Init
                 boolean sent = false;
                 

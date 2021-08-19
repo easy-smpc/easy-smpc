@@ -23,7 +23,7 @@ import org.bihealth.mi.easybus.Scope;
  * 
  * @author Felix Wirth
  */
-public class BusLocal extends Bus<Void>{
+public class BusLocal extends Bus {
     
     /**
      * Creates a new instance
