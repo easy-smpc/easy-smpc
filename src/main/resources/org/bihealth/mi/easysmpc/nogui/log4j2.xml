@@ -8,12 +8,20 @@
 		<RollingFile name="fileLogger"
 			fileName="${sys:logFilename}.log"
 			filePattern="${sys:logFilename}-%i.log">
-			<CsvParameterLayout delimiter=";"/>
+			<CsvParameterLayout delimiter=";" />
 			<Policies>
 				<SizeBasedTriggeringPolicy size="50MB" />
 			</Policies>
-			<DefaultRolloverStrategy max="50"/>
+			<DefaultRolloverStrategy max="50" />
 		</RollingFile>
+
+		<RollingFile name="imapFileLogger" fileName="imap.log"
+			filePattern="imap-%i.log">
+			<Policies>
+				<SizeBasedTriggeringPolicy size="50MB" />
+			</Policies>
+		</RollingFile>
+
 
 		<Console name="console" target="SYSTEM_OUT">
 			<PatternLayout>
@@ -25,6 +33,9 @@
 		<Logger name="org.bihealth" level="debug" additivity="false">
 			<appender-ref ref="fileLogger" level="debug" />
 			<appender-ref ref="console" />
+		</Logger>
+		<Logger name="com.sun.mail" level="all" additivity="false">
+			<appender-ref ref="imapFileLogger" level="all" />
 		</Logger>
 		<Root level="error" additivity="false">
 			<appender-ref ref="fileLogger" level="debug" />
