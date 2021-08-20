@@ -170,8 +170,9 @@ public class ConnectionIMAP extends ConnectionEmail {
             if (store != null && store.isConnected()) {
                 store.close();
             }                        
-        } catch (Exception e) {
+        } catch (MessagingException e) {
             // Ignore
+            logger.debug("Closing connection failed logged", new Date(), "Closing connection failed ", ExceptionUtils.getStackTrace(e));
         }
     }
     

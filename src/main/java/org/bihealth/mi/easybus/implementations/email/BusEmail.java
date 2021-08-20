@@ -231,7 +231,7 @@ public class BusEmail extends Bus {
                         message.delete();
                         logger.debug("Message deleted logged", new Date(),"Message deleted", message.scope.getName(),  message.receiver.getName(), message.subject);
                         deleted = message;
-                    } catch (Exception e) {
+                    } catch (BusException e) {
                         logger.error("Deletion error logged", new Date(), message.scope.getName(), message.receiver.getName(), message.subject);
                     }
                 }
