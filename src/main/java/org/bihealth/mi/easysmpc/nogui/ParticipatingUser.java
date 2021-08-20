@@ -101,7 +101,7 @@ public class ParticipatingUser extends User {
 
             // Init model
             setModel(MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data))));
-            getModel().connectionIMAPSettings = this.connectionIMAPSettings;
+            getModel().setConnectionIMAPSettings(this.connectionIMAPSettings);
             
             // Proceed to entering value
             getModel().toEnteringValues(data);
@@ -126,7 +126,7 @@ public class ParticipatingUser extends User {
      */
     private BigInteger[] fillBins(int lengthBitBigInteger) {
         // Init
-        BigInteger[] result = new BigInteger[getModel().bins.length];
+        BigInteger[] result = new BigInteger[getModel().getBins().length];
         
         // Set a random big integer for each
         for (int index = 0; index < result.length; index++) {

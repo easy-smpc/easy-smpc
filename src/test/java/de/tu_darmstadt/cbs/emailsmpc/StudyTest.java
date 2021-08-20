@@ -92,7 +92,7 @@ public class StudyTest {
     @Test
     public void AddingBins() throws IllegalStateException, IOException {
         Study testmodel = StudyTest.getInitializedModel(3, 4);
-        assertTrue(testmodel.bins.length == 4);
+        assertTrue(testmodel.getBins().length == 4);
     }
 
     /**
@@ -104,7 +104,7 @@ public class StudyTest {
     @Test
     public void AddingParticipants() throws IllegalStateException, IOException {
         Study testmodel = StudyTest.getInitializedModel(3, 4);
-        assertTrue(testmodel.participants.length == 3);
+        assertTrue(testmodel.getParticipants().length == 3);
     }
 
     /**
@@ -121,7 +121,7 @@ public class StudyTest {
         Study copy = (Study) model0.clone();
         assertTrue((copy != model0));
         assertTrue(copy.equals(model0));
-        assertTrue(copy.studyUID.equals(model0.studyUID));
+        assertTrue(copy.getStudyUID().equals(model0.getStudyUID()));
     }
     
     /**
@@ -132,8 +132,8 @@ public class StudyTest {
       Set<String> ids = new HashSet<String>();
       for (int i = 0; i < 1000; i++ ) {
         Study model = new Study();
-        assertTrue(!ids.contains(model.studyUID));
-        ids.add(model.studyUID);
+        assertTrue(!ids.contains(model.getStudyUID()));
+        ids.add(model.getStudyUID());
       }
     }
 
@@ -147,7 +147,7 @@ public class StudyTest {
     public void SaveLoad() throws ClassNotFoundException, IOException {
         Study testmodel = StudyTest.getInitializedModel(3, 4);
             File fn = new File("testing.dat");
-            testmodel.filename = fn;
+            testmodel.setFilename(fn);
             testmodel.saveProgram();
             Study load = Study.loadModel(fn);
             assertTrue(load.equals(testmodel));

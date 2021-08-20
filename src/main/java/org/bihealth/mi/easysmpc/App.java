@@ -383,7 +383,7 @@ public class App extends JFrame {
      */
     public StudyState getModelState() {
         if (getModel() != null) {
-            return getModel().state;
+            return getModel().getState();
         } else {
             return null;
         }
@@ -665,7 +665,7 @@ public class App extends JFrame {
         }
         
         // Set and switch to correct perspective        
-        switch (this.model.state) {
+        switch (this.model.getState()) {
         case NONE:
             showPerspective(Perspective0Start.class);
             break;
@@ -798,13 +798,13 @@ public class App extends JFrame {
      */
     public boolean actionSave() {
         
-        if (model.filename == null) {    
+        if (model.getFilename() == null) {    
             // Open dialog
             File file = getFile(false, new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING));
 
             // Check
             if (file == null) { return false; }
-            model.filename = file;
+            model.setFilename(file);
         }
         // Try to save file
         Study snapshot = this.beginTransaction();

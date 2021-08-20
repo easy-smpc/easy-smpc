@@ -116,7 +116,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      * @return Saving actually performed?
      */
     private void actionSave() {
-        BigInteger[] secret = new BigInteger[getApp().getModel().bins.length];
+        BigInteger[] secret = new BigInteger[getApp().getModel().getBins().length];
         for (int i = 0; i < this.panelBins.getComponents().length; i++) {
             secret[i] = new BigInteger(((EntryBin) this.panelBins.getComponents()[i]).getRightValue());
         }
@@ -228,16 +228,16 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         panelBins.removeAll();
         
         // Title
-        this.fieldTitle.setText(getApp().getModel().name);
+        this.fieldTitle.setText(getApp().getModel().getName());
         
         // Add participants
         int i = 0;
-        for (Participant currentParticipant : getApp().getModel().participants) {
-            EntryParticipant newNameEmailParticipantEntry = new EntryParticipant(currentParticipant.name, currentParticipant.emailAddress, false, false, i == getApp().getModel().ownId);
+        for (Participant currentParticipant : getApp().getModel().getParticipants()) {
+            EntryParticipant newNameEmailParticipantEntry = new EntryParticipant(currentParticipant.name, currentParticipant.emailAddress, false, false, i == getApp().getModel().getOwnId());
             panelParticipants.add(newNameEmailParticipantEntry);
             i++;
         }
-        for (Bin currentBin : getApp().getModel().bins) {
+        for (Bin currentBin : getApp().getModel().getBins()) {
             EntryBin newBin = new EntryBin(currentBin.name, false, "", true, false);
             newBin.setChangeListener(this);
             panelBins.add(newBin);

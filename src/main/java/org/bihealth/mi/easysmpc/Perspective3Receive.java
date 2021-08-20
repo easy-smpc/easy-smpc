@@ -152,7 +152,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @return
      */
     private boolean areSharesComplete() {
-        for (Bin b : getApp().getModel().bins) {
+        for (Bin b : getApp().getModel().getBins()) {
             if (!b.isComplete()) return false;
         }
         return true;
@@ -165,7 +165,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     public int numberSharesComplete() {
         int numberComplete = 0;
-        for (int i = 0; i < getApp().getModel().numParticipants; i++) {
+        for (int i = 0; i < getApp().getModel().getNumParticipants(); i++) {
             if (areSharesCompleteForParticipantId(i)) numberComplete++;
         }
         return numberComplete - 1;
@@ -177,7 +177,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @return
      */
     public int numberExpectedMessages() {
-        return getApp().getModel().numParticipants - 1;
+        return getApp().getModel().getNumParticipants() - 1;
     }
         
     /**
@@ -185,7 +185,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @return
      */
     private boolean areSharesCompleteForParticipantId(int participantId) {
-        for (Bin b : getApp().getModel().bins) {
+        for (Bin b : getApp().getModel().getBins()) {
             if (!b.isCompleteForParticipantId(participantId)) return false;
         }
         return true;
@@ -197,7 +197,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @return enabled
      */
     private boolean isAutomaticProcessingEnabled() {
-        return getApp().getModel().connectionIMAPSettings != null;
+        return getApp().getModel().getConnectionIMAPSettings() != null;
     }
     
     /**
@@ -206,9 +206,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     private void startAutomatedMailImport() {        
         try {
             // Start receiving
-            getApp().getModel().getBus().receive(new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
-                        new org.bihealth.mi.easybus.Participant(getApp().getModel().getParticipantFromId(getApp().getModel().ownId).name,
-                                                                getApp().getModel().getParticipantFromId(getApp().getModel().ownId).emailAddress),
+            getApp().getModel().getBus().receive(new Scope(getApp().getModel().getStudyUID() + getRoundIdentifier()),
+                        new org.bihealth.mi.easybus.Participant(getApp().getModel().getParticipantFromId(getApp().getModel().getOwnId()).name,
+                                                                getApp().getModel().getParticipantFromId(getApp().getModel().getOwnId()).emailAddress),
                                                                 this);            
             // Set message accordingly
             getApp().setAnimation(new ComponentLoadingVisualCheck() {
@@ -242,8 +242,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     private void updateCheckmarks() {
         int index = 0;
         for (Component c : this.panelParticipants.getComponents()) {
-            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(index == getApp().getModel().ownId || // Always mark own id as "received"
-                                                                (getApp().getModel().state != StudyState.RECIEVING_RESULT  &&  index == 0) || // Mark first entry in first round as received
+            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(index == getApp().getModel().getOwnId() || // Always mark own id as "received"
+                                                                (getApp().getModel().getState() != StudyState.RECIEVING_RESULT  &&  index == 0) || // Mark first entry in first round as received
                                                                 areSharesCompleteForParticipantId(index)); // Mark if share complete
             index++;
         }
@@ -338,13 +338,13 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     @Override
     protected void initialize() {
-        this.fieldTitle.setText(getApp().getModel().name);
+        this.fieldTitle.setText(getApp().getModel().getName());
         this.panelParticipants.removeAll();
         int i = 0;
-        for (Participant currentParticipant : getApp().getModel().participants) {
+        for (Participant currentParticipant : getApp().getModel().getParticipants()) {
             EntryParticipantCheckmark entry = new EntryParticipantCheckmark(currentParticipant.name,
                                                                             currentParticipant.emailAddress,
-                                                                            i == getApp().getModel().ownId);
+                                                                            i == getApp().getModel().getOwnId());
             panelParticipants.add(entry);
             i++;
         }

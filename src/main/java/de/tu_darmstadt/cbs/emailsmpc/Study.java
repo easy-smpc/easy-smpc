@@ -85,39 +85,39 @@ public class Study implements Serializable, Cloneable {
         if (!(o instanceof Study))
             throw new IllegalArgumentException("Invalid project file");
         Study model = (Study) o;
-        model.filename = filename;
+        model.setFilename(filename);
         return model;
     }
 
     /** The study UID. */
-    public String                 studyUID;
+    private String                 studyUID;
 
     /** The number of participants. */
-    public int                    numParticipants;
+    private int                    numParticipants;
 
     /** The own id. */
-    public int                    ownId;
+    private int                    ownId;
 
     /** The state. */
-    public StudyState             state;
+    private StudyState             state;
 
     /** The bins. */
-    public Bin[]                  bins;
+    private Bin[]                  bins;
 
     /** The participants. */
-    public Participant[]          participants;
+    private Participant[]          participants;
 
     /** The name. */
-    public String                 name;
+    private String                 name;
 
     /** The unsent messages. */
     private Message[]             unsentMessages;
 
     /** The filename. */
-    public transient File         filename;
+    private transient File         filename;
 
     /** The e-mail connection details */
-    public ConnectionIMAPSettings connectionIMAPSettings;
+    private ConnectionIMAPSettings connectionIMAPSettings;
 
     /** Bus for automatic e-mail processing */
     private transient BusEmail    bus;
@@ -129,22 +129,22 @@ public class Study implements Serializable, Cloneable {
      * Instantiates a new app model.
      */
     public Study() {
-        studyUID = UIDGenerator.generateShortUID(8);
-        name = null;
-        numParticipants = 0;
-        ownId = 0;
-        state = StudyState.NONE;
-        bins = null;
-        participants = null;
+        setStudyUID(UIDGenerator.generateShortUID(8));
+        setName(null);
+        setNumParticipants(0);
+        setOwnId(0);
+        setState(StudyState.NONE);
+        setBins(null);
+        setParticipants(null);
         unsentMessages = null;
-        filename = null;
+        setFilename(null);
     }
 
     /**
      * Clear bins.
      */
-    public void clearBins() {
-        for (Bin b : this.bins) {
+    public synchronized void clearBins() {
+        for (Bin b : this.getBins()) {
             b.clearShares();
         }
     }
@@ -155,30 +155,30 @@ public class Study implements Serializable, Cloneable {
      * @return the object
      */
     @Override
-    public Object clone() {
+    public synchronized Object clone() {
         Study newModel = null;
         try {
             newModel = (Study) super.clone();
         } catch (CloneNotSupportedException e) {
             newModel = new Study();
         }
-        newModel.name = this.name;
-        newModel.numParticipants = this.numParticipants;
-        newModel.ownId = this.ownId;
-        newModel.studyUID = this.studyUID;
-        newModel.state = this.state;
-        newModel.filename = this.filename;     
-        if (this.bins != null) {
-            newModel.bins = new Bin[this.bins.length];
-            for (int i = 0; i < newModel.bins.length; i++) {
-                newModel.bins[i] = (Bin) this.bins[i].clone();
+        newModel.setName(this.getName());
+        newModel.setNumParticipants(this.getNumParticipants());
+        newModel.setOwnId(this.getOwnId());
+        newModel.setStudyUID(this.getStudyUID());
+        newModel.setState(this.getState());
+        newModel.setFilename(this.getFilename());     
+        if (this.getBins() != null) {
+            newModel.setBins(new Bin[this.getBins().length]);
+            for (int i = 0; i < newModel.getBins().length; i++) {
+                newModel.getBins()[i] = (Bin) this.getBins()[i].clone();
             }
         }
       
-        if (this.participants != null) {
-            newModel.participants = new Participant[this.participants.length];
-            for (int i = 0; i < newModel.participants.length; i++) {
-                newModel.participants[i] = (Participant) this.participants[i].clone();
+        if (this.getParticipants() != null) {
+            newModel.setParticipants(new Participant[this.getParticipants().length]);
+            for (int i = 0; i < newModel.getParticipants().length; i++) {
+                newModel.getParticipants()[i] = (Participant) this.getParticipants()[i].clone();
             }
         }
       
@@ -205,29 +205,29 @@ public class Study implements Serializable, Cloneable {
         if (!(o instanceof Study))
             return false;
         Study m = (Study) o;
-        boolean result = (m.numParticipants == numParticipants);
-        result = result && (m.studyUID.equals(studyUID));
-        result = result && (m.ownId == ownId);
-        result = result && (m.state.equals(state));
-        result = result && (m.name.equals(name));
-        if (m.filename != null)
-          result = result && (m.filename.equals(filename));
+        boolean result = (m.getNumParticipants() == getNumParticipants());
+        result = result && (m.getStudyUID().equals(getStudyUID()));
+        result = result && (m.getOwnId() == getOwnId());
+        result = result && (m.getState().equals(getState()));
+        result = result && (m.getName().equals(getName()));
+        if (m.getFilename() != null)
+          result = result && (m.getFilename().equals(getFilename()));
         else
-          result = result && (filename == null);
-        result = result && (m.bins.length == bins.length);
-        result = result && (m.participants.length == participants.length);
+          result = result && (getFilename() == null);
+        result = result && (m.getBins().length == getBins().length);
+        result = result && (m.getParticipants().length == getParticipants().length);
         result = result && (m.unsentMessages.length == unsentMessages.length);
-        for (int i = 0; i < bins.length; i++) {
-            if (m.bins[i] != null)
-                result = result && m.bins[i].equals(bins[i]);
+        for (int i = 0; i < getBins().length; i++) {
+            if (m.getBins()[i] != null)
+                result = result && m.getBins()[i].equals(getBins()[i]);
             else
-                result = result && (bins[i] == null);
+                result = result && (getBins()[i] == null);
         }
-        for (int i = 0; i < participants.length; i++) {
-            if (m.participants[i] != null)
-                result = result && m.participants[i].equals(participants[i]);
+        for (int i = 0; i < getParticipants().length; i++) {
+            if (m.getParticipants()[i] != null)
+                result = result && m.getParticipants()[i].equals(getParticipants()[i]);
             else
-                result = result && (participants[i] == null);
+                result = result && (getParticipants()[i] == null);
         }
         for (int i = 0; i < unsentMessages.length; i++) {
             if (m.unsentMessages[i] != null)
@@ -244,11 +244,11 @@ public class Study implements Serializable, Cloneable {
      * @return the all results
      * @throws IllegalStateException the illegal state exception
      */
-    public BinResult[] getAllResults() throws IllegalStateException {
-        if (state != StudyState.FINISHED)
-            throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
-        BinResult[] result = new BinResult[bins.length];
-        for (int i = 0; i < bins.length; i++) {
+    public synchronized BinResult[] getAllResults() throws IllegalStateException {
+        if (getState() != StudyState.FINISHED)
+            throw new IllegalStateException("Forbidden action (getBinResult) at current state " + getState());
+        BinResult[] result = new BinResult[getBins().length];
+        for (int i = 0; i < getBins().length; i++) {
             result[i] = getBinResult(i);
         }
         return result;
@@ -261,10 +261,10 @@ public class Study implements Serializable, Cloneable {
      * @return the bin result
      * @throws IllegalStateException the illegal state exception
      */
-    public BinResult getBinResult(int binId) throws IllegalStateException {
-        if (state != StudyState.FINISHED)
-            throw new IllegalStateException("Forbidden action (getBinResult) at current state " + state);
-        return new BinResult(bins[binId].name, bins[binId].reconstructBin());
+    public synchronized BinResult getBinResult(int binId) throws IllegalStateException {
+        if (getState() != StudyState.FINISHED)
+            throw new IllegalStateException("Forbidden action (getBinResult) at current state " + getState());
+        return new BinResult(getBins()[binId].name, getBins()[binId].reconstructBin());
     }
     
     /**
@@ -273,7 +273,7 @@ public class Study implements Serializable, Cloneable {
      * @return the bus
      * @throws BusException 
      */
-    public BusEmail getBus() throws BusException {
+    public synchronized BusEmail getBus() throws BusException {
         return getBus(Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
     }
     
@@ -284,7 +284,7 @@ public class Study implements Serializable, Cloneable {
      * @return
      * @throws BusException
      */
-    public BusEmail getBus(int millis) throws BusException {
+    public synchronized BusEmail getBus(int millis) throws BusException {
         return getBus(millis, true);
     }
     
@@ -295,10 +295,10 @@ public class Study implements Serializable, Cloneable {
      * @return the bus
      * @throws BusException 
      */
-    public BusEmail getBus(int millis, boolean isSharedMailbox) throws BusException {
+    public synchronized BusEmail getBus(int millis, boolean isSharedMailbox) throws BusException {
 
-        if ((this.bus == null || !this.bus.isAlive()) && this.connectionIMAPSettings != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, isSharedMailbox), millis);
+        if ((this.bus == null || !this.bus.isAlive()) && this.getConnectionIMAPSettings() != null) {
+            this.bus = new BusEmail(new ConnectionIMAP(this.getConnectionIMAPSettings(), isSharedMailbox), millis);
         }
         return this.bus;
     }
@@ -308,7 +308,7 @@ public class Study implements Serializable, Cloneable {
      * 
      * @return
      */
-    public boolean isBusAlive() {
+    public synchronized boolean isBusAlive() {
         if (this.bus != null) {
             return this.bus.isAlive();
         }
@@ -321,7 +321,7 @@ public class Study implements Serializable, Cloneable {
      * 
      * @return
      */
-    public boolean isBusConectedReceiving() {
+    public synchronized boolean isBusConectedReceiving() {
         if (this.bus != null) {
             return this.bus.isReceivingConnected();
         }
@@ -336,10 +336,10 @@ public class Study implements Serializable, Cloneable {
      * @return the participant from id
      * @throws IllegalArgumentException the illegal argument exception
      */
-    public Participant getParticipantFromId(int p) throws IllegalArgumentException {
-        if (p < 0 || p > (participants.length - 1))
+    public synchronized Participant getParticipantFromId(int p) throws IllegalArgumentException {
+        if (p < 0 || p > (getParticipants().length - 1))
             throw new IllegalArgumentException("Unknown participant " + p);
-        return participants[p];
+        return getParticipants()[p];
     }
 
     /**
@@ -349,9 +349,9 @@ public class Study implements Serializable, Cloneable {
      * @return the participant id
      * @throws IllegalArgumentException the illegal argument exception
      */
-    public int getParticipantId(Participant p) throws IllegalArgumentException {
-        for (int i = 0; i < participants.length; i++) {
-            if (participants[i].equals(p))
+    public synchronized int getParticipantId(Participant p) throws IllegalArgumentException {
+        for (int i = 0; i < getParticipants().length; i++) {
+            if (getParticipants()[i].equals(p))
                 return i;
         }
         throw new IllegalArgumentException("Unknown participant " + p);
@@ -363,7 +363,7 @@ public class Study implements Serializable, Cloneable {
      * @param recipientId the recipient id
      * @return the unsent message for
      */
-    public Message getUnsentMessageFor(int recipientId) {
+    public synchronized Message getUnsentMessageFor(int recipientId) {
         return unsentMessages[recipientId];
     }
 
@@ -374,20 +374,20 @@ public class Study implements Serializable, Cloneable {
      */
     @Override
     public int hashCode() {
-        int result = numParticipants;
-        result = 31 * result + ownId;
-        result = 31 * result + studyUID.hashCode();
-        result = 31 * result + state.hashCode();
-        result = 31 * result + name.hashCode();
-        if (filename != null)
-            result = 31 * result + filename.hashCode();
-        for (Bin b : bins) {
+        int result = getNumParticipants();
+        result = 31 * result + getOwnId();
+        result = 31 * result + getStudyUID().hashCode();
+        result = 31 * result + getState().hashCode();
+        result = 31 * result + getName().hashCode();
+        if (getFilename() != null)
+            result = 31 * result + getFilename().hashCode();
+        for (Bin b : getBins()) {
             if (b != null)
                 result = 31 * result + b.hashCode();
             else
                 result = 31 * result;
         }
-        for (Participant p : participants) {
+        for (Participant p : getParticipants()) {
             if (p != null)
                 result = 31 * result + p.hashCode();
             else
@@ -411,25 +411,25 @@ public class Study implements Serializable, Cloneable {
      * @param connectionIMAPSettings 
      * @throws IllegalStateException the illegal state exception
      */
-    public void initializeStudy(String name, Participant[] participants, Bin[] bins, ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException {
-        if (!(state == StudyState.NONE || state == StudyState.STARTING))
-            throw new IllegalStateException("Unable to initialize study at state" + state);
-        this.name = name;
-        this.connectionIMAPSettings = connectionIMAPSettings;
-        numParticipants = participants.length;
-        unsentMessages = new Message[numParticipants];
-        retrievedMessages = new boolean[numParticipants];       
+    public synchronized void initializeStudy(String name, Participant[] participants, Bin[] bins, ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException {
+        if (!(getState() == StudyState.NONE || getState() == StudyState.STARTING))
+            throw new IllegalStateException("Unable to initialize study at state" + getState());
+        this.setName(name);
+        this.setConnectionIMAPSettings(connectionIMAPSettings);
+        setNumParticipants(participants.length);
+        unsentMessages = new Message[getNumParticipants()];
+        retrievedMessages = new boolean[getNumParticipants()];       
         for (Bin bin : bins) {
             if (!(bin.isInitialized())) {
-                bin.initialize(numParticipants);
+                bin.initialize(getNumParticipants());
             }
         }
-        this.bins = bins;
-        this.ownId = 0; // unneeded but for verbosity...
-        retrievedMessages[ownId] = true;
-        this.participants = participants;
-        if (state == StudyState.NONE)
-            state = StudyState.STARTING;
+        this.setBins(bins);
+        this.setOwnId(0); // unneeded but for verbosity...
+        retrievedMessages[getOwnId()] = true;
+        this.setParticipants(participants);
+        if (getState() == StudyState.NONE)
+            setState(StudyState.STARTING);
     }
 
     /**
@@ -437,8 +437,8 @@ public class Study implements Serializable, Cloneable {
      * @param msg
      * @return
      */
-    public boolean isCorrectRecipient(Message msg) {
-        return (msg.recipientName.equals(getParticipantFromId(ownId).name) && msg.recipientEmailAddress.equals(getParticipantFromId(ownId).emailAddress));
+    public synchronized boolean isCorrectRecipient(Message msg) {
+        return (msg.recipientName.equals(getParticipantFromId(getOwnId()).name) && msg.recipientEmailAddress.equals(getParticipantFromId(getOwnId()).emailAddress));
     }
 
     /**
@@ -447,14 +447,14 @@ public class Study implements Serializable, Cloneable {
      * @param msg the msg
      * @return true, if is message share result valid
      */
-    public boolean isMessageShareResultValid(Message msg) {
+    public synchronized boolean isMessageShareResultValid(Message msg) {
         try {
             if(!isCorrectRecipient(msg)){
                 return false;
             }            
             Participant sender = getParticipantFromId(msg.senderID);
-            Message.validateData(getParticipantId(sender), participants[ownId], msg.data);
-            switch (state){
+            Message.validateData(getParticipantId(sender), getParticipants()[getOwnId()], msg.data);
+            switch (getState()){
             case RECIEVING_SHARE:
                 MessageShare.decodeAndVerify(Message.getMessageData(msg), sender, this);
                 break;
@@ -475,9 +475,9 @@ public class Study implements Serializable, Cloneable {
      *
      * @return true, if is result computable
      */
-    public boolean isResultComputable() {
+    public synchronized boolean isResultComputable() {
         boolean ready = true;
-        for (Bin b : bins) {
+        for (Bin b : getBins()) {
             ready &= b.isComplete();
         }
         return ready;
@@ -489,7 +489,7 @@ public class Study implements Serializable, Cloneable {
      * @param recipientId the recipient id
      * @throws IllegalArgumentException the illegal argument exception
      */
-    public void markMessageSent(int recipientId) throws IllegalArgumentException {
+    public synchronized void markMessageSent(int recipientId) throws IllegalArgumentException {
         if (unsentMessages[recipientId] == null)
             throw new IllegalArgumentException("Message " + recipientId + " nonexistent");
         unsentMessages[recipientId] = null;
@@ -500,7 +500,7 @@ public class Study implements Serializable, Cloneable {
      *
      * @param recipientId the recipient id
      */
-    public void markMessageRetrieved(int recipientId) {
+    public synchronized void markMessageRetrieved(int recipientId) {
         retrievedMessages[recipientId] = true;
     }
     
@@ -510,7 +510,7 @@ public class Study implements Serializable, Cloneable {
      * @param recipientId the recipient id
      * @return message retrieved
      */
-    public boolean wasMessageRetrieved(int recipientId) {
+    public synchronized boolean wasMessageRetrieved(int recipientId) {
         return retrievedMessages[recipientId];
     }
     
@@ -519,7 +519,7 @@ public class Study implements Serializable, Cloneable {
      *
      * @return messages retrieved
      */
-    public boolean areAllMessagesRetrieved() {
+    public synchronized boolean areAllMessagesRetrieved() {
         for(int index = 0; index < retrievedMessages.length; index++) {
             if (!retrievedMessages[index]) return false;
         }
@@ -532,7 +532,7 @@ public class Study implements Serializable, Cloneable {
      *
      * @return true, if successful
      */
-    public boolean messagesUnsent() {
+    public synchronized boolean messagesUnsent() {
         for (Message m : unsentMessages) {
             if (m != null)
                 return true;
@@ -546,20 +546,20 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void populateInitialMessages() throws IllegalStateException, IOException {
-      if (state != StudyState.INITIAL_SENDING)
-        throw new IllegalStateException("Forbidden action (getInitialMessage) at current state " + state);
-        for (int i = 0; i < numParticipants; i++) {
-          if (i != ownId)
+    public synchronized void populateInitialMessages() throws IllegalStateException, IOException {
+      if (getState() != StudyState.INITIAL_SENDING)
+        throw new IllegalStateException("Forbidden action (getInitialMessage) at current state " + getState());
+        for (int i = 0; i < getNumParticipants(); i++) {
+          if (i != getOwnId())
             unsentMessages[i] = getInitialMessage(i);
           else {
-            for (Bin b : bins) {
-              b.transferSharesOutIn(ownId);
+            for (Bin b : getBins()) {
+              b.transferSharesOutIn(getOwnId());
             }
           }
         }
-        for (Bin b : bins) {
-          b.clearOutSharesExceptId(ownId);
+        for (Bin b : getBins()) {
+          b.clearOutSharesExceptId(getOwnId());
         }
     }
     
@@ -569,25 +569,25 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void populateResultMessages() throws IllegalStateException, IOException {
-        if (state != StudyState.SENDING_RESULT)
-            throw new IllegalStateException("Forbidden action (populateResultMessage) at current state " + state);
+    public synchronized void populateResultMessages() throws IllegalStateException, IOException {
+        if (getState() != StudyState.SENDING_RESULT)
+            throw new IllegalStateException("Forbidden action (populateResultMessage) at current state " + getState());
       MessageResult data = new MessageResult(this);
-      for (int i = 0; i < numParticipants; i++) {
-        if (i != ownId) {
-          Participant recipient = this.participants[i];
-          unsentMessages[i] = new Message(ownId, recipient, data.getMessage());
+      for (int i = 0; i < getNumParticipants(); i++) {
+        if (i != getOwnId()) {
+          Participant recipient = this.getParticipants()[i];
+          unsentMessages[i] = new Message(getOwnId(), recipient, data.getMessage());
           // Reset the retrieved messages array
           retrievedMessages[i] = false;
-          retrievedMessages[ownId] = true;
+          retrievedMessages[getOwnId()] = true;
         } else {
-          for (Bin b : bins) {
-            b.setInShare(b.getSumShare(), ownId);
+          for (Bin b : getBins()) {
+            b.setInShare(b.getSumShare(), getOwnId());
           }
         }
       }
-      for (Bin b : bins) {
-        b.clearInSharesExceptId(ownId);
+      for (Bin b : getBins()) {
+        b.clearInSharesExceptId(getOwnId());
       }
     }
 
@@ -597,20 +597,20 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void populateShareMessages() throws IllegalStateException, IOException {
-        if (state != StudyState.SENDING_SHARE)
-            throw new IllegalStateException("Forbidden action (populateShareMessage) at current state " + state);
-          for (int i = 0; i < numParticipants; i++) {
-            if (i != ownId) {
+    public synchronized void populateShareMessages() throws IllegalStateException, IOException {
+        if (getState() != StudyState.SENDING_SHARE)
+            throw new IllegalStateException("Forbidden action (populateShareMessage) at current state " + getState());
+          for (int i = 0; i < getNumParticipants(); i++) {
+            if (i != getOwnId()) {
               unsentMessages[i] = getShareMessage(i);
             } else {
-              for (Bin b : bins) {
-                b.transferSharesOutIn(ownId);
+              for (Bin b : getBins()) {
+                b.transferSharesOutIn(getOwnId());
               }
             }
           }
-          for (Bin b : bins) {
-            b.clearOutSharesExceptId(ownId);
+          for (Bin b : getBins()) {
+            b.clearOutSharesExceptId(getOwnId());
           }
     }
 
@@ -620,11 +620,11 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void saveProgram() throws IllegalStateException, IOException {
-        if (filename == null) {
+    public synchronized void saveProgram() throws IllegalStateException, IOException {
+        if (getFilename() == null) {
             throw new IllegalStateException("No filename defined");
         } else {
-            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename));
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(getFilename()));
             oos.writeObject(this);
             oos.close();
         }
@@ -639,12 +639,12 @@ public class Study implements Serializable, Cloneable {
      * @throws ClassNotFoundException the class not found exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void setModelFromMessage(String initialMsg)
+    public synchronized void setModelFromMessage(String initialMsg)
             throws IllegalStateException, IllegalArgumentException, ClassNotFoundException, IOException {
-        if (state != StudyState.PARTICIPATING)
-            throw new IllegalStateException("Setting the Model from a Message is not allowed at state " + state);
+        if (getState() != StudyState.PARTICIPATING)
+            throw new IllegalStateException("Setting the Model from a Message is not allowed at state " + getState());
         Study model = MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(initialMsg)));
-        model.state = StudyState.PARTICIPATING;
+        model.setState(StudyState.PARTICIPATING);
         update(model);
     }
 
@@ -658,26 +658,26 @@ public class Study implements Serializable, Cloneable {
      * @throws ClassNotFoundException the class not found exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void setShareFromMessage(Message msg) throws IllegalStateException, IllegalArgumentException, NoSuchAlgorithmException, ClassNotFoundException, IOException {
+    public synchronized void setShareFromMessage(Message msg) throws IllegalStateException, IllegalArgumentException, NoSuchAlgorithmException, ClassNotFoundException, IOException {
         Participant sender = getParticipantFromId(msg.senderID);
-        if (!(state == StudyState.RECIEVING_SHARE || state == StudyState.RECIEVING_RESULT)) {
-            throw new IllegalStateException("Setting a share from a message is not allowed at state " + state);
+        if (!(getState() == StudyState.RECIEVING_SHARE || getState() == StudyState.RECIEVING_RESULT)) {
+            throw new IllegalStateException("Setting a share from a message is not allowed at state " + getState());
         }
         if (!isCorrectRecipient(msg)) {
             throw new IllegalArgumentException("Message recipient does not match the current participant");
         }
-        if (Message.validateData(getParticipantId(sender), participants[ownId], msg.data)) {
-            if (state == StudyState.RECIEVING_SHARE) {
+        if (Message.validateData(getParticipantId(sender), getParticipants()[getOwnId()], msg.data)) {
+            if (getState() == StudyState.RECIEVING_SHARE) {
                 MessageShare sm = MessageShare.decodeAndVerify(Message.getMessageData(msg), sender, this);
                 int senderId = getParticipantId(sender);
-                for (int i = 0; i < bins.length; i++) {
-                    bins[i].setInShare(sm.bins[i].share, senderId);
+                for (int i = 0; i < getBins().length; i++) {
+                    getBins()[i].setInShare(sm.bins[i].share, senderId);
                 }
             } else {
                 MessageResult rm = MessageResult.decodeAndVerify(Message.getMessageData(msg), sender, this);
                 int senderId = getParticipantId(sender);
-                for (int i = 0; i < bins.length; i++) {
-                    bins[i].setInShare(rm.bins[i].share, senderId);
+                for (int i = 0; i < getBins().length; i++) {
+                    getBins()[i].setInShare(rm.bins[i].share, senderId);
                 }
             }
         } else {
@@ -688,7 +688,7 @@ public class Study implements Serializable, Cloneable {
     /**
      * Stops the bus
      */
-    public void stopBus() {
+    public synchronized void stopBus() {
         if (this.bus != null) {
             this.bus.stop();
         } 
@@ -703,11 +703,11 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalArgumentException the illegal argument exception
      * @throws ClassNotFoundException the class not found exception
      */
-    public void toEnteringValues(String initialMessage) throws IllegalStateException, IOException, IllegalArgumentException, ClassNotFoundException{
+    public synchronized void toEnteringValues(String initialMessage) throws IllegalStateException, IOException, IllegalArgumentException, ClassNotFoundException{
         setModelFromMessage(initialMessage);
-        unsentMessages = new Message[numParticipants];
-        retrievedMessages = new boolean[numParticipants];
-        retrievedMessages[ownId] = true;
+        unsentMessages = new Message[getNumParticipants()];
+        retrievedMessages = new boolean[getNumParticipants()];
+        retrievedMessages[getOwnId()] = true;
         advanceState(StudyState.ENTERING_VALUES);
     }
 
@@ -717,7 +717,7 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void toFinished() throws IllegalStateException, IOException{
+    public synchronized void toFinished() throws IllegalStateException, IOException{
         advanceState(StudyState.FINISHED);
     }
 
@@ -732,7 +732,7 @@ public class Study implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     // Note, that bins need to be initialized and have shared values
-    public void toInitialSending(String name, Participant[] participants, Bin[] bins, ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException, IOException {
+    public synchronized void toInitialSending(String name, Participant[] participants, Bin[] bins, ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException, IOException {
         initializeStudy(name, participants, bins, connectionIMAPSettings);
         advanceState(StudyState.INITIAL_SENDING);
     }
@@ -743,7 +743,7 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void toParticipating() throws IllegalStateException, IOException{
+    public synchronized void toParticipating() throws IllegalStateException, IOException{
         advanceState(StudyState.PARTICIPATING);
     }
 
@@ -753,7 +753,7 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void toRecievingResult() throws IllegalStateException, IOException{
+    public synchronized void toRecievingResult() throws IllegalStateException, IOException{
         advanceState(StudyState.RECIEVING_RESULT);
     }
 
@@ -763,7 +763,7 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void toRecievingShares() throws IllegalStateException, IOException{
+    public synchronized void toRecievingShares() throws IllegalStateException, IOException{
         advanceState(StudyState.RECIEVING_SHARE);
     }
 
@@ -773,7 +773,7 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void toSendingResult() throws IllegalStateException, IOException{
+    public synchronized void toSendingResult() throws IllegalStateException, IOException{
         advanceState(StudyState.SENDING_RESULT);
     }
 
@@ -785,11 +785,11 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void toSendingShares(BigInteger[] values) throws IllegalArgumentException, IllegalStateException, IOException {
-        if (values.length != bins.length)
+    public synchronized void toSendingShares(BigInteger[] values) throws IllegalArgumentException, IllegalStateException, IOException {
+        if (values.length != getBins().length)
             throw new IllegalArgumentException("Number of values not equal number of bins");
-        for (int i = 0; i < bins.length; i++) {
-            bins[i].shareValue(values[i]);
+        for (int i = 0; i < getBins().length; i++) {
+            getBins()[i].shareValue(values[i]);
         }
         advanceState(StudyState.SENDING_SHARE);
     }
@@ -845,7 +845,7 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public void toStarting() throws IllegalStateException, IOException{
+    public synchronized void toStarting() throws IllegalStateException, IOException{
         advanceState(StudyState.STARTING);
     }
 
@@ -855,10 +855,10 @@ public class Study implements Serializable, Cloneable {
      * @return the string
      */
     @Override
-    public String toString() {
-        return "AppModel [StudyUID=" + studyUID +", numParticipants=" + numParticipants + ", ownId=" + ownId + ", state=" + state + ", bins="
-                + Arrays.toString(bins) + ", participants=" + Arrays.toString(participants) + ", name=" + name
-                + ", unsentMessages=" + Arrays.toString(unsentMessages) + ", filename=" + filename + "]";
+    public synchronized String toString() {
+        return "AppModel [StudyUID=" + getStudyUID() +", numParticipants=" + getNumParticipants() + ", ownId=" + getOwnId() + ", state=" + getState() + ", bins="
+                + Arrays.toString(getBins()) + ", participants=" + Arrays.toString(getParticipants()) + ", name=" + getName()
+                + ", unsentMessages=" + Arrays.toString(unsentMessages) + ", filename=" + getFilename() + "]";
     }
 
     /**
@@ -866,14 +866,14 @@ public class Study implements Serializable, Cloneable {
      *
      * @param model the model
      */
-    public void update(Study model) {
-        studyUID = model.studyUID;
-        numParticipants = model.numParticipants;
-        ownId = model.ownId;
-        bins = model.bins;
-        participants = model.participants;
-        name = model.name;
-        state = model.state;
+    public synchronized void update(Study model) {
+        setStudyUID(model.getStudyUID());
+        setNumParticipants(model.getNumParticipants());
+        setOwnId(model.getOwnId());
+        setBins(model.getBins());
+        setParticipants(model.getParticipants());
+        setName(model.getName());
+        setState(model.getState());
     }
 
     /**
@@ -884,101 +884,101 @@ public class Study implements Serializable, Cloneable {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     private void advanceState(StudyState newState) throws IllegalStateException, IOException {
-        switch (state) {
+        switch (getState()) {
         case NONE:
             if (!(newState == StudyState.STARTING || newState == StudyState.PARTICIPATING))
-                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+                throw new IllegalStateException("Illegal state transition from " + getState() + " to " + newState);
             // Change GUI Window
-            state = newState;
+            setState(newState);
             break;
         case STARTING:
             if (!(newState == StudyState.INITIAL_SENDING))
-              throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
-            state = newState;
+              throw new IllegalStateException("Illegal state transition from " + getState() + " to " + newState);
+            setState(newState);
             populateInitialMessages();
             // Change GUI Window
             break;
         case PARTICIPATING:
             if (newState != StudyState.ENTERING_VALUES)
-                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
-            state = newState;
+                throw new IllegalStateException("Illegal state transition from " + getState() + " to " + newState);
+            setState(newState);
             // Change GUI Window
             break;
         case ENTERING_VALUES:
             if (newState != StudyState.SENDING_SHARE)
-                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
-            state = newState;
+                throw new IllegalStateException("Illegal state transition from " + getState() + " to " + newState);
+            setState(newState);
             populateShareMessages();
             // Change GUI Window
             break;
         case INITIAL_SENDING:
             if (newState != StudyState.RECIEVING_SHARE)
-                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+                throw new IllegalStateException("Illegal state transition from " + getState() + " to " + newState);
             if (messagesUnsent())
                 throw new IllegalStateException("Still unsent messages left");
             // Only one InShare set (at ownId, no OutShare set
-            for (Bin b : bins) {
+            for (Bin b : getBins()) {
                 int[] filledInShareIndices = b.getFilledInShareIndices();
                 int[] filledOutShareIndices = b.getFilledOutShareIndices();
-                if (!(filledInShareIndices.length == 1 && filledInShareIndices[0] == ownId))
+                if (!(filledInShareIndices.length == 1 && filledInShareIndices[0] == getOwnId()))
                     throw new IllegalStateException("InShares in bin " + b.name + " messed up");
                 if (filledOutShareIndices.length != 0)
                     throw new IllegalStateException("OutShares in bin " + b.name + " not empty");
             }
-            state = newState;
+            setState(newState);
             // Change GUI Window
             break;
         case SENDING_SHARE:
             // Forbid two parties
             if (newState != StudyState.RECIEVING_SHARE)
-                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+                throw new IllegalStateException("Illegal state transition from " + getState() + " to " + newState);
             if (messagesUnsent())
                 throw new IllegalStateException("Still unsent messages left");
             // Two inShares (one from initial msg, one from self), no OutShares
-            for (Bin b : bins) {
+            for (Bin b : getBins()) {
                 int[] filledInShareIndices = b.getFilledInShareIndices();
                 int[] filledOutShareIndices = b.getFilledOutShareIndices();
                 if (!(filledInShareIndices.length == 2
-                        && IntStream.of(filledInShareIndices).anyMatch(x -> (x == ownId || x == 0))))
+                        && IntStream.of(filledInShareIndices).anyMatch(x -> (x == getOwnId() || x == 0))))
                     throw new IllegalStateException("InShares in bin " + b.name + " messed up");
                 if (filledOutShareIndices.length != 0)
                     throw new IllegalStateException("OutShares in bin " + b.name + " not empty");
             }
-            state = newState;
+            setState(newState);
             // Change GUI Window
             break;
         case RECIEVING_SHARE:
             if (newState != StudyState.SENDING_RESULT)
-                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+                throw new IllegalStateException("Illegal state transition from " + getState() + " to " + newState);
             if (!isResultComputable())
                 throw new IllegalStateException("Not all shares collected");
-            state = newState;
+            setState(newState);
             populateResultMessages();
             // Change GUI Window
             break;
         case SENDING_RESULT:
             if (newState != StudyState.RECIEVING_RESULT)
-                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+                throw new IllegalStateException("Illegal state transition from " + getState() + " to " + newState);
             if (messagesUnsent())
                 throw new IllegalStateException("Still unsent messages left");
             // Sanity Check: Only one inShare (ownId), no OutShares
-            for (Bin b : bins) {
+            for (Bin b : getBins()) {
                 int[] filledInShareIndices = b.getFilledInShareIndices();
                 int[] filledOutShareIndices = b.getFilledOutShareIndices();
-                if (!(filledInShareIndices.length == 1 && filledInShareIndices[0] == ownId))
+                if (!(filledInShareIndices.length == 1 && filledInShareIndices[0] == getOwnId()))
                     throw new IllegalStateException("InShares in bin " + b.name + " messed up");
                 if (filledOutShareIndices.length != 0)
                     throw new IllegalStateException("OutShares in bin " + b.name + " not empty");
             }
-            state = newState;
+            setState(newState);
             // Change GUI Window
             break;
         case RECIEVING_RESULT:
             if (newState != StudyState.FINISHED)
-                throw new IllegalStateException("Illegal state transition from " + state + " to " + newState);
+                throw new IllegalStateException("Illegal state transition from " + getState() + " to " + newState);
             if (!isResultComputable())
                 throw new IllegalStateException("Not all shares collected");
-            state = newState;
+            setState(newState);
             // Change GUI WIndow and display result
             break;
         case FINISHED:
@@ -996,8 +996,8 @@ public class Study implements Serializable, Cloneable {
      */
     private Message getInitialMessage(int recipientId) throws IOException {
         MessageInitial data = new MessageInitial(this, recipientId);
-        Participant recipient = this.participants[recipientId];
-        return new Message(ownId, recipient, data.getMessage());
+        Participant recipient = this.getParticipants()[recipientId];
+        return new Message(getOwnId(), recipient, data.getMessage());
     }
     
     /**
@@ -1009,7 +1009,133 @@ public class Study implements Serializable, Cloneable {
      */
     private Message getShareMessage(int recipientId) throws IOException {
         MessageShare data = new MessageShare(this, recipientId);
-        Participant recipient = this.participants[recipientId];
-        return new Message(ownId, recipient, data.getMessage());
+        Participant recipient = this.getParticipants()[recipientId];
+        return new Message(getOwnId(), recipient, data.getMessage());
+    }
+
+    /**
+     * @return the studyUID
+     */
+    public synchronized String getStudyUID() {
+        return studyUID;
+    }
+
+    /**
+     * @param studyUID the studyUID to set
+     */
+    public synchronized void setStudyUID(String studyUID) {
+        this.studyUID = studyUID;
+    }
+
+    /**
+     * @return the numParticipants
+     */
+    public synchronized int getNumParticipants() {
+        return numParticipants;
+    }
+
+    /**
+     * @param numParticipants the numParticipants to set
+     */
+    public synchronized void setNumParticipants(int numParticipants) {
+        this.numParticipants = numParticipants;
+    }
+
+    /**
+     * @return the ownId
+     */
+    public synchronized int getOwnId() {
+        return ownId;
+    }
+
+    /**
+     * @param ownId the ownId to set
+     */
+    public synchronized void setOwnId(int ownId) {
+        this.ownId = ownId;
+    }
+
+    /**
+     * @return the state
+     */
+    public synchronized StudyState getState() {
+        return state;
+    }
+
+    /**
+     * @param state the state to set
+     */
+    public synchronized void setState(StudyState state) {
+        this.state = state;
+    }
+
+    /**
+     * @return the bins
+     */
+    public synchronized Bin[] getBins() {
+        return bins;
+    }
+
+    /**
+     * @param bins the bins to set
+     */
+    public synchronized void setBins(Bin[] bins) {
+        this.bins = bins;
+    }
+
+    /**
+     * @return the participants
+     */
+    public synchronized Participant[] getParticipants() {
+        return participants;
+    }
+
+    /**
+     * @param participants the participants to set
+     */
+    public synchronized void setParticipants(Participant[] participants) {
+        this.participants = participants;
+    }
+
+    /**
+     * @return the name
+     */
+    public synchronized String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public synchronized void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @return the filename
+     */
+    public synchronized File getFilename() {
+        return filename;
+    }
+
+    /**
+     * @param filename the filename to set
+     */
+    public synchronized void setFilename(File filename) {
+        this.filename = filename;
+    }
+
+    /**
+     * @return the connectionIMAPSettings
+     */
+    public synchronized ConnectionIMAPSettings getConnectionIMAPSettings() {
+        return connectionIMAPSettings;
+    }
+
+    /**
+     * @param connectionIMAPSettings the connectionIMAPSettings to set
+     */
+    public synchronized void setConnectionIMAPSettings(ConnectionIMAPSettings connectionIMAPSettings) {
+        this.connectionIMAPSettings = connectionIMAPSettings;
     }
 }

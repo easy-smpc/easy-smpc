@@ -56,7 +56,7 @@ public class RecordTimeDifferences {
     private RecordTimeDifferences(Study model, int mailBoxCheckInterval, long startTime) {
         this.mailBoxCheckInterval = mailBoxCheckInterval;
         this.model = model;
-        this.measurements = createEmptyList(model.numParticipants);
+        this.measurements = createEmptyList(model.getNumParticipants());
     }
     
     /**
@@ -86,11 +86,11 @@ public class RecordTimeDifferences {
      */
     public static void init(Study model, int mailBoxCheckInterval, long startTime) {        
         // Create a new entry in measurements
-        timeDifferencesMap.put(model.studyUID, new RecordTimeDifferences(model, mailBoxCheckInterval, startTime));
+        timeDifferencesMap.put(model.getStudyUID(), new RecordTimeDifferences(model, mailBoxCheckInterval, startTime));
         
         // Add and log the starting value 
-        addStartValue(model.studyUID, model.ownId, startTime);       
-        logger.debug("Started", new Date(), model.studyUID, "started", model.numParticipants, "participants", model.bins.length, "bins", mailBoxCheckInterval, "mailbox check interval"); 
+        addStartValue(model.getStudyUID(), model.getOwnId(), startTime);       
+        logger.debug("Started", new Date(), model.getStudyUID(), "started", model.getNumParticipants(), "participants", model.getBins().length, "bins", mailBoxCheckInterval, "mailbox check interval"); 
     }
      
     /**
@@ -137,9 +137,9 @@ public class RecordTimeDifferences {
         // Write performance results
         try {
             PerformanceEvaluation.csvPrinter.printRecord(new Date(),
-                                         timeDifferencesMap.get(studyUID).model.studyUID,
-                                         timeDifferencesMap.get(studyUID).model.numParticipants,
-                                         timeDifferencesMap.get(studyUID).model.bins.length,
+                                         timeDifferencesMap.get(studyUID).model.getStudyUID(),
+                                         timeDifferencesMap.get(studyUID).model.getNumParticipants(),
+                                         timeDifferencesMap.get(studyUID).model.getBins().length,
                                          timeDifferencesMap.get(studyUID).mailBoxCheckInterval,
                                          timeDifferences[0],
                                          timeDifferences[timeDifferences.length - 1],

@@ -91,9 +91,9 @@ public class CreatingUser extends User {
     private void createParticipants(int lengthBitBigInteger,
                                     MailboxDetails mailBoxDetails) {
         // Loop over participants
-        for(int index = 1; index < getModel().numParticipants; index++) {
-            ParticipatingUserData userData =  new ParticipatingUserData(getModel().studyUID,
-                                  getModel().participants[index],
+        for(int index = 1; index < getModel().getNumParticipants(); index++) {
+            ParticipatingUserData userData =  new ParticipatingUserData(getModel().getStudyUID(),
+                                  getModel().getParticipants()[index],
                                   index,
                                   mailBoxDetails.getConnection(index),
                                   lengthBitBigInteger,

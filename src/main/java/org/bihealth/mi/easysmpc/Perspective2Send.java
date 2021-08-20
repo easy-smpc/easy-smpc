@@ -197,7 +197,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                         if(!isInitialSending()) {
                             // Send message in bus mode
                             getApp().getModel().getBus(0).send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
-                                      new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
+                                      new Scope(getApp().getModel().getStudyUID() + getRoundIdentifier()),
                                       new org.bihealth.mi.easybus.Participant(entry.getLeftValue(), entry.getRightValue()),
                                       null);
                         } else {
@@ -308,12 +308,12 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                        String exchangeString) {
         return String.format(Resources.getString("PerspectiveSend.mailBody"),
                                     entry.getLeftValue(), // Name of participant
-                                    getApp().getModel().state == StudyState.INITIAL_SENDING
+                                    getApp().getModel().getState() == StudyState.INITIAL_SENDING
                                             ? Resources.getString("PerspectiveSend.mailBodyParticipateStartFragement")
                                             : String.format(Resources.getString("PerspectiveSend.mailBodyParticapteProceedFragement"),
-                                                            getApp().getModel().state == StudyState.SENDING_RESULT? 5: 3), // Step number
+                                                            getApp().getModel().getState() == StudyState.SENDING_RESULT? 5: 3), // Step number
                                     exchangeString,
-                                    getApp().getModel().participants[getApp().getModel().ownId].name);
+                                    getApp().getModel().getParticipants()[getApp().getModel().getOwnId()].name);
     }
 
     /**
@@ -337,10 +337,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     protected String generateEMailSubject() {
         return String.format(Resources.getString("PerspectiveSend.mailSubject"),
-                                       getApp().getModel().name,
-                                       getApp().getModel().state == StudyState.INITIAL_SENDING
+                                       getApp().getModel().getName(),
+                                       getApp().getModel().getState() == StudyState.INITIAL_SENDING
                                                ? 0
-                                               : getApp().getModel().state == StudyState.SENDING_RESULT
+                                               : getApp().getModel().getState() == StudyState.SENDING_RESULT
                                                        ? 2
                                                        : 1);
     }
@@ -386,7 +386,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @return enabled
      */
     private boolean isAutomaticProcessingEnabled() {
-        return getApp().getModel().connectionIMAPSettings != null;
+        return getApp().getModel().getConnectionIMAPSettings() != null;
     }
     
     /**
@@ -404,7 +404,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
       * @return
       */
     private boolean isOwnEntry(Component entry) {
-        return Arrays.asList(panelParticipants.getComponents()).indexOf(entry) == getApp().getModel().ownId;
+        return Arrays.asList(panelParticipants.getComponents()).indexOf(entry) == getApp().getModel().getOwnId();
     }
 
     /**
@@ -453,7 +453,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     protected void markAllMessagesSent() {
         for (int index = 0; index < panelParticipants.getComponentCount(); index++) {
-            if (index != getApp().getModel().ownId) {
+            if (index != getApp().getModel().getOwnId()) {
                 getApp().actionMarkMessageSend(index);
             }
         }
@@ -538,7 +538,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         int index = 0;
         for (Component c : this.panelParticipants.getComponents()) {
             EntryParticipantCheckmarkSendMail entry = (EntryParticipantCheckmarkSendMail) c;
-            entry.setCheckmarkEnabled(index == getApp().getModel().ownId || // Always mark own id as "received"
+            entry.setCheckmarkEnabled(index == getApp().getModel().getOwnId() || // Always mark own id as "received"
                                                                 wasMessageretrieved(entry)); // Mark if share complete
             index++;
         }
@@ -560,14 +560,14 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     @Override
     protected void initialize() {
         
-        this.fieldTitle.setText(getApp().getModel().name);
+        this.fieldTitle.setText(getApp().getModel().getName());
         this.panelParticipants.removeAll();
         
         int i = 0; // Index count for participants to access messages
-        for (Participant currentParticipant : getApp().getModel().participants) {
+        for (Participant currentParticipant : getApp().getModel().getParticipants()) {
             
             // Add participant
-            EntryParticipantCheckmarkSendMail entry = new EntryParticipantCheckmarkSendMail(currentParticipant.name, currentParticipant.emailAddress, i == getApp().getModel().ownId);
+            EntryParticipantCheckmarkSendMail entry = new EntryParticipantCheckmarkSendMail(currentParticipant.name, currentParticipant.emailAddress, i == getApp().getModel().getOwnId());
             panelParticipants.add(entry);
             
             // Create popup menu for the send-email-button

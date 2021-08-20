@@ -80,8 +80,8 @@ public class MessageShare implements Serializable {
      * @return true, if successful
      */
     public static boolean verify(MessageShare msg, Participant sender, Study model) {
-        return msg.sender.equals(sender) && msg.recipient.equals(model.participants[model.ownId])
-                && msg.bins.length == model.bins.length;
+        return msg.sender.equals(sender) && msg.recipient.equals(model.getParticipants()[model.getOwnId()])
+                && msg.bins.length == model.getBins().length;
     }
 
     /** The bins. */
@@ -100,11 +100,11 @@ public class MessageShare implements Serializable {
      * @param recipientId the recipient id
      */
     public MessageShare(Study model, int recipientId) {
-        this.recipient = model.participants[recipientId];
-        this.sender = model.participants[model.ownId];
-        this.bins = new MessageBin[model.bins.length];
-        for (int i = 0; i < model.bins.length; i++) {
-            bins[i] = new MessageBin(model.bins[i], recipientId);
+        this.recipient = model.getParticipants()[recipientId];
+        this.sender = model.getParticipants()[model.getOwnId()];
+        this.bins = new MessageBin[model.getBins().length];
+        for (int i = 0; i < model.getBins().length; i++) {
+            bins[i] = new MessageBin(model.getBins()[i], recipientId);
         }
     }
 

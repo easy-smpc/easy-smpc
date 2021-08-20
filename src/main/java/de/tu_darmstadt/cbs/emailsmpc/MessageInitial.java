@@ -65,16 +65,16 @@ public class MessageInitial implements Serializable {
      */
     public static Study getAppModel(MessageInitial msg) {
         Study model = new Study();
-        model.studyUID = msg.studyUID;
-        model.name = msg.name;
-        model.participants = msg.participants;
-        model.numParticipants = msg.participants.length;
-        model.ownId = msg.recipientId;
-        model.connectionIMAPSettings = msg.connectionIMAPSettings;
-        model.state = StudyState.PARTICIPATING;
-        model.bins = new Bin[msg.bins.length];
+        model.setStudyUID(msg.studyUID);
+        model.setName(msg.name);
+        model.setParticipants(msg.participants);
+        model.setNumParticipants(msg.participants.length);
+        model.setOwnId(msg.recipientId);
+        model.setConnectionIMAPSettings(msg.connectionIMAPSettings);
+        model.setState(StudyState.PARTICIPATING);
+        model.setBins(new Bin[msg.bins.length]);
         for (int i = 0; i < msg.bins.length; i++) {
-            model.bins[i] = MessageBin.getBin(msg.bins[i], model.numParticipants);
+            model.getBins()[i] = MessageBin.getBin(msg.bins[i], model.getNumParticipants());
         }
         return model;
     }
@@ -104,14 +104,14 @@ public class MessageInitial implements Serializable {
      * @param recipientId the recipient id
      */
     public MessageInitial(Study model, int recipientId) {
-        this.studyUID = model.studyUID;
-        this.name = model.name;
-        this.participants = model.participants;
+        this.studyUID = model.getStudyUID();
+        this.name = model.getName();
+        this.participants = model.getParticipants();
         this.recipientId = recipientId;
-        this.connectionIMAPSettings = model.connectionIMAPSettings; 
-        this.bins = new MessageBin[model.bins.length];
-        for (int i = 0; i < model.bins.length; i++) {
-            bins[i] = new MessageBin(model.bins[i], recipientId);
+        this.connectionIMAPSettings = model.getConnectionIMAPSettings(); 
+        this.bins = new MessageBin[model.getBins().length];
+        for (int i = 0; i < model.getBins().length; i++) {
+            bins[i] = new MessageBin(model.getBins()[i], recipientId);
         }
     }
     

@@ -80,23 +80,23 @@ public abstract class User implements MessageListener {
             // Sends the messages for the first round and proceeds the model
             sendMessages(Resources.ROUND_1);
             this.model.toRecievingShares();
-            logger.debug("1. round sending finished logged", new Date(), getModel().studyUID, "1. round sending finished for", getModel().ownId);
+            logger.debug("1. round sending finished logged", new Date(), getModel().getStudyUID(), "1. round sending finished for", getModel().getOwnId());
             
             // Receives the messages for the first round and proceeds the model
             receiveMessages(Resources.ROUND_1);
             this.model.toSendingResult();
-            logger.debug("1. round receiving finished logged", new Date(), getModel().studyUID, "1. round receiving finished for", getModel().ownId);
+            logger.debug("1. round receiving finished logged", new Date(), getModel().getStudyUID(), "1. round receiving finished for", getModel().getOwnId());
             
             // Sends the messages for the second round and proceeds the model
             sendMessages(Resources.ROUND_2);
             this.model.toRecievingResult();
-            logger.debug("2. round sending finished logged", new Date(), getModel().studyUID, "2. round sending finished for", getModel().ownId);
+            logger.debug("2. round sending finished logged", new Date(), getModel().getStudyUID(), "2. round sending finished for", getModel().getOwnId());
             
             // Receives the messages for the second round and finalizes the model
             receiveMessages(Resources.ROUND_2);            
             this.model.toFinished();
-            RecordTimeDifferences.finished(getModel().studyUID, this.model.ownId, System.nanoTime());            
-            logger.debug("Result logged", new Date(), getModel().studyUID, "result", getModel().ownId, "participantid", getModel().getAllResults()[0].name, "result name", getModel().getAllResults()[0].value, "result");
+            RecordTimeDifferences.finished(getModel().getStudyUID(), this.model.getOwnId(), System.nanoTime());            
+            logger.debug("Result logged", new Date(), getModel().getStudyUID(), "result", getModel().getOwnId(), "participantid", getModel().getAllResults()[0].name, "result name", getModel().getAllResults()[0].value, "result");
             
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
             logger.error("Unable to process common process steps logged", new Date(), "Unable to process common process steps", ExceptionUtils.getStackTrace(e));
@@ -113,9 +113,9 @@ public abstract class User implements MessageListener {
      */
     private void receiveMessages(String roundIdentifier) throws IllegalArgumentException,
                                                          BusException {
-        getModel().getBus(this.mailBoxCheckInterval, this.isSharedMailbox).receive(new Scope(getModel().studyUID + roundIdentifier),
-                           new org.bihealth.mi.easybus.Participant(getModel().getParticipantFromId(getModel().ownId).name,
-                                                                   getModel().getParticipantFromId(getModel().ownId).emailAddress),
+        getModel().getBus(this.mailBoxCheckInterval, this.isSharedMailbox).receive(new Scope(getModel().getStudyUID() + roundIdentifier),
+                           new org.bihealth.mi.easybus.Participant(getModel().getParticipantFromId(getModel().getOwnId()).name,
+                                                                   getModel().getParticipantFromId(getModel().getOwnId()).emailAddress),
                            this);
         
         // Wait for all shares
@@ -136,15 +136,15 @@ public abstract class User implements MessageListener {
              // Log potentially missing messages
              if((System.currentTimeMillis() - startTime) > (120*1000)){
                  startTime = System.currentTimeMillis();                   
-                     if (!getModel().bins[0].isComplete()) {
+                     if (!getModel().getBins()[0].isComplete()) {
                          int index = 0;
-                    for (de.tu_darmstadt.cbs.emailsmpc.Participant participant : getModel().participants) {
-                        if (!getModel().bins[0].isCompleteForParticipantId(index)) {
+                    for (de.tu_darmstadt.cbs.emailsmpc.Participant participant : getModel().getParticipants()) {
+                        if (!getModel().getBins()[0].isCompleteForParticipantId(index)) {
                             
                             // Create same subject as the actual e-mail would have
-                            String subject = ConnectionEmail.createSubject( new Scope(getModel().studyUID + (getModel().state == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
-                                                           new Participant(getModel().participants[getModel().ownId].name, getModel().participants[getModel().ownId].emailAddress),
-                                                           new Participant(getModel().participants[index].name , getModel().participants[index].emailAddress));                            
+                            String subject = ConnectionEmail.createSubject( new Scope(getModel().getStudyUID() + (getModel().getState() == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
+                                                           new Participant(getModel().getParticipants()[getModel().getOwnId()].name, getModel().getParticipants()[getModel().getOwnId()].emailAddress),
+                                                           new Participant(getModel().getParticipants()[index].name , getModel().getParticipants()[index].emailAddress));                            
                             
                             // Log
                             logger.error("Missing mail logged", new Date(), "Missing mail", subject);
@@ -168,18 +168,18 @@ public abstract class User implements MessageListener {
     private void sendMessages(String roundIdentifier) {
         
         // Loop over participants
-        for (int index = 0; index < getModel().numParticipants; index++) {
+        for (int index = 0; index < getModel().getNumParticipants(); index++) {
             // Do not proceed if own user
-            if (index != getModel().ownId) {
+            if (index != getModel().getOwnId()) {
 
                 try {
                     // Retrieve bus and send message
                     getModel().getBus(0, this.isSharedMailbox).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
-                                    new Scope(getModel().studyUID + (getModel().state == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
-                                    new org.bihealth.mi.easybus.Participant(getModel().participants[index].name,
-                                                                            getModel().participants[index].emailAddress),
-                                    new org.bihealth.mi.easybus.Participant(getModel().participants[getModel().ownId].name,
-                                                                            getModel().participants[getModel().ownId].emailAddress));
+                                    new Scope(getModel().getStudyUID() + (getModel().getState() == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
+                                    new org.bihealth.mi.easybus.Participant(getModel().getParticipants()[index].name,
+                                                                            getModel().getParticipants()[index].emailAddress),
+                                    new org.bihealth.mi.easybus.Participant(getModel().getParticipants()[getModel().getOwnId()].name,
+                                                                            getModel().getParticipants()[getModel().getOwnId()].emailAddress));
                     // Mark message as sent
                     model.markMessageSent(index);
                 } catch (BusException | IOException e) {
@@ -284,7 +284,7 @@ public abstract class User implements MessageListener {
      * @return
      */
     private boolean areSharesComplete() {
-        for (Bin b : this.model.bins) {
+        for (Bin b : this.model.getBins()) {
             if (!b.isComplete()) return false;
         }
         return true;
@@ -310,7 +310,7 @@ public abstract class User implements MessageListener {
      * @return
      */
     public boolean isProcessFinished() {
-        return getModel().state == StudyState.FINISHED;
+        return getModel().getState() == StudyState.FINISHED;
     }
     
     /**
@@ -319,6 +319,6 @@ public abstract class User implements MessageListener {
      * @return
      */
     public boolean isStudyStateNone() {
-        return (getModel() == null || getModel().state == null || getModel().state == StudyState.NONE);
+        return (getModel() == null || getModel().getState() == null || getModel().getState() == StudyState.NONE);
     }    
 }
