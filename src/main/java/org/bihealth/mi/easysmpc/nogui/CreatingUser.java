@@ -92,6 +92,7 @@ public class CreatingUser extends User {
                                     MailboxDetails mailBoxDetails) {
         // Loop over participants
         for(int index = 1; index < getModel().getNumParticipants(); index++) {
+            // Create data
             ParticipatingUserData userData =  new ParticipatingUserData(getModel().getStudyUID(),
                                   getModel().getParticipants()[index],
                                   index,

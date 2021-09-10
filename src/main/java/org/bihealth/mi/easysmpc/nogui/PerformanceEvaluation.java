@@ -79,7 +79,7 @@ public class PerformanceEvaluation {
         try {
             password = new Scanner(new File("password.txt")).nextLine();
         } catch (FileNotFoundException | NoSuchElementException e) {
-            // Logger not initialized
+            // System.out since logger not initialized
             System.out.println("Unable to read password file");
         };
       
@@ -115,7 +115,7 @@ public class PerformanceEvaluation {
         
         // Repeat endless
         while(true) {
-            Combination combination = combinator.getNextCombination();
+            Combination combination = combinator.nextCombination();
             
             // Call evaluation
             new PerformanceEvaluation(combination.getParticipants(),

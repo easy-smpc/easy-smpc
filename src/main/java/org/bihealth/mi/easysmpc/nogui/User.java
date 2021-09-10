@@ -121,12 +121,13 @@ public abstract class User implements MessageListener {
         // Wait for all shares
         long startTime = System.currentTimeMillis();
         while (!areSharesComplete()) {
-            
+
             // Proceed if shares complete
-            if(!getModel().isBusAlive()) {
+            if (!getModel().isBusAlive()) {
                 logger.error("Bus is not alive anymore!", new Date(), "Bus is not alive anymore!");
             }
-             // Wait
+            
+            // Wait
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -134,20 +135,21 @@ public abstract class User implements MessageListener {
             }
              
              // Log potentially missing messages
-            if ((System.currentTimeMillis() - startTime) > (120 * 1000)){
-                 startTime = System.currentTimeMillis();                   
-                     if (!getModel().getBins()[0].isComplete()) {
-                         int index = 0;
+            if ((System.currentTimeMillis() - startTime) > (Resources.WAIT_TIME_CHECK_MISSING_MAIL)){
+                // Prepare
+                startTime = System.currentTimeMillis();
+                if (!getModel().getBins()[0].isComplete()) {
+                    int index = 0;
                     for (de.tu_darmstadt.cbs.emailsmpc.Participant participant : getModel().getParticipants()) {
                         if (!getModel().getBins()[0].isCompleteForParticipantId(index)) {
-                            
-                            // Create same subject as the actual e-mail would have
+
+                            // Reproduce subject of actual e-mail
                             String subject = ConnectionEmail.createSubject( new Scope(getModel().getStudyUID() + (getModel().getState() == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                                            new Participant(getModel().getParticipants()[getModel().getOwnId()].name, getModel().getParticipants()[getModel().getOwnId()].emailAddress),
                                                            new Participant(getModel().getParticipants()[index].name , getModel().getParticipants()[index].emailAddress));                            
                             
                             // Log
-                            logger.error("Missing mail logged", new Date(), "Missing mail", subject);
+                            logger.debug("Missing mail logged", new Date(), "Missing mail", subject);
                             }
                         index++;
                     }
@@ -169,7 +171,8 @@ public abstract class User implements MessageListener {
         
         // Loop over participants
         for (int index = 0; index < getModel().getNumParticipants(); index++) {
-            // Do not proceed if own user
+            
+            // Only proceed if not own user
             if (index != getModel().getOwnId()) {
 
                 try {
@@ -250,9 +253,11 @@ public abstract class User implements MessageListener {
     @Override
     public void receive(org.bihealth.mi.easybus.Message message) {
         String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
-
+        
+        // Check if valid
         if (isMessageShareResultValid(messageStripped)) {
             try {
+                // Set message
                 model.setShareFromMessage(Message.deserializeMessage(messageStripped));
             } catch (IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException | IOException e) {
                 logger.error("Unable to digest message logged", new Date(), "Unable to digest message", ExceptionUtils.getStackTrace(e));

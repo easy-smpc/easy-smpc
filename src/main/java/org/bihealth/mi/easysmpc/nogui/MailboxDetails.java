@@ -44,7 +44,7 @@ public class MailboxDetails {
      */
     public MailboxDetails(boolean isSharedMailbox, ConnectionIMAPSettings connectionIMAPTemplate, List<Integer> participants) {
         
-        // Check if indication to replace index is given        
+        // Check index replace index is given        
         if(!isSharedMailbox && !connectionIMAPTemplate.getEmailAddress().contains(INDEX_REPLACE )) {
             throw new IllegalStateException(String.format("A non-shared mailbox must contain the indication %s", INDEX_REPLACE));
         }
@@ -63,6 +63,7 @@ public class MailboxDetails {
      * @return
      */
     public ConnectionIMAPSettings getConnection(int index) {
+        // Return same connection for alle index if shared mailbox
         if(isSharedMailbox) {
             return new ConnectionIMAPSettings(connectionIMAPTemplate.getEmailAddress()).setPassword(connectionIMAPTemplate.getPassword())
                                                                                        .setIMAPPort(connectionIMAPTemplate.getIMAPPort())

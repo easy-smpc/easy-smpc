@@ -55,6 +55,7 @@ public class ParticipatingUser extends User {
      * @param lengthBitBigInteger
      */
     public ParticipatingUser(ParticipatingUserData participatingUserData) {                
+   
         // Store
         super(participatingUserData.mailBoxCheckInterval, participatingUserData.isSharedMailbox);
         this.lengthBitBigInteger = participatingUserData.lengthBitBigInteger;

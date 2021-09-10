@@ -50,7 +50,7 @@ public abstract class Combinator {
      * 
      * @return
      */
-    public abstract Combination getNextCombination();
+    public abstract Combination nextCombination();
     
     /**
      * A combination of possible parameters 

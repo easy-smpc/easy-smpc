@@ -149,6 +149,9 @@ public class Resources {
     
     /** Maximal trys sending an e-mail */
     public static final int WAIT_TRY_SEND_MAIL = 10000;
+    
+    /** Wait until report a mail as missing*/
+    public static final long WAIT_TIME_CHECK_MISSING_MAIL = 180000;
 
     /**
      * Returns all available languages

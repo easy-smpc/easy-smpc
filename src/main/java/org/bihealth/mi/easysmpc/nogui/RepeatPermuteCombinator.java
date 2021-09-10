@@ -42,13 +42,15 @@ public class RepeatPermuteCombinator extends Combinator {
     public RepeatPermuteCombinator(List<Integer> participants,
                                      List<Integer> bins,
                                      List<Integer> mailboxCheckInterval,
-                                     int repeatPerStep) {
+                                     int repeatPerStep) {        
         super(participants, bins, mailboxCheckInterval);
+        
+        // Store
         this.repeatPerCombination = repeatPerStep;
     }
 
     @Override
-    public Combination getNextCombination() {
+    public Combination nextCombination() {
         
         // Advance indexes if necessary
         if (this.counterRepetition >= this.repeatPerCombination) {
@@ -77,7 +79,7 @@ public class RepeatPermuteCombinator extends Combinator {
             mailboxCheckIntervalIndex = 0;
             increase = true;
         } else {
-            ++mailboxCheckIntervalIndex;
+            mailboxCheckIntervalIndex++;
         }
 
         // Increase bin index

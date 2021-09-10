@@ -47,7 +47,7 @@ public class RandomCombinator extends Combinator {
      * 
      * @return
      */
-    public Combination getNextCombination() {        
+    public Combination nextCombination() {        
         return new Combination(getParticipants().get(random.nextInt(getParticipants().size())),
                                getBins().get(random.nextInt(getBins().size())),
                                getMailboxCheckInterval().get(random.nextInt(getMailboxCheckInterval().size())));
