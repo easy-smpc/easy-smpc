@@ -38,7 +38,6 @@ import jakarta.mail.Flags.Flag;
 import jakarta.mail.Folder;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
-import jakarta.mail.Store;
 import jakarta.mail.internet.MimeBodyPart;
 
 /**
@@ -76,7 +75,7 @@ public abstract class ConnectionEmail {
          * @param message
          * @param folder
          */
-        public ConnectionEmailMessage(jakarta.mail.Message message, Folder folder, Store store) {
+        public ConnectionEmailMessage(jakarta.mail.Message message, Folder folder) {
             
             // Store
             this.message = message;

@@ -79,11 +79,28 @@ public class ConnectionIMAP extends ConnectionEmail {
     /**
      * Create a new instance
      * 
-     * @param settings
-     * @param sharedMailbox
+     * @param settings of mailbox
+     * @param sharedMailbox - use shared mailbox or separared mailboxes
      * @throws BusException
      */
-    public ConnectionIMAP(ConnectionIMAPSettings settings, boolean sharedMailbox) throws BusException {
+    public ConnectionIMAP(ConnectionIMAPSettings settings,
+                          boolean sharedMailbox) throws BusException {
+        this(settings, sharedMailbox, false, false);
+    }
+
+    /**
+     * Create a new instance
+     * 
+     * @param settings of mailbox
+     * @param sharedMailbox - use shared mailbox or separared mailboxes
+     * @param useSSL
+     * @param acceptSelfSignedCert - accept a self signed certificate
+     * @throws BusException
+     */
+    public ConnectionIMAP(ConnectionIMAPSettings settings,
+                          boolean sharedMailbox,
+                          boolean useSSL,
+                          boolean acceptSelfSignedCert) throws BusException {
         
         // Super
         super(sharedMailbox, settings.getEmailAddress());
@@ -107,7 +124,8 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));        
         this.propertiesReceiving.put("mail.imap.partialfetch", "false");
         this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
-      //this.propertiesReceiving.put("mail.imap.ssl.enable", "true");
+        this.propertiesReceiving.put("mail.imap.ssl.enable", useSSL? "true": "false");
+        if(acceptSelfSignedCert) { this.propertiesReceiving.put("mail.imap.ssl.trust", "*"); }
         
         // Set proxy
 //        if (proxy != null) {
@@ -123,7 +141,9 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
         this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
         this.propertiesSending.put("mail.smtp.auth", "true");
-        //this.propertiesSending.put("mail.smtp.ssl.enable", "true");
+        this.propertiesSending.put("mail.smpt.ssl.enable", useSSL? "true": "false");
+        if(acceptSelfSignedCert) { this.propertiesSending.put("mail.smpt.ssl.trust", "*"); }
+
 
         // Set proxy
 //        if (proxy != null) {
@@ -224,7 +244,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                         if (subject.startsWith(EMAIL_SUBJECT_PREFIX) &&
                                 (filter == null || filter.accepts(subject))) {                                
                                 logger.debug("Message received logged", new Date(), "Message received", uid, subject);
-                                result.add(new ConnectionEmailMessage(message, folder, store));
+                                result.add(new ConnectionEmailMessage(message, folder));
                         }
                     } catch (Exception e) {
                         // Ignore, as this may be a result of non-transactional properties of the IMAP protocol

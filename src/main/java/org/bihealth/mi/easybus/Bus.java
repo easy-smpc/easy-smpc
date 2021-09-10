@@ -141,7 +141,7 @@ public abstract class Bus {
      * @param participant
      * @return
      */
-    protected boolean isParticipantScopeRegistered(Scope scope, Participant participant) {
+    protected synchronized boolean isParticipantScopeRegistered(Scope scope, Participant participant) {
         // Check not null
         if (scope == null || participant == null) {
             return false;

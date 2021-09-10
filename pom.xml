@@ -22,15 +22,16 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
-				<configuration>
+				 <configuration>
 					<release>13</release>
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
+				<groupId>org.apache.maven.plugins</groupId>				
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>application</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
@@ -45,6 +46,25 @@
 								<descriptorRef>jar-with-dependencies</descriptorRef>
 							</descriptorRefs>
 							<finalName>${project.name}</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+						</configuration>
+					</execution>
+					<execution>
+						<id>performEval</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<archive>
+								<manifest>
+									<mainClass>org.bihealth.mi.easysmpc.nogui.PerformanceEvaluation</mainClass>
+								</manifest>
+							</archive>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<finalName>${project.name}.eval</finalName>
 							<appendAssemblyId>false</appendAssemblyId>
 						</configuration>
 					</execution>

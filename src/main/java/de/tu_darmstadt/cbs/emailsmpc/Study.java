@@ -298,7 +298,30 @@ public class Study implements Serializable, Cloneable {
     public synchronized BusEmail getBus(int millis, boolean isSharedMailbox) throws BusException {
 
         if ((this.bus == null || !this.bus.isAlive()) && this.getConnectionIMAPSettings() != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.getConnectionIMAPSettings(), isSharedMailbox), millis);
+            this.bus = new BusEmail(new ConnectionIMAP(this.getConnectionIMAPSettings(),
+                                                       isSharedMailbox,
+                                                       true,
+                                                       true),
+                                    millis);
+        }
+        return this.bus;
+    }
+    
+    /**
+     * Returns the bus in insecure test mode - unencrypted connection and self signed certificates are accepted! 
+     * 
+     * @param millis milliseconds interval to check for new mails. If zero a send only bus is returned
+     * @return the bus
+     * @throws BusException 
+     */
+    public synchronized BusEmail getBusTestMode(int millis, boolean isSharedMailbox) throws BusException {
+
+        if ((this.bus == null || !this.bus.isAlive()) && this.getConnectionIMAPSettings() != null) {
+            this.bus = new BusEmail(new ConnectionIMAP(this.getConnectionIMAPSettings(),
+                                                       isSharedMailbox,
+                                                       false,
+                                                       false),
+                                    millis);
         }
         return this.bus;
     }

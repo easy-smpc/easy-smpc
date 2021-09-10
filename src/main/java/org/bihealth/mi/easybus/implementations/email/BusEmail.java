@@ -210,7 +210,6 @@ public class BusEmail extends Bus {
 
                 // Check for interrupt
                 if (Thread.interrupted()) {
-                    connection.close();
                     throw new InterruptedException();
                 }
 
@@ -221,7 +220,6 @@ public class BusEmail extends Bus {
                 try {
                     received |= receiveInternal(message.message, message.scope, message.receiver);
                 } catch (InterruptedException e) {
-                    connection.close();
                     throw e;
                 }
 

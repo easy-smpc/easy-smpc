@@ -67,12 +67,12 @@ public class PerformanceEvaluation {
 //      List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 15, 20}));
 //      List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 2500, 5000, 7500, 10000}));
 //      List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 15000, 20000}));
-        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {10, 15, 20}));
+        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 15, 20}));
         List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 2500, 5000, 7500, 10000}));
         List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 15000, 20000}));
         boolean isSharedMailbox = false;
         int waitTime = 1000;
-        Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 12);
+        Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 4);
         
         // Read password
         String password;
@@ -102,10 +102,11 @@ public class PerformanceEvaluation {
 //          .setSMTPPort(25);
 
         ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("james" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org")
-//      ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("james" + ConnectionIMAPSettings.INDEX_REPLACE + "@easysmpc.org").setPassword("12345")
          .setPassword("12345")
          .setSMTPServer("easysmpc.org")
          .setIMAPServer("easysmpc.org")
+//         .setIMAPPort(993)
+//         .setSMTPPort(465);
          .setIMAPPort(143)
          .setSMTPPort(25);
         
@@ -195,7 +196,7 @@ public class PerformanceEvaluation {
         
         // Delete existing e-mails
         for (ConnectionIMAPSettings connectionIMAPSettings : mailBoxDetails.getAllConnections()) {
-            BusEmail bus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true), 1000);
+            BusEmail bus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true, false, false), 1000);
             bus.purgeEmails();
             bus.stop();
         }

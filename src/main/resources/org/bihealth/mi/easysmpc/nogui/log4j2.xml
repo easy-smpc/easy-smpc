@@ -34,9 +34,11 @@
 			<appender-ref ref="fileLogger" level="debug" />
 			<appender-ref ref="console" />
 		</Logger>
+		<!-- 
+		Uncomment do activate IMAP logging
 		<Logger name="com.sun.mail" level="all" additivity="false">
 			<appender-ref ref="imapFileLogger" level="all" />
-		</Logger>
+		</Logger> -->
 		<Root level="error" additivity="false">
 			<appender-ref ref="fileLogger" level="debug" />
 			<appender-ref ref="console" />

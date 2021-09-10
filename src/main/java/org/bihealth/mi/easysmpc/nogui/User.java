@@ -94,8 +94,8 @@ public abstract class User implements MessageListener {
             
             // Receives the messages for the second round and finalizes the model
             receiveMessages(Resources.ROUND_2);            
+            RecordTimeDifferences.finished(getModel().getStudyUID(), this.model.getOwnId(), System.nanoTime());
             this.model.toFinished();
-            RecordTimeDifferences.finished(getModel().getStudyUID(), this.model.getOwnId(), System.nanoTime());            
             logger.debug("Result logged", new Date(), getModel().getStudyUID(), "result", getModel().getOwnId(), "participantid", getModel().getAllResults()[0].name, "result name", getModel().getAllResults()[0].value, "result");
             
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
@@ -113,7 +113,7 @@ public abstract class User implements MessageListener {
      */
     private void receiveMessages(String roundIdentifier) throws IllegalArgumentException,
                                                          BusException {
-        getModel().getBus(this.mailBoxCheckInterval, this.isSharedMailbox).receive(new Scope(getModel().getStudyUID() + roundIdentifier),
+        getModel().getBusTestMode(this.mailBoxCheckInterval, this.isSharedMailbox).receive(new Scope(getModel().getStudyUID() + roundIdentifier),
                            new org.bihealth.mi.easybus.Participant(getModel().getParticipantFromId(getModel().getOwnId()).name,
                                                                    getModel().getParticipantFromId(getModel().getOwnId()).emailAddress),
                            this);
@@ -134,7 +134,7 @@ public abstract class User implements MessageListener {
             }
              
              // Log potentially missing messages
-             if((System.currentTimeMillis() - startTime) > (120*1000)){
+            if ((System.currentTimeMillis() - startTime) > (120 * 1000)){
                  startTime = System.currentTimeMillis();                   
                      if (!getModel().getBins()[0].isComplete()) {
                          int index = 0;
@@ -174,7 +174,7 @@ public abstract class User implements MessageListener {
 
                 try {
                     // Retrieve bus and send message
-                    getModel().getBus(0, this.isSharedMailbox).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
+                    getModel().getBusTestMode(0, this.isSharedMailbox).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
                                     new Scope(getModel().getStudyUID() + (getModel().getState() == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().getParticipants()[index].name,
                                                                             getModel().getParticipants()[index].emailAddress),
