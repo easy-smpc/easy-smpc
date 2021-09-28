@@ -262,7 +262,7 @@ public class ConnectionIMAP extends ConnectionEmail {
     }
 
     @Override
-    protected synchronized void send(String recipient, String subject, String body, Object attachment) throws BusException {
+    protected void send(String recipient, String subject, String body, Object attachment) throws BusException {
 
         synchronized(propertiesSending) {
     
