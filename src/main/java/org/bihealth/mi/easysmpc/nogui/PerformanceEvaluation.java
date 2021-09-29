@@ -67,9 +67,9 @@ public class PerformanceEvaluation {
         List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10000, 7500, 5000, 2500, 1000}));
         List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {20000, 15000, 10000, 5000, 1000}));
         boolean isSharedMailbox = false;
-        useSSL = true;
+        useSSL = true;       
         int waitTime = 1000;
-        Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 4);        
+        Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 15);        
       
         // Create connection settings
         ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easy" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org")
