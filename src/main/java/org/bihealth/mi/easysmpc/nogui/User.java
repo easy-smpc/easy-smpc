@@ -24,9 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.MessageListener;
-import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
-import org.bihealth.mi.easybus.implementations.email.ConnectionEmail;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -119,7 +117,6 @@ public abstract class User implements MessageListener {
                            this);
         
         // Wait for all shares
-        long startTime = System.currentTimeMillis();
         while (!areSharesComplete()) {
 
             // Proceed if shares complete
@@ -132,29 +129,7 @@ public abstract class User implements MessageListener {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
                 logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged", ExceptionUtils.getStackTrace(e));
-            }
-             
-             // Log potentially missing messages
-            if ((System.currentTimeMillis() - startTime) > (Resources.WAIT_TIME_CHECK_MISSING_MAIL)){
-                // Prepare
-                startTime = System.currentTimeMillis();
-                if (!getModel().getBins()[0].isComplete()) {
-                    int index = 0;
-                    for (de.tu_darmstadt.cbs.emailsmpc.Participant participant : getModel().getParticipants()) {
-                        if (!getModel().getBins()[0].isCompleteForParticipantId(index)) {
-
-                            // Reproduce subject of actual e-mail
-                            String subject = ConnectionEmail.createSubject( new Scope(getModel().getStudyUID() + (getModel().getState() == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
-                                                           new Participant(getModel().getParticipants()[getModel().getOwnId()].name, getModel().getParticipants()[getModel().getOwnId()].emailAddress),
-                                                           new Participant(getModel().getParticipants()[index].name , getModel().getParticipants()[index].emailAddress));                            
-                            
-                            // Log
-                            logger.debug("Missing mail logged", new Date(), "Missing mail", subject);
-                            }
-                        index++;
-                    }
-                }
-            }
+            }             
         }
         
         // Stop bus

@@ -15,7 +15,6 @@ package org.bihealth.mi.easysmpc.nogui;
 
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -24,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -63,53 +60,22 @@ public class PerformanceEvaluation {
      */
     public static void main(String[] args) throws Exception  {
         
-        // Create parameters
-//      List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 15, 20}));
-//      List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 2500, 5000, 7500, 10000}));
-//      List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 15000, 20000}));
-        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {3, 5, 10, 15, 20}));
-        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {1000, 2500, 5000, 7500, 10000}));
-        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {1000, 5000, 10000, 15000, 20000}));
+        // Create parameters      
+        List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] {20, 15, 10, 5, 3}));
+        List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10000, 7500, 5000, 2500, 1000}));
+        List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {20000, 15000, 10000, 5000, 1000}));
         boolean isSharedMailbox = false;
         int waitTime = 1000;
-        Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 4);
-        
-        // Read password
-        String password;
-        try {
-            password = new Scanner(new File("password.txt")).nextLine();
-        } catch (FileNotFoundException | NoSuchElementException e) {
-            // System.out since logger not initialized
-            System.out.println("Unable to read password file");
-        };
+        Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 4);        
       
         // Create connection settings
-//        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev" + MailboxDetails.INDEX_REPLACE + "@insutec.de").setPassword(password)
-////        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@insutec.de").setPassword("3a$ySMPC!")
-//                .setSMTPServer("smtp.ionos.de")
-//                .setIMAPServer("imap.ionos.de");
-//        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easysmpc.dev@yahoo.de").setPassword("jjyhafmgqazaawge")
-//                .setSMTPServer("imap.mail.yahoo.com")
-//                .setIMAPServer("smtp.mail.yahoo.com");
-        
-//        ConnectionIMAPSettings connectionIMAPSettings =
-//                new ConnectionIMAPSettings("hmail" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org")
-////                new ConnectionIMAPSettings("hmail@easysmpc.org")
-//          .setPassword("12345")
-//          .setSMTPServer("easysmpc.org")
-//          .setIMAPServer("easysmpc.org")
-//          .setIMAPPort(143)
-//          .setSMTPPort(25);
-
-        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("james" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org")
+        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings("easy" + MailboxDetails.INDEX_REPLACE + "@easysmpc.org")
          .setPassword("12345")
-         .setSMTPServer("easysmpc.org")
-         .setIMAPServer("easysmpc.org")
-//         .setIMAPPort(993)
-//         .setSMTPPort(465);
-         .setIMAPPort(143)
-         .setSMTPPort(25);
-        
+         .setSMTPServer("localhost")
+         .setIMAPServer("localhost")
+         .setIMAPPort(993)
+         .setSMTPPort(465);
+                
         // Create mailbox details
         MailboxDetails mailBoxDetails = new MailboxDetails(isSharedMailbox, connectionIMAPSettings, participants);
         
@@ -160,7 +126,7 @@ public class PerformanceEvaluation {
         // Wait to finish
         while (!user.areAllUsersFinished()) {
             try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged", ExceptionUtils.getStackTrace(e));
             }
