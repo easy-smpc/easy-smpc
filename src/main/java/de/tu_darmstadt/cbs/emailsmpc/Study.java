@@ -29,6 +29,7 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easysmpc.nogui.PerformanceEvaluation;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -299,9 +300,7 @@ public class Study implements Serializable, Cloneable {
 
         if ((this.bus == null || !this.bus.isAlive()) && this.getConnectionIMAPSettings() != null) {
             this.bus = new BusEmail(new ConnectionIMAP(this.getConnectionIMAPSettings(),
-                                                       isSharedMailbox,
-                                                       true,
-                                                       true),
+                                                       isSharedMailbox),
                                     millis);
         }
         return this.bus;
@@ -319,8 +318,8 @@ public class Study implements Serializable, Cloneable {
         if ((this.bus == null || !this.bus.isAlive()) && this.getConnectionIMAPSettings() != null) {
             this.bus = new BusEmail(new ConnectionIMAP(this.getConnectionIMAPSettings(),
                                                        isSharedMailbox,
-                                                       false,
-                                                       false),
+                                                       PerformanceEvaluation.useSSL(),
+                                                       true),
                                     millis);
         }
         return this.bus;

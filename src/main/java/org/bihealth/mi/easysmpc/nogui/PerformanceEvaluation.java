@@ -50,6 +50,8 @@ public class PerformanceEvaluation {
     private static Logger logger;
     /** Was preparation executed*/
     private static boolean prepared = false;
+    /** Use SSL/TLS */
+    private static boolean useSSL;
     
     /**
      * 
@@ -65,6 +67,7 @@ public class PerformanceEvaluation {
         List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] {10000, 7500, 5000, 2500, 1000}));
         List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] {20000, 15000, 10000, 5000, 1000}));
         boolean isSharedMailbox = false;
+        useSSL = true;
         int waitTime = 1000;
         Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 4);        
       
@@ -162,7 +165,7 @@ public class PerformanceEvaluation {
         
         // Delete existing e-mails
         for (ConnectionIMAPSettings connectionIMAPSettings : mailBoxDetails.getAllConnections()) {
-            BusEmail bus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, true, false, false), 1000);
+            BusEmail bus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false, PerformanceEvaluation.useSSL(), true), 1000);
             bus.purgeEmails();
             bus.stop();
         }
@@ -186,5 +189,9 @@ public class PerformanceEvaluation {
         // Reset statistics and log
         Bus.resetStatistics();
         logger.debug("Finished preparation logged", new Date(), "Finished preparation");
+    }
+    
+    public static boolean useSSL() {
+        return useSSL;
     }
 }

@@ -85,7 +85,7 @@ public class ConnectionIMAP extends ConnectionEmail {
      */
     public ConnectionIMAP(ConnectionIMAPSettings settings,
                           boolean sharedMailbox) throws BusException {
-        this(settings, sharedMailbox, false, false);
+        this(settings, sharedMailbox, true, false);
     }
 
     /**
@@ -141,8 +141,8 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
         this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
         this.propertiesSending.put("mail.smtp.auth", "true");
-        this.propertiesSending.put("mail.smpt.ssl.enable", useSSL? "true": "false");
-        if(acceptSelfSignedCert) { this.propertiesSending.put("mail.smpt.ssl.trust", "*"); }
+        this.propertiesSending.put("mail.smtp.ssl.enable", useSSL? "true": "false");
+        if(acceptSelfSignedCert) { this.propertiesSending.put("mail.smtp.ssl.trust", "*"); }
 
 
         // Set proxy
