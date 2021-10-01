@@ -14,7 +14,6 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.math.BigDecimal;
 import java.util.Arrays;
 

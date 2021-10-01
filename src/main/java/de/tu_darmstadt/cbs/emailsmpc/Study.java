@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.math.BigInteger;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -284,7 +283,7 @@ public class Study implements Serializable, Cloneable {
      */
     public BusEmail getBus() throws BusException {
         if ((this.bus == null || !this.bus.isAlive()) && this.connectionIMAPSettings != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true),
+            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, false),
                                     Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
         }
         return this.bus;
@@ -986,6 +985,7 @@ public class Study implements Serializable, Cloneable {
      */
     private Message getInitialMessage(int recipientId) throws IOException {
         MessageInitial data = new MessageInitial(this, recipientId);
+        data.connectionIMAPSettings = null;
         Participant recipient = this.participants[recipientId];
         return new Message(ownId, recipient, data.getMessage());
     }

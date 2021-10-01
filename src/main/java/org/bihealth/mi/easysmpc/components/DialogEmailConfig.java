@@ -14,7 +14,6 @@
 package org.bihealth.mi.easysmpc.components;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,10 +25,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -96,8 +93,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                                                                                         TitledBorder.DEFAULT_POSITION));        
         // Entry boxes
         central.setLayout(new BoxLayout(central, BoxLayout.Y_AXIS));
-        JLabel warningText1 = new JLabel(Resources.getString("EmailConfig.20"), SwingConstants.CENTER);
-        warningText1.setForeground(Color.RED);
         this.emailPasswordEntry = new EntryEMailPassword();
         this.emailPasswordEntry.setChangeListener(this);
         this.serversEntry = new EntryServers();
@@ -106,7 +101,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         this.serverPortsEntry.setChangeListener(this);
         
         // Add
-        central.add(warningText1);
         central.add(emailPasswordEntry);
         central.add(serversEntry);
         central.add(serverPortsEntry);
