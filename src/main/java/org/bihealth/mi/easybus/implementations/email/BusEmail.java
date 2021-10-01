@@ -74,31 +74,38 @@ public class BusEmail extends Bus {
     /**
      * Creates a new instance
      * @param connection
-     * @param millis - interval in milliseconds in which messages are polled
+     * @param millis - interval in milliseconds in which messages are polled. If zero a send only bus is returned
      */
     public BusEmail(ConnectionEmail connection, int millis) {
+        // Check
+        if (millis < 0) {
+            throw new IllegalArgumentException("Interval must be a positive number or zero");
+        }
+        
         this.connection = connection;
-        this.thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (!stop) {
-                        try {
-                            receiveEmails();
-                        } catch (BusException e) {
-                            // Stop thread
-                            throw new RuntimeException(e);
+        if (millis > 0) {
+            this.thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        while (!stop) {
+                            try {
+                                receiveEmails();
+                            } catch (BusException e) {
+                                // Stop thread
+                                throw new RuntimeException(e);
+                            }
+                            Thread.sleep(millis);
                         }
-                        Thread.sleep(millis);
+                    } catch (InterruptedException e) {
+                        connection.close();
+                        // Die silently
                     }
-                } catch (InterruptedException e) {
-                    connection.close();
-                    // Die silently
                 }
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
+            });
+            thread.setDaemon(true);
+            thread.start();
+        }
     }    
     
     @Override
@@ -143,49 +150,57 @@ public class BusEmail extends Bus {
      * @throws BusException 
      * @throws InterruptedException 
      */
-    private synchronized void receiveEmails() throws BusException, InterruptedException {
-        
-        // Create filter for relevant messages
-        MessageFilter filter = new MessageFilter() {
-            @Override
-            public boolean accepts(String messageDescription) {
-                // Check if participant and scope is registered
-                return isParticipantScopeRegistered(ConnectionEmail.getScope(messageDescription),
-                                                    ConnectionEmail.getParticipant(messageDescription));
-            }
-        };
+    private synchronized void receiveEmails() throws InterruptedException, BusException {        
+        try {
+            // Create filter for relevant messages
+            MessageFilter filter = new MessageFilter() {
+                @Override
+                public boolean accepts(String messageDescription) {
+                    // Check if participant and scope is registered
+                    return isParticipantScopeRegistered(ConnectionEmail.getScope(messageDescription),
+                                                        ConnectionEmail.getParticipant(messageDescription));
+                }
+            };
 
-        // Get mails
-        BusEmail.BusEmailMessage deleted = null;
-        for (BusEmail.BusEmailMessage message : connection.receive(filter)) {
+            // Get mails
+            BusEmail.BusEmailMessage deleted = null;
+            for (BusEmail.BusEmailMessage message : connection.receive(filter)) {
 
-            // Check for interrupt
-            if (Thread.interrupted()) {
-                connection.close();
-                throw new InterruptedException();
+                // Check for interrupt
+                if (Thread.interrupted()) {
+                    throw new InterruptedException();
+                }
+
+                // Mark
+                boolean received = false;
+
+                // Send to scope and participant
+                try {
+                    received |= receiveInternal(message.message, message.scope, message.receiver);
+                } catch (InterruptedException e) {
+                    throw e;
+                }
+
+                // Delete
+                if (received) {
+                    try {
+                        message.delete();
+                        deleted = message;
+                    } catch (BusException e) {
+                        // Ignore
+                    }
+                }
             }
 
-            // Mark
-            boolean received = false;
-            
-            // Send to scope and participant
-            try {
-                received |= receiveInternal(message.message, message.scope, message.receiver);
-            } catch (InterruptedException e) {
-                connection.close();
-                throw e;
+            // Expunge
+            if (deleted != null) {
+                deleted.expunge();
             }
-
-            // Delete 
-            if (received) {
-                message.delete();
-                deleted = message;
-            }
-        }
-        
-        // Expunge
-        if (deleted != null) {
-            deleted.expunge();
+        } catch (BusException e) {
+            throw new BusException("Unable to receive e-mails!",e);
+        } finally {
+            // Close connection
+            connection.close();            
         }
     }
     

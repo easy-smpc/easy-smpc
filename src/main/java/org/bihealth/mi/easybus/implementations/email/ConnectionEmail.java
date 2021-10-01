@@ -83,7 +83,7 @@ public abstract class ConnectionEmail {
                     // Obtain body and attachment
                     for (int i = 0; i < 2; i++) {
                         BodyPart part = multipart.getBodyPart(i);
-                        if (part != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.ATTACHMENT)) {
+                        if (part != null && part.getDisposition() != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.ATTACHMENT)) {
                           attachment = getObject(((MimeBodyPart)part).getInputStream());
                       }                        
                     }
@@ -120,7 +120,7 @@ public abstract class ConnectionEmail {
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
         }
-    
+        
         /** 
          * Expunges all deleted messages on the server
          */
@@ -300,9 +300,7 @@ public abstract class ConnectionEmail {
 
                 Object attachment = message.getAttachment();
                 
-                // TODO: Is this a good idea? Delete malformed messages
                 if (text == null || attachment == null) {
-                    message.delete();
                     continue;
                 }
                 
@@ -321,14 +319,12 @@ public abstract class ConnectionEmail {
                     throw new InterruptedException();
                 }                        
     
-                // TODO: Is this a good idea? Delete malformed messages
                 if (scope == null || participant == null) {
-                    message.delete();
                     continue;
                 }
                         
                 // Pass on
-                ConnectionEmailMessage _message = message;
+                final ConnectionEmailMessage _message = message;
                 result.add(new BusEmail.BusEmailMessage(participant, scope, (Message) attachment) {
                     @Override
                     protected void delete() throws BusException {
