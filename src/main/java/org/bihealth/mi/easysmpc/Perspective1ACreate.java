@@ -36,6 +36,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -131,6 +132,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     public void stateChanged(ChangeEvent e) {
         // Is saving possible?
         this.buttonSave.setEnabled(this.areValuesValid());
+        
         // Can a mailbox be added or removed
         if (this.comboSelectMailbox.getSelectedItem() != null) {
             this.buttonEditMailbox.setEnabled(true);
@@ -138,7 +140,31 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         } else {
             this.buttonEditMailbox.setEnabled(false);
             this.buttonRemoveMailbox.setEnabled(false);
-        }               
+        }
+        
+        // If participants panels exists and automated mode selected => set e-mail address of creator automatically 
+        if (this.panelParticipants.getComponents() != null && this.panelParticipants.getComponents().length >= getApp().getModel().ownId + 1) {
+            // Get participant entry component            
+            EntryParticipant entry = ((EntryParticipant) this.panelParticipants.getComponents()[getApp().getModel().ownId]);
+            
+            if (this.comboSelectMailbox.getSelectedItem() != null) {
+                // No entry in field allowed
+                entry.setRightEnabled(false);
+
+                // Set email address if not already done
+                // TODO Simplify this part
+                String emailAddress = ((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getEmailAddress();
+                if (!entry.getRightValue().equals(emailAddress)) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            entry.setRightValue(emailAddress);
+                        }
+                    });
+                }
+            } else {
+                entry.setRightEnabled(true);
+            }
+        }
     }
 
     /**
