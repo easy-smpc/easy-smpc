@@ -83,7 +83,7 @@ public class ConnectionIMAPSettings implements Serializable {
     /** Search for proxy*/
     private boolean              searchForProxy           = true;
     /** Performance listener*/
-	private PerformanceListener  listener                 = null;
+	private transient PerformanceListener  listener                 = null;
 	
     /**
      * Creates a new instance

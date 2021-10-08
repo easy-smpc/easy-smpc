@@ -77,7 +77,7 @@ public class ConnectionIMAP extends ConnectionEmail {
     /** Password of the user */
     private String              password;
     /** Performance listener*/
-	private PerformanceListener listener;
+	private transient PerformanceListener listener;
    
     /**
      * Create a new instance

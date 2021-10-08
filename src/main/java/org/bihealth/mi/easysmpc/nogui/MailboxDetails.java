@@ -37,7 +37,7 @@ public class MailboxDetails {
     /** Max participants*/
     private Integer maxParticipants;
     /** Tracker*/
-    private PerformanceTracker tracker;
+    private transient PerformanceTracker tracker;
 
     /**
      * Creates a new instance
