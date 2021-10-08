@@ -93,6 +93,10 @@ public class PerformanceEvaluation {
 		}
 	}
 
+	public static boolean useSSL() {
+		return useSSL;
+	}
+
 	/**
 	 * Creates a new instance
 	 * 
@@ -177,9 +181,5 @@ public class PerformanceEvaluation {
 		// Reset statistics and log
 		mailBoxDetails.getTracker().resetStatistics();
 		logger.debug("Finished preparation logged", new Date(), "Finished preparation");
-	}
-
-	public static boolean useSSL() {
-		return useSSL;
 	}
 }

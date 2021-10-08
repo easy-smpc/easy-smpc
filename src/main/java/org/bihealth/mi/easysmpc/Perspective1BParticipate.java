@@ -76,14 +76,6 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     }    
     
     /**
-     * Reacts on all changes in any components
-     */
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        this.buttonSave.setEnabled(this.areValuesValid());
-    }
-
-    /**
      * Loads and sets bin names and data from a file
      */
     private void actionLoadFromFile() {
@@ -246,5 +238,13 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();
         getPanel().repaint();        
+    }
+
+    /**
+     * Reacts on all changes in any components
+     */
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        this.buttonSave.setEnabled(this.areValuesValid());
     }
 }

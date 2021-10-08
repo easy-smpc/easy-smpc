@@ -23,35 +23,6 @@ import java.util.List;
  */
 public abstract class Combinator {
     
-    /** Possible participants */
-    private final List<Integer> participants;
-    /** Possible bins */
-    private final List<Integer> bins;
-    /** Possible mailboxCheckInterval */
-    private final List<Integer> mailboxCheckInterval;
-    
-   
-    /**
-     * @param participants
-     * @param bins
-     * @param mailboxCheckInterval
-     */
-    public Combinator(List<Integer> participants,
-                            List<Integer> bins,
-                            List<Integer> mailboxCheckInterval) {
-        // Store
-        this.participants = participants;
-        this.bins = bins;
-        this.mailboxCheckInterval = mailboxCheckInterval;
-    }
-    
-    /**
-     * Get a new combination
-     * 
-     * @return
-     */
-    public abstract Combination nextCombination();
-    
     /**
      * A combination of possible parameters 
      * @author Felix Wirth
@@ -66,10 +37,18 @@ public abstract class Combinator {
         private final int mailboxCheckInterval;
 
         /**
-         * @return participants
+         * Creates a new instance
+         * 
+         * @param participants
+         * @param bins
+         * @param mailboxCheckInterval
          */
-        protected int getParticipants() {
-            return participants;
+        public Combination(int participants,
+                           int bins,
+                           int mailboxCheckInterval) {
+            this.participants = participants;
+            this.bins = bins;
+            this.mailboxCheckInterval = mailboxCheckInterval;
         }
 
         /**
@@ -87,21 +66,49 @@ public abstract class Combinator {
         }
 
         /**
-         * Creates a new instance
-         * 
-         * @param participants
-         * @param bins
-         * @param mailboxCheckInterval
+         * @return participants
          */
-        public Combination(int participants,
-                           int bins,
-                           int mailboxCheckInterval) {
-            this.participants = participants;
-            this.bins = bins;
-            this.mailboxCheckInterval = mailboxCheckInterval;
+        protected int getParticipants() {
+            return participants;
         }
     }
+    /** Possible participants */
+    private final List<Integer> participants;
+    /** Possible bins */
+    private final List<Integer> bins;
     
+   
+    /** Possible mailboxCheckInterval */
+    private final List<Integer> mailboxCheckInterval;
+    
+    /**
+     * @param participants
+     * @param bins
+     * @param mailboxCheckInterval
+     */
+    public Combinator(List<Integer> participants,
+                            List<Integer> bins,
+                            List<Integer> mailboxCheckInterval) {
+        // Store
+        this.participants = participants;
+        this.bins = bins;
+        this.mailboxCheckInterval = mailboxCheckInterval;
+    }
+    
+    /**
+     * @return the bins
+     */
+    protected List<Integer> getBins() {
+        return bins;
+    }
+    
+    /**
+     * @return the mailboxCheckInterval
+     */
+    protected List<Integer> getMailboxCheckInterval() {
+        return mailboxCheckInterval;
+    }
+
     /**
      * @return the participants
      */
@@ -110,16 +117,9 @@ public abstract class Combinator {
     }
 
     /**
-     * @return the bins
+     * Get a new combination
+     * 
+     * @return
      */
-    protected List<Integer> getBins() {
-        return bins;
-    }
-
-    /**
-     * @return the mailboxCheckInterval
-     */
-    protected List<Integer> getMailboxCheckInterval() {
-        return mailboxCheckInterval;
-    }
+    public abstract Combination nextCombination();
 }

@@ -33,35 +33,80 @@ import de.tu_darmstadt.cbs.emailsmpc.Study;
  *
  */
 public class RecordTimeDifferences {
+    /**
+     * Class for pairs
+     * 
+     * @author Felix Wirth
+     *
+     */
+    private static class Pair<K,V> {
+        /**First value */
+        private K firstValue;
+        /** Second value */
+        private V secondValue;
+        
+        /**
+         * Creates a new instance
+         * 
+         * @param firstValue
+         */
+        Pair(K firstValue) {
+            this.firstValue = firstValue;
+        }
+
+        /**
+         * @return the firstValue
+         */
+        public K getFirstValue() {
+            return firstValue;
+        }
+
+        /**
+         * @return the secondValue
+         */
+        public V getSecondValue() {
+            return secondValue;
+        }
+
+        /**
+         * @param secondValue the secondValue to set
+         */
+        public void setSecondValue(V secondValue) {
+            this.secondValue = secondValue;
+        }     
+    }
     /** Logger */
     private static final Logger  logger = LogManager.getLogger(RecordTimeDifferences.class);
     /** Stores measurements */
     private static final Map<String, RecordTimeDifferences> timeDifferencesMap = new HashMap<>();
-    /** Measurements */
-    private final List<Pair<Long, Long>> measurements;
-    /** Mailbox check interval */
-    private int mailBoxCheckInterval;
-    /** Model */
-    private Study model;
-    /** Tracker*/
-    private PerformanceTracker tracker;
-
-    
     /**
-     * Creates a new instance
+     * Records the start of a user's participation
      * 
-     * @param model
-     * @param mailBoxCheckInterval
+     * @param studyUID
+     * @param participantId
      * @param startTime
-     * @param performanceTracker 
      */
-    private RecordTimeDifferences(Study model, int mailBoxCheckInterval, long startTime, PerformanceTracker performanceTracker) {
-        this.mailBoxCheckInterval = mailBoxCheckInterval;
-        this.model = model;
-        this.measurements = createEmptyList(model.getNumParticipants());
-        this.tracker = performanceTracker;
+    public static void addStartValue(String studyUID, int participantId, long startTime) {
+        timeDifferencesMap.get(studyUID).measurements.set(participantId, new Pair<Long, Long>(startTime));
     }
-    
+    /**
+     * Calculates a mean
+     * 
+     * @param timeDifferences
+     * @return
+     */
+    private static long calculateMean(Long[] timeDifferences) {
+        // Init
+        long sum = 0;
+        
+        // Sum
+        for(long timeDifference : timeDifferences) {
+            sum = sum + timeDifference;
+        }
+        
+        // Divide and return
+        return sum / timeDifferences.length;
+    }
     /**
      * Creates a list with entries are all null
      * 
@@ -78,36 +123,8 @@ public class RecordTimeDifferences {
         // Return
         return result;
     }
-    
-    /**
-     * Add a new record with a start time
-     * 
-     * @param studyUID
-     * @param numberParticipants
-     * @param numberBins
-     * @param startTime
-     * @param performanceTracker 
-     */
-    public static void init(Study model, int mailBoxCheckInterval, long startTime, PerformanceTracker performanceTracker) {        
-        // Create a new entry in measurements
-        timeDifferencesMap.put(model.getStudyUID(), new RecordTimeDifferences(model, mailBoxCheckInterval, startTime, performanceTracker));
-        
-        // Add and log the starting value 
-        addStartValue(model.getStudyUID(), model.getOwnId(), startTime);       
-        logger.debug("Started", new Date(), model.getStudyUID(), "started", model.getNumParticipants(), "participants", model.getBins().length, "bins", mailBoxCheckInterval, "mailbox check interval"); 
-    }
-     
-    /**
-     * Records the start of a user's participation
-     * 
-     * @param studyUID
-     * @param participantId
-     * @param startTime
-     */
-    public static void addStartValue(String studyUID, int participantId, long startTime) {
-        timeDifferencesMap.get(studyUID).measurements.set(participantId, new Pair<Long, Long>(startTime));
-    }
 
+    
     /**
      * Add finished time
      * If all values are finished calculates final results
@@ -181,7 +198,25 @@ public class RecordTimeDifferences {
         // Remove from map
         timeDifferencesMap.remove(studyUID);
     }
-
+    
+    /**
+     * Add a new record with a start time
+     * 
+     * @param studyUID
+     * @param numberParticipants
+     * @param numberBins
+     * @param startTime
+     * @param performanceTracker 
+     */
+    public static void init(Study model, int mailBoxCheckInterval, long startTime, PerformanceTracker performanceTracker) {        
+        // Create a new entry in measurements
+        timeDifferencesMap.put(model.getStudyUID(), new RecordTimeDifferences(model, mailBoxCheckInterval, startTime, performanceTracker));
+        
+        // Add and log the starting value 
+        addStartValue(model.getStudyUID(), model.getOwnId(), startTime);       
+        logger.debug("Started", new Date(), model.getStudyUID(), "started", model.getNumParticipants(), "participants", model.getBins().length, "bins", mailBoxCheckInterval, "mailbox check interval"); 
+    }
+    
     /**
      * Checks if all values for start and finish are set
      * 
@@ -199,66 +234,31 @@ public class RecordTimeDifferences {
         // Return
         return true;
     }
+     
+    /** Measurements */
+    private final List<Pair<Long, Long>> measurements;
 
-    /**
-     * Calculates a mean
-     * 
-     * @param timeDifferences
-     * @return
-     */
-    private static long calculateMean(Long[] timeDifferences) {
-        // Init
-        long sum = 0;
-        
-        // Sum
-        for(long timeDifference : timeDifferences) {
-            sum = sum + timeDifference;
-        }
-        
-        // Divide and return
-        return sum / timeDifferences.length;
-    }
+    /** Mailbox check interval */
+    private int mailBoxCheckInterval;
+
+    /** Model */
+    private Study model;
+
+    /** Tracker*/
+    private PerformanceTracker tracker;
     
     /**
-     * Class for pairs
+     * Creates a new instance
      * 
-     * @author Felix Wirth
-     *
+     * @param model
+     * @param mailBoxCheckInterval
+     * @param startTime
+     * @param performanceTracker 
      */
-    private static class Pair<K,V> {
-        /**First value */
-        private K firstValue;
-        /** Second value */
-        private V secondValue;
-        
-        /**
-         * Creates a new instance
-         * 
-         * @param firstValue
-         */
-        Pair(K firstValue) {
-            this.firstValue = firstValue;
-        }
-
-        /**
-         * @return the secondValue
-         */
-        public V getSecondValue() {
-            return secondValue;
-        }
-
-        /**
-         * @param secondValue the secondValue to set
-         */
-        public void setSecondValue(V secondValue) {
-            this.secondValue = secondValue;
-        }
-
-        /**
-         * @return the firstValue
-         */
-        public K getFirstValue() {
-            return firstValue;
-        }     
+    private RecordTimeDifferences(Study model, int mailBoxCheckInterval, long startTime, PerformanceTracker performanceTracker) {
+        this.mailBoxCheckInterval = mailBoxCheckInterval;
+        this.model = model;
+        this.measurements = createEmptyList(model.getNumParticipants());
+        this.tracker = performanceTracker;
     }
 }

@@ -82,6 +82,29 @@ public class CreatingUser extends User {
     }
 
     /**
+     * Are all users finished?
+     * 
+     * @return
+     */
+    public boolean areAllUsersFinished() {        
+        
+        // Check for this creating users
+        if (!isProcessFinished()) {
+            return false;
+        }
+        
+        // Check for all participating users
+        for(User user : participatingUsers) {
+            if(!user.isProcessFinished()) {
+                return false;
+            }
+        }        
+        
+        // Return all
+        return true;
+    }
+
+    /**
      * Create participants
      * 
      * @param lengthBitBigInteger
@@ -104,34 +127,6 @@ public class CreatingUser extends User {
             // Create user as new thread
             participatingUsers.add(new ParticipatingUser(userData));
         }
-    }
-
-    /**
-     * Generate the involved participants
-     * 
-     * @param numberParticipants
-     * @param connectionIMAPSettings 
-     * @param stringLength length of names and e-mail address parts
-     * @return
-     */
-    private Participant[] generateParticpants(int numberParticipants, MailboxDetails mailBoxDetails, int stringLength) {
-        // Init result
-        Participant[] result = new Participant[numberParticipants];
-        
-        // Init each participant with a generated name and generated mail address
-        for(int index = 0; index < numberParticipants; index++) {
-            
-            // Generate either am email address or use an actual address 
-            String emailAddress = isSharedMailbox()
-                    ? generateRandomString(15) + "@" + generateRandomString(10) + ".org"
-                    : mailBoxDetails.getConnection(index).getEmailAddress();
-            
-            // Create participant   
-            result[index] = new Participant(generateRandomString(15), emailAddress);
-        }
-        
-        // Return
-        return result;
     }
 
 
@@ -162,25 +157,30 @@ public class CreatingUser extends User {
     }
     
     /**
-     * Are all users finished?
+     * Generate the involved participants
      * 
+     * @param numberParticipants
+     * @param connectionIMAPSettings 
+     * @param stringLength length of names and e-mail address parts
      * @return
      */
-    public boolean areAllUsersFinished() {        
+    private Participant[] generateParticpants(int numberParticipants, MailboxDetails mailBoxDetails, int stringLength) {
+        // Init result
+        Participant[] result = new Participant[numberParticipants];
         
-        // Check for this creating users
-        if (!isProcessFinished()) {
-            return false;
+        // Init each participant with a generated name and generated mail address
+        for(int index = 0; index < numberParticipants; index++) {
+            
+            // Generate either am email address or use an actual address 
+            String emailAddress = isSharedMailbox()
+                    ? generateRandomString(15) + "@" + generateRandomString(10) + ".org"
+                    : mailBoxDetails.getConnection(index).getEmailAddress();
+            
+            // Create participant   
+            result[index] = new Participant(generateRandomString(15), emailAddress);
         }
         
-        // Check for all participating users
-        for(User user : participatingUsers) {
-            if(!user.isProcessFinished()) {
-                return false;
-            }
-        }        
-        
-        // Return all
-        return true;
+        // Return
+        return result;
     }
 }

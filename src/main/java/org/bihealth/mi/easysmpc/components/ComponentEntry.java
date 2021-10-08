@@ -139,17 +139,6 @@ public abstract class ComponentEntry extends JPanel {
     }
     
     /**
-     * @param componentEntry
-     */
-    private void setBackgroundAllSubComponents(Component c) {
-        c.setBackground(new Color(223,223,223));
-        if (c instanceof Container)
-        for(Component childComponent : ((Container) c).getComponents()) {
-            setBackgroundAllSubComponents(childComponent);
-        }
-    }
-
-    /**
      * Creates a new instance
      * @param leftString
      * @param leftValue
@@ -183,6 +172,11 @@ public abstract class ComponentEntry extends JPanel {
         return this.fieldLeft.isValueValid() && this.fieldRight.isValueValid();
     }
 
+    /** Creates an additional control panel
+     * @return
+     */
+    protected abstract JPanel createAdditionalControls();
+
     /**
      * @return
      */
@@ -206,6 +200,17 @@ public abstract class ComponentEntry extends JPanel {
     }
     
     /**
+     * @param componentEntry
+     */
+    private void setBackgroundAllSubComponents(Component c) {
+        c.setBackground(new Color(223,223,223));
+        if (c instanceof Container)
+        for(Component childComponent : ((Container) c).getComponents()) {
+            setBackgroundAllSubComponents(childComponent);
+        }
+    }
+
+    /**
      * Sets a change listener
      * @param listener
      */
@@ -213,7 +218,7 @@ public abstract class ComponentEntry extends JPanel {
         this.fieldLeft.setChangeListener(listener);
         this.fieldRight.setChangeListener(listener);
     }
-
+    
     /**
      * Sets the left value
      * @return
@@ -229,9 +234,4 @@ public abstract class ComponentEntry extends JPanel {
     public void setRightValue(String text) {
         this.fieldRight.setText(text);
     }
-    
-    /** Creates an additional control panel
-     * @return
-     */
-    protected abstract JPanel createAdditionalControls();
 }

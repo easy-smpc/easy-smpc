@@ -29,41 +29,11 @@ public class PerformanceTracker implements PerformanceListener {
 	private static final AtomicLong totalSizeMessagesSent     = new AtomicLong();
     
     /**
-     * Resets the statistics
-     */
-    public void resetStatistics() {
-        numberMessagesReceived.set(0);
-        totalSizeMessagesReceived.set(0);
-        numberMessagesSent.set(0);
-        totalSizeMessagesSent.set(0);
-    }
-
-	@Override
-	public void messageReceived(long size) {
-		numberMessagesReceived.incrementAndGet();
-		totalSizeMessagesReceived.addAndGet(size);
-	}
-
-	@Override
-	public void messageSent(long size) {
-		numberMessagesSent.incrementAndGet();
-		totalSizeMessagesSent.addAndGet(size);
-	}
-
-	/**
 	 * Returns indicators
 	 * @return
 	 */
 	public long getNumberMessagesReceived() {
 		return numberMessagesReceived.longValue();
-	}
-
-	/**
-	 * Returns indicators
-	 * @return
-	 */
-	public long getTotalSizeMessagesReceived() {
-		return totalSizeMessagesReceived.longValue();
 	}
 
 	/**
@@ -78,7 +48,37 @@ public class PerformanceTracker implements PerformanceListener {
 	 * Returns indicators
 	 * @return
 	 */
+	public long getTotalSizeMessagesReceived() {
+		return totalSizeMessagesReceived.longValue();
+	}
+
+	/**
+	 * Returns indicators
+	 * @return
+	 */
 	public long getTotalsizeMessagesSent() {
 		return totalSizeMessagesSent.longValue();
 	}
+
+	@Override
+	public void messageReceived(long size) {
+		numberMessagesReceived.incrementAndGet();
+		totalSizeMessagesReceived.addAndGet(size);
+	}
+
+	@Override
+	public void messageSent(long size) {
+		numberMessagesSent.incrementAndGet();
+		totalSizeMessagesSent.addAndGet(size);
+	}
+
+	/**
+     * Resets the statistics
+     */
+    public void resetStatistics() {
+        numberMessagesReceived.set(0);
+        totalSizeMessagesReceived.set(0);
+        numberMessagesSent.set(0);
+        totalSizeMessagesSent.set(0);
+    }
 }

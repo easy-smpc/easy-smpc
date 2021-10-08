@@ -40,14 +40,14 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  *
  */
 public abstract class User implements MessageListener {
+    /** Logger */
+    private static Logger logger;
     /** The length of a generated string */
     public final int FIXED_LENGTH_STRING = 10;
     /** The length of a generated big integer */
     public final int FIXED_LENGTH_BIT_BIGINTEGER = 31;
     /** Round for initial e-mails */
-    public final String ROUND_0 = "_round0";
-    /** Logger */
-    private static Logger logger;       
+    public final String ROUND_0 = "_round0";       
     /** The study model */
     private Study model = new Study();
     /** The random object */
@@ -69,6 +69,117 @@ public abstract class User implements MessageListener {
         logger = LogManager.getLogger(User.class);        
      }
     
+    /**
+     * Are shares complete to proceed?
+     * 
+     * @return
+     */
+    private boolean areSharesComplete() {
+        for (Bin b : this.model.getBins()) {
+            if (!b.isComplete()) return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Generates a random big integer
+     * 
+     * @param bit length of big integer
+     * @return
+     * @throws IllegalArgumentException
+     */
+    protected BigInteger generateRandomBigInteger(int bitLength) throws IllegalArgumentException {
+        // Check
+        if (bitLength < 2) throw new IllegalArgumentException("Bitlength must be larger than 2");
+        
+        // Random integer
+        BigInteger value = new BigInteger(bitLength - 1, random);
+        
+        // Swap sign? 
+        byte[] randomByte = new byte[1];
+        random.nextBytes(randomByte);
+        int signum = Byte.valueOf(randomByte[0]).intValue() & 0x01;
+        if (signum == 1) value = value.negate();
+        
+        // Return
+        return value;
+      }
+
+
+    /**
+     * Generates a string with random letters
+     * 
+     * @param string length
+     * @return generated string
+     */
+    protected String generateRandomString(int stringLength) {
+        
+        // Generates and returns a letter  between "a" (97) and "z" (122)        
+        return  new Random().ints(97, 122 + 1)
+                .limit(stringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+    }
+
+    /**
+     * @return the mailBoxCheckInterval
+     */
+    public int getMailboxCheckInterval() {
+        return mailBoxCheckInterval;
+    }
+    
+    /**
+     * Gets the model
+     * 
+     * @return the model
+     */
+    public Study getModel() {
+        return model;
+    }
+    
+    /**
+	   * Check whether message is valid
+	   * 
+	   * @param text
+	   * @return
+	   */
+	    public boolean isMessageShareResultValid(String text) {
+	        // Check not null or empty
+	        if (model == null || text == null || text.trim().isEmpty()) { return false; }
+	        
+	        // Check message
+	        try {
+	            return model.isMessageShareResultValid(Message.deserializeMessage(text));
+	        } catch (Exception e) {
+	            return false;
+	        }
+	    }
+    
+    /**
+     * Is the process finished?
+     * 
+     * @return
+     */
+    public boolean isProcessFinished() {
+        return getModel().getState() == StudyState.FINISHED;
+    }
+    
+    /**
+     * @return is a shared mailbox used?
+     */
+    public boolean isSharedMailbox() {
+        return isSharedMailbox;
+    }
+  
+  /**
+ * Is study state none?
+ * 
+ * @return
+ */
+public boolean isStudyStateNone() {
+    return (getModel() == null || getModel().getState() == null || getModel().getState() == StudyState.NONE);
+}
+  
     /**
      * Proceeds the SMPC steps which are the same for participating and creating user
      */
@@ -99,6 +210,21 @@ public abstract class User implements MessageListener {
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
             logger.error("Unable to process common process steps logged", new Date(), "Unable to process common process steps", ExceptionUtils.getStackTrace(e));
             throw new IllegalStateException("Unable to process common process steps", e);
+        }
+    }
+
+    @Override
+    public void receive(org.bihealth.mi.easybus.Message message) {
+        String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
+        
+        // Check if valid
+        if (isMessageShareResultValid(messageStripped)) {
+            try {
+                // Set message
+                model.setShareFromMessage(Message.deserializeMessage(messageStripped));
+            } catch (IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException | IOException e) {
+                logger.error("Unable to digest message logged", new Date(), "Unable to digest message", ExceptionUtils.getStackTrace(e));
+            }
         }
     }
     
@@ -135,8 +261,7 @@ public abstract class User implements MessageListener {
         // Stop bus
         getModel().stopBus();        
     }
-
-
+    
     /** 
      * Sends a message by means of e-mail bus
      * 
@@ -167,15 +292,6 @@ public abstract class User implements MessageListener {
             }
         }
     }
-
-    /**
-     * Gets the model
-     * 
-     * @return the model
-     */
-    public Study getModel() {
-        return model;
-    }
     
     /**
      * Sets the model
@@ -184,121 +300,5 @@ public abstract class User implements MessageListener {
      */
     public void setModel(Study model) {
         this.model = model;
-    }
-    
-    /**
-     * Generates a string with random letters
-     * 
-     * @param string length
-     * @return generated string
-     */
-    protected String generateRandomString(int stringLength) {
-        
-        // Generates and returns a letter  between "a" (97) and "z" (122)        
-        return  new Random().ints(97, 122 + 1)
-                .limit(stringLength)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
-    }
-    
-    /**
-     * Generates a random big integer
-     * 
-     * @param bit length of big integer
-     * @return
-     * @throws IllegalArgumentException
-     */
-    protected BigInteger generateRandomBigInteger(int bitLength) throws IllegalArgumentException {
-        // Check
-        if (bitLength < 2) throw new IllegalArgumentException("Bitlength must be larger than 2");
-        
-        // Random integer
-        BigInteger value = new BigInteger(bitLength - 1, random);
-        
-        // Swap sign? 
-        byte[] randomByte = new byte[1];
-        random.nextBytes(randomByte);
-        int signum = Byte.valueOf(randomByte[0]).intValue() & 0x01;
-        if (signum == 1) value = value.negate();
-        
-        // Return
-        return value;
-      }
-    
-    @Override
-    public void receive(org.bihealth.mi.easybus.Message message) {
-        String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
-        
-        // Check if valid
-        if (isMessageShareResultValid(messageStripped)) {
-            try {
-                // Set message
-                model.setShareFromMessage(Message.deserializeMessage(messageStripped));
-            } catch (IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException | IOException e) {
-                logger.error("Unable to digest message logged", new Date(), "Unable to digest message", ExceptionUtils.getStackTrace(e));
-            }
-        }
-    }
-  
-  /**
-   * Check whether message is valid
-   * 
-   * @param text
-   * @return
-   */
-    public boolean isMessageShareResultValid(String text) {
-        // Check not null or empty
-        if (model == null || text == null || text.trim().isEmpty()) { return false; }
-        
-        // Check message
-        try {
-            return model.isMessageShareResultValid(Message.deserializeMessage(text));
-        } catch (Exception e) {
-            return false;
-        }
-    }
-  
-    /**
-     * Are shares complete to proceed?
-     * 
-     * @return
-     */
-    private boolean areSharesComplete() {
-        for (Bin b : this.model.getBins()) {
-            if (!b.isComplete()) return false;
-        }
-        return true;
-    }
-
-    /**
-     * @return the mailBoxCheckInterval
-     */
-    public int getMailboxCheckInterval() {
-        return mailBoxCheckInterval;
-    }
-    
-    /**
-     * @return is a shared mailbox used?
-     */
-    public boolean isSharedMailbox() {
-        return isSharedMailbox;
-    }
-    
-    /**
-     * Is the process finished?
-     * 
-     * @return
-     */
-    public boolean isProcessFinished() {
-        return getModel().getState() == StudyState.FINISHED;
-    }
-    
-    /**
-     * Is study state none?
-     * 
-     * @return
-     */
-    public boolean isStudyStateNone() {
-        return (getModel() == null || getModel().getState() == null || getModel().getState() == StudyState.NONE);
     }    
 }

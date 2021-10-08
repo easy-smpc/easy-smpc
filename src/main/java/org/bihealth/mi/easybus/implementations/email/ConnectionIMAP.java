@@ -60,6 +60,8 @@ public class ConnectionIMAP extends ConnectionEmail {
 
     /** File name of the attached message */
     private static final String FILENAME_MESSAGE = "message";
+    /** Logger */
+    private static final Logger logger = LogManager.getLogger(ConnectionIMAP.class);
     /** Properties */
     private final Properties    propertiesReceiving;
     /** Properties */
@@ -76,8 +78,6 @@ public class ConnectionIMAP extends ConnectionEmail {
     private String              password;
     /** Performance listener*/
 	private PerformanceListener listener;
-    /** Logger */
-    private static final Logger logger = LogManager.getLogger(ConnectionIMAP.class);
    
     /**
      * Create a new instance
@@ -159,20 +159,6 @@ public class ConnectionIMAP extends ConnectionEmail {
         return isReceivingConnected();
     }
 
-    /**
-     * Transforms an object into a byte stream array
-     * 
-     * @param object
-     * @return byte stream array
-     */
-    private byte[] getByteArrayOutputStream(Object object) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream ous = new ObjectOutputStream(new GZIPOutputStream(bos));
-        ous.writeObject(object);
-        ous.close();
-        return bos.toByteArray();
-    }
-
     @Override
     protected void close() {
         try {
@@ -188,7 +174,82 @@ public class ConnectionIMAP extends ConnectionEmail {
             logger.debug("Closing connection failed logged", new Date(), "Closing connection failed ", ExceptionUtils.getStackTrace(e));
         }
     }
+
+    /**
+     * Transforms an object into a byte stream array
+     * 
+     * @param object
+     * @return byte stream array
+     */
+    private byte[] getByteArrayOutputStream(Object object) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream ous = new ObjectOutputStream(new GZIPOutputStream(bos));
+        ous.writeObject(object);
+        ous.close();
+        return bos.toByteArray();
+    }
     
+    @Override
+    protected synchronized boolean isReceivingConnected() {
+        try {
+
+            // Make sure we are ready to go
+            Folder folder = null;                      
+            if (sessionReceiving == null) {
+                sessionReceiving = Session.getInstance(propertiesReceiving, null);
+            }
+            
+            // Create store
+            Store store = sessionReceiving.getStore();
+
+            // Connect store
+            store.connect(getEmailAddress(), password);
+
+            // Create new folder for every call to get latest state
+            folder = store.getFolder("INBOX");
+            if (!folder.exists()) {
+                folder.close(false);
+                store.close();
+                return false;
+            }
+
+            // Open folder
+            folder.open(Folder.READ_WRITE);
+
+            // Close
+            folder.close(false);
+            store.close();
+
+            // Done
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Is sending connected?
+     * @return
+     */
+    protected synchronized boolean isSendingConnected() {
+        try {
+            // TODO Replace with an actual check
+            // Check sending e-mails
+            Session.getInstance(propertiesSending, new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(getEmailAddress(), password);
+                }
+            });
+
+            // Done
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     @Override
     protected List<ConnectionEmailMessage> list(MessageFilter filter) throws BusException, InterruptedException {
         
@@ -253,7 +314,7 @@ public class ConnectionIMAP extends ConnectionEmail {
             return result;
         }
     }
-
+    
     @Override
     protected void send(String recipient, String subject, String body, Object attachment) throws BusException {
 
@@ -306,67 +367,6 @@ public class ConnectionIMAP extends ConnectionEmail {
             } catch (Exception e) {
                 throw new BusException("Unable to send message", e);
             }
-        }
-    }
-
-    @Override
-    protected synchronized boolean isReceivingConnected() {
-        try {
-
-            // Make sure we are ready to go
-            Folder folder = null;                      
-            if (sessionReceiving == null) {
-                sessionReceiving = Session.getInstance(propertiesReceiving, null);
-            }
-            
-            // Create store
-            Store store = sessionReceiving.getStore();
-
-            // Connect store
-            store.connect(getEmailAddress(), password);
-
-            // Create new folder for every call to get latest state
-            folder = store.getFolder("INBOX");
-            if (!folder.exists()) {
-                folder.close(false);
-                store.close();
-                return false;
-            }
-
-            // Open folder
-            folder.open(Folder.READ_WRITE);
-
-            // Close
-            folder.close(false);
-            store.close();
-
-            // Done
-            return true;
-
-        } catch (Exception e) {
-            return false;
-        }
-    }
-    
-    /**
-     * Is sending connected?
-     * @return
-     */
-    protected synchronized boolean isSendingConnected() {
-        try {
-            // TODO Replace with an actual check
-            // Check sending e-mails
-            Session.getInstance(propertiesSending, new Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(getEmailAddress(), password);
-                }
-            });
-
-            // Done
-            return true;
-
-        } catch (Exception e) {
-            return false;
         }
     }
 }

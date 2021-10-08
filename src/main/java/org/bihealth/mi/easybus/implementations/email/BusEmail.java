@@ -33,9 +33,6 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Fabian Prasser
  */
 public class BusEmail extends Bus {
-    /** Logger */
-    private static final Logger logger = LogManager.getLogger(BusEmail.class);
-
     /**
      * Internal message used by email-based implementations
      * 
@@ -74,6 +71,9 @@ public class BusEmail extends Bus {
          * @throws BusException */
         protected abstract void expunge() throws BusException;        
     }
+
+    /** Logger */
+    private static final Logger logger = LogManager.getLogger(BusEmail.class);
 
     /** Connection */
     private ConnectionEmail connection;
@@ -130,63 +130,40 @@ public class BusEmail extends Bus {
         return this.thread != null && this.thread.isAlive();
     }
 
-    @Override
-    public void send(Message message, Scope scope, Participant participant, Participant sender) throws BusException {
-        // Init
-        boolean sent = false;
-        int tryCounter = 1;
+    /**
+     * Is there an working connection to receive?
+     * 
+     * @return
+     */
+    public boolean isReceivingConnected() {
+        // Check if connected
+        if(this.connection != null) {
+            return this.connection.isReceivingConnected();
+        }
         
-        // Try to send e-mail
-        while (!sent) {
-            try {
-                this.connection.send(message, scope, participant, sender);
-                sent = true;
-            } catch (BusException e) {
-
-                // Throw exception after threshold
-                if (tryCounter == Resources.MAX_TRY_SEND_MAIL) {
-                    logger.error("Unable to send e-mail logged", new Date(), "Unable to send e-mail", ExceptionUtils.getStackTrace(e));
-                    throw new RuntimeException("Unable to send e-mail", e);
-                }
-                
-                // Add counter
-                tryCounter++;
-                
-                // Sleep
-                try {
-                    Thread.sleep(Resources.WAIT_TRY_SEND_MAIL);
-                } catch (InterruptedException e1) {
-                    // Ignore
-                }
-            }
-        }     
+        // Return false
+        return false;
     }
     
-    @Override
-    public void stop() {
-        
-        // Set stop flag
-        this.stop = true;
-        
-        // If on the same thread, just return
-        if (this.thread == null || Thread.currentThread().equals(this.thread)) {
-            return;
-        
-        // If on another thread, interrupt and wait for thread to die
-        } else {
-            
-            // Stop thread
-            this.thread.interrupt();
-            
-            // Wait for thread to stop
-            while (thread != null && thread.isAlive()) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    // Ignore
-                }
+    /**
+     * Deletes all e-mails in inbox
+     * @throws BusException 
+     * @throws InterruptedException 
+     */
+    public void purgeEmails() throws BusException, InterruptedException {
+
+            // Get mails
+            BusEmail.BusEmailMessage deleted = null;
+            for (BusEmail.BusEmailMessage message : connection.receive(null)) {
+                // Delete
+                message.delete();
+                deleted = message;
             }
-        }
+            
+            // Expunge
+            if (deleted != null) {
+                deleted.expunge();
+            }
     }
     
     /**
@@ -249,19 +226,36 @@ public class BusEmail extends Bus {
         }
     }
     
-    /**
-     * Is there an working connection to receive?
-     * 
-     * @return
-     */
-    public boolean isReceivingConnected() {
-        // Check if connected
-        if(this.connection != null) {
-            return this.connection.isReceivingConnected();
-        }
+    @Override
+    public void send(Message message, Scope scope, Participant participant, Participant sender) throws BusException {
+        // Init
+        boolean sent = false;
+        int tryCounter = 1;
         
-        // Return false
-        return false;
+        // Try to send e-mail
+        while (!sent) {
+            try {
+                this.connection.send(message, scope, participant, sender);
+                sent = true;
+            } catch (BusException e) {
+
+                // Throw exception after threshold
+                if (tryCounter == Resources.MAX_TRY_SEND_MAIL) {
+                    logger.error("Unable to send e-mail logged", new Date(), "Unable to send e-mail", ExceptionUtils.getStackTrace(e));
+                    throw new RuntimeException("Unable to send e-mail", e);
+                }
+                
+                // Add counter
+                tryCounter++;
+                
+                // Sleep
+                try {
+                    Thread.sleep(Resources.WAIT_TRY_SEND_MAIL);
+                } catch (InterruptedException e1) {
+                    // Ignore
+                }
+            }
+        }     
     };
     
     
@@ -277,24 +271,30 @@ public class BusEmail extends Bus {
         this.connection.send(recipient, subject, body, null);
     }
     
-    /**
-     * Deletes all e-mails in inbox
-     * @throws BusException 
-     * @throws InterruptedException 
-     */
-    public void purgeEmails() throws BusException, InterruptedException {
-
-            // Get mails
-            BusEmail.BusEmailMessage deleted = null;
-            for (BusEmail.BusEmailMessage message : connection.receive(null)) {
-                // Delete
-                message.delete();
-                deleted = message;
-            }
+    @Override
+    public void stop() {
+        
+        // Set stop flag
+        this.stop = true;
+        
+        // If on the same thread, just return
+        if (this.thread == null || Thread.currentThread().equals(this.thread)) {
+            return;
+        
+        // If on another thread, interrupt and wait for thread to die
+        } else {
             
-            // Expunge
-            if (deleted != null) {
-                deleted.expunge();
+            // Stop thread
+            this.thread.interrupt();
+            
+            // Wait for thread to stop
+            while (thread != null && thread.isAlive()) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
             }
+        }
     }
 }

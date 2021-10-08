@@ -58,6 +58,24 @@ public class ArithmeticSharing {
     }
 
     /**
+     * Generate a signed blind
+     * @param bitlength Bitlength *including* sign bit
+     * @throws IllegalArgumentException Too small or negative bitlength
+     * @return BigInteger
+     */
+    private BigInteger getSignedBlind(int bitlength) throws IllegalArgumentException {
+      if (bitlength < 2)
+        throw new IllegalArgumentException("Bitlength must be larger than 2");
+      BigInteger value = new BigInteger(bitlength-1, randomGenerator);
+      byte[] randomByte = new byte[1];
+      randomGenerator.nextBytes(randomByte);
+      int signum = Byte.valueOf(randomByte[0]).intValue() & 0x01;
+      if (signum == 1)
+        value = value.negate();
+      return value;
+    }
+
+    /**
      * Sets the prime
      * @param prime
      */
@@ -91,23 +109,5 @@ public class ArithmeticSharing {
      */
     public ArithmeticShare[] share(int secret) {
         return share(BigInteger.valueOf(secret));
-    }
-
-    /**
-     * Generate a signed blind
-     * @param bitlength Bitlength *including* sign bit
-     * @throws IllegalArgumentException Too small or negative bitlength
-     * @return BigInteger
-     */
-    private BigInteger getSignedBlind(int bitlength) throws IllegalArgumentException {
-      if (bitlength < 2)
-        throw new IllegalArgumentException("Bitlength must be larger than 2");
-      BigInteger value = new BigInteger(bitlength-1, randomGenerator);
-      byte[] randomByte = new byte[1];
-      randomGenerator.nextBytes(randomByte);
-      int signum = Byte.valueOf(randomByte[0]).intValue() & 0x01;
-      if (signum == 1)
-        value = value.negate();
-      return value;
     }
 }

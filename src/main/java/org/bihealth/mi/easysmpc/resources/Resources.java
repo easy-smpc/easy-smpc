@@ -185,18 +185,6 @@ public class Resources {
     }
     
     /**
-     * Loading animation
-     * 
-     * @return
-     * @throws IOException
-     */
-    public static ImageIcon getLoadingAnimation() throws IOException {        
-        URL url = Resources.class.getResource("loading.gif"); //$NON-NLS-1$
-        Image image = new ImageIcon(url).getImage().getScaledInstance(SIZE_LOADING_ANIMATION, SIZE_LOADING_ANIMATION, Image.SCALE_DEFAULT);
-        return new ImageIcon(image);
-      }
-    
-    /**
      * Reads the content from the file license.txt and returns the content as string.
      * 
      * @return
@@ -227,6 +215,18 @@ public class Resources {
         }
         return content;
     }
+    
+    /**
+     * Loading animation
+     * 
+     * @return
+     * @throws IOException
+     */
+    public static ImageIcon getLoadingAnimation() throws IOException {        
+        URL url = Resources.class.getResource("loading.gif"); //$NON-NLS-1$
+        Image image = new ImageIcon(url).getImage().getScaledInstance(SIZE_LOADING_ANIMATION, SIZE_LOADING_ANIMATION, Image.SCALE_DEFAULT);
+        return new ImageIcon(image);
+      }
     
     /**
      * Menu item

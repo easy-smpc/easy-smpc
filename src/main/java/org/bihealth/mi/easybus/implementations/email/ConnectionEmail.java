@@ -106,6 +106,40 @@ public abstract class ConnectionEmail {
             }
         }
     
+        /** 
+         * Deletes the message on the server
+         */
+        protected void delete() {
+            try {
+                message.setFlag(Flag.DELETED, true);
+            } catch (MessagingException e) {
+                logger.debug("Delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
+                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+            }
+        }
+        
+        /** 
+         * Expunges all deleted messages on the server
+         */
+        protected void expunge() {
+    
+            try {
+                if (folder != null && folder.isOpen()) {
+                    folder.close(true);
+                }
+            } catch (MessagingException e) {
+                logger.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
+                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+            }
+        }    
+        /**
+         * Returns the attachment
+         * @return the attachment
+         */
+        protected Object getAttachment() {
+            return attachment;
+        }
+    
         /**
          * Create object from byte stream
          * 
@@ -121,40 +155,6 @@ public abstract class ConnectionEmail {
             Object result = ois.readObject();
             ois.close();
             return result;
-        }
-        
-        /** 
-         * Deletes the message on the server
-         */
-        protected void delete() {
-            try {
-                message.setFlag(Flag.DELETED, true);
-            } catch (MessagingException e) {
-                logger.debug("Delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
-                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-            }
-        }    
-        /** 
-         * Expunges all deleted messages on the server
-         */
-        protected void expunge() {
-    
-            try {
-                if (folder != null && folder.isOpen()) {
-                    folder.close(true);
-                }
-            } catch (MessagingException e) {
-                logger.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
-                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-            }
-        }
-    
-        /**
-         * Returns the attachment
-         * @return the attachment
-         */
-        protected Object getAttachment() {
-            return attachment;
         }
     
         /**
@@ -187,42 +187,19 @@ public abstract class ConnectionEmail {
     /** Logger */
     private static final Logger logger = LogManager.getLogger(ConnectionEmail.class);
 
-	/** Use several or exactly one mail box for the bus */
-	private boolean sharedMailbox;
-
-	/** Mail address of the user */
-	private String emailAddress;
-
-	/** Performance listener */
-	private PerformanceListener listener;
-
-    /**
-     * Creates a new instance
-     * @param sharedMailBox
-     * @param emailAddress
-     * @throws BusException
+	/**
+     * @param scope
+     * @param receiver
+     * @param sender
+     * @return
      */
-    protected ConnectionEmail(boolean sharedMailBox, String emailAddress) {
-    	this(sharedMailBox, emailAddress, null);
+    public static String createSubject(Scope scope, Participant receiver, Participant sender) {
+        return EMAIL_SUBJECT_PREFIX + SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + " " + 
+                PARTICIPANT_NAME_START_TAG + receiver.getName() + PARTICIPANT_NAME_END_TAG + " " + 
+                PARTICIPANT_EMAIL_START_TAG + receiver.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG + " " +
+                "SENDER_START" + sender.getName() + "SENDER_END";
     }
-    
-    /**
-     * Creates a new instance
-     * @param sharedMailBox
-     * @param emailAddress
-     * @param listener
-     * @throws BusException
-     */
-    protected ConnectionEmail(boolean sharedMailBox, String emailAddress, PerformanceListener listener) {
-        // Check
-        if (emailAddress == null) {
-            throw new NullPointerException("Email address must not be null");
-        }
-        this.sharedMailbox = sharedMailBox;
-        this.emailAddress = emailAddress;
-        this.listener = listener;
-    }
-    
+
 	/**
      * Create participant from body
      * 
@@ -252,8 +229,8 @@ public abstract class ConnectionEmail {
             }
         }
     }
-    
-    /**
+
+	/**
      * Create scope from body
      * 
      * @param body
@@ -276,12 +253,48 @@ public abstract class ConnectionEmail {
             return new Scope(scope);
         }
     }
+
+    /** Use several or exactly one mail box for the bus */
+	private boolean sharedMailbox;
+    
+    /** Mail address of the user */
+	private String emailAddress;
+    
+	/** Performance listener */
+	private PerformanceListener listener;
+    
+    /**
+     * Creates a new instance
+     * @param sharedMailBox
+     * @param emailAddress
+     * @throws BusException
+     */
+    protected ConnectionEmail(boolean sharedMailBox, String emailAddress) {
+    	this(sharedMailBox, emailAddress, null);
+    }
+    
+    /**
+     * Creates a new instance
+     * @param sharedMailBox
+     * @param emailAddress
+     * @param listener
+     * @throws BusException
+     */
+    protected ConnectionEmail(boolean sharedMailBox, String emailAddress, PerformanceListener listener) {
+        // Check
+        if (emailAddress == null) {
+            throw new NullPointerException("Email address must not be null");
+        }
+        this.sharedMailbox = sharedMailBox;
+        this.emailAddress = emailAddress;
+        this.listener = listener;
+    }
     
     /** 
      * Close connection
      */
     protected abstract void close();
-    
+
     /**
      * Returns the associated email address
      * @return
@@ -289,6 +302,20 @@ public abstract class ConnectionEmail {
     protected String getEmailAddress() {
         return this.emailAddress;
     }
+
+    /**
+     * Is there an working connection to receive?
+     * 
+     * @return
+     */
+    protected abstract boolean isReceivingConnected();
+    
+    /**
+     * Is there an working connection to send?
+     * 
+     * @return
+     */
+    protected abstract boolean isSendingConnected();
 
     /**
      * Lists all relevant e-mails
@@ -299,7 +326,7 @@ public abstract class ConnectionEmail {
      * @throws InterruptedException 
      */
     protected abstract List<ConnectionEmailMessage> list(MessageFilter filter) throws BusException, InterruptedException;
-
+  
     /**
      * Receives a list of relevant messages
      * @param filter 
@@ -381,6 +408,7 @@ public abstract class ConnectionEmail {
         return result;
     }
     
+    
     /**
      * Send message to participant
      * @param message
@@ -405,20 +433,7 @@ public abstract class ConnectionEmail {
         // Send
         this.send(recipient, subject, body, message);
     }
-
-    /**
-     * @param scope
-     * @param receiver
-     * @param sender
-     * @return
-     */
-    public static String createSubject(Scope scope, Participant receiver, Participant sender) {
-        return EMAIL_SUBJECT_PREFIX + SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + " " + 
-                PARTICIPANT_NAME_START_TAG + receiver.getName() + PARTICIPANT_NAME_END_TAG + " " + 
-                PARTICIPANT_EMAIL_START_TAG + receiver.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG + " " +
-                "SENDER_START" + sender.getName() + "SENDER_END";
-    }
-  
+    
     /** 
      * Send email
      * @param recipient
@@ -428,19 +443,4 @@ public abstract class ConnectionEmail {
      * @throws BusException
      */
     protected abstract void send(String recipient, String subject, String body, Object attachment) throws BusException;
-    
-    
-    /**
-     * Is there an working connection to receive?
-     * 
-     * @return
-     */
-    protected abstract boolean isReceivingConnected();
-    
-    /**
-     * Is there an working connection to send?
-     * 
-     * @return
-     */
-    protected abstract boolean isSendingConnected();
 }

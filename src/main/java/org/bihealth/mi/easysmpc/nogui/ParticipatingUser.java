@@ -39,105 +39,6 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  *
  */
 public class ParticipatingUser extends User {
-    /** Stores the bit length of the big integer */
-    private int lengthBitBigInteger;
-    /** ConnectionIMAPSettings */
-    private ConnectionIMAPSettings connectionIMAPSettings;
-    /** Logger */
-    private static Logger logger = LogManager.getLogger(ParticipatingUser.class); 
-
-    /**
-     * Creates a new instance
-     * 
-     * @param studyUID
-     * @param ownParticipant
-     * @param connectionIMAPSettings
-     * @param lengthBitBigInteger
-     */
-    public ParticipatingUser(ParticipatingUserData participatingUserData) {                
-   
-        // Store
-        super(participatingUserData.mailBoxCheckInterval, participatingUserData.isSharedMailbox);
-        this.lengthBitBigInteger = participatingUserData.lengthBitBigInteger;
-        this.connectionIMAPSettings = participatingUserData.connectionIMAPSettings;
-        
-        // Init time recording
-        RecordTimeDifferences.addStartValue(participatingUserData.studyUID, participatingUserData.participantId, System.nanoTime());
-        
-        try {
-            // Register for initial e-mail
-            final BusEmail interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false),
-                                      participatingUserData.mailBoxCheckInterval);
-            interimBus.receive(new Scope(participatingUserData.studyUID + ROUND_0),
-                                        new org.bihealth.mi.easybus.Participant(participatingUserData.ownParticipant.name,
-                                                                                participatingUserData.ownParticipant.emailAddress),
-                                        new MessageListener() {
-                                            @Override
-                                            public void receive(org.bihealth.mi.easybus.Message message) {
-                                                // Stop interim bus
-                                                interimBus.stop();
-                                                
-                                                // Spawns the following steps in an own thread
-                                                Thread thread = new Thread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        receiveInitialEMail(message);
-                                                    }
-                                                });
-                                                thread.setDaemon(false);
-                                                thread.start();
-                                            }
-                                        });
-        } catch (BusException e) {
-            logger.error("Unable to register to receive initial e-mails logged", new Date(), "Unable to register to receive initial e-mails", ExceptionUtils.getStackTrace(e));
-            throw new IllegalStateException("Unable to register to receive initial e-mails", e);
-        }
-    }
-
-    private void receiveInitialEMail(org.bihealth.mi.easybus.Message message) {
-        
-        try {
-            // Get data
-            String data = Message.deserializeMessage((String) message.getMessage()).data;
-
-            // Init model
-            setModel(MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data))));
-            getModel().setConnectionIMAPSettings(this.connectionIMAPSettings);
-            
-            // Proceed to entering value
-            getModel().toEnteringValues(data);
-
-            // Set own values and proceed
-            getModel().toSendingShares(fillBins(lengthBitBigInteger));
-            
-            // Starts the common steps 
-            proceedCommonProcessSteps();
-            
-        } catch (ClassNotFoundException | IllegalArgumentException | IllegalStateException | IOException e) {
-            logger.error("Unable to execute particpating users steps logged", new Date(), "Unable to execute particpating users steps", ExceptionUtils.getStackTrace(e));
-            throw new IllegalStateException("Unable to execute particpating users steps" , e);
-        }
-        
-    }
-    /**
-     * Fills the bins with random numbers
-     * 
-     * @param lengthBitBigInteger
-     * @return
-     */
-    private BigInteger[] fillBins(int lengthBitBigInteger) {
-        // Init
-        BigInteger[] result = new BigInteger[getModel().getBins().length];
-        
-        // Set a random big integer for each
-        for (int index = 0; index < result.length; index++) {
-            result[index] = generateRandomBigInteger(lengthBitBigInteger);
-        }
-        
-        // Return
-        return result;
-    }
-    
     /**
      * Class containing data to create a participant
      * 
@@ -190,5 +91,104 @@ public class ParticipatingUser extends User {
             this.mailBoxCheckInterval = mailBoxCheckInterval;
             this.isSharedMailbox = isSharedMailbox;
         }
+    }
+    /** Logger */
+    private static Logger logger = LogManager.getLogger(ParticipatingUser.class);
+    /** Stores the bit length of the big integer */
+    private int lengthBitBigInteger; 
+
+    /** ConnectionIMAPSettings */
+    private ConnectionIMAPSettings connectionIMAPSettings;
+
+    /**
+     * Creates a new instance
+     * 
+     * @param studyUID
+     * @param ownParticipant
+     * @param connectionIMAPSettings
+     * @param lengthBitBigInteger
+     */
+    public ParticipatingUser(ParticipatingUserData participatingUserData) {                
+   
+        // Store
+        super(participatingUserData.mailBoxCheckInterval, participatingUserData.isSharedMailbox);
+        this.lengthBitBigInteger = participatingUserData.lengthBitBigInteger;
+        this.connectionIMAPSettings = participatingUserData.connectionIMAPSettings;
+        
+        // Init time recording
+        RecordTimeDifferences.addStartValue(participatingUserData.studyUID, participatingUserData.participantId, System.nanoTime());
+        
+        try {
+            // Register for initial e-mail
+            final BusEmail interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false),
+                                      participatingUserData.mailBoxCheckInterval);
+            interimBus.receive(new Scope(participatingUserData.studyUID + ROUND_0),
+                                        new org.bihealth.mi.easybus.Participant(participatingUserData.ownParticipant.name,
+                                                                                participatingUserData.ownParticipant.emailAddress),
+                                        new MessageListener() {
+                                            @Override
+                                            public void receive(org.bihealth.mi.easybus.Message message) {
+                                                // Stop interim bus
+                                                interimBus.stop();
+                                                
+                                                // Spawns the following steps in an own thread
+                                                Thread thread = new Thread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        receiveInitialEMail(message);
+                                                    }
+                                                });
+                                                thread.setDaemon(false);
+                                                thread.start();
+                                            }
+                                        });
+        } catch (BusException e) {
+            logger.error("Unable to register to receive initial e-mails logged", new Date(), "Unable to register to receive initial e-mails", ExceptionUtils.getStackTrace(e));
+            throw new IllegalStateException("Unable to register to receive initial e-mails", e);
+        }
+    }
+    /**
+     * Fills the bins with random numbers
+     * 
+     * @param lengthBitBigInteger
+     * @return
+     */
+    private BigInteger[] fillBins(int lengthBitBigInteger) {
+        // Init
+        BigInteger[] result = new BigInteger[getModel().getBins().length];
+        
+        // Set a random big integer for each
+        for (int index = 0; index < result.length; index++) {
+            result[index] = generateRandomBigInteger(lengthBitBigInteger);
+        }
+        
+        // Return
+        return result;
+    }
+    
+    private void receiveInitialEMail(org.bihealth.mi.easybus.Message message) {
+        
+        try {
+            // Get data
+            String data = Message.deserializeMessage((String) message.getMessage()).data;
+
+            // Init model
+            setModel(MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data))));
+            getModel().setConnectionIMAPSettings(this.connectionIMAPSettings);
+            
+            // Proceed to entering value
+            getModel().toEnteringValues(data);
+
+            // Set own values and proceed
+            getModel().toSendingShares(fillBins(lengthBitBigInteger));
+            
+            // Starts the common steps 
+            proceedCommonProcessSteps();
+            
+        } catch (ClassNotFoundException | IllegalArgumentException | IllegalStateException | IOException e) {
+            logger.error("Unable to execute particpating users steps logged", new Date(), "Unable to execute particpating users steps", ExceptionUtils.getStackTrace(e));
+            throw new IllegalStateException("Unable to execute particpating users steps" , e);
+        }
+        
     }
 }

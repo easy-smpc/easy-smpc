@@ -49,23 +49,6 @@ public class RepeatPermuteCombinator extends Combinator {
         this.repeatPerCombination = repeatPerStep;
     }
 
-    @Override
-    public Combination nextCombination() {
-        
-        // Advance indexes if necessary
-        if (this.counterRepetition >= this.repeatPerCombination) {
-            increaseIndexes();
-        }
-        
-        // Increase counter
-        ++this.counterRepetition; 
-        
-        // Return
-        return new Combination(getParticipants().get(particpantIndex),
-                               getBins().get(binIndex),
-                               getMailboxCheckInterval().get(mailboxCheckIntervalIndex));
-    }
-
     /**
      * 
      */
@@ -101,5 +84,22 @@ public class RepeatPermuteCombinator extends Combinator {
                 ++particpantIndex;
             }
         }
+    }
+
+    @Override
+    public Combination nextCombination() {
+        
+        // Advance indexes if necessary
+        if (this.counterRepetition >= this.repeatPerCombination) {
+            increaseIndexes();
+        }
+        
+        // Increase counter
+        ++this.counterRepetition; 
+        
+        // Return
+        return new Combination(getParticipants().get(particpantIndex),
+                               getBins().get(binIndex),
+                               getMailboxCheckInterval().get(mailboxCheckIntervalIndex));
     }
 }

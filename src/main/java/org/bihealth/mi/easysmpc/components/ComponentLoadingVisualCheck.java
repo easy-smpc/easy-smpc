@@ -22,10 +22,9 @@ package org.bihealth.mi.easysmpc.components;
 public interface ComponentLoadingVisualCheck {
     
     /**
-     * Should the animation be displayed?
-     * @return
+     * Which action to perform when an error occurs
      */
-    public boolean isDisplayed();
+    public void actionError();
     
     /**
      * Which action to perform in success case
@@ -33,8 +32,9 @@ public interface ComponentLoadingVisualCheck {
     public void actionSuccess();
     
     /**
-     * Which action to perform when an error occurs
+     * Should the animation be displayed?
+     * @return
      */
-    public void actionError();
+    public boolean isDisplayed();
 
 }
