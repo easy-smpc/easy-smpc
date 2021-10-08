@@ -93,23 +93,6 @@ public abstract class ConnectionEmail {
             }
         }
     
-        /**
-         * Create object from byte stream
-         * 
-         * @param inputStream
-         * @return message
-         * @throws IOException 
-         * @throws ClassNotFoundException 
-         */
-        private Object getObject(InputStream inputStream) throws IOException, ClassNotFoundException {
-            BufferedInputStream bufferedis = new BufferedInputStream(inputStream);
-            ByteArrayInputStream bis = new ByteArrayInputStream(bufferedis.readAllBytes());
-            ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(bis));
-            Object result = ois.readObject();
-            ois.close();
-            return result;
-        }
-        
         /** 
          * Deletes the message on the server
          */
@@ -134,13 +117,30 @@ public abstract class ConnectionEmail {
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
         }
-    
+        
         /**
          * Returns the attachment
          * @return the attachment
          */
         protected Object getAttachment() {
             return attachment;
+        }
+    
+        /**
+         * Create object from byte stream
+         * 
+         * @param inputStream
+         * @return message
+         * @throws IOException 
+         * @throws ClassNotFoundException 
+         */
+        private Object getObject(InputStream inputStream) throws IOException, ClassNotFoundException {
+            BufferedInputStream bufferedis = new BufferedInputStream(inputStream);
+            ByteArrayInputStream bis = new ByteArrayInputStream(bufferedis.readAllBytes());
+            ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(bis));
+            Object result = ois.readObject();
+            ois.close();
+            return result;
         }
     
         /**
@@ -171,27 +171,6 @@ public abstract class ConnectionEmail {
     /** String indicating end of participant address */
     public static final String PARTICIPANT_EMAIL_END_TAG   = "END_EMAIL_PARTICIPANT";
 
-    /** Use several or exactly one mail box for the bus */
-    private boolean sharedMailbox;
-    
-    /** Mail address of the user */
-    private String  emailAddress;
-
-    /**
-     * Creates a new instance
-     * @param sharedMailBox
-     * @param emailAddress
-     * @throws BusException
-     */
-    protected ConnectionEmail(boolean sharedMailBox, String emailAddress) {
-        // Check
-        if (emailAddress == null) {
-            throw new NullPointerException("Email address must not be null");
-        }
-        this.sharedMailbox = sharedMailBox;
-        this.emailAddress = emailAddress;
-    }
-    
     /**
      * Create participant from body
      * 
@@ -245,6 +224,27 @@ public abstract class ConnectionEmail {
             return new Scope(scope);
         }
     }
+
+    /** Use several or exactly one mail box for the bus */
+    private boolean sharedMailbox;
+    
+    /** Mail address of the user */
+    private String  emailAddress;
+    
+    /**
+     * Creates a new instance
+     * @param sharedMailBox
+     * @param emailAddress
+     * @throws BusException
+     */
+    protected ConnectionEmail(boolean sharedMailBox, String emailAddress) {
+        // Check
+        if (emailAddress == null) {
+            throw new NullPointerException("Email address must not be null");
+        }
+        this.sharedMailbox = sharedMailBox;
+        this.emailAddress = emailAddress;
+    }
     
     /** 
      * Close connection
@@ -260,6 +260,20 @@ public abstract class ConnectionEmail {
     }
 
     /**
+     * Is there an working connection to receive?
+     * 
+     * @return
+     */
+    protected abstract boolean isReceivingConnected();
+
+    /**
+     * Is there an working connection to send?
+     * 
+     * @return
+     */
+    protected abstract boolean isSendingConnected();
+    
+    /**
      * Lists all relevant e-mails
      * @param filter 
      * 
@@ -268,7 +282,7 @@ public abstract class ConnectionEmail {
      * @throws InterruptedException 
      */
     protected abstract List<ConnectionEmailMessage> list(MessageFilter filter) throws BusException, InterruptedException;
-
+  
     /**
      * Receives a list of relevant messages
      * @param filter 
@@ -348,6 +362,7 @@ public abstract class ConnectionEmail {
         return result;
     }
     
+    
     /**
      * Send message to participant
      * @param message
@@ -373,7 +388,7 @@ public abstract class ConnectionEmail {
         // Send
         this.send(recipient, subject, body, message);
     }
-  
+    
     /** 
      * Send email
      * @param recipient
@@ -383,19 +398,4 @@ public abstract class ConnectionEmail {
      * @throws BusException
      */
     protected abstract void send(String recipient, String subject, String body, Object attachment) throws BusException;
-    
-    
-    /**
-     * Is there an working connection to receive?
-     * 
-     * @return
-     */
-    protected abstract boolean isReceivingConnected();
-    
-    /**
-     * Is there an working connection to send?
-     * 
-     * @return
-     */
-    protected abstract boolean isSendingConnected();
 }

@@ -155,25 +155,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     }
 
     /**
-     * Show this dialog
-     */
-    public ConnectionIMAPSettings showDialog(){        
-        this.pack();
-        this.setLocationRelativeTo(this.parent);
-        this.setModal(true);
-        this.setVisible(true);
-        return this.result;
-    }
-
-    /**
-     * Reacts to changes
-     */
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        this.buttonOK.setEnabled(areValuesValid());
-    }
-    
-    /**
      * Action close
      */
     private void actionCheckAndProceed() {
@@ -255,5 +236,24 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             serverPortsEntry.setLeftValue(Integer.toString(connectionsSettings.getIMAPPort()));
             serverPortsEntry.setRightValue(Integer.toString(connectionsSettings.getSMTPPort()));
         }
+    }
+
+    /**
+     * Show this dialog
+     */
+    public ConnectionIMAPSettings showDialog(){        
+        this.pack();
+        this.setLocationRelativeTo(this.parent);
+        this.setModal(true);
+        this.setVisible(true);
+        return this.result;
+    }
+    
+    /**
+     * Reacts to changes
+     */
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        this.buttonOK.setEnabled(areValuesValid());
     } 
 }

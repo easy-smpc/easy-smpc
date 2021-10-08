@@ -280,254 +280,12 @@ public class App extends JFrame {
     }
 
     /**
-     * Writes data to a file
-     * 
-     * @param data
-     * @return successfully written?
-     */
-    public boolean exportData(List<List<String>> data) {
-        // Prepare
-        boolean success = false;
-        
-        // Get file
-        File file = getFile(false, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX),
-                                  new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
-        
-        if (file != null) {
-            try {
-                ExportFile.toFile(file).exportData(data);
-                success = true;
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
-            }
-        }
-        
-        // Return
-        return success;
-    }
-    
-    /**
-     * Reads data from a file
-     * @return List of data
-     */
-    public Map<String, String> getDataFromFile() {               
-        // Get file
-        File file = getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX), 
-                                  new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription97"), Resources.FILE_ENDING_EXCEL_XLS),
-                                  new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
-        
-        if (file != null) {
-            try {
-                return ImportFile.forFile(file).getData();       
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
-            }
-            catch (IllegalArgumentException e) {
-                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadDataError"), Resources.getString("App.11"),  JOptionPane.INFORMATION_MESSAGE); //$NON-NLS-1$               
-            }
-        }
-        return null;
-    }    
-    
-    /**
-     * Opens a file chooser
-     * @param load 
-     * @param fileNameExtensionFilter
-     * @return
-     */
-    public File getFile(boolean load, FileNameExtensionFilter... filters) {
-        // Prepare
-        JFileChooser fileChooser = new JFileChooser();
-        
-        // Set possible file filters
-        for (int i = 0; i < filters.length; i++) {
-            fileChooser.addChoosableFileFilter(filters[i]);
-        }
-        
-        // Set default file filters
-        if (filters.length > 0) {
-            fileChooser.setFileFilter(filters[0]);
-        }
-
-        // Open or save dialog
-        int state = load ? fileChooser.showOpenDialog(this) : fileChooser.showSaveDialog(this);
-        // Check file
-        if (state != JFileChooser.APPROVE_OPTION) {
-            return null;
-            }
-        File file = fileChooser.getSelectedFile();
-        
-        // Fix extension on save, only necessary if a specific file format has been selected
-        if (!load && fileChooser.getFileFilter() instanceof FileNameExtensionFilter) {
-            String fname = file.getAbsolutePath();
-            String extension =  ((FileNameExtensionFilter)fileChooser.getFileFilter()).getExtensions()[0];
-            if (!fname.endsWith("." + extension)) {
-                file = new File(fname + ("." + extension));
-            }
-        }
-        
-        // Check permissions
-        if ((load && !file.canRead()) || (file.exists() && !load && !file.canWrite())) {
-            JOptionPane.showMessageDialog(this, Resources.getString("App.12"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$ //$NON-NLS-2$
-            return null;
-        }
-        
-        // Should work
-        return file;
-    }
-    
-    /**
-     * Get model state
-     * 
-     * @return AppState
-     */
-    public StudyState getModelState() {
-        if (getModel() != null) {
-            return getModel().state;
-        } else {
-            return null;
-        }
-    }
-    
-    /**
-     * Check whether message is valid
-     * 
-     * @param text
-     * @return
-     */
-    public boolean isMessageShareResultValid(String text) {
-        if (model == null || text == null || text.trim().isEmpty()) {
-            return false;
-            }
-        try {
-            return model.isMessageShareResultValid(Message.deserializeMessage(text));
-        } catch (Exception e) {
-            return false;
-        }
-    }
-    
-    /**
-     * Set message share (message in perspectives receive)
-     * 
-     * @param message
-     */
-    public void setMessageShare(String message) {
-        Study snapshot = this.beginTransaction();        
-        try {
-            Message msg = Message.deserializeMessage(message);
-            if (!this.model.isCorrectRecipient(msg)) {
-                this.rollback(snapshot);
-                JOptionPane.showMessageDialog(this, Resources.getString("App.23"), Resources.getString("PerspectiveReceive.messageErrorTitle"), JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            this.model.setShareFromMessage(msg);
-        } catch (IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException | IOException e) {
-            this.rollback(snapshot);
-            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.messageError"), Resources.getString("PerspectiveReceive.messageErrorTitle"), JOptionPane.ERROR_MESSAGE);
-        }        
-    }
-
-    /**
-     * Adds a new perspective
-     * 
-     * @param perspective
-     * @throws IOException
-     */
-    private void addPerspective(Perspective perspective) throws IOException {
-
-        perspectives.add(0, perspective);
-        cards.add(perspective.getPanel(), perspective.getTitle());
-    }
-
-    /**
-     * Starts a transaction
-     * @return
-     */
-    private Study beginTransaction() {
-        return this.model != null ? (Study)this.model.clone() : null;
-    }
-
-    /**
-     * Check whether initial participation message is valid
-     * 
-     * @param text
-     * @return
-     */
-    private boolean isInitialParticipationMessageValid(String text) {
-        if (text == null) {
-            return false;
-        }
-        try {
-            String data =  Message.deserializeMessage(text).data;
-            MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data)));
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-    
-    /**
-     * Rolls back a transaction
-     * @param snapshot
-     */
-    private void rollback(Study snapshot) {
-        if (this.model != null && snapshot != null) {
-            this.model.update(snapshot);
-        }
-    }
-
-    /**
-     * Shows a perspective
-     * 
-     * @param clazz
-     */
-    private void showPerspective(Class<?> clazz) {
-        int index = 0;
-        for (Perspective p : perspectives) {
-            if (p.getClass().equals(clazz)) {
-                showPerspective(index);
-            }
-            index++;
-        }
-    }
-    
-    /**
-     * Shows the perspective with the given index
-     * 
-     * @param index
-     */
-    private void showPerspective(int index) {
-        showPerspective(perspectives.get(index));
-    }
-
-    /**
-     * Shows a certain perspective
-     * 
-     * @param perspective
-     */
-    private void showPerspective(Perspective perspective) {
-        // Uninitalizes currently displayed perspective
-        if (currentPerspective != null) {
-            currentPerspective.uninitialize();
-        }
-        
-        // Initalize and show requested perspective
-        CardLayout cl = (CardLayout) (cards.getLayout());
-        perspective.initialize();
-        cl.show(cards, perspective.getTitle());
-        currentPerspective = perspective;
-        progress.setProgress(perspective.getProgress());
-        jmiInterimSave.setEnabled(perspective.canSave());
-        progress.repaint();
-    }
-
-    /**
      * Shows the about dialog
      */
     protected void actionAbout() {
         new DialogAbout(this);
     }
-
+    
     /**
      * Change the language
      */
@@ -559,8 +317,8 @@ public class App extends JFrame {
                 Resources.setResourceBundleLocale(oldLocale);
             }
         }
-    }
-
+    }    
+    
     /**
      * Create action
      */
@@ -576,7 +334,7 @@ public class App extends JFrame {
         }
         this.showPerspective(Perspective1ACreate.class);
     }
-
+    
     /**
      * Called when action create is done
      * @param participants
@@ -611,7 +369,7 @@ public class App extends JFrame {
                                           System.exit(0);
                                       }
     }
-
+    
     /**
      * Action performed when first receiving done
      */
@@ -746,7 +504,7 @@ public class App extends JFrame {
             }
         }
     }
-
+    
     /**
      * Action called when done with participating
      * @param secret
@@ -767,7 +525,7 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("App.15"), Resources.getString("App.22"), JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     /**
      * Action to receive a message
      * 
@@ -832,7 +590,7 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     /**
      * Second sending done
      */
@@ -848,13 +606,130 @@ public class App extends JFrame {
         }
         this.showPerspective(Perspective5Receive.class);
     }
-    
+
     /**
      * Start action
      */
     protected void actionStart() {
         this.showPerspective(Perspective0Start.class);
-    }    
+    }
+    
+    /**
+     * Adds a new perspective
+     * 
+     * @param perspective
+     * @throws IOException
+     */
+    private void addPerspective(Perspective perspective) throws IOException {
+
+        perspectives.add(0, perspective);
+        cards.add(perspective.getPanel(), perspective.getTitle());
+    }
+
+    /**
+     * Starts a transaction
+     * @return
+     */
+    private Study beginTransaction() {
+        return this.model != null ? (Study)this.model.clone() : null;
+    }
+
+    /**
+     * Writes data to a file
+     * 
+     * @param data
+     * @return successfully written?
+     */
+    public boolean exportData(List<List<String>> data) {
+        // Prepare
+        boolean success = false;
+        
+        // Get file
+        File file = getFile(false, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX),
+                                  new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
+        
+        if (file != null) {
+            try {
+                ExportFile.toFile(file).exportData(data);
+                success = true;
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+            }
+        }
+        
+        // Return
+        return success;
+    }
+
+    /**
+     * Reads data from a file
+     * @return List of data
+     */
+    public Map<String, String> getDataFromFile() {               
+        // Get file
+        File file = getFile(true, new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription"), Resources.FILE_ENDING_EXCEL_XLSX), 
+                                  new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.ExcelFileDescription97"), Resources.FILE_ENDING_EXCEL_XLS),
+                                  new FileNameExtensionFilter(Resources.getString("PerspectiveCreate.CSVFileDescription"), Resources.FILE_ENDING_CSV));
+        
+        if (file != null) {
+            try {
+                return ImportFile.forFile(file).getData();       
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadFromFileError"), Resources.getString("App.11"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$               
+            }
+            catch (IllegalArgumentException e) {
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.LoadDataError"), Resources.getString("App.11"),  JOptionPane.INFORMATION_MESSAGE); //$NON-NLS-1$               
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Opens a file chooser
+     * @param load 
+     * @param fileNameExtensionFilter
+     * @return
+     */
+    public File getFile(boolean load, FileNameExtensionFilter... filters) {
+        // Prepare
+        JFileChooser fileChooser = new JFileChooser();
+        
+        // Set possible file filters
+        for (int i = 0; i < filters.length; i++) {
+            fileChooser.addChoosableFileFilter(filters[i]);
+        }
+        
+        // Set default file filters
+        if (filters.length > 0) {
+            fileChooser.setFileFilter(filters[0]);
+        }
+
+        // Open or save dialog
+        int state = load ? fileChooser.showOpenDialog(this) : fileChooser.showSaveDialog(this);
+        // Check file
+        if (state != JFileChooser.APPROVE_OPTION) {
+            return null;
+            }
+        File file = fileChooser.getSelectedFile();
+        
+        // Fix extension on save, only necessary if a specific file format has been selected
+        if (!load && fileChooser.getFileFilter() instanceof FileNameExtensionFilter) {
+            String fname = file.getAbsolutePath();
+            String extension =  ((FileNameExtensionFilter)fileChooser.getFileFilter()).getExtensions()[0];
+            if (!fname.endsWith("." + extension)) {
+                file = new File(fname + ("." + extension));
+            }
+        }
+        
+        // Check permissions
+        if ((load && !file.canRead()) || (file.exists() && !load && !file.canWrite())) {
+            JOptionPane.showMessageDialog(this, Resources.getString("App.12"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$ //$NON-NLS-2$
+            return null;
+        }
+        
+        // Should work
+        return file;
+    }
     
     /**
      * Returns the model
@@ -862,6 +737,19 @@ public class App extends JFrame {
      */
     public Study getModel() {
         return this.model;
+    }
+
+    /**
+     * Get model state
+     * 
+     * @return AppState
+     */
+    public StudyState getModelState() {
+        if (getModel() != null) {
+            return getModel().state;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -882,16 +770,49 @@ public class App extends JFrame {
     }
     
     /**
-     * Sets a status message
+     * Check whether initial participation message is valid
      * 
      * @param text
-     * @param errorMessage (text will be red)
-     * @param showLoadingAnimation 
+     * @return
      */
-    public void setStatusMessage(String text, boolean errorMessage) {
-        // Set text
-        statusMessageLabel.setText(text);
-        statusMessageLabel.setForeground(errorMessage ? Color.RED : Resources.COLOR_LIGHT_GREEN);   
+    private boolean isInitialParticipationMessageValid(String text) {
+        if (text == null) {
+            return false;
+        }
+        try {
+            String data =  Message.deserializeMessage(text).data;
+            MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data)));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Check whether message is valid
+     * 
+     * @param text
+     * @return
+     */
+    public boolean isMessageShareResultValid(String text) {
+        if (model == null || text == null || text.trim().isEmpty()) {
+            return false;
+            }
+        try {
+            return model.isMessageShareResultValid(Message.deserializeMessage(text));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Rolls back a transaction
+     * @param snapshot
+     */
+    private void rollback(Study snapshot) {
+        if (this.model != null && snapshot != null) {
+            this.model.update(snapshot);
+        }
     }
     
     /**
@@ -924,6 +845,85 @@ public class App extends JFrame {
             };
             loadingVisualWorker.execute();
         }
+    }
+    
+    /**
+     * Set message share (message in perspectives receive)
+     * 
+     * @param message
+     */
+    public void setMessageShare(String message) {
+        Study snapshot = this.beginTransaction();        
+        try {
+            Message msg = Message.deserializeMessage(message);
+            if (!this.model.isCorrectRecipient(msg)) {
+                this.rollback(snapshot);
+                JOptionPane.showMessageDialog(this, Resources.getString("App.23"), Resources.getString("PerspectiveReceive.messageErrorTitle"), JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            this.model.setShareFromMessage(msg);
+        } catch (IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException | IOException e) {
+            this.rollback(snapshot);
+            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.messageError"), Resources.getString("PerspectiveReceive.messageErrorTitle"), JOptionPane.ERROR_MESSAGE);
+        }        
+    }    
+    
+    /**
+     * Sets a status message
+     * 
+     * @param text
+     * @param errorMessage (text will be red)
+     * @param showLoadingAnimation 
+     */
+    public void setStatusMessage(String text, boolean errorMessage) {
+        // Set text
+        statusMessageLabel.setText(text);
+        statusMessageLabel.setForeground(errorMessage ? Color.RED : Resources.COLOR_LIGHT_GREEN);   
+    }
+
+    /**
+     * Shows a perspective
+     * 
+     * @param clazz
+     */
+    private void showPerspective(Class<?> clazz) {
+        int index = 0;
+        for (Perspective p : perspectives) {
+            if (p.getClass().equals(clazz)) {
+                showPerspective(index);
+            }
+            index++;
+        }
+    }
+    
+    /**
+     * Shows the perspective with the given index
+     * 
+     * @param index
+     */
+    private void showPerspective(int index) {
+        showPerspective(perspectives.get(index));
+    }
+    
+    /**
+     * Shows a certain perspective
+     * 
+     * @param perspective
+     */
+    private void showPerspective(Perspective perspective) {
+        // Uninitalizes currently displayed perspective
+        if (currentPerspective != null) {
+            currentPerspective.uninitialize();
+        }
+        
+        // Initalize and show requested perspective
+        CardLayout cl = (CardLayout) (cards.getLayout());
+        perspective.initialize();
+        cl.show(cards, perspective.getTitle());
+        currentPerspective = perspective;
+        progress.setProgress(perspective.getProgress());
+        jmiInterimSave.setEnabled(perspective.canSave());
+        progress.repaint();
     }
     
     /**

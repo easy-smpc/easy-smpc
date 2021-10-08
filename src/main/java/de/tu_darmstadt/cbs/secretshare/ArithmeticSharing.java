@@ -25,6 +25,21 @@ import java.security.SecureRandom;
 public class ArithmeticSharing {
     
     /**
+     * Convert a BigDecimal to a fixed point representation
+     * @param value Value as (unscaled) BigDecimal
+     * @param fractionalBits number of bits for fixed point scaling. Must be positive
+     * @return Fixed point represented value
+     * @throws IllegalArgumentException Negative fractionalBits
+    */
+
+    public static BigInteger convertToFixedPoint(BigDecimal value, int fractionalBits) throws IllegalArgumentException {
+      if (fractionalBits < 0)
+        throw new IllegalArgumentException("FractionalBits must be positive");
+      final BigDecimal scaleFactor = BigDecimal.valueOf(2).pow(fractionalBits);
+      return value.multiply(scaleFactor).toBigInteger();
+    }
+
+    /**
      * Reconstruct secret from shares
      * @param shares Array of all arithmetic shares
      * @return Clear text BigInteger
@@ -54,7 +69,7 @@ public class ArithmeticSharing {
       BigDecimal result = new BigDecimal(reconstruct(shares));
       return result.divide(scaleFactor);
     }
-
+    
     /**
      * Reconstruct secret from shares
      * @param shares Array of all arithmetic shares (containing decimal values)
@@ -71,7 +86,7 @@ public class ArithmeticSharing {
     
     /** Prime*/
     private BigInteger prime = BigInteger.valueOf(2).pow(127).subtract(BigInteger.ONE);
-    
+
     /** Number of parties*/
     private int numParties;
 
@@ -87,11 +102,40 @@ public class ArithmeticSharing {
     }
 
     /**
+     * Generate a signed blind
+     * @param bitlength Bitlength *including* sign bit
+     * @throws IllegalArgumentException Too small or negative bitlength
+     * @return BigInteger
+     */
+    private BigInteger getSignedBlind(int bitlength) throws IllegalArgumentException {
+      if (bitlength < 2)
+        throw new IllegalArgumentException("Bitlength must be larger than 2");
+      BigInteger value = new BigInteger(bitlength-1, randomGenerator);
+      byte[] randomByte = new byte[1];
+      randomGenerator.nextBytes(randomByte);
+      int signum = Byte.valueOf(randomByte[0]).intValue() & 0x01;
+      if (signum == 1)
+        value = value.negate();
+      return value;
+    }
+
+    /**
      * Sets the prime
      * @param prime
      */
     public void setPrime(BigInteger prime) {
         this.prime = prime;
+    }
+
+    /**
+     * Share a secret
+     * @param secret Secret BigDecimal value to share
+     * @param fractionalBits number of bits for fixed point scaling. Must be positive
+     * @return Array of arithmetic shares
+     * @throws IllegalArgumentException Negative fractionalBits
+    */
+    public ArithmeticShare[] share(BigDecimal secret, int fractionalBits) throws IllegalArgumentException {
+      return share(ArithmeticSharing.convertToFixedPoint(secret, fractionalBits));
     }
 
     /**
@@ -115,26 +159,6 @@ public class ArithmeticSharing {
 
     /**
      * Share a secret
-     * @param secret Secret integral value to share
-     * @return Array of arithmetic shares
-     */
-    public ArithmeticShare[] share(int secret) {
-        return share(BigInteger.valueOf(secret));
-    }
-
-    /**
-     * Share a secret
-     * @param secret Secret BigDecimal value to share
-     * @param fractionalBits number of bits for fixed point scaling. Must be positive
-     * @return Array of arithmetic shares
-     * @throws IllegalArgumentException Negative fractionalBits
-    */
-    public ArithmeticShare[] share(BigDecimal secret, int fractionalBits) throws IllegalArgumentException {
-      return share(ArithmeticSharing.convertToFixedPoint(secret, fractionalBits));
-    }
-
-    /**
-     * Share a secret
      * @param secret Secret double value to share
      * @param fractionalBits number of bits for fixed point scaling. Must be positive
      * @return Array of arithmetic shares
@@ -145,35 +169,11 @@ public class ArithmeticSharing {
     }
 
     /**
-     * Convert a BigDecimal to a fixed point representation
-     * @param value Value as (unscaled) BigDecimal
-     * @param fractionalBits number of bits for fixed point scaling. Must be positive
-     * @return Fixed point represented value
-     * @throws IllegalArgumentException Negative fractionalBits
-    */
-
-    public static BigInteger convertToFixedPoint(BigDecimal value, int fractionalBits) throws IllegalArgumentException {
-      if (fractionalBits < 0)
-        throw new IllegalArgumentException("FractionalBits must be positive");
-      final BigDecimal scaleFactor = BigDecimal.valueOf(2).pow(fractionalBits);
-      return value.multiply(scaleFactor).toBigInteger();
-    }
-
-    /**
-     * Generate a signed blind
-     * @param bitlength Bitlength *including* sign bit
-     * @throws IllegalArgumentException Too small or negative bitlength
-     * @return BigInteger
+     * Share a secret
+     * @param secret Secret integral value to share
+     * @return Array of arithmetic shares
      */
-    private BigInteger getSignedBlind(int bitlength) throws IllegalArgumentException {
-      if (bitlength < 2)
-        throw new IllegalArgumentException("Bitlength must be larger than 2");
-      BigInteger value = new BigInteger(bitlength-1, randomGenerator);
-      byte[] randomByte = new byte[1];
-      randomGenerator.nextBytes(randomByte);
-      int signum = Byte.valueOf(randomByte[0]).intValue() & 0x01;
-      if (signum == 1)
-        value = value.negate();
-      return value;
+    public ArithmeticShare[] share(int secret) {
+        return share(BigInteger.valueOf(secret));
     }
 }

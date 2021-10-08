@@ -31,9 +31,6 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  */
 public class ImportClipboard implements Runnable {
     
-    /** Last message which was saved */
-    String lastSavedMessage = null;
-    
     /**
      * Convenience method to remove exchange message tags
      * @param text
@@ -67,6 +64,9 @@ public class ImportClipboard implements Runnable {
         }
         return null;
     }
+    
+    /** Last message which was saved */
+    String lastSavedMessage = null;
     
     /** PerspectiveReceive */
     private Perspective3Receive parent;

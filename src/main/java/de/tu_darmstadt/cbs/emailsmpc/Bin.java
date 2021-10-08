@@ -144,6 +144,26 @@ public class Bin implements Serializable, Cloneable {
     }
 
     /**
+     * Gets the filled array indices.
+     *
+     * @param array the array
+     * @return the filled array indices
+     * @throws IllegalArgumentException the illegal argument exception
+     */
+    private int[] getFilledArrayIndices(ArithmeticShare[] array) throws IllegalArgumentException {
+        if (array == null)
+            throw new IllegalArgumentException("Not a valid array");
+        int[] result = new int[0]; // How is Data locality of lists in Java?
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] != null) {
+                result = Arrays.copyOf(result, result.length + 1);
+                result[result.length - 1] = i;
+            }
+        }
+        return result;
+    }
+
+    /**
      * Gets the filled in share indices.
      *
      * @return the filled in share indices
@@ -258,7 +278,7 @@ public class Bin implements Serializable, Cloneable {
     public boolean isInitialized() {
         return inShares != null;
     }
-
+    
     /**
      * Reconstruct bin.
      *
@@ -272,7 +292,7 @@ public class Bin implements Serializable, Cloneable {
             throw new IllegalStateException("Can not reconstruct incomplete shares");
         return ArithmeticSharing.reconstruct(inShares, fractionalBits);
     }
-    
+
     /**
      * Sets the in share.
      *
@@ -295,7 +315,6 @@ public class Bin implements Serializable, Cloneable {
         }
         inShares = shares;
     }
-
     /**
      * Share value.
      *
@@ -311,6 +330,7 @@ public class Bin implements Serializable, Cloneable {
         ArithmeticSharing as = new ArithmeticSharing(outShares.length);
         outShares = as.share(value, fractionalBits);
     }
+
     /**
      * To string.
      *
@@ -329,7 +349,7 @@ public class Bin implements Serializable, Cloneable {
         return result;
 
     }
-
+    
     /**
      * Transfer shares out in.
      *
@@ -338,25 +358,5 @@ public class Bin implements Serializable, Cloneable {
     public void transferSharesOutIn(int ownId) {
         inShares[ownId] = outShares[ownId];
         outShares[ownId] = null;
-    }
-    
-    /**
-     * Gets the filled array indices.
-     *
-     * @param array the array
-     * @return the filled array indices
-     * @throws IllegalArgumentException the illegal argument exception
-     */
-    private int[] getFilledArrayIndices(ArithmeticShare[] array) throws IllegalArgumentException {
-        if (array == null)
-            throw new IllegalArgumentException("Not a valid array");
-        int[] result = new int[0]; // How is Data locality of lists in Java?
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] != null) {
-                result = Arrays.copyOf(result, result.length + 1);
-                result[result.length - 1] = i;
-            }
-        }
-        return result;
     }
 }

@@ -43,6 +43,35 @@ public abstract class Bus {
     public abstract boolean isAlive();
     
     /**
+     * Is there a listener for the participant and scope registered
+     * 
+     * @param scope
+     * @param participant
+     * @return
+     */
+    protected synchronized boolean isParticipantScopeRegistered(Scope scope, Participant participant) {
+        // Check not null
+        if (scope == null || participant == null) {
+            return false;
+        }
+        
+        // Check if scope exists
+        Map<Participant,List<MessageListener>> subscriptionsForScope = subscriptions.get(scope);        
+        if (subscriptionsForScope == null) {
+           return false;
+        }
+        
+        // Check if participant is registered for scope
+        if (subscriptionsForScope.get(participant) == null ||
+            subscriptionsForScope.get(participant).size() == 0) {
+            return false;
+        }
+        
+        // At least one is listener is registered for scope and participant tuple
+        return true;     
+    }
+    
+    /**
      * Allows to subscribe to a scope for a participant 
      * 
      * @param scope
@@ -68,22 +97,7 @@ public abstract class Bus {
         // Add listener
         listenerForParticipant.add(messageListener);         
     }
-    
-    /**
-     * Allows to send a message to a participant
-     * 
-     * @param message
-     * @param scope
-     * @param participant
-     * @throws BusException
-     */
-    public abstract void send(Message message, Scope scope, Participant participant) throws BusException;
    
-    /**
-     * Stops all backend services that might be running
-     */
-    public abstract void stop();
-
     /**
      * Receives an external received message
      * 
@@ -114,33 +128,19 @@ public abstract class Bus {
         // Done
         return received;
     }
-    
+
     /**
-     * Is there a listener for the participant and scope registered
+     * Allows to send a message to a participant
      * 
+     * @param message
      * @param scope
      * @param participant
-     * @return
+     * @throws BusException
      */
-    protected synchronized boolean isParticipantScopeRegistered(Scope scope, Participant participant) {
-        // Check not null
-        if (scope == null || participant == null) {
-            return false;
-        }
-        
-        // Check if scope exists
-        Map<Participant,List<MessageListener>> subscriptionsForScope = subscriptions.get(scope);        
-        if (subscriptionsForScope == null) {
-           return false;
-        }
-        
-        // Check if participant is registered for scope
-        if (subscriptionsForScope.get(participant) == null ||
-            subscriptionsForScope.get(participant).size() == 0) {
-            return false;
-        }
-        
-        // At least one is listener is registered for scope and participant tuple
-        return true;     
-    }
+    public abstract void send(Message message, Scope scope, Participant participant) throws BusException;
+    
+    /**
+     * Stops all backend services that might be running
+     */
+    public abstract void stop();
 }

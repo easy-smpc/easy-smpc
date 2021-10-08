@@ -109,6 +109,16 @@ public class ConnectionIMAPSettings implements Serializable {
         }
     }
 
+    /**
+     * Check
+     * @param object
+     */
+    private void checkNonNull(Object object) {
+        if (object == null) {
+            throw new IllegalArgumentException("Parameter must not be null");
+        }
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -324,7 +334,7 @@ public class ConnectionIMAPSettings implements Serializable {
         // Done
         return this;
     }
-
+    
     /**
      * Set config parameter
      * @param smtpServer the SMTP server to set
@@ -340,15 +350,5 @@ public class ConnectionIMAPSettings implements Serializable {
 
         // Done
         return this;
-    }
-    
-    /**
-     * Check
-     * @param object
-     */
-    private void checkNonNull(Object object) {
-        if (object == null) {
-            throw new IllegalArgumentException("Parameter must not be null");
-        }
     }
 }

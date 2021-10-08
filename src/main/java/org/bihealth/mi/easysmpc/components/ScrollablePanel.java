@@ -60,36 +60,6 @@ import javax.swing.SwingConstants;
 public class ScrollablePanel extends JPanel implements Scrollable, SwingConstants {
 
     /**
-     * Increment in pixel or percentages.
-     */
-    public enum IncrementType {/** The percent. */
-                               PERCENT,
-                               /** The pixels. */
-                               PIXELS
-    }
-
-    /**
-     * Defines the scrolling behavior as described below: the ScrollableSizeHint
-     * enum for the height. The enum is used to determine the boolean value that
-     * is returned by the getScrollableTracksViewportHeight() method. The valid
-     * values are:
-     *
-     * ScrollableSizeHint.NONE - return "false", which causes the height of the
-     * panel to be used when laying out the children ScrollableSizeHint.FIT -
-     * return "true", which causes the height of the viewport to be used when
-     * laying out the children ScrollableSizeHint.STRETCH - return "true" when
-     * the viewport height is greater than the height of the panel, "false"
-     * otherwise.
-     * 
-     * The description applies respectively to width
-     */
-    public enum ScrollableSizeHint {/** The none. */
-                                    NONE,
-                                    /** The fit. */
-                                    FIT
-    }
-
-    /**
      * Helper class to hold the information required to calculate the scroll
      * amount.
      */
@@ -140,6 +110,36 @@ public class ScrollablePanel extends JPanel implements Scrollable, SwingConstant
         public String toString() {
             return "ScrollablePanel[" + type + ", " + amount + "]";
         }
+    }
+
+    /**
+     * Increment in pixel or percentages.
+     */
+    public enum IncrementType {/** The percent. */
+                               PERCENT,
+                               /** The pixels. */
+                               PIXELS
+    }
+
+    /**
+     * Defines the scrolling behavior as described below: the ScrollableSizeHint
+     * enum for the height. The enum is used to determine the boolean value that
+     * is returned by the getScrollableTracksViewportHeight() method. The valid
+     * values are:
+     *
+     * ScrollableSizeHint.NONE - return "false", which causes the height of the
+     * panel to be used when laying out the children ScrollableSizeHint.FIT -
+     * return "true", which causes the height of the viewport to be used when
+     * laying out the children ScrollableSizeHint.STRETCH - return "true" when
+     * the viewport height is greater than the height of the panel, "false"
+     * otherwise.
+     * 
+     * The description applies respectively to width
+     */
+    public enum ScrollableSizeHint {/** The none. */
+                                    NONE,
+                                    /** The fit. */
+                                    FIT
     }
 
     /** SVUID. */
@@ -226,6 +226,20 @@ public class ScrollablePanel extends JPanel implements Scrollable, SwingConstant
         default:
             throw new IllegalArgumentException("Invalid orientation: " + orientation);
         }
+    }
+
+    /**
+     * Returns the scrollable increment.
+     *
+     * @param info
+     *            the info
+     * @param distance
+     *            the distance
+     * @return the scrollable increment
+     */
+    protected int getScrollableIncrement(IncrementInfo info, int distance) {
+        if (info.getIncrement() == IncrementType.PIXELS) return info.getAmount();
+        else return distance * info.getAmount() / 100;
     }
 
     /**
@@ -317,19 +331,5 @@ public class ScrollablePanel extends JPanel implements Scrollable, SwingConstant
         default:
             throw new IllegalArgumentException("Invalid orientation: " + orientation);
         }
-    }
-
-    /**
-     * Returns the scrollable increment.
-     *
-     * @param info
-     *            the info
-     * @param distance
-     *            the distance
-     * @return the scrollable increment
-     */
-    protected int getScrollableIncrement(IncrementInfo info, int distance) {
-        if (info.getIncrement() == IncrementType.PIXELS) return info.getAmount();
-        else return distance * info.getAmount() / 100;
     }
 }

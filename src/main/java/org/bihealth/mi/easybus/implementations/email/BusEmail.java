@@ -113,36 +113,17 @@ public class BusEmail extends Bus {
         return this.thread != null && this.thread.isAlive();
     }
 
-    @Override
-    public void send(Message message, Scope scope, Participant participant) throws BusException {
-        this.connection.send(message, scope, participant);
-    }
-    
-    @Override
-    public void stop() {
-        
-        // Set stop flag
-        this.stop = true;
-        
-        // If on the same thread, just return
-        if (Thread.currentThread().equals(this.thread)) {
-            return;
-        
-        // If on another thread, interrupt and wait for thread to die
-        } else {
-            
-            // Stop thread
-            this.thread.interrupt();
-            
-            // Wait for thread to stop
-            while (thread != null && thread.isAlive()) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    // Ignore
-                }
-            }
+    /**
+     * Is there an working connection to receive?
+     * 
+     * @return
+     */
+    public boolean isReceivingConnected() {
+        if(this.connection != null) {
+            return this.connection.isReceivingConnected();
         }
+        
+        return false;
     }
     
     /**
@@ -204,19 +185,10 @@ public class BusEmail extends Bus {
         }
     }
     
-    /**
-     * Is there an working connection to receive?
-     * 
-     * @return
-     */
-    public boolean isReceivingConnected() {
-        if(this.connection != null) {
-            return this.connection.isReceivingConnected();
-        }
-        
-        return false;
-    };
-    
+    @Override
+    public void send(Message message, Scope scope, Participant participant) throws BusException {
+        this.connection.send(message, scope, participant);
+    }
     
     /**
      * Send a plain e-mail (no bus functionality)
@@ -228,5 +200,33 @@ public class BusEmail extends Bus {
      */
     public void sendPlain(String recipient, String subject, String body) throws BusException {
         this.connection.send(recipient, subject, body, null);
+    };
+    
+    
+    @Override
+    public void stop() {
+        
+        // Set stop flag
+        this.stop = true;
+        
+        // If on the same thread, just return
+        if (Thread.currentThread().equals(this.thread)) {
+            return;
+        
+        // If on another thread, interrupt and wait for thread to die
+        } else {
+            
+            // Stop thread
+            this.thread.interrupt();
+            
+            // Wait for thread to stop
+            while (thread != null && thread.isAlive()) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
+            }
+        }
     }
 }

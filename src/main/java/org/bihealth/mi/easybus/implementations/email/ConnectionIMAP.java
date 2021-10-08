@@ -138,20 +138,6 @@ public class ConnectionIMAP extends ConnectionEmail {
         return isReceivingConnected();
     }
 
-    /**
-     * Transforms an object into a byte stream array
-     * 
-     * @param object
-     * @return byte stream array
-     */
-    private byte[] getByteArrayOutputStream(Object object) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream ous = new ObjectOutputStream(new GZIPOutputStream(bos));
-        ous.writeObject(object);
-        ous.close();
-        return bos.toByteArray();
-    }
-
     @Override
     protected void close() {
         try {
@@ -166,7 +152,65 @@ public class ConnectionIMAP extends ConnectionEmail {
             // Ignore
         }
     }
+
+    /**
+     * Transforms an object into a byte stream array
+     * 
+     * @param object
+     * @return byte stream array
+     */
+    private byte[] getByteArrayOutputStream(Object object) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream ous = new ObjectOutputStream(new GZIPOutputStream(bos));
+        ous.writeObject(object);
+        ous.close();
+        return bos.toByteArray();
+    }
     
+    @Override
+    protected synchronized boolean isReceivingConnected() {
+        try {
+
+            // Prepare
+            Folder folder = null;
+            if (sessionReceiving == null) {
+                sessionReceiving = Session.getInstance(propertiesReceiving, null);
+            }
+
+            // Create store
+            Store store = sessionReceiving.getStore("imap");
+
+            // Connect store
+            store.connect(getEmailAddress(), password);
+
+            // Create folder new for every call to get latest state
+            folder = store.getFolder("INBOX");
+            if (!folder.exists()) {
+                folder.close(false);
+                store.close();
+                return false;
+            }
+
+            // Open folder
+            folder.open(Folder.READ_WRITE);
+
+            // Close
+            folder.close(false);
+            store.close();
+
+            // Done
+            return true;
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    protected synchronized boolean isSendingConnected() {
+        // TODO check sending connected
+        return true;
+    }
+
     @Override
     protected List<ConnectionEmailMessage> list(MessageFilter filter) throws BusException, InterruptedException {
         
@@ -229,7 +273,7 @@ public class ConnectionIMAP extends ConnectionEmail {
             return result;
         }
     }
-
+    
     @Override
     protected void send(String recipient, String subject, String body, Object attachment) throws BusException {
 
@@ -277,49 +321,5 @@ public class ConnectionIMAP extends ConnectionEmail {
                 throw new BusException("Unable to send message", e);
             }
         }
-    }
-
-    @Override
-    protected synchronized boolean isReceivingConnected() {
-        try {
-
-            // Prepare
-            Folder folder = null;
-            if (sessionReceiving == null) {
-                sessionReceiving = Session.getInstance(propertiesReceiving, null);
-            }
-
-            // Create store
-            Store store = sessionReceiving.getStore("imap");
-
-            // Connect store
-            store.connect(getEmailAddress(), password);
-
-            // Create folder new for every call to get latest state
-            folder = store.getFolder("INBOX");
-            if (!folder.exists()) {
-                folder.close(false);
-                store.close();
-                return false;
-            }
-
-            // Open folder
-            folder.open(Folder.READ_WRITE);
-
-            // Close
-            folder.close(false);
-            store.close();
-
-            // Done
-            return true;
-
-        } catch (Exception e) {
-            return false;
-        }
-    }
-    
-    protected synchronized boolean isSendingConnected() {
-        // TODO check sending connected
-        return true;
     }
 }
