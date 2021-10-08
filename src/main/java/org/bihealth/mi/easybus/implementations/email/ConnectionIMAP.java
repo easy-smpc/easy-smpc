@@ -23,11 +23,12 @@ import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.math3.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.MessageFilter;
+import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import jakarta.activation.DataHandler;
@@ -66,54 +67,43 @@ public class ConnectionIMAP extends ConnectionEmail {
     /** Store object to access e-mail server */
     private Store               store;
     /** Folder receiving*/
-    private Folder folder;
+    private Folder				folder;
     /** Session to send e-mails */
     private Session             sessionSending;
     /** Session to receive e-mails */
     private Session             sessionReceiving;
     /** Password of the user */
     private String              password;
+    /** Performance listener*/
+	private PerformanceListener listener;
     /** Logger */
     private static final Logger logger = LogManager.getLogger(ConnectionIMAP.class);
-    
+   
     /**
      * Create a new instance
      * 
      * @param settings of mailbox
      * @param sharedMailbox - use shared mailbox or separared mailboxes
+     * @param listener
      * @throws BusException
      */
-    public ConnectionIMAP(ConnectionIMAPSettings settings,
-                          boolean sharedMailbox) throws BusException {
-        this(settings, sharedMailbox, true, false);
-    }
+    public ConnectionIMAP(ConnectionIMAPSettings settings, boolean sharedMailbox) throws BusException {
 
-    /**
-     * Create a new instance
-     * 
-     * @param settings of mailbox
-     * @param sharedMailbox - use shared mailbox or separared mailboxes
-     * @param useSSL
-     * @param acceptSelfSignedCert - accept a self signed certificate
-     * @throws BusException
-     */
-    public ConnectionIMAP(ConnectionIMAPSettings settings,
-                          boolean sharedMailbox,
-                          boolean useSSL,
-                          boolean acceptSelfSignedCert) throws BusException {
-        
         // Super
-        super(sharedMailbox, settings.getEmailAddress());
+        super(sharedMailbox, settings.getEmailAddress(), settings.getPerformanceListener());
         
         // Check
         settings.check();
         
         // Store
         this.password = settings.getPassword();
+        this.listener = settings.getPerformanceListener();
         
         // Search for proxy
-        // TODO Reactivate proxy
-        //Pair<String, Integer> proxy = ConnectionIMAPProxy.getProxy(settings);
+        Pair<String, Integer> proxy = null;
+        if (settings.isSearchForProxy()) {
+        	proxy = ConnectionIMAPProxy.getProxy(settings);
+        }
         
         // Create properties of receiving connection
         this.propertiesReceiving = new Properties();
@@ -124,14 +114,16 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));        
         this.propertiesReceiving.put("mail.imap.partialfetch", "false");
         this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
-        this.propertiesReceiving.put("mail.imap.ssl.enable", useSSL? "true": "false");
-        if(acceptSelfSignedCert) { this.propertiesReceiving.put("mail.imap.ssl.trust", "*"); }
+        this.propertiesReceiving.put("mail.imap.ssl.enable", "true");
+        if(settings.isAcceptSelfSignedCertificates()) {
+        	this.propertiesReceiving.put("mail.imap.ssl.trust", "*");
+        }
         
         // Set proxy
-//        if (proxy != null) {
-//            this.propertiesReceiving.setProperty("mail.imap.proxy.host", proxy.getFirst());
-//            this.propertiesReceiving.setProperty("mail.imap.proxy.port", String.valueOf(proxy.getSecond()));
-//        }
+        if (proxy != null) {
+            this.propertiesReceiving.setProperty("mail.imap.proxy.host", proxy.getFirst());
+            this.propertiesReceiving.setProperty("mail.imap.proxy.port", String.valueOf(proxy.getSecond()));
+        }
         
         // Create properties of sending connection
         this.propertiesSending = new Properties();
@@ -141,15 +133,16 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
         this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
         this.propertiesSending.put("mail.smtp.auth", "true");
-        this.propertiesSending.put("mail.smtp.ssl.enable", useSSL? "true": "false");
-        if(acceptSelfSignedCert) { this.propertiesSending.put("mail.smtp.ssl.trust", "*"); }
-
+        this.propertiesSending.put("mail.smtp.ssl.enable", "true");
+        if(settings.isAcceptSelfSignedCertificates()) {
+        	this.propertiesSending.put("mail.smtp.ssl.trust", "*");
+        }
 
         // Set proxy
-//        if (proxy != null) {
-//            this.propertiesSending.setProperty("mail.smtp.proxy.host", proxy.getFirst());
-//            this.propertiesSending.setProperty("mail.smtp.proxy.port", String.valueOf(proxy.getSecond()));
-//        }
+        if (proxy != null) {
+            this.propertiesSending.setProperty("mail.smtp.proxy.host", proxy.getFirst());
+            this.propertiesSending.setProperty("mail.smtp.proxy.port", String.valueOf(proxy.getSecond()));
+        }
     }
 
     /**
@@ -290,6 +283,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 multipart.addBodyPart(mimeBodyPart);
     
                 // Add attachment
+                long attachmentSize = 0;
                 if (attachment != null) {
                     mimeBodyPart = new MimeBodyPart();
                     mimeBodyPart.setDisposition(MimeBodyPart.ATTACHMENT);
@@ -297,10 +291,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                     mimeBodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(attachmentBytes, "application/octet-stream")));
                     mimeBodyPart.setFileName(FILENAME_MESSAGE);
                     multipart.addBodyPart(mimeBodyPart);
-                    
-                    // Add statistics
-                    Bus.numberMessagesSent.incrementAndGet();
-                    Bus.totalSizeMessagesSent.addAndGet(attachmentBytes.length);
+                    attachmentSize = attachmentBytes.length;
                 }
                 
                 // Compose message
@@ -308,6 +299,9 @@ public class ConnectionIMAP extends ConnectionEmail {
     
                 // Send
                 Transport.send(email, getEmailAddress(), password);
+                if (listener != null) {
+                	listener.messageSent(attachmentSize);
+                }
                 logger.debug("Message sent logged", new Date(), "Message sent", subject);
             } catch (Exception e) {
                 throw new BusException("Unable to send message", e);

@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bihealth.mi.easybus.Bus;
 
 import de.tu_darmstadt.cbs.emailsmpc.Study;
 
@@ -44,6 +43,8 @@ public class RecordTimeDifferences {
     private int mailBoxCheckInterval;
     /** Model */
     private Study model;
+    /** Tracker*/
+    private PerformanceTracker tracker;
 
     
     /**
@@ -52,11 +53,13 @@ public class RecordTimeDifferences {
      * @param model
      * @param mailBoxCheckInterval
      * @param startTime
+     * @param performanceTracker 
      */
-    private RecordTimeDifferences(Study model, int mailBoxCheckInterval, long startTime) {
+    private RecordTimeDifferences(Study model, int mailBoxCheckInterval, long startTime, PerformanceTracker performanceTracker) {
         this.mailBoxCheckInterval = mailBoxCheckInterval;
         this.model = model;
         this.measurements = createEmptyList(model.getNumParticipants());
+        this.tracker = performanceTracker;
     }
     
     /**
@@ -83,10 +86,11 @@ public class RecordTimeDifferences {
      * @param numberParticipants
      * @param numberBins
      * @param startTime
+     * @param performanceTracker 
      */
-    public static void init(Study model, int mailBoxCheckInterval, long startTime) {        
+    public static void init(Study model, int mailBoxCheckInterval, long startTime, PerformanceTracker performanceTracker) {        
         // Create a new entry in measurements
-        timeDifferencesMap.put(model.getStudyUID(), new RecordTimeDifferences(model, mailBoxCheckInterval, startTime));
+        timeDifferencesMap.put(model.getStudyUID(), new RecordTimeDifferences(model, mailBoxCheckInterval, startTime, performanceTracker));
         
         // Add and log the starting value 
         addStartValue(model.getStudyUID(), model.getOwnId(), startTime);       
@@ -144,10 +148,10 @@ public class RecordTimeDifferences {
                                          timeDifferences[0],
                                          timeDifferences[timeDifferences.length - 1],
                                          calculateMean(timeDifferences),
-                                         Bus.numberMessagesReceived,
-                                         Bus.totalSizeMessagesReceived,
-                                         Bus.numberMessagesSent,
-                                         Bus.totalSizeMessagesSent);
+                                         timeDifferencesMap.get(studyUID).tracker.getNumberMessagesReceived(),
+                                         timeDifferencesMap.get(studyUID).tracker.getTotalSizeMessagesReceived(),
+                                         timeDifferencesMap.get(studyUID).tracker.getNumberMessagesSent(),
+                                         timeDifferencesMap.get(studyUID).tracker.getTotalsizeMessagesSent());
             PerformanceEvaluation.csvPrinter.flush();
         } catch (IOException e) {
             throw new IllegalStateException("Unable to write performance results", e);

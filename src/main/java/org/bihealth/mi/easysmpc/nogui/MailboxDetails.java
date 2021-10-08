@@ -34,15 +34,19 @@ public class MailboxDetails {
     private boolean isSharedMailbox;
     /** Template to create ConnectionIMAPSettings */
     private final ConnectionIMAPSettings connectionIMAPTemplate;
+    /** Max participants*/
     private Integer maxParticipants;
+    /** Tracker*/
+    private PerformanceTracker tracker;
 
     /**
      * Creates a new instance
-     * 
      * @param isSharedMailbox
      * @param connectionIMAPTemplate
+     * @param participants
+     * @param tracker
      */
-    public MailboxDetails(boolean isSharedMailbox, ConnectionIMAPSettings connectionIMAPTemplate, List<Integer> participants) {
+    public MailboxDetails(boolean isSharedMailbox, ConnectionIMAPSettings connectionIMAPTemplate, List<Integer> participants, PerformanceTracker tracker) {
         
         // Check index replace index is given        
         if(!isSharedMailbox && !connectionIMAPTemplate.getEmailAddress().contains(INDEX_REPLACE )) {
@@ -53,35 +57,9 @@ public class MailboxDetails {
         this.isSharedMailbox = isSharedMailbox;        
         this.connectionIMAPTemplate = connectionIMAPTemplate;
         this.maxParticipants = Collections.max(participants);
+        this.tracker = tracker;
     }
     
-    
-    /**
-     * Gets the connection for participant with given index
-     * 
-     * @param index
-     * @return
-     */
-    public ConnectionIMAPSettings getConnection(int index) {
-        // Return same connection for alle index if shared mailbox
-        if(isSharedMailbox) {
-            return new ConnectionIMAPSettings(connectionIMAPTemplate.getEmailAddress()).setPassword(connectionIMAPTemplate.getPassword())
-                                                                                       .setIMAPPort(connectionIMAPTemplate.getIMAPPort())
-                                                                                       .setIMAPServer(connectionIMAPTemplate.getIMAPServer())
-                                                                                       .setSMTPServer(connectionIMAPTemplate.getSMTPServer())
-                                                                                       .setSMTPPort(connectionIMAPTemplate.getSMTPPort());
-        }
-        
-        // Replace        
-        String newEmail = connectionIMAPTemplate.getEmailAddress().replaceFirst(INDEX_REPLACE, String.valueOf(index));
-        
-        // Return object with new mail address
-        return new ConnectionIMAPSettings(newEmail).setPassword(connectionIMAPTemplate.getPassword())
-                                                   .setIMAPPort(connectionIMAPTemplate.getIMAPPort())
-                                                   .setIMAPServer(connectionIMAPTemplate.getIMAPServer())
-                                                   .setSMTPServer(connectionIMAPTemplate.getSMTPServer())
-                                                   .setSMTPPort(connectionIMAPTemplate.getSMTPPort());
-    }
     
     /**
      * Get all distinct connections
@@ -99,6 +77,47 @@ public class MailboxDetails {
 
         // Return
         return new ArrayList<>(connections);
+    }
+    
+    /**
+     * Gets the connection for participant with given index
+     * 
+     * @param index
+     * @return
+     */
+    public ConnectionIMAPSettings getConnection(int index) {
+        // Return same connection for alle index if shared mailbox
+        if(isSharedMailbox) {
+            return new ConnectionIMAPSettings(connectionIMAPTemplate.getEmailAddress()).setPassword(connectionIMAPTemplate.getPassword())
+                                                                                       .setIMAPPort(connectionIMAPTemplate.getIMAPPort())
+                                                                                       .setIMAPServer(connectionIMAPTemplate.getIMAPServer())
+                                                                                       .setSMTPServer(connectionIMAPTemplate.getSMTPServer())
+                                                                                       .setSMTPPort(connectionIMAPTemplate.getSMTPPort())
+                                                                                       .setAcceptSelfSignedCertificates(true)
+                                                                                       .setSearchForProxy(false)
+                                                                                       .setPerformanceListener(tracker);
+        }
+        
+        // Replace        
+        String newEmail = connectionIMAPTemplate.getEmailAddress().replaceFirst(INDEX_REPLACE, String.valueOf(index));
+        
+        // Return object with new mail address
+        return new ConnectionIMAPSettings(newEmail).setPassword(connectionIMAPTemplate.getPassword())
+                                                   .setIMAPPort(connectionIMAPTemplate.getIMAPPort())
+                                                   .setIMAPServer(connectionIMAPTemplate.getIMAPServer())
+                                                   .setSMTPServer(connectionIMAPTemplate.getSMTPServer())
+                                                   .setSMTPPort(connectionIMAPTemplate.getSMTPPort())
+                                                   .setAcceptSelfSignedCertificates(true)
+                                                   .setSearchForProxy(false)
+                                                   .setPerformanceListener(tracker);
+    }
+    
+    /**
+     * Returns the tracker
+     * @return
+     */
+    public PerformanceTracker getTracker() {
+    	return this.tracker;
     }
     
     /**

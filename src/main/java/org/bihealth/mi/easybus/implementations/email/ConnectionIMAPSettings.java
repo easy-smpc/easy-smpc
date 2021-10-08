@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.bihealth.mi.easybus.Participant;
+import org.bihealth.mi.easybus.PerformanceListener;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -46,7 +47,6 @@ public class ConnectionIMAPSettings implements Serializable {
     public static final int      DEFAULT_PORT_SMTP        = 465;
     /** Regex to check dns validity */
     private static final Pattern regexDNS = Pattern.compile("^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]))*$");
-
 
     /**
      * Check server name
@@ -74,13 +74,17 @@ public class ConnectionIMAPSettings implements Serializable {
     private String               imapServer;
     /** Port of IMAP server */
     private int                  imapPort                 = DEFAULT_PORT_IMAP;
-
     /** SMTP server dns */
     private String               smtpServer;
-        
     /** Port of SMTP server */
     private int                  smtpPort                 = DEFAULT_PORT_SMTP;
-
+    /** Accept self signed certificates*/
+    private boolean				 acceptSelfSignedCert     = false;
+    /** Search for proxy*/
+    private boolean              searchForProxy           = true;
+    /** Performance listener*/
+	private PerformanceListener  listener                 = null;
+	
     /**
      * Creates a new instance
      * @param emailAddress Email address to use
@@ -105,6 +109,16 @@ public class ConnectionIMAPSettings implements Serializable {
     public void check() {
         if (this.emailAddress == null || this.password == null || this.imapServer == null || this.smtpServer == null) {
             throw new IllegalArgumentException("Connection parameters must not be null");
+        }
+    }
+
+    /**
+     * Check
+     * @param object
+     */
+    private void checkNonNull(Object object) {
+        if (object == null) {
+            throw new IllegalArgumentException("Parameter must not be null");
         }
     }
 
@@ -164,13 +178,21 @@ public class ConnectionIMAPSettings implements Serializable {
     }
 
     /**
+     * Returns performance listener
+     * @return
+     */
+	public PerformanceListener getPerformanceListener() {
+		return listener;
+	}
+
+    /**
      * Return config parameter
      * @return the smtpPort
      */
     public int getSMTPPort() {
         return smtpPort;
     }
-
+    
     /**
      * Return config parameter
      * @return the smtpServer
@@ -258,6 +280,31 @@ public class ConnectionIMAPSettings implements Serializable {
     }
 
     /**
+     * Returns whether self-signed certificates are accepted
+     * @return
+     */
+    public boolean isAcceptSelfSignedCertificates() {
+    	return acceptSelfSignedCert;
+    }
+
+    /**
+     * Search for proxy
+     * @return
+     */
+	public boolean isSearchForProxy() {
+		return this.searchForProxy;
+	}
+
+    /**
+     * Accept self-signed certificates
+     * @param accept
+     */
+    public ConnectionIMAPSettings setAcceptSelfSignedCertificates(boolean accept) {
+    	this.acceptSelfSignedCert = accept;
+    	return this;
+    }
+
+    /**
      * Set config parameter
      * @param imapPort the IMAP port to set
      */
@@ -273,7 +320,7 @@ public class ConnectionIMAPSettings implements Serializable {
         // Done
         return this;
     }
-
+    
     /**
      * Set config parameter
      * @param imapServer the IMAP server to set
@@ -290,7 +337,7 @@ public class ConnectionIMAPSettings implements Serializable {
         // Done
         return this;
     }
-
+    
     /**
      * Set config parameter
      * @param password the password to set
@@ -306,7 +353,27 @@ public class ConnectionIMAPSettings implements Serializable {
         // Done
         return this;
     }
-
+    
+    /**
+     * Sets performance listener
+     * @param listener
+     * @return
+     */
+    public ConnectionIMAPSettings setPerformanceListener(PerformanceListener listener) {
+    	this.listener = listener;
+    	return this;
+    }
+    
+    /**
+     * Search for proxy
+     * @param search
+     * @return
+     */
+    public ConnectionIMAPSettings setSearchForProxy(boolean search) {
+    	this.searchForProxy = search;
+    	return this;
+    }
+    
     /**
      * Set config parameter
      * @param smtpPort the SMTP port to set
@@ -323,7 +390,7 @@ public class ConnectionIMAPSettings implements Serializable {
         // Done
         return this;
     }
-
+    
     /**
      * Set config parameter
      * @param smtpServer the SMTP server to set
@@ -339,15 +406,5 @@ public class ConnectionIMAPSettings implements Serializable {
 
         // Done
         return this;
-    }
-    
-    /**
-     * Check
-     * @param object
-     */
-    private void checkNonNull(Object object) {
-        if (object == null) {
-            throw new IllegalArgumentException("Parameter must not be null");
-        }
     }    
 }

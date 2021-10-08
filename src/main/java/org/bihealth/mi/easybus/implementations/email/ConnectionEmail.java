@@ -26,11 +26,11 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.Participant;
+import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easybus.Scope;
 
 import jakarta.mail.BodyPart;
@@ -53,7 +53,7 @@ public abstract class ConnectionEmail {
      * 
      * @author Fabian Prasser
      */
-    protected static class ConnectionEmailMessage {
+    protected class ConnectionEmailMessage {
 
         /** Message */
         private final jakarta.mail.Message message;
@@ -66,9 +66,6 @@ public abstract class ConnectionEmail {
 
         /** Attachment */
         private Object                   attachment = null;
-        
-        /** Logger */
-        private static final Logger logger = LogManager.getLogger(ConnectionEmailMessage.class);
     
         /**
          * Creates a new instance
@@ -80,10 +77,9 @@ public abstract class ConnectionEmail {
             // Store
             this.message = message;
             this.folder = folder;
+        	long size = 0;
     
             try {
-                // Add statistics
-                Bus.numberMessagesReceived.incrementAndGet();
                 
                 // Extract parts
                 text = message.getSubject();
@@ -93,17 +89,20 @@ public abstract class ConnectionEmail {
                     // Obtain body and attachment
                     for (int i = 0; i < 2; i++) {
                         BodyPart part = multipart.getBodyPart(i);
-
                         if (part != null && part.getDisposition() != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.ATTACHMENT)) {
                           attachment = getObject(((MimeBodyPart)part).getInputStream());
-                          // Add statistics
-                          Bus.totalSizeMessagesReceived.addAndGet(((MimeBodyPart)part).getSize());
+                          size += ((MimeBodyPart)part).getSize();
                       }                        
                     }
                 }
             } catch (Exception e) {
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-                logger.debug("load message failed logged", new Date(), "load message failed", ExceptionUtils.getStackTrace(e));
+                logger.debug("Load message failed logged", new Date(), "load message failed", ExceptionUtils.getStackTrace(e));
+            }
+            
+            // Pass to listener
+            if (listener != null) {
+            	listener.messageReceived(size);
             }
         }
     
@@ -131,7 +130,7 @@ public abstract class ConnectionEmail {
             try {
                 message.setFlag(Flag.DELETED, true);
             } catch (MessagingException e) {
-                logger.debug("delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
+                logger.debug("Delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
         }    
@@ -145,7 +144,7 @@ public abstract class ConnectionEmail {
                     folder.close(true);
                 }
             } catch (MessagingException e) {
-                logger.debug("expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
+                logger.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
         }
@@ -188,11 +187,14 @@ public abstract class ConnectionEmail {
     /** Logger */
     private static final Logger logger = LogManager.getLogger(ConnectionEmail.class);
 
-    /** Use several or exactly one mail box for the bus */
-    private boolean sharedMailbox;
-    
-    /** Mail address of the user */
-    private String  emailAddress;
+	/** Use several or exactly one mail box for the bus */
+	private boolean sharedMailbox;
+
+	/** Mail address of the user */
+	private String emailAddress;
+
+	/** Performance listener */
+	private PerformanceListener listener;
 
     /**
      * Creates a new instance
@@ -201,15 +203,27 @@ public abstract class ConnectionEmail {
      * @throws BusException
      */
     protected ConnectionEmail(boolean sharedMailBox, String emailAddress) {
+    	this(sharedMailBox, emailAddress, null);
+    }
+    
+    /**
+     * Creates a new instance
+     * @param sharedMailBox
+     * @param emailAddress
+     * @param listener
+     * @throws BusException
+     */
+    protected ConnectionEmail(boolean sharedMailBox, String emailAddress, PerformanceListener listener) {
         // Check
         if (emailAddress == null) {
             throw new NullPointerException("Email address must not be null");
         }
         this.sharedMailbox = sharedMailBox;
         this.emailAddress = emailAddress;
+        this.listener = listener;
     }
     
-    /**
+	/**
      * Create participant from body
      * 
      * @param body

@@ -29,7 +29,6 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
-import org.bihealth.mi.easysmpc.nogui.PerformanceEvaluation;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -305,26 +304,7 @@ public class Study implements Serializable, Cloneable {
         }
         return this.bus;
     }
-    
-    /**
-     * Returns the bus in insecure test mode - unencrypted connection and self signed certificates are accepted! 
-     * 
-     * @param millis milliseconds interval to check for new mails. If zero a send only bus is returned
-     * @return the bus
-     * @throws BusException 
-     */
-    public synchronized BusEmail getBusTestMode(int millis, boolean isSharedMailbox) throws BusException {
 
-        if ((this.bus == null || !this.bus.isAlive()) && this.getConnectionIMAPSettings() != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.getConnectionIMAPSettings(),
-                                                       isSharedMailbox,
-                                                       PerformanceEvaluation.useSSL(),
-                                                       true),
-                                    millis);
-        }
-        return this.bus;
-    }
-    
     /**
      * Is the e-mail bus thread alive?
      * 

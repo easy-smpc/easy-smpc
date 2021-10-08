@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The Bus collecting and sending the messages
@@ -27,14 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class Bus {
     
-    /** Total number of messages started to receive */
-    public static final AtomicInteger numberMessagesReceived = new AtomicInteger();
-    /** Total attachment size of messages started to receive */
-    public static final AtomicInteger totalSizeMessagesReceived = new AtomicInteger();
-    /** Total number of messages sent */
-    public static final AtomicInteger numberMessagesSent = new AtomicInteger();
-    /** Total attachment size of messages sent */
-    public static final AtomicInteger totalSizeMessagesSent = new AtomicInteger();
     /** Stores the subscriptions with  known participants*/    
     private final Map<Scope, Map<Participant, List<MessageListener>>> subscriptions;
     
@@ -44,17 +35,7 @@ public abstract class Bus {
     public Bus(){
         this.subscriptions = new HashMap<>();
     }
-    
-    /**
-     * Resets the statistics
-     */
-    public static void resetStatistics() {
-        numberMessagesReceived.set(0);
-        totalSizeMessagesReceived.set(0);
-        numberMessagesSent.set(0);
-        totalSizeMessagesSent.set(0);
-    }
-    
+
     /**
      * Returns whether potentially running backend services are alive
      * @return

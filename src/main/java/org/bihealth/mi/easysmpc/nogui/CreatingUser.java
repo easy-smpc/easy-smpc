@@ -63,7 +63,7 @@ public class CreatingUser extends User {
                                         generateParticpants(numberParticipants, mailBoxDetails, FIXED_LENGTH_STRING),
                                         generateBins(numberBins,numberParticipants, FIXED_LENGTH_STRING, FIXED_LENGTH_BIT_BIGINTEGER), mailBoxDetails.getConnection(0));
             // Init recoding
-            RecordTimeDifferences.init(getModel(), mailBoxCheckInterval, System.nanoTime());
+            RecordTimeDifferences.init(getModel(), mailBoxCheckInterval, System.nanoTime(), mailBoxDetails.getTracker());
         } catch (IOException | IllegalStateException e) {
             logger.error("Unable to init logged", new Date(), "Unable to init", ExceptionUtils.getStackTrace(e));
             throw new IllegalStateException("Unable to init study!", e);

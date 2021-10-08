@@ -82,12 +82,14 @@ public class BusEmail extends Bus {
     /** Stop flag */
     private boolean         stop = false;
   
+
     /**
      * Creates a new instance
      * @param connection
      * @param millis - interval in milliseconds in which messages are polled. If zero a send only bus is returned
      */
     public BusEmail(ConnectionEmail connection, int millis) {
+
         // Check
         if (millis < 0) {
             throw new IllegalArgumentException("Interval must be a positive number or zero");
