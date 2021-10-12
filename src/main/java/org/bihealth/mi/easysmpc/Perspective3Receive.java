@@ -376,7 +376,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     @Override
     public void receiveError(Exception exception) {
-        getApp().setStatusMessage(Resources.getString("PerspectiveReceive.stoppedAutomaticEmail"),
+        getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
                                   true,
                                   false);
     }
