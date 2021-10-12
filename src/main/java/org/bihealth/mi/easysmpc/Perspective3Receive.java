@@ -33,7 +33,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.ErrorListener;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
@@ -53,7 +52,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  * @author Fabian Prasser
  * @author Felix Wirth
  */
-public class Perspective3Receive extends Perspective implements ChangeListener, ActionListener, MessageListener, ErrorListener {
+public class Perspective3Receive extends Perspective implements ChangeListener, ActionListener, MessageListener {
 
     /** Panel for participants */
     private ScrollablePanel    panelParticipants;
@@ -205,7 +204,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     private void startAutomatedMailImport() {        
         try {
-            getApp().getModel().getBus(this).receive(new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
+            getApp().getModel().getBus().receive(new Scope(getApp().getModel().studyUID + getRoundIdentifier()),
                         new org.bihealth.mi.easybus.Participant(getApp().getModel().getParticipantFromId(getApp().getModel().ownId).name,
                                                                 getApp().getModel().getParticipantFromId(getApp().getModel().ownId).emailAddress),
                                                                 this);
@@ -376,9 +375,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * Reacts on error messages from bus
      */
     @Override
-    public void receive(Exception exception) {
+    public void receiveError(Exception exception) {
         getApp().setStatusMessage(Resources.getString("PerspectiveReceive.stoppedAutomaticEmail"),
                                   true,
-                                  false);        
+                                  false);
     }
 }

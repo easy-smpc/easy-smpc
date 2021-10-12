@@ -140,6 +140,12 @@ public class Resources {
     
     /** Interval to check existing mailbox connection */
     public static final long TIMEOUT_SEND_EMAILS = 30000;
+    
+    /** Fetch size for messages with IMAP */
+    public static final int FETCH_SIZE_IMAP = 1048576;
+    
+    /** Number of threads in thread pool */
+    public static final int SIZE_THREADPOOL = 2;
 
     /**
      * Returns all available languages

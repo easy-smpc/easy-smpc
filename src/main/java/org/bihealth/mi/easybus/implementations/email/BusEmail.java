@@ -98,12 +98,7 @@ public class BusEmail extends Bus {
             public void run() {
                 try {
                     while (!stop) {
-                        try {
                             receiveEmails();
-                        } catch (BusException e) {
-                            // Stop thread
-                            throw new RuntimeException(e);
-                        }
                         Thread.sleep(millis);
                     }
                 } catch (InterruptedException e) {
@@ -159,7 +154,7 @@ public class BusEmail extends Bus {
      * @throws BusException 
      * @throws InterruptedException 
      */
-    private synchronized void receiveEmails() throws BusException, InterruptedException {
+    private synchronized void receiveEmails() throws InterruptedException {
         
         // Create filter for relevant messages
         MessageFilter filter = new MessageFilter() {
@@ -207,9 +202,6 @@ public class BusEmail extends Bus {
         } catch (BusException e) {
             // Pass error over
             this.receiveErrorInternal(e);
-            // TODO Is this a good idea? Rather no re-throw and have the client stop the bus manually?
-            // Re-throw exception
-            throw e;
         }
     }
     

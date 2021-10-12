@@ -35,6 +35,11 @@ public class IMAPTest {
         public void receive(Message message) {
             System.out.println("Message received: " + message.getMessage());
         }
+
+        @Override
+        public void receiveError(Exception exception) {
+            System.out.println("Error receiving message");
+        }
     };
 
     /** Listener*/
@@ -42,6 +47,11 @@ public class IMAPTest {
         @Override
         public void receive(Message message) {
             System.out.println("This message should not appear: " + message.getMessage());
+        }
+        
+        @Override
+        public void receiveError(Exception exception) {
+            System.out.println("Error receiving message");
         }
     };
     

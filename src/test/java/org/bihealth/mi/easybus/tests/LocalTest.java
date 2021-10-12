@@ -72,6 +72,11 @@ public class LocalTest {
         public void receive(Message message) {
             System.out.println("Message is: " + (String) message.getMessage());
         }
+
+        @Override
+        public void receiveError(Exception exception) {
+            System.out.println("Error receiving message");
+        }
     };
     
     class ReceiverImplPositiveBroadcast implements MessageListener {
@@ -79,12 +84,22 @@ public class LocalTest {
         public void receive(Message message) {
             System.out.println("This message should only be a brodcast message: " + (String) message.getMessage());
         }
+        
+        @Override
+        public void receiveError(Exception exception) {
+            System.out.println("Error receiving message");
+        }
     };
     
     class ReceiverImplNegative implements MessageListener {
         @Override
         public void receive(Message message) {
             System.out.println("This message should not appear: " + (String) message.getMessage());
+        }
+        
+        @Override
+        public void receiveError(Exception exception) {
+            System.out.println("Error receiving message");
         }
     };
 }

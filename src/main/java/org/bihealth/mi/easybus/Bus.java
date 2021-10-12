@@ -17,10 +17,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+
+import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
  * The Bus collecting and sending the messages
@@ -32,8 +35,6 @@ public abstract class Bus {
     
     /** Stores the subscriptions with  known participants*/    
     private final Map<Scope, Map<Participant, List<MessageListener>>> subscriptions;   
-    /** Error listener */    
-    private final List<ErrorListener> errorListener;
     /** Executor service */
     private final ExecutorService executor;
     
@@ -43,9 +44,8 @@ public abstract class Bus {
      * @param sizeThreadpool
      */
     public Bus(int sizeThreadpool) {
-        this.executor = Executors.newFixedThreadPool(sizeThreadpool != 0 ? sizeThreadpool : Defaults.SIZE_THREADPOOL);
+        this.executor = Executors.newFixedThreadPool(sizeThreadpool != 0 ? sizeThreadpool : Resources.SIZE_THREADPOOL);
         this.subscriptions = new HashMap<>();
-        this.errorListener = new ArrayList<>(); 
     }
 
     /**
@@ -195,26 +195,19 @@ public abstract class Bus {
     }
     
     /**
-     * Subscribes in the case of an error
-     *  
-     * @param messageListener
-     */
-    public synchronized void receiveError(ErrorListener errorListener) {
-        if (errorListener != null) {
-            this.errorListener.add(errorListener);
-        }
-    }
-    
-    /**
      * Passes on receiving errors
      *  
      * @param messageListener
      */
     public synchronized void receiveErrorInternal(Exception exception) {
-        // TODO synchronize error handling methods over errorListener list and message sending methods over subscriptions map? 
-        for(ErrorListener listener : this.errorListener) {
-            listener.receive(exception);
-        }
+        
+        for(Entry<Scope, Map<Participant, List<MessageListener>>> scope : subscriptions.entrySet()) {
+            for(Entry<Participant, List<MessageListener>> participant : scope.getValue().entrySet()) {
+                for(MessageListener messageListener : participant.getValue()) {
+                    messageListener.receiveError(exception);
+                }
+            }
+        }        
     }
 
     /**
