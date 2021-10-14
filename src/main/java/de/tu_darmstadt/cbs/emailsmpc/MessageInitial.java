@@ -23,8 +23,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
-
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import java.util.Objects;
 
 import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 
@@ -70,7 +69,7 @@ public class MessageInitial implements Serializable {
         model.participants = msg.participants;
         model.numParticipants = msg.participants.length;
         model.ownId = msg.recipientId;
-        model.connectionIMAPSettings = msg.connectionIMAPSettings;
+        model.automatedMode = msg.automatedMode;
         model.state = StudyState.PARTICIPATING;
         model.bins = new Bin[msg.bins.length];
         for (int i = 0; i < msg.bins.length; i++) {
@@ -91,8 +90,8 @@ public class MessageInitial implements Serializable {
     /** The recipient id. */
     public int recipientId;
     
-    /** Connections settings for automatic mail processing. */
-    public ConnectionIMAPSettings connectionIMAPSettings;
+    /** Are e-mails processed manually or automatically */
+    public boolean automatedMode;
     
     /** The study UID. */
     public String studyUID;
@@ -108,29 +107,11 @@ public class MessageInitial implements Serializable {
         this.name = model.name;
         this.participants = model.participants;
         this.recipientId = recipientId;
-        this.connectionIMAPSettings = model.connectionIMAPSettings; 
+        this.automatedMode = model.automatedMode;
         this.bins = new MessageBin[model.bins.length];
         for (int i = 0; i < model.bins.length; i++) {
             bins[i] = new MessageBin(model.bins[i], recipientId);
         }
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        MessageInitial other = (MessageInitial) obj;
-        if (!Arrays.equals(bins, other.bins)) return false;
-        if (connectionIMAPSettings == null) {
-            if (other.connectionIMAPSettings != null) return false;
-        } else if (!connectionIMAPSettings.equals(other.connectionIMAPSettings)) return false;
-        if (name == null) {
-            if (other.name != null) return false;
-        } else if (!name.equals(other.name)) return false;
-        if (!Arrays.equals(participants, other.participants)) return false;
-        if (recipientId != other.recipientId) return false;
-        return true;
     }
 
     /**
@@ -152,11 +133,20 @@ public class MessageInitial implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + Arrays.hashCode(bins);
-        result = prime * result +
-                 ((connectionIMAPSettings == null) ? 0 : connectionIMAPSettings.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + Arrays.hashCode(participants);
-        result = prime * result + recipientId;
+        result = prime * result + Objects.hash(automatedMode, name, recipientId, studyUID);
         return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        MessageInitial other = (MessageInitial) obj;
+        return automatedMode == other.automatedMode && Arrays.equals(bins, other.bins) &&
+               Objects.equals(name, other.name) &&
+               Arrays.equals(participants, other.participants) &&
+               recipientId == other.recipientId && Objects.equals(studyUID, other.studyUID);
     }
 }

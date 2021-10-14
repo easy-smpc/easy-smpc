@@ -125,8 +125,11 @@ public class Study implements Serializable, Cloneable {
     /** Bus for automatic e-mail processing */
     private transient BusEmail    bus;
     
-    /** Store whether messages have been retrieved */
+    /** Stores whether messages have been retrieved */
     private boolean[] retrievedMessages;
+    
+    /** Are e-mails processed manually or automatically */
+    public boolean automatedMode = false;
 
     /**
      * Instantiates a new app model.
@@ -422,7 +425,6 @@ public class Study implements Serializable, Cloneable {
      */
     private Message getInitialMessage(int recipientId) throws IOException {
         MessageInitial data = new MessageInitial(this, recipientId);
-        data.connectionIMAPSettings = null;
         Participant recipient = this.participants[recipientId];
         return new Message(ownId, recipient, data.getMessage());
     }
@@ -528,6 +530,7 @@ public class Study implements Serializable, Cloneable {
             throw new IllegalStateException("Unable to initialize study at state" + state);
         this.name = name;
         this.connectionIMAPSettings = connectionIMAPSettings;
+        this.automatedMode = connectionIMAPSettings != null ? true: false;
         numParticipants = participants.length;
         unsentMessages = new Message[numParticipants];
         retrievedMessages = new boolean[numParticipants];       
