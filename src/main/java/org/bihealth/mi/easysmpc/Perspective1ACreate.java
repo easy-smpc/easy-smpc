@@ -18,7 +18,7 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +36,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -126,22 +127,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     }
 
     /**
-     * Reacts on all changes in any components
-     */
-    public void stateChanged(ChangeEvent e) {
-        // Is saving possible?
-        this.buttonSave.setEnabled(this.areValuesValid());
-        // Can a mailbox be added or removed
-        if (this.comboSelectMailbox.getSelectedItem() != null) {
-            this.buttonEditMailbox.setEnabled(true);
-            this.buttonRemoveMailbox.setEnabled(true);
-        } else {
-            this.buttonEditMailbox.setEnabled(false);
-            this.buttonRemoveMailbox.setEnabled(false);
-        }               
-    }
-
-    /**
      * Adds an e-mail configuration
      */
     private void actionAddEMailConf() {
@@ -154,7 +139,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         }
         this.stateChanged(new ChangeEvent(this));
     }
-    
+
     /**
      * Edits an e-mail configuration
      */
@@ -167,7 +152,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         }
         this.stateChanged(new ChangeEvent(this));        
     }
-
+    
     /**
      * Loads and sets bin names and data from a file
      */
@@ -274,7 +259,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         for (Component entry : this.panelBins.getComponents()) {
             Bin bin = new Bin(((EntryBin)entry).getLeftValue());
             bin.initialize(participants.size());
-            bin.shareValue(new BigInteger(((EntryBin)entry).getRightValue().trim()));
+            bin.shareValue(new BigDecimal(((EntryBin)entry).getRightValue().trim().replace(',','.')), Resources.FRACTIONAL_BITS);
             bins.add(bin);
         }
         
@@ -412,63 +397,6 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Done
         return true;
-    }
-
-
-    /**
-     * Returns previous configurations
-     * 
-     * @return
-     */
-    private ConnectionIMAPSettings[] getEmailConfig() {
-        try {
-            // Read from preferences
-            ArrayList<ConnectionIMAPSettings> configFromPreferences = Connections.list();
-            // Add null for non-automatic
-            configFromPreferences.add(0, null);
-            return configFromPreferences.toArray(new ConnectionIMAPSettings[configFromPreferences.size()]);
-        } catch (BackingStoreException e) {
-            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorLoadingPreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-    }
-    
-    /**
-     * Removes a bin
-     * @param entry
-     */
-    private void removeBin(EntryBin entry) {
-        
-        // Check whether it's the last entry
-        if (this.panelBins.getComponentCount() == 1) {
-            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.errorTooFewEntries"));
-            return;
-        }
-        
-        // Remove and update
-        this.panelBins.remove(entry);
-        this.stateChanged(new ChangeEvent(this));
-        this.panelBins.revalidate();
-        this.panelBins.repaint();
-    }
-    
-    /**
-     * Removes a participant
-     * @param entry
-     */
-    private void removeParticipant(EntryParticipant entry) {
-        
-        // Check whether it's the last entry
-        if (this.panelParticipants.getComponentCount() == 1) {
-            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.errorTooFewEntries"));
-            return;
-        }
-        
-        // Remove and update
-        this.panelParticipants.remove(entry);
-        this.stateChanged(new ChangeEvent(this));
-        this.panelParticipants.revalidate();    
-        this.panelParticipants.repaint();
     }
 
     /**
@@ -614,6 +542,25 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
 
+
+    /**
+     * Returns previous configurations
+     * 
+     * @return
+     */
+    private ConnectionIMAPSettings[] getEmailConfig() {
+        try {
+            // Read from preferences
+            ArrayList<ConnectionIMAPSettings> configFromPreferences = Connections.list();
+            // Add null for non-automatic
+            configFromPreferences.add(0, null);
+            return configFromPreferences.toArray(new ConnectionIMAPSettings[configFromPreferences.size()]);
+        } catch (BackingStoreException e) {
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorLoadingPreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+    }
+    
     /**
      * Initialize perspective based on model
      */
@@ -632,5 +579,84 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Update
         this.stateChanged(new ChangeEvent(this));
+    }
+    
+    /**
+     * Removes a bin
+     * @param entry
+     */
+    private void removeBin(EntryBin entry) {
+        
+        // Check whether it's the last entry
+        if (this.panelBins.getComponentCount() == 1) {
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.errorTooFewEntries"));
+            return;
+        }
+        
+        // Remove and update
+        this.panelBins.remove(entry);
+        this.stateChanged(new ChangeEvent(this));
+        this.panelBins.revalidate();
+        this.panelBins.repaint();
+    }
+
+    /**
+     * Removes a participant
+     * @param entry
+     */
+    private void removeParticipant(EntryParticipant entry) {
+        
+        // Check whether it's the last entry
+        if (this.panelParticipants.getComponentCount() == 1) {
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.errorTooFewEntries"));
+            return;
+        }
+        
+        // Remove and update
+        this.panelParticipants.remove(entry);
+        this.stateChanged(new ChangeEvent(this));
+        this.panelParticipants.revalidate();    
+        this.panelParticipants.repaint();
+    }
+
+    /**
+     * Reacts on all changes in any components
+     */
+    public void stateChanged(ChangeEvent e) {
+        // Is saving possible?
+        this.buttonSave.setEnabled(this.areValuesValid());
+        
+        // Can a mailbox be added or removed
+        if (this.comboSelectMailbox.getSelectedItem() != null) {
+            this.buttonEditMailbox.setEnabled(true);
+            this.buttonRemoveMailbox.setEnabled(true);
+        } else {
+            this.buttonEditMailbox.setEnabled(false);
+            this.buttonRemoveMailbox.setEnabled(false);
+        }
+        
+        // If participants panels exists and automated mode selected => set e-mail address of creator automatically 
+        if (this.panelParticipants.getComponents() != null && this.panelParticipants.getComponents().length >= getApp().getModel().ownId + 1) {
+            // Get participant entry component            
+            EntryParticipant entry = ((EntryParticipant) this.panelParticipants.getComponents()[getApp().getModel().ownId]);
+            
+            if (this.comboSelectMailbox.getSelectedItem() != null) {
+                // No entry in field allowed
+                entry.setRightEnabled(false);
+
+                // Set email address if not already done
+                // TODO Simplify this part
+                String emailAddress = ((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getEmailAddress();
+                if (!entry.getRightValue().equals(emailAddress)) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            entry.setRightValue(emailAddress);
+                        }
+                    });
+                }
+            } else {
+                entry.setRightEnabled(true);
+            }
+        }
     }
 }

@@ -52,7 +52,7 @@ public abstract class Bus {
      * Returns whether potentially running backend services are alive
      * @return
      */
-    public abstract boolean isAlive();
+    public abstract boolean isAlive();    
     
     /**
      * Allows to subscribe to a scope for a participant 
@@ -79,8 +79,7 @@ public abstract class Bus {
         
         // Add listener
         listenerForParticipant.add(messageListener);         
-    }
-    
+    }    
 
     /**
      * Abstract method to send a message
@@ -133,7 +132,7 @@ public abstract class Bus {
      * Stops all backend services that might be running
      */
     public abstract void stop();
-
+    
     /**
      * Receives an external received message
      * 
@@ -164,13 +163,14 @@ public abstract class Bus {
         // Done
         return received;
     }
-    
+
     /**
-     * Is there a listener for the participant and scope registered
+     * Allows to send a message to a participant
      * 
+     * @param message
      * @param scope
      * @param participant
-     * @return
+     * @throws BusException
      */
     protected boolean isParticipantScopeRegistered(Scope scope, Participant participant) {
         // Check not null

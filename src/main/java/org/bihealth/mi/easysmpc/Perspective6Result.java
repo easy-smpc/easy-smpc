@@ -68,31 +68,6 @@ public class Perspective6Result extends Perspective {
     }
     
     /**
-     * Initialize perspective based on model
-     */
-    @Override
-    public void initialize() {
-        // Remove previous content
-        panelParticipants.removeAll();
-        panelBins.removeAll();
-        
-        // Set new content
-        this.fieldTitle.setText(getApp().getModel().name);
-        int i = 0;
-        for (Participant currentParticipant : getApp().getModel().participants) {
-            panelParticipants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress, i == getApp().getModel().ownId));
-            i++;
-        }
-        for (BinResult binResult : getApp().getModel().getAllResults()) {
-            panelBins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
-        }
-        
-        // Update GUI
-        getPanel().revalidate();
-        getPanel().repaint(); 
-    }
-    
-    /**
      * 
      * @param Exports data
      */
@@ -107,7 +82,7 @@ public class Perspective6Result extends Perspective {
         // Export data
         getApp().exportData(list);
     }
-
+    
     /**
      *Creates and adds UI elements
      */
@@ -168,5 +143,30 @@ public class Perspective6Result extends Perspective {
         });
         buttonsPane.add(buttonExport, BorderLayout.CENTER);        
         panel.add(buttonsPane, BorderLayout.SOUTH);
+    }
+
+    /**
+     * Initialize perspective based on model
+     */
+    @Override
+    public void initialize() {
+        // Remove previous content
+        panelParticipants.removeAll();
+        panelBins.removeAll();
+        
+        // Set new content
+        this.fieldTitle.setText(getApp().getModel().name);
+        int i = 0;
+        for (Participant currentParticipant : getApp().getModel().participants) {
+            panelParticipants.add(new EntryParticipantNoButton(currentParticipant.name, currentParticipant.emailAddress, i == getApp().getModel().ownId));
+            i++;
+        }
+        for (BinResult binResult : getApp().getModel().getAllResults()) {
+            panelBins.add(new EntryBinNoButton(binResult.name, binResult.value.toString()));
+        }
+        
+        // Update GUI
+        getPanel().revalidate();
+        getPanel().repaint(); 
     }
 }

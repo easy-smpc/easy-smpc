@@ -111,6 +111,14 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
     }
 
     /**
+     * Checks string for validity
+     * @return
+     */
+    private boolean areValuesValid() {
+        return this.text.isValueValid();
+    }
+    
+    /**
      * Show this dialog
      */
     public String showDialog(){
@@ -118,20 +126,12 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
         this.setVisible(true);
         return this.result;
     }
-    
+      
     /**
      * Reacts to changes
      */
     @Override
     public void stateChanged(ChangeEvent e) {
         this.buttonOK.setEnabled(this.areValuesValid());
-    }
-      
-    /**
-     * Checks string for validity
-     * @return
-     */
-    private boolean areValuesValid() {
-        return this.text.isValueValid();
     } 
 }

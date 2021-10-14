@@ -77,7 +77,7 @@ public class BusEmail extends Bus {
     /**
      * Creates a new instance
      * @param connection
-     * @param millis - interval in milliseconds in which messages are polled
+     * @param millis - interval in milliseconds in which messages are polled. If zero a send only bus is returned
      */
     public BusEmail(ConnectionEmail connection, int millis) {
         this(connection, millis, 0);
@@ -116,11 +116,24 @@ public class BusEmail extends Bus {
         return this.thread != null && this.thread.isAlive();
     }
 
+    /**
+     * Is there an working connection to receive?
+     * 
+     * @return
+     */
+    public boolean isReceivingConnected() {
+        if(this.connection != null) {
+            return this.connection.isReceivingConnected();
+        }
+        
+        return false;
+    }
+    
     @Override
     public Void sendInternal(Message message, Scope scope, Participant participant) throws BusException {
         this.connection.send(message, scope, participant);
         return null;
-    }
+    }  
     
     @Override
     public void stop() {
@@ -204,20 +217,6 @@ public class BusEmail extends Bus {
             this.receiveErrorInternal(e);
         }
     }
-    
-    /**
-     * Is there an working connection to receive?
-     * 
-     * @return
-     */
-    public boolean isReceivingConnected() {
-        if(this.connection != null) {
-            return this.connection.isReceivingConnected();
-        }
-        
-        return false;
-    };
-    
     
     /**
      * Send a plain e-mail (no bus functionality)

@@ -61,6 +61,20 @@ public abstract class Perspective {
     }
 
     /**
+     * Does perspective allow interim saving
+     */
+    protected boolean canSave() {
+        return canSave;
+    }
+
+    /**
+     * Creates the contents
+     * 
+     * @param panel
+     */
+    protected abstract void createContents(JPanel panel);
+
+    /**
      * Returns the app
      * 
      * @return
@@ -77,36 +91,6 @@ public abstract class Perspective {
     public Component getPanel() {
         return panel;
     }
-
-    /**
-     * Returns the title
-     * 
-     * @return
-     */
-    public String getTitle() {
-        return this.title;
-    }
-
-    /**
-     * Is perspective visible
-     */
-    public boolean isVisible() {
-        return this.panel.isVisible();
-    }
-    
-    /**
-     * Does perspective allow interim saving
-     */
-    protected boolean canSave() {
-        return canSave;
-    }
-    
-    /**
-     * Creates the contents
-     * 
-     * @param panel
-     */
-    protected abstract void createContents(JPanel panel);
     
     /**
      * Returns the progress associated with this perspective
@@ -117,9 +101,25 @@ public abstract class Perspective {
     }
     
     /**
+     * Returns the title
+     * 
+     * @return
+     */
+    public String getTitle() {
+        return this.title;
+    }
+    
+    /**
      * Initialize perspective based on model
      */
     protected abstract void initialize();
+    
+    /**
+     * Is perspective visible
+     */
+    public boolean isVisible() {
+        return this.panel.isVisible();
+    }
     
     /**
      * Call when before other perspective is shown
@@ -128,10 +128,10 @@ public abstract class Perspective {
         // Stop the bus for automatic processing if running
         if (getApp().getModel() != null) {
             getApp().getModel().stopBus();
-        }
-        
+        }      
         
         // Reset status message and loading visual
-        getApp().setStatusMessage("", false, false);
+        getApp().setStatusMessage("", false);
+        getApp().stopAnimation();
     }
 }

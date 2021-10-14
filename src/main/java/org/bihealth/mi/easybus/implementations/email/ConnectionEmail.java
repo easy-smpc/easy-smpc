@@ -22,18 +22,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import javax.mail.BodyPart;
-import javax.mail.Flags.Flag;
-import javax.mail.Folder;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.internet.MimeBodyPart;
-
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
+
+import jakarta.mail.BodyPart;
+import jakarta.mail.Flags.Flag;
+import jakarta.mail.Folder;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.internet.MimeBodyPart;
 
 /**
  * Abstract class for e-mail connections
@@ -51,7 +51,7 @@ public abstract class ConnectionEmail {
     protected static class ConnectionEmailMessage {
 
         /** Message */
-        private final javax.mail.Message message;
+        private final jakarta.mail.Message message;
 
         /** Folder */
         private final Folder             folder;
@@ -67,7 +67,7 @@ public abstract class ConnectionEmail {
          * @param message
          * @param folder
          */
-        public ConnectionEmailMessage(javax.mail.Message message, Folder folder) {
+        public ConnectionEmailMessage(jakarta.mail.Message message, Folder folder) {
             
             // Store
             this.message = message;
@@ -83,7 +83,7 @@ public abstract class ConnectionEmail {
                     // Obtain body and attachment
                     for (int i = 0; i < 2; i++) {
                         BodyPart part = multipart.getBodyPart(i);
-                        if (part != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.ATTACHMENT)) {
+                        if (part != null && part.getDisposition() != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.ATTACHMENT)) {
                           attachment = getObject(((MimeBodyPart)part).getInputStream());
                       }                        
                     }
@@ -91,6 +91,39 @@ public abstract class ConnectionEmail {
             } catch (Exception e) {
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
+        }
+    
+        /** 
+         * Deletes the message on the server
+         */
+        protected void delete() {
+            try {
+                message.setFlag(Flag.DELETED, true);
+            } catch (MessagingException e) {
+                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+            }
+        }
+        
+        /** 
+         * Expunges all deleted messages on the server
+         */
+        protected void expunge() {
+    
+            try {
+                if (folder != null && folder.isOpen()) {
+                    folder.close(true);
+                }
+            } catch (MessagingException e) {
+                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+            }
+        }
+        
+        /**
+         * Returns the attachment
+         * @return the attachment
+         */
+        protected Object getAttachment() {
+            return attachment;
         }
     
         /**
@@ -108,39 +141,6 @@ public abstract class ConnectionEmail {
             Object result = ois.readObject();
             ois.close();
             return result;
-        }
-        
-        /** 
-         * Deletes the message on the server
-         */
-        protected void delete() {
-            try {
-                message.setFlag(Flag.DELETED, true);
-            } catch (MessagingException e) {
-                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-            }
-        }
-    
-        /** 
-         * Expunges all deleted messages on the server
-         */
-        protected void expunge() {
-    
-            try {
-                if (folder != null && folder.isOpen()) {
-                    folder.close(true);
-                }
-            } catch (MessagingException e) {
-                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-            }
-        }
-    
-        /**
-         * Returns the attachment
-         * @return the attachment
-         */
-        protected Object getAttachment() {
-            return attachment;
         }
     
         /**
@@ -171,27 +171,6 @@ public abstract class ConnectionEmail {
     /** String indicating end of participant address */
     public static final String PARTICIPANT_EMAIL_END_TAG   = "END_EMAIL_PARTICIPANT";
 
-    /** Use several or exactly one mail box for the bus */
-    private boolean sharedMailbox;
-    
-    /** Mail address of the user */
-    private String  emailAddress;
-
-    /**
-     * Creates a new instance
-     * @param sharedMailBox
-     * @param emailAddress
-     * @throws BusException
-     */
-    protected ConnectionEmail(boolean sharedMailBox, String emailAddress) {
-        // Check
-        if (emailAddress == null) {
-            throw new NullPointerException("Email address must not be null");
-        }
-        this.sharedMailbox = sharedMailBox;
-        this.emailAddress = emailAddress;
-    }
-    
     /**
      * Create participant from body
      * 
@@ -245,6 +224,27 @@ public abstract class ConnectionEmail {
             return new Scope(scope);
         }
     }
+
+    /** Use several or exactly one mail box for the bus */
+    private boolean sharedMailbox;
+    
+    /** Mail address of the user */
+    private String  emailAddress;
+    
+    /**
+     * Creates a new instance
+     * @param sharedMailBox
+     * @param emailAddress
+     * @throws BusException
+     */
+    protected ConnectionEmail(boolean sharedMailBox, String emailAddress) {
+        // Check
+        if (emailAddress == null) {
+            throw new NullPointerException("Email address must not be null");
+        }
+        this.sharedMailbox = sharedMailBox;
+        this.emailAddress = emailAddress;
+    }
     
     /** 
      * Close connection
@@ -260,6 +260,20 @@ public abstract class ConnectionEmail {
     }
 
     /**
+     * Is there an working connection to receive?
+     * 
+     * @return
+     */
+    protected abstract boolean isReceivingConnected();
+
+    /**
+     * Is there an working connection to send?
+     * 
+     * @return
+     */
+    protected abstract boolean isSendingConnected();
+    
+    /**
      * Lists all relevant e-mails
      * @param filter 
      * 
@@ -268,7 +282,7 @@ public abstract class ConnectionEmail {
      * @throws InterruptedException 
      */
     protected abstract List<ConnectionEmailMessage> list(MessageFilter filter) throws BusException, InterruptedException;
-
+  
     /**
      * Receives a list of relevant messages
      * @param filter 
@@ -300,9 +314,7 @@ public abstract class ConnectionEmail {
 
                 Object attachment = message.getAttachment();
                 
-                // TODO: Is this a good idea? Delete malformed messages
                 if (text == null || attachment == null) {
-                    message.delete();
                     continue;
                 }
                 
@@ -321,14 +333,12 @@ public abstract class ConnectionEmail {
                     throw new InterruptedException();
                 }                        
     
-                // TODO: Is this a good idea? Delete malformed messages
                 if (scope == null || participant == null) {
-                    message.delete();
                     continue;
                 }
                         
                 // Pass on
-                ConnectionEmailMessage _message = message;
+                final ConnectionEmailMessage _message = message;
                 result.add(new BusEmail.BusEmailMessage(participant, scope, (Message) attachment) {
                     @Override
                     protected void delete() throws BusException {
@@ -351,6 +361,7 @@ public abstract class ConnectionEmail {
         // Done
         return result;
     }
+    
     
     /**
      * Send message to participant
@@ -377,7 +388,7 @@ public abstract class ConnectionEmail {
         // Send
         this.send(recipient, subject, body, message);
     }
-  
+    
     /** 
      * Send email
      * @param recipient
@@ -387,19 +398,4 @@ public abstract class ConnectionEmail {
      * @throws BusException
      */
     protected abstract void send(String recipient, String subject, String body, Object attachment) throws BusException;
-    
-    
-    /**
-     * Is there an working connection to receive?
-     * 
-     * @return
-     */
-    protected abstract boolean isReceivingConnected();
-    
-    /**
-     * Is there an working connection to send?
-     * 
-     * @return
-     */
-    protected abstract boolean isSendingConnected();
 }
