@@ -227,7 +227,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         }
         
         // Proceed
-        getApp().actionParticipateDone(secret);
+        getApp().actionParticipateDone(secret, (ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem());
     }
 
     /**

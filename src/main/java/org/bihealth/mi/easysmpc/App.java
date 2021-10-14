@@ -509,11 +509,12 @@ public class App extends JFrame {
      * Action called when done with participating
      * @param secret
      */
-    protected void actionParticipateDone(BigDecimal[] secret) {
+    protected void actionParticipateDone(BigDecimal[] secret, ConnectionIMAPSettings connectionIMAPSettings) {
 
         // Pass over bins and participants
         Study snapshot = this.beginTransaction();
         try {
+            model.connectionIMAPSettings = connectionIMAPSettings;
             model.toSendingShares(secret);
             if (actionSave()) {
                 this.showPerspective(Perspective2Send.class);
