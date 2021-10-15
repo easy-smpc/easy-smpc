@@ -161,7 +161,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         
         try {
             ConnectionIMAPSettings settings = getConnectionSettings();
-            if (!new ConnectionIMAP(settings, true).checkConnection()) {
+            if (!new ConnectionIMAP(settings, false).checkConnection()) {
                 throw new BusException("Connection error");
             }
             this.result = settings;

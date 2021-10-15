@@ -421,13 +421,14 @@ public class Study implements Serializable, Cloneable {
      */
     public BusEmail getBus(int millis) throws BusException {
         // Check millis
+        // TODO Add send only bus
         if (millis <= 0) {
             throw new IllegalArgumentException("Interval must be a positive number");
         }
         
         // Check or create bus
         if ((this.bus == null || !this.bus.isAlive()) && this.connectionIMAPSettings != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, true), millis);
+            this.bus = new BusEmail(new ConnectionIMAP(this.connectionIMAPSettings, false), millis);
         }
         
         // Return 
@@ -1004,6 +1005,7 @@ public class Study implements Serializable, Cloneable {
      * @param model the model
      */
     public void update(Study model) {
+        // TODO Check this
         studyUID = model.studyUID;
         numParticipants = model.numParticipants;
         ownId = model.ownId;

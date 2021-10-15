@@ -97,7 +97,7 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));        
         this.propertiesReceiving.put("mail.imap.partialfetch", "false");
         this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
-        this.propertiesReceiving.put("mail.imap.ssl.enable", "true");
+        this.propertiesReceiving.put("mail.imap.ssl.enable", "true");        
         
         // Set proxy
         if (proxy != null) {

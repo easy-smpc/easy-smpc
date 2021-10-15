@@ -237,7 +237,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         // Check e-mail configuration if not done so far
         if (comboSelectMailbox.getSelectedItem() != null && !emailconfigCheck) {
             try {
-                if (!new ConnectionIMAP((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem(), true).checkConnection()) {
+                if (!new ConnectionIMAP((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem(), false).checkConnection()) {
                     throw new BusException("Connection error");
                 }
             } catch (BusException e) {
@@ -637,25 +637,31 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // If participants panels exists and automated mode selected => set e-mail address of creator automatically 
         if (this.panelParticipants.getComponents() != null && this.panelParticipants.getComponents().length >= getApp().getModel().ownId + 1) {
-            // Get participant entry component            
+            // Get participant entry component           
             EntryParticipant entry = ((EntryParticipant) this.panelParticipants.getComponents()[getApp().getModel().ownId]);
             
             if (this.comboSelectMailbox.getSelectedItem() != null) {
-                // No entry in field allowed
-                entry.setRightEnabled(false);
-
-                // Set email address if not already done
-                // TODO Simplify this part
+                // Set email address and deactivate if not already done
                 String emailAddress = ((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getEmailAddress();
-                if (!entry.getRightValue().equals(emailAddress)) {
+                if (!entry.getRightValue().equals(emailAddress) || entry.isRightEnabled()) {
                     SwingUtilities.invokeLater(new Runnable() {
                         public void run() {
+                            // No entry in field allowed
+                            entry.setRightEnabled(false);
+                            // Set e-mail address
                             entry.setRightValue(emailAddress);
                         }
                     });
                 }
             } else {
-                entry.setRightEnabled(true);
+                if (!entry.isRightEnabled()) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            entry.setRightEnabled(true);
+                        }
+                    });
+                }                
             }
         }
     }
