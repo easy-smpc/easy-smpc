@@ -638,30 +638,33 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         // If participants panels exists and automated mode selected => set e-mail address of creator automatically 
         if (this.panelParticipants.getComponents() != null && this.panelParticipants.getComponents().length >= getApp().getModel().ownId + 1) {
             // Get participant entry component           
-            EntryParticipant entry = ((EntryParticipant) this.panelParticipants.getComponents()[getApp().getModel().ownId]);
+            final EntryParticipant entry = ((EntryParticipant) this.panelParticipants.getComponents()[getApp().getModel().ownId]);
             
             if (this.comboSelectMailbox.getSelectedItem() != null) {
                 // Set email address and deactivate if not already done
                 String emailAddress = ((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getEmailAddress();
-                if (!entry.getRightValue().equals(emailAddress) || entry.isRightEnabled()) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            // No entry in field allowed
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        // No entry in field allowed
+                        if (entry.isRightEnabled()) {
                             entry.setRightEnabled(false);
-                            // Set e-mail address
+                        }
+
+                        // Set e-mail address
+                        if (!entry.getRightValue().equals(emailAddress)) {
                             entry.setRightValue(emailAddress);
                         }
-                    });
-                }
-            } else {
-                if (!entry.isRightEnabled()) {
+                    }
+                });
+                } else {
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            entry.setRightEnabled(true);
+                            if (!entry.isRightEnabled()) {
+                                entry.setRightEnabled(true);
+                            }
                         }
-                    });
-                }                
+                    });         
             }
         }
     }
