@@ -94,7 +94,10 @@ public class App extends JFrame {
         } catch( Exception ex ) {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
-               
+        
+        // Prefer IPv6 if network (e.g. e-mail) is used
+        System.getProperties().setProperty("java.net.preferIPv6Addresses", "true");               
+        
         // Start App
         new App();
     }
