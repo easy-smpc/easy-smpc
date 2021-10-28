@@ -21,6 +21,8 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -170,27 +172,30 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             ((EntryParticipantCheckmarkSendMail) c).setButtonEnabled(false);
         }
         
-        // Spawn async task
-        new SwingWorker<Void, Void>() {
+        // Create progress monitor
+        ProgressMonitor monitor = new ProgressMonitor(Perspective2Send.this.getPanel(), 
+                                                      Resources.getString("PerspectiveSend.ProgressTitle"),
+                                                      Resources.getString("PerspectiveSend.ProgressNote"),
+                                                      0, list.size());
+        
+        // Timing
+        monitor.setMillisToDecideToPopup(0);
+        monitor.setMillisToPopup(0);
+        monitor.setProgress(1);
+        
+        // Create async task
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+            /** Has message been sent */
+            boolean messageSent = false;
+            /** Did an error occurred */
+            boolean error = false;
             
             @Override
-            protected Void doInBackground() throws Exception {
-
-                // Create progress monitor
-                ProgressMonitor monitor = new ProgressMonitor(Perspective2Send.this.getPanel(), 
-                                                              Resources.getString("PerspectiveSend.ProgressTitle"),
-                                                              Resources.getString("PerspectiveSend.ProgressNote"),
-                                                              0, list.size());      
-                // Timing
-                monitor.setMillisToDecideToPopup(100);
-                monitor.setMillisToPopup(100);
-                monitor.setProgress(0);
+            protected Void doInBackground() throws Exception {                
 
                 // Init loop
-                boolean messageSent = false;
-                boolean error = false;
                 int workDone = 0;
-                    
+
                 // Loop over messages
                 for (EntryParticipantCheckmarkSendMail entry : list) {
                     // Init
@@ -215,7 +220,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                                       generateFormatedExchangeString(entry)));
                     }
 
-                    
                     try {
                         // Wait for result with a timeout time
                         future.get(Resources.TIMEOUT_SEND_EMAILS, TimeUnit.MILLISECONDS);
@@ -225,26 +229,33 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                         getApp().actionMarkMessageRetrieved(index);
                         messageSent = true;
                     } catch (Exception e) {
-                        // TODO: Differentiate between errors by different exceptions?
+                        // TODO: Differentiate between errors by different
+                        // exceptions?
                         future.cancel(true);
                         error = true;
                     }
-                    monitor.setProgress(++workDone);
-                }
+                    this.setProgress((++workDone / list.size()) * 100);
+                }              
 
+                // Done
+                return null;
+            }
+            
+            @Override
+            public void done() {
                 // Persist changes
                 if (messageSent) {
                     getApp().actionSave();
                 }
 
                 // Display error message if applicable
-                if (error) {                   
+                if (error) {
                     JOptionPane.showMessageDialog(getPanel(),
                                                   Resources.getString("PerspectiveSend.sendAutomaticError"),
                                                   Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
                                                   JOptionPane.ERROR_MESSAGE);
                 }
-                
+
                 // Re-activate buttons
                 buttonSendAllAutomatically.setEnabled(true);
                 buttonSendAllManually.setEnabled(true);
@@ -257,11 +268,24 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 // Finalize
                 monitor.setProgress(list.size());
                 stateChanged(new ChangeEvent(this));
-
-                // Done
-                return null;
             }
-        }.execute();
+        };
+        
+        // Add change listener to worker
+        worker.addPropertyChangeListener(new PropertyChangeListener() {
+
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+
+                // Set progress
+                if (evt.getPropertyName().equals("progress")) {
+                    monitor.setProgress((((Integer) evt.getNewValue()) / 100) * list.size());
+                }
+            }
+        });
+
+        // Start worker
+        worker.execute();
     }
 
     /**
@@ -545,7 +569,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         // Update GUI
         getPanel().revalidate();
         getPanel().repaint();
-
+        
         // Send e-mails automatically if enabled
         if (isAutomaticProcessingEnabled()) {
             actionSendMailAutomatically(getAllParticipants());
