@@ -35,20 +35,18 @@ import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.nogui.Combinator.Combination;
 
 /**
- * Starts a performance test without GUI
+ * Starts a performance evaluation (no usage of GUI)
  * 
  * @author Felix Wirth
  *
  */
 public class PerformanceEvaluation implements ResultPrinter {
 	/** File path */
-	public static final String FILEPATH = "performanceEvaluation";
+	private static final String FILEPATH = "performanceEvaluation";
 	/** CSV printer */
-	public static CSVPrinter csvPrinter;
+	private CSVPrinter csvPrinter;
 	/** Logger */
 	private static Logger logger;
-	/** Was preparation executed */
-	private static boolean prepared = false;
 
 	/**
 	 * 
@@ -66,12 +64,17 @@ public class PerformanceEvaluation implements ResultPrinter {
 		List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] { 3 }));
 		List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] { 10000, 7500, 5000, 2500, 1000 }));
 		List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] { 20000, 15000, 10000, 5000, 1000 }));
+		
 		// Use separated mailboxes
 		boolean isSharedMailbox = false;
+		
 		// Repeat each parameter combinations 15 times
 		int repetitionsPerCombination = 15;
+		
 		// Wait after a complete EasySMPC round 1000 ms before start the next
 		int waitTime = 1000;
+		
+		// Create combinator
 		Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, repetitionsPerCombination);
 
 		// Create connection settings
@@ -83,14 +86,8 @@ public class PerformanceEvaluation implements ResultPrinter {
 		// Create mailbox details
 		MailboxDetails mailBoxDetails = new MailboxDetails(isSharedMailbox, connectionIMAPSettings, participants, tracker);
 
-		// Repeat endless
-		while (true) {
-			Combination combination = combinator.nextCombination();
-
-			// Call evaluation
-			new PerformanceEvaluation(combination.getParticipants(), combination.getBins(),
-					combination.getMailboxCheckInterval(), mailBoxDetails, waitTime);
-		}
+        // Call evaluation
+        new PerformanceEvaluation(combinator, mailBoxDetails, waitTime);
 	}
 
 	/**
@@ -101,44 +98,42 @@ public class PerformanceEvaluation implements ResultPrinter {
 	 * @param waitTime between two repetition/EasySMPC processes
 	 * @throws IOException
 	 */
-	public PerformanceEvaluation(int participants, int bins, int mailboxCheckIntervals, MailboxDetails mailBoxDetails,
-			int waitTime) throws IOException {
-		// Prepare if necessary
-		if (!prepared) {
-			try {
-				prepare(mailBoxDetails);
-				prepared = true;
-			} catch (IOException | BusException | InterruptedException e) {
-				logger.error("Preparation failed logged", new Date(), "Preparation failed",
-						ExceptionUtils.getStackTrace(e));
-				throw new IllegalStateException("Unable to prepare performance evaluation", e);
-			}
-		}
+	public PerformanceEvaluation(Combinator combinator, MailboxDetails mailBoxDetails, int waitTime) throws IOException {
+        // Prepare
+        try {
+            prepare(mailBoxDetails);
+        } catch (IOException | BusException | InterruptedException e) {
+            logger.error("Preparation failed logged", new Date(), "Preparation failed", ExceptionUtils.getStackTrace(e));
+            throw new IllegalStateException("Unable to prepare performance evaluation", e);
+        }
+        
+        for(Combination combination: combinator) {
 
-		// Start a EasySMPC process
-		CreatingUser user = new CreatingUser(participants, bins, mailboxCheckIntervals, mailBoxDetails, this);
+            // Start a EasySMPC process
+            CreatingUser user = new CreatingUser(combination.getParticipants(), combination.getBins(), combination.getMailboxCheckInterval(), mailBoxDetails, this);
 
-		// Wait to finish
-		while (!user.areAllUsersFinished()) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged",
-						ExceptionUtils.getStackTrace(e));
-			}
-		}
+            // Wait to finish
+            while (!user.areAllUsersFinished()) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged",
+                                 ExceptionUtils.getStackTrace(e));
+                }
+            }
 
-		// Reset statistics
-		mailBoxDetails.getTracker().resetStatistics();
+            // Reset statistics
+            mailBoxDetails.getTracker().resetStatistics();
 
-		// Wait
-		logger.debug("Wait logged", new Date(), "Started waiting for", waitTime);
-		try {
-			Thread.sleep(waitTime);
-		} catch (InterruptedException e) {
-			logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged",
-					ExceptionUtils.getStackTrace(e));
-		}
+            // Wait
+            logger.debug("Wait logged", new Date(), "Started waiting for", waitTime);
+            try {
+                Thread.sleep(waitTime);
+            } catch (InterruptedException e) {
+                logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged",
+                             ExceptionUtils.getStackTrace(e));
+            }
+        }
 	}
 
 	/**
@@ -154,6 +149,7 @@ public class PerformanceEvaluation implements ResultPrinter {
 
 		// Set log4j also as log manager for Java utility logging
 		System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+		
 		// Set logging properties from file
 		System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");
 		logger = LogManager.getLogger(PerformanceEvaluation.class);
@@ -173,6 +169,7 @@ public class PerformanceEvaluation implements ResultPrinter {
 						"Mailbox check interval", "Fastest processing time", "Slowest processing time",
 						"Mean processing time", "Number messages received", "Total size messages received",
 						"Number messages sent", "Total size messages sent").withSkipHeaderRecord(skipHeader));
+		
 		// Reset statistics and log
 		mailBoxDetails.getTracker().resetStatistics();
 		logger.debug("Finished preparation logged", new Date(), "Finished preparation");

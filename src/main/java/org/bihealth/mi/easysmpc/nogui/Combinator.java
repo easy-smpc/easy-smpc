@@ -15,13 +15,15 @@ package org.bihealth.mi.easysmpc.nogui;
 
 import java.util.List;
 
+import org.bihealth.mi.easysmpc.nogui.Combinator.Combination;
+
 /**
  * A class to combine the different parameters
  * 
  * @author Felix Wirth
  *
  */
-public abstract class Combinator {
+public abstract class Combinator implements Iterable<Combination>{
     
     /**
      * A combination of possible parameters 
@@ -115,11 +117,4 @@ public abstract class Combinator {
     protected List<Integer> getParticipants() {
         return participants;
     }
-
-    /**
-     * Get a new combination
-     * 
-     * @return
-     */
-    public abstract Combination nextCombination();
 }

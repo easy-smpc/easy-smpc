@@ -13,8 +13,11 @@
  */
 package org.bihealth.mi.easysmpc.nogui;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+
+import org.bihealth.mi.easysmpc.nogui.Combinator.Combination;
 
 /**
  * Allows to obtain a random combination of parameters
@@ -22,7 +25,7 @@ import java.util.Random;
  * @author Felix Wirth
  *
  */
-public class RandomCombinator extends Combinator {
+public class RandomCombinator extends Combinator implements Iterator<Combination> {
     
     /** Random */
     private Random random;
@@ -40,14 +43,20 @@ public class RandomCombinator extends Combinator {
         
         // Store
         this.random = new Random();
+    }    
+
+    @Override
+    public Iterator<Combination> iterator() {
+        return this;
     }
-    
-    /**
-     * Creates a new combination
-     * 
-     * @return
-     */
-    public Combination nextCombination() {        
+
+    @Override
+    public boolean hasNext() {
+        return true;
+    }
+
+    @Override
+    public Combination next() {
         return new Combination(getParticipants().get(random.nextInt(getParticipants().size())),
                                getBins().get(random.nextInt(getBins().size())),
                                getMailboxCheckInterval().get(random.nextInt(getMailboxCheckInterval().size())));

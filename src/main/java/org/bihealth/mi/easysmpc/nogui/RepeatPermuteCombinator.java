@@ -13,7 +13,10 @@
  */
 package org.bihealth.mi.easysmpc.nogui;
 
+import java.util.Iterator;
 import java.util.List;
+
+import org.bihealth.mi.easysmpc.nogui.Combinator.Combination;
 
 /**
  * A class to permute the parameters and repeat them
@@ -21,7 +24,7 @@ import java.util.List;
  * @author Felix Wirth
  *
  */
-public class RepeatPermuteCombinator extends Combinator {
+public class RepeatPermuteCombinator extends Combinator implements Iterator<Combination> {
 
     /** How often repeat each step? */
     private final int repeatPerCombination;
@@ -49,57 +52,93 @@ public class RepeatPermuteCombinator extends Combinator {
         this.repeatPerCombination = repeatPerStep;
     }
 
+
     /**
+     * Increases the counter and indexes
      * 
+     * @param dryRun If actually increase numbers, if false just check if possible 
+     * @return Is an increase still possible?
      */
-    private void increaseIndexes() {
-        // Reset counter
-        this.counterRepetition = 0;
-
-        // Increase mailbox check interval index
-        boolean increase = false;
-        if (mailboxCheckIntervalIndex + 1 >= getMailboxCheckInterval().size()) {
-            mailboxCheckIntervalIndex = 0;
-            increase = true;
-        } else {
-            mailboxCheckIntervalIndex++;
-        }
-
-        // Increase bin index
-        if (increase) {
-            if (binIndex + 1 >= getBins().size()) {
-                binIndex = 0;
-                increase = true;
-            } else {
-                ++binIndex;
-                increase = false;
-            }
-        }
+    private boolean increase(boolean dryRun) {
+        // Create local variables
+        int mailboxCheckIntervalIndex = this.mailboxCheckIntervalIndex;
+        int binIndex = this.binIndex;
+        int particpantIndex = this.particpantIndex;
+        int counterRepetition = this.counterRepetition;
         
-        // Increase participants index
-        if (increase) {
-            if (particpantIndex + 1 >= getParticipants().size()) {
-                particpantIndex = 0;
-            } else {
-                ++particpantIndex;
-            }
-        }
-    }
-
-    @Override
-    public Combination nextCombination() {
         
         // Advance indexes if necessary
         if (this.counterRepetition >= this.repeatPerCombination) {
-            increaseIndexes();
+
+            // Reset counter
+            counterRepetition = 0;
+
+            // Increase mailbox check interval index
+            boolean increase = false;
+            if (mailboxCheckIntervalIndex + 1 >= getMailboxCheckInterval().size()) {
+                mailboxCheckIntervalIndex = 0;
+                increase = true;
+            } else {
+                mailboxCheckIntervalIndex++;
+            }
+
+            // Increase bin index
+            if (increase) {
+                if (binIndex + 1 >= getBins().size()) {
+                    binIndex = 0;
+                    increase = true;
+                } else {
+                    ++binIndex;
+                    increase = false;
+                }
+            }
+
+            // Increase participants index
+            if (increase) {
+                if (particpantIndex + 1 >= getParticipants().size()) {
+                    // Return false only if no more participants
+                    return false;
+                } else {
+                    ++particpantIndex;
+                }
+            }
         }
         
         // Increase counter
-        ++this.counterRepetition; 
+        ++counterRepetition;
+        
+        // If actual run store variables
+        if(!dryRun) {
+            // Store counter
+            this.counterRepetition = counterRepetition;
+            // Store indexes
+            this.mailboxCheckIntervalIndex = mailboxCheckIntervalIndex;
+            this.binIndex = binIndex;
+            this.particpantIndex = particpantIndex;
+        }
+        
+        return true;
+    }
+
+    @Override
+    public Iterator<Combination> iterator() {
+        return this;
+    }
+    
+    @Override
+    public boolean hasNext() {
+        return increase(true);
+    }
+
+    @Override
+    public Combination next() {
+        if(!increase(false)) {
+            return null;
+        }
         
         // Return
         return new Combination(getParticipants().get(particpantIndex),
                                getBins().get(binIndex),
                                getMailboxCheckInterval().get(mailboxCheckIntervalIndex));
-    }
+    };
 }
