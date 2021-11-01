@@ -17,6 +17,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+
+import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
  * The Bus collecting and sending the messages
@@ -27,12 +34,17 @@ import java.util.Map;
 public abstract class Bus {
     
     /** Stores the subscriptions with  known participants*/    
-    private final Map<Scope, Map<Participant, List<MessageListener>>> subscriptions;
+    private final Map<Scope, Map<Participant, List<MessageListener>>> subscriptions;   
+    /** Executor service */
+    private final ExecutorService executor;
     
     /**
      * Creates a new instance
+     * 
+     * @param sizeThreadpool
      */
-    public Bus(){
+    public Bus(int sizeThreadpool) {
+        this.executor = Executors.newFixedThreadPool(sizeThreadpool != 0 ? sizeThreadpool : Resources.SIZE_THREADPOOL);
         this.subscriptions = new HashMap<>();
     }
 
@@ -40,7 +52,7 @@ public abstract class Bus {
      * Returns whether potentially running backend services are alive
      * @return
      */
-    public abstract boolean isAlive();
+    public abstract boolean isAlive();    
     
     /**
      * Is there a listener for the participant and scope registered
@@ -95,9 +107,56 @@ public abstract class Bus {
         }
         
         // Add listener
-        listenerForParticipant.add(messageListener);         
+        listenerForParticipant.add(messageListener);
+    }    
+
+    /**
+     * Abstract method to send a message
+     * 
+     * @param message
+     * @param scope
+     * @param participant
+     * @return task
+     * @throws Exception
+     */
+    public abstract Void sendInternal(Message message, Scope scope, Participant participant) throws Exception;
+    
+    /**
+     * Allows to send a message to a participant
+     * In case of error retries infinitely - error handling must be done by using the returned FutureTask object
+     * 
+     * @param message
+     * @param scope
+     * @param participant
+     * @return 
+     * @throws BusException
+     */
+    public FutureTask<Void> send(Message message, Scope scope, Participant participant) throws BusException {
+        // Create future task 
+        FutureTask<Void> task = new FutureTask<>(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                // Init
+                boolean sent = false;
+                
+                // Retry until sent successful
+                while(!sent) {
+                    try {
+                        sendInternal(message, scope, participant);
+                        sent = true;
+                    } catch (BusException e) {
+                        // Ignore and repeat
+                    }
+                }
+                return null;
+            }
+        });
+        
+        // Start and return
+        executor.execute(task);
+        return task;
     }
-   
+    
     /**
      * Receives an external received message
      * 
@@ -128,19 +187,32 @@ public abstract class Bus {
         // Done
         return received;
     }
-
-    /**
-     * Allows to send a message to a participant
-     * 
-     * @param message
-     * @param scope
-     * @param participant
-     * @throws BusException
-     */
-    public abstract void send(Message message, Scope scope, Participant participant, Participant sender) throws BusException;
     
     /**
      * Stops all backend services that might be running
      */
-    public abstract void stop();
+    public abstract void stop();    
+    
+    /**
+     * Passes on receiving errors
+     *  
+     * @param messageListener
+     */
+    public synchronized void receiveErrorInternal(Exception exception) {
+        
+        for(Entry<Scope, Map<Participant, List<MessageListener>>> scope : subscriptions.entrySet()) {
+            for(Entry<Participant, List<MessageListener>> participant : scope.getValue().entrySet()) {
+                for(MessageListener messageListener : participant.getValue()) {
+                    messageListener.receiveError(exception);
+                }
+            }
+        }        
+    }
+
+    /**
+     * @return the executor
+     */
+    protected ExecutorService getExecutor() {
+        return executor;
+    }
 }

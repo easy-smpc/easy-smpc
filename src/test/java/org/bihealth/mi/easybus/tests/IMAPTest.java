@@ -35,6 +35,11 @@ public class IMAPTest {
         public void receive(Message message) {
             System.out.println("Message received: " + message.getMessage());
         }
+
+        @Override
+        public void receiveError(Exception exception) {
+            System.out.println("Error receiving message");
+        }
     };
 
     /** Listener*/
@@ -42,6 +47,11 @@ public class IMAPTest {
         @Override
         public void receive(Message message) {
             System.out.println("This message should not appear: " + message.getMessage());
+        }
+        
+        @Override
+        public void receiveError(Exception exception) {
+            System.out.println("Error receiving message");
         }
     };
     
@@ -55,7 +65,7 @@ public class IMAPTest {
         
         // Create bus
         BusEmail bus = new BusEmail(new ConnectionIMAP(login,
-                                                       true), 1000);
+                                                       false), 1000);
 
         // Positive test receiver
         bus.receive(new Scope("scope1"),
@@ -70,7 +80,7 @@ public class IMAPTest {
         // Send message
         bus.send(new Message("My shared mailbox message"),
                  new Scope("scope1"),
-                 new Participant("part1", "hello@number1.de"), null);
+                 new Participant("part1", "hello@number1.de"));
 
         // Wait for test to pass
         Thread.sleep(5000);

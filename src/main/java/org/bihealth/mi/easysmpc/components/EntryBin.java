@@ -13,9 +13,12 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.bihealth.mi.easysmpc.resources.Resources;
+
+import de.tu_darmstadt.cbs.secretshare.ArithmeticSharing;
 
 /**
  * Entry for bins
@@ -27,18 +30,23 @@ public class EntryBin extends ComponentEntryAddRemove {
     
     /** SVUID*/
     private static final long serialVersionUID = 950691229934119178L;
-    /** Lower*/
-    private static final BigInteger LOWER = ((BigInteger.valueOf(2).pow(126)).add(BigInteger.ONE)).negate(); // -2^126-1
-    /** Upper*/
-    private static final BigInteger UPPER = ((BigInteger.valueOf(2).pow(126)).subtract(BigInteger.ONE)); // 2^126-1
-    
+    /** LowerInt*/
+    private static final BigInteger LOWERINT = ((BigInteger.valueOf(2).pow(126)).negate()).add(BigInteger.ONE); // -2^126+1
+    /** UpperInt*/
+    private static final BigInteger UPPERINT = ((BigInteger.valueOf(2).pow(126)).subtract(BigInteger.ONE)); // 2^126-1
+        
     /**
-     * Checks whether the value is within range [-2^126-1, 2^126-1]
+     * Checks whether the integral value is within ranges before and after the point
      * @param value
      * @return
      */
-    private static final boolean isInRange(BigInteger value) {
-        return (value.compareTo(LOWER) >= 0) && (value.compareTo(UPPER) <= 0);
+    private static final boolean isInRange(BigDecimal value) {
+        
+        // Convert to BigInteger
+        BigInteger valueAsInteger = ArithmeticSharing.convertToFixedPoint(value, Resources.FRACTIONAL_BITS);
+
+        // Check ranges
+        return (valueAsInteger.compareTo(LOWERINT) >= 0 ) && (valueAsInteger.compareTo(UPPERINT) <= 0);
     }
 
     /**
@@ -85,7 +93,7 @@ public class EntryBin extends ComponentEntryAddRemove {
                   @Override
                   public boolean validate(String text) {
                       try {
-                          return isInRange(new BigInteger(text.trim()));
+                          return isInRange(new BigDecimal(text.trim().replace(',', '.')));
                       } catch (Exception e) {
                           return false;
                       }
@@ -117,7 +125,7 @@ public class EntryBin extends ComponentEntryAddRemove {
                   @Override
                   public boolean validate(String text) {
                       try {
-                          return isInRange(new BigInteger(text.trim()));
+                          return isInRange(new BigDecimal(text.trim().replace(',', '.')));
                       } catch (Exception e) {
                           return false;
                       }

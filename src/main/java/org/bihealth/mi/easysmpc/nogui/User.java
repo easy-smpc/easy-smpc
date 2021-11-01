@@ -14,10 +14,14 @@
 package org.bihealth.mi.easysmpc.nogui;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Random;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -44,14 +48,14 @@ public abstract class User implements MessageListener {
     private static Logger logger;
     /** The length of a generated string */
     public final int FIXED_LENGTH_STRING = 10;
-    /** The length of a generated big integer */
-    public final int FIXED_LENGTH_BIT_BIGINTEGER = 31;
+    /** The length of a generated big decimal before the comma */
+    public final int FIXED_LENGTH_BIT_NUMBER = 31;
     /** Round for initial e-mails */
     public final String ROUND_0 = "_round0";       
     /** The study model */
     private Study model = new Study();
     /** The random object */
-    private final Random random = new Random();
+    private final SecureRandom randomGenerator = new SecureRandom();
     /** The mailbox check interval in  milliseconds */
     private final int mailBoxCheckInterval;
     /** Is shared mailbox used? */
@@ -82,22 +86,22 @@ public abstract class User implements MessageListener {
     }
     
     /**
-     * Generates a random big integer
+     * Generates a random big decimal
      * 
-     * @param bit length of big integer
+     * @param bit length of big decimal
      * @return
      * @throws IllegalArgumentException
      */
-    protected BigInteger generateRandomBigInteger(int bitLength) throws IllegalArgumentException {
+    protected BigDecimal generateRandomBigDecimal(int bitLength) throws IllegalArgumentException {
         // Check
         if (bitLength < 2) throw new IllegalArgumentException("Bitlength must be larger than 2");
         
         // Random integer
-        BigInteger value = new BigInteger(bitLength - 1, random);
+        BigDecimal value =  new BigDecimal(new BigInteger(bitLength, randomGenerator));
         
         // Swap sign? 
         byte[] randomByte = new byte[1];
-        random.nextBytes(randomByte);
+        randomGenerator.nextBytes(randomByte);
         int signum = Byte.valueOf(randomByte[0]).intValue() & 0x01;
         if (signum == 1) value = value.negate();
         
@@ -277,15 +281,17 @@ public boolean isStudyStateNone() {
 
                 try {
                     // Retrieve bus and send message
-                    getModel().getBus(0, this.isSharedMailbox).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
+                    FutureTask<Void> future = getModel().getBus(0, this.isSharedMailbox).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
                                     new Scope(getModel().getStudyUID() + (getModel().getState() == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().getParticipants()[index].name,
-                                                                            getModel().getParticipants()[index].emailAddress),
-                                    new org.bihealth.mi.easybus.Participant(getModel().getParticipants()[getModel().getOwnId()].name,
-                                                                            getModel().getParticipants()[getModel().getOwnId()].emailAddress));
+                                                                            getModel().getParticipants()[index].emailAddress));
+                    
+                    // Wait for result with a timeout time
+                    future.get(Resources.TIMEOUT_SEND_EMAILS, TimeUnit.MILLISECONDS);
+                    
                     // Mark message as sent
                     model.markMessageSent(index);
-                } catch (BusException | IOException e) {
+                } catch (Exception e) {
                     logger.error("Unable to send e-mail logged", new Date(), "Unable to send e-mail", ExceptionUtils.getStackTrace(e));
                     throw new IllegalStateException("Unable to send e-mail!", e);
                 }

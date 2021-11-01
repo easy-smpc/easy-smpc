@@ -138,7 +138,7 @@ public abstract class ConnectionEmail {
          */
         protected Object getAttachment() {
             return attachment;
-        }
+        }        
     
         /**
          * Create object from byte stream
@@ -193,11 +193,11 @@ public abstract class ConnectionEmail {
      * @param sender
      * @return
      */
-    public static String createSubject(Scope scope, Participant receiver, Participant sender) {
-        return EMAIL_SUBJECT_PREFIX + SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + " " + 
-                PARTICIPANT_NAME_START_TAG + receiver.getName() + PARTICIPANT_NAME_END_TAG + " " + 
-                PARTICIPANT_EMAIL_START_TAG + receiver.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG + " " +
-                "SENDER_START" + sender.getName() + "SENDER_END";
+    public static String createSubject(Scope scope, Participant receiver) {
+        return EMAIL_SUBJECT_PREFIX + SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG +
+               " " + PARTICIPANT_NAME_START_TAG + receiver.getName() + PARTICIPANT_NAME_END_TAG +
+               " " + PARTICIPANT_EMAIL_START_TAG + receiver.getEmailAddress() +
+               PARTICIPANT_EMAIL_END_TAG;
     }
 
 	/**
@@ -239,13 +239,15 @@ public abstract class ConnectionEmail {
     public static Scope getScope(String body) {
 
         // Check
-        if(!body.contains(SCOPE_NAME_START_TAG) || !body.contains(SCOPE_NAME_END_TAG)){
+        if (!body.contains(SCOPE_NAME_START_TAG) || !body.contains(SCOPE_NAME_END_TAG)) {
             return null;
         }
-        
+
         // Extract
-        String scope = body.substring(body.indexOf(SCOPE_NAME_START_TAG) + SCOPE_NAME_START_TAG.length(), body.indexOf(SCOPE_NAME_END_TAG));
-        
+        String scope = body.substring(body.indexOf(SCOPE_NAME_START_TAG) +
+                                      SCOPE_NAME_START_TAG.length(),
+                                      body.indexOf(SCOPE_NAME_END_TAG));
+
         // Check
         if (scope.length() == 0) {
             return null;
@@ -309,14 +311,14 @@ public abstract class ConnectionEmail {
      * @return
      */
     protected abstract boolean isReceivingConnected();
-    
+
     /**
      * Is there an working connection to send?
      * 
      * @return
      */
     protected abstract boolean isSendingConnected();
-
+    
     /**
      * Lists all relevant e-mails
      * @param filter 
@@ -357,7 +359,7 @@ public abstract class ConnectionEmail {
                 }
 
                 Object attachment = message.getAttachment();
-                                
+
                 if (text == null || attachment == null) {
                     logger.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
                     continue;
@@ -377,7 +379,7 @@ public abstract class ConnectionEmail {
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }                        
-                    
+
                 if (scope == null || participant == null) {
                     logger.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
                     continue;
@@ -385,7 +387,9 @@ public abstract class ConnectionEmail {
                 
                 // Pass on
                 final ConnectionEmailMessage _message = message;
+
                 result.add(new BusEmail.BusEmailMessage(participant, scope, (Message) attachment, message.text) {
+
                     @Override
                     protected void delete() throws BusException {
                         _message.delete();
@@ -417,13 +421,13 @@ public abstract class ConnectionEmail {
      * @param sender 
      * @throws BusException 
      */
-    protected void send(Message message, Scope scope, Participant receiver, Participant sender) throws BusException {
+    protected void send(Message message, Scope scope, Participant receiver) throws BusException {
         
         // Recipient
         String recipient = sharedMailbox ? getEmailAddress() : receiver.getEmailAddress();
         
         // Subject
-        String subject = createSubject(scope, receiver, sender);       
+        String subject = createSubject(scope, receiver);       
   
         // Body
         String body = SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + "\n" + 

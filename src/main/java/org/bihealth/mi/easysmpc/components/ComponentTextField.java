@@ -109,7 +109,14 @@ public class ComponentTextField extends JPanel {
      */
     @Override
     public void setEnabled(boolean enabled) {
-        this.field.setEnabled(enabled);
+        this.field.setEditable(enabled);
+    }
+    
+    /**
+     * Is the text field enabled
+     */
+    public boolean isEnabled() {
+        return  this.field.isEditable();
     }
     
     /**

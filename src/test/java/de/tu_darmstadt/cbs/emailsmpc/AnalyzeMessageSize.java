@@ -14,7 +14,7 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
 import java.io.IOException;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 
 /**
  * Small helper to analyze the size of messages (exchange strings)
@@ -33,13 +33,14 @@ public class AnalyzeMessageSize {
         Study testmodel = new Study();
         Participant[] part = new Participant[3];
         Bin[] bins = new Bin[1];
+        int fractionalBits = 32;
         for (int i = 0; i < part.length; i++) {
             part[i] = new Participant("Participant1 " + i, "part" + i + "@test.com");
         }
         for (int i = 0; i < bins.length; i++) {
             bins[i] = new Bin("Bin " + i);
             bins[i].initialize(part.length);
-            bins[i].shareValue(BigInteger.valueOf(1));
+            bins[i].shareValue(BigDecimal.valueOf(1), fractionalBits);
         }
         testmodel.toStarting();
         testmodel.toInitialSending("A1231231", part, bins, null);

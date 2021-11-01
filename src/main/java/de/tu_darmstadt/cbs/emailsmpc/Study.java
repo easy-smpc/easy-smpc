@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -37,6 +37,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
+
 public class Study implements Serializable, Cloneable {
     
     /**
@@ -115,6 +116,9 @@ public class Study implements Serializable, Cloneable {
 
     /** The filename. */
     private transient File         filename;
+    
+    /** Number of fractional bits for decimal representation */
+    public int                    fractionalBits;
 
     /** The e-mail connection details */
     private ConnectionIMAPSettings connectionIMAPSettings;
@@ -124,6 +128,9 @@ public class Study implements Serializable, Cloneable {
     
     /** Store whether messages have been retrieved */
     private boolean[] retrievedMessages;
+    
+    /** Are e-mails processed manually or automatically */
+    private boolean automatedMode = false;
 
     /**
      * Instantiates a new app model.
@@ -138,6 +145,7 @@ public class Study implements Serializable, Cloneable {
         setParticipants(null);
         unsentMessages = null;
         setFilename(null);
+        fractionalBits = 32;
     }
 
     /**
@@ -291,7 +299,8 @@ public class Study implements Serializable, Cloneable {
         newModel.setOwnId(this.getOwnId());
         newModel.setStudyUID(this.getStudyUID());
         newModel.setState(this.getState());
-        newModel.setFilename(this.getFilename());     
+        newModel.setFilename(this.getFilename());   
+        newModel.setFractionalBits(this.getFractionalBits());
         if (this.getBins() != null) {
             newModel.setBins(new Bin[this.getBins().length]);
             for (int i = 0; i < newModel.getBins().length; i++) {
@@ -315,7 +324,7 @@ public class Study implements Serializable, Cloneable {
      
       return newModel;
     }
-
+    
     /**
      * Equals.
      *
@@ -338,6 +347,7 @@ public class Study implements Serializable, Cloneable {
           result = result && (m.getFilename().equals(getFilename()));
         else
           result = result && (getFilename() == null);
+        result = result && m.fractionalBits == fractionalBits;
         result = result && (m.getBins().length == getBins().length);
         result = result && (m.getParticipants().length == getParticipants().length);
         result = result && (m.unsentMessages.length == unsentMessages.length);
@@ -384,11 +394,14 @@ public class Study implements Serializable, Cloneable {
      * @param binId the bin id
      * @return the bin result
      * @throws IllegalStateException the illegal state exception
+     * @throws IllegalArgumentException fractionalBits must be positive
      */
-    public synchronized BinResult getBinResult(int binId) throws IllegalStateException {
+    public synchronized BinResult getBinResult(int binId) throws IllegalStateException, IllegalArgumentException {
+        if (fractionalBits < 0)
+            throw new IllegalArgumentException("fractionalBits must be positive");
         if (getState() != StudyState.FINISHED)
             throw new IllegalStateException("Forbidden action (getBinResult) at current state " + getState());
-        return new BinResult(getBins()[binId].name, getBins()[binId].reconstructBin());
+        return new BinResult(getBins()[binId].name, getBins()[binId].reconstructBin(fractionalBits));
     }
     
     /**
@@ -416,7 +429,7 @@ public class Study implements Serializable, Cloneable {
      * @throws BusException
      */
     public synchronized BusEmail getBus(int millis) throws BusException {
-        return getBus(millis, true);
+        return getBus(millis, false);
     }
 
     /**
@@ -556,6 +569,30 @@ public class Study implements Serializable, Cloneable {
         return unsentMessages[recipientId];
     }
     
+    /** @return the fractionalBits */
+    public int getFractionalBits() {
+        return fractionalBits;
+    }
+    
+    /**
+     * @param fractionalBits the fractional bits to sets
+     */
+    public void setFractionalBits(int fractionalBits) {
+        this.fractionalBits = fractionalBits;
+    }
+    
+    /**
+     * @param automatedMode the automatedMode to sets
+     */
+    public void setAutomatedMode(boolean automatedMode) {
+        this.automatedMode = automatedMode;
+    }
+    
+    /** @return Is automated mode used? */
+    public boolean isAutomatedMode() {
+        return this.automatedMode;
+    }
+
     /**
      * Hash code.
      *
@@ -568,6 +605,7 @@ public class Study implements Serializable, Cloneable {
         result = 31 * result + getStudyUID().hashCode();
         result = 31 * result + getState().hashCode();
         result = 31 * result + getName().hashCode();
+        result = 31 * result + fractionalBits;
         if (getFilename() != null)
             result = 31 * result + getFilename().hashCode();
         for (Bin b : getBins()) {
@@ -605,6 +643,7 @@ public class Study implements Serializable, Cloneable {
             throw new IllegalStateException("Unable to initialize study at state" + getState());
         this.setName(name);
         this.setConnectionIMAPSettings(connectionIMAPSettings);
+        this.automatedMode = connectionIMAPSettings != null ? true: false;
         setNumParticipants(participants.length);
         unsentMessages = new Message[getNumParticipants()];
         retrievedMessages = new boolean[getNumParticipants()];       
@@ -1040,11 +1079,13 @@ public class Study implements Serializable, Cloneable {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public synchronized void toSendingShares(BigInteger[] values) throws IllegalArgumentException, IllegalStateException, IOException {
+    public synchronized void toSendingShares(BigDecimal[] values) throws IllegalArgumentException, IllegalStateException, IOException {
         if (values.length != getBins().length)
             throw new IllegalArgumentException("Number of values not equal number of bins");
+        if (fractionalBits < 0)
+            throw new IllegalArgumentException("fractionalBits must be positive");
         for (int i = 0; i < getBins().length; i++) {
-            getBins()[i].shareValue(values[i]);
+            getBins()[i].shareValue(values[i], fractionalBits);
         }
         advanceState(StudyState.SENDING_SHARE);
     }
@@ -1129,6 +1170,7 @@ public class Study implements Serializable, Cloneable {
         setParticipants(model.getParticipants());
         setName(model.getName());
         setState(model.getState());
+        setFractionalBits(model.getFractionalBits());
     }
 
     /**

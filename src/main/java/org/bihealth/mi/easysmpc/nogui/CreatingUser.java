@@ -22,6 +22,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easysmpc.nogui.ParticipatingUser.ParticipatingUserData;
+import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
@@ -61,7 +62,7 @@ public class CreatingUser extends User {
             // Init model with generated study name, participants and bins 
             getModel().toInitialSending(generateRandomString(FIXED_LENGTH_STRING),
                                         generateParticpants(numberParticipants, mailBoxDetails, FIXED_LENGTH_STRING),
-                                        generateBins(numberBins,numberParticipants, FIXED_LENGTH_STRING, FIXED_LENGTH_BIT_BIGINTEGER), mailBoxDetails.getConnection(0));
+                                        generateBins(numberBins,numberParticipants, FIXED_LENGTH_STRING, FIXED_LENGTH_BIT_NUMBER), mailBoxDetails.getConnection(0));
             // Init recoding
             RecordTimeDifferences.init(getModel(), mailBoxCheckInterval, System.nanoTime(), mailBoxDetails.getTracker());
         } catch (IOException | IllegalStateException e) {
@@ -70,7 +71,7 @@ public class CreatingUser extends User {
         }
         
         // Spawn participants
-        createParticipants(FIXED_LENGTH_BIT_BIGINTEGER, mailBoxDetails);
+        createParticipants(FIXED_LENGTH_BIT_NUMBER, mailBoxDetails);
         
         // Spawns the common steps in an own thread
         new Thread(new Runnable() {
@@ -149,7 +150,7 @@ public class CreatingUser extends User {
         // Init each bin and set generated secret value of creating user
         for (int index = 0; index < numberBins; index++) {
             result[index] = new Bin(generateRandomString(stringLength), numberParties);
-            result[index].shareValue(generateRandomBigInteger(bigIntegerBitLength));
+            result[index].shareValue(generateRandomBigDecimal(bigIntegerBitLength), Resources.FRACTIONAL_BITS);
         }
         
         // Return
@@ -182,5 +183,10 @@ public class CreatingUser extends User {
         
         // Return
         return result;
+    }
+    
+    @Override
+    public void receiveError(Exception e) {
+        logger.error("Error receiveing e-mails logged", new Date(), "Error receiveing e-mails" ,ExceptionUtils.getStackTrace(e));
     }
 }

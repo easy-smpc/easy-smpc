@@ -18,7 +18,7 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +36,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -236,7 +237,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         // Check e-mail configuration if not done so far
         if (comboSelectMailbox.getSelectedItem() != null && !emailconfigCheck) {
             try {
-                if (!new ConnectionIMAP((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem(), true).checkConnection()) {
+                if (!new ConnectionIMAP((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem(), false).checkConnection()) {
                     throw new BusException("Connection error");
                 }
             } catch (BusException e) {
@@ -258,7 +259,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         for (Component entry : this.panelBins.getComponents()) {
             Bin bin = new Bin(((EntryBin)entry).getLeftValue());
             bin.initialize(participants.size());
-            bin.shareValue(new BigInteger(((EntryBin)entry).getRightValue().trim()));
+            bin.shareValue(new BigDecimal(((EntryBin)entry).getRightValue().trim().replace(',','.')), Resources.FRACTIONAL_BITS);
             bins.add(bin);
         }
         
@@ -624,6 +625,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     public void stateChanged(ChangeEvent e) {
         // Is saving possible?
         this.buttonSave.setEnabled(this.areValuesValid());
+        
         // Can a mailbox be added or removed
         if (this.comboSelectMailbox.getSelectedItem() != null) {
             this.buttonEditMailbox.setEnabled(true);
@@ -631,6 +633,48 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         } else {
             this.buttonEditMailbox.setEnabled(false);
             this.buttonRemoveMailbox.setEnabled(false);
-        }               
+        }
+        
+        // Can a mailbox be added or removed
+        if (this.comboSelectMailbox.getSelectedItem() != null) {
+            this.buttonEditMailbox.setEnabled(true);
+            this.buttonRemoveMailbox.setEnabled(true);
+        } else {
+            this.buttonEditMailbox.setEnabled(false);
+            this.buttonRemoveMailbox.setEnabled(false);
+        }
+        
+        // If participants panels exists and automated mode selected => set e-mail address of creator automatically 
+        if (this.panelParticipants.getComponents() != null && this.panelParticipants.getComponents().length >= getApp().getModel().getOwnId() + 1) {
+            // Get participant entry component           
+            final EntryParticipant entry = ((EntryParticipant) this.panelParticipants.getComponents()[getApp().getModel().getOwnId()]);
+            
+            if (this.comboSelectMailbox.getSelectedItem() != null) {
+                // Set email address and deactivate if not already done
+                String emailAddress = ((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getEmailAddress();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        // No entry in field allowed
+                        if (entry.isRightEnabled()) {
+                            entry.setRightEnabled(false);
+                        }
+
+                        // Set e-mail address
+                        if (!entry.getRightValue().equals(emailAddress)) {
+                            entry.setRightValue(emailAddress);
+                        }
+                    }
+                });
+                } else {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!entry.isRightEnabled()) {
+                                entry.setRightEnabled(true);
+                            }
+                        }
+                    });         
+            }
+        }
     }
 }

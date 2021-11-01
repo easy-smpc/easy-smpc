@@ -406,5 +406,5 @@ public class ConnectionIMAPSettings implements Serializable {
 
         // Done
         return this;
-    }    
+    }
 }

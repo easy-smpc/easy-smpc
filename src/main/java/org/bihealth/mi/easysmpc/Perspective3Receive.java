@@ -126,6 +126,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @return
      */
     private boolean areSharesComplete() {
+        
         for (Bin b : getApp().getModel().getBins()) {
             if (!b.isComplete()) return false;
         }
@@ -374,6 +375,15 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             this.buttonsPane.add(this.buttonProceed, 0, 1);
         }
     }
+
+    /**
+     * Reacts on error messages from bus
+     */
+    @Override
+    public void receiveError(Exception exception) {
+        getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
+                                  true);
+        }    
     
     /**
      * Check participant entries visually if complete

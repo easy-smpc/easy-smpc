@@ -32,13 +32,11 @@ import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import jakarta.activation.DataHandler;
-import jakarta.mail.Authenticator;
 import jakarta.mail.Folder;
 import jakarta.mail.Message;
 import jakarta.mail.Message.RecipientType;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
-import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.Store;
 import jakarta.mail.Transport;
@@ -62,9 +60,9 @@ public class ConnectionIMAP extends ConnectionEmail {
     private static final String FILENAME_MESSAGE = "message";
     /** Logger */
     private static final Logger logger = LogManager.getLogger(ConnectionIMAP.class);
-    /** Properties */
+    /** Properties t o receive*/
     private final Properties    propertiesReceiving;
-    /** Properties */
+    /** Properties to send*/
     private final Properties    propertiesSending;
     /** Store object to access e-mail server */
     private Store               store;
@@ -127,9 +125,9 @@ public class ConnectionIMAP extends ConnectionEmail {
         
         // Create properties of sending connection
         this.propertiesSending = new Properties();
-        this.propertiesSending.put("mail.user", getEmailAddress());
-        this.propertiesSending.put("mail.from", getEmailAddress());
         this.propertiesSending.put("mail.transport.protocol", "smtp");
+        this.propertiesSending.put("mail.user", getEmailAddress());
+        this.propertiesSending.put("mail.from", getEmailAddress());        
         this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
         this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
         this.propertiesSending.put("mail.smtp.auth", "true");
@@ -188,7 +186,12 @@ public class ConnectionIMAP extends ConnectionEmail {
         ous.close();
         return bos.toByteArray();
     }
-    
+
+    protected synchronized boolean isSendingConnected() {
+        // TODO check sending connected
+        return true;
+    }
+
     @Override
     protected synchronized boolean isReceivingConnected() {
         try {
@@ -219,28 +222,6 @@ public class ConnectionIMAP extends ConnectionEmail {
             // Close
             folder.close(false);
             store.close();
-
-            // Done
-            return true;
-
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    /**
-     * Is sending connected?
-     * @return
-     */
-    protected synchronized boolean isSendingConnected() {
-        try {
-            // TODO Replace with an actual check
-            // Check sending e-mails
-            Session.getInstance(propertiesSending, new Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(getEmailAddress(), password);
-                }
-            });
 
             // Done
             return true;
@@ -361,7 +342,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 // Send
                 Transport.send(email, getEmailAddress(), password);
                 if (listener != null) {
-                	listener.messageSent(attachmentSize);
+                    listener.messageSent(attachmentSize);
                 }
                 logger.debug("Message sent logged", new Date(), "Message sent", subject);
             } catch (Exception e) {

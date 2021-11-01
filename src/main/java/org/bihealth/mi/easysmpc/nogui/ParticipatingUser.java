@@ -15,7 +15,7 @@ package org.bihealth.mi.easysmpc.nogui;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -141,6 +141,11 @@ public class ParticipatingUser extends User {
                                                 thread.setDaemon(false);
                                                 thread.start();
                                             }
+
+                                            @Override
+                                            public void receiveError(Exception e) {
+                                                logger.error("Error receiveing e-mails logged", new Date(), "Error receiveing e-mails" ,ExceptionUtils.getStackTrace(e));
+                                            }
                                         });
         } catch (BusException e) {
             logger.error("Unable to register to receive initial e-mails logged", new Date(), "Unable to register to receive initial e-mails", ExceptionUtils.getStackTrace(e));
@@ -153,13 +158,13 @@ public class ParticipatingUser extends User {
      * @param lengthBitBigInteger
      * @return
      */
-    private BigInteger[] fillBins(int lengthBitBigInteger) {
+    private BigDecimal[] fillBins(int lengthBitBigInteger) {
         // Init
-        BigInteger[] result = new BigInteger[getModel().getBins().length];
+        BigDecimal[] result = new BigDecimal[getModel().getBins().length];
         
         // Set a random big integer for each
         for (int index = 0; index < result.length; index++) {
-            result[index] = generateRandomBigInteger(lengthBitBigInteger);
+            result[index] = generateRandomBigDecimal(lengthBitBigInteger);
         }
         
         // Return
@@ -190,5 +195,9 @@ public class ParticipatingUser extends User {
             throw new IllegalStateException("Unable to execute particpating users steps" , e);
         }
         
+    }
+    @Override
+    public void receiveError(Exception e) {
+        logger.error("Error receiveing e-mails logged", new Date(), "Error receiveing e-mails" ,ExceptionUtils.getStackTrace(e));
     }
 }

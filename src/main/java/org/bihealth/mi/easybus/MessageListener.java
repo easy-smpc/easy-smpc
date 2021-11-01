@@ -14,6 +14,8 @@
 package org.bihealth.mi.easybus;
 
 /**
+ * An interface allowing the receiving of a message
+ * 
  * @author Felix Wirth
  *
  */
@@ -23,4 +25,9 @@ public interface MessageListener {
      * Needs to be implemented in order to receive a message
      */
     public void receive(Message message);
+    
+    /**
+     * Needs to be implemented in order to process an error
+     */
+    public void receiveError(Exception exception);
 }

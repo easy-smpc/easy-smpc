@@ -21,12 +21,16 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -46,7 +50,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.http.client.utils.URIBuilder;
-import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmarkSendMail;
@@ -169,82 +172,120 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             ((EntryParticipantCheckmarkSendMail) c).setButtonEnabled(false);
         }
         
-        // Spawn async task
-        new SwingWorker<Void, Void>() {
+        // Create progress monitor
+        ProgressMonitor monitor = new ProgressMonitor(Perspective2Send.this.getPanel(), 
+                                                      Resources.getString("PerspectiveSend.ProgressTitle"),
+                                                      Resources.getString("PerspectiveSend.ProgressNote"),
+                                                      0, list.size());
+        
+        // Timing
+        monitor.setMillisToDecideToPopup(0);
+        monitor.setMillisToPopup(0);
+        monitor.setProgress(1);
+        
+        // Create async task
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+            /** Has message been sent */
+            boolean messageSent = false;
+            /** Did an error occurred */
+            boolean error = false;
             
             @Override
-            protected Void doInBackground() throws Exception {
+            protected Void doInBackground() throws Exception {                
 
-                // Create progress monitor
-                ProgressMonitor monitor = new ProgressMonitor(Perspective2Send.this.getPanel(), 
-                                                              Resources.getString("PerspectiveSend.ProgressTitle"),
-                                                              Resources.getString("PerspectiveSend.ProgressNote"),
-                                                              0, list.size());
-                
-                try {
-                    
-                    // Timing
-                    monitor.setMillisToDecideToPopup(100);
-                    monitor.setMillisToPopup(100);
-                    monitor.setProgress(0);
-                    
-                    // Loop over messages
-                    boolean messageSent = false;
-                    int workDone = 0;
-                    for (EntryParticipantCheckmarkSendMail entry : list) {
-                        
-                        if(!isInitialSending()) {
-                            // Send message in bus mode
-                            getApp().getModel().getBus(0).send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
-                                      new Scope(getApp().getModel().getStudyUID() + getRoundIdentifier()),
-                                      new org.bihealth.mi.easybus.Participant(entry.getLeftValue(), entry.getRightValue()),
-                                      null);
-                        } else {
-                            // Send message as regular e-mail
-                            getApp().getModel().getBus(0).sendPlain(entry.getRightValue(),
-                                                                   generateEMailSubject(),
-                                                                   generateEMailBody(entry, generateFormatedExchangeString(entry)));
-                        }
-                        
+                // Init loop
+                int workDone = 0;
+
+                // Loop over messages
+                for (EntryParticipantCheckmarkSendMail entry : list) {
+                    // Init
+                    FutureTask<Void> future;
+
+                    if (!isInitialSending()) {
+                        // Send message in bus mode
+                        future = getApp().getModel()
+                                         .getBus()
+                                         .send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
+                                               new Scope(getApp().getModel().getStudyUID() +
+                                                         getRoundIdentifier()),
+                                               new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
+                                                                                       entry.getRightValue()));
+                    } else {
+                        // Send message as regular e-mail
+                        future = getApp().getModel()
+                                         .getBus()
+                                         .sendPlain(entry.getRightValue(),
+                                                    generateEMailSubject(),
+                                                    generateEMailBody(entry,
+                                                                      generateFormatedExchangeString(entry)));
+                    }
+
+                    try {
+                        // Wait for result with a timeout time
+                        future.get(Resources.TIMEOUT_SEND_EMAILS, TimeUnit.MILLISECONDS);
+
                         // Mark message sent
                         int index = Arrays.asList(panelParticipants.getComponents()).indexOf(entry);
                         getApp().actionMarkMessageRetrieved(index);
                         messageSent = true;
-                        monitor.setProgress(++workDone);
+                    } catch (Exception e) {
+                        // TODO: Differentiate between errors by different
+                        // exceptions?
+                        future.cancel(true);
+                        error = true;
                     }
-                    
-                    // Persist changes
-                    if (messageSent) {
-                        getApp().actionSave();
-                    }
-                    
-                } catch (BusException | IOException e) {
-                    
-                    // Error
-                    monitor.setProgress(list.size());
+                    this.setProgress((++workDone / list.size()) * 100);
+                }              
+
+                // Done
+                return null;
+            }
+            
+            @Override
+            public void done() {
+                // Persist changes
+                if (messageSent) {
+                    getApp().actionSave();
+                }
+
+                // Display error message if applicable
+                if (error) {
                     JOptionPane.showMessageDialog(getPanel(),
                                                   Resources.getString("PerspectiveSend.sendAutomaticError"),
                                                   Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
                                                   JOptionPane.ERROR_MESSAGE);
-                } finally {
-                    // Re-activate buttons
-                    buttonSendAllAutomatically.setEnabled(true);
-                    buttonSendAllManually.setEnabled(true);
-                    for (Component c : panelParticipants.getComponents()) {
-                        if (!isOwnEntry(c)) {
-                            ((EntryParticipantCheckmarkSendMail) c).setButtonEnabled(true);
-                        }
+                }
+
+                // Re-activate buttons
+                buttonSendAllAutomatically.setEnabled(true);
+                buttonSendAllManually.setEnabled(true);
+                for (Component c : panelParticipants.getComponents()) {
+                    if (!isOwnEntry(c)) {
+                        ((EntryParticipantCheckmarkSendMail) c).setButtonEnabled(true);
                     }
                 }
-                
+
                 // Finalize
                 monitor.setProgress(list.size());
                 stateChanged(new ChangeEvent(this));
-                
-                // Done
-                return null;
             }
-        }.execute();
+        };
+        
+        // Add change listener to worker
+        worker.addPropertyChangeListener(new PropertyChangeListener() {
+
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+
+                // Set progress
+                if (evt.getPropertyName().equals("progress")) {
+                    monitor.setProgress((((Integer) evt.getNewValue()) / 100) * list.size());
+                }
+            }
+        });
+
+        // Start worker
+        worker.execute();
     }
 
     /**
@@ -393,12 +434,11 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     protected String generateEMailSubject() {
         return String.format(Resources.getString("PerspectiveSend.mailSubject"),
-                                       getApp().getModel().getName(),
-                                       getApp().getModel().getState() == StudyState.INITIAL_SENDING
-                                               ? 0
-                                               : getApp().getModel().getState() == StudyState.SENDING_RESULT
-                                                       ? 2
-                                                       : 1);
+                             getApp().getModel().getName(),
+                             getApp().getModel().getState() == StudyState.INITIAL_SENDING ? 0
+                                     : getApp().getModel().getState() == StudyState.SENDING_RESULT
+                                             ? 2
+                                             : 1);
     }
     
      /**
@@ -528,7 +568,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         // Update GUI
         getPanel().revalidate();
         getPanel().repaint();
-
+        
         // Send e-mails automatically if enabled
         if (isAutomaticProcessingEnabled()) {
             actionSendMailAutomatically(getAllParticipants());

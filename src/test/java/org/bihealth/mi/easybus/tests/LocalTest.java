@@ -13,6 +13,8 @@
  */
 package org.bihealth.mi.easybus.tests;
 
+import java.util.concurrent.ExecutionException;
+
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
@@ -49,8 +51,8 @@ public class LocalTest {
         try {
             bus.send(new Message("message specific to part1"),
                      scope1ForPart3,
-                     new Participant("number 1", "hello@number1.de"), null);
-        } catch (BusException e) {
+                     new Participant("number 1", "hello@number1.de")).get();
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     
@@ -58,8 +60,8 @@ public class LocalTest {
         try {
             bus.send(new Message("message for non existing scope"),
                      new Scope("9999"),
-                     new Participant("number 1", "hello@number1.de"), null);
-        } catch (BusException e) {
+                     new Participant("number 1", "hello@number1.de")).get();
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
@@ -70,6 +72,11 @@ public class LocalTest {
         public void receive(Message message) {
             System.out.println("Message is: " + (String) message.getMessage());
         }
+
+        @Override
+        public void receiveError(Exception exception) {
+            System.out.println("Error receiving message");
+        }
     };
     
     class ReceiverImplPositiveBroadcast implements MessageListener {
@@ -77,12 +84,22 @@ public class LocalTest {
         public void receive(Message message) {
             System.out.println("This message should only be a brodcast message: " + (String) message.getMessage());
         }
+        
+        @Override
+        public void receiveError(Exception exception) {
+            System.out.println("Error receiving message");
+        }
     };
     
     class ReceiverImplNegative implements MessageListener {
         @Override
         public void receive(Message message) {
             System.out.println("This message should not appear: " + (String) message.getMessage());
+        }
+        
+        @Override
+        public void receiveError(Exception exception) {
+            System.out.println("Error receiving message");
         }
     };
 }

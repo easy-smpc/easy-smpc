@@ -128,10 +128,7 @@ public class Resources {
 
     /** Interval to check mail box automatically */
     public static final int       INTERVAL_CHECK_MAILBOX_MILLISECONDS = 30000;
-    
-    /** Fetch size for messages with IMAP */
-    public static final int FETCH_SIZE_IMAP = 36700160;
-    
+
     /** Step 1 identifier */
     public static final String    ROUND_1                             = "_round1";
 
@@ -142,17 +139,20 @@ public class Resources {
     public static final Color     COLOR_LIGHT_GREEN                   = new Color(82, 153, 75);
 
     /** Interval to check existing mailbox connection */
-    public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED    = 3000;
+    public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED = 3000;
     
-    /** Maximal trys sending an e-mail */
-    public static final int MAX_TRY_SEND_MAIL = 20;
+    /** Interval to check existing mailbox connection */
+    public static final long TIMEOUT_SEND_EMAILS = 30000;
     
-    /** Maximal trys sending an e-mail */
-    public static final int WAIT_TRY_SEND_MAIL = 10000;
+    /** Fetch size for messages with IMAP */
+    public static final int FETCH_SIZE_IMAP = 1048576;
     
-    /** Wait until report a mail as missing*/
-    public static final long WAIT_TIME_CHECK_MISSING_MAIL = 180000;
+    /** Number of threads in thread pool */
+    public static final int SIZE_THREADPOOL = 2;
 
+    /** Fractional bits for decimal values */
+    public static final int FRACTIONAL_BITS = 32;
+        
     /**
      * Returns all available languages
      * 

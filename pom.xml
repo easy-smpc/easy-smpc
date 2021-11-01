@@ -22,7 +22,7 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
-				 <configuration>
+				<configuration>
 					<release>14</release>
 				</configuration>
 			</plugin>

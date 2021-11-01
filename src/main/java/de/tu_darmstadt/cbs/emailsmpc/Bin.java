@@ -14,7 +14,7 @@
 package de.tu_darmstadt.cbs.emailsmpc;
 
 import java.io.Serializable;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.Arrays;
 
 import de.tu_darmstadt.cbs.secretshare.ArithmeticShare;
@@ -285,10 +285,12 @@ public class Bin implements Serializable, Cloneable {
      * @return the big integer
      * @throws IllegalStateException the illegal state exception
      */
-    public BigInteger reconstructBin() throws IllegalStateException {
+    public BigDecimal reconstructBin(int fractionalBits) throws IllegalStateException, IllegalArgumentException {
+        if (fractionalBits < 0)
+          throw new IllegalArgumentException("fractionalBits must be positive");
         if (!isComplete())
             throw new IllegalStateException("Can not reconstruct incomplete shares");
-        return ArithmeticSharing.reconstruct(inShares);
+        return ArithmeticSharing.reconstruct(inShares, fractionalBits);
     }
 
     /**
@@ -313,18 +315,20 @@ public class Bin implements Serializable, Cloneable {
         }
         inShares = shares;
     }
-
     /**
      * Share value.
      *
      * @param value the value
      * @throws IllegalStateException the illegal state exception
+     * @throw IllegalArgumentException fractionalBits must be positive
      */
-    public void shareValue(BigInteger value) throws IllegalStateException {
+    public void shareValue(BigDecimal value, int fractionalBits) throws IllegalStateException, IllegalArgumentException {
+        if (fractionalBits < 0)
+          throw new IllegalArgumentException("fractionalBits must be positive");
         if (!isInitialized())
             throw new IllegalStateException("Unable to share value in unititialized bin");
         ArithmeticSharing as = new ArithmeticSharing(outShares.length);
-        outShares = as.share(value);
+        outShares = as.share(value, fractionalBits);
     }
 
     /**

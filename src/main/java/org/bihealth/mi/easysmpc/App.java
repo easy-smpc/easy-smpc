@@ -20,7 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +94,10 @@ public class App extends JFrame {
         } catch( Exception ex ) {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
-               
+        
+        // Prefer IPv6 if network (e.g. e-mail) is used
+        System.getProperties().setProperty("java.net.preferIPv6Addresses", "true");               
+        
         // Start App
         new App();
     }
@@ -509,11 +512,12 @@ public class App extends JFrame {
      * Action called when done with participating
      * @param secret
      */
-    protected void actionParticipateDone(BigInteger[] secret) {
+    protected void actionParticipateDone(BigDecimal[] secret, ConnectionIMAPSettings connectionIMAPSettings) {
 
         // Pass over bins and participants
         Study snapshot = this.beginTransaction();
         try {
+            model.setConnectionIMAPSettings(connectionIMAPSettings);
             model.toSendingShares(secret);
             if (actionSave()) {
                 this.showPerspective(Perspective2Send.class);
