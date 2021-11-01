@@ -40,7 +40,7 @@ import org.bihealth.mi.easysmpc.nogui.Combinator.Combination;
  * @author Felix Wirth
  *
  */
-public class PerformanceEvaluation {
+public class PerformanceEvaluation implements ResultPrinter {
 	/** File path */
 	public static final String FILEPATH = "performanceEvaluation";
 	/** CSV printer */
@@ -63,13 +63,12 @@ public class PerformanceEvaluation {
 		PerformanceTracker tracker = new PerformanceTracker();
 
 		// Create parameters
-		List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] { 20, 15, 10, 5, 3 }));
+		List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] { 3 }));
 		List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] { 10000, 7500, 5000, 2500, 1000 }));
-		List<Integer> mailboxCheckInterval = new ArrayList<>(
-				Arrays.asList(new Integer[] { 20000, 15000, 10000, 5000, 1000 }));
-		// Use separted mailboxes
+		List<Integer> mailboxCheckInterval = new ArrayList<>(Arrays.asList(new Integer[] { 20000, 15000, 10000, 5000, 1000 }));
+		// Use separated mailboxes
 		boolean isSharedMailbox = false;
-		// Repeat each parameter combinatons 15 times
+		// Repeat each parameter combinations 15 times
 		int repetitionsPerCombination = 15;
 		// Wait after a complete EasySMPC round 1000 ms before start the next
 		int waitTime = 1000;
@@ -117,7 +116,7 @@ public class PerformanceEvaluation {
 		}
 
 		// Start a EasySMPC process
-		CreatingUser user = new CreatingUser(participants, bins, mailboxCheckIntervals, mailBoxDetails);
+		CreatingUser user = new CreatingUser(participants, bins, mailboxCheckIntervals, mailBoxDetails, this);
 
 		// Wait to finish
 		while (!user.areAllUsersFinished()) {
@@ -178,4 +177,14 @@ public class PerformanceEvaluation {
 		mailBoxDetails.getTracker().resetStatistics();
 		logger.debug("Finished preparation logged", new Date(), "Finished preparation");
 	}
+
+    @Override
+    public void print(Object... values) throws IOException {
+        csvPrinter.printRecord(values);
+    }
+
+    @Override
+    public void flush() throws IOException {
+        csvPrinter.flush();        
+    }
 }

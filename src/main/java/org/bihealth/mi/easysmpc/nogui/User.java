@@ -60,12 +60,26 @@ public abstract class User implements MessageListener {
     private final int mailBoxCheckInterval;
     /** Is shared mailbox used? */
     private boolean isSharedMailbox;
+    /** Store the time differences */
+    private RecordTimeDifferences recording;
     
+    /**
+     * Creates a new instance
+     *  
+     * @param mailBoxCheckInterval
+     * @param isSharedMailbox
+     * @param recording
+     */
+    User(int mailBoxCheckInterval, boolean isSharedMailbox, RecordTimeDifferences recording) {
+        this(mailBoxCheckInterval, isSharedMailbox);
+        this.recording = recording;
+    }
     
     /**
      * Creates a new instance
      * 
      * @param mailBoxCheckInterval
+     * @param recordTimeDifferences 
      */
     User(int mailBoxCheckInterval, boolean isSharedMailbox) {
         this.mailBoxCheckInterval = mailBoxCheckInterval;
@@ -207,7 +221,7 @@ public boolean isStudyStateNone() {
             
             // Receives the messages for the second round and finalizes the model
             receiveMessages(Resources.ROUND_2);            
-            RecordTimeDifferences.finished(getModel().getStudyUID(), this.model.getOwnId(), System.nanoTime());
+            recording.finished(this.model.getOwnId(), System.nanoTime());
             this.model.toFinished();
             logger.debug("Result logged", new Date(), getModel().getStudyUID(), "result", getModel().getOwnId(), "participantid", getModel().getAllResults()[0].name, "result name", getModel().getAllResults()[0].value, "result");
             
@@ -306,5 +320,13 @@ public boolean isStudyStateNone() {
      */
     public void setModel(Study model) {
         this.model = model;
-    }    
+    }
+
+    public RecordTimeDifferences getRecording() {
+        return recording;
+    }
+
+    public void setRecording(RecordTimeDifferences recording) {
+        this.recording = recording;
+    }       
 }

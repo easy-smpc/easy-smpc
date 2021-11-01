@@ -17,9 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,10 +73,25 @@ public class RecordTimeDifferences {
             this.secondValue = secondValue;
         }     
     }
+    
     /** Logger */
     private static final Logger  logger = LogManager.getLogger(RecordTimeDifferences.class);
-    /** Stores measurements */
-    private static final Map<String, RecordTimeDifferences> timeDifferencesMap = new HashMap<>();
+    
+    /** Measurements */
+    private final List<Pair<Long, Long>> measurements;
+
+    /** Mailbox check interval */
+    private int mailBoxCheckInterval;
+
+    /** Model */
+    private Study model;
+
+    /** Tracker*/
+    private PerformanceTracker tracker;
+    
+    /** Printer */
+    private ResultPrinter printer;
+
     /**
      * Records the start of a user's participation
      * 
@@ -86,8 +99,8 @@ public class RecordTimeDifferences {
      * @param participantId
      * @param startTime
      */
-    public static void addStartValue(String studyUID, int participantId, long startTime) {
-        timeDifferencesMap.get(studyUID).measurements.set(participantId, new Pair<Long, Long>(startTime));
+    public void addStartValue(int participantId, long startTime) {
+        measurements.set(participantId, new Pair<Long, Long>(startTime));
     }
     /**
      * Calculates a mean
@@ -95,7 +108,7 @@ public class RecordTimeDifferences {
      * @param timeDifferences
      * @return
      */
-    private static long calculateMean(Long[] timeDifferences) {
+    private long calculateMean(Long[] timeDifferences) {
         // Init
         long sum = 0;
         
@@ -108,12 +121,12 @@ public class RecordTimeDifferences {
         return sum / timeDifferences.length;
     }
     /**
-     * Creates a list with entries are all null
+     * Creates a list with entries all null
      * 
      * @param numberParticipants
      * @return
      */
-    private static List<Pair<Long, Long>> createEmptyList(int numberParticipants) {
+    private List<Pair<Long, Long>> initList(int numberParticipants) {
         // Create list
         List<Pair<Long, Long>>  result = new ArrayList<>();
         for(int i = 0; i < numberParticipants ; i++) {
@@ -126,16 +139,12 @@ public class RecordTimeDifferences {
 
     
     /**
-     * Add finished time
-     * If all values are finished calculates final results
+     * Add finished time for a participant and calculates final results if all values are finished 
      * 
      * @param studyUID
      * @param finishedTime
      */
-    public static void finished(String studyUID, int participantId, long finishedTime) {
-        // Init
-        List<Pair<Long, Long>> measurements = timeDifferencesMap.get(studyUID).measurements;
-        
+    public void finished(int participantId, long finishedTime) {       
         // Set finished time
         measurements.get(participantId).setSecondValue(finishedTime);
         
@@ -157,19 +166,18 @@ public class RecordTimeDifferences {
         
         // Write performance results
         try {
-            PerformanceEvaluation.csvPrinter.printRecord(new Date(),
-                                         timeDifferencesMap.get(studyUID).model.getStudyUID(),
-                                         timeDifferencesMap.get(studyUID).model.getNumParticipants(),
-                                         timeDifferencesMap.get(studyUID).model.getBins().length,
-                                         timeDifferencesMap.get(studyUID).mailBoxCheckInterval,
+           printer.print(new Date(), model.getStudyUID(),
+                                         model.getNumParticipants(),
+                                         model.getBins().length,
+                                         mailBoxCheckInterval,
                                          timeDifferences[0],
                                          timeDifferences[timeDifferences.length - 1],
                                          calculateMean(timeDifferences),
-                                         timeDifferencesMap.get(studyUID).tracker.getNumberMessagesReceived(),
-                                         timeDifferencesMap.get(studyUID).tracker.getTotalSizeMessagesReceived(),
-                                         timeDifferencesMap.get(studyUID).tracker.getNumberMessagesSent(),
-                                         timeDifferencesMap.get(studyUID).tracker.getTotalsizeMessagesSent());
-            PerformanceEvaluation.csvPrinter.flush();
+                                         tracker.getNumberMessagesReceived(),
+                                         tracker.getTotalSizeMessagesReceived(),
+                                         tracker.getNumberMessagesSent(),
+                                         tracker.getTotalsizeMessagesSent());
+           printer.flush();
         } catch (IOException e) {
             throw new IllegalStateException("Unable to write performance results", e);
         }
@@ -178,7 +186,7 @@ public class RecordTimeDifferences {
         // Fastest finished entry => log            
         logger.debug("Entry logged",
                     new Date(),
-                    studyUID,
+                    model.getStudyUID(),
                     "finished",
                     "first",
                     timeDifferences[0],
@@ -187,36 +195,15 @@ public class RecordTimeDifferences {
         // Slowest finished entry => log
         logger.debug("Slowest entry logged",
                     new Date(),
-                    studyUID,
+                    model.getStudyUID(),
                     "finished",
                     "last",
                     timeDifferences[timeDifferences.length - 1],
                     "duration",
                     calculateMean(timeDifferences)
                     );
-        
-        // Remove from map
-        timeDifferencesMap.remove(studyUID);
     }
-    
-    /**
-     * Add a new record with a start time
-     * 
-     * @param studyUID
-     * @param numberParticipants
-     * @param numberBins
-     * @param startTime
-     * @param performanceTracker 
-     */
-    public static void init(Study model, int mailBoxCheckInterval, long startTime, PerformanceTracker performanceTracker) {        
-        // Create a new entry in measurements
-        timeDifferencesMap.put(model.getStudyUID(), new RecordTimeDifferences(model, mailBoxCheckInterval, startTime, performanceTracker));
-        
-        // Add and log the starting value 
-        addStartValue(model.getStudyUID(), model.getOwnId(), startTime);       
-        logger.debug("Started", new Date(), model.getStudyUID(), "started", model.getNumParticipants(), "participants", model.getBins().length, "bins", mailBoxCheckInterval, "mailbox check interval"); 
-    }
-    
+       
     /**
      * Checks if all values for start and finish are set
      * 
@@ -233,19 +220,7 @@ public class RecordTimeDifferences {
         
         // Return
         return true;
-    }
-     
-    /** Measurements */
-    private final List<Pair<Long, Long>> measurements;
-
-    /** Mailbox check interval */
-    private int mailBoxCheckInterval;
-
-    /** Model */
-    private Study model;
-
-    /** Tracker*/
-    private PerformanceTracker tracker;
+    }     
     
     /**
      * Creates a new instance
@@ -255,10 +230,16 @@ public class RecordTimeDifferences {
      * @param startTime
      * @param performanceTracker 
      */
-    private RecordTimeDifferences(Study model, int mailBoxCheckInterval, long startTime, PerformanceTracker performanceTracker) {
+    public RecordTimeDifferences(Study model, int mailBoxCheckInterval, long startTime, PerformanceTracker performanceTracker, ResultPrinter printer) {
+        // Store
         this.mailBoxCheckInterval = mailBoxCheckInterval;
         this.model = model;
-        this.measurements = createEmptyList(model.getNumParticipants());
+        this.measurements = initList(model.getNumParticipants());
         this.tracker = performanceTracker;
+        this.printer = printer;
+        
+        // Add and log the starting value
+        measurements.set(model.getOwnId(), new Pair<Long, Long>(startTime));
+        logger.debug("Started", new Date(), model.getStudyUID(), "started", model.getNumParticipants(), "participants", model.getBins().length, "bins", mailBoxCheckInterval, "mailbox check interval");
     }
 }

@@ -52,7 +52,8 @@ public class CreatingUser extends User {
     CreatingUser(int numberParticipants,
                  int numberBins,
                  int mailBoxCheckInterval,
-                 MailboxDetails mailBoxDetails) throws IllegalStateException {
+                 MailboxDetails mailBoxDetails,
+                 ResultPrinter printer) throws IllegalStateException {
         super(mailBoxCheckInterval, mailBoxDetails.isSharedMailbox());
 
         try {          
@@ -64,7 +65,7 @@ public class CreatingUser extends User {
                                         generateParticpants(numberParticipants, mailBoxDetails, FIXED_LENGTH_STRING),
                                         generateBins(numberBins,numberParticipants, FIXED_LENGTH_STRING, FIXED_LENGTH_BIT_NUMBER), mailBoxDetails.getConnection(0));
             // Init recoding
-            RecordTimeDifferences.init(getModel(), mailBoxCheckInterval, System.nanoTime(), mailBoxDetails.getTracker());
+            setRecording(new RecordTimeDifferences(getModel(), mailBoxCheckInterval, System.nanoTime(), mailBoxDetails.getTracker(), printer));
         } catch (IOException | IllegalStateException e) {
             logger.error("Unable to init logged", new Date(), "Unable to init", ExceptionUtils.getStackTrace(e));
             throw new IllegalStateException("Unable to init study!", e);
@@ -123,7 +124,8 @@ public class CreatingUser extends User {
                                   mailBoxDetails.getConnection(index),
                                   lengthBitBigInteger,
                                   getMailboxCheckInterval(),
-                                  mailBoxDetails.isSharedMailbox());
+                                  mailBoxDetails.isSharedMailbox(),
+                                  getRecording());
             
             // Create user as new thread
             participatingUsers.add(new ParticipatingUser(userData));

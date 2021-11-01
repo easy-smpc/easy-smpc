@@ -63,6 +63,8 @@ public class ParticipatingUser extends User {
         private final int                    mailBoxCheckInterval;
         /** connectionIMAPSettings */
         private final boolean                isSharedMailbox;
+        /** Store the time differences */
+        private RecordTimeDifferences recording;
 
         /**
          * Create a new instance
@@ -74,6 +76,7 @@ public class ParticipatingUser extends User {
          * @param lengthBitBigInteger
          * @param mailBoxCheckInterval
          * @param isSharedMailbox
+         * @param recording 
          */
         public ParticipatingUserData(String studyUID,
                                      Participant ownParticipant,
@@ -81,7 +84,7 @@ public class ParticipatingUser extends User {
                                      ConnectionIMAPSettings connectionIMAPSettings,
                                      int lengthBitBigInteger,
                                      int mailBoxCheckInterval,
-                                     boolean isSharedMailbox) {
+                                     boolean isSharedMailbox, RecordTimeDifferences recording) {
             // Store
             this.studyUID = studyUID;
             this.ownParticipant = ownParticipant;
@@ -90,6 +93,7 @@ public class ParticipatingUser extends User {
             this.lengthBitBigInteger = lengthBitBigInteger;
             this.mailBoxCheckInterval = mailBoxCheckInterval;
             this.isSharedMailbox = isSharedMailbox;
+            this.recording = recording;
         }
     }
     /** Logger */
@@ -111,12 +115,12 @@ public class ParticipatingUser extends User {
     public ParticipatingUser(ParticipatingUserData participatingUserData) {                
    
         // Store
-        super(participatingUserData.mailBoxCheckInterval, participatingUserData.isSharedMailbox);
+        super(participatingUserData.mailBoxCheckInterval, participatingUserData.isSharedMailbox, participatingUserData.recording);
         this.lengthBitBigInteger = participatingUserData.lengthBitBigInteger;
         this.connectionIMAPSettings = participatingUserData.connectionIMAPSettings;
         
         // Init time recording
-        RecordTimeDifferences.addStartValue(participatingUserData.studyUID, participatingUserData.participantId, System.nanoTime());
+        getRecording().addStartValue(participatingUserData.participantId, System.nanoTime());
         
         try {
             // Register for initial e-mail

@@ -17,6 +17,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.bihealth.mi.easybus.PerformanceListener;
 
+/**
+ * A class to record processing times
+ * 
+ * @author Fabian Prasser
+ * @author Felix Wirth
+ *
+ */
 public class PerformanceTracker implements PerformanceListener {
 
 	/** Total number of messages started to receive */
