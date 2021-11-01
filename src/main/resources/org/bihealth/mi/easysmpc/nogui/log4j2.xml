@@ -5,9 +5,8 @@
 	</Properties>
 
 	<Appenders>
-		<RollingFile name="fileLogger"
-			fileName="${sys:logFilename}.log"
-			filePattern="${sys:logFilename}-%i.log">
+		<RollingFile name="fileLogger" fileName="easySMPC.log"
+			filePattern="easySMPC-%i.log">
 			<CsvParameterLayout delimiter=";" />
 			<Policies>
 				<SizeBasedTriggeringPolicy size="50MB" />

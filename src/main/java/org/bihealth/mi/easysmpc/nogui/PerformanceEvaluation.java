@@ -63,7 +63,7 @@ public class PerformanceEvaluation {
 		PerformanceTracker tracker = new PerformanceTracker();
 
 		// Create parameters
-		List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] { 20, 15, 10, 5, 3 }));
+		List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] { 3 }));
 		List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] { 10000, 7500, 5000, 2500, 1000 }));
 		List<Integer> mailboxCheckInterval = new ArrayList<>(
 				Arrays.asList(new Integer[] { 20000, 15000, 10000, 5000, 1000 }));
@@ -150,9 +150,9 @@ public class PerformanceEvaluation {
 	 */
 	private void prepare(MailboxDetails mailBoxDetails) throws IOException, BusException, InterruptedException {
 
-		// Set logging properties from file
-		System.setProperty("logFilename", "logging-main");
+		// Set log4j also as log manager for Java utility logging
 		System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+		// Set logging properties from file
 		System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");
 		logger = LogManager.getLogger(PerformanceEvaluation.class);
 
