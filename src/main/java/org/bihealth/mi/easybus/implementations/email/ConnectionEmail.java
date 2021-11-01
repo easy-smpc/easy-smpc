@@ -401,10 +401,7 @@ public abstract class ConnectionEmail {
                 });
             }
 
-        } catch (InterruptedException e) {
-            close();
-            throw e;
-        } catch (Exception e) {
+        } catch (BusException e) {
             throw new BusException("Error receiving message", e);
         }
 

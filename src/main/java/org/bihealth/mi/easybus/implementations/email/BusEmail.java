@@ -217,8 +217,6 @@ public class BusEmail extends Bus {
 
                 // Check for interrupt
                 if (Thread.interrupted()) {
-                    // TODO remove close?
-                    connection.close();
                     throw new InterruptedException();
                 }
 
@@ -226,12 +224,7 @@ public class BusEmail extends Bus {
                 boolean received = false;
                 
                 // Send to scope and participant
-                try {
-                    received |= receiveInternal(message.message, message.scope, message.receiver);
-                } catch (InterruptedException e) {
-                    connection.close();
-                    throw e;
-                }
+                received |= receiveInternal(message.message, message.scope, message.receiver);
 
                 // Delete 
                 if (received) {
