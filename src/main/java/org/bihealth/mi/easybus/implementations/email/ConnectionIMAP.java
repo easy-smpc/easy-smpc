@@ -187,47 +187,50 @@ public class ConnectionIMAP extends ConnectionEmail {
         return bos.toByteArray();
     }
 
-    protected synchronized boolean isSendingConnected() {
+    protected boolean isSendingConnected() {
         // TODO check sending connected
         return true;
     }
 
     @Override
-    protected synchronized boolean isReceivingConnected() {
-        try {
-
+    protected boolean isReceivingConnected() {
+        synchronized (propertiesReceiving) {
             // Make sure we are ready to go
-            Folder folder = null;                      
-            if (sessionReceiving == null) {
-                sessionReceiving = Session.getInstance(propertiesReceiving, null);
-            }
-            
-            // Create store
-            Store store = sessionReceiving.getStore();
+            try {
 
-            // Connect store
-            store.connect(getEmailAddress(), password);
+                // Make sure we are ready to go
+                Folder folder = null;
+                if (sessionReceiving == null) {
+                    sessionReceiving = Session.getInstance(propertiesReceiving, null);
+                }
 
-            // Create new folder for every call to get latest state
-            folder = store.getFolder("INBOX");
-            if (!folder.exists()) {
+                // Create store
+                Store store = sessionReceiving.getStore();
+
+                // Connect store
+                store.connect(getEmailAddress(), password);
+
+                // Create new folder for every call to get latest state
+                folder = store.getFolder("INBOX");
+                if (!folder.exists()) {
+                    folder.close(false);
+                    store.close();
+                    return false;
+                }
+
+                // Open folder
+                folder.open(Folder.READ_WRITE);
+
+                // Close
                 folder.close(false);
                 store.close();
+
+                // Done
+                return true;
+
+            } catch (Exception e) {
                 return false;
             }
-
-            // Open folder
-            folder.open(Folder.READ_WRITE);
-
-            // Close
-            folder.close(false);
-            store.close();
-
-            // Done
-            return true;
-
-        } catch (Exception e) {
-            return false;
         }
     }
 

@@ -125,7 +125,7 @@ public class BusEmail extends Bus {
     }
 
     /**
-     * Is there an working connection to receive?
+     * Is there a working connection to receive?
      * 
      * @return
      */
@@ -140,7 +140,7 @@ public class BusEmail extends Bus {
     }
     
     /**
-     * Deletes all e-mails in inbox
+     * Deletes all e-mails in inbox relevant for easysmpc
      * @throws BusException 
      * @throws InterruptedException 
      */

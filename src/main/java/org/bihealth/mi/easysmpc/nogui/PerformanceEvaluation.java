@@ -49,8 +49,6 @@ public class PerformanceEvaluation {
 	private static Logger logger;
 	/** Was preparation executed */
 	private static boolean prepared = false;
-	/** Use SSL/TLS */
-	private static boolean useSSL;
 
 	/**
 	 * 
@@ -70,7 +68,6 @@ public class PerformanceEvaluation {
 		List<Integer> mailboxCheckInterval = new ArrayList<>(
 				Arrays.asList(new Integer[] { 20000, 15000, 10000, 5000, 1000 }));
 		boolean isSharedMailbox = false;
-		useSSL = true;
 		int waitTime = 1000;
 		Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 15);
 
@@ -91,10 +88,6 @@ public class PerformanceEvaluation {
 			new PerformanceEvaluation(combination.getParticipants(), combination.getBins(),
 					combination.getMailboxCheckInterval(), mailBoxDetails, waitTime);
 		}
-	}
-
-	public static boolean useSSL() {
-		return useSSL;
 	}
 
 	/**
