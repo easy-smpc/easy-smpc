@@ -229,8 +229,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                         getApp().actionMarkMessageRetrieved(index);
                         messageSent = true;
                     } catch (Exception e) {
-                        // TODO: Differentiate between errors by different
-                        // exceptions?
                         future.cancel(true);
                         error = true;
                     }

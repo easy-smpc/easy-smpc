@@ -63,13 +63,17 @@ public class PerformanceEvaluation {
 		PerformanceTracker tracker = new PerformanceTracker();
 
 		// Create parameters
-		List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] { 3 }));
+		List<Integer> participants = new ArrayList<>(Arrays.asList(new Integer[] { 20, 15, 10, 5, 3 }));
 		List<Integer> bins = new ArrayList<>(Arrays.asList(new Integer[] { 10000, 7500, 5000, 2500, 1000 }));
 		List<Integer> mailboxCheckInterval = new ArrayList<>(
 				Arrays.asList(new Integer[] { 20000, 15000, 10000, 5000, 1000 }));
+		// Use separted mailboxes
 		boolean isSharedMailbox = false;
+		// Repeat each parameter combinatons 15 times
+		int repetitionsPerCombination = 15;
+		// Wait after a complete EasySMPC round 1000 ms before start the next
 		int waitTime = 1000;
-		Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, 15);
+		Combinator combinator = new RepeatPermuteCombinator(participants, bins, mailboxCheckInterval, repetitionsPerCombination);
 
 		// Create connection settings
 		ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings(
@@ -91,12 +95,11 @@ public class PerformanceEvaluation {
 	}
 
 	/**
-	 * Creates a new instance
-	 * 
 	 * @param participants
 	 * @param bins
-	 * @param mailboxCheckInterval
+	 * @param mailboxCheckIntervals
 	 * @param mailBoxDetails
+	 * @param waitTime between two repetition/EasySMPC processes
 	 * @throws IOException
 	 */
 	public PerformanceEvaluation(int participants, int bins, int mailboxCheckIntervals, MailboxDetails mailBoxDetails,
