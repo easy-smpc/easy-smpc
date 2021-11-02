@@ -13,7 +13,10 @@
  */
 package org.bihealth.mi.easybus.implementations.local;
 
+import java.util.concurrent.FutureTask;
+
 import org.bihealth.mi.easybus.Bus;
+import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
@@ -46,5 +49,16 @@ public class BusLocal extends Bus {
     @Override
     public void stop() {
         // Empty by design
+    }
+
+    @Override
+    public FutureTask<Void>
+           sendPlain(String recipient, String subject, String content) throws BusException {
+        throw new UnsupportedOperationException("Send plain not supported for local bus");
+    }
+
+    @Override
+    public boolean isConnected() {
+        return true;
     }
 }

@@ -215,4 +215,23 @@ public abstract class Bus {
     protected ExecutorService getExecutor() {
         return executor;
     }
+
+    /**
+     * Send a plain e-mail (no bus functionality)
+     * 
+     * @param recipient
+     * @param subject
+     * @param content
+     * @return
+     * @throws BusException
+     */
+    public abstract FutureTask<Void>
+              sendPlain(String recipient, String subject, String content) throws BusException;
+
+    /**
+     * Is the bus connected?
+     * 
+     * @return
+     */
+    public abstract boolean isConnected();
 }

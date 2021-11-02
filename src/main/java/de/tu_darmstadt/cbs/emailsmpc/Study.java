@@ -25,6 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
@@ -123,8 +124,8 @@ public class Study implements Serializable, Cloneable {
     /** The e-mail connection details */
     private ConnectionIMAPSettings connectionIMAPSettings;
 
-    /** Bus for automatic e-mail processing */
-    private transient BusEmail    bus;
+    /** Bus for automatic message processing */
+    private transient Bus    bus;
     
     /** Store whether messages have been retrieved */
     private boolean[] retrievedMessages;
@@ -417,7 +418,7 @@ public class Study implements Serializable, Cloneable {
      * @return the bus
      * @throws BusException 
      */
-    public synchronized BusEmail getBus() throws BusException {
+    public synchronized Bus getBus() throws BusException {
         return getBus(Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
     }
     
@@ -428,7 +429,7 @@ public class Study implements Serializable, Cloneable {
      * @return
      * @throws BusException
      */
-    public synchronized BusEmail getBus(int millis) throws BusException {
+    public synchronized Bus getBus(int millis) throws BusException {
         return getBus(millis, false);
     }
 
@@ -439,7 +440,7 @@ public class Study implements Serializable, Cloneable {
      * @return the bus
      * @throws BusException 
      */
-    public synchronized BusEmail getBus(int millis, boolean isSharedMailbox) throws BusException {
+    public synchronized Bus getBus(int millis, boolean isSharedMailbox) throws BusException {
 
         if ((this.bus == null || !this.bus.isAlive()) && this.getConnectionIMAPSettings() != null) {
             this.bus = new BusEmail(new ConnectionIMAP(this.getConnectionIMAPSettings(),
@@ -680,7 +681,7 @@ public class Study implements Serializable, Cloneable {
      */
     public synchronized boolean isBusConectedReceiving() {
         if (this.bus != null) {
-            return this.bus.isReceivingConnected();
+            return this.bus.isConnected();
         }
         
         return false;

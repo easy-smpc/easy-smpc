@@ -124,13 +124,10 @@ public class BusEmail extends Bus {
         return this.thread != null && this.thread.isAlive();
     }
 
-    /**
-     * Is there a working connection to receive?
-     * 
-     * @return
-     */
-    public boolean isReceivingConnected() {
-        // Check if connected
+    @Override
+    public boolean isConnected() {
+        
+        // Check if connected to receive
         if(this.connection != null) {
             return this.connection.isReceivingConnected();
         }
