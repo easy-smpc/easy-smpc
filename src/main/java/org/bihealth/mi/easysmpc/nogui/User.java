@@ -44,11 +44,12 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  *
  */
 public abstract class User implements MessageListener {
+    
     /** Logger */
     private static Logger logger;
     /** The length of a generated string */
     public final int FIXED_LENGTH_STRING = 10;
-    /** The length of a generated big decimal before the comma */
+    /** The length of a generated number before the comma */
     public final int FIXED_LENGTH_BIT_NUMBER = 31;
     /** Round for initial e-mails */
     public final String ROUND_0 = "_round0";       
@@ -102,7 +103,7 @@ public abstract class User implements MessageListener {
     /**
      * Generates a random big decimal
      * 
-     * @param bit length of big decimal
+     * @param bit length of big decimal before comma
      * @return
      * @throws IllegalArgumentException
      */
@@ -322,11 +323,26 @@ public boolean isStudyStateNone() {
         this.model = model;
     }
 
+    /**
+     * Returns the recording
+     * 
+     * @return
+     */
     public RecordTimeDifferences getRecording() {
         return recording;
     }
-
+    
+    /**
+     * Sets the recording
+     * 
+     * @param the recording
+     */
     public void setRecording(RecordTimeDifferences recording) {
         this.recording = recording;
-    }       
+    }
+    
+    @Override
+    public void receiveError(Exception e) {
+        logger.error("Error receiveing e-mails logged", new Date(), "Error receiveing e-mails" ,ExceptionUtils.getStackTrace(e));
+    }
 }

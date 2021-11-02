@@ -187,8 +187,4 @@ public class CreatingUser extends User {
         return result;
     }
     
-    @Override
-    public void receiveError(Exception e) {
-        logger.error("Error receiveing e-mails logged", new Date(), "Error receiveing e-mails" ,ExceptionUtils.getStackTrace(e));
-    }
 }

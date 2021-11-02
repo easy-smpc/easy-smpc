@@ -38,16 +38,18 @@ public class RepeatPermuteCombinator extends Combinator implements Iterator<Comb
     private int       counterRepetition         = 0;
 
     /**
+     * Creates a new instance
+     * 
      * @param participants
      * @param bins
      * @param mailboxCheckInterval
      */
     public RepeatPermuteCombinator(List<Integer> participants,
-                                     List<Integer> bins,
-                                     List<Integer> mailboxCheckInterval,
-                                     int repeatPerStep) {        
+                                   List<Integer> bins,
+                                   List<Integer> mailboxCheckInterval,
+                                   int repeatPerStep) {
         super(participants, bins, mailboxCheckInterval);
-        
+
         // Store
         this.repeatPerCombination = repeatPerStep;
     }
@@ -60,7 +62,8 @@ public class RepeatPermuteCombinator extends Combinator implements Iterator<Comb
      * @return Is an increase still possible?
      */
     private boolean increase(boolean dryRun) {
-        // Create local variables
+
+        // Copy fields as local variables
         int mailboxCheckIntervalIndex = this.mailboxCheckIntervalIndex;
         int binIndex = this.binIndex;
         int particpantIndex = this.particpantIndex;

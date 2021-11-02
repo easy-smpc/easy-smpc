@@ -3,7 +3,7 @@ package org.bihealth.mi.easysmpc.nogui;
 import java.io.IOException;
 
 /**
- * Interface to print results of performance evaluation
+ * Interface to print results of a performance evaluation
  * 
  * @author Felix Wirth
  *
@@ -24,5 +24,5 @@ public interface ResultPrinter {
      * @throws IOException
      */
     public void flush() throws IOException;
-
+    
 }

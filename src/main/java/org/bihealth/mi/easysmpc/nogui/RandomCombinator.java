@@ -41,7 +41,7 @@ public class RandomCombinator extends Combinator implements Iterator<Combination
         // Call super
         super(participants, bins, mailboxCheckInterval);
         
-        // Store
+        // Create random
         this.random = new Random();
     }    
 
@@ -52,6 +52,7 @@ public class RandomCombinator extends Combinator implements Iterator<Combination
 
     @Override
     public boolean hasNext() {
+        // This combinator has always a next element
         return true;
     }
 

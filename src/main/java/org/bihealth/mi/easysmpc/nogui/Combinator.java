@@ -18,7 +18,7 @@ import java.util.List;
 import org.bihealth.mi.easysmpc.nogui.Combinator.Combination;
 
 /**
- * A class to combine the different parameters
+ * A class to combine the different parameters for the performance evaluation
  * 
  * @author Felix Wirth
  *
@@ -74,12 +74,11 @@ public abstract class Combinator implements Iterable<Combination>{
             return participants;
         }
     }
+    
     /** Possible participants */
     private final List<Integer> participants;
     /** Possible bins */
     private final List<Integer> bins;
-    
-   
     /** Possible mailboxCheckInterval */
     private final List<Integer> mailboxCheckInterval;
     

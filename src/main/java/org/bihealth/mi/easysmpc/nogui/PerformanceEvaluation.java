@@ -99,6 +99,7 @@ public class PerformanceEvaluation implements ResultPrinter {
 	 * @throws IOException
 	 */
 	public PerformanceEvaluation(Combinator combinator, MailboxDetails mailBoxDetails, int waitTime) throws IOException {
+	    
         // Prepare
         try {
             prepare(mailBoxDetails);
@@ -107,9 +108,10 @@ public class PerformanceEvaluation implements ResultPrinter {
             throw new IllegalStateException("Unable to prepare performance evaluation", e);
         }
         
+        // Conduct an EasySMPC process over each combination
         for(Combination combination: combinator) {
 
-            // Start a EasySMPC process
+            // Start an EasySMPC process
             CreatingUser user = new CreatingUser(combination.getParticipants(), combination.getBins(), combination.getMailboxCheckInterval(), mailBoxDetails, this);
 
             // Wait to finish
@@ -130,8 +132,7 @@ public class PerformanceEvaluation implements ResultPrinter {
             try {
                 Thread.sleep(waitTime);
             } catch (InterruptedException e) {
-                logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged",
-                             ExceptionUtils.getStackTrace(e));
+                logger.error("Interrupted exception logged", new Date(), "Interrupted exception logged", ExceptionUtils.getStackTrace(e));
             }
         }
 	}
@@ -147,14 +148,14 @@ public class PerformanceEvaluation implements ResultPrinter {
 	 */
 	private void prepare(MailboxDetails mailBoxDetails) throws IOException, BusException, InterruptedException {
 
-		// Set log4j also as log manager for Java utility logging
+		// Set log4j also as log manager also for Java utility logging
 		System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
 		
 		// Set logging properties from file
 		System.setProperty("log4j2.configurationFile", "src/main/resources/org/bihealth/mi/easysmpc/nogui/log4j2.xml");
 		logger = LogManager.getLogger(PerformanceEvaluation.class);
 
-		// Delete existing e-mails
+		// Delete existing e-mails relevant to EasySMPC
 		for (ConnectionIMAPSettings connectionIMAPSettings : mailBoxDetails.getAllConnections()) {
 			BusEmail bus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false), 1000);
 			bus.purgeEmails();
@@ -170,7 +171,7 @@ public class PerformanceEvaluation implements ResultPrinter {
 						"Mean processing time", "Number messages received", "Total size messages received",
 						"Number messages sent", "Total size messages sent").withSkipHeaderRecord(skipHeader));
 		
-		// Reset statistics and log
+		// Reset statistics and log preparation finished
 		mailBoxDetails.getTracker().resetStatistics();
 		logger.debug("Finished preparation logged", new Date(), "Finished preparation");
 	}

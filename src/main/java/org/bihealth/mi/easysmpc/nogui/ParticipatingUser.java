@@ -39,6 +39,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  *
  */
 public class ParticipatingUser extends User {
+    
     /**
      * Class containing data to create a participant
      * 
@@ -57,13 +58,13 @@ public class ParticipatingUser extends User {
         private final int                    participantId;
         /** connectionIMAPSettings */
         private final ConnectionIMAPSettings connectionIMAPSettings;
-        /** connectionIMAPSettings */
-        private final int                    lengthBitBigInteger;
-        /** connectionIMAPSettings */
+        /** Length of generated numbers */
+        private final int                    lengthGeneratedNumbers;
+        /** Mailbox check interval */
         private final int                    mailBoxCheckInterval;
-        /** connectionIMAPSettings */
+        /** Is a shared mailbox used */
         private final boolean                isSharedMailbox;
-        /** Store the time differences */
+        /** Stores the time differences */
         private RecordTimeDifferences recording;
 
         /**
@@ -90,16 +91,18 @@ public class ParticipatingUser extends User {
             this.ownParticipant = ownParticipant;
             this.participantId = participantId;
             this.connectionIMAPSettings = connectionIMAPSettings;
-            this.lengthBitBigInteger = lengthBitBigInteger;
+            this.lengthGeneratedNumbers = lengthBitBigInteger;
             this.mailBoxCheckInterval = mailBoxCheckInterval;
             this.isSharedMailbox = isSharedMailbox;
             this.recording = recording;
         }
     }
+    
     /** Logger */
     private static Logger logger = LogManager.getLogger(ParticipatingUser.class);
-    /** Stores the bit length of the big integer */
-    private int lengthBitBigInteger; 
+    
+    /** Stores the bit length of the generated numbers */
+    private int lengthNumber; 
 
     /** ConnectionIMAPSettings */
     private ConnectionIMAPSettings connectionIMAPSettings;
@@ -110,13 +113,13 @@ public class ParticipatingUser extends User {
      * @param studyUID
      * @param ownParticipant
      * @param connectionIMAPSettings
-     * @param lengthBitBigInteger
+     * @param lengthNumber
      */
     public ParticipatingUser(ParticipatingUserData participatingUserData) {                
    
         // Store
         super(participatingUserData.mailBoxCheckInterval, participatingUserData.isSharedMailbox, participatingUserData.recording);
-        this.lengthBitBigInteger = participatingUserData.lengthBitBigInteger;
+        this.lengthNumber = participatingUserData.lengthGeneratedNumbers;
         this.connectionIMAPSettings = participatingUserData.connectionIMAPSettings;
         
         // Init time recording
@@ -124,7 +127,7 @@ public class ParticipatingUser extends User {
         
         try {
             // Register for initial e-mail
-            final BusEmail interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false),
+            BusEmail interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false),
                                       participatingUserData.mailBoxCheckInterval);
             interimBus.receive(new Scope(participatingUserData.studyUID + ROUND_0),
                                         new org.bihealth.mi.easybus.Participant(participatingUserData.ownParticipant.name,
@@ -156,6 +159,7 @@ public class ParticipatingUser extends User {
             throw new IllegalStateException("Unable to register to receive initial e-mails", e);
         }
     }
+    
     /**
      * Fills the bins with random numbers
      * 
@@ -175,8 +179,13 @@ public class ParticipatingUser extends User {
         return result;
     }
     
+    /**
+     * Receives the initial e-mail
+     * 
+     * @param message
+     */
     private void receiveInitialEMail(org.bihealth.mi.easybus.Message message) {
-        
+
         try {
             // Get data
             String data = Message.deserializeMessage((String) message.getMessage()).data;
@@ -184,24 +193,19 @@ public class ParticipatingUser extends User {
             // Init model
             setModel(MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data))));
             getModel().setConnectionIMAPSettings(this.connectionIMAPSettings);
-            
+
             // Proceed to entering value
             getModel().toEnteringValues(data);
 
             // Set own values and proceed
-            getModel().toSendingShares(fillBins(lengthBitBigInteger));
-            
+            getModel().toSendingShares(fillBins(lengthNumber));
+
             // Starts the common steps 
             proceedCommonProcessSteps();
-            
+
         } catch (ClassNotFoundException | IllegalArgumentException | IllegalStateException | IOException e) {
             logger.error("Unable to execute particpating users steps logged", new Date(), "Unable to execute particpating users steps", ExceptionUtils.getStackTrace(e));
             throw new IllegalStateException("Unable to execute particpating users steps" , e);
-        }
-        
-    }
-    @Override
-    public void receiveError(Exception e) {
-        logger.error("Error receiveing e-mails logged", new Date(), "Error receiveing e-mails" ,ExceptionUtils.getStackTrace(e));
+        }        
     }
 }

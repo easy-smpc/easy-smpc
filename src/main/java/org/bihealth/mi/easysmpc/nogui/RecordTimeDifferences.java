@@ -91,6 +91,27 @@ public class RecordTimeDifferences {
     
     /** Printer */
     private ResultPrinter printer;
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param model
+     * @param mailBoxCheckInterval
+     * @param startTime
+     * @param performanceTracker 
+     */
+    public RecordTimeDifferences(Study model, int mailBoxCheckInterval, long startTime, PerformanceTracker performanceTracker, ResultPrinter printer) {
+        // Store
+        this.mailBoxCheckInterval = mailBoxCheckInterval;
+        this.model = model;
+        this.measurements = initList(model.getNumParticipants());
+        this.tracker = performanceTracker;
+        this.printer = printer;
+        
+        // Add and log the starting value
+        measurements.set(model.getOwnId(), new Pair<Long, Long>(startTime));
+        logger.debug("Started", new Date(), model.getStudyUID(), "started", model.getNumParticipants(), "participants", model.getBins().length, "bins", mailBoxCheckInterval, "mailbox check interval");
+    }
 
     /**
      * Records the start of a user's participation
@@ -102,6 +123,7 @@ public class RecordTimeDifferences {
     public void addStartValue(int participantId, long startTime) {
         measurements.set(participantId, new Pair<Long, Long>(startTime));
     }
+    
     /**
      * Calculates a mean
      * 
@@ -112,7 +134,7 @@ public class RecordTimeDifferences {
         // Init
         long sum = 0;
         
-        // Sum
+        // Sum up
         for(long timeDifference : timeDifferences) {
             sum = sum + timeDifference;
         }
@@ -120,8 +142,9 @@ public class RecordTimeDifferences {
         // Divide and return
         return sum / timeDifferences.length;
     }
+    
     /**
-     * Creates a list with entries all null
+     * Initializes a list with entries all null
      * 
      * @param numberParticipants
      * @return
@@ -136,7 +159,6 @@ public class RecordTimeDifferences {
         // Return
         return result;
     }
-
     
     /**
      * Add finished time for a participant and calculates final results if all values are finished 
@@ -166,18 +188,19 @@ public class RecordTimeDifferences {
         
         // Write performance results
         try {
-           printer.print(new Date(), model.getStudyUID(),
-                                         model.getNumParticipants(),
-                                         model.getBins().length,
-                                         mailBoxCheckInterval,
-                                         timeDifferences[0],
-                                         timeDifferences[timeDifferences.length - 1],
-                                         calculateMean(timeDifferences),
-                                         tracker.getNumberMessagesReceived(),
-                                         tracker.getTotalSizeMessagesReceived(),
-                                         tracker.getNumberMessagesSent(),
-                                         tracker.getTotalsizeMessagesSent());
-           printer.flush();
+            printer.print(new Date(),
+                          model.getStudyUID(),
+                          model.getNumParticipants(),
+                          model.getBins().length,
+                          mailBoxCheckInterval,
+                          timeDifferences[0],
+                          timeDifferences[timeDifferences.length - 1],
+                          calculateMean(timeDifferences),
+                          tracker.getNumberMessagesReceived(),
+                          tracker.getTotalSizeMessagesReceived(),
+                          tracker.getNumberMessagesSent(),
+                          tracker.getTotalsizeMessagesSent());
+            printer.flush();
         } catch (IOException e) {
             throw new IllegalStateException("Unable to write performance results", e);
         }
@@ -205,7 +228,7 @@ public class RecordTimeDifferences {
     }
        
     /**
-     * Checks if all values for start and finish are set
+     * Checks if all values for start and finish are set and thus process is finished
      * 
      * @param durations
      * @return
@@ -220,26 +243,5 @@ public class RecordTimeDifferences {
         
         // Return
         return true;
-    }     
-    
-    /**
-     * Creates a new instance
-     * 
-     * @param model
-     * @param mailBoxCheckInterval
-     * @param startTime
-     * @param performanceTracker 
-     */
-    public RecordTimeDifferences(Study model, int mailBoxCheckInterval, long startTime, PerformanceTracker performanceTracker, ResultPrinter printer) {
-        // Store
-        this.mailBoxCheckInterval = mailBoxCheckInterval;
-        this.model = model;
-        this.measurements = initList(model.getNumParticipants());
-        this.tracker = performanceTracker;
-        this.printer = printer;
-        
-        // Add and log the starting value
-        measurements.set(model.getOwnId(), new Pair<Long, Long>(startTime));
-        logger.debug("Started", new Date(), model.getStudyUID(), "started", model.getNumParticipants(), "participants", model.getBins().length, "bins", mailBoxCheckInterval, "mailbox check interval");
     }
 }
