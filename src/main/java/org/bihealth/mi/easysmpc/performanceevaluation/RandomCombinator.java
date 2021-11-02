@@ -11,13 +11,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.bihealth.mi.easysmpc.nogui;
+package org.bihealth.mi.easysmpc.performanceevaluation;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import org.bihealth.mi.easysmpc.nogui.Combinator.Combination;
+import org.bihealth.mi.easysmpc.performanceevaluation.Combinator.Combination;
 
 /**
  * Allows to obtain a random combination of parameters

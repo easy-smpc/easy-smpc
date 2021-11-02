@@ -1,4 +1,4 @@
-package org.bihealth.mi.easysmpc.nogui;
+package org.bihealth.mi.easysmpc.performanceevaluation;
 
 import java.io.IOException;
 

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.bihealth.mi.easysmpc.nogui;
+package org.bihealth.mi.easysmpc.performanceevaluation;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +32,7 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
-import org.bihealth.mi.easysmpc.nogui.Combinator.Combination;
+import org.bihealth.mi.easysmpc.performanceevaluation.Combinator.Combination;
 
 /**
  * Starts a performance evaluation (no usage of GUI)

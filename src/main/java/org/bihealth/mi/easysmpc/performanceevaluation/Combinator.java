@@ -11,11 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.bihealth.mi.easysmpc.nogui;
+package org.bihealth.mi.easysmpc.performanceevaluation;
 
 import java.util.List;
 
-import org.bihealth.mi.easysmpc.nogui.Combinator.Combination;
+import org.bihealth.mi.easysmpc.performanceevaluation.Combinator.Combination;
 
 /**
  * A class to combine the different parameters for the performance evaluation
