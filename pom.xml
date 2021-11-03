@@ -4,26 +4,18 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.bihealth.mi</groupId>
 	<artifactId>easysmpc</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0</version>
 	<packaging>jar</packaging>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
 		<testSourceDirectory>src/test/java</testSourceDirectory>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>3.0.0</version>
-				<configuration>
-					<mainClass>org.bihealth.mi.easysmpc.nogui.PerformanceEvaluation</mainClass>
-				</configuration>
-			</plugin>
-
-			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
+				<version>3.8.1</version>
 				<configuration>
-					<release>14</release>
+					          <source>14</source>
+					          <target>14</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -45,27 +37,8 @@
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
 							</descriptorRefs>
-							<finalName>${project.name}</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
-						</configuration>
-					</execution>
-					<execution>
-						<id>performEval</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<archive>
-								<manifest>
-									<mainClass>org.bihealth.mi.easysmpc.nogui.PerformanceEvaluation</mainClass>
-								</manifest>
-							</archive>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
-							<finalName>${project.name}.eval</finalName>
-							<appendAssemblyId>false</appendAssemblyId>
+							 <finalName>${project.name}</finalName>
+							<!--<appendAssemblyId>false</appendAssemblyId>  -->
 						</configuration>
 					</execution>
 				</executions>
