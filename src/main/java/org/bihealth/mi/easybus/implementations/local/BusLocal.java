@@ -32,7 +32,7 @@ public class BusLocal extends Bus {
      * Creates a new instance
      */
     public BusLocal(){
-        super(0);
+        super(1);
     }
 
     @Override

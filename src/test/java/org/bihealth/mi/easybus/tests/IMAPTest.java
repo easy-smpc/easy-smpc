@@ -28,6 +28,12 @@ import org.junit.Test;
  * @author Felix Wirth
  */
 public class IMAPTest {
+    
+    /** Enter to use test case */
+    private static final String USERNAME = null;
+    /** Enter to use test case */
+    private static final String PASSWORD = null;
+    
    
     /** Listener*/
     MessageListener ListenerImplPositive = new MessageListener() {                
@@ -58,7 +64,12 @@ public class IMAPTest {
     @Test
     public void testSharedMailbox() throws Exception {
         
-        ConnectionIMAPSettings login = new ConnectionIMAPSettings("easysmpc.dev@gmail.com").setPassword("3a$ySMPC!");
+        // Proceed only if credentials are set
+        if(USERNAME == null || PASSWORD == null) {
+            return;
+        }
+        
+        ConnectionIMAPSettings login = new ConnectionIMAPSettings(USERNAME).setPassword(PASSWORD);
         if (!login.guess()) {
             throw new IllegalStateException("Could not guess connection settings");
         }

@@ -13,6 +13,8 @@
  */
 package org.bihealth.mi.easybus.tests;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.concurrent.ExecutionException;
 
 import org.bihealth.mi.easybus.Bus;
@@ -30,6 +32,8 @@ import org.junit.Test;
  * @author Felix Wirth
  */
 public class LocalTest {
+    private static final String MESSAGE = "message specific to part1";
+
     @Test
     public void test() throws BusException {
         
@@ -49,7 +53,7 @@ public class LocalTest {
         bus.receive(scope1ForPart1, part1, new ReceiverImplPositive());
         // Positive tests
         try {
-            bus.send(new Message("message specific to part1"),
+            bus.send(new Message(MESSAGE),
                      scope1ForPart3,
                      new Participant("number 1", "hello@number1.de")).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -70,7 +74,7 @@ public class LocalTest {
     class ReceiverImplPositive implements MessageListener {
         @Override
         public void receive(Message message) {
-            System.out.println("Message is: " + (String) message.getMessage());
+            assertEquals("message specific to part1", (String) message.getMessage());
         }
 
         @Override
