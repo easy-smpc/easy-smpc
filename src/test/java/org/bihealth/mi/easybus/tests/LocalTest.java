@@ -22,7 +22,7 @@ import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.local.BusLocal;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 /**
  * Test local bus

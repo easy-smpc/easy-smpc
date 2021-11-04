@@ -20,7 +20,7 @@ import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 /**
  * Simple test class for IMAP
