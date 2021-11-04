@@ -105,7 +105,7 @@ public class BusEmail extends Bus {
         super(sizeThreadpool);
         
         // Check
-        if(millis >= 0) {
+        if(millis <= 0) {
             throw new IllegalArgumentException("millis must be a positive number");
         }
         

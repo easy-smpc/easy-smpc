@@ -84,8 +84,8 @@ public abstract class Bus {
             return false;
         }
         
-        // At least one is listener is registered for scope and participant tuple
-        return true;     
+        // At least one listener is registered for scope and participant tuple
+        return true;
     }
     
     /**
