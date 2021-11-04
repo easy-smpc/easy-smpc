@@ -24,6 +24,7 @@ import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
+import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
  * Bus implementation by email
@@ -88,7 +89,7 @@ public class BusEmail extends Bus {
      * @param millis - interval in milliseconds in which messages are polled. If zero a send only bus is returned
      */
     public BusEmail(ConnectionEmail connection, int millis) {
-        this(connection, millis, 1);
+        this(connection, millis, Resources.SIZE_THREADPOOL);
     }
 
     /**
@@ -99,8 +100,19 @@ public class BusEmail extends Bus {
      * @param sizeThreadpool
      */
     public BusEmail(ConnectionEmail connection, int millis, int sizeThreadpool) {
+        
+        // Super
         super(sizeThreadpool);
+        
+        // Check
+        if(millis >= 0) {
+            throw new IllegalArgumentException("millis must be a positive number");
+        }
+        
+        // Store
         this.connection = connection;
+        
+        // Create thread
         this.thread = new Thread(new Runnable() {
             @Override
             public void run() {

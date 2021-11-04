@@ -142,13 +142,13 @@ public class Resources {
     public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED = 3000;
     
     /** Interval to check existing mailbox connection */
-    public static final long TIMEOUT_SEND_EMAILS = 30000;
+    public static final long TIMEOUT_SEND_EMAILS = 45000;
     
     /** Fetch size for messages with IMAP */
     public static final int FETCH_SIZE_IMAP = 1048576;
     
     /** Number of threads in thread pool */
-    public static final int SIZE_THREADPOOL = 2;
+    public static final int SIZE_THREADPOOL = 1;
 
     /** Fractional bits for decimal values */
     public static final int FRACTIONAL_BITS = 32;

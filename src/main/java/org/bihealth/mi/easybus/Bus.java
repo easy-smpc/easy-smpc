@@ -23,8 +23,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
-import org.bihealth.mi.easysmpc.resources.Resources;
-
 /**
  * The Bus collecting and sending the messages
  * 
@@ -44,7 +42,14 @@ public abstract class Bus {
      * @param sizeThreadpool
      */
     public Bus(int sizeThreadpool) {
-        this.executor = Executors.newFixedThreadPool(sizeThreadpool != 0 ? sizeThreadpool : Resources.SIZE_THREADPOOL);
+        
+        // Check
+        if (sizeThreadpool <= 0) {
+            throw new IllegalArgumentException("sizeThreadpool must be a positive number");
+        }
+        
+        // Create
+        this.executor = Executors.newFixedThreadPool(sizeThreadpool);
         this.subscriptions = new HashMap<>();
     }
 

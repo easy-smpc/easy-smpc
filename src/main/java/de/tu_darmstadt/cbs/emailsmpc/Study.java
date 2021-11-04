@@ -413,7 +413,7 @@ public class Study implements Serializable, Cloneable {
     }
 
     /**
-     * Returns the bus with standard interval length and shared-mailbox mode
+     * Returns the bus with standard interval length
      * 
      * @return the bus
      * @throws BusException 
