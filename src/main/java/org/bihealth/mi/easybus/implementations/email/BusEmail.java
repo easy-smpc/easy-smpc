@@ -88,7 +88,7 @@ public class BusEmail extends Bus {
      * @param millis - interval in milliseconds in which messages are polled. If zero a send only bus is returned
      */
     public BusEmail(ConnectionEmail connection, int millis) {
-        this(connection, millis, 0);
+        this(connection, millis, 1);
     }
 
     /**
@@ -168,6 +168,9 @@ public class BusEmail extends Bus {
         
         // Set stop flag
         this.stop = true;
+        
+        // Shutdown executor
+        getExecutor().shutdown();
         
         // If on the same thread, just return
         if (this.thread == null || Thread.currentThread().equals(this.thread)) {
