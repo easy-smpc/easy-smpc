@@ -76,9 +76,10 @@ public class ConnectionIMAP extends ConnectionEmail {
     private String              password;
     /** Performance listener*/
 	private transient PerformanceListener listener;
-   
+	
+	
     /**
-     * Create a new instance
+     * Create a new instance with ssl/tls
      * 
      * @param settings of mailbox
      * @param sharedMailbox - use shared mailbox or separared mailboxes
@@ -86,6 +87,24 @@ public class ConnectionIMAP extends ConnectionEmail {
      * @throws BusException
      */
     public ConnectionIMAP(ConnectionIMAPSettings settings, boolean sharedMailbox) throws BusException {
+        this(settings, sharedMailbox, true, true);
+
+    }
+   
+    /**
+     * Create a new instance
+     * 
+     * @param settings of mailbox
+     * @param sharedMailbox - use shared mailbox or separared mailboxes
+     * @param listener
+     * @param ssltlsIMAP Use ssl/tls or startls for IMAP connection
+     * @param ssltlsSMTP Use ssl/tls or startls for SMTP connection
+     * @throws BusException
+     */
+    public ConnectionIMAP(ConnectionIMAPSettings settings,
+                          boolean sharedMailbox,
+                          boolean ssltlsIMAP,
+                          boolean ssltlsSMTP) throws BusException {
 
         // Super
         super(sharedMailbox, settings.getEmailAddress(), settings.getPerformanceListener());
@@ -112,9 +131,9 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));        
         this.propertiesReceiving.put("mail.imap.partialfetch", "false");
         this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
-        this.propertiesReceiving.put("mail.imap.ssl.enable", "true");
-        if(settings.isAcceptSelfSignedCertificates()) {
-        	this.propertiesReceiving.put("mail.imap.ssl.trust", "*");
+        this.propertiesReceiving.put(ssltlsIMAP ? "mail.imap.ssl.enable" : "mail.imap.starttls.enable", "true");        
+        if (settings.isAcceptSelfSignedCertificates()) {
+            this.propertiesReceiving.put("mail.imap.ssl.trust", "*");
         }
         
         // Set proxy
@@ -131,7 +150,7 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
         this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
         this.propertiesSending.put("mail.smtp.auth", "true");
-        this.propertiesSending.put("mail.smtp.ssl.enable", "true");
+        this.propertiesReceiving.put(ssltlsSMTP ? "mail.smtp.ssl.enable" : "mail.imap.starttls.enable", "true"); 
         if(settings.isAcceptSelfSignedCertificates()) {
         	this.propertiesSending.put("mail.smtp.ssl.trust", "*");
         }

@@ -84,6 +84,10 @@ public class ConnectionIMAPSettings implements Serializable {
     private boolean              searchForProxy           = true;
     /** Performance listener*/
 	private transient PerformanceListener  listener                 = null;
+	/** Use ssl/tls or starttls for IMAP connection  */
+	private boolean ssltlsIMAP = true;
+	/** Use ssl/tls or starttls for SMTP connection  */
+    private boolean ssltlsSMTP = true;
 	
     /**
      * Creates a new instance
@@ -200,7 +204,23 @@ public class ConnectionIMAPSettings implements Serializable {
     public String getSMTPServer() {
         return smtpServer;
     }
-
+    
+    /**
+     * Is ssl/tls or startls used for IMAP connection?
+     * @return the ssltlsIMAP
+     */
+    public boolean isSSLtlsIMAP() {
+        return ssltlsIMAP;
+    }
+    
+    /**
+     * Is ssl/tls or startls used for SMTP connection?     
+     * @return the ssltlsSMTP
+     */
+    public boolean isSSLtlsSMTP() {
+        return ssltlsSMTP;
+    }
+      
     /**
      * Tries to guess the connection settings from the email address provider
      * @param Whether settings could be guessed successfully
@@ -404,6 +424,28 @@ public class ConnectionIMAPSettings implements Serializable {
         // Set
         this.smtpServer = smtpServer;
 
+        // Done
+        return this;
+    }
+    
+    /**
+     * @param ssltlsIMAP the ssltlsIMAP to set
+     */
+    public ConnectionIMAPSettings setSSLtlsIMAP(boolean ssltlsIMAP) {
+        // Set
+        this.ssltlsIMAP = ssltlsIMAP;
+        
+        // Done
+        return this;
+    }
+    
+    /**
+     * @param ssltlsSMTP the ssltlsSMTP to set
+     */
+    public ConnectionIMAPSettings setSSLtlsSMTP(boolean ssltlsSMTP) {
+        // Set
+        this.ssltlsSMTP = ssltlsSMTP;
+        
         // Done
         return this;
     }

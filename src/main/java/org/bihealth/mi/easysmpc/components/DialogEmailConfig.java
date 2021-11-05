@@ -100,10 +100,23 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         this.serverPortsEntry = new EntryServerPorts();
         this.serverPortsEntry.setChangeListener(this);
         
+        // Panel for encryption radio buttons
+        JPanel encryptionTypePanel = new JPanel();
+        encryptionTypePanel.setLayout(new BoxLayout(encryptionTypePanel, BoxLayout.X_AXIS));
+        ComponentRadioEntry radioEncryptionIMAP = new ComponentRadioEntry(Resources.getString("EmailConfig.20"),
+                                Resources.getString("EmailConfig.21"),
+                                Resources.getString("EmailConfig.22"));
+        ComponentRadioEntry radioEncryptionSMTP = new ComponentRadioEntry(Resources.getString("EmailConfig.23"),
+                                                                          Resources.getString("EmailConfig.21"),
+                                                                          Resources.getString("EmailConfig.22"));
+        encryptionTypePanel.add(radioEncryptionIMAP);
+        encryptionTypePanel.add(radioEncryptionSMTP);
+        
         // Add
         central.add(emailPasswordEntry);
         central.add(serversEntry);
         central.add(serverPortsEntry);
+        central.add(encryptionTypePanel);
         this.getContentPane().add(central, BorderLayout.CENTER);        
         
         // Buttons        
