@@ -415,7 +415,24 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             EntryBin newBin = new EntryBin(currentBin.name, false, "", true, false);
             newBin.setChangeListener(this);
             panelBins.add(newBin);
-        }     
+        }
+        
+        // If automated mode and e-mail config is already known chose the e-mail config
+        if (getApp().getModel().isAutomatedMode()) {
+            // Loop over all settings
+            for (int index = 0; index < comboSelectMailbox.getItemCount(); index++) {
+                if (comboSelectMailbox.getItemAt(index) != null &&
+                    comboSelectMailbox.getItemAt(index)
+                                      .getEmailAddress()
+                                      .equals(getApp().getModel()
+                                                      .getParticipantFromId(getApp().getModel()
+                                                                                    .getOwnId()).emailAddress)) {
+                    comboSelectMailbox.setSelectedIndex(index);
+                    break;
+                }
+            }
+        }
+        
         // Update GUI
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();
