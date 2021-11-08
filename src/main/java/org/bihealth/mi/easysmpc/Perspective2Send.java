@@ -165,6 +165,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     private void actionSendMailAutomatically(List<EntryParticipantCheckmarkSendMail> list) {
         
+        // Ask for password
+        getApp().actionPreparePassword();
+        
         // Deactivate buttons at start: Will be re-enabled if needed by the thread spawned below
         buttonSendAllAutomatically.setEnabled(false);
         buttonSendAllManually.setEnabled(false);

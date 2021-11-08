@@ -24,7 +24,6 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
@@ -36,6 +35,7 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easysmpc.App;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -47,8 +47,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
 
     /** SVUID */
     private static final long      serialVersionUID = -5892937473681272650L;
-    /** E-Mail and password entry */
-    private EntryEMailPassword     emailPasswordEntry;
+    /** Enter e-mail address */
+    private ComponentEntryOne      emailEntry;
     /** E-mail server entry */
     private EntryServers           serversEntry;
     /** Port of e-mail servers entry */
@@ -58,19 +58,20 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /** Result */
     private ConnectionIMAPSettings result;
     /** Parent frame */
-    private JFrame                 parent;
+    private App                    app;
     /** Radio button group for encryption IMAP */
-    private ComponentRadioEntry radioEncryptionIMAP;
+    private ComponentRadioEntry    radioEncryptionIMAP;
     /** Radio button group for encryption STMP */
-    private ComponentRadioEntry radioEncryptionSMTP;
+    private ComponentRadioEntry    radioEncryptionSMTP;
+
      
     /**
      * Create a new instance
      * 
      * @param connectionsSettings to fill as default in the fields
-     * @param parent Component to set the location of JDialog relative to
+     * @param parent component/frame
      */
-    public DialogEmailConfig(ConnectionIMAPSettings connectionsSettings, JFrame parent) {
+    public DialogEmailConfig(ConnectionIMAPSettings connectionsSettings, App parent) {
         this(parent);
         setFieldsFromConnectionSettings(connectionsSettings);
     }
@@ -78,27 +79,34 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /**
      * Create a new instance
      * 
-     * @param parent Component to set the location of JDialog relative to
+     * @param app Component to set the location of JDialog relative to
      */
-    public DialogEmailConfig(JFrame parent) {
+    public DialogEmailConfig(App app) {
 
         // Dialog properties
-        this.parent = parent;
+        this.app = app;
         this.setTitle(Resources.getString("EmailConfig.0"));
         this.getContentPane().setLayout(new BorderLayout());
-        this.setIconImage(this.parent.getIconImage());
+        this.setIconImage(this.app.getIconImage());
         this.setResizable(false);
         
         // Title
         JPanel central = new JPanel();
+        central.setLayout(new BoxLayout(central, BoxLayout.Y_AXIS));
         central.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                                         Resources.getString("EmailConfig.0"),
                                                                                         TitledBorder.CENTER,
                                                                                         TitledBorder.DEFAULT_POSITION));        
-        // Entry boxes
-        central.setLayout(new BoxLayout(central, BoxLayout.Y_AXIS));
-        this.emailPasswordEntry = new EntryEMailPassword();
-        this.emailPasswordEntry.setChangeListener(this);
+        // E-mail address entry
+        emailEntry = new ComponentEntryOne(Resources.getString("EmailConfig.1"), "", true, new ComponentTextFieldValidator() {
+            @Override
+            public boolean validate(String text) {
+                return Participant.isEmailValid(text);
+            }
+        }, false, false);
+        emailEntry.setChangeListener(this);
+        
+        // Server names and port entry
         this.serversEntry = new EntryServers();
         this.serversEntry.setChangeListener(this);
         this.serverPortsEntry = new EntryServerPorts();
@@ -120,7 +128,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         encryptionTypePanel.add(radioEncryptionSMTP);
         
         // Add
-        central.add(emailPasswordEntry);
+        central.add(emailEntry);
         central.add(serversEntry);
         central.add(serverPortsEntry);
         central.add(encryptionTypePanel);
@@ -179,6 +187,11 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     private void actionCheckAndProceed() {
         
+        // Check that password is set
+        if(!this.app.actionPreparePassword()) {
+            return;
+        }
+        
         try {
             ConnectionIMAPSettings settings = getConnectionSettings();
             if (!new ConnectionIMAP(settings, false).checkConnection()) {
@@ -187,6 +200,9 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             this.result = settings;
             this.dispose();
         } catch (BusException e) {
+            // Reset password
+            this.app.setPassword(null);
+            
             JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.14"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
             return;
         }        
@@ -197,15 +213,15 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     private void actionGuessConfig() {
         // Check
-        if (this.emailPasswordEntry.getLeftValue() == null ||
-            !Participant.isEmailValid(this.emailPasswordEntry.getLeftValue())) {
+        if (this.emailEntry.getValue() == null ||
+            !Participant.isEmailValid(this.emailEntry.getValue())) {
             JOptionPane.showMessageDialog(this,Resources.getString("EmailConfig.9"), Resources.getString("EmailConfig.10"), JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         // Try to determine and set
         try {
-            ConnectionIMAPSettings connectionSettings = new ConnectionIMAPSettings(this.emailPasswordEntry.getLeftValue());
+            ConnectionIMAPSettings connectionSettings = new ConnectionIMAPSettings(this.emailEntry.getValue(), app);
             if (connectionSettings.guess()) {
                 serversEntry.setLeftValue(connectionSettings.getIMAPServer());
                 serversEntry.setRightValue(connectionSettings.getSMTPServer());
@@ -227,7 +243,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * @return
      */
     private boolean areValuesValid() {
-        return this.emailPasswordEntry.areValuesValid() && this.serversEntry.areValuesValid() && this.serverPortsEntry.areValuesValid();
+        return this.emailEntry.isValueValid() && this.serversEntry.areValuesValid() && this.serverPortsEntry.areValuesValid();
     }
 
     /**
@@ -237,13 +253,12 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * @throws BusException
      */
     private ConnectionIMAPSettings getConnectionSettings() throws BusException {
-        return new ConnectionIMAPSettings(emailPasswordEntry.getLeftValue()).setPassword(emailPasswordEntry.getRightValue())
-                                                                            .setIMAPServer(serversEntry.getLeftValue())
-                                                                            .setIMAPPort(Integer.valueOf(serverPortsEntry.getLeftValue()))
-                                                                            .setSMTPServer(serversEntry.getRightValue())
-                                                                            .setSMTPPort(Integer.valueOf(serverPortsEntry.getRightValue()))
-                                                                            .setSSLtlsIMAP(radioEncryptionIMAP.isUpperOptionSelected())
-                                                                            .setSSLtlsSMTP(radioEncryptionSMTP.isUpperOptionSelected());
+        return new ConnectionIMAPSettings(emailEntry.getValue(), app).setIMAPServer(serversEntry.getLeftValue())
+                                                               .setIMAPPort(Integer.valueOf(serverPortsEntry.getLeftValue()))
+                                                               .setSMTPServer(serversEntry.getRightValue())
+                                                               .setSMTPPort(Integer.valueOf(serverPortsEntry.getRightValue()))
+                                                               .setSSLtlsIMAP(radioEncryptionIMAP.isUpperOptionSelected())
+                                                               .setSSLtlsSMTP(radioEncryptionSMTP.isUpperOptionSelected());
     }
     
     /**
@@ -253,8 +268,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     private void setFieldsFromConnectionSettings(ConnectionIMAPSettings connectionsSettings) {
         if (connectionsSettings != null) {
-            emailPasswordEntry.setLeftValue(connectionsSettings.getEmailAddress());
-            emailPasswordEntry.setRightValue(connectionsSettings.getPassword());
+            emailEntry.setValue(connectionsSettings.getEmailAddress());
             serversEntry.setLeftValue(connectionsSettings.getIMAPServer());
             serversEntry.setRightValue(connectionsSettings.getSMTPServer());
             serverPortsEntry.setLeftValue(Integer.toString(connectionsSettings.getIMAPPort()));
@@ -269,7 +283,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     public ConnectionIMAPSettings showDialog(){        
         this.pack();
-        this.setLocationRelativeTo(this.parent);
+        this.setLocationRelativeTo(this.app);
         this.setModal(true);
         this.setVisible(true);
         return this.result;
@@ -283,5 +297,5 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         if (this.buttonOK != null) {
             this.buttonOK.setEnabled(areValuesValid());
         }
-    } 
+    }
 }

@@ -42,11 +42,13 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easybus.implementations.email.PasswordAccessor;
 import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
 import org.bihealth.mi.easysmpc.components.ComponentLoadingVisualCheck;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
+import org.bihealth.mi.easysmpc.components.DialogPassword;
 import org.bihealth.mi.easysmpc.components.DialogStringPicker;
 import org.bihealth.mi.easysmpc.dataexport.ExportFile;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
@@ -68,7 +70,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class App extends JFrame {
+public class App extends JFrame implements PasswordAccessor {
     
     public static final String VERSION = "1.0.0";
 
@@ -125,13 +127,15 @@ public class App extends JFrame {
     private ComponentLoadingVisual loadingVisual = null;
     /** Stop flag visual*/
     private boolean stopFlagVisual = false;
+    /** Password */
+    private String password = null;
 
     /**
      * Creates a new instance
      * 
      * @throws IOException
      */
-    public App() throws IOException {
+    public App() throws IOException {                
 
         // Title
         super(Resources.getString("App.0")); //$NON-NLS-1$
@@ -157,7 +161,7 @@ public class App extends JFrame {
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 actionExit();
             }
-        });     
+        });
 
         // Menu
         JMenuBar jmb = new JMenuBar();
@@ -424,6 +428,9 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("App.11"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE ); //$NON-NLS-1$
             return;
         }
+        
+        // Set password accessor
+        this.model.getConnectionIMAPSettings().setPasswordAccessor(this);
         
         // Set and switch to correct perspective        
         switch (this.model.getState()) {
@@ -935,13 +942,45 @@ public class App extends JFrame {
      */
     public void stopAnimation() {
         // Cancel thread if not null
-        if(loadingVisualWorker != null) {
+        if (loadingVisualWorker != null) {
             loadingVisualWorker.cancel(true);
         }
-        
+
         // Stop animation
-        if(loadingVisual != null) {
+        if (loadingVisual != null) {
             loadingVisual.deactivate();
+        }
+    }
+
+    @Override
+    public void setPassword(String password) {        
+
+        this.password = password;        
+    }
+
+    @Override
+    public String getPassword() {
+
+        return password;
+    }
+
+    /**
+     * Get password from dialog if unset
+     * 
+     * @return
+     */
+    public boolean actionPreparePassword() {
+        
+        // Get from dialog if null or requested new
+        if (this.password == null) {
+            this.password = new DialogPassword(this).showDialog();
+        }
+        
+        // Return
+        if (this.password != null ) {
+            return true;
+        } else {
+            return false;
         }
     }
 }

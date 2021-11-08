@@ -307,6 +307,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     private void startAutomatedMailImport() {        
         try {
+            // Ask for password
+            getApp().actionPreparePassword();
+            
             // Start receiving
             getApp().getModel().getBus().receive(new Scope(getApp().getModel().getStudyUID() + getRoundIdentifier()),
                         new org.bihealth.mi.easybus.Participant(getApp().getModel().getParticipantFromId(getApp().getModel().getOwnId()).name,
@@ -331,6 +334,10 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                         }
                                     });
         } catch (IllegalArgumentException | BusException e) {
+            // Reset password
+            getApp().setPassword(null);
+            
+            // Error message
             JOptionPane.showMessageDialog(getPanel(),
                                           Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
                                           Resources.getString("PerspectiveReceive.AutomaticEmail"),
