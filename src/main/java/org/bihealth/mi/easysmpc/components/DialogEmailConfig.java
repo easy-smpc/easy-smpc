@@ -59,6 +59,10 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private ConnectionIMAPSettings result;
     /** Parent frame */
     private JFrame                 parent;
+    /** Radio button group for encryption IMAP */
+    private ComponentRadioEntry radioEncryptionIMAP;
+    /** Radio button group for encryption STMP */
+    private ComponentRadioEntry radioEncryptionSMTP;
      
     /**
      * Create a new instance
@@ -103,12 +107,15 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         // Panel for encryption radio buttons
         JPanel encryptionTypePanel = new JPanel();
         encryptionTypePanel.setLayout(new BoxLayout(encryptionTypePanel, BoxLayout.X_AXIS));
-        ComponentRadioEntry radioEncryptionIMAP = new ComponentRadioEntry(Resources.getString("EmailConfig.20"),
+        radioEncryptionIMAP = new ComponentRadioEntry(Resources.getString("EmailConfig.20"),
                                 Resources.getString("EmailConfig.21"),
-                                Resources.getString("EmailConfig.22"));
-        ComponentRadioEntry radioEncryptionSMTP = new ComponentRadioEntry(Resources.getString("EmailConfig.23"),
+                                Resources.getString("EmailConfig.22"),
+                                this);
+        
+        radioEncryptionSMTP = new ComponentRadioEntry(Resources.getString("EmailConfig.23"),
                                                                           Resources.getString("EmailConfig.21"),
-                                                                          Resources.getString("EmailConfig.22"));
+                                                                          Resources.getString("EmailConfig.22"),
+                                                                          this);
         encryptionTypePanel.add(radioEncryptionIMAP);
         encryptionTypePanel.add(radioEncryptionSMTP);
         
@@ -204,6 +211,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                 serversEntry.setRightValue(connectionSettings.getSMTPServer());
                 serverPortsEntry.setLeftValue(Integer.toString(connectionSettings.getIMAPPort()));
                 serverPortsEntry.setRightValue(Integer.toString(connectionSettings.getSMTPPort()));
+                radioEncryptionIMAP.setUpperOptionSelected(connectionSettings.isSSLtlsIMAP());
+                radioEncryptionSMTP.setUpperOptionSelected(connectionSettings.isSSLtlsSMTP());
             }
             else {
                 throw new IllegalArgumentException("Configuration could not be guessed");
@@ -232,7 +241,9 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                                                                             .setIMAPServer(serversEntry.getLeftValue())
                                                                             .setIMAPPort(Integer.valueOf(serverPortsEntry.getLeftValue()))
                                                                             .setSMTPServer(serversEntry.getRightValue())
-                                                                            .setSMTPPort(Integer.valueOf(serverPortsEntry.getRightValue()));
+                                                                            .setSMTPPort(Integer.valueOf(serverPortsEntry.getRightValue()))
+                                                                            .setSSLtlsIMAP(radioEncryptionIMAP.isUpperOptionSelected())
+                                                                            .setSSLtlsSMTP(radioEncryptionSMTP.isUpperOptionSelected());
     }
     
     /**
@@ -248,6 +259,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             serversEntry.setRightValue(connectionsSettings.getSMTPServer());
             serverPortsEntry.setLeftValue(Integer.toString(connectionsSettings.getIMAPPort()));
             serverPortsEntry.setRightValue(Integer.toString(connectionsSettings.getSMTPPort()));
+            radioEncryptionIMAP.setUpperOptionSelected(connectionsSettings.isSSLtlsIMAP());
+            radioEncryptionSMTP.setUpperOptionSelected(connectionsSettings.isSSLtlsSMTP());
         }
     }
 
@@ -267,6 +280,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     @Override
     public void stateChanged(ChangeEvent e) {
-        this.buttonOK.setEnabled(areValuesValid());
+        if (this.buttonOK != null) {
+            this.buttonOK.setEnabled(areValuesValid());
+        }
     } 
 }

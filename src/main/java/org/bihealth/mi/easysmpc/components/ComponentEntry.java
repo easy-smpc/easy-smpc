@@ -73,7 +73,7 @@ public abstract class ComponentEntry extends JPanel {
         
         // Layout
         this.setBorder(new EmptyBorder(Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP));
-        this.setLayout(new GridLayout(1, 2, Resources.ROW_GAP, Resources.ROW_GAP));        
+        this.setLayout(new GridLayout(1, 2, Resources.ROW_GAP, Resources.ROW_GAP));
         
         // Left
         JPanel left = new JPanel();

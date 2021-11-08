@@ -84,9 +84,9 @@ public class ConnectionIMAPSettings implements Serializable {
     private boolean              searchForProxy           = true;
     /** Performance listener*/
 	private transient PerformanceListener  listener                 = null;
-	/** Use ssl/tls or starttls for IMAP connection  */
+	/** Use ssl/tls (=true) or starttls (=false) for IMAP connection  */
 	private boolean ssltlsIMAP = true;
-	/** Use ssl/tls or starttls for SMTP connection  */
+	/** Use ssl/tls (=true) or starttls (=false) for SMTP connection  */
     private boolean ssltlsSMTP = true;
 	
     /**
@@ -259,6 +259,12 @@ public class ConnectionIMAPSettings implements Serializable {
                                                             .getChildNodes()
                                                             .item(0)
                                                             .getNodeValue());
+                    this.ssltlsIMAP = element.getElementsByTagName("socketType")
+                                             .item(0)
+                                             .getChildNodes()
+                                             .item(0)
+                                             .getNodeValue()
+                                             .equals("STARTTLS") ? false : true;
                 }
             }
 
@@ -276,6 +282,12 @@ public class ConnectionIMAPSettings implements Serializable {
                                                     .getChildNodes()
                                                     .item(0)
                                                     .getNodeValue());
+            this.ssltlsSMTP = element.getElementsByTagName("socketType")
+                    .item(0)
+                    .getChildNodes()
+                    .item(0)
+                    .getNodeValue()
+                    .equals("STARTTLS") ? false : true;
             
             // Success
             return true;

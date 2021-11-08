@@ -33,9 +33,14 @@ public class Connections {
     /** Key */
     private static final String IMAP_PORT_KEY   = "imap_port";
     /** Key */
+    private static final String IMAP_ENCRYPTION_TYPE   = "imap_encryption";
+    /** Key */
     private static final String SMTP_SERVER_KEY = "smtp_server";
     /** Key */
     private static final String SMTP_PORT_KEY   = "smtp_port";
+    /** Key */
+    private static final String SMTP_ENCRYPTION_TYPE   = "smtp_encryption";
+
 
     /**
      * Adds a certain setting
@@ -54,6 +59,8 @@ public class Connections {
         node.putInt(IMAP_PORT_KEY, settings.getIMAPPort());
         node.put(SMTP_SERVER_KEY, settings.getSMTPServer());
         node.putInt(SMTP_PORT_KEY, settings.getSMTPPort());
+        node.putBoolean(IMAP_ENCRYPTION_TYPE, settings.isSSLtlsIMAP());
+        node.putBoolean(SMTP_ENCRYPTION_TYPE, settings.isSSLtlsSMTP());
     }
     
     /**
@@ -73,8 +80,10 @@ public class Connections {
             result.add(new ConnectionIMAPSettings(children).setPassword(child.get(PASSWORD_KEY, null))
                                                            .setIMAPServer(child.get(IMAP_SERVER_KEY, null))
                                                            .setIMAPPort(child.getInt(IMAP_PORT_KEY, 0))
+                                                           .setSSLtlsIMAP(child.getBoolean(IMAP_ENCRYPTION_TYPE, true))
                                                            .setSMTPServer(child.get(SMTP_SERVER_KEY, null))
-                                                           .setSMTPPort(child.getInt(SMTP_PORT_KEY, 0)));
+                                                           .setSMTPPort(child.getInt(SMTP_PORT_KEY, 0))
+                                                           .setSSLtlsSMTP(child.getBoolean(SMTP_ENCRYPTION_TYPE, true)));
         }
         
         // Return
