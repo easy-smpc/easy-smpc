@@ -146,8 +146,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void actionEditEMailConf() {
         ConnectionIMAPSettings settings = new DialogEmailConfig((ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem(), getApp()).showDialog();
         if(settings != null) {
-            Connections.add(settings);
-            this.comboSelectMailbox.addItem(settings);
+            Connections.add(settings);            
             this.comboSelectMailbox.setSelectedItem(settings);
         }
         this.stateChanged(new ChangeEvent(this));        
