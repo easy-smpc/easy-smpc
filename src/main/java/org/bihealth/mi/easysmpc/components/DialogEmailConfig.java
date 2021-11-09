@@ -188,7 +188,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private void actionCheckAndProceed() {
         
         // Check that password is set
-        if(!this.app.actionPreparePassword()) {
+        if(!this.app.askForPassword()) {
             return;
         }
         

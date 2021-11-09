@@ -238,7 +238,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         if (comboSelectMailbox.getSelectedItem() != null && !emailconfigCheck) {
             
             // Check that password is set
-            if(!getApp().actionPreparePassword()) {
+            if(!getApp().askForPassword()) {
                 return;
             }
             
@@ -576,6 +576,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      */
     @Override
     protected void initialize() {
+        // Reset password from former project
+        getApp().setPassword(null);        
         
         // Clear
         this.panelParticipants.removeAll();

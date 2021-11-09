@@ -38,6 +38,8 @@ public abstract class Perspective {
     private final JPanel panel;
     /** Is interim saving in this perspective possible */
     private boolean      canSave = false;
+    /** Can the password of the user be reset?*/
+    private boolean canReenterPassword = false;
     
 
     /**
@@ -46,20 +48,41 @@ public abstract class Perspective {
      * @param app
      * @param title
      * @param progress
+     * @param canSave
      */
     protected Perspective(App app, String title, int progress, boolean canSave) {
+        this(app, title, progress, canSave, false);
+    }
+
+    /**
+     * Creates a new instance
+     * 
+     * @param app
+     * @param title
+     * @param progress
+     * @param canSave
+     * @param canReenterPassword
+     */
+    protected Perspective(App app,
+                          String title,
+                          int progress,
+                          boolean canSave,
+                          boolean canReenterPassword) {
+        
         this.app = app;
         this.title = title;
         this.progress = progress;
         this.canSave = canSave;
+        this.canReenterPassword  = canReenterPassword;
         this.panel = new JPanel();
         this.panel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                               title,
                                                               TitledBorder.CENTER,
                                                               TitledBorder.DEFAULT_POSITION));
         this.createContents(panel);
+        
     }
-
+    
     /**
      * Does perspective allow interim saving
      */
@@ -67,6 +90,13 @@ public abstract class Perspective {
         return canSave;
     }
 
+    /**
+     * Does perspective allow reset the password
+     */
+    protected boolean canReenterPassword() {
+        return canReenterPassword;
+    }
+    
     /**
      * Creates the contents
      * 

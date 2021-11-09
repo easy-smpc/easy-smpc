@@ -87,5 +87,8 @@ public class Perspective0Start extends Perspective {
 
     @Override
     protected void initialize() {
+        
+        // Reset password from former project
+        getApp().setPassword(null);
     }
 }

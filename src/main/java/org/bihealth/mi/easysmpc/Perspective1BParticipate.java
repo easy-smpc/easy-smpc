@@ -213,7 +213,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         if (comboSelectMailbox.getSelectedItem() != null && !emailconfigCheck) {
             
             // Check that password is set
-            if(!getApp().actionPreparePassword()) {
+            if(!getApp().askForPassword()) {
                 return;
             }
                         
@@ -406,7 +406,10 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      */
     @Override
     protected void initialize() {
-
+        
+        // Reset password from former project
+        getApp().setPassword(null);
+        
         // Clear
         panelParticipants.removeAll();
         panelBins.removeAll();

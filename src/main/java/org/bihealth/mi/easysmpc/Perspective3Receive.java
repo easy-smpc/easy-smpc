@@ -225,8 +225,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     @Override
     protected void initialize() {
+        
+        // Set title and clear participants        
         this.fieldTitle.setText(getApp().getModel().getName());
         this.panelParticipants.removeAll();
+        
+        // Set participants
         int i = 0;
         for (Participant currentParticipant : getApp().getModel().getParticipants()) {
             EntryParticipantCheckmark entry = new EntryParticipantCheckmark(currentParticipant.name,
@@ -308,7 +312,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     private void startAutomatedMailImport() {        
         try {
             // Ask for password
-            getApp().actionPreparePassword();
+            getApp().askForPassword();
             
             // Start receiving
             getApp().getModel().getBus().receive(new Scope(getApp().getModel().getStudyUID() + getRoundIdentifier()),

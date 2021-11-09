@@ -106,7 +106,6 @@ public class App extends JFrame implements PasswordAccessor {
 
     /** Model */
     private Study          model;
-
     /** Cards */
     private JPanel            cards;
     /** Menu */
@@ -117,7 +116,9 @@ public class App extends JFrame implements PasswordAccessor {
     private List<Perspective> perspectives = new ArrayList<Perspective>();
     /** Interim save menu item */
     private JMenuItem jmiInterimSave;
-    /** Stores reference to currently displayed perspective */
+    /** Reenter password menu item */
+    private JMenuItem jmiReenterPassword;
+    /** Stores reference to currently displayed perspective */    
     private Perspective currentPerspective;
     /** Label for status messages */
     private JLabel statusMessageLabel;
@@ -221,6 +222,16 @@ public class App extends JFrame implements PasswordAccessor {
             }
         });
         
+        // Reset password
+        jmiReenterPassword = new JMenuItem(Resources.getString("App.25"), Resources.getMenuItem()); //$NON-NLS-1$
+        actionMenu.add(jmiReenterPassword);
+        jmiReenterPassword.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionReenterPassword();
+            }
+        });
+        
         // Exit menu
         JMenuItem jmiExit = new JMenuItem(Resources.getString("App.4"), Resources.getMenuItem()); //$NON-NLS-1$
         actionMenu.add(jmiExit);
@@ -284,6 +295,17 @@ public class App extends JFrame implements PasswordAccessor {
              
         // Finally, make the frame visible
         this.setVisible(true);
+    }
+
+    /**
+     * Reenter password
+     */
+    protected void actionReenterPassword() {
+        // Reset
+        this.password = null;
+        
+        // Enter new
+        askForPassword();
     }
 
     /**
@@ -934,6 +956,7 @@ public class App extends JFrame implements PasswordAccessor {
         currentPerspective = perspective;
         progress.setProgress(perspective.getProgress());
         jmiInterimSave.setEnabled(perspective.canSave());
+        jmiReenterPassword.setEnabled(perspective.canReenterPassword());
         progress.repaint();
     }
     
@@ -969,7 +992,7 @@ public class App extends JFrame implements PasswordAccessor {
      * 
      * @return
      */
-    public boolean actionPreparePassword() {
+    public boolean askForPassword() {
         
         // Get from dialog if null or requested new
         if (this.password == null) {

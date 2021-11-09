@@ -91,7 +91,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @param app
      */
     protected Perspective2Send(App app) {
-        super(app, Resources.getString("PerspectiveSend.send"), 2, true); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveSend.send"), 2, true, true); //$NON-NLS-1$
     }
     
     /**
@@ -100,7 +100,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @param progress
      */
     protected Perspective2Send(App app, int progress) {
-        super(app, Resources.getString("PerspectiveSend.send"), progress, true); //$NON-NLS-1$
+        super(app, Resources.getString("PerspectiveSend.send"), progress, true, true); //$NON-NLS-1$
     }
     
     /**
@@ -109,7 +109,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @param progress
      */
     protected Perspective2Send(App app, String title , int progress) {
-        super(app, title, progress, true); //$NON-NLS-1$
+        super(app, title, progress, true, true); //$NON-NLS-1$
     }
     
     /**
@@ -166,7 +166,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     private void actionSendMailAutomatically(List<EntryParticipantCheckmarkSendMail> list) {
         
         // Ask for password
-        getApp().actionPreparePassword();
+        getApp().askForPassword();
         
         // Deactivate buttons at start: Will be re-enabled if needed by the thread spawned below
         buttonSendAllAutomatically.setEnabled(false);
@@ -498,7 +498,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     @Override
     protected void initialize() {
-        
+               
+        // Set title and clear participants
         this.fieldTitle.setText(getApp().getModel().getName());
         this.panelParticipants.removeAll();
         
