@@ -13,12 +13,13 @@
  */
 package de.tu_darmstadt.cbs.secretshare;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 
 import org.junit.Test;
-import java.math.BigInteger;
-import java.math.BigDecimal;
-import java.security.SecureRandom;
 
 /**
  * Unit test for secret sharing
@@ -53,7 +54,7 @@ public class ArithmeticSharingTest {
     public void fivePartiesDec() {
         int numParties = 5;
         int fractionalBits = 32;
-        double delta = 0.001;
+        double delta = 0.01;
         ArithmeticSharing as = new ArithmeticSharing(numParties);
         SecureRandom randomGenerator = new SecureRandom();
         BigDecimal secret1 = BigDecimal.valueOf(7.634);
@@ -96,7 +97,7 @@ public class ArithmeticSharingTest {
     public void homomorphityDec() {
         int numParties = 15;
         int fractionalBits = 32;
-        double delta = 0.001;
+        double delta = 0.01;
         ArithmeticSharing as = new ArithmeticSharing(numParties);
         SecureRandom randomGenerator = new SecureRandom();
         BigDecimal secret1 = new BigDecimal(new BigInteger(93, randomGenerator)).add(BigDecimal.valueOf(0.4532679821));
@@ -140,7 +141,7 @@ public class ArithmeticSharingTest {
     public void lotPartiesDec() {
         int numParties = 5341;
         int fractionalBits = 32;
-        double delta = 0.001;
+        double delta = 0.01;
         ArithmeticSharing as = new ArithmeticSharing(numParties);
         SecureRandom randomGenerator = new SecureRandom();
         BigDecimal secret1 = BigDecimal.valueOf(7.543323456);
