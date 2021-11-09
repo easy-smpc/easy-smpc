@@ -27,6 +27,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -190,8 +191,24 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         buttonPollManually.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                getApp().getModel().stopBus();
-                startAutomatedMailImport();
+                
+                // Ask for password if not set
+                if (getApp().askForPassword()) {
+
+                    // Stop and restart bus in new thread
+                    new SwingWorker<Void, Void>() {
+
+                        @Override
+                        protected Void doInBackground() throws Exception {
+
+                            getApp().getModel().stopBus();
+                            startAutomatedMailImport();
+
+                            // Return null
+                            return null;
+                        }
+                    }.execute();
+                }
             }
         });
         
@@ -240,11 +257,23 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             i++;
         }
         
-        // Add elements and actions if automatic processing is enabled
+        // Start automatic processing is enabled
         if (isAutomaticProcessingEnabled()) {
-            
-            // Start import reading e-mails automatically if enabled 
-            startAutomatedMailImport();
+            // Ask for password if not set
+            if (getApp().askForPassword()) {
+
+                new SwingWorker<Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        // Start import reading e-mails automatically if enabled
+                        startAutomatedMailImport();
+
+                        // Return null
+                        return null;
+                    }
+                }.execute();
+            }
         }
         
         // Hide or show button to receive automatically
@@ -311,8 +340,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     private void startAutomatedMailImport() {        
         try {
-            // Ask for password
-            getApp().askForPassword();
             
             // Start receiving
             getApp().getModel().getBus().receive(new Scope(getApp().getModel().getStudyUID() + getRoundIdentifier()),

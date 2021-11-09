@@ -42,7 +42,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ProgressMonitor;
-import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -388,11 +387,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         buttonSendAllAutomatically.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        actionSendMailAutomatically(getAllParticipants());
-                    }
-                  });
+                // Ask for password if not set
+                if (getApp().askForPassword()) {
+                    actionSendMailAutomatically(getAllParticipants());
+                }
             }
         });
         
@@ -534,7 +532,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             automaticSend.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    actionSendMailAutomatically(Arrays.asList(entry));
+                    // Ask for password if not set
+                    if (getApp().askForPassword()) {
+                        actionSendMailAutomatically(Arrays.asList(entry));
+                    }
                 }
             });
             automaticSend.setVisible(isInitialSending());
@@ -577,8 +578,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         getPanel().revalidate();
         getPanel().repaint();
         
-        // Send e-mails automatically if enabled
-        if (isAutomaticProcessingEnabled()) {
+        // Send e-mails automatically if enabled and password set
+        if (isAutomaticProcessingEnabled() && getApp().askForPassword()) {
             actionSendMailAutomatically(getAllParticipants());
         }
     }
