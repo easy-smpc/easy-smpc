@@ -20,6 +20,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -27,6 +28,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -113,15 +115,13 @@ public class DialogPassword extends JDialog implements ChangeListener {
         this.buttonOK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogPassword.this.result = passwordEntry.getValue();
-                DialogPassword.this.dispose();
+                actionProceed();
             }
         });
         buttonCancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogPassword.this.result = null;
-                DialogPassword.this.dispose();
+                actionCancel();
             }
         });
         this.addWindowListener(new WindowAdapter() {
@@ -131,9 +131,45 @@ public class DialogPassword extends JDialog implements ChangeListener {
             }
         });
         
+        // Add shortcut key for escape
+        JPanel dialogPanel = (JPanel) getContentPane();
+        dialogPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                   .put(KeyStroke.getKeyStroke("ESCAPE"), "cancel");
+        dialogPanel.getActionMap().put("cancel", new AbstractAction() {
+            /** SVUID */
+            private static final long serialVersionUID = -5809172959090943313L;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionCancel();
+            }
+        });
+        
+        // Add shortcut key for enter
+        dialogPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                   .put(KeyStroke.getKeyStroke("ENTER"), "proceed");
+        dialogPanel.getActionMap().put("proceed", new AbstractAction() {
+
+            /** SVUID */
+            private static final long serialVersionUID = -4085624272147282716L;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionProceed();
+            }
+        });
+        
         // Pack and set location
         this.pack();
         this.setLocationRelativeTo(parent);
+    }
+
+    /**
+     * Action proceed and close
+     */
+    protected void actionProceed() {
+        this.result = passwordEntry.getValue();
+        this.dispose();
     }
 
     /**
@@ -160,5 +196,13 @@ public class DialogPassword extends JDialog implements ChangeListener {
     @Override
     public void stateChanged(ChangeEvent e) {
         this.buttonOK.setEnabled(this.areValuesValid());
-    } 
+    }
+    
+    /**
+     * Action cancel and close
+     */
+    private void actionCancel() {
+        this.result = null;
+        this.dispose();
+    }
 }

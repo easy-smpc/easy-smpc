@@ -20,12 +20,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -88,15 +90,13 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
         this.buttonOK.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogStringPicker.this.result = text.getText();
-                DialogStringPicker.this.dispose();
+                actionProceed();
             }
         });
         buttonCancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogStringPicker.this.result = null;
-                DialogStringPicker.this.dispose();
+                actionCancel();
             }
         });
         this.addWindowListener(new WindowAdapter() {
@@ -106,7 +106,21 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
             }
         });
         
-        // Pack and set location
+        // Add shortcut key for escape
+        JPanel dialogPanel = (JPanel) getContentPane();
+        dialogPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                   .put(KeyStroke.getKeyStroke("ESCAPE"), "cancel");
+        dialogPanel.getActionMap().put("cancel", new AbstractAction() {
+            /** SVUID */
+            private static final long serialVersionUID = -5809172959090943313L;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionCancel();
+            }
+        });        
+        
+        // Set location
         this.setLocationRelativeTo(parent);
     }
 
@@ -133,5 +147,21 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
     @Override
     public void stateChanged(ChangeEvent e) {
         this.buttonOK.setEnabled(this.areValuesValid());
+    }
+
+    /**
+     * Action proceed and close
+     */
+    private void actionProceed() {
+        this.result = text.getText();
+        this.dispose();
+    }
+
+    /**
+     * Action cancel and close
+     */
+    private void actionCancel() {
+        this.result = null;
+        this.dispose();
     } 
 }

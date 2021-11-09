@@ -20,12 +20,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -149,7 +152,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         okCancelPane.add(buttonOK);
         buttonsPane.add(okCancelPane);
         getContentPane().add(buttonsPane, BorderLayout.SOUTH);
-        this.stateChanged(new ChangeEvent(this));
+        this.stateChanged(new ChangeEvent(this));             
         
         // Listeners
         buttonGuessConfig.addActionListener(new ActionListener() {
@@ -169,8 +172,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         buttonCancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DialogEmailConfig.this.result = null;
-                DialogEmailConfig.this.dispose();
+                actionCancel();
             }
         });
         
@@ -180,10 +182,38 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                 DialogEmailConfig.this.result = null;
             }
         });
+        
+        // Add shortcut key for escape
+        JPanel dialogPanel = (JPanel) getContentPane();
+        dialogPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                   .put(KeyStroke.getKeyStroke("ESCAPE"), "cancel");
+        dialogPanel.getActionMap().put("cancel", new AbstractAction() {
+            /** SVUID */
+            private static final long serialVersionUID = -5809172959090943313L;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionCancel();
+            }
+        });
+        
+        // Add shortcut key for enter
+        dialogPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                   .put(KeyStroke.getKeyStroke("ENTER"), "proceed");
+        dialogPanel.getActionMap().put("proceed", new AbstractAction() {
+
+            /** SVUID */
+            private static final long serialVersionUID = -4085624272147282716L;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionCheckAndProceed();
+            }
+        });
     }
 
     /**
-     * Action close
+     * Action proceed and close
      */
     private void actionCheckAndProceed() {
         
@@ -297,5 +327,13 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         if (this.buttonOK != null) {
             this.buttonOK.setEnabled(areValuesValid());
         }
+    }
+
+    /**
+     * Action cancel and close
+     */
+    private void actionCancel() {
+        this.result = null;
+        this.dispose();
     }
 }
