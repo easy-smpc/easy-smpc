@@ -201,6 +201,12 @@ public class Perspective2Send extends Perspective implements ChangeListener {
 
                 // Loop over messages
                 for (EntryParticipantCheckmarkSendMail entry : list) {
+                    
+                    // Stop if cancel button hit
+                    if(monitor.isCanceled()) {
+                        break;
+                    }
+                    
                     // Init
                     FutureTask<Void> future;
 
