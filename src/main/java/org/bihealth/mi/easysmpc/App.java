@@ -988,7 +988,7 @@ public class App extends JFrame implements PasswordAccessor {
     }
 
     /**
-     * Get password from dialog if unset
+     * Get password from dialog if password is null
      * 
      * @return
      */

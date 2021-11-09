@@ -338,8 +338,6 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                         }
                                     });
         } catch (IllegalArgumentException | BusException e) {
-            // Reset password
-            getApp().setPassword(null);
             
             // Error message
             JOptionPane.showMessageDialog(getPanel(),
