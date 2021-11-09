@@ -50,6 +50,7 @@ import javax.swing.event.ChangeListener;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.Scope;
+import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmarkSendMail;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
@@ -220,8 +221,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                                                        entry.getRightValue()));
                     } else {
                         // Send message as regular e-mail
-                        future = getApp().getModel()
-                                         .getBus()
+                        future = ((BusEmail) getApp().getModel()
+                                         .getBus())
                                          .sendPlain(entry.getRightValue(),
                                                     generateEMailSubject(),
                                                     generateEMailBody(entry,

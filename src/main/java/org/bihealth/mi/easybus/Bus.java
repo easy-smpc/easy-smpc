@@ -222,18 +222,6 @@ public abstract class Bus {
     }
 
     /**
-     * Send a plain e-mail (no bus functionality)
-     * 
-     * @param recipient
-     * @param subject
-     * @param content
-     * @return
-     * @throws BusException
-     */
-    public abstract FutureTask<Void>
-              sendPlain(String recipient, String subject, String content) throws BusException;
-
-    /**
      * Is the bus connected?
      * 
      * @return
