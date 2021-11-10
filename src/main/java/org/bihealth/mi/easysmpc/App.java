@@ -36,7 +36,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -44,7 +43,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easybus.implementations.email.PasswordAccessor;
 import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
-import org.bihealth.mi.easysmpc.components.ComponentLoadingVisualCheck;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
@@ -122,12 +120,8 @@ public class App extends JFrame implements PasswordAccessor {
     private Perspective currentPerspective;
     /** Label for status messages */
     private JLabel statusMessageLabel;
-    /** Thread for visual worker*/
-    private SwingWorker<Void, Void> loadingVisualWorker;
     /** Component loadingVisual */
     private ComponentLoadingVisual loadingVisual = null;
-    /** Stop flag visual*/
-    private boolean stopFlagVisual = false;
     /** Password */
     private String password = null;
 
@@ -849,38 +843,6 @@ public class App extends JFrame implements PasswordAccessor {
     }
     
     /**
-     * Sets the animation
-     * 
-     * @param loadingAnimationCheck
-     */
-    public void setAnimation(ComponentLoadingVisualCheck loadingAnimationCheck) {
-        // Activate animation create thread if not existing
-        if (loadingVisualWorker == null || loadingVisualWorker.isCancelled() ||
-            loadingVisualWorker.isDone()) {
-            stopFlagVisual = false;
-            loadingVisualWorker = new SwingWorker<Void, Void>() {
-                @Override
-                protected Void doInBackground() throws Exception {
-                    while (!stopFlagVisual) {
-                        if (loadingAnimationCheck.isDisplayed()) {
-                            loadingVisual.activate();
-                            loadingAnimationCheck.actionSuccess();
-                        } else {
-                            loadingVisual.deactivate();
-                            loadingAnimationCheck.actionError();
-                            stopFlagVisual = true;
-                        }
-                        Thread.sleep(Resources.INTERVAL_CHECK_MAILBOX_CONNECTED);
-                    }
-                    loadingVisual.deactivate();
-                    return null;
-                }
-            };
-            loadingVisualWorker.execute();
-        }
-    }
-    
-    /**
      * Set message share (message in perspectives receive)
      * 
      * @param message
@@ -905,13 +867,30 @@ public class App extends JFrame implements PasswordAccessor {
      * Sets a status message
      * 
      * @param text
-     * @param errorMessage (text will be red)
-     * @param showLoadingAnimation 
+     * @param errorMessage (text will be red) 
      */
     public void setStatusMessage(String text, boolean errorMessage) {
         // Set text
         statusMessageLabel.setText(text);
         statusMessageLabel.setForeground(errorMessage ? Color.RED : Resources.COLOR_LIGHT_GREEN);   
+    }
+    
+    /**
+     * Sets a status message and changes the animation
+     * 
+     * @param text
+     * @param errorMessage (text will be red) 
+     * @param activateAnimation
+     */
+    public void setStatusMessage(String text, boolean errorMessage, boolean activateAnimation) {
+        // Set text
+        this.setStatusMessage(text, errorMessage);
+
+        if (activateAnimation) {
+            this.startAnimation();
+        } else {
+            this.stopAnimation();
+        }
     }
 
     /**
@@ -961,17 +940,22 @@ public class App extends JFrame implements PasswordAccessor {
     }
     
     /**
-     * Stops the animation
+     * Stops the loading animation
      */
     public void stopAnimation() {
-        // Cancel thread if not null
-        if (loadingVisualWorker != null) {
-            loadingVisualWorker.cancel(true);
-        }
 
-        // Stop animation
         if (loadingVisual != null) {
             loadingVisual.deactivate();
+        }
+    }
+    
+    /**
+     * Starts the loading animation
+     */
+    public void startAnimation() {
+
+        if (loadingVisual != null) {
+            loadingVisual.activate();
         }
     }
 

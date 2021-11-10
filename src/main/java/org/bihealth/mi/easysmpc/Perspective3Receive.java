@@ -37,7 +37,6 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
-import org.bihealth.mi.easysmpc.components.ComponentLoadingVisualCheck;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmark;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
@@ -67,12 +66,12 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
 
     /** Receive button */
     private JButton            buttonReceive;
-    
+
     /** Buttons pane */
-    private JPanel buttonsPane;
-    
-    /** Button poll manually*/
-    private JButton buttonPollManually;
+    private JPanel             buttonsPane;
+
+    /** Button poll manually */
+    private JButton            buttonPollManually;
 
     /**
      * Creates the perspective
@@ -338,32 +337,19 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     /**
      * Start the automatic import of e-mails if necessary
      */
-    private void startAutomatedMailImport() {        
-        try {
-            
+    private void startAutomatedMailImport() {
+        
+        // Set status message
+        getApp().setStatusMessage(Resources.getString("PerspectiveReceive.LoadingInProgress"),
+                                  false,
+                                  true);
+        try {                                                      
             // Start receiving
             getApp().getModel().getBus().receive(new Scope(getApp().getModel().getStudyUID() + getRoundIdentifier()),
                         new org.bihealth.mi.easybus.Participant(getApp().getModel().getParticipantFromId(getApp().getModel().getOwnId()).name,
                                                                 getApp().getModel().getParticipantFromId(getApp().getModel().getOwnId()).emailAddress),
-                                                                this);            
-            // Set message accordingly
-            getApp().setAnimation(new ComponentLoadingVisualCheck() {
-                                        @Override
-                                        public void actionError() {
-                                            getApp().setStatusMessage(Resources.getString("App.24"), true);
-                                        }
-                                        
-                                        @Override
-                                        public void actionSuccess() {
-                                            getApp().setStatusMessage(Resources.getString("PerspectiveReceive.LoadingInProgress"), false);                                            
-                                        }
-
-                                        @Override
-                                        public boolean isDisplayed() {
-                                            // Check if bus is still receiving
-                                            return getApp().getModel().isBusAlive() && getApp().getModel().isBusConectedReceiving();
-                                        }
-                                    });
+                                                                this);
+            
         } catch (IllegalArgumentException | BusException e) {
             
             // Error message
@@ -371,7 +357,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                           Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
                                           Resources.getString("PerspectiveReceive.AutomaticEmail"),
                                           JOptionPane.ERROR_MESSAGE);
-        }
+            getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
+                                      true, false);
+        }    
     }
 
     @Override
@@ -418,7 +406,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     @Override
     public void receiveError(Exception exception) {
         getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
-                                  true);
+                                  true, false);
         }    
     
     /**
