@@ -269,7 +269,6 @@ public class App extends JFrame implements PasswordAccessor {
         statusMessageLabel = new JLabel("");
         messagesPanel.add(statusMessageLabel, BorderLayout.CENTER);
         loadingVisual = new ComponentLoadingVisual(Resources.getLoadingAnimation());
-        loadingVisual.deactivate();
         messagesPanel.add(loadingVisual, BorderLayout.EAST);
         jmb.add(Box.createHorizontalGlue());
         jmb.add(menuPanel);

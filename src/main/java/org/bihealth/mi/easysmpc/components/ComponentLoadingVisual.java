@@ -43,6 +43,9 @@ public class ComponentLoadingVisual extends JPanel {
         
         // Create layout and add panel
         this.setLayout(new BorderLayout());
+        
+        // Deactivate as default
+        this.deactivate();
     }
      
     /**
