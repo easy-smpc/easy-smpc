@@ -148,12 +148,7 @@ public class ConnectionIMAP extends ConnectionEmail {
      * Checks if connections are working
      */
     public boolean checkConnection() {
-        
-        // Check sending
-        if (!isSendingConnected()) {
-            return false;
-        }
-        
+                
         // Check receiving
         return isReceivingConnected();
     }
@@ -188,12 +183,11 @@ public class ConnectionIMAP extends ConnectionEmail {
         return bos.toByteArray();
     }
 
-    protected boolean isSendingConnected() {
-        // TODO check sending connected
-        return true;
-    }
-
-    @Override
+    /**
+     * Is there a working connection to receive
+     * 
+     * @return
+     */
     protected boolean isReceivingConnected() {
         synchronized (propertiesReceiving) {
             // Make sure we are ready to go

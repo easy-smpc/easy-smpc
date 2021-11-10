@@ -304,20 +304,6 @@ public abstract class ConnectionEmail {
     protected String getEmailAddress() {
         return this.emailAddress;
     }
-
-    /**
-     * Is there an working connection to receive?
-     * 
-     * @return
-     */
-    protected abstract boolean isReceivingConnected();
-
-    /**
-     * Is there an working connection to send?
-     * 
-     * @return
-     */
-    protected abstract boolean isSendingConnected();
     
     /**
      * Lists all relevant e-mails
