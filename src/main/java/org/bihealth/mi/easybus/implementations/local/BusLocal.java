@@ -47,9 +47,4 @@ public class BusLocal extends Bus {
     public void stop() {
         // Empty by design
     }
-
-    @Override
-    public boolean isConnected() {
-        return true;
-    }
 }

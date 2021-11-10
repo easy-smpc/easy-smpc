@@ -220,11 +220,4 @@ public abstract class Bus {
     protected ExecutorService getExecutor() {
         return executor;
     }
-
-    /**
-     * Is the bus connected?
-     * 
-     * @return
-     */
-    public abstract boolean isConnected();
 }

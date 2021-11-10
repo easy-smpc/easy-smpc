@@ -135,18 +135,6 @@ public class BusEmail extends Bus {
     public boolean isAlive() {
         return this.thread != null && this.thread.isAlive();
     }
-
-    @Override
-    public boolean isConnected() {
-        
-        // Check if connected to receive
-        if(this.connection != null) {
-            return this.connection.isReceivingConnected();
-        }
-        
-        // Return false
-        return false;
-    }
     
     /**
      * Deletes all e-mails in inbox relevant for easysmpc

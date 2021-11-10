@@ -675,19 +675,6 @@ public class Study implements Serializable, Cloneable {
     }
 
     /**
-     * Is the e-mail bus connected to receive e-mails?
-     * 
-     * @return
-     */
-    public synchronized boolean isBusConectedReceiving() {
-        if (this.bus != null) {
-            return this.bus.isConnected();
-        }
-        
-        return false;
-    }
-
-    /**
      * Check whether the message is for the correct recipient
      * @param msg
      * @return
