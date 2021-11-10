@@ -38,6 +38,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
@@ -270,6 +271,7 @@ public class App extends JFrame implements PasswordAccessor {
         messagesPanel.add(statusMessageLabel, BorderLayout.CENTER);
         loadingVisual = new ComponentLoadingVisual(Resources.getLoadingAnimation());
         messagesPanel.add(loadingVisual, BorderLayout.EAST);
+        messagesPanel.setBorder(new EmptyBorder(0, 0, 0, 5));
         jmb.add(Box.createHorizontalGlue());
         jmb.add(menuPanel);
         
