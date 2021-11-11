@@ -256,7 +256,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
             i++;
         }
         
-        // Start automatic processing is enabled
+        // Start automatic processing if enabled
         if (isAutomaticProcessingEnabled()) {
             // Ask for password if not set
             if (getApp().askForPassword()) {
@@ -317,6 +317,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
 
     @Override
     public void receive(Message message) {
+        
+        // Set error message in EDT 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -324,9 +326,9 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                 if (getApp().isMessageShareResultValid(messageStripped)) {
                     getApp().setMessageShare(messageStripped);
                     getApp().actionSave();
-                    getApp().setStatusMessage( String.format(Resources.getString("PerspectiveReceive.displaySuccess")
-                                                                    , numberSharesComplete()
-                                                                    , numberExpectedMessages())
+                    getApp().setStatusMessage(String.format(Resources.getString("PerspectiveReceive.displaySuccess"),
+                                                            numberSharesComplete(),
+                                                            numberExpectedMessages())
                                                       , false);
                     stateChanged(new ChangeEvent(this));
                 }
@@ -335,7 +337,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     }
 
     /**
-     * Start the automatic import of e-mails if necessary
+     * Start the automatic import of e-mails
      */
     private void startAutomatedMailImport() {
         
@@ -351,15 +353,26 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                                                 this);
             
         } catch (IllegalArgumentException | BusException e) {
-            
-            // Error message
-            JOptionPane.showMessageDialog(getPanel(),
-                                          Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
-                                          Resources.getString("PerspectiveReceive.AutomaticEmail"),
-                                          JOptionPane.ERROR_MESSAGE);
-            getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
-                                      true, false);
-        }    
+
+            // Error message in EDT
+            if (!SwingUtilities.isEventDispatchThread()) {
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        JOptionPane.showMessageDialog(getPanel(),
+                                                      Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
+                                                      Resources.getString("PerspectiveReceive.AutomaticEmail"),
+                                                      JOptionPane.ERROR_MESSAGE);
+                        getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
+                                                  true,
+                                                  false);
+
+                    }
+                });
+            }
+
+        }
     }
 
     @Override
@@ -405,9 +418,17 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      */
     @Override
     public void receiveError(Exception exception) {
-        getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
-                                  true, false);
-        }    
+        
+        // Set error message in EDT 
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
+                                          true,
+                                          false);
+            }
+        });
+    }
     
     /**
      * Check participant entries visually if complete

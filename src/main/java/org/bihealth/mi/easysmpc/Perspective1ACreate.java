@@ -681,6 +681,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                         @Override
                         public void run() {
                             if (!entry.isRightEnabled()) {
+                                // Allow entry in field
                                 entry.setRightEnabled(true);
                             }
                         }
