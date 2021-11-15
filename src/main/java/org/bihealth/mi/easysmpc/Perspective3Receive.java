@@ -190,24 +190,18 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         buttonPollManually.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                
-                // Ask for password if not set
-                if (getApp().askForPassword()) {
+                // Stop and restart bus in new thread
+                new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
 
-                    // Stop and restart bus in new thread
-                    new SwingWorker<Void, Void>() {
+                        getApp().getModel().stopBus();
+                        startAutomatedMailImport();
 
-                        @Override
-                        protected Void doInBackground() throws Exception {
-
-                            getApp().getModel().stopBus();
-                            startAutomatedMailImport();
-
-                            // Return null
-                            return null;
-                        }
-                    }.execute();
-                }
+                        // Return null
+                        return null;
+                    }
+                }.execute();
             }
         });
         
@@ -258,21 +252,16 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         
         // Start automatic processing if enabled
         if (isAutomaticProcessingEnabled()) {
-            // Ask for password if not set
-            if (getApp().askForPassword()) {
+            new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    // Start import reading e-mails automatically if enabled
+                    startAutomatedMailImport();
 
-                new SwingWorker<Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        // Start import reading e-mails automatically if enabled
-                        startAutomatedMailImport();
-
-                        // Return null
-                        return null;
-                    }
-                }.execute();
-            }
+                    // Return null
+                    return null;
+                }
+            }.execute();
         }
         
         // Hide or show button to receive automatically

@@ -39,27 +39,30 @@ import com.github.markusbernhardt.proxy.ProxySearch;
 public class ConnectionIMAPSettings implements Serializable {
 
     /** SVUID */
-    private static final long serialVersionUID = 3880443185633907293L;
+    private static final long    serialVersionUID  = 3880443185633907293L;
     /** End-point for Mozilla auto-configuration service */
-    public static final String   MOZILLA_AUTOCONF = "https://autoconfig.thunderbird.net/v1.1/";
+    public static final String   MOZILLA_AUTOCONF  = "https://autoconfig.thunderbird.net/v1.1/";
     /** Standard port for IMAP */
-    public static final int      DEFAULT_PORT_IMAP        = 993;
+    public static final int      DEFAULT_PORT_IMAP = 993;
     /** Standard port for SMTP */
-    public static final int      DEFAULT_PORT_SMTP        = 465;
+    public static final int      DEFAULT_PORT_SMTP = 465;
     /** Regex to check dns validity */
-    private static final Pattern regexDNS = Pattern.compile("^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]))*$");
-    
+    private static final Pattern regexDNS          = Pattern.compile("^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]))*$");
+
     /**
      * Check server name
+     * 
      * @param text
      */
     public static void checkDNSName(String text) {
         if (!regexDNS.matcher(text).matches()) {
             throw new IllegalArgumentException("DNS name invalid");
-        }        
+        }
     }
+
     /**
      * Check
+     * 
      * @param object
      */
     public static void checkPort(int object) {
@@ -67,39 +70,39 @@ public class ConnectionIMAPSettings implements Serializable {
             throw new IllegalArgumentException("Port must not be between 1 and 65535");
         }
     }
+
     /** E-mail address */
-    private String               emailAddress;
+    private String                        emailAddress;
     /** Password */
-    private String               password;
+    private transient String              password;
     /** IMAP server dns */
-    private String               imapServer;
+    private String                        imapServer;
     /** Port of IMAP server */
-    private int                  imapPort                 = DEFAULT_PORT_IMAP;
+    private int                           imapPort             = DEFAULT_PORT_IMAP;
     /** SMTP server dns */
-    private String               smtpServer;
+    private String                        smtpServer;
     /** Port of SMTP server */
-    private int                  smtpPort                 = DEFAULT_PORT_SMTP;
-    /** Accept self signed certificates*/
-    private boolean				 acceptSelfSignedCert     = false;
-    /** Search for proxy*/
-    private boolean              searchForProxy           = true;
-    /** Performance listener*/
-	private transient PerformanceListener  listener                 = null;
-	/** Use ssl/tls (=true) or starttls (=false) for IMAP connection  */
-	private boolean ssltlsIMAP = true;
-	/** Use ssl/tls (=true) or starttls (=false) for SMTP connection  */
-    private boolean ssltlsSMTP = true;
+    private int                           smtpPort             = DEFAULT_PORT_SMTP;
+    /** Accept self signed certificates */
+    private boolean                       acceptSelfSignedCert = false;
+    /** Search for proxy */
+    private boolean                       searchForProxy       = true;
+    /** Performance listener */
+    private transient PerformanceListener listener             = null;
+    /** Use ssl/tls (=true) or starttls (=false) for IMAP connection */
+    private boolean                       ssltlsIMAP           = true;
+    /** Use ssl/tls (=true) or starttls (=false) for SMTP connection */
+    private boolean                       ssltlsSMTP           = true;
     /** Password accessor */
-    private transient PasswordAccessor passwordAccessor;
-	
-    
+    private PasswordProvider              provider;
+
     /**
      * Creates a new instance
      * 
      * @param emailAddress
-     * @param passwordAccessor
+     * @param provider
      */
-    public ConnectionIMAPSettings(String emailAddress, PasswordAccessor passwordAccessor) {
+    public ConnectionIMAPSettings(String emailAddress, PasswordProvider provider) {
         
         // Checks
         checkNonNull(emailAddress);
@@ -109,39 +112,9 @@ public class ConnectionIMAPSettings implements Serializable {
         
         // Store
         this.emailAddress = emailAddress;
-
-        // Set either specific or default password accessor
-        if (passwordAccessor != null) {
-            this.passwordAccessor = passwordAccessor;
-        } else {
-            passwordAccessor = new PasswordAccessor() {
-                @Override
-                public String getPassword() {
-                    return password;
-                }
-
-                @Override
-                public void setPassword(String password) {
-                    // Check
-                    if (password == null) {
-                        throw new IllegalArgumentException("Password can not be null");
-                    }
-
-                    // Set
-                    ConnectionIMAPSettings.this.password = password;
-                }
-            };
-        }
+        this.provider = provider;
     }
     
-    /**
-     * Creates a new instance
-     * @param emailAddress Email address to use
-     */
-    public ConnectionIMAPSettings(String emailAddress) {
-        this(emailAddress, null);
-    }
-
     /**
      * Checks whether fields are empty
      * 
@@ -192,7 +165,19 @@ public class ConnectionIMAPSettings implements Serializable {
      * @return the password
      */
     public String getPassword() {
-        return passwordAccessor.getPassword();
+        
+        // Potentially ask for password
+        if (this.password == null && this.provider != null) {
+            this.password = this.provider.getPassword();
+            
+            // Check connection settings
+            if (!this.isValid()) {
+                this.password = null;
+            }
+        }
+        
+        // Return password
+        return this.password;
     }
 
     /**
@@ -223,7 +208,7 @@ public class ConnectionIMAPSettings implements Serializable {
      * Is ssl/tls or startls used for IMAP connection?
      * @return the ssltlsIMAP
      */
-    public boolean isSSLtlsIMAP() {
+    public boolean isSSLTLSIMAP() {
         return ssltlsIMAP;
     }
     
@@ -231,7 +216,7 @@ public class ConnectionIMAPSettings implements Serializable {
      * Is ssl/tls or startls used for SMTP connection?     
      * @return the ssltlsSMTP
      */
-    public boolean isSSLtlsSMTP() {
+    public boolean isSSLTLSSMTP() {
         return ssltlsSMTP;
     }
       
@@ -376,10 +361,7 @@ public class ConnectionIMAPSettings implements Serializable {
      * @param password the password to set
      */
     public ConnectionIMAPSettings setPassword(String password) {
-        // Set
-        this.passwordAccessor.setPassword(password);
-        
-        // Return
+        this.password = password;
         return this;        
     }
     
@@ -440,25 +422,18 @@ public class ConnectionIMAPSettings implements Serializable {
     /**
      * @param ssltlsIMAP the ssltlsIMAP to set
      */
-    public ConnectionIMAPSettings setSSLtlsIMAP(boolean ssltlsIMAP) {
+    public ConnectionIMAPSettings setSSLTLSIMAP(boolean ssltlsIMAP) {
         // Set
         this.ssltlsIMAP = ssltlsIMAP;
         
         // Done
         return this;
     }
-     
-    /**
-     * @param passwordAccessor the passwordAccessor to set
-     */
-    public void setPasswordAccessor(PasswordAccessor passwordAccessor) {
-        this.passwordAccessor = passwordAccessor;
-    }
-    
+
     /**
      * @param ssltlsSMTP the ssltlsSMTP to set
      */
-    public ConnectionIMAPSettings setSSLtlsSMTP(boolean ssltlsSMTP) {
+    public ConnectionIMAPSettings setSSLTLSSMTP(boolean ssltlsSMTP) {
         // Set
         this.ssltlsSMTP = ssltlsSMTP;
         
@@ -491,5 +466,17 @@ public class ConnectionIMAPSettings implements Serializable {
                Objects.equals(password, other.password) && searchForProxy == other.searchForProxy &&
                smtpPort == other.smtpPort && Objects.equals(smtpServer, other.smtpServer) &&
                ssltlsIMAP == other.ssltlsIMAP && ssltlsSMTP == other.ssltlsSMTP;
+    }
+
+    /**
+     * Returns whether this connection is valid
+     * @return
+     */
+    public boolean isValid() {
+        try {
+            return new ConnectionIMAP(this, false).checkConnection();
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

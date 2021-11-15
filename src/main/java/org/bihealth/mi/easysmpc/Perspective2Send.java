@@ -165,9 +165,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      */
     private void actionSendMailAutomatically(List<EntryParticipantCheckmarkSendMail> list) {
         
-        // Ask for password
-        getApp().askForPassword();
-        
         // Deactivate buttons at start: Will be re-enabled if needed by the thread spawned below
         buttonSendAllAutomatically.setEnabled(false);
         buttonSendAllManually.setEnabled(false);
@@ -388,10 +385,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         buttonSendAllAutomatically.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Ask for password if not set
-                if (getApp().askForPassword()) {
-                    actionSendMailAutomatically(getAllParticipants());
-                }
+                actionSendMailAutomatically(getAllParticipants());
             }
         });
         
@@ -533,10 +527,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             automaticSend.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    // Ask for password if not set
-                    if (getApp().askForPassword()) {
-                        actionSendMailAutomatically(Arrays.asList(entry));
-                    }
+                    actionSendMailAutomatically(Arrays.asList(entry));
                 }
             });
             automaticSend.setVisible(isInitialSending());
@@ -580,7 +571,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         getPanel().repaint();
         
         // Send e-mails automatically if enabled and password set
-        if (isAutomaticProcessingEnabled() && getApp().askForPassword()) {
+        if (isAutomaticProcessingEnabled()) {
             actionSendMailAutomatically(getAllParticipants());
         }
     }

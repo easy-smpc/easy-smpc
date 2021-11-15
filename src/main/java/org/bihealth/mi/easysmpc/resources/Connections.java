@@ -18,7 +18,7 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
-import org.bihealth.mi.easybus.implementations.email.PasswordAccessor;
+import org.bihealth.mi.easysmpc.AppPasswordProvider;
 
 /**
  * Store and retrieve connections
@@ -57,18 +57,16 @@ public class Connections {
         node.putInt(IMAP_PORT_KEY, settings.getIMAPPort());
         node.put(SMTP_SERVER_KEY, settings.getSMTPServer());
         node.putInt(SMTP_PORT_KEY, settings.getSMTPPort());
-        node.putBoolean(IMAP_ENCRYPTION_TYPE, settings.isSSLtlsIMAP());
-        node.putBoolean(SMTP_ENCRYPTION_TYPE, settings.isSSLtlsSMTP());
+        node.putBoolean(IMAP_ENCRYPTION_TYPE, settings.isSSLTLSIMAP());
+        node.putBoolean(SMTP_ENCRYPTION_TYPE, settings.isSSLTLSSMTP());
     }
     
     /**
      * Lists all available settings
-     * 
-     * @param passwordAccessor
      * @return
      * @throws BackingStoreException
      */
-    public static ArrayList<ConnectionIMAPSettings> list(PasswordAccessor passwordAccessor) throws BackingStoreException{
+    public static ArrayList<ConnectionIMAPSettings> list() throws BackingStoreException{
         
         // Prepare
         ArrayList<ConnectionIMAPSettings> result = new ArrayList<>();
@@ -77,12 +75,12 @@ public class Connections {
         // Loop each sub node
         for(String children : rootPreferences.childrenNames()) {
             Preferences child = rootPreferences.node(children);
-            result.add(new ConnectionIMAPSettings(children, passwordAccessor).setIMAPServer(child.get(IMAP_SERVER_KEY, null))
+            result.add(new ConnectionIMAPSettings(children, new AppPasswordProvider()).setIMAPServer(child.get(IMAP_SERVER_KEY, null))
                                                            .setIMAPPort(child.getInt(IMAP_PORT_KEY, 0))
-                                                           .setSSLtlsIMAP(child.getBoolean(IMAP_ENCRYPTION_TYPE, true))
+                                                           .setSSLTLSIMAP(child.getBoolean(IMAP_ENCRYPTION_TYPE, true))
                                                            .setSMTPServer(child.get(SMTP_SERVER_KEY, null))
                                                            .setSMTPPort(child.getInt(SMTP_PORT_KEY, 0))
-                                                           .setSSLtlsSMTP(child.getBoolean(SMTP_ENCRYPTION_TYPE, true)));
+                                                           .setSSLTLSSMTP(child.getBoolean(SMTP_ENCRYPTION_TYPE, true)));
         }
         
         // Return

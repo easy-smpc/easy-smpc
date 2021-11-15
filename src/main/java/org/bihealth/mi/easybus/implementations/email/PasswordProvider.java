@@ -14,24 +14,16 @@
 package org.bihealth.mi.easybus.implementations.email;
 
 /**
- * Interface to allow access to a password
- * 
+ * An interface for providing passwords on-demand
  * @author Felix Wirth
- *
+ * @author Fabian Prasser
  */
-public interface PasswordAccessor {
+public interface PasswordProvider {
 
     /**
-     * Return password
-     * 
+     * Returns the password
+     * @param settings 
      * @return
      */
     public String getPassword();
-    
-    /**
-     * Set password
-     * 
-     * @param password
-     */
-    public void setPassword(String password);
 }

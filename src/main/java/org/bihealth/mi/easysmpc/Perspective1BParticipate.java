@@ -40,7 +40,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
@@ -211,20 +210,11 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         
         // Check e-mail configuration if not done so far
         if (comboSelectMailbox.getSelectedItem() != null && !emailconfigCheck) {
-            
-            // Check that password is set
-            if(!getApp().askForPassword()) {
-                return;
-            }
-                        
             try {
-                if (!new ConnectionIMAP((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem(), false).checkConnection()) {
+                if (!((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).isValid()) {
                     throw new BusException("Connection error");
                 }
             } catch (BusException e) {
-                // Reset password
-                getApp().setPassword(null);
-                
                 // Error message
                 JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.emailConnectionNotWorking"));
                 return;
@@ -391,7 +381,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     private ConnectionIMAPSettings[] getEmailConfig() {
         try {
             // Read from preferences
-            ArrayList<ConnectionIMAPSettings> configFromPreferences = Connections.list(getApp());
+            ArrayList<ConnectionIMAPSettings> configFromPreferences = Connections.list();
             // Add null for non-automatic
             configFromPreferences.add(0, null);
             return configFromPreferences.toArray(new ConnectionIMAPSettings[configFromPreferences.size()]);
@@ -406,9 +396,6 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      */
     @Override
     protected void initialize() {
-        
-        // Reset password from former project
-        getApp().setPassword(null);
         
         // Clear
         panelParticipants.removeAll();

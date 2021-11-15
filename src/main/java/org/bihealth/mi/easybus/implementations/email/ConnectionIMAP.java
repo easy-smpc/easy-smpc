@@ -113,7 +113,7 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));        
         this.propertiesReceiving.put("mail.imap.partialfetch", "false");
         this.propertiesReceiving.put("mail.imap.fetchsize", Resources.FETCH_SIZE_IMAP);
-        this.propertiesReceiving.put(settings.isSSLtlsIMAP() ? "mail.imap.ssl.enable" : "mail.imap.starttls.enable", "true");        
+        this.propertiesReceiving.put(settings.isSSLTLSIMAP() ? "mail.imap.ssl.enable" : "mail.imap.starttls.enable", "true");        
         if (settings.isAcceptSelfSignedCertificates()) {
             this.propertiesReceiving.put("mail.imap.ssl.trust", "*");
         }
@@ -132,7 +132,7 @@ public class ConnectionIMAP extends ConnectionEmail {
         this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
         this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
         this.propertiesSending.put("mail.smtp.auth", "true");
-        this.propertiesSending.put(settings.isSSLtlsSMTP() ? "mail.smtp.ssl.enable" : "mail.smtp.starttls.enable", "true");
+        this.propertiesSending.put(settings.isSSLTLSSMTP() ? "mail.smtp.ssl.enable" : "mail.smtp.starttls.enable", "true");
         if(settings.isAcceptSelfSignedCertificates()) {
         	this.propertiesSending.put("mail.smtp.ssl.trust", "*");
         }

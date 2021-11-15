@@ -224,6 +224,7 @@ public abstract class ComponentEntry extends JPanel {
      * @return
      */
     public void setLeftValue(String text) {
+        text = text == null ? "" : text;
         this.fieldLeft.setText(text);
     }
     

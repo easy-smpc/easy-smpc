@@ -44,7 +44,6 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  */
 public class DialogPassword extends JDialog implements ChangeListener {
 
-
     /** SVUID */
     private static final long serialVersionUID = 2844321619003751907L;
     /** Component to enter string */

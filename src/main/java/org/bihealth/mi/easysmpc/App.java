@@ -42,12 +42,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
-import org.bihealth.mi.easybus.implementations.email.PasswordAccessor;
 import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
-import org.bihealth.mi.easysmpc.components.DialogPassword;
 import org.bihealth.mi.easysmpc.components.DialogStringPicker;
 import org.bihealth.mi.easysmpc.dataexport.ExportFile;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
@@ -69,7 +67,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class App extends JFrame implements PasswordAccessor {
+public class App extends JFrame {
     
     public static final String VERSION = "1.0.0";
 
@@ -104,27 +102,23 @@ public class App extends JFrame implements PasswordAccessor {
     }
 
     /** Model */
-    private Study          model;
+    private Study                  model;
     /** Cards */
-    private JPanel            cards;
+    private JPanel                 cards;
     /** Menu */
-    private JMenu             actionMenu;
-    /** Progress*/
-    private ComponentProgress progress;
+    private JMenu                  actionMenu;
+    /** Progress */
+    private ComponentProgress      progress;
     /** List of perspectives */
-    private List<Perspective> perspectives = new ArrayList<Perspective>();
+    private List<Perspective>      perspectives  = new ArrayList<Perspective>();
     /** Interim save menu item */
-    private JMenuItem jmiInterimSave;
-    /** Reenter password menu item */
-    private JMenuItem jmiReenterPassword;
-    /** Stores reference to currently displayed perspective */    
-    private Perspective currentPerspective;
+    private JMenuItem              jmiInterimSave;
+    /** Stores reference to currently displayed perspective */
+    private Perspective            currentPerspective;
     /** Label for status messages */
-    private JLabel statusMessageLabel;
+    private JLabel                 statusMessageLabel;
     /** Component loadingVisual */
     private ComponentLoadingVisual loadingVisual = null;
-    /** Password */
-    private String password = null;
 
     /**
      * Creates a new instance
@@ -217,16 +211,6 @@ public class App extends JFrame implements PasswordAccessor {
             }
         });
         
-        // Reset password
-        jmiReenterPassword = new JMenuItem(Resources.getString("App.25"), Resources.getMenuItem()); //$NON-NLS-1$
-        actionMenu.add(jmiReenterPassword);
-        jmiReenterPassword.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionReenterPassword();
-            }
-        });
-        
         // Exit menu
         JMenuItem jmiExit = new JMenuItem(Resources.getString("App.4"), Resources.getMenuItem()); //$NON-NLS-1$
         actionMenu.add(jmiExit);
@@ -290,17 +274,6 @@ public class App extends JFrame implements PasswordAccessor {
              
         // Finally, make the frame visible
         this.setVisible(true);
-    }
-
-    /**
-     * Reenter password
-     */
-    protected void actionReenterPassword() {
-        // Reset
-        this.password = null;
-        
-        // Enter new
-        askForPassword();
     }
 
     /**
@@ -445,9 +418,6 @@ public class App extends JFrame implements PasswordAccessor {
             JOptionPane.showMessageDialog(this, Resources.getString("App.11"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE ); //$NON-NLS-1$
             return;
         }
-        
-        // Set password accessor
-        this.model.getConnectionIMAPSettings().setPasswordAccessor(this);
         
         // Set and switch to correct perspective        
         switch (this.model.getState()) {
@@ -936,7 +906,6 @@ public class App extends JFrame implements PasswordAccessor {
         currentPerspective = perspective;
         progress.setProgress(perspective.getProgress());
         jmiInterimSave.setEnabled(perspective.canSave());
-        jmiReenterPassword.setEnabled(perspective.canReenterPassword());
         progress.repaint();
     }
     
@@ -957,38 +926,6 @@ public class App extends JFrame implements PasswordAccessor {
 
         if (loadingVisual != null) {
             loadingVisual.activate();
-        }
-    }
-
-    @Override
-    public void setPassword(String password) {        
-
-        this.password = password;        
-    }
-
-    @Override
-    public String getPassword() {
-
-        return password;
-    }
-
-    /**
-     * Get password from dialog if password is null
-     * 
-     * @return
-     */
-    public boolean askForPassword() {
-        
-        // Get from dialog if null or requested new
-        if (this.password == null) {
-            this.password = new DialogPassword(this).showDialog();
-        }
-        
-        // Return
-        if (this.password != null ) {
-            return true;
-        } else {
-            return false;
         }
     }
 }
