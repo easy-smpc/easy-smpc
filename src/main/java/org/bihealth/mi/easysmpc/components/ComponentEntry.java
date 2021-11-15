@@ -172,18 +172,13 @@ public abstract class ComponentEntry extends JPanel {
         return this.fieldLeft.isValueValid() && this.fieldRight.isValueValid();
     }
 
-    /** Creates an additional control panel
-     * @return
-     */
-    protected abstract JPanel createAdditionalControls();
-
     /**
      * @return
      */
     public String getLeftValue() {
         return this.fieldLeft.getText();
     }
-    
+
     /**
      * Returns the right value
      * @return
@@ -200,16 +195,13 @@ public abstract class ComponentEntry extends JPanel {
     }
     
     /**
-     * @param componentEntry
+     * Is the right field enabled
+     * @return
      */
-    private void setBackgroundAllSubComponents(Component c) {
-        c.setBackground(new Color(223,223,223));
-        if (c instanceof Container)
-        for(Component childComponent : ((Container) c).getComponents()) {
-            setBackgroundAllSubComponents(childComponent);
-        }
+    public boolean isRightEnabled() {
+        return this.fieldRight.isEnabled();
     }
-
+    
     /**
      * Sets a change listener
      * @param listener
@@ -218,7 +210,7 @@ public abstract class ComponentEntry extends JPanel {
         this.fieldLeft.setChangeListener(listener);
         this.fieldRight.setChangeListener(listener);
     }
-    
+
     /**
      * Sets the left value
      * @return
@@ -237,18 +229,26 @@ public abstract class ComponentEntry extends JPanel {
     }
     
     /**
-     * Is the right field enabled
-     * @return
-     */
-    public boolean isRightEnabled() {
-        return this.fieldRight.isEnabled();
-    }
-    
-    /**
      * Sets the right value
      * @return
      */
     public void setRightValue(String text) {
         this.fieldRight.setText(text);
     }
+    
+    /**
+     * @param componentEntry
+     */
+    private void setBackgroundAllSubComponents(Component c) {
+        c.setBackground(new Color(223,223,223));
+        if (c instanceof Container)
+        for(Component childComponent : ((Container) c).getComponents()) {
+            setBackgroundAllSubComponents(childComponent);
+        }
+    }
+    
+    /** Creates an additional control panel
+     * @return
+     */
+    protected abstract JPanel createAdditionalControls();
 }

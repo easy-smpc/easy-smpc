@@ -106,40 +106,6 @@ public abstract class ConnectionEmail {
             }
         }
     
-        /** 
-         * Deletes the message on the server
-         */
-        protected void delete() {
-            try {
-                message.setFlag(Flag.DELETED, true);
-            } catch (MessagingException e) {
-                logger.debug("Delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
-                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-            }
-        }
-        
-        /** 
-         * Expunges all deleted messages on the server
-         */
-        protected void expunge() {
-    
-            try {
-                if (folder != null && folder.isOpen()) {
-                    folder.close(true);
-                }
-            } catch (MessagingException e) {
-                logger.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
-                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-            }
-        }    
-        /**
-         * Returns the attachment
-         * @return the attachment
-         */
-        protected Object getAttachment() {
-            return attachment;
-        }        
-    
         /**
          * Create object from byte stream
          * 
@@ -155,6 +121,40 @@ public abstract class ConnectionEmail {
             Object result = ois.readObject();
             ois.close();
             return result;
+        }
+        
+        /** 
+         * Deletes the message on the server
+         */
+        protected void delete() {
+            try {
+                message.setFlag(Flag.DELETED, true);
+            } catch (MessagingException e) {
+                logger.debug("Delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
+                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+            }
+        }    
+        /** 
+         * Expunges all deleted messages on the server
+         */
+        protected void expunge() {
+    
+            try {
+                if (folder != null && folder.isOpen()) {
+                    folder.close(true);
+                }
+            } catch (MessagingException e) {
+                logger.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
+                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+            }
+        }        
+    
+        /**
+         * Returns the attachment
+         * @return the attachment
+         */
+        protected Object getAttachment() {
+            return attachment;
         }
     
         /**

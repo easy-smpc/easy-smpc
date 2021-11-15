@@ -153,6 +153,20 @@ public class ConnectionIMAP extends ConnectionEmail {
         return isReceivingConnected();
     }
 
+    /**
+     * Transforms an object into a byte stream array
+     * 
+     * @param object
+     * @return byte stream array
+     */
+    private byte[] getByteArrayOutputStream(Object object) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream ous = new ObjectOutputStream(new GZIPOutputStream(bos));
+        ous.writeObject(object);
+        ous.close();
+        return bos.toByteArray();
+    }
+
     @Override
     protected void close() {
         try {
@@ -167,20 +181,6 @@ public class ConnectionIMAP extends ConnectionEmail {
             // Ignore
             logger.debug("Closing connection failed logged", new Date(), "Closing connection failed ", ExceptionUtils.getStackTrace(e));
         }
-    }
-
-    /**
-     * Transforms an object into a byte stream array
-     * 
-     * @param object
-     * @return byte stream array
-     */
-    private byte[] getByteArrayOutputStream(Object object) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream ous = new ObjectOutputStream(new GZIPOutputStream(bos));
-        ous.writeObject(object);
-        ous.close();
-        return bos.toByteArray();
     }
 
     /**

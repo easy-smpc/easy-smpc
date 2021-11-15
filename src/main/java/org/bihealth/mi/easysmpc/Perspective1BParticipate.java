@@ -125,6 +125,22 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     }    
     
     /**
+     * Reacts on all changes in any components
+     */
+    @Override
+    public void stateChanged(ChangeEvent e) {
+
+        // Deactivate e-mail configuration if manual mode
+        this.buttonAddMailbox.setEnabled(getApp().getModel().isAutomatedMode());
+        this.buttonEditMailbox.setEnabled(getApp().getModel().isAutomatedMode());
+        this.buttonRemoveMailbox.setEnabled(getApp().getModel().isAutomatedMode());
+        this.comboSelectMailbox.setEnabled(getApp().getModel().isAutomatedMode());
+        
+        // Set save button enabled/disabled
+        this.buttonSave.setEnabled(this.areValuesValid());
+    }
+
+    /**
      * Adds an e-mail configuration
      */
     private void actionAddEMailConf() {
@@ -149,19 +165,6 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             this.comboSelectMailbox.setSelectedItem(settings);
         }
         this.stateChanged(new ChangeEvent(this));        
-    }
-
-    /**
-     * Removes an e-mail configuration
-     */
-    private void actionRemoveEMailConf() {
-        try {
-            Connections.remove((ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem());
-            this.comboSelectMailbox.removeItem(this.comboSelectMailbox.getSelectedItem());
-        } catch (BackingStoreException e) {
-            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
-        }
-        this.stateChanged(new ChangeEvent(this));  
     }
     
     /**
@@ -189,6 +192,19 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             }            
             this.stateChanged(new ChangeEvent(this));
         }
+    }
+
+    /**
+     * Removes an e-mail configuration
+     */
+    private void actionRemoveEMailConf() {
+        try {
+            Connections.remove((ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem());
+            this.comboSelectMailbox.removeItem(this.comboSelectMailbox.getSelectedItem());
+        } catch (BackingStoreException e) {
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+        }
+        this.stateChanged(new ChangeEvent(this));  
     }
 
     /**
@@ -245,7 +261,25 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         // Done
         return true;
     }
-
+    
+    /**
+     * Returns previous configurations
+     * 
+     * @return
+     */
+    private ConnectionIMAPSettings[] getEmailConfig() {
+        try {
+            // Read from preferences
+            ArrayList<ConnectionIMAPSettings> configFromPreferences = Connections.list();
+            // Add null for non-automatic
+            configFromPreferences.add(0, null);
+            return configFromPreferences.toArray(new ConnectionIMAPSettings[configFromPreferences.size()]);
+        } catch (BackingStoreException e) {
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorLoadingPreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+    }
+    
     /**
      *Creates and adds UI elements
      */
@@ -372,25 +406,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         buttonsPane.add(buttonSave, 0, 1);
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
-    
-    /**
-     * Returns previous configurations
-     * 
-     * @return
-     */
-    private ConnectionIMAPSettings[] getEmailConfig() {
-        try {
-            // Read from preferences
-            ArrayList<ConnectionIMAPSettings> configFromPreferences = Connections.list();
-            // Add null for non-automatic
-            configFromPreferences.add(0, null);
-            return configFromPreferences.toArray(new ConnectionIMAPSettings[configFromPreferences.size()]);
-        } catch (BackingStoreException e) {
-            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorLoadingPreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-    }
-    
+
     /**
      * Initialize perspective based on model
      */
@@ -437,21 +453,5 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();
         getPanel().repaint();        
-    }
-
-    /**
-     * Reacts on all changes in any components
-     */
-    @Override
-    public void stateChanged(ChangeEvent e) {
-
-        // Deactivate e-mail configuration if manual mode
-        this.buttonAddMailbox.setEnabled(getApp().getModel().isAutomatedMode());
-        this.buttonEditMailbox.setEnabled(getApp().getModel().isAutomatedMode());
-        this.buttonRemoveMailbox.setEnabled(getApp().getModel().isAutomatedMode());
-        this.comboSelectMailbox.setEnabled(getApp().getModel().isAutomatedMode());
-        
-        // Set save button enabled/disabled
-        this.buttonSave.setEnabled(this.areValuesValid());
     }
 }

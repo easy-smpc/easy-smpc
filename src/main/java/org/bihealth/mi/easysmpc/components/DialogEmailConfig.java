@@ -175,6 +175,27 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     }
 
     /**
+     * Show this dialog
+     */
+    public ConnectionIMAPSettings showDialog(){        
+        this.pack();
+        this.setLocationRelativeTo(this.parent);
+        this.setModal(true);
+        this.setVisible(true);
+        return this.result;
+    }
+
+    /**
+     * Reacts to changes
+     */
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        if (this.buttonOK != null) {
+            this.buttonOK.setEnabled(areValuesValid());
+        }
+    }
+    
+    /**
      * Action close
      */
     private void actionCheckAndProceed() {
@@ -262,27 +283,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             serverPortsEntry.setRightValue(Integer.toString(connectionsSettings.getSMTPPort()));
             radioEncryptionIMAP.setUpperOptionSelected(connectionsSettings.isSSLTLSIMAP());
             radioEncryptionSMTP.setUpperOptionSelected(connectionsSettings.isSSLTLSSMTP());
-        }
-    }
-
-    /**
-     * Show this dialog
-     */
-    public ConnectionIMAPSettings showDialog(){        
-        this.pack();
-        this.setLocationRelativeTo(this.parent);
-        this.setModal(true);
-        this.setVisible(true);
-        return this.result;
-    }
-    
-    /**
-     * Reacts to changes
-     */
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        if (this.buttonOK != null) {
-            this.buttonOK.setEnabled(areValuesValid());
         }
     } 
 }

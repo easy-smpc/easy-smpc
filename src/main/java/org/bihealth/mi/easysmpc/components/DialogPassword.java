@@ -164,22 +164,6 @@ public class DialogPassword extends JDialog implements ChangeListener {
     }
 
     /**
-     * Action proceed and close
-     */
-    protected void actionProceed() {
-        this.result = passwordEntry.getValue();
-        this.dispose();
-    }
-
-    /**
-     * Checks string for validity
-     * @return
-     */
-    private boolean areValuesValid() {
-        return this.passwordEntry.isValueValid();
-    }
-    
-    /**
      * Show this dialog
      */
     public String showDialog(){
@@ -188,7 +172,7 @@ public class DialogPassword extends JDialog implements ChangeListener {
         this.setVisible(true);
         return this.result;
     }
-      
+
     /**
      * Reacts to changes
      */
@@ -202,6 +186,22 @@ public class DialogPassword extends JDialog implements ChangeListener {
      */
     private void actionCancel() {
         this.result = null;
+        this.dispose();
+    }
+      
+    /**
+     * Checks string for validity
+     * @return
+     */
+    private boolean areValuesValid() {
+        return this.passwordEntry.isValueValid();
+    }
+    
+    /**
+     * Action proceed and close
+     */
+    protected void actionProceed() {
+        this.result = passwordEntry.getValue();
         this.dispose();
     }
 }

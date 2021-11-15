@@ -60,35 +60,6 @@ public abstract class Bus {
     public abstract boolean isAlive();    
     
     /**
-     * Is there a listener for the participant and scope registered
-     * 
-     * @param scope
-     * @param participant
-     * @return
-     */
-    protected synchronized boolean isParticipantScopeRegistered(Scope scope, Participant participant) {
-        // Check not null
-        if (scope == null || participant == null) {
-            return false;
-        }
-        
-        // Check if scope exists
-        Map<Participant,List<MessageListener>> subscriptionsForScope = subscriptions.get(scope);        
-        if (subscriptionsForScope == null) {
-           return false;
-        }
-        
-        // Check if participant is registered for scope
-        if (subscriptionsForScope.get(participant) == null ||
-            subscriptionsForScope.get(participant).size() == 0) {
-            return false;
-        }
-        
-        // At least one listener is registered for scope and participant tuple
-        return true;
-    }
-    
-    /**
      * Allows to subscribe to a scope for a participant 
      * 
      * @param scope
@@ -113,19 +84,24 @@ public abstract class Bus {
         
         // Add listener
         listenerForParticipant.add(messageListener);
+    }
+    
+    /**
+     * Passes on receiving errors
+     *  
+     * @param messageListener
+     */
+    public synchronized void receiveErrorInternal(Exception exception) {
+        
+        for(Entry<Scope, Map<Participant, List<MessageListener>>> scope : subscriptions.entrySet()) {
+            for(Entry<Participant, List<MessageListener>> participant : scope.getValue().entrySet()) {
+                for(MessageListener messageListener : participant.getValue()) {
+                    messageListener.receiveError(exception);
+                }
+            }
+        }        
     }    
 
-    /**
-     * Abstract method to send a message
-     * 
-     * @param message
-     * @param scope
-     * @param participant
-     * @return task
-     * @throws Exception
-     */
-    public abstract Void sendInternal(Message message, Scope scope, Participant participant) throws Exception;
-    
     /**
      * Allows to send a message to a participant
      * In case of error retries infinitely - error handling must be done by using the returned FutureTask object
@@ -163,6 +139,58 @@ public abstract class Bus {
     }
     
     /**
+     * Abstract method to send a message
+     * 
+     * @param message
+     * @param scope
+     * @param participant
+     * @return task
+     * @throws Exception
+     */
+    public abstract Void sendInternal(Message message, Scope scope, Participant participant) throws Exception;
+    
+    /**
+     * Stops all backend services that might be running
+     */
+    public abstract void stop();
+    
+    /**
+     * @return the executor
+     */
+    protected ExecutorService getExecutor() {
+        return executor;
+    }    
+    
+    /**
+     * Is there a listener for the participant and scope registered
+     * 
+     * @param scope
+     * @param participant
+     * @return
+     */
+    protected synchronized boolean isParticipantScopeRegistered(Scope scope, Participant participant) {
+        // Check not null
+        if (scope == null || participant == null) {
+            return false;
+        }
+        
+        // Check if scope exists
+        Map<Participant,List<MessageListener>> subscriptionsForScope = subscriptions.get(scope);        
+        if (subscriptionsForScope == null) {
+           return false;
+        }
+        
+        // Check if participant is registered for scope
+        if (subscriptionsForScope.get(participant) == null ||
+            subscriptionsForScope.get(participant).size() == 0) {
+            return false;
+        }
+        
+        // At least one listener is registered for scope and participant tuple
+        return true;
+    }
+
+    /**
      * Receives an external received message
      * 
      * @param message
@@ -191,33 +219,5 @@ public abstract class Bus {
 
         // Done
         return received;
-    }
-    
-    /**
-     * Stops all backend services that might be running
-     */
-    public abstract void stop();    
-    
-    /**
-     * Passes on receiving errors
-     *  
-     * @param messageListener
-     */
-    public synchronized void receiveErrorInternal(Exception exception) {
-        
-        for(Entry<Scope, Map<Participant, List<MessageListener>>> scope : subscriptions.entrySet()) {
-            for(Entry<Participant, List<MessageListener>> participant : scope.getValue().entrySet()) {
-                for(MessageListener messageListener : participant.getValue()) {
-                    messageListener.receiveError(exception);
-                }
-            }
-        }        
-    }
-
-    /**
-     * @return the executor
-     */
-    protected ExecutorService getExecutor() {
-        return executor;
     }
 }

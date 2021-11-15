@@ -114,13 +114,80 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     }
     
     /**
-     * Proceed the project
+     * Returns number of expected external messages
      * 
+     * @return
      */
-    protected void actionProceed() {
-        getApp().actionFirstReceivingDone();
+    public int numberExpectedMessages() {
+        return getApp().getModel().getNumParticipants() - 1;
     }
 
+    /**
+     * Checks the number of complete messages
+     * 
+     * @return
+     */
+    public int numberSharesComplete() {
+        int numberComplete = 0;
+        for (int i = 0; i < getApp().getModel().getNumParticipants(); i++) {
+            if (areSharesCompleteForParticipantId(i)) numberComplete++;
+        }
+        return numberComplete - 1;
+        }
+     
+    @Override
+    public void receive(Message message) {
+        
+        // Set error message in EDT 
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
+                if (getApp().isMessageShareResultValid(messageStripped)) {
+                    getApp().setMessageShare(messageStripped);
+                    getApp().actionSave();
+                    getApp().setStatusMessage(String.format(Resources.getString("PerspectiveReceive.displaySuccess"),
+                                                            numberSharesComplete(),
+                                                            numberExpectedMessages())
+                                                      , false);
+                    stateChanged(new ChangeEvent(this));
+                }
+            }
+        });
+    }
+    
+    /**
+     * Reacts on error messages from bus
+     */
+    @Override
+    public void receiveError(Exception exception) {
+        
+        // Set error message in EDT 
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
+                                          true,
+                                          false);
+            }
+        });
+    }
+    
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        
+        // Update
+        updateCheckmarks();
+        boolean sharesComplete = this.areSharesComplete();
+        this.buttonReceive.setEnabled(!sharesComplete);
+        this.buttonProceed.setEnabled(sharesComplete);
+        
+        // If no more messages and automatic processing proceed automatically
+        if (sharesComplete && isAutomaticProcessingEnabled()) {
+            actionProceed();
+        }
+    }
+        
     /**
      * Checks if all bins are complete
      * @return
@@ -132,7 +199,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         }
         return true;
     }
-     
+
     /**
      * Checks if all bins for a certain user id are complete
      * @return
@@ -144,6 +211,98 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         return true;
     }
     
+    /**
+     * Indicates whether the automatic processing enabled
+     * 
+     * @return enabled
+     */
+    private boolean isAutomaticProcessingEnabled() {
+        return getApp().getModel().getConnectionIMAPSettings() != null;
+    }
+    
+    /**
+     * Start the automatic import of e-mails
+     */
+    private void startAutomatedMailImport() {
+        
+        // Set status message
+        getApp().setStatusMessage(Resources.getString("PerspectiveReceive.LoadingInProgress"),
+                                  false,
+                                  true);
+        try {                                                      
+            // Start receiving
+            getApp().getModel().getBus().receive(new Scope(getApp().getModel().getStudyUID() + getRoundIdentifier()),
+                        new org.bihealth.mi.easybus.Participant(getApp().getModel().getParticipantFromId(getApp().getModel().getOwnId()).name,
+                                                                getApp().getModel().getParticipantFromId(getApp().getModel().getOwnId()).emailAddress),
+                                                                this);
+            
+        } catch (IllegalArgumentException | BusException e) {
+
+            // Error message in EDT
+            if (!SwingUtilities.isEventDispatchThread()) {
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        JOptionPane.showMessageDialog(getPanel(),
+                                                      Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
+                                                      Resources.getString("PerspectiveReceive.AutomaticEmail"),
+                                                      JOptionPane.ERROR_MESSAGE);
+                        getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
+                                                  true,
+                                                  false);
+
+                    }
+                });
+            }
+
+        }
+    }
+
+    /**
+     * Draws the buttons pane with or without the poll button to receive e-mail automatically
+     * 
+     * @param automaticProcessingEnabled
+     */
+    private void updateButtonsPane(boolean showPollManually) {
+        // Remove
+        this.buttonsPane.removeAll();
+        
+        // Create with two or three rows and add resend button if necessary
+        if (showPollManually) {
+            this.buttonsPane.setLayout(new GridLayout(3, 1));
+            this.buttonsPane.add(this.buttonPollManually, 0, 0);
+            this.buttonsPane.add(this.buttonReceive, 0, 1);
+            this.buttonsPane.add(this.buttonProceed, 0, 2);
+            
+        } else {
+            this.buttonsPane.setLayout(new GridLayout(2, 1));
+            this.buttonsPane.add(this.buttonReceive, 0, 0);
+            this.buttonsPane.add(this.buttonProceed, 0, 1);
+        }
+    }
+
+    /**
+     * Check participant entries visually if complete
+     */
+    private void updateCheckmarks() {
+        int index = 0;
+        for (Component c : this.panelParticipants.getComponents()) {
+            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(index == getApp().getModel().getOwnId() || // Always mark own id as "received"
+                                                                (getApp().getModel().getState() != StudyState.RECIEVING_RESULT  &&  index == 0) || // Mark first entry in first round as received
+                                                                areSharesCompleteForParticipantId(index)); // Mark if share complete
+            index++;
+        }
+    }
+
+    /**
+     * Proceed the project
+     * 
+     */
+    protected void actionProceed() {
+        getApp().actionFirstReceivingDone();
+    }
+
     /**
      *Creates and adds UI elements
      */
@@ -219,7 +378,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         // Adds for south panel
         panel.add(buttonsPane, BorderLayout.SOUTH);
     }
-    
+
     /**
      * Returns an identifier for the current round of EasySMPC 
      * This is needed to make sure the correct message are sent to the correct receivers
@@ -229,7 +388,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     protected String getRoundIdentifier() {
         return Resources.ROUND_1;
     }
-        
+    
     /**
      * Initialize perspective based on model
      */
@@ -271,164 +430,5 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         this.stateChanged(new ChangeEvent(this));
         getPanel().revalidate();
         getPanel().repaint(); 
-    }
-
-    /**
-     * Indicates whether the automatic processing enabled
-     * 
-     * @return enabled
-     */
-    private boolean isAutomaticProcessingEnabled() {
-        return getApp().getModel().getConnectionIMAPSettings() != null;
-    }
-    
-    /**
-     * Returns number of expected external messages
-     * 
-     * @return
-     */
-    public int numberExpectedMessages() {
-        return getApp().getModel().getNumParticipants() - 1;
-    }
-    
-    /**
-     * Checks the number of complete messages
-     * 
-     * @return
-     */
-    public int numberSharesComplete() {
-        int numberComplete = 0;
-        for (int i = 0; i < getApp().getModel().getNumParticipants(); i++) {
-            if (areSharesCompleteForParticipantId(i)) numberComplete++;
-        }
-        return numberComplete - 1;
-        }
-
-    @Override
-    public void receive(Message message) {
-        
-        // Set error message in EDT 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
-                if (getApp().isMessageShareResultValid(messageStripped)) {
-                    getApp().setMessageShare(messageStripped);
-                    getApp().actionSave();
-                    getApp().setStatusMessage(String.format(Resources.getString("PerspectiveReceive.displaySuccess"),
-                                                            numberSharesComplete(),
-                                                            numberExpectedMessages())
-                                                      , false);
-                    stateChanged(new ChangeEvent(this));
-                }
-            }
-        });
-    }
-
-    /**
-     * Start the automatic import of e-mails
-     */
-    private void startAutomatedMailImport() {
-        
-        // Set status message
-        getApp().setStatusMessage(Resources.getString("PerspectiveReceive.LoadingInProgress"),
-                                  false,
-                                  true);
-        try {                                                      
-            // Start receiving
-            getApp().getModel().getBus().receive(new Scope(getApp().getModel().getStudyUID() + getRoundIdentifier()),
-                        new org.bihealth.mi.easybus.Participant(getApp().getModel().getParticipantFromId(getApp().getModel().getOwnId()).name,
-                                                                getApp().getModel().getParticipantFromId(getApp().getModel().getOwnId()).emailAddress),
-                                                                this);
-            
-        } catch (IllegalArgumentException | BusException e) {
-
-            // Error message in EDT
-            if (!SwingUtilities.isEventDispatchThread()) {
-                SwingUtilities.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        JOptionPane.showMessageDialog(getPanel(),
-                                                      Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
-                                                      Resources.getString("PerspectiveReceive.AutomaticEmail"),
-                                                      JOptionPane.ERROR_MESSAGE);
-                        getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
-                                                  true,
-                                                  false);
-
-                    }
-                });
-            }
-
-        }
-    }
-
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        
-        // Update
-        updateCheckmarks();
-        boolean sharesComplete = this.areSharesComplete();
-        this.buttonReceive.setEnabled(!sharesComplete);
-        this.buttonProceed.setEnabled(sharesComplete);
-        
-        // If no more messages and automatic processing proceed automatically
-        if (sharesComplete && isAutomaticProcessingEnabled()) {
-            actionProceed();
-        }
-    }
-
-    /**
-     * Draws the buttons pane with or without the poll button to receive e-mail automatically
-     * 
-     * @param automaticProcessingEnabled
-     */
-    private void updateButtonsPane(boolean showPollManually) {
-        // Remove
-        this.buttonsPane.removeAll();
-        
-        // Create with two or three rows and add resend button if necessary
-        if (showPollManually) {
-            this.buttonsPane.setLayout(new GridLayout(3, 1));
-            this.buttonsPane.add(this.buttonPollManually, 0, 0);
-            this.buttonsPane.add(this.buttonReceive, 0, 1);
-            this.buttonsPane.add(this.buttonProceed, 0, 2);
-            
-        } else {
-            this.buttonsPane.setLayout(new GridLayout(2, 1));
-            this.buttonsPane.add(this.buttonReceive, 0, 0);
-            this.buttonsPane.add(this.buttonProceed, 0, 1);
-        }
-    }
-
-    /**
-     * Reacts on error messages from bus
-     */
-    @Override
-    public void receiveError(Exception exception) {
-        
-        // Set error message in EDT 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
-                                          true,
-                                          false);
-            }
-        });
-    }
-    
-    /**
-     * Check participant entries visually if complete
-     */
-    private void updateCheckmarks() {
-        int index = 0;
-        for (Component c : this.panelParticipants.getComponents()) {
-            ((EntryParticipantCheckmark) c).setCheckmarkEnabled(index == getApp().getModel().getOwnId() || // Always mark own id as "received"
-                                                                (getApp().getModel().getState() != StudyState.RECIEVING_RESULT  &&  index == 0) || // Mark first entry in first round as received
-                                                                areSharesCompleteForParticipantId(index)); // Mark if share complete
-            index++;
-        }
     }
 }

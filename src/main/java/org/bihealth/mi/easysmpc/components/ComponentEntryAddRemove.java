@@ -78,6 +78,27 @@ public abstract class ComponentEntryAddRemove extends ComponentEntry {
     }
 
     /**
+     * Are components fields empty
+     */
+    public abstract boolean isEmpty();
+
+    /**
+     * Sets a change listener
+     * @param listener
+     */
+    public void setAddListener(ActionListener listener) {
+        this.addListener = listener;
+    }
+
+    /**
+     * Sets a change listener
+     * @param listener
+     */
+    public void setRemoveListener(ActionListener listener) {
+        this.removeListener = listener;
+    }
+    
+    /**
      * Add action
      */
     private void add() {
@@ -85,7 +106,17 @@ public abstract class ComponentEntryAddRemove extends ComponentEntry {
             addListener.actionPerformed(new ActionEvent(this, 0, null));
         }        
     }
-
+    
+    
+    /** 
+     * Remove action
+     */
+    private void remove() {
+        if (removeListener != null) {
+            removeListener.actionPerformed(new ActionEvent(this, 0, null));
+        }
+    }
+    
     /**
      * Creates and additional control panel
      */
@@ -118,37 +149,6 @@ public abstract class ComponentEntryAddRemove extends ComponentEntry {
         
         // Done
         return panel;
-    }
-
-    /**
-     * Are components fields empty
-     */
-    public abstract boolean isEmpty();
-    
-    /** 
-     * Remove action
-     */
-    private void remove() {
-        if (removeListener != null) {
-            removeListener.actionPerformed(new ActionEvent(this, 0, null));
-        }
-    }
-    
-    
-    /**
-     * Sets a change listener
-     * @param listener
-     */
-    public void setAddListener(ActionListener listener) {
-        this.addListener = listener;
-    }
-    
-    /**
-     * Sets a change listener
-     * @param listener
-     */
-    public void setRemoveListener(ActionListener listener) {
-        this.removeListener = listener;
     }
 
 }

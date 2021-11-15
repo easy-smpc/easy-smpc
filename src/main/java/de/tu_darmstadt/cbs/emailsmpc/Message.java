@@ -127,17 +127,6 @@ public class Message implements Serializable, Cloneable {
     public final int senderID;
 
     /**
-     * Disallow default constructor to avoid illegal states
-     */
-    @SuppressWarnings("unused")
-    private Message() {
-        recipientName = null;
-        recipientEmailAddress = null;
-        data = null;
-        senderID = -1;
-    }
-
-    /**
      * Instantiates a new message.
      *
      * @param senderID the sender ID
@@ -164,6 +153,17 @@ public class Message implements Serializable, Cloneable {
         this.recipientName = recipientName;
         this.recipientEmailAddress = recipientEmailAddress;
         this.data = getHashedData(data);
+    }
+
+    /**
+     * Disallow default constructor to avoid illegal states
+     */
+    @SuppressWarnings("unused")
+    private Message() {
+        recipientName = null;
+        recipientEmailAddress = null;
+        data = null;
+        senderID = -1;
     }
 
     /**
@@ -202,24 +202,6 @@ public class Message implements Serializable, Cloneable {
     }
 
     /**
-     * Gets the hashed data.
-     *
-     * @param data the data
-     * @return the hashed data
-     */
-    private String getHashedData(String data) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] digest = md.digest((String.valueOf(this.senderID) + this.recipientName + this.recipientEmailAddress + data).getBytes());
-            Encoder be = Base64.getEncoder();
-            return data + "@" + be.encodeToString(digest);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
      * Hash code.
      *
      * @return the int
@@ -241,5 +223,23 @@ public class Message implements Serializable, Cloneable {
     @Override
     public String toString() {
         return "From "+ String.valueOf(senderID) + " to " +recipientName + "<" + recipientEmailAddress + ">:\n" + data;
+    }
+
+    /**
+     * Gets the hashed data.
+     *
+     * @param data the data
+     * @return the hashed data
+     */
+    private String getHashedData(String data) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] digest = md.digest((String.valueOf(this.senderID) + this.recipientName + this.recipientEmailAddress + data).getBytes());
+            Encoder be = Base64.getEncoder();
+            return data + "@" + be.encodeToString(digest);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

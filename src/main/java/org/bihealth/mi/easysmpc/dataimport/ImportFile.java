@@ -66,6 +66,16 @@ public abstract class ImportFile {
     }
 
     /**
+     * Returns the data as key-value pairs
+     * 
+     * @return the data
+     * @throws IOException 
+     */
+    public Map<String, String> getData() throws IllegalArgumentException, IOException {
+        return extract(clean(load()));
+    }
+    
+    /**
      * Remove all empty rows and columns
      * 
      * @param data
@@ -125,7 +135,7 @@ public abstract class ImportFile {
         // Done
         return result;
     }
-    
+
     /**
      * Extracts the data out of a stripped array
      * 
@@ -152,23 +162,6 @@ public abstract class ImportFile {
         
         // Done
         return result;
-    }
-
-    /**
-     * Returns the data as key-value pairs
-     * 
-     * @return the data
-     * @throws IOException 
-     */
-    public Map<String, String> getData() throws IllegalArgumentException, IOException {
-        return extract(clean(load()));
-    }
-
-    /**
-     * @return the file
-     */
-    protected File getFile() {
-        return file;
     }
 
     /**
@@ -202,6 +195,13 @@ public abstract class ImportFile {
         }
         // Done
         return !empty;
+    }
+
+    /**
+     * @return the file
+     */
+    protected File getFile() {
+        return file;
     }
     
     /**

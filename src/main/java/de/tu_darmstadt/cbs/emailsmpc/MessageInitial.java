@@ -115,6 +115,18 @@ public class MessageInitial implements Serializable {
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        MessageInitial other = (MessageInitial) obj;
+        return automatedMode == other.automatedMode && Arrays.equals(bins, other.bins) &&
+               Objects.equals(name, other.name) &&
+               Arrays.equals(participants, other.participants) &&
+               recipientId == other.recipientId && Objects.equals(studyUID, other.studyUID);
+    }
+
     /**
      * Gets the message.
      *
@@ -137,17 +149,5 @@ public class MessageInitial implements Serializable {
         result = prime * result + Arrays.hashCode(participants);
         result = prime * result + Objects.hash(automatedMode, name, recipientId, studyUID);
         return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        MessageInitial other = (MessageInitial) obj;
-        return automatedMode == other.automatedMode && Arrays.equals(bins, other.bins) &&
-               Objects.equals(name, other.name) &&
-               Arrays.equals(participants, other.participants) &&
-               recipientId == other.recipientId && Objects.equals(studyUID, other.studyUID);
     }
 }

@@ -67,6 +67,15 @@ public class ComponentRadioEntry extends JPanel {
     }
     
     /**
+     * Is upper option selected?
+     * 
+     * @return
+     */
+    public boolean isUpperOptionSelected() {
+        return upperOption.isSelected();
+    }
+    
+    /**
      * Set or unset upper option and the respective inverse for the lower option
      * 
      * @param selected
@@ -74,14 +83,5 @@ public class ComponentRadioEntry extends JPanel {
     public void setUpperOptionSelected(boolean selected) {
         this.upperOption.setSelected(selected);
         this.lowerOption.setSelected(!selected);
-    }
-    
-    /**
-     * Is upper option selected?
-     * 
-     * @return
-     */
-    public boolean isUpperOptionSelected() {
-        return upperOption.isSelected();
     }
 }

@@ -48,6 +48,15 @@ public class EntryParticipantCheckmark extends EntryParticipant {
     }
 
     /**
+     * Set the checkmark enabled
+     */
+    public void setCheckmarkEnabled(boolean enabled){
+        imageLabel.setEnabled(enabled);
+        imageLabel.repaint();
+        imageLabel.revalidate();
+    }  
+    
+    /**
      * Creates and additional control panel
      */
     @Override
@@ -62,14 +71,5 @@ public class EntryParticipantCheckmark extends EntryParticipant {
             JOptionPane.showMessageDialog(this, Resources.getString("Participant.3"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
         }
         return panel;
-    }  
-    
-    /**
-     * Set the checkmark enabled
-     */
-    public void setCheckmarkEnabled(boolean enabled){
-        imageLabel.setEnabled(enabled);
-        imageLabel.repaint();
-        imageLabel.revalidate();
     }   
 }

@@ -84,27 +84,6 @@ public abstract class Perspective {
     }
     
     /**
-     * Does perspective allow interim saving
-     */
-    protected boolean canSave() {
-        return canSave;
-    }
-
-    /**
-     * Does perspective allow reset the password
-     */
-    protected boolean canReenterPassword() {
-        return canReenterPassword;
-    }
-    
-    /**
-     * Creates the contents
-     * 
-     * @param panel
-     */
-    protected abstract void createContents(JPanel panel);
-
-    /**
      * Returns the app
      * 
      * @return
@@ -123,6 +102,43 @@ public abstract class Perspective {
     }
     
     /**
+     * Returns the title
+     * 
+     * @return
+     */
+    public String getTitle() {
+        return this.title;
+    }
+
+    /**
+     * Is perspective visible
+     */
+    public boolean isVisible() {
+        return this.panel.isVisible();
+    }
+
+    /**
+     * Does perspective allow reset the password
+     */
+    protected boolean canReenterPassword() {
+        return canReenterPassword;
+    }
+    
+    /**
+     * Does perspective allow interim saving
+     */
+    protected boolean canSave() {
+        return canSave;
+    }
+    
+    /**
+     * Creates the contents
+     * 
+     * @param panel
+     */
+    protected abstract void createContents(JPanel panel);
+    
+    /**
      * Returns the progress associated with this perspective
      * @return
      */
@@ -131,25 +147,9 @@ public abstract class Perspective {
     }
     
     /**
-     * Returns the title
-     * 
-     * @return
-     */
-    public String getTitle() {
-        return this.title;
-    }
-    
-    /**
      * Initialize perspective based on model
      */
     protected abstract void initialize();
-    
-    /**
-     * Is perspective visible
-     */
-    public boolean isVisible() {
-        return this.panel.isVisible();
-    }
     
     /**
      * Call when before other perspective is shown

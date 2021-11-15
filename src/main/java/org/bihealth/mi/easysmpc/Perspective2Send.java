@@ -113,6 +113,24 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     }
     
     /**
+      * Reacts on all changes in any components
+      */
+     @Override
+     public void stateChanged(ChangeEvent e) {
+         // Update checkmarks
+         updateCheckmarks();
+         
+         // Check click able send all mails button and save button
+         boolean allMessagesRetrieved = getApp().getModel().areAllMessagesRetrieved();
+         this.buttonProceed.setEnabled(allMessagesRetrieved);
+        
+        // If no more messages and automatic processing proceed automatically
+        if (allMessagesRetrieved && isAutomaticProcessingEnabled()) {
+            actionProceed();
+        }
+     }
+    
+    /**
      * @param entry
      */
    private void actionCopyButton(EntryParticipantCheckmarkSendMail entry) {
@@ -138,23 +156,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         } catch (IOException exception) {
             JOptionPane.showMessageDialog(null,Resources.getString("PerspectiveSend.copyToClipboardError"), Resources.getString("PerspectiveSend.copyToClipboardErrorTitle"), JOptionPane.ERROR_MESSAGE);
         }        
-    }
-    
-    /**
-     * Proceed action
-     */
-    protected void actionProceed() {
-        // Prevent a second click on proceed button
-        buttonProceed.setEnabled(false);
-        
-        // Mark all messages as sent
-        markAllMessagesSent();
-        
-        // Execute action
-        getApp().actionFirstSendingDone();
-        
-        // Re-enable proceed button
-        buttonProceed.setEnabled(true);
     }
     
     
@@ -189,6 +190,35 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             boolean messageSent = false;
             /** Did an error occurred */
             boolean error = false;
+            
+            @Override
+            public void done() {
+                // Persist changes
+                if (messageSent) {
+                    getApp().actionSave();
+                }
+
+                // Display error message if applicable
+                if (error) {
+                    JOptionPane.showMessageDialog(getPanel(),
+                                                  Resources.getString("PerspectiveSend.sendAutomaticError"),
+                                                  Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
+                                                  JOptionPane.ERROR_MESSAGE);
+                }
+
+                // Re-activate buttons
+                buttonSendAllAutomatically.setEnabled(true);
+                buttonSendAllManually.setEnabled(true);
+                for (Component c : panelParticipants.getComponents()) {
+                    if (!isOwnEntry(c)) {
+                        ((EntryParticipantCheckmarkSendMail) c).setButtonEnabled(true);
+                    }
+                }
+
+                // Finalize
+                monitor.setProgress(list.size());
+                stateChanged(new ChangeEvent(this));
+            }
             
             @Override
             protected Void doInBackground() throws Exception {                
@@ -243,35 +273,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
 
                 // Done
                 return null;
-            }
-            
-            @Override
-            public void done() {
-                // Persist changes
-                if (messageSent) {
-                    getApp().actionSave();
-                }
-
-                // Display error message if applicable
-                if (error) {
-                    JOptionPane.showMessageDialog(getPanel(),
-                                                  Resources.getString("PerspectiveSend.sendAutomaticError"),
-                                                  Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
-                                                  JOptionPane.ERROR_MESSAGE);
-                }
-
-                // Re-activate buttons
-                buttonSendAllAutomatically.setEnabled(true);
-                buttonSendAllManually.setEnabled(true);
-                for (Component c : panelParticipants.getComponents()) {
-                    if (!isOwnEntry(c)) {
-                        ((EntryParticipantCheckmarkSendMail) c).setButtonEnabled(true);
-                    }
-                }
-
-                // Finalize
-                monitor.setProgress(list.size());
-                stateChanged(new ChangeEvent(this));
             }
         };
         
@@ -339,6 +340,122 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             JOptionPane.showMessageDialog(this.getPanel(), Resources.getString("PerspectiveSend.mailToError"), Resources.getString("PerspectiveSend.mailToErrorTitle"), JOptionPane.ERROR_MESSAGE);
         }
         this.stateChanged(new ChangeEvent(this));
+    }
+
+    /**
+     * List all participants with unsent messages
+     * 
+     * @return list of participants
+     */
+    private List<EntryParticipantCheckmarkSendMail> getAllParticipants() {
+        List<EntryParticipantCheckmarkSendMail> list = new ArrayList<>();
+        for (Component c : panelParticipants.getComponents()) {
+            if (!isOwnEntry(c)) {
+                list.add((EntryParticipantCheckmarkSendMail)  c);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Returns the exchange string for the given entry
+     * 
+     * @param entry
+     * @throws IOException
+     */
+    private String getExchangeString(EntryParticipantCheckmarkSendMail entry) throws IOException {
+        int index = Arrays.asList(panelParticipants.getComponents()).indexOf(entry);
+        return Message.serializeMessage(getApp().getModel().getUnsentMessageFor(index));
+    }
+
+    /**
+     * Indicates whether the automatic processing enabled
+     * 
+     * @return enabled
+     */
+    private boolean isAutomaticProcessingEnabled() {
+        return getApp().getModel().getConnectionIMAPSettings() != null;
+    }
+    
+     /**
+     * Indicates whether it is the initial sending of the creator
+     * 
+     * @return enabled
+     */
+    private boolean isInitialSending() {
+        return getApp().getModelState() == StudyState.INITIAL_SENDING;
+    }
+    
+    /**
+      * Returns whether this is the own entry
+      * @param entry
+      * @return
+      */
+    private boolean isOwnEntry(Component entry) {
+        return Arrays.asList(panelParticipants.getComponents()).indexOf(entry) == getApp().getModel().getOwnId();
+    }
+     
+    /**
+     * Draws the buttons pane with or without the automatic resend button
+     * 
+     * @param showResend
+     */
+    private void updateButtonsPane(boolean showResend) {
+        
+        // Remove
+        this.buttonsPane.removeAll();
+        
+        // Create with two or three rows and add resend button if necessary
+        if (showResend) {
+            this.buttonsPane.setLayout(new GridLayout(3, 1));
+            this.buttonsPane.add(this.buttonSendAllAutomatically, 0, 0);
+            this.buttonsPane.add(this.buttonSendAllManually, 0, 1);
+            this.buttonsPane.add(this.buttonProceed, 0, 2);
+            
+        } else {
+            this.buttonsPane.setLayout(new GridLayout(2, 1));
+            this.buttonsPane.add(this.buttonSendAllManually, 0, 0);
+            this.buttonsPane.add(this.buttonProceed, 0, 1);
+        }
+    }
+    
+     /**
+     * Check participant entries visually if complete
+     */
+    private void updateCheckmarks() {
+        int index = 0;
+        for (Component c : this.panelParticipants.getComponents()) {
+            EntryParticipantCheckmarkSendMail entry = (EntryParticipantCheckmarkSendMail) c;
+            entry.setCheckmarkEnabled(index == getApp().getModel().getOwnId() || // Always mark own id as "received"
+                                                                wasMessageretrieved(entry)); // Mark if share complete
+            index++;
+        }
+    }
+    
+    /**
+     * Returns whether a message was already retrieved
+     * @param entry
+     * @return
+     */
+   private boolean wasMessageretrieved(Component entry) {
+       return getApp().getModel().wasMessageRetrieved(Arrays.asList(panelParticipants.getComponents()).indexOf(entry));                     
+   }
+
+    /**
+     * Proceed action
+     */
+    protected void actionProceed() {
+        // Prevent a second click on proceed button
+        buttonProceed.setEnabled(false);
+        
+        // Mark all messages as sent
+        markAllMessagesSent();
+        
+        // Execute action
+        getApp().actionFirstSendingDone();
+        
+        // Re-enable proceed button
+        buttonProceed.setEnabled(true);
     }
 
     /**
@@ -440,8 +557,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                              ? 2
                                              : 1);
     }
-    
-     /**
+
+    /**
      * Generates the formated exchange string
      * 
      * @param entry
@@ -457,32 +574,6 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     }
     
     /**
-     * List all participants with unsent messages
-     * 
-     * @return list of participants
-     */
-    private List<EntryParticipantCheckmarkSendMail> getAllParticipants() {
-        List<EntryParticipantCheckmarkSendMail> list = new ArrayList<>();
-        for (Component c : panelParticipants.getComponents()) {
-            if (!isOwnEntry(c)) {
-                list.add((EntryParticipantCheckmarkSendMail)  c);
-            }
-        }
-        return list;
-    }
-     
-    /**
-     * Returns the exchange string for the given entry
-     * 
-     * @param entry
-     * @throws IOException
-     */
-    private String getExchangeString(EntryParticipantCheckmarkSendMail entry) throws IOException {
-        int index = Arrays.asList(panelParticipants.getComponents()).indexOf(entry);
-        return Message.serializeMessage(getApp().getModel().getUnsentMessageFor(index));
-    }
-    
-     /**
      * Returns an identifier for the current round of EasySMPC 
      * This is needed to make sure the correct message are sent to the correct receivers
      * 
@@ -491,7 +582,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     protected String getRoundIdentifier() {
         return Resources.ROUND_1;
     }
-    
+
     /**
      * Initialize perspective based on model
      */
@@ -575,34 +666,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             actionSendMailAutomatically(getAllParticipants());
         }
     }
-
-    /**
-     * Indicates whether the automatic processing enabled
-     * 
-     * @return enabled
-     */
-    private boolean isAutomaticProcessingEnabled() {
-        return getApp().getModel().getConnectionIMAPSettings() != null;
-    }
-
-    /**
-     * Indicates whether it is the initial sending of the creator
-     * 
-     * @return enabled
-     */
-    private boolean isInitialSending() {
-        return getApp().getModelState() == StudyState.INITIAL_SENDING;
-    }
-
-    /**
-      * Returns whether this is the own entry
-      * @param entry
-      * @return
-      */
-    private boolean isOwnEntry(Component entry) {
-        return Arrays.asList(panelParticipants.getComponents()).indexOf(entry) == getApp().getModel().getOwnId();
-    }
-
+    
     /**
      * Marks all messages as sent
      */
@@ -613,68 +677,4 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             }
         }
     }
-
-    /**
-      * Reacts on all changes in any components
-      */
-     @Override
-     public void stateChanged(ChangeEvent e) {
-         // Update checkmarks
-         updateCheckmarks();
-         
-         // Check click able send all mails button and save button
-         boolean allMessagesRetrieved = getApp().getModel().areAllMessagesRetrieved();
-         this.buttonProceed.setEnabled(allMessagesRetrieved);
-        
-        // If no more messages and automatic processing proceed automatically
-        if (allMessagesRetrieved && isAutomaticProcessingEnabled()) {
-            actionProceed();
-        }
-     }
-    
-    /**
-     * Draws the buttons pane with or without the automatic resend button
-     * 
-     * @param showResend
-     */
-    private void updateButtonsPane(boolean showResend) {
-        
-        // Remove
-        this.buttonsPane.removeAll();
-        
-        // Create with two or three rows and add resend button if necessary
-        if (showResend) {
-            this.buttonsPane.setLayout(new GridLayout(3, 1));
-            this.buttonsPane.add(this.buttonSendAllAutomatically, 0, 0);
-            this.buttonsPane.add(this.buttonSendAllManually, 0, 1);
-            this.buttonsPane.add(this.buttonProceed, 0, 2);
-            
-        } else {
-            this.buttonsPane.setLayout(new GridLayout(2, 1));
-            this.buttonsPane.add(this.buttonSendAllManually, 0, 0);
-            this.buttonsPane.add(this.buttonProceed, 0, 1);
-        }
-    }
-
-    /**
-     * Check participant entries visually if complete
-     */
-    private void updateCheckmarks() {
-        int index = 0;
-        for (Component c : this.panelParticipants.getComponents()) {
-            EntryParticipantCheckmarkSendMail entry = (EntryParticipantCheckmarkSendMail) c;
-            entry.setCheckmarkEnabled(index == getApp().getModel().getOwnId() || // Always mark own id as "received"
-                                                                wasMessageretrieved(entry)); // Mark if share complete
-            index++;
-        }
-    }
-    
-    /**
-     * Returns whether a message was already retrieved
-     * @param entry
-     * @return
-     */
-   private boolean wasMessageretrieved(Component entry) {
-       return getApp().getModel().wasMessageRetrieved(Arrays.asList(panelParticipants.getComponents()).indexOf(entry));                     
-   }
 }

@@ -111,6 +111,22 @@ public class ComponentEntryOne extends JPanel {
     }
     
     /**
+     * Sets a change listener
+     * @param listener
+     */
+    public void setChangeListener(ChangeListener listener) {
+        this.field.setChangeListener(listener);
+    }
+
+    /**
+     * Sets value
+     * @return
+     */
+    public void setValue(String text) {
+        this.field.setText(text);
+    }
+    
+    /**
      * @param componentEntry
      */
     private void setBackgroundAllSubComponents(Component c) {
@@ -119,21 +135,5 @@ public class ComponentEntryOne extends JPanel {
         for(Component childComponent : ((Container) c).getComponents()) {
             setBackgroundAllSubComponents(childComponent);
         }
-    }
-
-    /**
-     * Sets a change listener
-     * @param listener
-     */
-    public void setChangeListener(ChangeListener listener) {
-        this.field.setChangeListener(listener);
-    }
-    
-    /**
-     * Sets value
-     * @return
-     */
-    public void setValue(String text) {
-        this.field.setText(text);
     }
 }
