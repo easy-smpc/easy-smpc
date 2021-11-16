@@ -163,15 +163,24 @@ public class ConnectionIMAPSettings implements Serializable {
     public String getIMAPServer() {
         return imapServer;
     }
-
+    
     /**
      * Return config parameter
      * @return the password
      */
     public String getPassword() {
+        return getPassword(true);
+    }
+
+    /**
+     * Return config parameter
+     * @param usePasswordProvider
+     * @return the password
+     */
+    public String getPassword(boolean usePasswordProvider) {
         
         // Potentially ask for password
-        if (this.password == null && this.provider != null) {
+        if (this.password == null && this.provider != null && usePasswordProvider) {
             this.password = this.provider.getPassword();
             
             // Check connection settings
@@ -336,6 +345,9 @@ public class ConnectionIMAPSettings implements Serializable {
      * @return
      */
     public boolean isValid() {
+        if (this.password == null) {
+            return false;
+        }
         try {
             return new ConnectionIMAP(this, false).checkConnection();
         } catch (Exception e) {

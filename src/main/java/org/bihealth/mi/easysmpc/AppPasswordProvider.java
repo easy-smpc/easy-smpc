@@ -32,11 +32,6 @@ public class AppPasswordProvider implements PasswordProvider, Serializable {
 
     @Override
     public String getPassword() {
-        try {
-            throw new RuntimeException("Here");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return new DialogPassword(getParent()).showDialog();
     }
 
