@@ -66,16 +66,23 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private ComponentRadioEntry    radioEncryptionIMAP;
     /** Radio button group for encryption STMP */
     private ComponentRadioEntry    radioEncryptionSMTP;
+    /** IMAP settings */
+    private ConnectionIMAPSettings settings;
 
     /**
      * Create a new instance
      * 
-     * @param settings to fill as default in the fields
+     * @param settings to fill as default in the fields. If not null the dialog is used to edit an existing connection, if null create a new one
      * @param parent Component to set the location of JDialog relative to
      */
     public DialogEmailConfig(ConnectionIMAPSettings settings, JFrame parent) {
         this(parent);
+        
+        // Are settings edited or created
         if (settings != null) {
+            
+            // Store
+            this.settings = settings;
             emailPasswordEntry.setLeftValue(settings.getEmailAddress());
             emailPasswordEntry.setRightValue(settings.getPassword(false));
             serversEntry.setLeftValue(settings.getIMAPServer());
@@ -84,6 +91,9 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             serverPortsEntry.setRightValue(Integer.toString(settings.getSMTPPort()));
             radioEncryptionIMAP.setUpperOptionSelected(settings.isSSLTLSIMAP());
             radioEncryptionSMTP.setUpperOptionSelected(settings.isSSLTLSSMTP());
+
+            // If settings exists disable password entry field
+            emailPasswordEntry.setLeftEnabled(false);
         }
     }
 
@@ -305,13 +315,19 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * @throws BusException
      */
     private ConnectionIMAPSettings getConnectionSettings() throws BusException {
-        return new ConnectionIMAPSettings(emailPasswordEntry.getLeftValue(),
-                                          new AppPasswordProvider()).setPassword(emailPasswordEntry.getRightValue())
-                                                                    .setIMAPServer(serversEntry.getLeftValue())
-                                                                    .setIMAPPort(Integer.valueOf(serverPortsEntry.getLeftValue()))
-                                                                    .setSMTPServer(serversEntry.getRightValue())
-                                                                    .setSMTPPort(Integer.valueOf(serverPortsEntry.getRightValue()))
-                                                                    .setSSLTLSIMAP(radioEncryptionIMAP.isUpperOptionSelected())
-                                                                    .setSSLTLSSMTP(radioEncryptionSMTP.isUpperOptionSelected());
+        
+        // Create Settings if not exists
+        if (this.settings == null) {
+            this.settings = new ConnectionIMAPSettings(emailPasswordEntry.getLeftValue(), new AppPasswordProvider());
+        }
+        
+        // Return
+        return this.settings.setPassword(emailPasswordEntry.getRightValue())
+                            .setIMAPServer(serversEntry.getLeftValue())
+                            .setIMAPPort(Integer.valueOf(serverPortsEntry.getLeftValue()))
+                            .setSMTPServer(serversEntry.getRightValue())
+                            .setSMTPPort(Integer.valueOf(serverPortsEntry.getRightValue()))
+                            .setSSLTLSIMAP(radioEncryptionIMAP.isUpperOptionSelected())
+                            .setSSLTLSSMTP(radioEncryptionSMTP.isUpperOptionSelected());
     }
 }
