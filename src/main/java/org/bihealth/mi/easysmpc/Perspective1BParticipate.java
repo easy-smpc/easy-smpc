@@ -146,7 +146,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     private void actionAddEMailConf() {
         ConnectionIMAPSettings settings = new DialogEmailConfig(null, getApp()).showDialog();
         if(settings != null) {
-            Connections.add(settings);
+            Connections.addOrUpdate(settings);
             this.comboSelectMailbox.addItem(settings);
             this.comboSelectMailbox.setSelectedItem(settings);
             this.emailconfigCheck = true;
@@ -160,7 +160,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     private void actionEditEMailConf() {
         ConnectionIMAPSettings settings = new DialogEmailConfig((ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem(), getApp()).showDialog();
         if(settings != null) {
-            Connections.add(settings);
+            Connections.addOrUpdate(settings);
             this.comboSelectMailbox.addItem(settings);
             this.comboSelectMailbox.setSelectedItem(settings);
         }

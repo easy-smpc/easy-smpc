@@ -42,10 +42,10 @@ public class Connections {
 
 
     /**
-     * Adds a certain setting
+     * Adds or updates a certain setting
      * @param settings
      */
-    public static void add(ConnectionIMAPSettings settings) {
+    public static void addOrUpdate(ConnectionIMAPSettings settings) {
         
         // Get node
         Preferences node = Preferences.userRoot()
