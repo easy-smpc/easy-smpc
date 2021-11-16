@@ -200,7 +200,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         if (settings != null) {                       
             // Set values
             emailPasswordEntry.setLeftValue(settings.getEmailAddress());
-            emailPasswordEntry.setRightValue(settings.getPassword(false));
+            emailPasswordEntry.setRightValue(settings.getPasswordAndValidateConnection(false));
             serversEntry.setLeftValue(settings.getIMAPServer());
             serversEntry.setRightValue(settings.getSMTPServer());
             serverPortsEntry.setLeftValue(Integer.toString(settings.getIMAPPort()));

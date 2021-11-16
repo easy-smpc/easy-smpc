@@ -227,7 +227,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         // Check e-mail configuration if not done so far
         if (comboSelectMailbox.getSelectedItem() != null && !emailconfigCheck) {
             try {
-                if (!((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).isValid()) {
+                if (((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getPasswordAndValidateConnection(true) == null) {
                     throw new BusException("Connection error");
                 }
             } catch (BusException e) {
