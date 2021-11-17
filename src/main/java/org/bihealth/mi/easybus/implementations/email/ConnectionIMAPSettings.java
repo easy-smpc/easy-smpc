@@ -86,7 +86,7 @@ public class ConnectionIMAPSettings implements Serializable {
     /** Accept self signed certificates */
     private boolean                       acceptSelfSignedCert = false;
     /** Search for proxy */
-    private boolean                       searchForProxy       = true;
+    private boolean                       searchForProxy       = false;
     /** Performance listener */
     private transient PerformanceListener listener             = null;
     /** Use ssl/tls (=true) or starttls (=false) for IMAP connection */
