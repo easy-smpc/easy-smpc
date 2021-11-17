@@ -296,7 +296,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         if (comboSelectMailbox.getSelectedItem() != null && !emailconfigCheck) {
             
             try {
-                if (!((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).isValid()) {
+                if (!((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).isValid(true)) {
                     throw new BusException("Connection error");
                 }
             } catch (BusException e) {

@@ -339,15 +339,32 @@ public class ConnectionIMAPSettings implements Serializable {
     public boolean isSSLTLSSMTP() {
         return ssltlsSMTP;
     }
-
+    
     /**
      * Returns whether this connection is valid
+     * 
      * @return
      */
     public boolean isValid() {
-        if (this.password == null) {
+        return isValid(false);
+    }
+
+    /**
+     * Returns whether this connection is valid
+     * 
+     * @param usePasswordProvider
+     * @return
+     */
+    public boolean isValid(boolean usePasswordProvider) {
+        
+        if (this.password == null && !usePasswordProvider) {
             return false;
         }
+
+        if (this.password == null && getPassword() == null) {
+            return false;
+        }       
+
         try {
             return new ConnectionIMAP(this, false).checkConnection();
         } catch (Exception e) {
