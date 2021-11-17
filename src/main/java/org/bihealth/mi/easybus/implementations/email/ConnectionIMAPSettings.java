@@ -169,7 +169,7 @@ public class ConnectionIMAPSettings implements Serializable {
      * @return the password
      */
     public String getPassword() {
-        return getPasswordAndValidateConnection(true);
+        return getPassword(true);
     }
 
     /**
@@ -177,7 +177,7 @@ public class ConnectionIMAPSettings implements Serializable {
      * @param usePasswordProvider
      * @return the password
      */
-    public String getPasswordAndValidateConnection(boolean usePasswordProvider) {
+    public String getPassword(boolean usePasswordProvider) {
         
         // Potentially ask for password
         if (this.password == null && this.provider != null && usePasswordProvider) {
