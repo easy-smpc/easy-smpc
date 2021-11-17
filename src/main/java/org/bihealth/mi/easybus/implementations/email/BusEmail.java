@@ -180,8 +180,8 @@ public class BusEmail extends Bus {
                 // Init
                 boolean sent = false;
                 
-                // Retry until sent successful
-                while(!sent) {
+                // Retry until sent successful or interrupted
+                while(!sent && !Thread.interrupted()) {
                     try {
                         connection.send(recipient, subject, body, null);
                         sent = true;
