@@ -229,14 +229,6 @@ public abstract class ComponentEntry extends JPanel {
     }
     
     /**
-     * Sets the left field enabled
-     * @return
-     */
-    public void setLeftEnabled(boolean enabled) {
-        this.fieldLeft.setEnabled(enabled);
-    }
-    
-    /**
      * Sets the right value
      * @return
      */

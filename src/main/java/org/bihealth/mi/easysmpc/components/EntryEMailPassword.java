@@ -13,13 +13,9 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
-import java.util.prefs.BackingStoreException;
-
 import javax.swing.JPanel;
 
 import org.bihealth.mi.easybus.Participant;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
-import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -34,32 +30,15 @@ public class EntryEMailPassword extends ComponentEntry {
     
     /**
      * Creates a new instance
-     * @param checkEmailExisting
      */
-    public EntryEMailPassword(boolean checkEmailExisting) {
+    public EntryEMailPassword() {
         super(Resources.getString("EmailConfig.1"),
               "",
               true,
               new ComponentTextFieldValidator() {
                     @Override
                     public boolean validate(String text) {
-                        
-                      // If mail address is invalid return false
-                      if (!Participant.isEmailValid(text)) { return false; }
-
-                      // If mail address exists already or existing can not be read return false
-                      if (checkEmailExisting) {
-                          try {
-                              for (ConnectionIMAPSettings settings : Connections.list()) {
-                                  if (settings.getEmailAddress().equals(text)) { return false; }
-                              }
-                          } catch (BackingStoreException e) {
-                              return false;
-                          }
-                      }
-
-                      // Email address is valid
-                      return true;
+                        return Participant.isEmailValid(text);
                     }
                 }, 
               false,
