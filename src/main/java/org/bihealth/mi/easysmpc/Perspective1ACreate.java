@@ -189,11 +189,21 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      * Adds an e-mail configuration
      */
     private void actionAddEMailConf() {
-        ConnectionIMAPSettings settings = new DialogEmailConfig(null, getApp()).showDialog();
-        if(settings != null) {
-            Connections.addOrUpdate(settings);
-            this.comboSelectMailbox.addItem(settings);
-            this.comboSelectMailbox.setSelectedItem(settings);
+        // Get new settings
+        ConnectionIMAPSettings newSettings = new DialogEmailConfig(null, getApp()).showDialog();
+        
+        if (newSettings != null) {
+            // Update connections in preferences
+            Connections.addOrUpdate(newSettings);
+            
+            // Reset combo  box
+            comboSelectMailbox.removeAllItems();
+            for(ConnectionIMAPSettings settings: getEmailConfig()) {
+                this.comboSelectMailbox.addItem(settings);
+            }
+            
+            // Select new settings item
+            this.comboSelectMailbox.setSelectedItem(newSettings);
             this.emailconfigCheck = true;
         }
         this.stateChanged(new ChangeEvent(this));
@@ -203,25 +213,25 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      * Edits an e-mail configuration
      */
     private void actionEditEMailConf() {
-        // Store current settings
-        ConnectionIMAPSettings oldSettings = (ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem();
         
         // Get new settings
-        ConnectionIMAPSettings newSettings = new DialogEmailConfig(oldSettings, getApp()).showDialog();
+        ConnectionIMAPSettings newSettings = new DialogEmailConfig((ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem(),
+                                                                   getApp()).showDialog();
         
         // Alter combo box if new settings given
         if (newSettings != null) {
             // Update connections in preferences
             Connections.addOrUpdate(newSettings);
-
-            // Remove if an item has been edited
-            if (oldSettings.getEmailAddress().equals(newSettings.getEmailAddress())) {
-                this.comboSelectMailbox.removeItem(oldSettings);
+            
+            // Reset combo  box
+            comboSelectMailbox.removeAllItems();
+            for(ConnectionIMAPSettings settings: getEmailConfig()) {
+                this.comboSelectMailbox.addItem(settings);
             }
 
             // Set new settings item
-            this.comboSelectMailbox.addItem(newSettings);
             this.comboSelectMailbox.setSelectedItem(newSettings);
+            this.emailconfigCheck = true;
         }
         
         // Change state

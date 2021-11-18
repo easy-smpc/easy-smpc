@@ -144,8 +144,25 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      * Adds an e-mail configuration
      */
     private void actionAddEMailConf() {
+        // Get new settings
         ConnectionIMAPSettings settings = new DialogEmailConfig(null, getApp()).showDialog();
-        if(settings != null) {
+        
+        if(settings != null) {           
+            // Update connections in preferences
+            Connections.addOrUpdate(settings);
+            
+            // Remove entry if existing
+            for (int i = 0; i < this.comboSelectMailbox.getItemCount(); i++) {
+                ConnectionIMAPSettings existingSettings = this.comboSelectMailbox.getItemAt(i);
+                if (existingSettings.getEmailAddress().equals(settings.getEmailAddress())) {
+                    this.comboSelectMailbox.removeItemAt(i);
+                }
+            }
+
+            // Set new settings item
+            this.comboSelectMailbox.addItem(settings);
+            this.comboSelectMailbox.setSelectedItem(settings);
+            this.emailconfigCheck = true;
             Connections.addOrUpdate(settings);
             this.comboSelectMailbox.addItem(settings);
             this.comboSelectMailbox.setSelectedItem(settings);
