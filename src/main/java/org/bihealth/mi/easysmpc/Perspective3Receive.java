@@ -37,7 +37,9 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
+import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmark;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
@@ -162,13 +164,42 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     @Override
     public void receiveError(Exception exception) {
         
-        // Set error message in EDT 
+        // Error handling in EDT 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
-                                          true,
-                                          false);
+                // Stop bus and reset status message
+                getApp().setStatusMessage("", false, false);
+                getApp().getModel().stopBus();
+                
+
+                // Ask to change settings
+                if (JOptionPane.showConfirmDialog(getPanel(),
+                                                  String.format(Resources.getString("PerspectiveReceive.errorAutomaticEmail")),
+                                                  "",
+                                                  JOptionPane.OK_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
+                    
+                    // Get new settings
+                    ConnectionIMAPSettings newSettings = new DialogEmailConfig(getApp().getModel().getConnectionIMAPSettings(), getApp()).showDialog();
+                    
+                    // Use new settings if given
+                    if(newSettings != null) {
+                        getApp().getModel().setConnectionIMAPSettings(newSettings);
+
+                        // Restart bus
+                        new SwingWorker<Void, Void>() {
+                            @Override
+                            protected Void doInBackground() throws Exception {
+
+                                getApp().getModel().stopBus();
+                                startAutomatedMailImport();
+
+                                // Return null
+                                return null;
+                            }
+                        }.execute();
+                    }
+                }
             }
         });
     }

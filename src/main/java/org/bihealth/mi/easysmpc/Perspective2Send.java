@@ -42,6 +42,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.ProgressMonitor;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -51,7 +52,9 @@ import javax.swing.event.ChangeListener;
 import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
+import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmarkSendMail;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -200,10 +203,33 @@ public class Perspective2Send extends Perspective implements ChangeListener {
 
                 // Display error message if applicable
                 if (error) {
-                    JOptionPane.showMessageDialog(getPanel(),
-                                                  Resources.getString("PerspectiveSend.sendAutomaticError"),
-                                                  Resources.getString("PerspectiveSend.sendAutomaticErrorTitle"),
-                                                  JOptionPane.ERROR_MESSAGE);
+                    
+                    // Ask to change settings
+                    if (JOptionPane.showConfirmDialog(getPanel(),
+                                                      String.format(Resources.getString("PerspectiveSend.sendAutomaticError")),
+                                                      "",
+                                                      JOptionPane.OK_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
+                        
+                        // Get new settings
+                        ConnectionIMAPSettings newSettings = new DialogEmailConfig(getApp().getModel().getConnectionIMAPSettings(), getApp()).showDialog();
+                        
+                        // Use new settings if given
+                        if (newSettings != null) {
+                            // Set settings
+                            getApp().getModel().setConnectionIMAPSettings(newSettings);
+
+                            // Stop bus and restart send
+                            SwingUtilities.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    getApp().getModel().stopBus();
+                                    actionSendMailAutomatically(list);
+                                }
+                            });
+
+                        }
+                    }
                 }
 
                 // Re-activate buttons

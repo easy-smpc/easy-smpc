@@ -70,7 +70,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /**
      * Create a new instance
      * 
-     * @param settings to fill as default in the fields
+     * @param settings to fill as default in the fields and deactivate the email field
      * @param parent Component to set the location of JDialog relative to
      */
     public DialogEmailConfig(ConnectionIMAPSettings settings, JFrame parent) {
@@ -84,6 +84,9 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             serverPortsEntry.setRightValue(Integer.toString(settings.getSMTPPort()));
             radioEncryptionIMAP.setUpperOptionSelected(settings.isSSLTLSIMAP());
             radioEncryptionSMTP.setUpperOptionSelected(settings.isSSLTLSSMTP());
+            
+            // Deactivate e-mail field
+            emailPasswordEntry.setLefttEnabled(false);
         }
     }
 
