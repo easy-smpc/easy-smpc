@@ -6,7 +6,7 @@
 VERSION="1.0.0"
 TYPE="dmg"
 BUILD_PATH="../target"
-MAIN_JAR="easysmpc.jar"
+MAIN_JAR="easy-smpc-1.0.0.jar"
 MAIN_CLASS="org.bihealth.mi.easysmpc.App"
 APPLICATION_NAME="EasySMPC"
 DESCRIPTION_TEXT="No-Code Approach to Secure Multi-Party Computation"
