@@ -5,7 +5,7 @@ REM Before executing the batch file the WIX toolset needs to be obtained and ins
 REM ==================================
 @SET version="1.0.0"
 @SET buildPath="..\target"
-@SET mainJar="EasySMPC.jar"
+@SET mainJar="easy-smpc-1.0.0.jar"
 @SET mainClass=org.bihealth.mi.easysmpc.App
 @SET applicationName=EasySMPC
 @SET descriptionText="No-Code Approach to Secure Multi-Party Computation"
