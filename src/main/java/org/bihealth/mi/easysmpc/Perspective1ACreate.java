@@ -200,10 +200,15 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             comboSelectMailbox.removeAllItems();
             for(ConnectionIMAPSettings settings: getEmailConfig()) {
                 this.comboSelectMailbox.addItem(settings);
+                
+                // Set selected
+                if(settings != null && settings.getEmailAddress().equals(newSettings.getEmailAddress())) {
+                    settings.setPassword(newSettings.getPassword());
+                    this.comboSelectMailbox.setSelectedItem(settings);
+                }
             }
             
-            // Select new settings item
-            this.comboSelectMailbox.setSelectedItem(newSettings);
+            // Set checked
             this.emailconfigCheck = true;
         }
         this.stateChanged(new ChangeEvent(this));
@@ -227,10 +232,15 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             comboSelectMailbox.removeAllItems();
             for(ConnectionIMAPSettings settings: getEmailConfig()) {
                 this.comboSelectMailbox.addItem(settings);
+                
+                // Set selected
+                if(settings != null && settings.getEmailAddress().equals(newSettings.getEmailAddress())) {
+                    settings.setPassword(newSettings.getPassword());
+                    this.comboSelectMailbox.setSelectedItem(settings);
+                }
             }
-
-            // Set new settings item
-            this.comboSelectMailbox.setSelectedItem(newSettings);
+            
+            // Set checked
             this.emailconfigCheck = true;
         }
         

@@ -145,29 +145,28 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      */
     private void actionAddEMailConf() {
         // Get new settings
-        ConnectionIMAPSettings settings = new DialogEmailConfig(null, getApp()).showDialog();
+        ConnectionIMAPSettings newSettings = new DialogEmailConfig(null, getApp()).showDialog();
         
-        if(settings != null) {           
+        if (newSettings != null) {
             // Update connections in preferences
-            Connections.addOrUpdate(settings);
+            Connections.addOrUpdate(newSettings);
             
-            // Remove entry if existing
-            for (int i = 0; i < this.comboSelectMailbox.getItemCount(); i++) {
-                ConnectionIMAPSettings existingSettings = this.comboSelectMailbox.getItemAt(i);
-                if (existingSettings.getEmailAddress().equals(settings.getEmailAddress())) {
-                    this.comboSelectMailbox.removeItemAt(i);
+            // Reset combo  box
+            comboSelectMailbox.removeAllItems();
+            for(ConnectionIMAPSettings settings: getEmailConfig()) {
+                this.comboSelectMailbox.addItem(settings);
+                
+                // Set selected
+                if(settings != null && settings.getEmailAddress().equals(newSettings.getEmailAddress())) {
+                    settings.setPassword(newSettings.getPassword());
+                    this.comboSelectMailbox.setSelectedItem(settings);
                 }
             }
-
-            // Set new settings item
-            this.comboSelectMailbox.addItem(settings);
-            this.comboSelectMailbox.setSelectedItem(settings);
-            this.emailconfigCheck = true;
-            Connections.addOrUpdate(settings);
-            this.comboSelectMailbox.addItem(settings);
-            this.comboSelectMailbox.setSelectedItem(settings);
+            
+            // Set checked
             this.emailconfigCheck = true;
         }
+        
         this.stateChanged(new ChangeEvent(this));
     }
 
@@ -186,14 +185,20 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             // Update connections in preferences
             Connections.addOrUpdate(newSettings);
 
-            // Remove if an item has been edited
-            if (oldSettings.getEmailAddress().equals(newSettings.getEmailAddress())) {
-                this.comboSelectMailbox.removeItem(oldSettings);
+            // Reset combo box
+            comboSelectMailbox.removeAllItems();
+            for (ConnectionIMAPSettings settings : getEmailConfig()) {
+                this.comboSelectMailbox.addItem(settings);
+
+                // Set selected
+                if (settings != null && settings.getEmailAddress().equals(newSettings.getEmailAddress())) {
+                    settings.setPassword(newSettings.getPassword());
+                    this.comboSelectMailbox.setSelectedItem(settings);
+                }
             }
 
-            // Set new settings item
-            this.comboSelectMailbox.addItem(newSettings);
-            this.comboSelectMailbox.setSelectedItem(newSettings);
+            // Set checked
+            this.emailconfigCheck = true;
         }
         
         // Change state
