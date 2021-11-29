@@ -95,7 +95,9 @@ public class App extends JFrame {
         }
         
         // Prefer IPv6 if network (e.g. e-mail) is used
-        System.getProperties().setProperty("java.net.preferIPv6Addresses", "true");               
+        System.getProperties().setProperty("java.net.preferIPv6Addresses", "true");
+        // Don't embed menu in window decoration
+        System.setProperty( "flatlaf.menuBarEmbedded", "false" );
         
         // Start App
         new App();
@@ -156,6 +158,7 @@ public class App extends JFrame {
         // Menu
         JMenuBar jmb = new JMenuBar();
         this.setJMenuBar(jmb);
+        jmb.setBackground(getForeground());
 
         // Action menu
         actionMenu = new JMenu(Resources.getString("App.1")); //$NON-NLS-1$
