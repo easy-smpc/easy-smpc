@@ -124,6 +124,8 @@ EasySMPC uses the following dependencies:
  - [Apache Commons CSV](http://commons.apache.org/proper/commons-csv/) - Apache License 2.0
  - [jUnit](https://github.com/junit-team/junit5) (Unit tests only) - Eclipse Public License v2.0
  - [Proxy Vole](https://github.com/akuhtz/proxy-vole) - Apache License 2.0
+ - [Apache Logging](https://logging.apache.org/log4j) - Apache License 2.0
+ - [LMAX Disruptor](https://github.com/LMAX-Exchange/disruptor) - Apache License 2.0
 
 
 ## Acknowledgments
