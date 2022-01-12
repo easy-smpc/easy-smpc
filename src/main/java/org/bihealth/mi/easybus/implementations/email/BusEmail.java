@@ -142,10 +142,19 @@ public class BusEmail extends Bus {
      * @throws InterruptedException 
      */
     public void purgeEmails() throws BusException, InterruptedException {
+        purgeEmails(null);
+    }
+    
+    /**
+     * Deletes all e-mails matching the message filter
+     * @throws BusException 
+     * @throws InterruptedException 
+     */
+    public void purgeEmails(MessageFilter filter) throws BusException, InterruptedException {
 
             // Get mails
             BusEmail.BusEmailMessage deleted = null;
-            for (BusEmail.BusEmailMessage message : connection.receive(null)) {
+            for (BusEmail.BusEmailMessage message : connection.receive(filter)) {
                 // Delete
                 message.delete();
                 deleted = message;
@@ -156,6 +165,8 @@ public class BusEmail extends Bus {
                 deleted.expunge();
             }
     }
+    
+    
     
     @Override
     public Void sendInternal(Message message, Scope scope, Participant participant) throws BusException {
