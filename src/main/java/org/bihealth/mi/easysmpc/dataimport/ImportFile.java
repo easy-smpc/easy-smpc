@@ -32,8 +32,11 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  */
 public abstract class ImportFile {
     
+    /** Default value for expected rows/colu,ns */
+    protected static final int DEFAULT_ROW_COL = 2;
+
     /**
-     * Creates a new extractor for a given file
+     * Creates a new extractor for a given file with the default number of expected rows/columns
      * 
      * @param file
      * @return
@@ -42,17 +45,33 @@ public abstract class ImportFile {
      */
     public static ImportFile forFile(File file) throws IllegalArgumentException, IOException {
         
+        return forFile(file, DEFAULT_ROW_COL);
+    }
+    
+    /**
+     * Creates a new extractor for a given file
+     * 
+     * @param file
+     * @param expectedRowCol - Expected number of columns or rows
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IOException
+     */
+    public static ImportFile forFile(File file, int expectedRowCol) throws IllegalArgumentException, IOException {
+        
         // Choose correct extractor
         if (file.getName().endsWith(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().endsWith(Resources.FILE_ENDING_EXCEL_XLSX)) {
-            return new ImportExcel(file);
+            return new ImportExcel(file, expectedRowCol);
         }
         else {
-            return new ImportCSV(file);
+            return new ImportCSV(file, expectedRowCol);
         }   
     }
 
     /** File of data origin */
     private File          file;
+    /** Number of expected row or columns in data */
+    private int expectedRowCol;
 
     /**
      * Creates a new instance
@@ -61,8 +80,9 @@ public abstract class ImportFile {
      * @throws IOException
      * @throws EncryptedDocumentException
      */
-    protected ImportFile(File file) throws IOException, IllegalArgumentException {
-        this.file = file;    
+    protected ImportFile(File file, int expectedRowCol) throws IOException, IllegalArgumentException {
+        this.file = file;
+        this.expectedRowCol = expectedRowCol;
     }
 
     /**
@@ -128,8 +148,8 @@ public abstract class ImportFile {
         
         // Final sanity check
         String[][] result = pack(rows);
-        if (result.length != 2 && result[0] != null && result[0].length != 2) {
-            throw new IllegalArgumentException("Array must either have exact two rows or two columns");
+        if (result.length != this.expectedRowCol && result[0] != null && result[0].length != this.expectedRowCol) {
+            throw new IllegalArgumentException(String.format("Array must have exact %d rows or columns", this.expectedRowCol));
         }
         
         // Done
