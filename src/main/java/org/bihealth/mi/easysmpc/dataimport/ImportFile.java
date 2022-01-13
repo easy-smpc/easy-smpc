@@ -59,6 +59,11 @@ public abstract class ImportFile {
      */
     public static ImportFile forFile(File file, int expectedRowCol) throws IllegalArgumentException, IOException {
         
+        // Check
+        if(expectedRowCol != 1 && expectedRowCol != 2 ) {
+            throw new IllegalArgumentException("Only one or two expected rows/columns are supported!");
+        }
+        
         // Choose correct extractor
         if (file.getName().endsWith(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().endsWith(Resources.FILE_ENDING_EXCEL_XLSX)) {
             return new ImportExcel(file, expectedRowCol);
@@ -166,17 +171,37 @@ public abstract class ImportFile {
         
         // Prepare
         Map<String, String> result = new LinkedHashMap<String, String>();
+        
+        // Two rows/columns
+        if (this.expectedRowCol == 2) {
 
-        // Two columns
-        if (strippedData.length != 2) {
-            for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
-                result.put(strippedData[indexRow][0], strippedData[indexRow][1]);
+            // Two columns
+            if (strippedData.length != 2) {
+                for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
+                    result.put(strippedData[indexRow][0], strippedData[indexRow][1]);
+                }
+
+                // Two rows
+            } else {
+                for (int indexColumn = 0; indexColumn < strippedData[0].length; indexColumn++) {
+                    result.put(strippedData[0][indexColumn], strippedData[1][indexColumn]);
+                }
             }
-       
-        // Two rows
         } else {
-            for (int indexColumn = 0; indexColumn < strippedData[0].length; indexColumn++) {
-                result.put(strippedData[0][indexColumn], strippedData[1][indexColumn]);
+
+            // One row or column
+
+            if (strippedData.length != 1) {
+                // One column
+                for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
+                    result.put(strippedData[indexRow][0], null);
+                }
+
+                // One row
+            } else {
+                for (int indexColumn = 0; indexColumn < strippedData[0].length; indexColumn++) {
+                    result.put(strippedData[0][indexColumn], null);
+                }
             }
         }
         
