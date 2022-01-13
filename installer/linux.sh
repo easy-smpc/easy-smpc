@@ -4,12 +4,12 @@
 #Usually only the version variable and the type (RPM or DEB) needs to be adapted
 #==================================
 VERSION="1.0"
-MINOR_VERSION="3" # if left out for deb packages a "1" is added
+MINOR_VERSION="4" # if left out for deb packages a "1" is added
 TYPE="deb"
 BUILD_PATH="../target"
-MAIN_JAR="easysmpc-1.0.3-generic.jar"
+MAIN_JAR="easy-smpc-1.0.4-generic.jar"
 MAIN_CLASS="org.bihealth.mi.easysmpc.App"
-APPLICATION_NAME="EasySMPC"
+APPLICATION_NAME="easy-smpc"
 DESCRIPTION_TEXT="No-Code Approach to Secure Multi-Party Computation"
 VENDOR="Berlin Institute of Health and Technical University of Darmstadt"
 COPYRIGHT="Licensed under the Apache License, Version 2.0 (the License); you may not use this file except in compliance with the License. You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-2.0"
