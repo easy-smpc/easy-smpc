@@ -18,6 +18,7 @@ import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easysmpc.AppPasswordProvider;
 
 /**
  * Store and retrieve connections
@@ -27,21 +28,24 @@ import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 public class Connections {
 
     /** Key */
-    private static final String PASSWORD_KEY    = "password";
-    /** Key */
     private static final String IMAP_SERVER_KEY = "imap_server";
     /** Key */
     private static final String IMAP_PORT_KEY   = "imap_port";
     /** Key */
+    private static final String IMAP_ENCRYPTION_TYPE   = "imap_encryption";
+    /** Key */
     private static final String SMTP_SERVER_KEY = "smtp_server";
     /** Key */
     private static final String SMTP_PORT_KEY   = "smtp_port";
+    /** Key */
+    private static final String SMTP_ENCRYPTION_TYPE   = "smtp_encryption";
+
 
     /**
-     * Adds a certain setting
+     * Adds or updates a certain setting
      * @param settings
      */
-    public static void add(ConnectionIMAPSettings settings) {
+    public static void addOrUpdate(ConnectionIMAPSettings settings) {
         
         // Get node
         Preferences node = Preferences.userRoot()
@@ -49,11 +53,12 @@ public class Connections {
                                       .node(settings.getEmailAddress());
         
         // Add details
-        node.put(PASSWORD_KEY, settings.getPassword());
         node.put(IMAP_SERVER_KEY, settings.getIMAPServer());
         node.putInt(IMAP_PORT_KEY, settings.getIMAPPort());
         node.put(SMTP_SERVER_KEY, settings.getSMTPServer());
         node.putInt(SMTP_PORT_KEY, settings.getSMTPPort());
+        node.putBoolean(IMAP_ENCRYPTION_TYPE, settings.isSSLTLSIMAP());
+        node.putBoolean(SMTP_ENCRYPTION_TYPE, settings.isSSLTLSSMTP());
     }
     
     /**
@@ -70,11 +75,12 @@ public class Connections {
         // Loop each sub node
         for(String children : rootPreferences.childrenNames()) {
             Preferences child = rootPreferences.node(children);
-            result.add(new ConnectionIMAPSettings(children).setPassword(child.get(PASSWORD_KEY, null))
-                                                           .setIMAPServer(child.get(IMAP_SERVER_KEY, null))
+            result.add(new ConnectionIMAPSettings(children, new AppPasswordProvider()).setIMAPServer(child.get(IMAP_SERVER_KEY, null))
                                                            .setIMAPPort(child.getInt(IMAP_PORT_KEY, 0))
+                                                           .setSSLTLSIMAP(child.getBoolean(IMAP_ENCRYPTION_TYPE, true))
                                                            .setSMTPServer(child.get(SMTP_SERVER_KEY, null))
-                                                           .setSMTPPort(child.getInt(SMTP_PORT_KEY, 0)));
+                                                           .setSMTPPort(child.getInt(SMTP_PORT_KEY, 0))
+                                                           .setSSLTLSSMTP(child.getBoolean(SMTP_ENCRYPTION_TYPE, true)));
         }
         
         // Return

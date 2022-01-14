@@ -13,11 +13,13 @@
  */
 package de.tu_darmstadt.cbs.secretshare;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+
+import org.junit.Test;
 
 /**
  * Unit test for secret sharing
@@ -25,11 +27,33 @@ import java.security.SecureRandom;
  */
 public class ArithmeticSharingTest {
     
+    @Test
+    public void fivePartiesDec() {
+        int numParties = 5;
+        int fractionalBits = 32;
+        double delta = 0.01;
+        ArithmeticSharing as = new ArithmeticSharing(numParties);
+        SecureRandom randomGenerator = new SecureRandom();
+        BigDecimal secret1 = BigDecimal.valueOf(7.634);
+        BigDecimal secret2 = BigDecimal.valueOf(764023475.927456326789234);
+        BigDecimal secret3 = new BigDecimal(new BigInteger(93, randomGenerator));
+
+        ArithmeticShare[] shares1 = as.share(secret1, fractionalBits);
+        ArithmeticShare[] shares2 = as.share(secret2, fractionalBits);
+        ArithmeticShare[] shares3 = as.share(secret3, fractionalBits);
+        assertEquals(shares1.length, numParties);
+        assertEquals(shares2.length, numParties);
+        assertEquals(shares3.length, numParties);
+        assertEquals(ArithmeticSharing.reconstruct(shares1, fractionalBits).doubleValue(), secret1.doubleValue(), delta);
+        assertEquals(ArithmeticSharing.reconstruct(shares2, fractionalBits).doubleValue(), secret2.doubleValue(), delta);
+        assertEquals(ArithmeticSharing.reconstruct(shares3, fractionalBits).doubleValue(), secret3.doubleValue(), delta);
+    }
+
     /**
      * Rigorous Test :-).
      */
     @Test
-    public void fiveParties() {
+    public void fivePartiesInt() {
         int numParties = 5;
         ArithmeticSharing as = new ArithmeticSharing(numParties);
         SecureRandom randomGenerator = new SecureRandom();
@@ -47,12 +71,32 @@ public class ArithmeticSharingTest {
         assertEquals(ArithmeticSharing.reconstruct(shares2), secret2);
         assertEquals(ArithmeticSharing.reconstruct(shares3), secret3);
     }
+    @Test
+    public void homomorphityDec() {
+        int numParties = 15;
+        int fractionalBits = 32;
+        double delta = 0.01;
+        ArithmeticSharing as = new ArithmeticSharing(numParties);
+        SecureRandom randomGenerator = new SecureRandom();
+        BigDecimal secret1 = new BigDecimal(new BigInteger(93, randomGenerator)).add(BigDecimal.valueOf(0.4532679821));
+        BigDecimal secret2 = new BigDecimal(new BigInteger(93, randomGenerator)).add(BigDecimal.valueOf(0.4532679821));
+        BigDecimal secret3 = new BigDecimal(new BigInteger(93, randomGenerator)).add(BigDecimal.valueOf(0.4532679821));
 
+        ArithmeticShare[] shares1 = as.share(secret1, fractionalBits);
+        ArithmeticShare[] shares2 = as.share(secret2, fractionalBits);
+        ArithmeticShare[] shares3 = as.share(secret3, fractionalBits);
+        ArithmeticShare[] sum = new ArithmeticShare[numParties];
+        for (int i = 0; i < numParties; i++) {
+            sum[i] = shares1[i].add(shares2[i]).add(shares3[i]);
+        }
+        assertEquals(ArithmeticSharing.reconstruct(sum, fractionalBits).doubleValue(), secret1.add(secret2).add(secret3).doubleValue(), delta);
+
+    }
     /**
      * Homomorphity.
      */
     @Test
-    public void homomorphity() {
+    public void homomorphityInt() {
         int numParties = 15;
         ArithmeticSharing as = new ArithmeticSharing(numParties);
         SecureRandom randomGenerator = new SecureRandom();
@@ -71,11 +115,32 @@ public class ArithmeticSharingTest {
 
     }
 
+    @Test
+    public void lotPartiesDec() {
+        int numParties = 5341;
+        int fractionalBits = 32;
+        double delta = 0.01;
+        ArithmeticSharing as = new ArithmeticSharing(numParties);
+        SecureRandom randomGenerator = new SecureRandom();
+        BigDecimal secret1 = BigDecimal.valueOf(7.543323456);
+        BigDecimal secret2 = BigDecimal.valueOf(768532475.5437892031);
+        BigDecimal secret3 = new BigDecimal(new BigInteger(93, randomGenerator));
+
+        ArithmeticShare[] shares1 = as.share(secret1, fractionalBits);
+        ArithmeticShare[] shares2 = as.share(secret2, fractionalBits);
+        ArithmeticShare[] shares3 = as.share(secret3, fractionalBits);
+        assertEquals(shares1.length, numParties);
+        assertEquals(shares2.length, numParties);
+        assertEquals(shares3.length, numParties);
+        assertEquals(ArithmeticSharing.reconstruct(shares1, fractionalBits).doubleValue(), secret1.doubleValue(), delta);
+        assertEquals(ArithmeticSharing.reconstruct(shares2, fractionalBits).doubleValue(), secret2.doubleValue(), delta);
+        assertEquals(ArithmeticSharing.reconstruct(shares3, fractionalBits).doubleValue(), secret3.doubleValue(), delta);
+    }
     /**
      * Lot parties.
      */
     @Test
-    public void lotParties() {
+    public void lotPartiesInt() {
         int numParties = 5341;
         ArithmeticSharing as = new ArithmeticSharing(numParties);
         SecureRandom randomGenerator = new SecureRandom();
@@ -98,7 +163,7 @@ public class ArithmeticSharingTest {
      * Seven parties.
      */
     @Test
-    public void sevenParties() {
+    public void sevenPartiesInt() {
         int numParties = 7;
         ArithmeticSharing as = new ArithmeticSharing(numParties);
         SecureRandom randomGenerator = new SecureRandom();

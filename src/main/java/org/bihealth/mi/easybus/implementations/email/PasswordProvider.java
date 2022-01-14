@@ -11,23 +11,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.bihealth.mi.easybus;
+package org.bihealth.mi.easybus.implementations.email;
 
 /**
- * An interface allowing the receiving of a message
- * 
+ * An interface for providing passwords on-demand
  * @author Felix Wirth
- *
+ * @author Fabian Prasser
  */
-public interface MessageListener {
-    
+public interface PasswordProvider {
+
     /**
-     * Needs to be implemented in order to receive a message
+     * Returns the password
+     * @param settings 
+     * @return
      */
-    public void receive(Message message);
-    
-    /**
-     * Needs to be implemented in order to process an error
-     */
-    public void receiveError(Exception exception);
+    public String getPassword();
 }

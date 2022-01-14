@@ -13,25 +13,32 @@
  */
 package org.bihealth.mi.easybus.implementations.email;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-import javax.mail.BodyPart;
-import javax.mail.Flags.Flag;
-import javax.mail.Folder;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.internet.MimeBodyPart;
-
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
+import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.Participant;
+import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easybus.Scope;
+
+import jakarta.mail.BodyPart;
+import jakarta.mail.Flags.Flag;
+import jakarta.mail.Folder;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.internet.MimeBodyPart;
 
 /**
  * Abstract class for e-mail connections
@@ -46,10 +53,10 @@ public abstract class ConnectionEmail {
      * 
      * @author Fabian Prasser
      */
-    protected static class ConnectionEmailMessage {
+    protected class ConnectionEmailMessage {
 
         /** Message */
-        private final javax.mail.Message message;
+        private final jakarta.mail.Message message;
 
         /** Folder */
         private final Folder             folder;
@@ -65,30 +72,37 @@ public abstract class ConnectionEmail {
          * @param message
          * @param folder
          */
-        public ConnectionEmailMessage(javax.mail.Message message, Folder folder) {
+        public ConnectionEmailMessage(jakarta.mail.Message message, Folder folder) {
             
             // Store
             this.message = message;
             this.folder = folder;
+        	long size = 0;
     
             try {
-    
+                
                 // Extract parts
+                text = message.getSubject();
                 Multipart multipart = (Multipart) message.getContent();
                 if (multipart.getCount() == 2) {
                     
                     // Obtain body and attachment
                     for (int i = 0; i < 2; i++) {
                         BodyPart part = multipart.getBodyPart(i);
-                        if (part != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.INLINE)) {
-                            text = (String)((MimeBodyPart)part).getContent();
-                        } else if (part != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.ATTACHMENT)) {
-                            attachment = getObject(((MimeBodyPart)part).getInputStream());
-                        }
+                        if (part != null && part.getDisposition() != null && part.getDisposition().equalsIgnoreCase(MimeBodyPart.ATTACHMENT)) {
+                          attachment = getObject(((MimeBodyPart)part).getInputStream());
+                          size += ((MimeBodyPart)part).getSize();
+                      }                        
                     }
                 }
             } catch (Exception e) {
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+                logger.debug("Load message failed logged", new Date(), "load message failed", ExceptionUtils.getStackTrace(e));
+            }
+            
+            // Pass to listener
+            if (listener != null) {
+            	listener.messageReceived(size);
             }
         }
     
@@ -101,8 +115,9 @@ public abstract class ConnectionEmail {
          * @throws ClassNotFoundException 
          */
         private Object getObject(InputStream inputStream) throws IOException, ClassNotFoundException {
-            ByteArrayInputStream bos = new ByteArrayInputStream(inputStream.readAllBytes());
-            ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(bos));
+            BufferedInputStream bufferedis = new BufferedInputStream(inputStream);
+            ByteArrayInputStream bis = new ByteArrayInputStream(bufferedis.readAllBytes());
+            ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(bis));
             Object result = ois.readObject();
             ois.close();
             return result;
@@ -115,10 +130,10 @@ public abstract class ConnectionEmail {
             try {
                 message.setFlag(Flag.DELETED, true);
             } catch (MessagingException e) {
+                logger.debug("Delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
-        }
-    
+        }    
         /** 
          * Expunges all deleted messages on the server
          */
@@ -129,9 +144,10 @@ public abstract class ConnectionEmail {
                     folder.close(true);
                 }
             } catch (MessagingException e) {
+                logger.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
-        }
+        }        
     
         /**
          * Returns the attachment
@@ -168,36 +184,29 @@ public abstract class ConnectionEmail {
     public static final String PARTICIPANT_EMAIL_START_TAG = "BEGIN_EMAIL_PARTICIPANT";
     /** String indicating end of participant address */
     public static final String PARTICIPANT_EMAIL_END_TAG   = "END_EMAIL_PARTICIPANT";
+    /** Logger */
+    private static final Logger logger = LogManager.getLogger(ConnectionEmail.class);
 
-    /** Use several or exactly one mail box for the bus */
-    private boolean sharedMailbox;
-    
-    /** Mail address of the user */
-    private String  emailAddress;
-
-    /**
-     * Creates a new instance
-     * @param sharedMailBox
-     * @param emailAddress
-     * @throws BusException
+	/**
+     * @param scope
+     * @param receiver
+     * @param sender
+     * @return
      */
-    protected ConnectionEmail(boolean sharedMailBox, String emailAddress) {
-        // Check
-        if (emailAddress == null) {
-            throw new NullPointerException("Email address must not be null");
-        }
-        this.sharedMailbox = sharedMailBox;
-        this.emailAddress = emailAddress;
+    public static String createSubject(Scope scope, Participant receiver) {
+        return EMAIL_SUBJECT_PREFIX + SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG +
+               " " + PARTICIPANT_NAME_START_TAG + receiver.getName() + PARTICIPANT_NAME_END_TAG +
+               " " + PARTICIPANT_EMAIL_START_TAG + receiver.getEmailAddress() +
+               PARTICIPANT_EMAIL_END_TAG;
     }
-    
-    /**
+
+	/**
      * Create participant from body
      * 
      * @param body
-     * @return participant
-     * @throws BusException 
+     * @return participant 
      */
-    private Participant getParticipant(String body) throws BusException {
+    public static Participant getParticipant(String body) {
 
         // Check
         if(!body.contains(PARTICIPANT_NAME_END_TAG) || !body.contains(PARTICIPANT_NAME_END_TAG) ||
@@ -213,27 +222,32 @@ public abstract class ConnectionEmail {
         if (name.isEmpty() || email.isEmpty() || !Participant.isEmailValid(email)) {
             return null;
         } else {
-            return new Participant(name, email);
+            try {
+                return new Participant(name, email);
+            } catch (BusException e) {
+                return null;
+            }
         }
     }
-    
-    /**
+
+	/**
      * Create scope from body
      * 
      * @param body
      * @return scope
-     * @throws BusException 
      */
-    private Scope getScope(String body) throws BusException {
+    public static Scope getScope(String body) {
 
         // Check
-        if(!body.contains(SCOPE_NAME_START_TAG) || !body.contains(SCOPE_NAME_END_TAG)){
+        if (!body.contains(SCOPE_NAME_START_TAG) || !body.contains(SCOPE_NAME_END_TAG)) {
             return null;
         }
-        
+
         // Extract
-        String scope = body.substring(body.indexOf(SCOPE_NAME_START_TAG) + SCOPE_NAME_START_TAG.length(), body.indexOf(SCOPE_NAME_END_TAG));
-        
+        String scope = body.substring(body.indexOf(SCOPE_NAME_START_TAG) +
+                                      SCOPE_NAME_START_TAG.length(),
+                                      body.indexOf(SCOPE_NAME_END_TAG));
+
         // Check
         if (scope.length() == 0) {
             return null;
@@ -241,12 +255,48 @@ public abstract class ConnectionEmail {
             return new Scope(scope);
         }
     }
+
+    /** Use several or exactly one mail box for the bus */
+	private boolean sharedMailbox;
+    
+    /** Mail address of the user */
+	private String emailAddress;
+    
+	/** Performance listener */
+	private PerformanceListener listener;
+    
+    /**
+     * Creates a new instance
+     * @param sharedMailBox
+     * @param emailAddress
+     * @throws BusException
+     */
+    protected ConnectionEmail(boolean sharedMailBox, String emailAddress) {
+    	this(sharedMailBox, emailAddress, null);
+    }
+    
+    /**
+     * Creates a new instance
+     * @param sharedMailBox
+     * @param emailAddress
+     * @param listener
+     * @throws BusException
+     */
+    protected ConnectionEmail(boolean sharedMailBox, String emailAddress, PerformanceListener listener) {
+        // Check
+        if (emailAddress == null) {
+            throw new NullPointerException("Email address must not be null");
+        }
+        this.sharedMailbox = sharedMailBox;
+        this.emailAddress = emailAddress;
+        this.listener = listener;
+    }
     
     /** 
      * Close connection
      */
     protected abstract void close();
-    
+
     /**
      * Returns the associated email address
      * @return
@@ -254,22 +304,24 @@ public abstract class ConnectionEmail {
     protected String getEmailAddress() {
         return this.emailAddress;
     }
-
+    
     /**
      * Lists all relevant e-mails
+     * @param filter 
      * 
      * @return relevant e-mails
      * @throws BusException 
      * @throws InterruptedException 
      */
-    protected abstract List<ConnectionEmailMessage> list() throws BusException, InterruptedException;
-
+    protected abstract List<ConnectionEmailMessage> list(MessageFilter filter) throws BusException, InterruptedException;
+  
     /**
-     * Receives a list of potentially relevant messages
+     * Receives a list of relevant messages
+     * @param filter 
      * @return
      * @throws InterruptedException 
      */
-    protected List<BusEmail.BusEmailMessage> receive() throws BusException, InterruptedException {
+    protected List<BusEmail.BusEmailMessage> receive(MessageFilter filter) throws BusException, InterruptedException {
         
         // Prepare
         List<BusEmail.BusEmailMessage> result = new ArrayList<>();
@@ -277,7 +329,7 @@ public abstract class ConnectionEmail {
         try {
             
             // Receive messages
-            for (ConnectionEmailMessage message : list()) {
+            for (ConnectionEmailMessage message : list(filter)) {
 
                 // Check for interrupt
                 if (Thread.interrupted()) {
@@ -293,10 +345,9 @@ public abstract class ConnectionEmail {
                 }
 
                 Object attachment = message.getAttachment();
-                
-                // TODO: Is this a good idea? Delete malformed messages
+
                 if (text == null || attachment == null) {
-                    message.delete();
+                    logger.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
                     continue;
                 }
                 
@@ -314,16 +365,17 @@ public abstract class ConnectionEmail {
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }                        
-    
-                // TODO: Is this a good idea? Delete malformed messages
+
                 if (scope == null || participant == null) {
-                    message.delete();
+                    logger.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
                     continue;
                 }
-                        
+                
                 // Pass on
-                ConnectionEmailMessage _message = message;
-                result.add(new BusEmail.BusEmailMessage(participant, scope, (Message) attachment) {
+                final ConnectionEmailMessage _message = message;
+
+                result.add(new BusEmail.BusEmailMessage(participant, scope, (Message) attachment, message.text) {
+
                     @Override
                     protected void delete() throws BusException {
                         _message.delete();
@@ -335,10 +387,7 @@ public abstract class ConnectionEmail {
                 });
             }
 
-        } catch (InterruptedException e) {
-            close();
-            throw e;
-        } catch (Exception e) {
+        } catch (BusException e) {
             throw new BusException("Error receiving message", e);
         }
 
@@ -346,30 +395,32 @@ public abstract class ConnectionEmail {
         return result;
     }
     
+    
     /**
      * Send message to participant
      * @param message
      * @param scope
-     * @param participant
+     * @param receiver
+     * @param sender 
      * @throws BusException 
      */
-    protected void send(Message message, Scope scope, Participant participant) throws BusException {
+    protected void send(Message message, Scope scope, Participant receiver) throws BusException {
         
         // Recipient
-        String recipient = sharedMailbox ? getEmailAddress() : participant.getEmailAddress();
+        String recipient = sharedMailbox ? getEmailAddress() : receiver.getEmailAddress();
         
         // Subject
-        String subject = String.format(EMAIL_SUBJECT_RECEIVER, scope.getName(), participant.getName());
-        
+        String subject = createSubject(scope, receiver);       
+  
         // Body
         String body = SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + "\n" + 
-                      PARTICIPANT_NAME_START_TAG + participant.getName() + PARTICIPANT_NAME_END_TAG + "\n" + 
-                      PARTICIPANT_EMAIL_START_TAG + participant.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG;
+                      PARTICIPANT_NAME_START_TAG + receiver.getName() + PARTICIPANT_NAME_END_TAG + "\n" + 
+                      PARTICIPANT_EMAIL_START_TAG + receiver.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG;
         
         // Send
         this.send(recipient, subject, body, message);
     }
-  
+    
     /** 
      * Send email
      * @param recipient
@@ -379,19 +430,4 @@ public abstract class ConnectionEmail {
      * @throws BusException
      */
     protected abstract void send(String recipient, String subject, String body, Object attachment) throws BusException;
-    
-    
-    /**
-     * Is there an working connection to receive?
-     * 
-     * @return
-     */
-    protected abstract boolean isReceivingConnected();
-    
-    /**
-     * Is there an working connection to send?
-     * 
-     * @return
-     */
-    protected abstract boolean isSendingConnected();
 }

@@ -26,6 +26,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
@@ -41,50 +42,73 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class DialogStringPicker extends JDialog implements ChangeListener {
+public class DialogPassword extends JDialog implements ChangeListener {
 
-    /** SVID */
-    private static final long serialVersionUID = -2803385597185044215L;
+    /** SVUID */
+    private static final long serialVersionUID = 2844321619003751907L;
     /** Component to enter string */
-    private ComponentTextArea text;
+    private ComponentEntryOne passwordEntry;
     /** Result */
     private String            result;
     /** Button*/
     private JButton           buttonOK;
+    /** Parent */
+    private JFrame parent;
         
     /**
      * Create a new instance
-     * @param parent Component to set the location of JDialog relative to
-     * @param additionalAction  Action which will be performed when clicking the okButton
+     * 
+     * @param textDefault
+     * @param validator
+     * @param parent
      */
-    public DialogStringPicker(String textDefault, ComponentTextFieldValidator validator, JFrame parent) {
+    public DialogPassword(JFrame parent) {
+        
+        // Store
+        this.parent = parent;
 
-        // Dialog properties
-        this.setSize(Resources.SIZE_DIALOG_SMALL_X, Resources.SIZE_DIALOG_SMALL_Y);
-        this.setTitle(Resources.getString("PerspectiveParticipate.PickerTitle"));
+        // Dialog properties        
+        this.setTitle(Resources.getString("EmailConfig.24"));
         this.getContentPane().setLayout(new BorderLayout());
         this.setIconImage(parent.getIconImage());
+        this.setResizable(false);
         
         // Title
         ((JComponent) this.getContentPane()).setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                                                        Resources.getString("PerspectiveParticipate.PickerText"),
+                                                                                        Resources.getString("EmailConfig.24"),
                                                                                         TitledBorder.CENTER,
                                                                                         TitledBorder.DEFAULT_POSITION));
         
-        // Text
-        this.text = new ComponentTextArea(textDefault == null ? "" : textDefault, validator);
-        this.text.setChangeListener(this);
-        this.add(text, BorderLayout.CENTER);
+        // Password disclaimer 
+        this.add(new JLabel(Resources.getString("EmailConfig.25")), BorderLayout.NORTH);
         
-        // Button
+        // Password entry
+        this.passwordEntry = new ComponentEntryOne(Resources.getString("EmailConfig.2"),
+                                                   "",
+                                                   true,
+                                                   new ComponentTextFieldValidator() {
+                                                       @Override
+                                                       public boolean validate(String text) {
+                                                           if (text == null ||
+                                                               text.equals("")) { return false; }
+                                                           return true;
+                                                       }
+                                                   },
+                                                   true,
+                                                   false);
+        this.add(this.passwordEntry, BorderLayout.CENTER);
+        passwordEntry.setChangeListener(this);   
+        
+        
+        // Buttons 
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(1, 2));
-        this.getContentPane().add(buttonsPane, BorderLayout.SOUTH);
         this.buttonOK = new JButton(Resources.getString("PerspectiveParticipate.ok"));
-        this.buttonOK.setEnabled(this.areValuesValid());
-        JButton buttonCancel = new JButton(Resources.getString("PerspectiveParticipate.cancel"));
+        JButton buttonCancel = new JButton(Resources.getString("EmailConfig.7"));
         buttonsPane.add(buttonCancel);
         buttonsPane.add(buttonOK);
+        this.add(buttonsPane, BorderLayout.SOUTH);
+        this.stateChanged(new ChangeEvent(this));
         
         // Listeners
         this.buttonOK.addActionListener(new ActionListener() {
@@ -102,7 +126,7 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
-                DialogStringPicker.this.result = null;
+                DialogPassword.this.result = null;
             }
         });
         
@@ -118,9 +142,24 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
             public void actionPerformed(ActionEvent e) {
                 actionCancel();
             }
-        });        
+        });
         
-        // Set location
+        // Add shortcut key for enter
+        dialogPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                   .put(KeyStroke.getKeyStroke("ENTER"), "proceed");
+        dialogPanel.getActionMap().put("proceed", new AbstractAction() {
+
+            /** SVUID */
+            private static final long serialVersionUID = -4085624272147282716L;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionProceed();
+            }
+        });
+        
+        // Pack and set location
+        this.pack();
         this.setLocationRelativeTo(parent);
     }
 
@@ -129,10 +168,11 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
      */
     public String showDialog(){
         this.setModal(true);
+        this.setLocationRelativeTo(this.parent);
         this.setVisible(true);
         return this.result;
     }
-    
+
     /**
      * Reacts to changes
      */
@@ -140,7 +180,7 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
     public void stateChanged(ChangeEvent e) {
         this.buttonOK.setEnabled(this.areValuesValid());
     }
-      
+    
     /**
      * Action cancel and close
      */
@@ -148,20 +188,20 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
         this.result = null;
         this.dispose();
     }
-
-    /**
-     * Action proceed and close
-     */
-    private void actionProceed() {
-        this.result = text.getText();
-        this.dispose();
-    }
-
+      
     /**
      * Checks string for validity
      * @return
      */
     private boolean areValuesValid() {
-        return this.text.isValueValid();
-    } 
+        return this.passwordEntry.isValueValid();
+    }
+    
+    /**
+     * Action proceed and close
+     */
+    protected void actionProceed() {
+        this.result = passwordEntry.getValue();
+        this.dispose();
+    }
 }

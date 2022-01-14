@@ -55,6 +55,30 @@ public class EntryParticipantCheckmarkSendMail extends EntryParticipantCheckmark
     }
     
     /**
+     * Disables the button
+     */
+    public void setButtonEnabled(boolean enabled) {
+        this.button.setEnabled(enabled);
+    }
+    
+    /**
+     * Sets a change listener
+     * @param listener
+     */
+    public void setButtonListener(ActionListener listener) {
+        this.listener = listener;
+    }
+    
+    /**
+     * Button action
+     */
+    private void buttonAction() {
+        if (listener != null) {
+            listener.actionPerformed(new ActionEvent(this, 0, null));
+        }
+    }
+
+    /**
      * Creates an additional control panel
      */
     @Override
@@ -88,29 +112,5 @@ public class EntryParticipantCheckmarkSendMail extends EntryParticipantCheckmark
      */
     protected String getText() {
         return Resources.getString("PerspectiveSend.sendEmailButton");
-    }
-    
-    /**
-     * Sets a change listener
-     * @param listener
-     */
-    public void setButtonListener(ActionListener listener) {
-        this.listener = listener;
-    }
-
-    /**
-     * Button action
-     */
-    private void buttonAction() {
-        if (listener != null) {
-            listener.actionPerformed(new ActionEvent(this, 0, null));
-        }
-    }
-    
-    /**
-     * Disables the button
-     */
-    public void setButtonEnabled(boolean enabled) {
-        this.button.setEnabled(enabled);
     }
 }

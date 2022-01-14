@@ -39,15 +39,28 @@ import com.carrotsearch.hppc.IntIntOpenHashMap;
 public class ImportCSV extends ImportFile {
     
     /**
-     * Creates a new instance
+     * Creates a new instance with the default number of expected row/columns
      * 
      * @param file
      * @throws IOException
      * @throws IllegalArgumentException
      */
     public ImportCSV(File file) throws IOException, IllegalArgumentException {
-        super(file);
+        this(file, DEFAULT_ROW_COL);
     }
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param file
+     * @param expectedRowCol
+     * @throws IOException
+     * @throws IllegalArgumentException
+     */
+    public ImportCSV(File file, int expectedRowCol) throws IOException, IllegalArgumentException {
+        super(file, expectedRowCol);
+    }
+    
 
     /**
      * Detects a delimiter.

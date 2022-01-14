@@ -18,7 +18,7 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,13 +36,13 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
@@ -131,6 +131,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     public void stateChanged(ChangeEvent e) {
         // Is saving possible?
         this.buttonSave.setEnabled(this.areValuesValid());
+        
         // Can a mailbox be added or removed
         if (this.comboSelectMailbox.getSelectedItem() != null) {
             this.buttonEditMailbox.setEnabled(true);
@@ -138,18 +139,76 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         } else {
             this.buttonEditMailbox.setEnabled(false);
             this.buttonRemoveMailbox.setEnabled(false);
-        }               
+        }
+        
+        // Can a mailbox be added or removed
+        if (this.comboSelectMailbox.getSelectedItem() != null) {
+            this.buttonEditMailbox.setEnabled(true);
+            this.buttonRemoveMailbox.setEnabled(true);
+        } else {
+            this.buttonEditMailbox.setEnabled(false);
+            this.buttonRemoveMailbox.setEnabled(false);
+        }
+        
+        // If participants panels exists and automated mode selected => set e-mail address of creator automatically 
+        if (this.panelParticipants.getComponents() != null && this.panelParticipants.getComponents().length >= getApp().getModel().getOwnId() + 1) {
+            // Get participant entry component           
+            final EntryParticipant entry = ((EntryParticipant) this.panelParticipants.getComponents()[getApp().getModel().getOwnId()]);
+            
+            if (this.comboSelectMailbox.getSelectedItem() != null) {
+                // Set email address and deactivate if not already done
+                String emailAddress = ((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getEmailAddress();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        // No entry in field allowed
+                        if (entry.isRightEnabled()) {
+                            entry.setRightEnabled(false);
+                        }
+
+                        // Set e-mail address
+                        if (!entry.getRightValue().equals(emailAddress)) {
+                            entry.setRightValue(emailAddress);
+                        }
+                    }
+                });
+                } else {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!entry.isRightEnabled()) {
+                                // Allow entry in field
+                                entry.setRightEnabled(true);
+                            }
+                        }
+                    });         
+            }
+        }
     }
 
     /**
      * Adds an e-mail configuration
      */
     private void actionAddEMailConf() {
-        ConnectionIMAPSettings settings = new DialogEmailConfig(null, getApp()).showDialog();
-        if(settings != null) {
-            Connections.add(settings);
-            this.comboSelectMailbox.addItem(settings);
-            this.comboSelectMailbox.setSelectedItem(settings);
+        // Get new settings
+        ConnectionIMAPSettings newSettings = new DialogEmailConfig(null, getApp()).showDialog();
+        
+        if (newSettings != null) {
+            // Update connections in preferences
+            Connections.addOrUpdate(newSettings);
+            
+            // Reset combo  box
+            comboSelectMailbox.removeAllItems();
+            for(ConnectionIMAPSettings settings: getEmailConfig()) {
+                this.comboSelectMailbox.addItem(settings);
+                
+                // Set selected
+                if(settings != null && settings.getEmailAddress().equals(newSettings.getEmailAddress())) {
+                    settings.setPassword(newSettings.getPassword());
+                    this.comboSelectMailbox.setSelectedItem(settings);
+                }
+            }
+            
+            // Set checked
             this.emailconfigCheck = true;
         }
         this.stateChanged(new ChangeEvent(this));
@@ -159,13 +218,34 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      * Edits an e-mail configuration
      */
     private void actionEditEMailConf() {
-        ConnectionIMAPSettings settings = new DialogEmailConfig((ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem(), getApp()).showDialog();
-        if(settings != null) {
-            Connections.add(settings);
-            this.comboSelectMailbox.addItem(settings);
-            this.comboSelectMailbox.setSelectedItem(settings);
+        
+        // Get new settings
+        ConnectionIMAPSettings newSettings = new DialogEmailConfig((ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem(),
+                                                                   getApp()).showDialog();
+        
+        // Alter combo box if new settings given
+        if (newSettings != null) {
+            // Update connections in preferences
+            Connections.addOrUpdate(newSettings);
+            
+            // Reset combo  box
+            comboSelectMailbox.removeAllItems();
+            for(ConnectionIMAPSettings settings: getEmailConfig()) {
+                this.comboSelectMailbox.addItem(settings);
+                
+                // Set selected
+                if(settings != null && settings.getEmailAddress().equals(newSettings.getEmailAddress())) {
+                    settings.setPassword(newSettings.getPassword());
+                    this.comboSelectMailbox.setSelectedItem(settings);
+                }
+            }
+            
+            // Set checked
+            this.emailconfigCheck = true;
         }
-        this.stateChanged(new ChangeEvent(this));        
+        
+        // Change state
+        this.stateChanged(new ChangeEvent(this));
     }
 
     /**
@@ -251,11 +331,13 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         
         // Check e-mail configuration if not done so far
         if (comboSelectMailbox.getSelectedItem() != null && !emailconfigCheck) {
+            
             try {
-                if (!new ConnectionIMAP((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem(), true).checkConnection()) {
+                if (!((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).isValid(true)) {
                     throw new BusException("Connection error");
                 }
             } catch (BusException e) {
+                // Error message
                 JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.emailConnectionNotWorking"));
                 return;
             }
@@ -274,7 +356,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         for (Component entry : this.panelBins.getComponents()) {
             Bin bin = new Bin(((EntryBin)entry).getLeftValue());
             bin.initialize(participants.size());
-            bin.shareValue(new BigInteger(((EntryBin)entry).getRightValue().trim()));
+            bin.shareValue(new BigDecimal(((EntryBin)entry).getRightValue().trim().replace(',','.')), Resources.FRACTIONAL_BITS);
             bins.add(bin);
         }
         

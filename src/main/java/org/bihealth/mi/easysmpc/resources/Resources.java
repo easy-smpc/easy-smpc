@@ -54,6 +54,9 @@ public class Resources {
 
     /** Row gap */
     public static final int       ROW_GAP                             = 2;
+    
+    /** Row gap large */
+    public static final int       ROW_GAP_LARGE                       = 5;
 
     /** X-size of small dialog */
     public static final int       SIZE_DIALOG_SMALL_X                 = 450;
@@ -86,7 +89,7 @@ public class Resources {
     private final static Charset  CHARSET                             = StandardCharsets.UTF_8;
     
     /** Size of loading animation */
-    public static final int       SIZE_LOADING_ANIMATION              = 25;
+    public static final int       SIZE_LOADING_ANIMATION              = 15;
     
     /** Size of checkmark clipart x */
     public static final int       SIZE_CHECKMARK_X                    = 15;
@@ -131,16 +134,25 @@ public class Resources {
 
     /** Step 2 identifier */
     public static final String    ROUND_2                             = "_round2";
-    
-    /** Light green color */
-    public static final Color COLOR_LIGHT_GREEN = new Color(82, 153, 75);
-    
-    /** Interval to check existing mailbox connection */
-    public static final int       INTERVAL_CHECK_MAILBOX_CONNECTED = 3000;
 
     /** Size of diplayed table */
     public static final int TABLE_SIZE = 24;
+    
+    /** Light green color */
+    public static final Color     COLOR_LIGHT_GREEN                   = new Color(82, 153, 75);
+    
+    /** Interval to wait for sending e-mails */
+    public static final long TIMEOUT_SEND_EMAILS = 30000;
+    
+    /** Fetch size for messages with IMAP */
+    public static final int FETCH_SIZE_IMAP = 1048576;
+    
+    /** Number of threads in thread pool */
+    public static final int SIZE_THREADPOOL = 1;
 
+    /** Fractional bits for decimal values */
+    public static final int FRACTIONAL_BITS = 32;
+    
     /**
      * Returns all available languages
      * 
@@ -173,18 +185,6 @@ public class Resources {
     }
     
     /**
-     * Loading animation
-     * 
-     * @return
-     * @throws IOException
-     */
-    public static ImageIcon getLoadingAnimation() throws IOException {        
-        URL url = Resources.class.getResource("loading.gif"); //$NON-NLS-1$
-        Image image = new ImageIcon(url).getImage().getScaledInstance(SIZE_LOADING_ANIMATION, SIZE_LOADING_ANIMATION, Image.SCALE_DEFAULT);
-        return new ImageIcon(image);
-      }
-    
-    /**
      * Reads the content from the file license.txt and returns the content as string.
      * 
      * @return
@@ -215,6 +215,18 @@ public class Resources {
         }
         return content;
     }
+    
+    /**
+     * Loading animation
+     * 
+     * @return
+     * @throws IOException
+     */
+    public static ImageIcon getLoadingAnimation() throws IOException {        
+        URL url = Resources.class.getResource("loading.gif"); //$NON-NLS-1$
+        Image image = new ImageIcon(url).getImage().getScaledInstance(SIZE_LOADING_ANIMATION, SIZE_LOADING_ANIMATION, Image.SCALE_DEFAULT);
+        return new ImageIcon(image);
+      }
     
     /**
      * Menu item

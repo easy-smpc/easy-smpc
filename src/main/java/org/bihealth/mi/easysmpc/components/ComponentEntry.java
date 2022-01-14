@@ -73,7 +73,7 @@ public abstract class ComponentEntry extends JPanel {
         
         // Layout
         this.setBorder(new EmptyBorder(Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP, Resources.ROW_GAP));
-        this.setLayout(new GridLayout(1, 2, Resources.ROW_GAP, Resources.ROW_GAP));        
+        this.setLayout(new GridLayout(1, 2, Resources.ROW_GAP, Resources.ROW_GAP));
         
         // Left
         JPanel left = new JPanel();
@@ -139,17 +139,6 @@ public abstract class ComponentEntry extends JPanel {
     }
     
     /**
-     * @param componentEntry
-     */
-    private void setBackgroundAllSubComponents(Component c) {
-        c.setBackground(new Color(223,223,223));
-        if (c instanceof Container)
-        for(Component childComponent : ((Container) c).getComponents()) {
-            setBackgroundAllSubComponents(childComponent);
-        }
-    }
-
-    /**
      * Creates a new instance
      * @param leftString
      * @param leftValue
@@ -189,7 +178,7 @@ public abstract class ComponentEntry extends JPanel {
     public String getLeftValue() {
         return this.fieldLeft.getText();
     }
-    
+
     /**
      * Returns the right value
      * @return
@@ -206,6 +195,14 @@ public abstract class ComponentEntry extends JPanel {
     }
     
     /**
+     * Is the right field enabled
+     * @return
+     */
+    public boolean isRightEnabled() {
+        return this.fieldRight.isEnabled();
+    }
+    
+    /**
      * Sets a change listener
      * @param listener
      */
@@ -219,7 +216,24 @@ public abstract class ComponentEntry extends JPanel {
      * @return
      */
     public void setLeftValue(String text) {
+        text = text == null ? "" : text;
         this.fieldLeft.setText(text);
+    }
+    
+    /**
+     * Sets the right field enabled
+     * @return
+     */
+    public void setRightEnabled(boolean enabled) {
+        this.fieldRight.setEnabled(enabled);
+    }
+    
+    /**
+     * Sets the left field enabled
+     * @return
+     */
+    public void setLefttEnabled(boolean enabled) {
+        this.fieldLeft.setEnabled(enabled);
     }
     
     /**
@@ -228,6 +242,17 @@ public abstract class ComponentEntry extends JPanel {
      */
     public void setRightValue(String text) {
         this.fieldRight.setText(text);
+    }
+    
+    /**
+     * @param componentEntry
+     */
+    private void setBackgroundAllSubComponents(Component c) {
+        c.setBackground(new Color(223,223,223));
+        if (c instanceof Container)
+        for(Component childComponent : ((Container) c).getComponents()) {
+            setBackgroundAllSubComponents(childComponent);
+        }
     }
     
     /** Creates an additional control panel

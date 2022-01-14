@@ -23,13 +23,13 @@ import org.bihealth.mi.easybus.Scope;
  * 
  * @author Felix Wirth
  */
-public class BusLocal extends Bus{
+public class BusLocal extends Bus {
     
     /**
      * Creates a new instance
      */
     public BusLocal(){
-        // Empty by design
+        super(1);
     }
 
     @Override
@@ -38,12 +38,9 @@ public class BusLocal extends Bus{
     }
 
     @Override
-    public void send(Message message, Scope scope, Participant participant) {
-        try {
-            receiveInternal(message, scope, participant);
-        } catch (InterruptedException e) {
-            // Nothing to do
-        }
+    public Void sendInternal(Message message, Scope scope, Participant participant) throws Exception {
+        receiveInternal(message, scope, participant);
+        return null;
     }
 
     @Override

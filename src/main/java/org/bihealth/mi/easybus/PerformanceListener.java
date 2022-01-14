@@ -14,20 +14,20 @@
 package org.bihealth.mi.easybus;
 
 /**
- * An interface allowing the receiving of a message
- * 
- * @author Felix Wirth
- *
+ * Listener for performance indicators
+ * @author Fabian Prasser
  */
-public interface MessageListener {
-    
-    /**
-     * Needs to be implemented in order to receive a message
-     */
-    public void receive(Message message);
-    
-    /**
-     * Needs to be implemented in order to process an error
-     */
-    public void receiveError(Exception exception);
+public interface PerformanceListener {
+
+	/**
+	 * Message received
+	 * @param size
+	 */
+	public void messageReceived(long size);
+	
+	/**
+	 * Message sent
+	 * @param size
+	 */
+	public void messageSent(long size);
 }

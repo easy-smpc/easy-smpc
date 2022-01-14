@@ -8,7 +8,7 @@
 
 ---
 
-### [Prerequisites](#prerequisites) ⚫ [Installation](#installation) ⚫ [Features](#features) ⚫ [Screenshot](#screenshot) ⚫ [Contact](#contact) ⚫ [License](#license) ⚫ [Acknowledgements](#acknowledgments)
+### [Prerequisites](#prerequisites) ⚫ [Installation](#installation) ⚫ [Features](#features) ⚫ [Screenshot](#screenshot) ⚫ [Quick start guide](#quick-start-guide) ⚫ [Contact](#contact) ⚫ [License](#license) ⚫ [Acknowledgements](#acknowledgments)
 
 ---
 
@@ -26,7 +26,8 @@ EasySMPC does not need an installation and can be used as a Java jar package.
 However, to increase portability we packaged the nessecary Java runtime with our
 application in an installer to build an executable for Linux, Windows and Mac
 OSX. This installer does not need any administrator priviledges and should be
-run as a user.
+run as a user. The installers for Windows and MacOS are not signed.
+Thus a respective message while installing must be confirmed.
 
 ### Get binary installer
 
@@ -82,6 +83,17 @@ prime.
 
 ![Screenshot](doc/screenshot.png)
 
+## Quick start guide
+
+1. As a study initiator, click on _Create new project_ and enter the names of all participants, their e-mail addresses, the variables to sum up and your own confidential data. For performing the computation, you can choose between an automatic or a manual mode.
+
+     a)	In _manual mode_ the users need to exchange all messages by sending and receiving e-mails manually.
+     
+     b) In _automatic mode_ participants receive and import the initial message manually into EasySMPC (see 2). All further messages are exchanged automatically via their respective mailboxes. If the study initiator chooses automatic mode, all participants also have to choose automated mode. The user name and connection details provided for the automated mode will be saved for future use, the password will not be saved and must be re-entered if the study was closed in between.
+2. As a participant, you copy the message you received via email into the clipboard, click on _Participate in project_ in EasySMPC and paste the content. You will now see the study definition and can enter your own confidential data and mail box details if applicable.
+3. As an initiator or participant, you now click on proceed. If running in automated mode, EasySMPC will automatically perform all steps until the final result is displayed. If running in manual mode, all users need to send and receive e-mails prepared by EasySMPC to perform the computation.
+4. The final perspective shows the result of the secure addition of all variables.
+
 ## Contact
 
 If you have questions or problems, we would like to invite you to
@@ -112,9 +124,11 @@ EasySMPC uses the following dependencies:
  - [Apache Commons CSV](http://commons.apache.org/proper/commons-csv/) - Apache License 2.0
  - [jUnit](https://github.com/junit-team/junit5) (Unit tests only) - Eclipse Public License v2.0
  - [Proxy Vole](https://github.com/akuhtz/proxy-vole) - Apache License 2.0
+ - [Apache Logging](https://logging.apache.org/log4j) - Apache License 2.0
+ - [LMAX Disruptor](https://github.com/LMAX-Exchange/disruptor) - Apache License 2.0
 
 
-## Acknowledgements
+## Acknowledgments
 
 This project is partly financed by the "Collaboration on Rare Diseases" of the
 Medical Informatics Initiative, funded by the German Federal Ministry of

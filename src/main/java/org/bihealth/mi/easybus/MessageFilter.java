@@ -14,20 +14,19 @@
 package org.bihealth.mi.easybus;
 
 /**
- * An interface allowing the receiving of a message
+ * Interface to filter relevant messages
  * 
  * @author Felix Wirth
  *
  */
-public interface MessageListener {
-    
+public interface MessageFilter {
+
     /**
-     * Needs to be implemented in order to receive a message
+     * Checks whether a message is relevant
+     * 
+     * @param messageDescription
+     * @return 
      */
-    public void receive(Message message);
-    
-    /**
-     * Needs to be implemented in order to process an error
-     */
-    public void receiveError(Exception exception);
+    public boolean accepts(String messageDescription);
+
 }

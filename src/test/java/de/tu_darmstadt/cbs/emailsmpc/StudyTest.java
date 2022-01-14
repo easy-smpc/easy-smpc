@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,13 +43,14 @@ public class StudyTest {
         Study testmodel = new Study();
         Participant[] part = new Participant[numParticipants];
         Bin[] bins = new Bin[numBins];
+        int fractionalBits = 32;
         for (int i = 0; i < part.length; i++) {
             part[i] = new Participant("Participant " + i, "part" + i + "@test.com");
         }
         for (int i = 0; i < bins.length; i++) {
             bins[i] = new Bin("Bin " + i);
             bins[i].initialize(part.length);
-            bins[i].shareValue(BigInteger.valueOf(3 * i + 7));
+            bins[i].shareValue(BigDecimal.valueOf(3 * i + 7 +0.003 * i), fractionalBits);
         }
         testmodel.toStarting();
         testmodel.toInitialSending("Teststudy", part, bins, null);
@@ -66,17 +67,18 @@ public class StudyTest {
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    static private Study getInitializedModel(int numParticipants, int numBins, BigInteger[] array) throws IllegalStateException, IOException {
+    static private Study getInitializedModel(int numParticipants, int numBins, BigDecimal[] array) throws IllegalStateException, IOException {
         Study testmodel = new Study();
         Participant[] part = new Participant[numParticipants];
         Bin[] bins = new Bin[numBins];
+        int fractionalBits = 32;
         for (int i = 0; i < part.length; i++) {
             part[i] = new Participant("Participant " + i, "part" + i + "@test.com");
         }
         for (int i = 0; i < bins.length; i++) {
             bins[i] = new Bin("Bin " + i);
             bins[i].initialize(part.length);
-            bins[i].shareValue(array[i]);
+            bins[i].shareValue(array[i], fractionalBits);
         }
         testmodel.toStarting();
         testmodel.toInitialSending("Teststudy", part, bins, null);
@@ -92,7 +94,7 @@ public class StudyTest {
     @Test
     public void AddingBins() throws IllegalStateException, IOException {
         Study testmodel = StudyTest.getInitializedModel(3, 4);
-        assertTrue(testmodel.bins.length == 4);
+        assertTrue(testmodel.getBins().length == 4);
     }
 
     /**
@@ -104,7 +106,7 @@ public class StudyTest {
     @Test
     public void AddingParticipants() throws IllegalStateException, IOException {
         Study testmodel = StudyTest.getInitializedModel(3, 4);
-        assertTrue(testmodel.participants.length == 3);
+        assertTrue(testmodel.getParticipants().length == 3);
     }
 
     /**
@@ -115,13 +117,13 @@ public class StudyTest {
      */
     @Test
     public void CloneTest() throws IllegalStateException, IOException {
-        BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
-                BigInteger.valueOf(4) };
+        BigDecimal[] secrets0 = { BigDecimal.valueOf(1), BigDecimal.valueOf(2),
+                BigDecimal.valueOf(3), BigDecimal.valueOf(4) };
         Study model0 = StudyTest.getInitializedModel(3, 4, secrets0);
         Study copy = (Study) model0.clone();
         assertTrue((copy != model0));
         assertTrue(copy.equals(model0));
-        assertTrue(copy.studyUID.equals(model0.studyUID));
+        assertTrue(copy.getStudyUID().equals(model0.getStudyUID()));
     }
     
     /**
@@ -132,8 +134,8 @@ public class StudyTest {
       Set<String> ids = new HashSet<String>();
       for (int i = 0; i < 1000; i++ ) {
         Study model = new Study();
-        assertTrue(!ids.contains(model.studyUID));
-        ids.add(model.studyUID);
+        assertTrue(!ids.contains(model.getStudyUID()));
+        ids.add(model.getStudyUID());
       }
     }
 
@@ -147,7 +149,7 @@ public class StudyTest {
     public void SaveLoad() throws ClassNotFoundException, IOException {
         Study testmodel = StudyTest.getInitializedModel(3, 4);
             File fn = new File("testing.dat");
-            testmodel.filename = fn;
+            testmodel.setFilename(fn);
             testmodel.saveProgram();
             Study load = Study.loadModel(fn);
             assertTrue(load.equals(testmodel));
@@ -164,8 +166,8 @@ public class StudyTest {
      */
     @Test
     public void TestWithThree() throws ClassNotFoundException, IllegalStateException, IOException, IllegalArgumentException, NoSuchAlgorithmException {
-        BigInteger[] secrets0 = { BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3),
-                BigInteger.valueOf(4) };
+        BigDecimal[] secrets0 = { BigDecimal.valueOf(1), BigDecimal.valueOf(2),
+                BigDecimal.valueOf(3), BigDecimal.valueOf(4) };
         Study model0 = StudyTest.getInitializedModel(3, 4, secrets0);
         Study model1 = new Study();
         Study model2 = new Study();
@@ -177,10 +179,10 @@ public class StudyTest {
         model0.markMessageSent(2);
         model1.toEnteringValues(initialMessage1.data);
         model2.toEnteringValues(initialMessage2.data);
-        BigInteger[] secrets1 = { BigInteger.valueOf(7 * 1), BigInteger.valueOf(7 * 2), BigInteger.valueOf(7 * 3),
-                BigInteger.valueOf(7 * 4) };
-        BigInteger[] secrets2 = { BigInteger.valueOf(11 * 1), BigInteger.valueOf(11 * 2), BigInteger.valueOf(11 * 3),
-                BigInteger.valueOf(0) };
+        BigDecimal[] secrets1 = { BigDecimal.valueOf(7 * 1), BigDecimal.valueOf(7 * 2), BigDecimal.valueOf(7 * 3),
+                BigDecimal.valueOf(7 * 4) };
+        BigDecimal[] secrets2 = { BigDecimal.valueOf(11 * 1), BigDecimal.valueOf(11 * 2), BigDecimal.valueOf(11 * 3),
+                BigDecimal.valueOf(0) };
         model1.toSendingShares(secrets1);
         model2.toSendingShares(secrets2);
         Message share10 = model1.getUnsentMessageFor(0);
@@ -230,8 +232,8 @@ public class StudyTest {
         BinResult[] sum2 = model2.getAllResults();
         assertTrue(sum0.length == sum1.length);
         assertTrue(sum0.length == sum2.length);
-        BigInteger[] sum = { BigInteger.valueOf(1 + 7 * 1 + 11 * 1), BigInteger.valueOf(2 + 7 * 2 + 11 * 2),
-                BigInteger.valueOf(3 + 7 * 3 + 11 * 3), BigInteger.valueOf(4 + 7 * 4 + 0), };
+        BigDecimal[] sum = { BigDecimal.valueOf(1 + 7 * 1 + 11 * 1), BigDecimal.valueOf(2 + 7 * 2 + 11 * 2),
+                BigDecimal.valueOf(3 + 7 * 3 + 11 * 3), BigDecimal.valueOf(4 + 7 * 4 + 0), };
         for (int i = 0; i < sum0.length; i++) {
             assertTrue(sum0[i].equals(sum1[i]));
             assertTrue(sum0[i].equals(sum2[i]));

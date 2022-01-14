@@ -20,7 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +36,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
@@ -69,7 +69,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  */
 public class App extends JFrame {
     
-    public static final String VERSION = "1.0.0";
+    public static final String VERSION = "1.0.4";
 
     /** SVUID */
     private static final long serialVersionUID = 8047583915796168387L;
@@ -93,41 +93,41 @@ public class App extends JFrame {
         } catch( Exception ex ) {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
-               
+        
+        // Prefer IPv6 if network (e.g. e-mail) is used
+        System.getProperties().setProperty("java.net.preferIPv6Addresses", "true");
+        // Don't embed menu in window decoration
+        System.setProperty( "flatlaf.menuBarEmbedded", "false" );
+        
         // Start App
         new App();
     }
 
     /** Model */
-    private Study          model;
-
+    private Study                  model;
     /** Cards */
-    private JPanel            cards;
+    private JPanel                 cards;
     /** Menu */
-    private JMenu             actionMenu;
-    /** Progress*/
-    private ComponentProgress progress;
+    private JMenu                  actionMenu;
+    /** Progress */
+    private ComponentProgress      progress;
     /** List of perspectives */
-    private List<Perspective> perspectives = new ArrayList<Perspective>();
+    private List<Perspective>      perspectives  = new ArrayList<Perspective>();
     /** Interim save menu item */
-    private JMenuItem jmiInterimSave;
+    private JMenuItem              jmiInterimSave;
     /** Stores reference to currently displayed perspective */
-    private Perspective currentPerspective;
+    private Perspective            currentPerspective;
     /** Label for status messages */
-    private JLabel statusMessageLabel;
-    /** Thread for visual worker*/
-    private SwingWorker<Void, Void> loadingVisualWorker;
+    private JLabel                 statusMessageLabel;
     /** Component loadingVisual */
     private ComponentLoadingVisual loadingVisual = null;
-    /** Stop flag visual*/
-    private boolean stopFlagVisual = false;
 
     /**
      * Creates a new instance
      * 
      * @throws IOException
      */
-    public App() throws IOException {
+    public App() throws IOException {                
 
         // Title
         super(Resources.getString("App.0")); //$NON-NLS-1$
@@ -153,11 +153,12 @@ public class App extends JFrame {
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 actionExit();
             }
-        });     
+        });
 
         // Menu
         JMenuBar jmb = new JMenuBar();
         this.setJMenuBar(jmb);
+        jmb.setBackground(getForeground());
 
         // Action menu
         actionMenu = new JMenu(Resources.getString("App.1")); //$NON-NLS-1$
@@ -251,13 +252,13 @@ public class App extends JFrame {
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BorderLayout());
         JPanel messagesPanel = new JPanel();
-        messagesPanel.setLayout(new BorderLayout());
+        messagesPanel.setLayout(new BorderLayout(Resources.ROW_GAP_LARGE, 0));
         menuPanel.add(messagesPanel, BorderLayout.EAST);
         statusMessageLabel = new JLabel("");
         messagesPanel.add(statusMessageLabel, BorderLayout.CENTER);
         loadingVisual = new ComponentLoadingVisual(Resources.getLoadingAnimation());
-        loadingVisual.deactivate();
         messagesPanel.add(loadingVisual, BorderLayout.EAST);
+        messagesPanel.setBorder(new EmptyBorder(0, 0, 0, 5));
         jmb.add(Box.createHorizontalGlue());
         jmb.add(menuPanel);
         
@@ -279,6 +280,31 @@ public class App extends JFrame {
         this.setVisible(true);
     }
 
+    /**
+     * Saves the project
+     */
+    public boolean actionSave() {
+        
+        if (model.getFilename() == null) {    
+            // Open dialog
+            File file = getFile(false, new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING));
+
+            // Check
+            if (file == null) { return false; }
+            model.setFilename(file);
+        }
+        // Try to save file
+        Study snapshot = this.beginTransaction();
+        try {           
+            model.saveProgram();
+            return true;
+        } catch (IOException e) {
+            this.rollback(snapshot);
+            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$
+            return false;
+        }
+    }
+    
     /**
      * Writes data to a file
      * 
@@ -304,7 +330,7 @@ public class App extends JFrame {
         
         // Return
         return success;
-    }
+    }    
     
     /**
      * Reads data from a file
@@ -327,7 +353,7 @@ public class App extends JFrame {
             }
         }
         return null;
-    }    
+    }
     
     /**
      * Opens a file chooser
@@ -377,18 +403,26 @@ public class App extends JFrame {
     }
     
     /**
+     * Returns the model
+     * @return
+     */
+    public Study getModel() {
+        return this.model;
+    }
+    
+    /**
      * Get model state
      * 
      * @return AppState
      */
     public StudyState getModelState() {
         if (getModel() != null) {
-            return getModel().state;
+            return getModel().getState();
         } else {
             return null;
         }
     }
-    
+
     /**
      * Check whether message is valid
      * 
@@ -405,7 +439,7 @@ public class App extends JFrame {
             return false;
         }
     }
-    
+
     /**
      * Set message share (message in perspectives receive)
      * 
@@ -425,6 +459,56 @@ public class App extends JFrame {
             this.rollback(snapshot);
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.messageError"), Resources.getString("PerspectiveReceive.messageErrorTitle"), JOptionPane.ERROR_MESSAGE);
         }        
+    }
+
+    /**
+     * Sets a status message
+     * 
+     * @param text
+     * @param errorMessage (text will be red) 
+     */
+    public void setStatusMessage(String text, boolean errorMessage) {
+        // Set text
+        statusMessageLabel.setText(text);
+        statusMessageLabel.setForeground(errorMessage ? Color.RED : Resources.COLOR_LIGHT_GREEN);   
+    }
+    
+    /**
+     * Sets a status message and changes the animation
+     * 
+     * @param text
+     * @param errorMessage (text will be red) 
+     * @param activateAnimation
+     */
+    public void setStatusMessage(String text, boolean errorMessage, boolean activateAnimation) {
+        // Set text
+        this.setStatusMessage(text, errorMessage);
+
+        if (activateAnimation) {
+            this.startAnimation();
+        } else {
+            this.stopAnimation();
+        }
+    }
+
+    /**
+     * Starts the loading animation
+     */
+    public void startAnimation() {
+
+        if (loadingVisual != null) {
+            loadingVisual.activate();
+        }
+    }
+    
+    /**
+     * Stops the loading animation
+     */
+    public void stopAnimation() {
+
+        if (loadingVisual != null) {
+            loadingVisual.deactivate();
+        }
     }
 
     /**
@@ -465,7 +549,7 @@ public class App extends JFrame {
             return false;
         }
     }
-    
+
     /**
      * Rolls back a transaction
      * @param snapshot
@@ -576,7 +660,7 @@ public class App extends JFrame {
         }
         this.showPerspective(Perspective1ACreate.class);
     }
-
+    
     /**
      * Called when action create is done
      * @param participants
@@ -599,7 +683,7 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("App.15"), Resources.getString("App.22"), JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     /**
      * Shows the exit dialog
      */
@@ -626,7 +710,7 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveReceive.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
         }        
     }
-
+    
     /**
      * First sending done
      */
@@ -665,7 +749,7 @@ public class App extends JFrame {
         }
         
         // Set and switch to correct perspective        
-        switch (this.model.state) {
+        switch (this.model.getState()) {
         case NONE:
             showPerspective(Perspective0Start.class);
             break;
@@ -713,8 +797,8 @@ public class App extends JFrame {
      */
     protected void actionMarkMessageSend(int index) {
         this.model.markMessageSent(index);
-    }
-
+    }    
+    
     /**
      * Participate action
      */
@@ -746,16 +830,17 @@ public class App extends JFrame {
             }
         }
     }
-
+    
     /**
      * Action called when done with participating
      * @param secret
      */
-    protected void actionParticipateDone(BigInteger[] secret) {
+    protected void actionParticipateDone(BigDecimal[] secret, ConnectionIMAPSettings connectionIMAPSettings) {
 
         // Pass over bins and participants
         Study snapshot = this.beginTransaction();
         try {
+            model.setConnectionIMAPSettings(connectionIMAPSettings);
             model.toSendingShares(secret);
             if (actionSave()) {
                 this.showPerspective(Perspective2Send.class);
@@ -767,7 +852,7 @@ public class App extends JFrame {
             JOptionPane.showMessageDialog(this, Resources.getString("App.15"), Resources.getString("App.22"), JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     /**
      * Action to receive a message
      * 
@@ -792,32 +877,7 @@ public class App extends JFrame {
             setMessageShare(ImportClipboard.getStrippedExchangeMessage(message));           
         }  
     }
-
-    /**
-     * Saves the project
-     */
-    public boolean actionSave() {
-        
-        if (model.filename == null) {    
-            // Open dialog
-            File file = getFile(false, new FileNameExtensionFilter(Resources.getString("App.10"), Resources.FILE_ENDING));
-
-            // Check
-            if (file == null) { return false; }
-            model.filename = file;
-        }
-        // Try to save file
-        Study snapshot = this.beginTransaction();
-        try {           
-            model.saveProgram();
-            return true;
-        } catch (IOException e) {
-            this.rollback(snapshot);
-            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.saveError"),Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE); //$NON-NLS-1$
-            return false;
-        }
-    }
-
+    
     /**
      * Action performed when second receiving done
      */
@@ -854,16 +914,8 @@ public class App extends JFrame {
      */
     protected void actionStart() {
         this.showPerspective(Perspective0Start.class);
-    }    
-    
-    /**
-     * Returns the model
-     * @return
-     */
-    public Study getModel() {
-        return this.model;
     }
-
+    
     /**
      * Returns a perspective
      * 
@@ -880,48 +932,7 @@ public class App extends JFrame {
         }
         return returnPerspective;
     }
-    
-    /**
-     * Sets a status message
-     * 
-     * @param text
-     * @param errorMessage (text will be red)
-     * @param showLoadingAnimation 
-     */
-    public void setStatusMessage(String text, boolean errorMessage, boolean showLoadingAnimation) {
-        
-        // Add text
-        statusMessageLabel.setText(text);
-        statusMessageLabel.setForeground(errorMessage ? Color.RED : Resources.COLOR_LIGHT_GREEN);
-        
-        // If no animation deactivate and return
-        if (!showLoadingAnimation) {
-            stopFlagVisual = true;
-            return;
-        }
-        
-        // Activate animation create thread if not existing
-        if (loadingVisualWorker == null || loadingVisualWorker.isCancelled() || loadingVisualWorker.isDone()) {
-            stopFlagVisual = false;
-            loadingVisualWorker = new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        while (!stopFlagVisual) {
-                            if (getModel().isBusAlive() && getModel().isBusConectedReceiving()) {
-                                loadingVisual.activate();
-                            } else {
-                                loadingVisual.deactivate();
-                                setStatusMessage(Resources.getString("App.24"), true, true);
-                            }
-                            Thread.sleep(Resources.INTERVAL_CHECK_MAILBOX_CONNECTED);
-                        }
-                        loadingVisual.deactivate();
-                        return null;
-                    }
-                };
-                loadingVisualWorker.execute();
-        }    
-    }
+
 
     /**
      * Creates the spreadsheet
