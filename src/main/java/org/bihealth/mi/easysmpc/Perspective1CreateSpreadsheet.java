@@ -83,9 +83,12 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
         // Formula field
         formulaField = new JTextField();
         formulaField.addKeyListener(new KeyListener() {
+
             @Override
             public void keyTyped(KeyEvent e) {
-                table.editCellAt(table.getSelectedRow(), table.getSelectedColumn()); 
+                if(!table.isEditing()) {
+                    table.editCellAt(table.getSelectedRow(), table.getSelectedColumn());
+                } 
             }
             
             @Override
@@ -129,11 +132,7 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
             
             @Override
             public void focusGained(FocusEvent e) {
-                // Check
-                if(table.getSelectedRow() < 0 || table.getSelectedColumn() < 0 ) {
-                    return;
-                }
-                table.editCellAt(table.getSelectedRow(), table.getSelectedColumn());          
+                // Empty
             }
         });
         
@@ -207,7 +206,11 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
      * Action when table editing and canceled pressed
      */
     private void actionTableEditCancel() {
+        // Cancel editing
         table.editingCanceled(null);
+        
+        // Set old value in formula field
+        setFormularFieldByCurrentTableIndex();
     }
     
     /**
