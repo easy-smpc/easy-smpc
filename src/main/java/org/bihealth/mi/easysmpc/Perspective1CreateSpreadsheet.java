@@ -15,6 +15,8 @@ package org.bihealth.mi.easysmpc;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -94,12 +96,12 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
             @Override
             public void keyPressed(KeyEvent e) {
                 if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
-                    table.editingCanceled(null);
+                    actionTableEditCancel();
                     return;
                 }
                 
                 if(e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    table.editingStopped(null);
+                    actionTableEditOk();
                 }
             }
         });
@@ -150,12 +152,24 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
         } catch (IOException e) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("Participant.3"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
         }
+        okButton.addActionListener(new ActionListener() {           
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionTableEditOk();
+            }
+        });
         JButton cancelButton = new JButton();
         try {
             cancelButton.setIcon(new ImageIcon(Resources.getCancel()));
         } catch (IOException e) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("Participant.3"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
         }
+        cancelButton.addActionListener(new ActionListener() {           
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionTableEditCancel();
+            }
+        });
         buttonsPane.add(okButton);
         buttonsPane.add(cancelButton);
         
@@ -163,7 +177,6 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
         JPanel formulaPane = new JPanel(new BorderLayout());
         formulaPane.add(buttonsPane, BorderLayout.EAST);
         formulaPane.add(formulaField, BorderLayout.CENTER);
-        //formulaPane.setBorder(BorderFactory.createLineBorder(Color.red));
         
         // Split pane
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, formulaPane, scrollPane);
@@ -189,4 +202,19 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
         }
         formulaField.setText(table.currentSelectedCellData().getContentDefinition());        
     }
+    
+    /**
+     * Action when table editing and canceled pressed
+     */
+    private void actionTableEditCancel() {
+        table.editingCanceled(null);
+    }
+    
+    /**
+     * Action when table editing and ok pressed
+     */
+    private void actionTableEditOk() {
+        table.editingStopped(null);
+    }
+    
 }
