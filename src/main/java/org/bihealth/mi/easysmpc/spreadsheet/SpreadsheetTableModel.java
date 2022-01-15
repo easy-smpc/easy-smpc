@@ -42,7 +42,8 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Seriali
      * @param numColumns
      */
     public SpreadsheetTableModel(boolean isEditable, int numRows, int numColumns) {
-        this.isEditable = isEditable;
+        // Store
+        this.isEditable = isEditable;        
         
         // Init table
         getCell(numRows, numColumns);

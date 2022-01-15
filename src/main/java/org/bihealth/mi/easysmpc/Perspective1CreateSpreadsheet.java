@@ -80,7 +80,7 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
         // Layout
         panel.setLayout(new BorderLayout());
         
-        // Formula field        
+        // Formula field
         formulaField = new JTextField();
         formulaField.addKeyListener(new KeyListener() {
             @Override
@@ -215,6 +215,10 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
      */
     private void actionTableEditOk() {
         table.editingStopped(null);
+                
+        // Select one cell below if possible
+        if (table.getSelectedRow() + 1 <= table.getModel().getRowCount()) {
+            table.changeSelection(table.getSelectedRow() + 1, table.getSelectedColumn(), false, false);
+        }
     }
-    
 }
