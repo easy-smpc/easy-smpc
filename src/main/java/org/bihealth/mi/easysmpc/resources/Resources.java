@@ -172,6 +172,17 @@ public class Resources {
         InputStream stream = Resources.class.getResourceAsStream("checkmark.png"); //$NON-NLS-1$
         return ImageIO.read(stream).getScaledInstance(Resources.SIZE_CHECKMARK_X, Resources.SIZE_CHECKMARK_Y,  java.awt.Image.SCALE_SMOOTH);
     }
+    
+    /**
+     * Icon
+     * 
+     * @return
+     * @throws IOException
+     */
+    public static Image getCancel() throws IOException {
+        InputStream stream = Resources.class.getResourceAsStream("cancel.png"); //$NON-NLS-1$
+        return ImageIO.read(stream).getScaledInstance(Resources.SIZE_CHECKMARK_X, Resources.SIZE_CHECKMARK_X,  java.awt.Image.SCALE_SMOOTH);
+    }
 
     /**
      * Icon

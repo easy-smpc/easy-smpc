@@ -14,11 +14,16 @@
 package org.bihealth.mi.easysmpc;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -136,9 +141,33 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
         table.getColumnModel().getSelectionModel().addListSelectionListener(this);
         JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         
+        // Buttons pane for formula
+        JPanel buttonsPane = new JPanel();
+        buttonsPane.setLayout(new GridLayout(2, 1));
+        JButton okButton = new JButton();
+        try {
+            okButton.setIcon(new ImageIcon(Resources.getCheckmark()));
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("Participant.3"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
+        }
+        JButton cancelButton = new JButton();
+        try {
+            cancelButton.setIcon(new ImageIcon(Resources.getCancel()));
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(getPanel(), Resources.getString("Participant.3"), Resources.getString("App.13"), JOptionPane.ERROR_MESSAGE);
+        }
+        buttonsPane.add(okButton);
+        buttonsPane.add(cancelButton);
+        
+        // Formula pane
+        JPanel formulaPane = new JPanel(new BorderLayout());
+        formulaPane.add(buttonsPane, BorderLayout.EAST);
+        formulaPane.add(formulaField, BorderLayout.CENTER);
+        //formulaPane.setBorder(BorderFactory.createLineBorder(Color.red));
+        
         // Split pane
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, formulaField, scrollPane);
-        splitPane.setDividerLocation(20);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, formulaPane, scrollPane);
+        splitPane.setDividerLocation(35);
         panel.add(splitPane, BorderLayout.CENTER);
     }
 
