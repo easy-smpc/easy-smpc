@@ -70,6 +70,10 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Seriali
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
+        // First column only has names
+        if (columnIndex == 0) { return false; }
+        
+        // Return
         return isEditable;
     }
 

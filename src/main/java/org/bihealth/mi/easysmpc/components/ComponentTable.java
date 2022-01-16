@@ -36,10 +36,33 @@ public class ComponentTable extends JTable {
      
     public ComponentTable(int numRows, int numColumns) {
         super(new SpreadsheetTableModel(true, numRows, numColumns));
+        
+        // Configure
         this.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         this.setCellSelectionEnabled(true);
         this.setDefaultRenderer(SpreadsheetCell.getClassStatic(), new SpreadsheetCellRenderer());
         this.setDefaultEditor(SpreadsheetCell.getClassStatic(), new SpreadsheetCellEditor(new JTextField(), this.getModel()));
+        
+        // Set first column as row names
+        setRowNames();
+        
+        // Set first editable cell as selected 
+        changeSelection(0, 1, false, false);
+    }
+
+
+    /**
+     * Sets the first columns as names for the rows
+     */
+    private void setRowNames() {
+        
+        // Set number as name
+        for(int i = 0; i < getModel().getRowCount(); i++) {
+            getModel().setValueAt(SpreadsheetCell.createNew(String.valueOf(i), dataModel), i, 0);
+        }
+        
+        // Set cell renderer to look like header
+        getColumnModel().getColumn(0).setCellRenderer(getTableHeader().getDefaultRenderer());        
     }
 
 

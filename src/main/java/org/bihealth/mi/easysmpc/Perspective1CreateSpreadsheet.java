@@ -177,12 +177,12 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
     }
 
     /**
-     * Sets the content of the formular field by the current selected cell
+     * Sets the content of the formula field by the current selected cell
      */
     private void setFormularFieldByCurrentTableIndex() {
         
         // Check
-        if (table.currentSelectedCellData() == null) {
+        if (table.currentSelectedCellData() == null || table.getSelectedColumn() == 0) {
             formulaField.setText("");
             return;
         }

@@ -80,7 +80,11 @@ public abstract class SpreadsheetCell {
     public static Class<SpreadsheetCell> getClassStatic() {
         return SpreadsheetCell.class;
     }
-
+    
+    @Override
+    public String toString() {
+        return getDisplayedText();
+    }
     /**
      * Create a new, suitable sub class
      * 
