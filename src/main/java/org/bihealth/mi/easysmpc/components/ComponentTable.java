@@ -17,6 +17,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
+import org.bihealth.mi.easysmpc.spreadsheet.CellsAccessor;
 import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell;
 import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell.SpreadsheetCellEditor;
 import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell.SpreadsheetCellRenderer;
@@ -40,8 +41,14 @@ public class ComponentTable extends JTable {
         // Configure
         this.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         this.setCellSelectionEnabled(true);
-        this.setDefaultRenderer(SpreadsheetCell.getClassStatic(), new SpreadsheetCellRenderer());
-        this.setDefaultEditor(SpreadsheetCell.getClassStatic(), new SpreadsheetCellEditor(new JTextField(), this.getModel()));
+        this.setDefaultRenderer(SpreadsheetCell.class, new SpreadsheetCellRenderer());
+        this.setDefaultEditor(SpreadsheetCell.getClassStatic(), new SpreadsheetCellEditor(new JTextField(), new CellsAccessor() {
+            
+            @Override
+            public SpreadsheetCell getCellAt(int row, int column) {
+                return (SpreadsheetCell) getModel().getValueAt(row, column);
+            }
+        }));
         
         // Set first column as row names
         setRowNames();
@@ -58,7 +65,7 @@ public class ComponentTable extends JTable {
         
         // Set number as name
         for(int i = 0; i < getModel().getRowCount(); i++) {
-            getModel().setValueAt(SpreadsheetCell.createNew(String.valueOf(i), dataModel), i, 0);
+            getModel().setValueAt(SpreadsheetCell.createNew(String.valueOf(i)), i, 0);
         }
         
         // Set cell renderer to look like header

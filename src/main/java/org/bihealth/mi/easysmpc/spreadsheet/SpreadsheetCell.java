@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableModel;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -38,7 +37,7 @@ public abstract class SpreadsheetCell {
      * 
      * @param value
      */
-    SpreadsheetCell(SpreadsheetCellType type) {
+    protected SpreadsheetCell(SpreadsheetCellType type) {
         this.type = type;
     }
 
@@ -77,6 +76,11 @@ public abstract class SpreadsheetCell {
         return type;
     }
 
+    /**
+     * Returns the class
+     * 
+     * @return
+     */
     public static Class<SpreadsheetCell> getClassStatic() {
         return SpreadsheetCell.class;
     }
@@ -85,6 +89,18 @@ public abstract class SpreadsheetCell {
     public String toString() {
         return getDisplayedText();
     }
+    
+    /**
+     * Creates a new Spreadsheet cell when no surrounding cells are needed 
+     * 
+     * @param value
+     * @return
+     */
+    public static SpreadsheetCell createNew(String value) {
+        return createNew(value, null);
+    }
+    
+    
     /**
      * Create a new, suitable sub class
      * 
@@ -92,13 +108,13 @@ public abstract class SpreadsheetCell {
      * @param tableModel
      * @return
      */
-    public static SpreadsheetCell createNew(String value, TableModel tableModel) {
+    public static SpreadsheetCell createNew(String value, CellsAccessor accesssor) {
 
         // Check
         if (value == null) { throw new IllegalArgumentException("Value must not be null"); }
 
         // Set as script if applicable
-        if (value.charAt(0) == '=') { return SpreadsheetCellFunction.createNew(value, tableModel); }
+        if (value.charAt(0) == '=') { return SpreadsheetCellFunction.createNew(value, accesssor); }
 
         try {
             // Set as decimal if applicable
@@ -171,28 +187,52 @@ public abstract class SpreadsheetCell {
         /** Text field*/
         private JTextField textField;
  
+        /** 
+         * Set the text field
+         * @param text
+         */
         public void setTextField(String text) {
             textField.setText(text);
         }
-        public SpreadsheetCellEditor(final JTextField textField, TableModel tableModel) {
+        
+        /**
+         * Creates a new instance
+         * 
+         * @param textField
+         * @param accessor
+         */
+        public SpreadsheetCellEditor(final JTextField textField, CellsAccessor accessor) {
+            // Super
             super(textField);
+            
+            // Store
             this.textField = textField;
+            
+            // Create delegate
             delegate = new EditorDelegate() {
                 /** SVUID */
                 private static final long serialVersionUID = 2088491318086396011L;
 
+                /**
+                 * Set value to cell
+                 */
                 public void setValue(Object cell) {
                     textField.setText((cell != null) ? ((SpreadsheetCell) cell).getDisplayedText()
                             : "");
                 }
 
+                /**
+                 * Get value from cell
+                 */
                 public Object getCellEditorValue() {
                     String text = textField.getText();
                     return text == null || text.length() > 0
-                            ? SpreadsheetCell.createNew(text, tableModel)
+                            ? SpreadsheetCell.createNew(text, accessor)
                             : null;
                 }
             };
+
+            // Add delegate
             textField.addActionListener(delegate);
         }
     }

@@ -15,8 +15,6 @@ package org.bihealth.mi.easysmpc.spreadsheet;
 
 import java.math.BigDecimal;
 
-import javax.swing.table.TableModel;
-
 /**
  * @author Felix Wirth
  *
@@ -27,10 +25,10 @@ public class SpreadsheetCellFunctionMean extends SpreadsheetCellFunction {
      * Create a new instance
      * 
      * @param values
-     * @param tableModel
+     * @param accessor
      */
-    SpreadsheetCellFunctionMean(String values, TableModel tableModel) {
-        super(values, tableModel, true);
+    SpreadsheetCellFunctionMean(String values, CellsAccessor accessor) {
+        super(values, accessor, true);
     }
     
     @Override

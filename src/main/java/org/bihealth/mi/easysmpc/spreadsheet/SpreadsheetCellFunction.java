@@ -17,8 +17,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.table.TableModel;
-
 /**
  * @author Felix Wirth
  *
@@ -36,11 +34,11 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
     private static final String FUNCTION_WITH_CELL = "=([a-zA-Z]*)(\\(){1}" + CELL_REFERENCE_RANGE + "(\\)){1}";
     /** Base for column letters to numbers and v.v. */
     public static String BASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    /** Table model */
-    private TableModel tableModel;
+    /** Accessor for other cells */
+    private CellsAccessor accessor;
     /** Rows of relevant cells */
     private final List<Integer> relevantRows = new ArrayList<>();
-    /** Cols of relevant cells */
+    /** Columns of relevant cells */
     private final List<Integer> relevantCols = new ArrayList<>();
     /** Is secret function */
     private final boolean isSecret;
@@ -50,11 +48,11 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
      * 
      * @param value
      */
-    public SpreadsheetCellFunction(String text, TableModel tableModel, boolean isSecret) {
+    SpreadsheetCellFunction(String text, CellsAccessor accessor, boolean isSecret) {
         super(SpreadsheetCellType.SCRIPT);
 
         // Prepare
-        this.tableModel = tableModel;
+        this.accessor = accessor;
         this.isSecret = isSecret;
         this.value = text;
         String[] splitValues = text.substring(text.indexOf("(") + 1, text.length() - 2).split(";");
@@ -68,11 +66,17 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
                 this.relevantRows.add(Integer.valueOf(valuePart.replaceFirst("([A-Z]){1,3}", "")));
 
                 // Add cols
-                this.relevantCols.add(getExcelColumnName(valuePart.replaceFirst("([0-9]){1,7}","")));
+                this.relevantCols.add(getColumnNameAlpha(valuePart.replaceFirst("([0-9]){1,7}","")));
             }
         }
+        accessor.getCellAt(relevantRows.get(0), relevantCols.get(0));
     }
     
+    /**
+     * Calculates a result
+     * 
+     * @return
+     */
     public abstract BigDecimal calculate();
 
     /**
@@ -82,7 +86,7 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
         return isSecret;
     }
 
-    public static SpreadsheetCellFunction createNew(String text, TableModel tableModel) {
+    public static SpreadsheetCellFunction createNew(String text, CellsAccessor accessor) {
         // TODO Fix this semicolon hack
         text = text.substring(0, text.length() - 1) + ";" + text.substring(text.length() - 1, text.length());
         if (!text.matches(FUNCTION_WITH_CELL)) {
@@ -95,7 +99,7 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
             ScriptFunctionType function = ScriptFunctionType.valueOf(functionName);
             switch (function) {
             case MEAN:
-                return new SpreadsheetCellFunctionMean(text, tableModel);
+                return new SpreadsheetCellFunctionMean(text, accessor);
             default:
                 throw new IllegalArgumentException(String.format("Unknown script function %s",
                                                                  functionName));
@@ -131,7 +135,7 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
 
         // Loop over relevant rows and cells
         for (int row : relevantRows) {
-            result.add((SpreadsheetCell) this.tableModel.getValueAt(row, relevantCols.get(index)));
+            result.add(this.accessor.getCellAt(row, relevantCols.get(index)));
             index++;
         }
 
@@ -156,7 +160,7 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
      * @param columnAlpha
      * @return number
      */
-    public static int getExcelColumnName(String columnAlpha) {
+    public static int getColumnNameAlpha(String columnAlpha) {
         int result = 0;
         for (int index = 0; index < columnAlpha.length(); index++) {
             // Prepare
