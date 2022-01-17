@@ -25,10 +25,10 @@ public class SpreadsheetCellFunctionMean extends SpreadsheetCellFunction {
      * Create a new instance
      * 
      * @param values
-     * @param accessor
+     * @param internalDataProvider
      */
-    SpreadsheetCellFunctionMean(String values, CellsAccessor accessor) {
-        super(values, accessor, true);
+    SpreadsheetCellFunctionMean(String values, InternalDataProvider internalDataProvider) {
+        super(values, internalDataProvider, null,  false);
     }
     
     @Override
@@ -56,5 +56,10 @@ public class SpreadsheetCellFunctionMean extends SpreadsheetCellFunction {
             }
         }
         return true;
+    }
+    
+    @Override
+    public String getDisplayedText() {
+        return calculate().toPlainString();
     }
 }

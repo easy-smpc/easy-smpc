@@ -17,7 +17,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
-import org.bihealth.mi.easysmpc.spreadsheet.CellsAccessor;
+import org.bihealth.mi.easysmpc.spreadsheet.InternalDataProvider;
 import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell;
 import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell.SpreadsheetCellEditor;
 import org.bihealth.mi.easysmpc.spreadsheet.SpreadsheetCell.SpreadsheetCellRenderer;
@@ -45,7 +45,7 @@ public class ComponentTable extends JTable {
         this.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         this.setCellSelectionEnabled(true);
         this.setDefaultRenderer(SpreadsheetCell.class, new SpreadsheetCellRenderer());
-        this.setDefaultEditor(SpreadsheetCell.getClassStatic(), new SpreadsheetCellEditor(new JTextField(), new CellsAccessor() {
+        this.setDefaultEditor(SpreadsheetCell.getClassStatic(), new SpreadsheetCellEditor(new JTextField(), new InternalDataProvider() {
             
             @Override
             public SpreadsheetCell getCellAt(int row, int column) {

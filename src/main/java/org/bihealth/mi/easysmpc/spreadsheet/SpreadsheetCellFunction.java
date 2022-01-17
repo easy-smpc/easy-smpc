@@ -34,25 +34,32 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
     private static final String FUNCTION_WITH_CELL = "=([a-zA-Z]*)(\\(){1}" + CELL_REFERENCE_RANGE + "(\\)){1}";
     /** Base for column letters to numbers and v.v. */
     public static String BASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    /** Accessor for other cells */
-    private CellsAccessor accessor;
+    /** InternalDataProvider */
+    private final InternalDataProvider internalDataProvider;
     /** Rows of relevant cells */
     private final List<Integer> relevantRows = new ArrayList<>();
     /** Columns of relevant cells */
     private final List<Integer> relevantCols = new ArrayList<>();
     /** Is secret function */
     private final boolean isSecret;
+    /** ExternalDataProvider */
+    private final ExternalDataProvider externalDataProvider;
     
+
     /**
      * Create a new instance
      * 
-     * @param value
+     * @param text
+     * @param internalDataProvider
+     * @param externalDataProvider
+     * @param isSecret
      */
-    SpreadsheetCellFunction(String text, CellsAccessor accessor, boolean isSecret) {
+    SpreadsheetCellFunction(String text, InternalDataProvider internalDataProvider, ExternalDataProvider externalDataProvider, boolean isSecret) {
         super(SpreadsheetCellType.SCRIPT);
 
         // Prepare
-        this.accessor = accessor;
+        this.internalDataProvider = internalDataProvider;
+        this.externalDataProvider = externalDataProvider;
         this.isSecret = isSecret;
         this.value = text;
         String[] splitValues = text.substring(text.indexOf("(") + 1, text.length() - 2).split(";");
@@ -94,8 +101,27 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
     public boolean isSecret() {
         return isSecret;
     }
-
-    public static SpreadsheetCellFunction createNew(String text, CellsAccessor accessor) {
+    
+    /**
+     * Picks the correct sub-type and create a new instance of the type
+     * 
+     * @param text
+     * @param InternalDataProvider
+     * @return
+     */
+    public static SpreadsheetCellFunction createNew(String text, InternalDataProvider internalDataProvider) {
+        return createNew(text, internalDataProvider, null);
+    }
+    
+    /**
+     * Picks the correct sub-type and create a new instance of the type
+     * 
+     * @param text
+     * @param internalDataProvider
+     * @param externalDataProvider
+     * @return
+     */
+    public static SpreadsheetCellFunction createNew(String text, InternalDataProvider internalDataProvider, ExternalDataProvider externalDataProvider) {
         // TODO Fix this semicolon hack
         text = text.substring(0, text.length() - 1) + ";" + text.substring(text.length() - 1, text.length());
         if (!text.matches(FUNCTION_WITH_CELL)) {
@@ -108,7 +134,9 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
             ScriptFunctionType function = ScriptFunctionType.valueOf(functionName);
             switch (function) {
             case MEAN:
-                return new SpreadsheetCellFunctionMean(text, accessor);
+                return new SpreadsheetCellFunctionMean(text, internalDataProvider);
+            case SMPCADD:
+                return new SpreadsheetCellFunctionSMPCAddition(text, internalDataProvider, externalDataProvider);
             default:
                 throw new IllegalArgumentException(String.format("Unknown script function %s",
                                                                  functionName));
@@ -121,11 +149,6 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
     @Override
     public String getContentDefinition() {
         return this.value;
-    }
-
-    @Override
-    public String getDisplayedText() {
-        return calculate().toPlainString();
     }
 
     @Override
@@ -144,7 +167,7 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
 
         // Loop over relevant rows and cells
         for (int row : relevantRows) {
-            result.add(this.accessor.getCellAt(row, relevantCols.get(index)));
+            result.add(this.internalDataProvider.getCellAt(row, relevantCols.get(index)));
             index++;
         }
 
@@ -160,7 +183,7 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
      */
     public enum ScriptFunctionType {
                                     MEAN,
-                                    SECRET_ADD
+                                    SMPCADD
     }
     
     /**
@@ -191,4 +214,32 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
         // Return
         return result;
     }
+
+    /**
+     * @return the InternalDataProvider
+     */
+    protected InternalDataProvider getInternalDataProvider() {
+        return internalDataProvider;
+    }
+
+    /**
+     * @return the relevantRows
+     */
+    protected List<Integer> getRelevantRows() {
+        return relevantRows;
+    }
+
+    /**
+     * @return the relevantCols
+     */
+    protected List<Integer> getRelevantCols() {
+        return relevantCols;
+    }
+
+    /**
+     * @return the externalDataProvider
+     */
+    protected ExternalDataProvider getExternalDataProvider() {
+        return externalDataProvider;
+    }       
 }

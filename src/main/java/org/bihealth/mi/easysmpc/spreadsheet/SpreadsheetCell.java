@@ -105,16 +105,16 @@ public abstract class SpreadsheetCell {
      * Create a new, suitable sub class
      * 
      * @param value
-     * @param tableModel
+     * @param InternalDataProvider
      * @return
      */
-    public static SpreadsheetCell createNew(String value, CellsAccessor accesssor) {
+    public static SpreadsheetCell createNew(String value, InternalDataProvider internalDataProvider) {
 
         // Check
         if (value == null) { throw new IllegalArgumentException("Value must not be null"); }
 
         // Set as script if applicable
-        if (value.charAt(0) == '=') { return SpreadsheetCellFunction.createNew(value, accesssor); }
+        if (value.charAt(0) == '=') { return SpreadsheetCellFunction.createNew(value, internalDataProvider); }
 
         try {
             // Set as decimal if applicable
@@ -199,9 +199,9 @@ public abstract class SpreadsheetCell {
          * Creates a new instance
          * 
          * @param textField
-         * @param accessor
+         * @param internalDataProvider
          */
-        public SpreadsheetCellEditor(final JTextField textField, CellsAccessor accessor) {
+        public SpreadsheetCellEditor(final JTextField textField, InternalDataProvider internalDataProvider) {
             // Super
             super(textField);
             
@@ -227,7 +227,7 @@ public abstract class SpreadsheetCell {
                 public Object getCellEditorValue() {
                     String text = textField.getText();
                     return text == null || text.length() > 0
-                            ? SpreadsheetCell.createNew(text, accessor)
+                            ? SpreadsheetCell.createNew(text, internalDataProvider)
                             : null;
                 }
             };

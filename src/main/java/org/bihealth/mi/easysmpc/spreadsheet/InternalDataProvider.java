@@ -6,7 +6,7 @@ package org.bihealth.mi.easysmpc.spreadsheet;
  * @author Felix Wirth
  *
  */
-public interface CellsAccessor {
+public interface InternalDataProvider {
     
     /**
      * Returns a SpreadsheetCell at a specified row and column

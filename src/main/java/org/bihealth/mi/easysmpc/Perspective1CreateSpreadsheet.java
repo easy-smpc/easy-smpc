@@ -172,7 +172,6 @@ public class Perspective1CreateSpreadsheet extends Perspective implements ListSe
 
     @Override
     public void valueChanged(ListSelectionEvent e) {
-        System.out.println(table.getSelectedRow() + " " + table.getSelectedColumn() );
         setFormularFieldByCurrentTableIndex();
         
     }
