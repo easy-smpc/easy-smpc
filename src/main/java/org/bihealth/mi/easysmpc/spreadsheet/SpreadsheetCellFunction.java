@@ -63,13 +63,22 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
                 // TODO
             } else {
                 // Add row
-                this.relevantRows.add(Integer.valueOf(valuePart.replaceFirst("([A-Z]){1,3}", "")));
+                this.relevantRows.add(getRowFromString(valuePart));
 
                 // Add cols
-                this.relevantCols.add(getColumnNameAlpha(valuePart.replaceFirst("([0-9]){1,7}","")));
+                this.relevantCols.add(getColumnNameAlpha(valuePart));
             }
         }
-        accessor.getCellAt(relevantRows.get(0), relevantCols.get(0));
+    }
+
+    /**
+     * Get a row from a string
+     * 
+     * @param valuePart
+     * @return
+     */
+    private Integer getRowFromString(String valuePart) {
+        return (Integer.valueOf(valuePart.replaceFirst("([A-Z]){1,3}", "")) - 1);
     }
     
     /**
@@ -161,6 +170,9 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
      * @return number
      */
     public static int getColumnNameAlpha(String columnAlpha) {
+        // Remove unnecessary text
+        columnAlpha = columnAlpha.replaceFirst("([0-9]){1,7}","");
+        
         int result = 0;
         for (int index = 0; index < columnAlpha.length(); index++) {
             // Prepare
@@ -177,6 +189,6 @@ public abstract class SpreadsheetCellFunction extends SpreadsheetCell {
         }
 
         // Return
-        return result - 1;
+        return result;
     }
 }

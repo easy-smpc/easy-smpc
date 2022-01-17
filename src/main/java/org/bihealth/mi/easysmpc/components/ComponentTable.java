@@ -38,6 +38,9 @@ public class ComponentTable extends JTable {
     public ComponentTable(int numRows, int numColumns) {
         super(new SpreadsheetTableModel(true, numRows, numColumns));
         
+        // First colum is not used for data
+        numColumns =  numColumns++;
+        
         // Configure
         this.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         this.setCellSelectionEnabled(true);
@@ -65,13 +68,12 @@ public class ComponentTable extends JTable {
         
         // Set number as name
         for(int i = 0; i < getModel().getRowCount(); i++) {
-            getModel().setValueAt(SpreadsheetCell.createNew(String.valueOf(i)), i, 0);
+            getModel().setValueAt(SpreadsheetCell.createNew(String.valueOf(i + 1)), i, 0);
         }
         
         // Set cell renderer to look like header
-        getColumnModel().getColumn(0).setCellRenderer(getTableHeader().getDefaultRenderer());        
+        getColumnModel().getColumn(0).setCellRenderer(getTableHeader().getDefaultRenderer());
     }
-
 
     /**
      * Returns the data of the current selected cell

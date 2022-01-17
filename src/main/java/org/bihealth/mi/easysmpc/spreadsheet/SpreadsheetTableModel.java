@@ -90,8 +90,7 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Seriali
         // Set data
         data.get(rowIndex).set(columnIndex, cell != null ? (SpreadsheetCell) cell : null);
         fireTableChanged(new TableModelEvent(this, rowIndex, columnIndex));
-    }
-    
+    }    
 
     private SpreadsheetCell getCell(int rowIndex, int columnIndex) {
         // If row does not exist create
@@ -113,5 +112,20 @@ public class SpreadsheetTableModel extends AbstractTableModel implements Seriali
         
         // Return
         return data.get(rowIndex).get(columnIndex);
+    }
+    
+    @Override
+    public String getColumnName(int column) {
+
+        // Return empty string for first column
+        if (column == 0) { return ""; }
+
+        // Return column - 1 to ignore first colum and result spreadsheet name
+        column--;
+        String result = "";
+        for (; column >= 0; column = column / 26 - 1) {
+            result = (char) ((char) (column % 26) + 'A') + result;
+        }
+        return result;
     }
 }
