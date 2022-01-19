@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.prefs.BackingStoreException;
@@ -41,16 +42,16 @@ import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easysmpc.components.ComponentListDataParticipant;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryBin;
-import org.bihealth.mi.easysmpc.components.EntryParticipant;
+import org.bihealth.mi.easysmpc.components.EntryParticipantsView;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
-import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
  * A perspective
@@ -62,8 +63,11 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     
     /** Allows to set a custom text for each object in the list */
     private class CustomRenderer extends DefaultListCellRenderer {
+        
         /** SVUID */
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1989627652310258433L;
+
+        /** SVUID */
 
         @Override
         public Component getListCellRendererComponent(JList<?> list,
@@ -85,10 +89,6 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             return label;
         }
     }
-    
-    /** Panel for participants */
-    private ScrollablePanel    panelParticipants;
-
     /** Panel for bins */
     private ScrollablePanel    panelBins;
 
@@ -99,7 +99,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     private JButton            buttonSave;
 
     /** Central panel */
-    private JPanel             panelCentral;
+    private JPanel             central;
     
     /** Add configuration e-mail box */
     private JButton                           buttonAddMailbox;
@@ -114,7 +114,10 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     private JButton                           buttonEditMailbox;
     
     /** Has e-mail config been checked? */
-    private boolean                           emailconfigCheck;    
+    private boolean                           emailconfigCheck;
+    
+    /**  Panel for participants */
+    private ComponentListDataParticipant panelEntryParticipants;    
 
     /**
      * Creates the perspective
@@ -395,29 +398,9 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         generalDataPanel.add(automaticEMailPanel);        
         
         // Central panel
-        panelCentral = new JPanel();
-        panelCentral.setLayout(new GridLayout(2, 1));
-        panel.add(panelCentral, BorderLayout.CENTER);        
-        
-        // Participants
-        this.panelParticipants = new ScrollablePanel();
-        this.panelParticipants.setLayout(new BoxLayout(this.panelParticipants, BoxLayout.Y_AXIS));
-        JScrollPane pane = new JScrollPane(panelParticipants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                        Resources.getString("PerspectiveParticipate.participants"),
-                                                        TitledBorder.LEFT,
-                                                        TitledBorder.DEFAULT_POSITION));
-        panelCentral.add(pane, BorderLayout.NORTH);    
-                        
-        // Bins
-        this.panelBins = new ScrollablePanel();
-        this.panelBins.setLayout(new BoxLayout(this.panelBins, BoxLayout.Y_AXIS));
-        pane = new JScrollPane(panelBins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                        Resources.getString("PerspectiveParticipate.bins"),
-                                                        TitledBorder.LEFT,
-                                                        TitledBorder.DEFAULT_POSITION));
-        panelCentral.add(pane, BorderLayout.SOUTH);
+        central = new JPanel();
+        central.setLayout(new GridLayout(2, 1));
+        panel.add(central, BorderLayout.CENTER);                        
 
         // Buttons pane
         JPanel buttonsPane = new JPanel();
@@ -452,19 +435,33 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     protected void initialize() {
         
         // Clear
-        panelParticipants.removeAll();
-        panelBins.removeAll();
+        central.removeAll();
+        
+        // Participants
+        panelEntryParticipants = new EntryParticipantsView(Arrays.asList(getApp().getModel().getParticipants()), this);        
+        JScrollPane pane = new JScrollPane(panelEntryParticipants,
+                                           JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                           JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                        Resources.getString("PerspectiveCreate.participants"),
+                                                        TitledBorder.LEFT,
+                                                        TitledBorder.DEFAULT_POSITION));
+        central.add(pane, BorderLayout.NORTH);
+        
+        // Bins
+        this.panelBins = new ScrollablePanel();
+        this.panelBins.setLayout(new BoxLayout(this.panelBins, BoxLayout.Y_AXIS));
+        pane = new JScrollPane(panelBins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                        Resources.getString("PerspectiveParticipate.bins"),
+                                                        TitledBorder.LEFT,
+                                                        TitledBorder.DEFAULT_POSITION));
+        central.add(pane, BorderLayout.SOUTH);       
         
         // Title
         this.fieldTitle.setText(getApp().getModel().getName());
         
-        // Add participants
-        int i = 0;
-        for (Participant currentParticipant : getApp().getModel().getParticipants()) {
-            EntryParticipant newNameEmailParticipantEntry = new EntryParticipant(currentParticipant.name, currentParticipant.emailAddress, false, false, i == getApp().getModel().getOwnId());
-            panelParticipants.add(newNameEmailParticipantEntry);
-            i++;
-        }
+        // Add bins
         for (Bin currentBin : getApp().getModel().getBins()) {
             EntryBin newBin = new EntryBin(currentBin.name, false, "", true, false);
             newBin.setChangeListener(this);

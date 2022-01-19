@@ -93,7 +93,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     /** Panel for bins */
     private ScrollablePanel                   panelBins;
     
-    /** Panel for Participants */
+    /** Panel for participants */
     private ComponentListDataParticipant      panelEntryParticipants;
 
     /** Text field containing title of study */
@@ -544,18 +544,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         // Central panel
         central = new JPanel();
         central.setLayout(new GridLayout(2, 1));
-        panel.add(central, BorderLayout.CENTER);        
-
-        // Bins
-        this.panelBins = new ScrollablePanel();
-        this.panelBins.setLayout(new BoxLayout(this.panelBins, BoxLayout.Y_AXIS));
-        JScrollPane pane = new JScrollPane(panelBins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                                    Resources.getString("PerspectiveCreate.bins"),
-                                                                    TitledBorder.LEFT,
-                                                                    TitledBorder.DEFAULT_POSITION));
-
-        central.add(pane, BorderLayout.SOUTH);
+        panel.add(central, BorderLayout.CENTER);
        
         // Buttons pane
         JPanel buttonsPane = new JPanel();
@@ -600,7 +589,14 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     @Override
     protected void initialize() {
         
-        // Create and add participants
+        // Clear existing fields
+        panelBins.removeAll();
+        fieldTitle.setText("");
+        emailconfigCheck = false; 
+        panelBins.removeAll();
+        central.removeAll();
+        
+        // Participants
         panelEntryParticipants = new EntryParticipantsEdit(null, this);        
         JScrollPane pane = new JScrollPane(panelEntryParticipants,
                                            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -611,10 +607,15 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                                                         TitledBorder.DEFAULT_POSITION));
         central.add(pane, BorderLayout.NORTH);
         
-        // Clear existing fields
-        this.panelBins.removeAll();
-        this.fieldTitle.setText("");
-        this.emailconfigCheck = false;                
+        // Bins
+        this.panelBins = new ScrollablePanel();
+        this.panelBins.setLayout(new BoxLayout(this.panelBins, BoxLayout.Y_AXIS));
+        pane = new JScrollPane(panelBins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                                    Resources.getString("PerspectiveCreate.bins"),
+                                                                    TitledBorder.LEFT,
+                                                                    TitledBorder.DEFAULT_POSITION));
+        central.add(pane, BorderLayout.SOUTH);
         
         // Add initial
         this.addBin(null, "", "", true);

@@ -30,15 +30,14 @@ public class EntryParticipantsView extends ComponentListDataParticipantEntryLine
 
     @Override
     protected void addParticipant(EntryParticipant previous, String name, String emailAddress) {
-        // TODO fix
-        // EntryParticipant newNameEmailParticipantEntry = new
-        // EntryParticipant(name,
-        // emailAddress,
-        // false,
-        // false,
-        // i == getApp().getModel()
-        // .getOwnId());
-        // getPanelParticipants().add(newNameEmailParticipantEntry);
+        // Create participant
+        EntryParticipant newNameEmailParticipantEntry = new EntryParticipant(name,
+                                                                             emailAddress,
+                                                                             false,
+                                                                             false,
+                                                                             false);
+        // Add to panel
+        getPanelParticipants().add(newNameEmailParticipantEntry);
     }
 
     @Override
