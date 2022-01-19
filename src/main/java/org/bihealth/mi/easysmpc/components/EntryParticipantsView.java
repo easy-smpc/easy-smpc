@@ -22,20 +22,24 @@ public class EntryParticipantsView extends ComponentListDataParticipantEntryLine
      * 
      * @param inputData
      * @param listener
+     * @param compareParticipant
      */
-    public EntryParticipantsView(List<Participant> inputData, ChangeListener listener) {
+    public EntryParticipantsView(List<Participant> inputData, ChangeListener listener, ComponentCompare<Participant> compareParticipant) {
         // Super
-        super(inputData, listener, false);
+        super(inputData, listener, false, compareParticipant);
     }
 
     @Override
-    protected void addParticipant(EntryParticipant previous, String name, String emailAddress) {
+    protected void addParticipant(EntryParticipant previous, String name, String email) {
+        // Is this the own participant?
+        boolean ownParticipant = name.equals("") || email.equals("") ? false: getCompareParticipant().isSame(new Participant(name, email));
+        
         // Create participant
         EntryParticipant newNameEmailParticipantEntry = new EntryParticipant(name,
-                                                                             emailAddress,
+                                                                             email,
                                                                              false,
                                                                              false,
-                                                                             false);
+                                                                             ownParticipant);
         // Add to panel
         getPanelParticipants().add(newNameEmailParticipantEntry);
     }

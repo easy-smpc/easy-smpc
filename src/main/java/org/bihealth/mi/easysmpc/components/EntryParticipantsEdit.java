@@ -32,10 +32,13 @@ public class EntryParticipantsEdit extends ComponentListDataParticipantEntryLine
      * 
      * @param inputData
      * @param listener
+     * @param compareParticipant
      */
-    public EntryParticipantsEdit(List<Participant> inputData, ChangeListener listener) {
+    public EntryParticipantsEdit(List<Participant> inputData,
+                                 ChangeListener listener,
+                                 ComponentCompare<Participant> compareParticipant) {
         // Super
-        super(inputData, listener, true);
+        super(inputData, listener, true, compareParticipant);
 
         // If no participants exists add an empty one
         if (getPanelParticipants() != null && getPanelParticipants().getComponents().length == 0) {
@@ -141,9 +144,12 @@ public class EntryParticipantsEdit extends ComponentListDataParticipantEntryLine
         // Find index
         int index = Arrays.asList(getPanelParticipants().getComponents()).indexOf(previous);
         index = index == -1 ? 0 : index + 1;
-
+        
+        // Is this the own participant?
+        boolean ownParticipant = name.equals("") || email.equals("") ? false: getCompareParticipant().isSame(new Participant(name, email));
+        
         // Create and add entry
-        EntryParticipant entry = new EntryParticipant(name, email, isEnabled(), isEnabled(), false);
+        EntryParticipant entry = new EntryParticipant(name, email, isEnabled(), isEnabled(), ownParticipant);
         entry.setChangeListener(this);
         entry.setAddListener(new ActionListener() {
             @Override

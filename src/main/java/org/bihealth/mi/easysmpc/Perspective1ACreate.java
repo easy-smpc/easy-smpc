@@ -43,6 +43,7 @@ import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easysmpc.components.ComponentCompare;
 import org.bihealth.mi.easysmpc.components.ComponentListDataParticipant;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
@@ -590,14 +591,19 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     protected void initialize() {
         
         // Clear existing fields
-        panelBins.removeAll();
         fieldTitle.setText("");
-        emailconfigCheck = false; 
-        panelBins.removeAll();
+        emailconfigCheck = false;
         central.removeAll();
         
         // Participants
-        panelEntryParticipants = new EntryParticipantsEdit(null, this);        
+        panelEntryParticipants = new EntryParticipantsEdit(null, this, new ComponentCompare<Participant>() {          
+            @Override
+            public boolean isSame(Participant participant) {
+                // Compare if participant is the same as own participant
+                Participant ownParticipant = getApp().getModel().getParticipantFromId(getApp().getModel().getOwnId());
+                return participant.name.equals(ownParticipant.name) && participant.emailAddress.equals(ownParticipant.emailAddress);
+            }
+        });
         JScrollPane pane = new JScrollPane(panelEntryParticipants,
                                            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                                            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

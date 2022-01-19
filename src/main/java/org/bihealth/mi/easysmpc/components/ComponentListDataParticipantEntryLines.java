@@ -25,6 +25,8 @@ public abstract class ComponentListDataParticipantEntryLines extends ComponentLi
     private final ScrollablePanel panelParticipants;
     /** Is entry editable */
     private boolean               editable;
+    /** Compare Participant */
+    private final ComponentCompare<Participant> compareParticipant;
 
     /**
      * Creates a new instance
@@ -35,13 +37,15 @@ public abstract class ComponentListDataParticipantEntryLines extends ComponentLi
      */
     protected ComponentListDataParticipantEntryLines(List<Participant> inputData,
                                                      ChangeListener listener,
-                                                     boolean editable) {
+                                                     boolean editable,
+                                                     ComponentCompare<Participant> compareParticipant) {
 
         // Super
         super(inputData, listener);
 
         // Store
         this.editable = editable;
+        this.compareParticipant = compareParticipant;
 
         // Init panel and layout
         this.panelParticipants = new ScrollablePanel();
@@ -118,5 +122,12 @@ public abstract class ComponentListDataParticipantEntryLines extends ComponentLi
      */
     public boolean isEditable() {
         return editable;
+    }
+
+    /**
+     * @return the compareParticipant
+     */
+    public ComponentCompare<Participant> getCompareParticipant() {
+        return compareParticipant;
     }
 }
