@@ -36,7 +36,6 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -44,11 +43,12 @@ import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easysmpc.components.ComponentListDataParticipant;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryBin;
-import org.bihealth.mi.easysmpc.components.EntryParticipant;
+import org.bihealth.mi.easysmpc.components.EntryParticipantsEdit;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -90,11 +90,11 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         }
     }
 
-    /** Panel for participants */
-    private ScrollablePanel                   panelParticipants;
-
     /** Panel for bins */
     private ScrollablePanel                   panelBins;
+    
+    /** Panel for Participants */
+    private ComponentListDataParticipant      panelEntryParticipants;
 
     /** Text field containing title of study */
     private ComponentTextField                fieldTitle;
@@ -116,7 +116,10 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     
     /** Has e-mail config been checked? */
     private boolean                           emailconfigCheck;
-
+    
+    /** Central panel */
+    private JPanel central;
+    
     /**
      * Creates the perspective
      * @param app
@@ -130,8 +133,9 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      */
     public void stateChanged(ChangeEvent e) {
         // Is saving possible?
-        this.buttonSave.setEnabled(this.areValuesValid());
-        
+        if (this.buttonSave != null) {
+            this.buttonSave.setEnabled(this.areValuesValid());
+        }
         // Can a mailbox be added or removed
         if (this.comboSelectMailbox.getSelectedItem() != null) {
             this.buttonEditMailbox.setEnabled(true);
@@ -151,36 +155,14 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         }
         
         // If participants panels exists and automated mode selected => set e-mail address of creator automatically 
-        if (this.panelParticipants.getComponents() != null && this.panelParticipants.getComponents().length >= getApp().getModel().getOwnId() + 1) {
-            // Get participant entry component           
-            final EntryParticipant entry = ((EntryParticipant) this.panelParticipants.getComponents()[getApp().getModel().getOwnId()]);
-            
+        if (this.panelEntryParticipants != null &&
+            this.panelEntryParticipants.getLength() >= getApp().getModel().getOwnId() + 1) {
             if (this.comboSelectMailbox.getSelectedItem() != null) {
-                // Set email address and deactivate if not already done
-                String emailAddress = ((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getEmailAddress();
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        // No entry in field allowed
-                        if (entry.isRightEnabled()) {
-                            entry.setRightEnabled(false);
-                        }
-
-                        // Set e-mail address
-                        if (!entry.getRightValue().equals(emailAddress)) {
-                            entry.setRightValue(emailAddress);
-                        }
-                    }
-                });
-                } else {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!entry.isRightEnabled()) {
-                                // Allow entry in field
-                                entry.setRightEnabled(true);
-                            }
-                        }
-                    });         
+                // Set email address and deactivate
+                this.panelEntryParticipants.setEMailAddress(((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getEmailAddress());
+            } else {
+                // Enables e-mail field if not already done
+                this.panelEntryParticipants.enableEMailField(true);
             }
         }
     }
@@ -286,20 +268,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
      * Removes empty lines in participants and bins
      */
     private void actionRemoveEmptyLines() {
-        // Collect to remove
-        List<EntryParticipant> participantsToRemove = new ArrayList<>();
-        for (Component entry : this.panelParticipants.getComponents()) {
-                // Remove participants if both fields empty
-                if (((EntryParticipant) entry).isEmpty()) {
-                    participantsToRemove.add((EntryParticipant) entry);
-                }
-        }
-        // Actually remove
-        for (EntryParticipant entry : participantsToRemove) {
-            if (this.panelParticipants.getComponentCount() > 1) {
-                removeParticipant(entry);
-            }
-        }
+        this.panelEntryParticipants.removeEmptyLines();
         
         // Collect to remove
         List<EntryBin> binsToRemove = new ArrayList<>();
@@ -324,7 +293,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void actionSave() {
        
         // Check whether at least three participants
-        if (this.panelParticipants.getComponents().length < 3) {
+        if (this.panelEntryParticipants.getLength() < 3) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.notEnoughParticipants"));
             return;
         }
@@ -343,14 +312,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             }
         }
         
-        // Collect participants
-        List<Participant> participants = new ArrayList<>();
-        for (Component entry : this.panelParticipants.getComponents()) {
-            Participant participant = new Participant(((EntryParticipant)entry).getLeftValue(),
-                                                      ((EntryParticipant)entry).getRightValue());
-            participants.add(participant);
-        }
-        
+        // Collect particpants
+        List<Participant> participants = panelEntryParticipants.getOutputData();
         // Collect bins
         List<Bin> bins = new ArrayList<>();
         for (Component entry : this.panelBins.getComponents()) {
@@ -436,61 +399,25 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     }
 
     /**
-     * Adds a new line for participant entry
-     * @param previous
-     * @param enabled
-     */
-    private void addParticipant(EntryParticipant previous, boolean enabled) {
-        
-        // Find index
-        int index = Arrays.asList(this.panelParticipants.getComponents()).indexOf(previous);
-        index = index == -1 ? 0 : index + 1;
-        
-        // Create and add entry
-        EntryParticipant entry = new EntryParticipant("", "", enabled, enabled, false);
-        entry.setChangeListener(this);
-        entry.setAddListener(new ActionListener() {
-           @Override
-            public void actionPerformed(ActionEvent e) {
-               addParticipant(entry, true);
-            } 
-        });
-        entry.setRemoveListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                removeParticipant(entry);
-            }
-        });
-        this.panelParticipants.add(entry, index);
-        this.panelParticipants.revalidate();
-        this.panelParticipants.repaint();
-        this.stateChanged(new ChangeEvent(this));
-    }
-
-    /**
      * Checks all values for validity
      * @return
      */
-    private boolean areValuesValid() {
+    private boolean areValuesValid() {        
         
         // Check participants
-        for (Component c : this.panelParticipants.getComponents()) {
-            if (!((EntryParticipant) c).areValuesValid()) {
-                return false;
-            }
-        }
+        if (panelEntryParticipants == null || !panelEntryParticipants.areValuesValid()) { return false; }
         
         // Check bins
         for (Component c : this.panelBins.getComponents()) {
             if (!((EntryBin) c).areValuesValid()) { 
-                return false; 
+                return false;
             }
         }
-      
+        
         // Check title
         if (!fieldTitle.isValueValid()) {
             return false;
-        }       
+        }
         
         // Done
         return true;
@@ -532,26 +459,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.stateChanged(new ChangeEvent(this));
         this.panelBins.revalidate();
         this.panelBins.repaint();
-    }
-    
-    /**
-     * Removes a participant
-     * @param entry
-     */
-    private void removeParticipant(EntryParticipant entry) {
-        
-        // Check whether it's the last entry
-        if (this.panelParticipants.getComponentCount() == 1) {
-            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.errorTooFewEntries"));
-            return;
-        }
-        
-        // Remove and update
-        this.panelParticipants.remove(entry);
-        this.stateChanged(new ChangeEvent(this));
-        this.panelParticipants.revalidate();    
-        this.panelParticipants.repaint();
-    }
+    }   
 
     /**
      *Creates and adds UI elements
@@ -634,24 +542,14 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         generalDataPanel.add(automaticEMailPanel);
         
         // Central panel
-        JPanel central = new JPanel();
+        central = new JPanel();
         central.setLayout(new GridLayout(2, 1));
-        panel.add(central, BorderLayout.CENTER);
-        
-        // Participants
-        this.panelParticipants = new ScrollablePanel();
-        this.panelParticipants.setLayout(new BoxLayout(this.panelParticipants, BoxLayout.Y_AXIS));     
-        JScrollPane pane = new JScrollPane(panelParticipants, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                                           Resources.getString("PerspectiveCreate.participants"),
-                                                                           TitledBorder.LEFT,
-                                                                           TitledBorder.DEFAULT_POSITION));
-        central.add(pane, BorderLayout.NORTH);
+        panel.add(central, BorderLayout.CENTER);        
 
         // Bins
         this.panelBins = new ScrollablePanel();
         this.panelBins.setLayout(new BoxLayout(this.panelBins, BoxLayout.Y_AXIS));
-        pane = new JScrollPane(panelBins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane pane = new JScrollPane(panelBins, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                     Resources.getString("PerspectiveCreate.bins"),
                                                                     TitledBorder.LEFT,
@@ -702,17 +600,29 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     @Override
     protected void initialize() {
         
-        // Clear
-        this.panelParticipants.removeAll();
+        // Create and add participants
+        panelEntryParticipants = new EntryParticipantsEdit(null, this);        
+        JScrollPane pane = new JScrollPane(panelEntryParticipants,
+                                           JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                           JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                        Resources.getString("PerspectiveCreate.participants"),
+                                                        TitledBorder.LEFT,
+                                                        TitledBorder.DEFAULT_POSITION));
+        central.add(pane, BorderLayout.NORTH);
+        
+        // Clear existing fields
         this.panelBins.removeAll();
         this.fieldTitle.setText("");
-        this.emailconfigCheck = false;
-
+        this.emailconfigCheck = false;                
+        
         // Add initial
-        this.addParticipant(null, true);
         this.addBin(null, "", "", true);
         
         // Update
-        this.stateChanged(new ChangeEvent(this));
+        this.stateChanged(new ChangeEvent(this));        
+        getPanel().revalidate();
+        getPanel().repaint();
+
     }
 }

@@ -78,17 +78,7 @@ public class Perspective0Start extends Perspective {
             public void actionPerformed(ActionEvent e) {
                 getApp().actionCreateSpreadsheet();
             }
-        });
-        
-        // Action 4
-        JButton button4 = new JButton(Resources.getString("App.9")); //$NON-NLS-1$
-        buttons.add(button4);
-        button4.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getApp().actionCreateSpreadsheet();
-            }
-        });
+        });       
 
         // Add
         panel.setLayout(new GridBagLayout());
