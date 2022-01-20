@@ -149,6 +149,9 @@ public class Resources {
 
     /** Fractional bits for decimal values */
     public static final int FRACTIONAL_BITS = 32;
+    
+    /** Aggregation delimiter */
+    public static final String AGGREGATION_DELIMITER = "X";
         
     /**
      * Returns all available languages

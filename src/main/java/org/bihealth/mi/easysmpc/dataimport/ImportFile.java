@@ -197,7 +197,7 @@ public abstract class ImportFile {
                 // Merge all columns into one column
                 String concat = "";
                 for (int indexCol = 0; indexCol < strippedData[indexRow].length; indexCol++) {
-                    concat = concat + strippedData[indexRow][indexCol];
+                    concat = concat + (indexCol != 0 ? Resources.AGGREGATION_DELIMITER : "") + strippedData[indexRow][indexCol];
                 }
 
                 // Put
@@ -211,7 +211,7 @@ public abstract class ImportFile {
                 // Merge all columns but the last into one column
                 String concat = "";
                 for (int indexCol = 0; indexCol < strippedData[indexRow].length - 1; indexCol++) {
-                    concat = concat + strippedData[indexRow][indexCol];
+                    concat = concat + (indexCol != 0 ? Resources.AGGREGATION_DELIMITER : "") + strippedData[indexRow][indexCol];
                 }
 
                 // Put
