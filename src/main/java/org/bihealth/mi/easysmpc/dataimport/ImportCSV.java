@@ -39,26 +39,28 @@ import com.carrotsearch.hppc.IntIntOpenHashMap;
 public class ImportCSV extends ImportFile {
     
     /**
-     * Creates a new instance with the default number of expected row/columns
+     * Creates a new instance with default parameters
      * 
      * @param file
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public ImportCSV(File file) throws IOException, IllegalArgumentException {
-        this(file, DEFAULT_ROW_COL);
+    protected ImportCSV(File file) throws IOException, IllegalArgumentException {
+        this(file, true, false, false);
     }
     
     /**
      * Creates a new instance
      * 
      * @param file
-     * @param expectedRowCol
+     * @param rowOriented - is data row or column oriented?
+     * @param oneRowCol - Is the result supposed to be two or one column. If this parameter is set all data is merge together, if it is unset the last column will be handled separately  
+     * @param hasHeader - skip first line since it contains the header     
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public ImportCSV(File file, int expectedRowCol) throws IOException, IllegalArgumentException {
-        super(file, expectedRowCol);
+    protected ImportCSV(File file, boolean rowOriented, boolean oneRowCol, boolean hasHeader) throws IOException, IllegalArgumentException {
+        super(file, rowOriented, oneRowCol, hasHeader);
     }
     
 

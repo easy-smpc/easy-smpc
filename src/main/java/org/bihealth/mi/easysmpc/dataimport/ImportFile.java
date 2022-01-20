@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.EncryptedDocumentException;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -31,69 +32,78 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Fabian Prasser
  */
 public abstract class ImportFile {
-    
-    /** Default value for expected rows/colu,ns */
-    protected static final int DEFAULT_ROW_COL = 2;
 
     /**
-     * Creates a new extractor for a given file with the default number of expected rows/columns
+     * Creates a new extractor for a given file with the default of more row oriented data with more than one column
      * 
      * @param file
      * @return
      * @throws IOException 
      * @throws IllegalArgumentException 
      */
-    public static ImportFile forFile(File file) throws IllegalArgumentException, IOException {
-        
-        return forFile(file, DEFAULT_ROW_COL);
+    public static ImportFile forFile(File file) throws IllegalArgumentException, IOException {        
+        return forFile(file, true, false, false);
     }
     
     /**
      * Creates a new extractor for a given file
      * 
      * @param file
-     * @param expectedRowCol - Expected number of columns or rows
+     * @param rowOriented - is data row or column oriented?
+     * @param oneRowCol - Is the result supposed to be two or one column. If this parameter is set all data is merge together, if it is unset the last column will be handled separately
+     * @param hasHeader - skip first line since it contains the header  
      * @return
      * @throws IllegalArgumentException
      * @throws IOException
      */
-    public static ImportFile forFile(File file, int expectedRowCol) throws IllegalArgumentException, IOException {
-        
-        // Check
-        if(expectedRowCol != 1 && expectedRowCol != 2 ) {
-            throw new IllegalArgumentException("Only one or two expected rows/columns are supported!");
-        }
+    public static ImportFile forFile(File file,
+                                     boolean rowOriented,
+                                     boolean oneRowCol,
+                                     boolean hasHeader) throws IllegalArgumentException,
+                                                        IOException {
         
         // Choose correct extractor
         if (file.getName().endsWith(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().endsWith(Resources.FILE_ENDING_EXCEL_XLSX)) {
-            return new ImportExcel(file, expectedRowCol);
+            return new ImportExcel(file, rowOriented, oneRowCol, hasHeader);
         }
         else {
-            return new ImportCSV(file, expectedRowCol);
+            return new ImportCSV(file, rowOriented, oneRowCol, hasHeader);
         }   
     }
 
     /** File of data origin */
-    private File          file;
-    /** Number of expected row or columns in data */
-    private int expectedRowCol;
+    private File file;
+    /** Is data row or column oriented? */
+    private boolean rowOriented;
+    /** Is data only one or multiple rows/columns? */
+    private boolean oneRowCol;
+    /** Has data a header line? */
+    private boolean hasHeader;
 
     /**
      * Creates a new instance
      * 
      * @param file
+     * @param rowOriented - is data row or column oriented?
+     * @param oneRowCol - Is the result supposed to be two or one column. If this parameter is set all data is merge together, if it is unset the last column will be handled separately
+     * @param hasHeader - skip first line since it contains the header 
      * @throws IOException
      * @throws EncryptedDocumentException
      */
-    protected ImportFile(File file, int expectedRowCol) throws IOException, IllegalArgumentException {
+    protected ImportFile(File file,
+                         boolean rowOriented,
+                         boolean oneRowCol,
+                         boolean hasHeader) throws IOException, IllegalArgumentException {
         this.file = file;
-        this.expectedRowCol = expectedRowCol;
+        this.rowOriented = rowOriented;
+        this.oneRowCol = oneRowCol;
+        this.hasHeader = hasHeader;
     }
 
     /**
      * Returns the data as key-value pairs
      * 
-     * @return the data
+     * @return A list with either all columns per row merged as keys and values as null or all columns but the last merged as keys and the last column as values (see <code>oneRowCol<code> of the constructor)
      * @throws IOException 
      */
     public Map<String, String> getData() throws IllegalArgumentException, IOException {
@@ -111,6 +121,11 @@ public abstract class ImportFile {
         // Prepare
         int columns = -1;
         List<List<String>> rows = new ArrayList<>();
+        
+        // Transpose if necessary
+        if(!this.rowOriented) {
+            data = transposeMatrix(data);
+        }
 
         // Remove empty rows
         for (String[] row : data) {
@@ -151,10 +166,12 @@ public abstract class ImportFile {
             }
         }
         
-        // Final sanity check
+        // Pack
         String[][] result = pack(rows);
-        if (result.length != this.expectedRowCol && result[0] != null && result[0].length != this.expectedRowCol) {
-            throw new IllegalArgumentException(String.format("Array must have exact %d rows or columns", this.expectedRowCol));
+        
+        // Remove header line
+        if (hasHeader) {
+            result = ArrayUtils.removeElement(result, result [0]);
         }
         
         // Done
@@ -167,44 +184,41 @@ public abstract class ImportFile {
      * @param strippedData
      * @return extracted data
      */
-    private Map<String,String> extract(String[][] strippedData) {
-        
+    private Map<String, String> extract(String[][] strippedData) {
+
         // Prepare
         Map<String, String> result = new LinkedHashMap<String, String>();
-        
-        // Two rows/columns
-        if (this.expectedRowCol == 2) {
 
-            // Two columns
-            if (strippedData.length != 2) {
-                for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
-                    result.put(strippedData[indexRow][0], strippedData[indexRow][1]);
+        if (oneRowCol) {
+            
+            // Loop over data
+            for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
+
+                // Merge all columns into one column
+                String concat = "";
+                for (int indexCol = 0; indexCol < strippedData[indexRow].length; indexCol++) {
+                    concat = concat + strippedData[indexRow][indexCol];
                 }
 
-                // Two rows
-            } else {
-                for (int indexColumn = 0; indexColumn < strippedData[0].length; indexColumn++) {
-                    result.put(strippedData[0][indexColumn], strippedData[1][indexColumn]);
-                }
+                // Put
+                result.put(concat, null);
             }
         } else {
 
-            // One row or column
+            // Loop over data
+            for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
 
-            if (strippedData.length != 1) {
-                // One column
-                for (int indexRow = 0; indexRow < strippedData.length; indexRow++) {
-                    result.put(strippedData[indexRow][0], null);
+                // Merge all columns but the last into one column
+                String concat = "";
+                for (int indexCol = 0; indexCol < strippedData[indexRow].length - 1; indexCol++) {
+                    concat = concat + strippedData[indexRow][indexCol];
                 }
 
-                // One row
-            } else {
-                for (int indexColumn = 0; indexColumn < strippedData[0].length; indexColumn++) {
-                    result.put(strippedData[0][indexColumn], null);
-                }
+                // Put
+                result.put(concat, strippedData[indexRow][strippedData[indexRow].length - 1]);
             }
         }
-        
+
         // Done
         return result;
     }
@@ -267,16 +281,39 @@ public abstract class ImportFile {
         int columns = 0;
         for (List<String> row : rows) {
             columns = Math.max(row.size(), columns);
-        }
+        }        
         
         // Convert list of lists to array
         String[][] result = new String[rows.size()][];
         int index = 0;
         for (List<String> row : rows) {
             result[index++] = row.toArray(new String[columns]);
-        }
+        }       
         
         // Done
+        return result;
+    }
+
+    /**
+     * Transpose a matrix
+     * 
+     * @param array
+     * @return
+     */
+    protected String[][] transposeMatrix(String[][] array) {
+        // Check
+        if (array == null || array.length == 0) { return array; }
+
+        // Init
+        String[][] result = new String[array[0].length][array.length];
+
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array[0].length; j++) {
+                result[j][i] = array[i][j];
+            }
+        }
+
+        // Return
         return result;
     }
 }

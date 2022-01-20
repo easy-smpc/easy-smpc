@@ -35,26 +35,29 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class ImportExcel extends ImportFile {
 
     /**
-     * Creates a new instance with the default number of expected row/columns
+     * Creates a new instance with default parameters
      * 
      * @param file
+
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public ImportExcel(File file) throws IOException, IllegalArgumentException {
-        this(file, DEFAULT_ROW_COL);
+    protected ImportExcel(File file) throws IOException, IllegalArgumentException {
+        this(file, true, false, false);
     }
 
     /**
      * Creates a new instance
      * 
      * @param file
-     * @param expectedRowCol - Expected number of columns or rows
+     * @param oneRowCol 
+     * @param rowOriented 
+     * @param hasHeader
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    public ImportExcel(File file, int expectedRowCol) throws IOException, IllegalArgumentException {
-        super(file, expectedRowCol);
+    protected ImportExcel(File file, boolean rowOriented, boolean oneRowCol, boolean hasHeader) throws IOException, IllegalArgumentException {
+        super(file, rowOriented, oneRowCol, hasHeader);
     }
 
     /**
