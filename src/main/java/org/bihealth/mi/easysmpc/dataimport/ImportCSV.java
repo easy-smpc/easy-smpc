@@ -19,7 +19,6 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,7 +78,7 @@ public class ImportCSV extends ImportFile {
         final CharIntOpenHashMap delimitors = new CharIntOpenHashMap();
         
         try {
-        r = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), Charset.defaultCharset()));        
+        r = new BufferedReader(new InputStreamReader(new FileInputStream(getFile()), "UTF-8"));        
         for (int i=0; i<Resources.DELIMITERS.length; i++) {
             delimitors.put(Resources.DELIMITERS[i], i);
         }
@@ -135,7 +134,7 @@ public class ImportCSV extends ImportFile {
     protected String[][] load() throws IOException {     
         
         // Open
-        Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(getDelimiter()).parse(new FileReader(getFile()));
+        Iterable<CSVRecord> records = CSVFormat.DEFAULT.withDelimiter(getDelimiter()).parse((new InputStreamReader(new FileInputStream(getFile()), "UTF-8")));
         List<List<String>> rows = new ArrayList<>();
         
         // Load per row
