@@ -1,7 +1,5 @@
 package org.bihealth.mi.easysmpc.components;
 
-import java.util.List;
-
 import javax.swing.event.ChangeListener;
 
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
@@ -24,9 +22,9 @@ public class EntryParticipantsView extends ComponentListDataParticipantEntryLine
      * @param listener
      * @param compareParticipant
      */
-    public EntryParticipantsView(List<Participant> inputData, ChangeListener listener, ComponentCompare<Participant> compareParticipant) {
+    public EntryParticipantsView(ChangeListener listener, ComponentCompare<Participant> compareParticipant) {
         // Super
-        super(inputData, listener, false, compareParticipant);
+        super(listener, false, compareParticipant);
     }
 
     @Override
@@ -46,12 +44,6 @@ public class EntryParticipantsView extends ComponentListDataParticipantEntryLine
 
     @Override
     public void removeEmptyLines() {
-        // Not supported
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void reset() {
         // Not supported
         throw new UnsupportedOperationException();
     }

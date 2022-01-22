@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.tu_darmstadt.cbs.emailsmpc.Participant;
@@ -17,33 +19,33 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Felix Wirth
  *
  */
-public abstract class ComponentListDataParticipantEntryLines extends ComponentListDataParticipant {
+public abstract class ComponentListDataParticipantEntryLines extends JPanel implements ComponentListDataParticipant {
 
     /** SVUID */
-    private static final long     serialVersionUID = -5311279647815163120L;
+    private static final long serialVersionUID = -4679900601010426388L;
     /** Panel for participants */
-    private final ScrollablePanel panelParticipants;
+    private final ScrollablePanel               panelParticipants;
     /** Is entry editable */
-    private boolean               editable;
+    private boolean                             editable;
     /** Compare Participant */
     private final ComponentCompare<Participant> compareParticipant;
+    /** Change listener */
+    private final ChangeListener                listener;
 
+    
     /**
      * Creates a new instance
      * 
-     * @param inputData
      * @param listener
      * @param editable
+     * @param compareParticipant
      */
-    protected ComponentListDataParticipantEntryLines(List<Participant> inputData,
-                                                     ChangeListener listener,
+    protected ComponentListDataParticipantEntryLines(ChangeListener listener,
                                                      boolean editable,
                                                      ComponentCompare<Participant> compareParticipant) {
 
-        // Super
-        super(inputData, listener);
-
         // Store
+        this.listener = listener;
         this.editable = editable;
         this.compareParticipant = compareParticipant;
 
@@ -52,13 +54,6 @@ public abstract class ComponentListDataParticipantEntryLines extends ComponentLi
         this.panelParticipants.setLayout(new BoxLayout(this.panelParticipants, BoxLayout.Y_AXIS));
         this.setLayout(new BorderLayout());
         this.add(panelParticipants, BorderLayout.CENTER);
-
-        // Set initial data
-        if (inputData != null) {
-            for (Participant p : inputData) {
-                addParticipant(null, p.name, p.emailAddress);
-            }
-        }
     }
 
     /**
@@ -72,7 +67,7 @@ public abstract class ComponentListDataParticipantEntryLines extends ComponentLi
               addParticipant(EntryParticipant previous, String name, String emailAddress);
 
     @Override
-    protected List<Participant> collectOutputData() {
+    public List<Participant> getParticipants() {
         // Prepare
         List<Participant> participants = new ArrayList<>();
 
@@ -129,5 +124,27 @@ public abstract class ComponentListDataParticipantEntryLines extends ComponentLi
      */
     public ComponentCompare<Participant> getCompareParticipant() {
         return compareParticipant;
+    }
+    
+    @Override
+    public void setParticipants(List<Participant> participants) {
+        
+        if (participants != null) {
+            for (Participant p : participants) {
+                addParticipant(null, p.name, p.emailAddress);
+            }
+        }
+    }
+    
+    @Override
+    public ChangeListener getListener() {
+        return this.listener;
+    }
+    
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        if (listener != null) {
+            listener.stateChanged(e);
+        }
     }
 }

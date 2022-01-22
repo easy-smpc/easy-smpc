@@ -14,12 +14,12 @@
 package org.bihealth.mi.easysmpc.components;
 
 /**
- * Compare with another object interface
+ * Compare with another object
  * 
  * @author Felix Wirth
  */
 public interface ComponentCompare <T> {
 
     /** Is it the same? */
-    public boolean isSame(T participant);
+    public boolean isSame(T object);
 }

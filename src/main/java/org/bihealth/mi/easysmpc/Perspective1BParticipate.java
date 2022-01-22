@@ -43,7 +43,7 @@ import javax.swing.event.ChangeListener;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentCompare;
-import org.bihealth.mi.easysmpc.components.ComponentListDataParticipant;
+import org.bihealth.mi.easysmpc.components.ComponentListDataParticipantEntryLines;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryBin;
@@ -118,9 +118,6 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     /** Has e-mail config been checked? */
     private boolean                           emailconfigCheck;
     
-    /**  Panel for participants */
-    private ComponentListDataParticipant panelEntryParticipants;    
-
     /**
      * Creates the perspective
      * @param app
@@ -440,14 +437,16 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         central.removeAll();
         
         // Participants
-        panelEntryParticipants = new EntryParticipantsView(Arrays.asList(getApp().getModel().getParticipants()), this, new ComponentCompare<Participant>() {          
+        ComponentListDataParticipantEntryLines panelEntryParticipants = new EntryParticipantsView(this, new ComponentCompare<Participant>() {          
             @Override
             public boolean isSame(Participant participant) {
                 // Compare if participant is the same as own participant
                 Participant ownParticipant = getApp().getModel().getParticipantFromId(getApp().getModel().getOwnId());
                 return participant.name.equals(ownParticipant.name) && participant.emailAddress.equals(ownParticipant.emailAddress);
             }
-        });        
+        });    
+        panelEntryParticipants.setParticipants(Arrays.asList(getApp().getModel().getParticipants()));
+        
         JScrollPane pane = new JScrollPane(panelEntryParticipants,
                                            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                                            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

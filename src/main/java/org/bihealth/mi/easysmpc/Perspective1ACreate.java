@@ -314,7 +314,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         }
         
         // Collect particpants
-        List<Participant> participants = panelEntryParticipants.getOutputData();
+        List<Participant> participants = panelEntryParticipants.getParticipants();
         // Collect bins
         List<Bin> bins = new ArrayList<>();
         for (Component entry : this.panelBins.getComponents()) {
@@ -596,7 +596,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         central.removeAll();
         
         // Participants
-        panelEntryParticipants = new EntryParticipantsEdit(null, this, new ComponentCompare<Participant>() {          
+        panelEntryParticipants = new EntryParticipantsEdit(this, new ComponentCompare<Participant>() {          
             @Override
             public boolean isSame(Participant participant) {
                 // Compare if participant is the same as own participant
@@ -604,7 +604,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 return participant.name.equals(ownParticipant.name) && participant.emailAddress.equals(ownParticipant.emailAddress);
             }
         });
-        JScrollPane pane = new JScrollPane(panelEntryParticipants,
+        JScrollPane pane = new JScrollPane((EntryParticipantsEdit) panelEntryParticipants,
                                            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                                            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         pane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),

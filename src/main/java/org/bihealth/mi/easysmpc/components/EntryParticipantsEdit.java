@@ -34,11 +34,10 @@ public class EntryParticipantsEdit extends ComponentListDataParticipantEntryLine
      * @param listener
      * @param compareParticipant
      */
-    public EntryParticipantsEdit(List<Participant> inputData,
-                                 ChangeListener listener,
+    public EntryParticipantsEdit(ChangeListener listener,
                                  ComponentCompare<Participant> compareParticipant) {
         // Super
-        super(inputData, listener, true, compareParticipant);
+        super(listener, true, compareParticipant);
 
         // If no participants exists add an empty one
         if (getPanelParticipants() != null && getPanelParticipants().getComponents().length == 0) {
@@ -171,14 +170,5 @@ public class EntryParticipantsEdit extends ComponentListDataParticipantEntryLine
         if (getListener() != null) {
             getListener().stateChanged(new ChangeEvent(this));
         }
-    }
-
-    @Override
-    public void reset() {
-        // Remove
-        getPanelParticipants().removeAll();
-
-        // Add a single line
-        addParticipant(null, "", "");
     }
 }
