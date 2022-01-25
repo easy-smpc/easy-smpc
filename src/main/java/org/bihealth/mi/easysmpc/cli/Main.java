@@ -192,6 +192,9 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+	    // Prefer IPv6 if network (e.g. e-mail) is used
+        System.getProperties().setProperty("java.net.preferIPv6Addresses", "true");
+	    
 	    // Prepare
 	    CommandLine cli;	    
 	    Options options = new Options();

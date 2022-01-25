@@ -173,7 +173,7 @@ public class UserParticipating extends User {
         
         // Warning about unmapped variables
         for(Entry<String, String> entry : this.data.entrySet()) {
-            LOGGER.warn(String.format("Data for variable %s was provided, but variable was not found in variable definition", entry.getKey()));
+            LOGGER.warn(String.format("Data for variable \"%s\" was provided, but variable was not found in variable definition", entry.getKey()));
         }
         
         // Return
