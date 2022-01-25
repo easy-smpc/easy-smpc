@@ -185,6 +185,14 @@ public class Main {
                                                                  .required(false)
                                                                  .hasArg(false)
                                                                  .build();
+    
+    /** Command line option */
+    private static final Option OPTION_SKIP_COLUMNS  = Option.builder("j")
+                                                                 .desc("Indicates the numbers of columns to skip")
+                                                                 .longOpt("skip-columns")
+                                                                 .required(false)
+                                                                 .hasArg(true)
+                                                                 .build();
 
 	/**
 	 * Starts an EasySMPC process
@@ -218,7 +226,8 @@ public class Main {
                .addOption(OPTION_PARTICIPANT_NAME)
                .addOption(OPTION_STUDY_NAME)
                .addOption(OPTION_DATA_COLUMN)
-               .addOption(OPTION_HAS_HEADER);
+               .addOption(OPTION_HAS_HEADER)
+               .addOption(OPTION_SKIP_COLUMNS);
 	    
         try {
             // Parse arguments
@@ -263,11 +272,13 @@ public class Main {
                              getDataFromFiles(cli.getOptionValue(OPTION_BINS_NAMES),
                                               !cli.hasOption(OPTION_DATA_COLUMN),
                                               true,
-                                              cli.hasOption(OPTION_HAS_HEADER)),
+                                              cli.hasOption(OPTION_HAS_HEADER),
+                                              cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
                              getDataFromFiles(cli.getOptionValue(OPTION_DATA_FILES),
                                               !cli.hasOption(OPTION_DATA_COLUMN),
                                               false,
-                                              cli.hasOption(OPTION_HAS_HEADER)),
+                                              cli.hasOption(OPTION_HAS_HEADER),
+                                              cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
                              getConnectionIMAPSettingsFromCLI(cli),
                              MAILBOX_CHECK_INTERVAL);
         } else {
@@ -287,7 +298,8 @@ public class Main {
                                                                         getDataFromFiles(cli.getOptionValue(OPTION_DATA_FILES),
                                                                                          !cli.hasOption(OPTION_DATA_COLUMN),
                                                                                          false,
-                                                                                         cli.hasOption(OPTION_HAS_HEADER)),
+                                                                                         cli.hasOption(OPTION_HAS_HEADER),
+                                                                                         cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
                                                                   getConnectionIMAPSettingsFromCLI(cli),
                                                                   MAILBOX_CHECK_INTERVAL);
            
@@ -310,6 +322,7 @@ public class Main {
      * @param rowOrientedData
      * @param oneRowCol
      * @param hasHeader
+     * @param skipCol 
      * @return
      * @throws IllegalStateException
      */
@@ -317,7 +330,7 @@ public class Main {
            getDataFromFiles(String filenames,
                             boolean rowOrientedData,
                             boolean oneRowCol,
-                            boolean hasHeader) throws IllegalStateException {
+                            boolean hasHeader, int skipCol) throws IllegalStateException {
         // Prepare
         Map<String, String> result = new HashMap<>();
         String[] split = filenames.split(",");
@@ -325,7 +338,7 @@ public class Main {
         // Loop over file names
         for(String filename : split) {
             // Add one file's result to the result map
-            result.putAll(getDataFromFile(new File(filename), rowOrientedData, oneRowCol, hasHeader));
+            result.putAll(getDataFromFile(new File(filename), rowOrientedData, oneRowCol, hasHeader, skipCol));
         }
         
         // Return
@@ -344,6 +357,9 @@ public class Main {
             // Check integer
             Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT));
             Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT));
+            if (cli.hasOption(cli.getOptionValue(OPTION_SKIP_COLUMNS))) {
+                Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS));
+            }
             
             // Check participant name and e-mail address
             new Participant(cli.hasOption(OPTION_PARTICIPANT_NAME) ? cli.getOptionValue(OPTION_PARTICIPANT_NAME) : "Creator", cli.getOptionValue(OPTION_MAILADDRESS));            
@@ -356,7 +372,7 @@ public class Main {
             // Check encryption for SMTP
             if(!(cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(SSL_TLS) || cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(START_TLS))) {
                 throw new IllegalArgumentException(String.format("Please enter either %s or s% for SMTP encryption", SSL_TLS, START_TLS));
-            }
+            }            
             
         } catch(Exception e) {
             throw new IllegalArgumentException("Arguments were not correct!", e);
@@ -393,17 +409,21 @@ public class Main {
      * @param rowOrientedData
      * @param oneRowCol
      * @param hasHeader
+     * @param skipCol
      * @return
      */
-    public static Map<String, String>
-           getDataFromFile(File file, boolean rowOrientedData, boolean oneRowCol, boolean hasHeader) {
+    public static Map<String, String> getDataFromFile(File file,
+                                                      boolean rowOrientedData,
+                                                      boolean oneRowCol,
+                                                      boolean hasHeader,
+                                                      int skipCol) {
         
         // Check
         if (file == null) { return null; }
         
         // Load data map
         try {
-            return ImportFile.forFile(file, rowOrientedData, oneRowCol, hasHeader).getData();
+            return ImportFile.forFile(file, rowOrientedData, oneRowCol, hasHeader, skipCol).getData();
         } catch (IOException e) {
             LOGGER.error(String.format("Error loading file. Does the file %s exists and is accessible?", file.getAbsolutePath()));
             throw new IllegalStateException(e);
