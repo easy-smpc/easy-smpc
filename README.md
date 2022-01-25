@@ -119,6 +119,7 @@ Please note that in addition to the parameters mentioned above the following opt
 1. `-u`: Pass this parameter if an automatically detected proxy server will be used contact the e-mail server. This feature is experimental.
 2. `-h`: Pass this parameter if the data in the data and variables files are oriented horizontally
 3. `-e`: Pass this parameter if the data in the data and variables files have headers, which need to be skipped
+4. `-j N_COLUMNS_TO_SKIP`: Pass this parameter to skip the first n columns
 
 ### Participant
 Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -participate -l STUDY_NAME -d FILE_PATH_DATA -o PARTICIPANT_NAME -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. Most parameters are explained in [Creator](#Creator), other parameters are described below:
