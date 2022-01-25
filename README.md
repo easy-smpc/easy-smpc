@@ -95,10 +95,10 @@ prime.
 4. The final perspective shows the result of the secure addition of all variables.
 
 ## Command line version
-There is also a command line version of EasySMPC. After [building](#build-from-source) use the jar easy-smpc-cli-{Version}.jar as a creator and as two participants or more.
+There is also a command line version of EasySMPC. After [building](#build-from-source) use the jar easy-smpc-cli-*{Version}*.jar as a creator and as two participants or more.
 
 ### Creator
-Execute the program with `java -jar easy-smpc-cli-{Version}.jar -create -l STUDY_NAME -b FILES_PATH_VARIABLES -d FILES_PATH_DATA -f PARTICIPANTS -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. The parameters mean to the following:
+Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -create -l STUDY_NAME -b FILES_PATH_VARIABLES -d FILES_PATH_DATA -f PARTICIPANTS -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. The parameters mean to the following:
 1. `-create`: Indicates the creation of a new EasySMPC process
 2. `-l STUDY_NAME`: Name/title of the study. Muste be same same for the creator and all participants.
 3. `-b FILE_PATH_VARIABLES`: The names of the variables to exchange in Excel or CSV-files with one row or column in the format *firstFile.xlsx,secondFile.csv*
@@ -121,7 +121,7 @@ Please note that in addition to the parameters mentioned above the following opt
 3. `-e`: Pass this parameter if the data in the data and variables files have headers, which need to be skipped
 
 ### Participant
-Execute the program with `java -jar easy-smpc-cli-{Version}.jar -participate -l STUDY_NAME -d FILE_PATH_DATA -o PARTICIPANT_NAME -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. Most parameters are explained in [Creator](#Creator), other parameters are described below:
+Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -participate -l STUDY_NAME -d FILE_PATH_DATA -o PARTICIPANT_NAME -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. Most parameters are explained in [Creator](#Creator), other parameters are described below:
 1. `-participate`: Indicates the participation in a new EasySMPC process.
 2. `-l STUDY_NAME`: Name/title of the study. Muste be same same as for the creator. Must be the same as for the creator.
 3. `-o PARTICIPANT_NAME`: Name of the participant as defined in the participants files by the creator.
@@ -132,9 +132,9 @@ After executing check the result in the file `result_<study name>_<timestamp>.xl
 
 ### Sample 
 Data for a sample can be found in the folder `sample-cli`. A sample process with this data might can be started with these three commands: 
- 1. `java -jar easy-smpc-cli-{Version}.jar -create -b "-create -l "sample Study" -b ./sample/variables.xlsx -d "./sample/PKU comorbidities.xlsx" -f "Creator,easysmpc.dev0@gmail.com;Participant1,easysmpc.dev1@gmail.com;Participant2,easysmpc.dev2@gmail.com" -a easysmpc.dev0@gmail.com -p thePassword -i imap.gmail.com -x 993 -y SSLTLS -s smtp.gmail.com -z 465 -q SSLTLS`
-2. `java -jar easy-smpc-cli-{Version}.jar -participate -l "sample Study" -d "./sample/PKU comorbidities.xlsx" -o Participant1 -a easysmpc.dev1@gmail.com -p thePassword-i imap.ionos.de -x 993 -y SSLTLS -s smtp.ionos.de -z 465 -q SSLTLS5`
-3. `java -jar easy-smpc-cli-{Version}.jar -participate -l "sample Study" -d "./sample/PKU comorbidities.xlsx" -o Participant2 -a easysmpc.dev2@gmail.com -p &r6=Jbh9 -i imap.ionos.de -x 993 -y SSLTLS -s smtp.ionos.de -z 465 -q SSLTLS`
+ 1. `java -jar easy-smpc-cli-*{Version}*.jar -create -b "-create -l "sample Study" -b ./sample/variables.xlsx -d "./sample/PKU comorbidities.xlsx" -f "Creator,easysmpc.dev0@gmail.com;Participant1,easysmpc.dev1@gmail.com;Participant2,easysmpc.dev2@gmail.com" -a easysmpc.dev0@gmail.com -p thePassword -i imap.gmail.com -x 993 -y SSLTLS -s smtp.gmail.com -z 465 -q SSLTLS`
+2. `java -jar easy-smpc-cli-*{Version}*.jar -participate -l "sample Study" -d "./sample/PKU comorbidities.xlsx" -o Participant1 -a easysmpc.dev1@gmail.com -p thePassword-i imap.ionos.de -x 993 -y SSLTLS -s smtp.ionos.de -z 465 -q SSLTLS5`
+3. `java -jar easy-smpc-cli-*{Version}*.jar -participate -l "sample Study" -d "./sample/PKU comorbidities.xlsx" -o Participant2 -a easysmpc.dev2@gmail.com -p &r6=Jbh9 -i imap.ionos.de -x 993 -y SSLTLS -s smtp.ionos.de -z 465 -q SSLTLS`
 
 The single commands are expected to start on different folders or better different computers. If they start on one computer, errors of writing log and result files can happen. Also in this minimal test the same data file `PKU comorbidities.xlsx` is used for each party. However, in a real-world usage each participant would use different data in the file
 
