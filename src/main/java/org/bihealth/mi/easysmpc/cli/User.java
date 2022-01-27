@@ -49,27 +49,29 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 public class User implements MessageListener {
 
     /** Logger */
-    private static final Logger        LOGGER                  = LogManager.getLogger(User.class);
+    private static final Logger    LOGGER  = LogManager.getLogger(User.class);
     /** Round for initial e-mails */
-    public static final String         ROUND_0                 = "_round0";    
+    public static final String     ROUND_0 = "_round0";
     /** The study model */
-    private Study                      model                   = new Study();
-     /** The mailbox check interval in milliseconds */
-    private final int                  mailBoxCheckInterval;
+    private Study                  model   = new Study();
+    /** The mailbox check interval in milliseconds */
+    private final int              mailBoxCheckInterval;
     /** connectionIMAPSettings */
     private ConnectionIMAPSettings connectionIMAPSettings;
+    /** Error flag */
+    private boolean                error   = false;
 
     /**
      * Creates a new instance for creating users
      * 
-     * @param mailboxCheckInterval 
-     * @param connectionIMAPSettings 
+     * @param mailboxCheckInterval
+     * @param connectionIMAPSettings
      */
     public User(int mailboxCheckInterval, ConnectionIMAPSettings connectionIMAPSettings) {
 
         this.mailBoxCheckInterval = mailboxCheckInterval;
         this.connectionIMAPSettings = connectionIMAPSettings;
-    }    
+    }   
     
     /**
      * @return the mailBoxCheckInterval
@@ -114,6 +116,7 @@ public class User implements MessageListener {
     @Override
     public void receiveError(Exception e) {
         LOGGER.error("Error receiveing e-mails",e);
+        this.error = true;
     }
 
     /**
@@ -161,7 +164,12 @@ public class User implements MessageListener {
         
         // Wait for all shares
         while (!areSharesComplete()) {
-
+            
+            // Check for error while receiving and throw exeception
+            if(this.error) {
+                throw new IllegalArgumentException("Error receiving e-mails!");
+            }
+            
             // Proceed if shares complete
             if (!getModel().isBusAlive()) {
                 LOGGER.error("Bus is not alive anymore!");
@@ -183,15 +191,19 @@ public class User implements MessageListener {
      */
     private void sendMessages(String roundIdentifier) {
         
+        // Prepare
+        FutureTask<Void> future = null;
+        
         // Loop over participants
         for (int index = 0; index < getModel().getNumParticipants(); index++) {
+            
             
             // Only proceed if not own user
             if (index != getModel().getOwnId()) {
 
                 try {
                     // Retrieve bus and send message
-                    FutureTask<Void> future = getModel().getBus(this.mailBoxCheckInterval, false).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
+                    future = getModel().getBus(this.mailBoxCheckInterval, false).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
                                     new Scope(getModel().getName() + (getModel().getState() == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().getParticipants()[index].name,
                                                                             getModel().getParticipants()[index].emailAddress));
@@ -202,6 +214,7 @@ public class User implements MessageListener {
                     // Mark message as sent
                     model.markMessageSent(index);
                 } catch (Exception e) {
+                     future.cancel(true);
                     LOGGER.error("Unable to send e-mail" ,e);
                     throw new IllegalStateException("Unable to send e-mail!", e);
                 }
@@ -244,7 +257,12 @@ public class User implements MessageListener {
             LOGGER.info(String.format("Process completed sucessfully. Please see result file %s", createResultFileName()));
             
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
-            LOGGER.error("Unable to process common process", e);
+            LOGGER.error("Unable to process common process steps", e);
+            try {
+                this.model.getBus().stop();
+            } catch (BusException e1) {
+                // Ignore
+            }
         }
     }
 
