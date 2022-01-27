@@ -85,6 +85,9 @@ public class UserCreating extends User {
                                       getModel().getName(),
                                       getModel().getNumParticipants(),
                                       getModel().getBins().length));
+            
+            // Save state
+            save();
 
         } catch (IOException | IllegalStateException e) {
             LOGGER.error("Unable to init study", e);

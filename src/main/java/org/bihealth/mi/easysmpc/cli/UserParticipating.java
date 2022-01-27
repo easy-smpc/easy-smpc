@@ -132,6 +132,9 @@ public class UserParticipating extends User {
 
             // Set own values and proceed
             getModel().toSendingShares(getValuesFromData());
+            
+            // Save state         
+            save();
 
             // Starts the common steps 
             performCommonSteps();

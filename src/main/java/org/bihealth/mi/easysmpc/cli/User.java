@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
@@ -62,17 +63,97 @@ public class User implements MessageListener {
     private boolean                error   = false;
 
     /**
-     * Creates a new instance for creating users
+     * Creates a new instance
      * 
      * @param mailboxCheckInterval
      * @param connectionIMAPSettings
      */
-    public User(int mailboxCheckInterval, ConnectionIMAPSettings connectionIMAPSettings) {
+    protected User(int mailboxCheckInterval, ConnectionIMAPSettings connectionIMAPSettings) {
 
+        // Store
         this.mailBoxCheckInterval = mailboxCheckInterval;
-        this.connectionIMAPSettings = connectionIMAPSettings;
-    }   
+        this.connectionIMAPSettings = connectionIMAPSettings;               
+    }
     
+    
+    
+    /**
+     * Create a new instance from an existing model
+     * 
+     * @param file
+     * @throws IOException 
+     * @throws IllegalArgumentException 
+     * @throws ClassNotFoundException 
+     */
+    public User(File file, int mailboxCheckInterval) throws ClassNotFoundException, IllegalArgumentException, IOException {
+        this(mailboxCheckInterval, Study.loadModel(file).getConnectionIMAPSettings());
+        
+        // Load model
+        this.model = Study.loadModel(file);
+        LOGGER.info("Data reloaded successfully");
+                
+        // Spawns the common steps in an own thread
+        new Thread(new Runnable() {
+            public void run() {
+                performCommonSteps();
+            }
+        }).start();
+    }
+    
+    /**
+     * Creates a key board listener thread to allow for stop processing
+     * 
+     * @param thread
+     */
+    private void registerKeyboardListenerThread() {
+        
+        // Create thread
+        Thread thread = new Thread(new Runnable() {            
+            @Override
+            public void run() {
+                Scanner input = new Scanner(System.in);
+                while (!input.next().equals(Resources.STOP_CLI_PROCESS_CHAR)) {
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
+                }
+                
+                // Initiate shutdown
+                input.close();
+                shutdown();
+            }
+        });
+        
+        // Start thread and log
+        thread.setDaemon(true);
+        thread.start();        
+        LOGGER.info(String.format("Presss %s to stop processing", Resources.STOP_CLI_PROCESS_CHAR));
+    }
+
+
+    
+    /**
+     * Stops the process
+     */
+    protected void shutdown() {
+        // Stop bus
+        try {
+            this.model.getBus().stop();
+        } catch (BusException e1) {
+            // Ignore
+        }
+        
+        // Save latest state
+        save();
+        
+        // Last log entry
+        LOGGER.info(String.format("Process stopped. Restart with \"resume -d %s\"", model.getFilename()));
+    }
+
+
+
     /**
      * @return the mailBoxCheckInterval
      */
@@ -107,6 +188,9 @@ public class User implements MessageListener {
             try {
                 // Set message
                 model.setShareFromMessage(Message.deserializeMessage(messageStripped));
+                
+                // Save
+                save();
             } catch (IllegalStateException | IllegalArgumentException | NoSuchAlgorithmException | ClassNotFoundException | IOException e) {
                 LOGGER.error("Unable to digest message", e);
             }
@@ -213,6 +297,9 @@ public class User implements MessageListener {
                     
                     // Mark message as sent
                     model.markMessageSent(index);
+
+                    // Save
+                    save();
                 } catch (Exception e) {
                      future.cancel(true);
                     LOGGER.error("Unable to send e-mail" ,e);
@@ -228,41 +315,57 @@ public class User implements MessageListener {
     protected void performCommonSteps() {
         
         try {
+            
+            // Register keyboard listener to stop
+            registerKeyboardListenerThread();
+            
             // Sends the messages for the first round and proceeds the model
-            sendMessages(Resources.ROUND_1);
-            this.model.toRecievingShares();
-            LOGGER.info(String.format("1. round sending finished for study %s", getModel().getName()));
+            if(model.getState() == StudyState.INITIAL_SENDING || model.getState() == StudyState.SENDING_SHARE) {
+                sendMessages(Resources.ROUND_1);
+                this.model.toRecievingShares();
+                this.save();
+                LOGGER.info(String.format("1. round sending finished for study %s", getModel().getName()));
+            }
             
             // Receives the messages for the first round and proceeds the model
-            receiveMessages(Resources.ROUND_1);
-            this.model.toSendingResult();
-            LOGGER.info(String.format("1. round receiving finished for study %s", getModel().getName()));
+            if(model.getState() == StudyState.RECIEVING_SHARE) {
+                receiveMessages(Resources.ROUND_1);
+                this.model.toSendingResult();
+                this.save();
+                LOGGER.info(String.format("1. round receiving finished for study %s", getModel().getName()));
+            }
             
             // Sends the messages for the second round and proceeds the model
-            sendMessages(Resources.ROUND_2);
-            this.model.toRecievingResult();
-            LOGGER.info(String.format("2. round sending finished for study %s", getModel().getName()));
+            if(getModel().getState() == StudyState.SENDING_RESULT) {
+                sendMessages(Resources.ROUND_2);
+                this.model.toRecievingResult();
+                this.save();
+                LOGGER.info(String.format("2. round sending finished for study %s", getModel().getName()));
+            }
             
             // Receives the messages for the second round, stops the bus and finalizes the model
-            receiveMessages(Resources.ROUND_2);
-            getModel().stopBus();
-            this.model.toFinished();
-            LOGGER.info(String.format("2. round receiving finished for study %s", getModel().getName()));
+            if(getModel().getState() == StudyState.RECIEVING_RESULT) {
+                receiveMessages(Resources.ROUND_2);
+                getModel().stopBus();
+                this.model.toFinished();
+                this.save();
+                LOGGER.info(String.format("2. round receiving finished for study %s", getModel().getName()));
+            }            
             
-            // Write result
-            LOGGER.info("Start calculating and writing result");
-            exportResult();
+            // Calculate & write result, delete file model
+            if(getModel().getState() == StudyState.FINISHED) {
+                LOGGER.info("Start calculating and writing result");
+                exportResult();
+                model.getFilename().delete();
+            }
             
             // Log finished
             LOGGER.info(String.format("Process completed sucessfully. Please see result file %s", createResultFileName()));
             
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
+            // Log and shutdown
             LOGGER.error("Unable to process common process steps", e);
-            try {
-                this.model.getBus().stop();
-            } catch (BusException e1) {
-                // Ignore
-            }
+            shutdown();
         }
     }
 
@@ -313,5 +416,25 @@ public class User implements MessageListener {
      */
     protected ConnectionIMAPSettings getConnectionIMAPSettings() {
         return connectionIMAPSettings;
+    }
+    
+    /**
+     * Tries to save the current state and logs in case of an error
+     * 
+     * @return
+     */
+    protected void save() {
+        
+        // Ensure filename
+        if (model.getFilename() == null) {
+            model.setFilename(new File(getModel().getName() + Resources.FILE_ENDING));
+        }
+        
+        // Try saving
+        try {
+            this.model.saveProgram();
+        } catch (IllegalStateException | IOException e) {
+            LOGGER.error("Unable to save interim state. Program execution is proceeded but state will be lost if the programm stops", e);
+        }
     }
 }
