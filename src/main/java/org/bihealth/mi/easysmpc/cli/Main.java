@@ -30,9 +30,9 @@ import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
-import org.bihealth.mi.easysmpc.AppPasswordProvider;
 import org.bihealth.mi.easysmpc.dataimport.ImportFile;
 
+import de.tu_darmstadt.cbs.emailsmpc.Study;
 import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 /**
  * EasySMPC command line version
@@ -72,8 +72,29 @@ public class Main {
                                                                 .required(false)
                                                                 .build();
     /** Command line option */
+    private static final Option OPTION_CREATE_REQUIRED  = Option.builder(OPTION_CREATE.getOpt())
+                                                                .desc(OPTION_CREATE.getDescription())
+                                                                .longOpt(OPTION_CREATE.getLongOpt())
+                                                                .hasArg(OPTION_CREATE.hasArg())
+                                                                .required(true)
+                                                                .build();
+    /** Command line option */
+    private static final Option OPTION_PARTICIPATE_REQUIRED  = Option.builder(OPTION_PARTICIPATE.getOpt())
+                                                                .desc(OPTION_PARTICIPATE.getDescription())
+                                                                .longOpt(OPTION_PARTICIPATE.getLongOpt())
+                                                                .hasArg(OPTION_PARTICIPATE.hasArg())
+                                                                .required(true)
+                                                                .build();
+    /** Command line option */
+    private static final Option OPTION_RESUME_REQUIRED  = Option.builder(OPTION_RESUME.getOpt())
+                                                                .desc(OPTION_RESUME.getDescription())
+                                                                .longOpt(OPTION_RESUME.getLongOpt())
+                                                                .hasArg(OPTION_RESUME.hasArg())
+                                                                .required(true)
+                                                                .build();    
+    /** Command line option */
     private static final Option OPTION_DATA_FILE       = Option.builder("d")
-                                                                .desc("Data file(s) when creating or participating; file to load when resuming")
+                                                                .desc("Data file(s) when creating or participating")
                                                                 .longOpt("data-files")
                                                                 .required(true)
                                                                 .hasArg(true)
@@ -82,14 +103,14 @@ public class Main {
     private static final Option OPTION_PARTICIPANTS     = Option.builder("f")
                                                                 .desc("Participants file")
                                                                 .longOpt("participants-file")
-                                                                .required(false)
+                                                                .required(true)
                                                                 .hasArg(true)
                                                                 .build();
     /** Command line option */
     private static final Option OPTION_BINS_NAMES       = Option.builder("b")
                                                                 .desc("Variable names files")
                                                                 .longOpt("variables-files")
-                                                                .required(false)
+                                                                .required(true)
                                                                 .hasArg(true)
                                                                 .build();
     /** Command line option */
@@ -166,7 +187,7 @@ public class Main {
     private static final Option OPTION_PARTICIPANT_NAME = Option.builder("o")
                                                                 .desc("Name of participant")
                                                                 .longOpt("participant-name")
-                                                                .required(false)
+                                                                .required(true)
                                                                 .hasArg(true)
                                                                 .build();
 
@@ -201,71 +222,101 @@ public class Main {
                                                                 .required(false)
                                                                 .hasArg(true)
                                                                 .build();
+    
+    /** Command line option */
+    private static final Option OPTION_RESUME_FILE          = Option.builder("k")
+                                                                    .desc("Data file to resume")
+                                                                    .longOpt("resume-file")
+                                                                    .required(true)
+                                                                    .hasArg(true)
+                                                                    .build();
+    /** Options when in creating mode */
+    private static Options      optionsCreate               = new Options();
+    /** Options when in participating mode */
+    private static Options      optionsParticipate          = new Options();
+    /** Options when in resuming mode */
+    private static Options      optionsResume               = new Options();
 
-	/**
-	 * Starts an EasySMPC process
-	 *
-	 * @param args
-	 */
-	public static void main(String[] args) {
-	    // Prefer IPv6 if network (e.g. e-mail) is used
+    /**
+     * Starts an EasySMPC process
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
+        // Prefer IPv6 if network (e.g. e-mail) is used
         System.getProperties().setProperty("java.net.preferIPv6Addresses", "true");
+
+        // Prepare
+        CommandLine cli;
+        Options optionsInitial = new Options();
+        optionsCreate = new Options();
+        optionsParticipate = new Options();
+        optionsResume = new Options();
 	    
-	    // Prepare
-	    CommandLine cli;	    
-	    Options options = new Options();
-	    	      
-	    // Add options
-        options.addOption(OPTION_CREATE)
-               .addOption(OPTION_PARTICIPATE)
-               .addOption(OPTION_RESUME)
-               .addOption(OPTION_DATA_FILE)
-               .addOption(OPTION_MAILADDRESS)
-               .addOption(OPTION_PARTICIPANTS)
-               .addOption(OPTION_BINS_NAMES)
-               .addOption(OPTION_PASSWORD)
-               .addOption(OPTION_IMAP_SERVER)
-               .addOption(OPTION_IMAP_PORT)
-               .addOption(OPTION_IMAP_ENCRYPTION)
-               .addOption(OPTION_SMTP_SERVER)
-               .addOption(OPTION_SMTP_PORT)
-               .addOption(OPTION_SMTP_ENCRYPTION)
-               .addOption(OPTION_USE_PROXY)
-               .addOption(OPTION_SELF_SIGNED)
-               .addOption(OPTION_PARTICIPANT_NAME)
-               .addOption(OPTION_STUDY_NAME)
-               .addOption(OPTION_DATA_COLUMN)
-               .addOption(OPTION_HAS_HEADER)
-               .addOption(OPTION_SKIP_COLUMNS);
+        // Options initial
+        optionsInitial.addOption(OPTION_CREATE)
+                      .addOption(OPTION_PARTICIPATE)
+                      .addOption(OPTION_RESUME);
+
+        // Add options when creating
+        optionsCreate.addOption(OPTION_CREATE_REQUIRED)
+                     .addOption(OPTION_STUDY_NAME)
+                     .addOption(OPTION_DATA_FILE)
+                     .addOption(OPTION_BINS_NAMES)
+                     .addOption(OPTION_MAILADDRESS)
+                     .addOption(OPTION_PARTICIPANTS)
+                     .addOption(OPTION_BINS_NAMES)
+                     .addOption(OPTION_PASSWORD)
+                     .addOption(OPTION_IMAP_SERVER)
+                     .addOption(OPTION_IMAP_PORT)
+                     .addOption(OPTION_IMAP_ENCRYPTION)
+                     .addOption(OPTION_SMTP_SERVER)
+                     .addOption(OPTION_SMTP_PORT)
+                     .addOption(OPTION_SMTP_ENCRYPTION)
+                     .addOption(OPTION_USE_PROXY)
+                     .addOption(OPTION_SELF_SIGNED)
+                     .addOption(OPTION_DATA_COLUMN)
+                     .addOption(OPTION_HAS_HEADER)
+                     .addOption(OPTION_SKIP_COLUMNS);
+
+        // Add options when participating
+        optionsParticipate.addOption(OPTION_PARTICIPATE_REQUIRED)
+                          .addOption(OPTION_STUDY_NAME)
+                          .addOption(OPTION_PARTICIPANT_NAME)
+                          .addOption(OPTION_DATA_FILE)
+                          .addOption(OPTION_MAILADDRESS)
+                          .addOption(OPTION_PASSWORD)
+                          .addOption(OPTION_IMAP_SERVER)
+                          .addOption(OPTION_IMAP_PORT)
+                          .addOption(OPTION_IMAP_ENCRYPTION)
+                          .addOption(OPTION_SMTP_SERVER)
+                          .addOption(OPTION_SMTP_PORT)
+                          .addOption(OPTION_SMTP_ENCRYPTION)
+                          .addOption(OPTION_USE_PROXY)
+                          .addOption(OPTION_SELF_SIGNED)
+                          .addOption(OPTION_DATA_COLUMN)
+                          .addOption(OPTION_HAS_HEADER)
+                          .addOption(OPTION_SKIP_COLUMNS);
+        
+        // Add options when participating
+        optionsResume.addOption(OPTION_RESUME_REQUIRED)
+                     .addOption(OPTION_RESUME_FILE)
+                     .addOption(OPTION_PASSWORD);
 	    
         try {
             // Parse arguments
             CommandLineParser parser = new DefaultParser();
-            cli = parser.parse(options, args);
             
             // Check exactly create, participate or load
+            cli = parser.parse(optionsInitial, args, true);
             if (!((cli.hasOption(OPTION_CREATE) & !cli.hasOption(OPTION_PARTICIPATE) & !cli.hasOption(OPTION_RESUME)) |
                   (!cli.hasOption(OPTION_CREATE) & cli.hasOption(OPTION_PARTICIPATE) & !cli.hasOption(OPTION_RESUME)) |
                  (!cli.hasOption(OPTION_CREATE) & !cli.hasOption(OPTION_PARTICIPATE) & cli.hasOption(OPTION_RESUME)))) {
-                throw new ParseException("Please pass either \"create\", \"participate\" or \"resume\" as a first argument");
+                throw new ParseException("Please pass either \"-create\", \"-participate\" or \"-resume\"");
             }
             
-            // Check parameters when creating
-            if (cli.hasOption(OPTION_CREATE) && !(cli.hasOption(OPTION_BINS_NAMES) && cli.hasOption(OPTION_BINS_NAMES))) {
-                throw new ParseException("Please pass participants file and bins names file when creating a study");
-            }
-            
-            // Check parameters when participating
-            if (cli.hasOption(OPTION_PARTICIPATE) && !cli.hasOption(OPTION_PARTICIPANT_NAME)) {
-                throw new ParseException("Please pass name of participant when participarting in a study");
-            }
-            
-            // Check parameters when resuming
-            if (cli.hasOption(OPTION_RESUME) && (!cli.hasOption(OPTION_DATA_FILE) || cli.getOptionValue(OPTION_DATA_FILE).contains(","))) {
-                throw new ParseException(String.format("Please use pass exactly one name of the data file to load in the parameter \"-%s\" respective \"-%s\" when resuming a study",
-                                                       OPTION_DATA_FILE.getLongOpt(),
-                                                       OPTION_DATA_FILE.getOpt()));
-            }
+            // Choose correct options
+            cli = returnSpecificCli(cli, parser, args);            
             
             // Check minimal participants of three
             if(cli.hasOption(OPTION_PARTICIPANTS) && UserCreating.createParticipantsFromCSVString(cli.getOptionValue(OPTION_PARTICIPANTS)).length < 3){
@@ -281,7 +332,7 @@ public class Main {
             
             // Output help message
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("easy-smpc-cli", options);
+            formatter.printHelp("easy-smpc-cli", optionsCreate);
             
             // Throw exception
             throw new IllegalStateException("Unable to parse cli arguments");
@@ -349,16 +400,52 @@ public class Main {
         // Start resuming if applicable
         if (cli.hasOption(OPTION_RESUME)) {
             try {
-                new User(new File(cli.getOptionValue(OPTION_DATA_FILE)), MAILBOX_CHECK_INTERVAL);
+                
+                // Create study from file and set password
+                Study study = Study.loadModel(new File(cli.getOptionValue(OPTION_RESUME_FILE)));                
+                study.getConnectionIMAPSettings().setPassword(cli.getOptionValue(OPTION_PASSWORD));
+                
+                // Start process
+                new User(study, MAILBOX_CHECK_INTERVAL);
             } catch (ClassNotFoundException | IllegalArgumentException | IOException e) {
-                LOGGER.error("Unable to resume with given file" , e);
+                LOGGER.error("Unable to resume with given file", e);
             }
-            
+
             // Done
             return;
         }
 	}
 	
+    /**
+     * Return the options suiting the mode chosen by the user
+     * 
+     * @param cli
+     * @param parser
+     * @param args
+     * @return
+     * @throws ParseException 
+     */
+    private static CommandLine returnSpecificCli(CommandLine cli, CommandLineParser parser, String[] args) throws ParseException {
+        
+        // Return create
+        if (cli.hasOption(OPTION_CREATE)) {
+            return parser.parse(optionsCreate, args);
+        }
+        
+        // Return participate
+        if (cli.hasOption(OPTION_PARTICIPATE)) {
+            return parser.parse(optionsParticipate, args);
+        }
+
+        // Return resume
+        if (cli.hasOption(OPTION_RESUME)) {
+            return parser.parse(optionsResume, args);
+        }
+        
+        // Default null
+        return null;
+    }
+
     /**
      * Strips different file names from a string and reads from all of them
      * 
@@ -397,6 +484,11 @@ public class Main {
      */
 	public static boolean checkCliArguments(CommandLine cli) throws IllegalArgumentException {
         
+	    // Check only for create and participate
+	    if(cli.hasOption(OPTION_RESUME)) {
+	        return true;
+	    }
+	    
         try {
             // Check integer
             Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT));
@@ -434,16 +526,16 @@ public class Main {
      */
     public static ConnectionIMAPSettings getConnectionIMAPSettingsFromCLI(CommandLine cli) {
 
-        return new ConnectionIMAPSettings(cli.getOptionValue(OPTION_MAILADDRESS), new AppPasswordProvider())
-                .setPassword(cli.getOptionValue(OPTION_PASSWORD))
-                .setIMAPServer(cli.getOptionValue(OPTION_IMAP_SERVER))
-                .setIMAPPort(Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT)))
-                .setSSLTLSIMAP(cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(SSL_TLS))
-                .setSMTPServer(cli.getOptionValue(OPTION_SMTP_SERVER))
-                .setSMTPPort(Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT)))
-                .setSSLTLSSMTP(cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(SSL_TLS))
-                .setSearchForProxy(cli.hasOption(OPTION_USE_PROXY))
-                .setAcceptSelfSignedCertificates(cli.hasOption(OPTION_SELF_SIGNED));
+        return new ConnectionIMAPSettings(cli.getOptionValue(OPTION_MAILADDRESS),null)
+                                            .setPassword(cli.getOptionValue(OPTION_PASSWORD))
+                                            .setIMAPServer(cli.getOptionValue(OPTION_IMAP_SERVER))
+                                            .setIMAPPort(Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT)))
+                                            .setSSLTLSIMAP(cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(SSL_TLS))
+                                            .setSMTPServer(cli.getOptionValue(OPTION_SMTP_SERVER))
+                                            .setSMTPPort(Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT)))
+                                            .setSSLTLSSMTP(cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(SSL_TLS))
+                                            .setSearchForProxy(cli.hasOption(OPTION_USE_PROXY))
+                                            .setAcceptSelfSignedCertificates(cli.hasOption(OPTION_SELF_SIGNED));
     }
 
     /**

@@ -60,7 +60,7 @@ public class User implements MessageListener {
     /** connectionIMAPSettings */
     private ConnectionIMAPSettings connectionIMAPSettings;
     /** Error flag */
-    private boolean                error   = false;
+    private boolean                stop    = false;
 
     /**
      * Creates a new instance
@@ -85,14 +85,14 @@ public class User implements MessageListener {
      * @throws IllegalArgumentException 
      * @throws ClassNotFoundException 
      */
-    public User(File file, int mailboxCheckInterval) throws ClassNotFoundException, IllegalArgumentException, IOException {
-        this(mailboxCheckInterval, Study.loadModel(file).getConnectionIMAPSettings());
+    public User(Study model, int mailboxCheckInterval) throws ClassNotFoundException, IllegalArgumentException, IOException {
+        this(mailboxCheckInterval, model.getConnectionIMAPSettings());
         
-        // Load model
-        this.model = Study.loadModel(file);
-        LOGGER.info("Data reloaded successfully");
+        // Store
+        this.model = model;
                 
         // Spawns the common steps in an own thread
+        LOGGER.info("Restart process");
         new Thread(new Runnable() {
             public void run() {
                 performCommonSteps();
@@ -108,11 +108,18 @@ public class User implements MessageListener {
     private void registerKeyboardListenerThread() {
         
         // Create thread
-        Thread thread = new Thread(new Runnable() {            
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                Scanner input = new Scanner(System.in);
-                while (!input.next().equals(Resources.STOP_CLI_PROCESS_CHAR)) {
+
+                Scanner scanner = new Scanner(System.in);                
+                while (true) {
+                    // Check if stop is necessary
+                    if (scanner.hasNext() && scanner.next().equals(Resources.STOP_CLI_PROCESS_STRING)) {
+                        break;
+                    }
+
+                    // Sleep
                     try {
                         Thread.sleep(300);
                     } catch (InterruptedException e) {
@@ -121,23 +128,24 @@ public class User implements MessageListener {
                 }
                 
                 // Initiate shutdown
-                input.close();
-                shutdown();
+                scanner.close();
+                stop = true;
             }
         });
         
         // Start thread and log
         thread.setDaemon(true);
         thread.start();        
-        LOGGER.info(String.format("Presss %s to stop processing", Resources.STOP_CLI_PROCESS_CHAR));
+        LOGGER.info(String.format("Enter \"%s\" to stop processing at the next possible step", Resources.STOP_CLI_PROCESS_STRING));
     }
-
-
     
     /**
      * Stops the process
      */
     protected void shutdown() {
+        // Set stop flag
+        this.stop = true;
+        
         // Stop bus
         try {
             this.model.getBus().stop();
@@ -149,7 +157,7 @@ public class User implements MessageListener {
         save();
         
         // Last log entry
-        LOGGER.info(String.format("Process stopped. Restart with \"resume -d %s\"", model.getFilename()));
+        LOGGER.info(String.format("Process stopped. Restart with \"-resume -d %s\"", model.getFilename()));
     }
 
 
@@ -200,7 +208,7 @@ public class User implements MessageListener {
     @Override
     public void receiveError(Exception e) {
         LOGGER.error("Error receiveing e-mails",e);
-        this.error = true;
+        this.stop = true;
     }
 
     /**
@@ -234,13 +242,14 @@ public class User implements MessageListener {
     }
 
     /**
-     * Receives a message by means of e-mail bus
+     * Starts receiving a message by means of e-mail bus
      * 
      * @param roundIdentifier
      * @throws IllegalArgumentException
      * @throws BusException
+     * @throws InterruptedException 
      */
-    private void receiveMessages(String roundIdentifier) throws IllegalArgumentException, BusException {
+    private void receiveMessages(String roundIdentifier) throws IllegalArgumentException, BusException, InterruptedException {
         getModel().getBus(this.mailBoxCheckInterval, false).receive(new Scope(getModel().getName() + roundIdentifier),
                            new org.bihealth.mi.easybus.Participant(getModel().getParticipantFromId(getModel().getOwnId()).name,
                                                                    getModel().getParticipantFromId(getModel().getOwnId()).emailAddress),
@@ -249,9 +258,9 @@ public class User implements MessageListener {
         // Wait for all shares
         while (!areSharesComplete()) {
             
-            // Check for error while receiving and throw exeception
-            if(this.error) {
-                throw new IllegalArgumentException("Error receiving e-mails!");
+            // Check for error while receiving and throw exception
+            if(this.stop) {
+                throw new InterruptedException("Process stopped");
             }
             
             // Proceed if shares complete
@@ -272,8 +281,9 @@ public class User implements MessageListener {
      * Sends a message by means of e-mail bus
      * 
      * @param roundIdentifier
+     * @throws InterruptedException 
      */
-    private void sendMessages(String roundIdentifier) {
+    private void sendMessages(String roundIdentifier) throws InterruptedException {
         
         // Prepare
         FutureTask<Void> future = null;
@@ -285,6 +295,16 @@ public class User implements MessageListener {
             // Only proceed if not own user
             if (index != getModel().getOwnId()) {
 
+                // Check for error while receiving and throw exception
+                if(this.stop) {
+                    throw new InterruptedException("Process stopped");
+                }
+                
+                // Check if message has been sent already
+                if (getModel().getUnsentMessageFor(index) == null) {
+                    continue;
+                }                
+                
                 try {
                     // Retrieve bus and send message
                     future = getModel().getBus(this.mailBoxCheckInterval, false).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
@@ -320,7 +340,8 @@ public class User implements MessageListener {
             registerKeyboardListenerThread();
             
             // Sends the messages for the first round and proceeds the model
-            if(model.getState() == StudyState.INITIAL_SENDING || model.getState() == StudyState.SENDING_SHARE) {
+            if((model.getState() == StudyState.INITIAL_SENDING || model.getState() == StudyState.SENDING_SHARE) && !this.stop) {
+                LOGGER.info(String.format("1. round sending started for study %s", getModel().getName()));
                 sendMessages(Resources.ROUND_1);
                 this.model.toRecievingShares();
                 this.save();
@@ -328,7 +349,8 @@ public class User implements MessageListener {
             }
             
             // Receives the messages for the first round and proceeds the model
-            if(model.getState() == StudyState.RECIEVING_SHARE) {
+            if(model.getState() == StudyState.RECIEVING_SHARE && !this.stop) {
+                LOGGER.info(String.format("1. round receiving started for study %s", getModel().getName()));
                 receiveMessages(Resources.ROUND_1);
                 this.model.toSendingResult();
                 this.save();
@@ -336,7 +358,8 @@ public class User implements MessageListener {
             }
             
             // Sends the messages for the second round and proceeds the model
-            if(getModel().getState() == StudyState.SENDING_RESULT) {
+            if(getModel().getState() == StudyState.SENDING_RESULT && !this.stop) {
+                LOGGER.info(String.format("2. round sending started for study %s", getModel().getName()));
                 sendMessages(Resources.ROUND_2);
                 this.model.toRecievingResult();
                 this.save();
@@ -344,7 +367,8 @@ public class User implements MessageListener {
             }
             
             // Receives the messages for the second round, stops the bus and finalizes the model
-            if(getModel().getState() == StudyState.RECIEVING_RESULT) {
+            if(getModel().getState() == StudyState.RECIEVING_RESULT && !this.stop) {
+                LOGGER.info(String.format("2. round receiving started for study %s", getModel().getName()));
                 receiveMessages(Resources.ROUND_2);
                 getModel().stopBus();
                 this.model.toFinished();
@@ -365,6 +389,10 @@ public class User implements MessageListener {
         } catch (IllegalStateException | IllegalArgumentException | IOException | BusException e) {
             // Log and shutdown
             LOGGER.error("Unable to process common process steps", e);
+            shutdown();
+        } catch (InterruptedException e) {
+            // Log and shutdown
+            LOGGER.info("Execution stopped");
             shutdown();
         }
     }
@@ -427,7 +455,7 @@ public class User implements MessageListener {
         
         // Ensure filename
         if (model.getFilename() == null) {
-            model.setFilename(new File(getModel().getName() + Resources.FILE_ENDING));
+            model.setFilename(new File(getModel().getName() + "." + Resources.FILE_ENDING));
         }
         
         // Try saving

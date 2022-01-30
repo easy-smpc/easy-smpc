@@ -42,3 +42,4 @@ testing.dat
 /password.txt
 /dependency-reduced-pom.xml
 /*.csv
+/*.smpc
