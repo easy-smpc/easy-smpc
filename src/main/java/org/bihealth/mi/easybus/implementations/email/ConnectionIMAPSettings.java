@@ -13,11 +13,15 @@
  */
 package org.bihealth.mi.easybus.implementations.email;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.ProxySelector;
 import java.net.URL;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -39,15 +43,37 @@ import com.github.markusbernhardt.proxy.ProxySearch;
 public class ConnectionIMAPSettings implements Serializable {
 
     /** SVUID */
-    private static final long    serialVersionUID  = 3880443185633907293L;
+    private static final long    serialVersionUID            = 3880443185633907293L;
     /** End-point for Mozilla auto-configuration service */
-    public static final String   MOZILLA_AUTOCONF  = "https://autoconfig.thunderbird.net/v1.1/";
+    public static final String   MOZILLA_AUTOCONF            = "https://autoconfig.thunderbird.net/v1.1/";
     /** Standard port for IMAP */
-    public static final int      DEFAULT_PORT_IMAP = 993;
+    public static final int      DEFAULT_PORT_IMAP           = 993;
     /** Standard port for SMTP */
-    public static final int      DEFAULT_PORT_SMTP = 465;
+    public static final int      DEFAULT_PORT_SMTP           = 465;
     /** Regex to check dns validity */
-    private static final Pattern regexDNS          = Pattern.compile("^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]))*$");
+    private static final Pattern regexDNS                    = Pattern.compile("^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]))*$");
+    /** Key */
+    private static final String  EMAIL_ADDRESS_KEY           = "email_address";
+    /** Key */
+    private static final String  PASSWORD_KEY                = "password";
+    /** Key */
+    private static final String  IMAP_SERVER_KEY             = "imap_server";
+    /** Key */
+    private static final String  IMAP_PORT_KEY               = "imap_port";
+    /** Key */
+    private static final String  IMAP_ENCRYPTION_TYPE        = "imap_encryption";
+    /** Key */
+    private static final String  SMTP_SERVER_KEY             = "smtp_server";
+    /** Key */
+    private static final String  SMTP_PORT_KEY               = "smtp_port";
+    /** Key */
+    private static final String  SMTP_ENCRYPTION_TYPE        = "smtp_encryption";
+    /** Key */
+    private static final String  ACCEPT_SELF_SIGNED_CERT_KEY = "accept_self_signed_cert";
+    /** Key */
+    private static final String  USE_PROXY_KEY               = "use_poxy";
+    /** Prefix for system properties */
+    private static final String  PREFIX_SYSTEM_PROPERTIES    = "org.bihealth.mi.easybus.";
 
     /**
      * Check server name
@@ -507,5 +533,84 @@ public class ConnectionIMAPSettings implements Serializable {
         if (object == null) {
             throw new IllegalArgumentException("Parameter must not be null");
         }
+    }
+    
+    /**
+     * Reads all IMAP connection settings from file but the password. The password will be provided with the passwordProvider parameter
+     * 
+     * @param file
+     * @param passwordProvider
+     * @return
+     */
+    public static ConnectionIMAPSettings getConnectionIMAPSettingsFromFile(File file, PasswordProvider passwordProvider) {
+        // Check
+        if (file == null) { return null; }
+        
+        // Prepare
+        Properties prop = new Properties();
+        try {
+            prop.load(new FileInputStream(file));
+        } catch (IOException e) {          
+            throw new IllegalStateException("Unable to load file to read ConnectionIMAPSettings", e);
+        }
+        
+        // Check parameters
+        if (prop.getProperty(EMAIL_ADDRESS_KEY) == null ||prop.getProperty(IMAP_SERVER_KEY) == null || prop.getProperty(IMAP_PORT_KEY) == null || prop.getProperty(IMAP_ENCRYPTION_TYPE) == null
+            || prop.getProperty(SMTP_SERVER_KEY) == null || prop.getProperty(SMTP_PORT_KEY) == null || prop.getProperty(SMTP_ENCRYPTION_TYPE) == null) {            
+            throw new IllegalStateException("Properties file does not contain all necessary fields!");
+        }
+        
+        // Return
+        return new ConnectionIMAPSettings(prop.getProperty(EMAIL_ADDRESS_KEY),
+                                          passwordProvider).setIMAPServer(prop.getProperty(IMAP_SERVER_KEY))
+                                                           .setIMAPPort(Integer.valueOf(prop.getProperty(IMAP_PORT_KEY)))
+                                                           .setSMTPServer(prop.getProperty(SMTP_SERVER_KEY))
+                                                           .setSMTPPort(Integer.valueOf(prop.getProperty(SMTP_PORT_KEY)))
+                                                           .setSSLTLSIMAP(Boolean.valueOf(prop.getProperty(IMAP_ENCRYPTION_TYPE)))
+                                                           .setSSLTLSSMTP(Boolean.valueOf(prop.getProperty(SMTP_ENCRYPTION_TYPE)))
+                                                           .setAcceptSelfSignedCertificates(prop.getProperty(ACCEPT_SELF_SIGNED_CERT_KEY) != null
+                                                                   ? Boolean.valueOf(prop.getProperty(ACCEPT_SELF_SIGNED_CERT_KEY))
+                                                                   : false)
+                                                           .setSearchForProxy(prop.getProperty(USE_PROXY_KEY) != null
+                                                                   ? Boolean.valueOf(prop.getProperty(USE_PROXY_KEY))
+                                                                   : false);
+    }
+    
+    /**
+     * Reads IMAP connection settings from system properties including the password
+     * 
+     * @param file
+     * @return IMAP connection settings
+     */
+    public static ConnectionIMAPSettings getConnectionIMAPSettingsFromSystemProperties() {        
+
+        // Check parameters
+        if (System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + EMAIL_ADDRESS_KEY) == null ||
+                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + PASSWORD_KEY) == null ||
+                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_SERVER_KEY) == null ||
+                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_PORT_KEY) == null ||
+                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_ENCRYPTION_TYPE) == null ||
+                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_SERVER_KEY) == null ||
+                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_PORT_KEY) == null ||
+                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_ENCRYPTION_TYPE) == null) {
+            throw new IllegalStateException("Properties file does not contain all necessary fields!");
+        }
+        
+        // Return
+        return new ConnectionIMAPSettings(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + EMAIL_ADDRESS_KEY), null)
+                .setPassword(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + PASSWORD_KEY))
+                .setIMAPServer(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_SERVER_KEY))
+                .setIMAPPort(Integer.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_PORT_KEY)))
+                .setSMTPServer(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_SERVER_KEY))
+                .setSMTPPort(Integer.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_PORT_KEY)))
+                .setSSLTLSIMAP(Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_ENCRYPTION_TYPE)))
+                .setSSLTLSSMTP(Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_ENCRYPTION_TYPE)))
+                .setAcceptSelfSignedCertificates(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + ACCEPT_SELF_SIGNED_CERT_KEY) != null ? Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + ACCEPT_SELF_SIGNED_CERT_KEY)) : false)
+                .setSearchForProxy(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + USE_PROXY_KEY) != null ? Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + USE_PROXY_KEY)) : false);
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("IMAP connections for e-mail address %s", this.emailAddress);
     }
 }
