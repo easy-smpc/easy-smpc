@@ -52,7 +52,7 @@ public class Message implements Serializable {
     /**
      * Returns the respond to participant
      */
-    public Object getRespondTo(){
+    public Participant getRespondTo(){
         return this.respondTo;
     }
 }
