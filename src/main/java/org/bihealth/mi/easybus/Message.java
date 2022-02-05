@@ -24,16 +24,22 @@ import java.io.Serializable;
 public class Message implements Serializable {
     
     /** SVUID */
-    private static final long serialVersionUID = 1557145500504512577L;
-    
-    /** The message content*/
+    private static final long serialVersionUID = 1557145500504512577L;    
+    /** The message content */
     private Object messageContent;
+    /** Participant to respond to on this message */
+    private Participant respondTo;
     
     /**
      * Creates a new instance
      */
     public Message(Object messageContent){
+       this(messageContent, null);
+    }
+    
+    public Message(Object messageContent, Participant respondTo) {
         this.messageContent = messageContent;
+        this.respondTo = respondTo;
     }
     
     /**
@@ -41,5 +47,12 @@ public class Message implements Serializable {
      */
     public Object getMessage(){
         return this.messageContent;
+    }
+    
+    /**
+     * Returns the respond to participant
+     */
+    public Object getRespondTo(){
+        return this.respondTo;
     }
 }
