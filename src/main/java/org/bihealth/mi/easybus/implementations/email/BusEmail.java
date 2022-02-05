@@ -169,7 +169,7 @@ public class BusEmail extends Bus {
     
     
     @Override
-    public Void sendInternal(Message message, Scope scope, Participant participant) throws BusException {
+    protected Void sendInternal(Message message, Scope scope, Participant participant) throws BusException {
         this.connection.send(message, scope, participant);
         return null;
     }    
