@@ -74,6 +74,10 @@ public class ConnectionIMAPSettings implements Serializable {
     private static final String  USE_PROXY_KEY               = "use_poxy";
     /** Prefix for system properties */
     private static final String  PREFIX_SYSTEM_PROPERTIES    = "org.bihealth.mi.easybus.";
+    /** Encryption ssl/tls */
+    private static final String  SSL_TLS                     = "SSLTLS";
+    /** Encryption starttls */
+    private static final String  START_TLS                   = "STARTTLS";
 
     /**
      * Check server name
@@ -559,6 +563,12 @@ public class ConnectionIMAPSettings implements Serializable {
             || prop.getProperty(SMTP_SERVER_KEY) == null || prop.getProperty(SMTP_PORT_KEY) == null || prop.getProperty(SMTP_ENCRYPTION_TYPE) == null) {            
             throw new IllegalStateException("Properties file does not contain all necessary fields!");
         }
+        if (!(prop.getProperty(SMTP_ENCRYPTION_TYPE).equals(SSL_TLS) ||
+              prop.getProperty(SMTP_ENCRYPTION_TYPE).equals(START_TLS)) ||
+            !(prop.getProperty(IMAP_ENCRYPTION_TYPE).equals(SSL_TLS) ||
+              prop.getProperty(IMAP_ENCRYPTION_TYPE).equals(SSL_TLS))) {
+            throw new IllegalStateException(String.format("Please set eithr %s or %s for IMAP and SMTP encryption", SSL_TLS, START_TLS));
+        }
         
         // Return
         return new ConnectionIMAPSettings(prop.getProperty(EMAIL_ADDRESS_KEY),
@@ -566,8 +576,8 @@ public class ConnectionIMAPSettings implements Serializable {
                                                            .setIMAPPort(Integer.valueOf(prop.getProperty(IMAP_PORT_KEY)))
                                                            .setSMTPServer(prop.getProperty(SMTP_SERVER_KEY))
                                                            .setSMTPPort(Integer.valueOf(prop.getProperty(SMTP_PORT_KEY)))
-                                                           .setSSLTLSIMAP(Boolean.valueOf(prop.getProperty(IMAP_ENCRYPTION_TYPE)))
-                                                           .setSSLTLSSMTP(Boolean.valueOf(prop.getProperty(SMTP_ENCRYPTION_TYPE)))
+                                                           .setSSLTLSIMAP(Boolean.valueOf(prop.getProperty(IMAP_ENCRYPTION_TYPE).equals(SSL_TLS)))
+                                                           .setSSLTLSSMTP(Boolean.valueOf(prop.getProperty(SMTP_ENCRYPTION_TYPE).equals(SSL_TLS)))
                                                            .setAcceptSelfSignedCertificates(prop.getProperty(ACCEPT_SELF_SIGNED_CERT_KEY) != null
                                                                    ? Boolean.valueOf(prop.getProperty(ACCEPT_SELF_SIGNED_CERT_KEY))
                                                                    : false)
@@ -595,6 +605,12 @@ public class ConnectionIMAPSettings implements Serializable {
                 System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_ENCRYPTION_TYPE) == null) {
             throw new IllegalStateException("Properties file does not contain all necessary fields!");
         }
+        if (!(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_ENCRYPTION_TYPE).equals(SSL_TLS) ||
+              System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_ENCRYPTION_TYPE).equals(START_TLS)) ||
+            !(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_ENCRYPTION_TYPE).equals(SSL_TLS) ||
+              System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_ENCRYPTION_TYPE).equals(SSL_TLS))) {
+            throw new IllegalStateException(String.format("Please set eithr %s or %s for IMAP and SMTP encryption", SSL_TLS, START_TLS));
+        }
         
         // Return
         return new ConnectionIMAPSettings(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + EMAIL_ADDRESS_KEY), null)
@@ -603,8 +619,8 @@ public class ConnectionIMAPSettings implements Serializable {
                 .setIMAPPort(Integer.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_PORT_KEY)))
                 .setSMTPServer(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_SERVER_KEY))
                 .setSMTPPort(Integer.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_PORT_KEY)))
-                .setSSLTLSIMAP(Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_ENCRYPTION_TYPE)))
-                .setSSLTLSSMTP(Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_ENCRYPTION_TYPE)))
+                .setSSLTLSIMAP(Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_ENCRYPTION_TYPE).equals(SSL_TLS)))
+                .setSSLTLSSMTP(Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_ENCRYPTION_TYPE).equals(SSL_TLS)))
                 .setAcceptSelfSignedCertificates(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + ACCEPT_SELF_SIGNED_CERT_KEY) != null ? Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + ACCEPT_SELF_SIGNED_CERT_KEY)) : false)
                 .setSearchForProxy(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + USE_PROXY_KEY) != null ? Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + USE_PROXY_KEY)) : false);
     }
