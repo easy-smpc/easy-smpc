@@ -29,17 +29,20 @@ public class Message implements Serializable {
     private Object messageContent;
     /** Participant to respond to on this message */
     private Participant respondTo;
+    /** A response will be sent with this reply id */
+    private String replyID;
     
     /**
      * Creates a new instance
      */
     public Message(Object messageContent){
-       this(messageContent, null);
+       this(messageContent, null, null);
     }
     
-    public Message(Object messageContent, Participant respondTo) {
+    public Message(Object messageContent, Participant respondTo, String replyID) {
         this.messageContent = messageContent;
         this.respondTo = respondTo;
+        this.replyID = replyID;
     }
     
     /**
@@ -54,5 +57,12 @@ public class Message implements Serializable {
      */
     public Participant getRespondTo(){
         return this.respondTo;
+    }
+    
+    /**
+     * Returns the reply id
+     */
+    public String getReplyID(){
+        return this.replyID;
     }
 }
