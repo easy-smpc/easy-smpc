@@ -147,7 +147,7 @@ public abstract class Bus {
      * @return task
      * @throws Exception
      */
-    public abstract Void sendInternal(Message message, Scope scope, Participant participant) throws Exception;
+    protected abstract Void sendInternal(Message message, Scope scope, Participant participant) throws Exception;
     
     /**
      * Stops all backend services that might be running

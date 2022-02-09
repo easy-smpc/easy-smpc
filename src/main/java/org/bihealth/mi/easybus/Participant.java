@@ -13,6 +13,7 @@
  */
 package org.bihealth.mi.easybus;
 
+import java.io.Serializable;
 import java.util.regex.Pattern;
 
 /**
@@ -21,8 +22,11 @@ import java.util.regex.Pattern;
  * @author Felix Wirth
  * 
  */
-public class Participant {
+public class Participant implements Serializable {
     
+    /** SVUID */
+    private static final long serialVersionUID = 4218866719460664961L;
+
     /** Regex to check for a correct mail address */
     private static final Pattern CHECK_EMAIL_REGEX = Pattern.compile("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$");
    
