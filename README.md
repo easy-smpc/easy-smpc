@@ -124,7 +124,6 @@ Please note that in addition to the parameters mentioned above the following opt
 ### Participant
 Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -participate -l STUDY_NAME -d FILE_PATH_DATA -o PARTICIPANT_NAME -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. Most parameters are explained in [Creator](#Creator), other parameters are described below:
 1. `-participate`: Indicates the participation in a new EasySMPC process.
-2. `-l STUDY_NAME`: Name/title of the study. Muste be same same as for the creator. Must be the same as for the creator.
 3. `-o PARTICIPANT_NAME`: Name of the participant as defined in the participants files by the creator.
 4. `-d FILE_PATH_DATA`: The data of the participant to add. The format is the same as for the [Creator](#Creator).
 
