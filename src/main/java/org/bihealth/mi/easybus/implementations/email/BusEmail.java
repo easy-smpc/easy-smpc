@@ -296,4 +296,9 @@ public class BusEmail extends Bus {
             connection.close();
         }
     }
+
+    @Override
+    protected void receivePostActivities(Participant participant) {
+        // TODO
+    }
 }

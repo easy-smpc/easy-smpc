@@ -84,8 +84,18 @@ public abstract class Bus {
         
         // Add listener
         listenerForParticipant.add(messageListener);
+        
+        // Conduct post-registering activities
+        receivePostActivities(participant);
     }
     
+    /**
+     * Called in subclasses after registering for a message
+     * 
+     * @param participant
+     */
+    protected abstract void receivePostActivities(Participant participant);
+
     /**
      * Passes on receiving errors
      *  
