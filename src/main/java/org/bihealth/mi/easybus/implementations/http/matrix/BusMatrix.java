@@ -1,4 +1,4 @@
-package org.bihealth.mi.easybus.implementations.matrix;
+package org.bihealth.mi.easybus.implementations.http.matrix;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,13 +6,22 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
+import org.bihealth.mi.easybus.implementations.http.ExecutHTTPRequest;
+import org.bihealth.mi.easybus.implementations.http.matrix.model.Sync;
 import org.bihealth.mi.easysmpc.resources.Resources;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.ws.rs.core.Response;
 
 /**
  *  Bus implementation by the matrix protocol (see matrix.org)
@@ -24,6 +33,8 @@ public class BusMatrix extends Bus{
     
     /** Path to create a room */
     private final static String     PATH_CREATE_ROOM      = "";
+    /** Path to sync */
+    private static final String PATH_SYNC = "_matrix/client/r0/sync";
     /** Connection details */
     private final ConnectionMatrix  connection;
     /** Thread */
@@ -32,8 +43,8 @@ public class BusMatrix extends Bus{
     boolean                         stop                  = false;
     /** Subscribed users */
     private final List<Participant> subscribedParticipant = new ArrayList<>();
-    /** Current authorization string */
-    private String                  authorization;
+    /** Last time synchronized */
+    private String lastSynchronized = null;
 
     /**
      * Creates a new instance
@@ -55,7 +66,7 @@ public class BusMatrix extends Bus{
             public void run() {
                 try {
                     while (!stop) {
-                        receiveFromRooms();
+                        receive();
                         Thread.sleep(millis);
                     }
                 } catch (InterruptedException e) {
@@ -102,30 +113,24 @@ public class BusMatrix extends Bus{
             return;
         }
         
+        // TODO Generate actual data
+        String inputData = null;
+
         // Create task
-        FutureTask<Void> future = new ExecuteRequest<Void>(this.connection,
-                this.authorization,
-                PATH_CREATE_ROOM,
-                (authorization) -> updateAuthorization(authorization),
-                () -> getExecutor(),
-                new Object(),
-                null).execute();
+        FutureTask<Void> future = new ExecutHTTPRequest<Void>(this.connection.getBuilder(PATH_CREATE_ROOM),
+                                                               ExecutHTTPRequest.REST_TYPE.POST,
+                                                               () -> getExecutor(),
+                                                               inputData,
+                                                               null,
+                                                               ConnectionMatrix.DEFAULT_ERROR_HANDLER,
+                                                               this.connection).execute();
         
-        // Wait for task or exception
+        // Wait for task end or exception
         try {
             future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new BusException("Unable to create room", e);
         }
-    }
-
-    /**
-     * Update authorization
-     * 
-     * @param authorization
-     */
-    private synchronized void updateAuthorization(String authorization) {
-        this.authorization = authorization;
     }
 
     /**
@@ -143,14 +148,14 @@ public class BusMatrix extends Bus{
         
         // Return if sender
         if (isSender) {
-            return String.format("%s.%sto%s.%s",
+            return String.format("EasySMPC%s.%sto%s.%s",
                                  this.connection.getSelf().getName(),
                                  this.connection.getSelf().getEmailAddress(),
                                  participant.getName(),
                                  participant.getEmailAddress());
         }
         
-        return String.format("%s.%sto%s.%s",
+        return String.format("EasySMPC%s%s.%sto%s.%s",
                              participant.getName(),
                              participant.getEmailAddress(),
                              this.connection.getSelf().getName(),
@@ -201,27 +206,54 @@ public class BusMatrix extends Bus{
     /**
      * Receives message from rooms
      */
-    private void receiveFromRooms() {
+    private void receive() {
 
-        // Get subscribed rooms
-        List<String> notSubscribedRooms = getNotSubscribedRooms();
+        // Create task
+        FutureTask<String> future = new ExecutHTTPRequest<String>(this.connection.getBuilder(PATH_SYNC),
+                                                               ExecutHTTPRequest.REST_TYPE.GET,
+                                                               () -> getExecutor(),
+                                                               null,
+                                                               new Function<Response, String>() {
 
-        // Check if possible to join relevant rooms not joined so far
-        if (notSubscribedRooms != null) {
-            checkAcceptInvites(notSubscribedRooms);
+                                                                @Override
+                                                                public String apply(Response reponse) {          
+                                                                    return reponse.readEntity(String.class);
+                                                                }
+                                                            } ,
+                                                               ConnectionMatrix.DEFAULT_ERROR_HANDLER,
+                                                               this.connection).execute();
+        
+        // Wait for task end or exception
+        try {
+            System.out.println("Before");
+            String result = future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);
+            Sync tmp = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(result, Sync.class);           
+            System.out.println("My result " + new ObjectMapper().writeValueAsString(tmp));
+            System.out.println("After");
+        } catch (InterruptedException | ExecutionException | TimeoutException | JsonProcessingException e) {
+            System.out.println(e);
         }
+        System.out.println("Done receiving");
 
-        // Get subscribed and relevant rooms
-        List<String> relevantRoomNames = new ArrayList<>();
-        for (Participant participant : subscribedParticipant) {
-            relevantRoomNames.add(generateRoomName(participant, false));
-        }
-        relevantRoomNames.removeAll(notSubscribedRooms);
-
-        // Get messages of relevant room
-        for (String roomName : relevantRoomNames) {
-            receiveFromRoom(roomName);
-        }      
+//        // Get subscribed rooms
+//        List<String> notSubscribedRooms = getNotSubscribedRooms();
+//
+//        // Check if possible to join relevant rooms not joined so far
+//        if (notSubscribedRooms != null) {
+//            checkAcceptInvites(notSubscribedRooms);
+//        }
+//
+//        // Get subscribed and relevant rooms
+//        List<String> relevantRoomNames = new ArrayList<>();
+//        for (Participant participant : subscribedParticipant) {
+//            relevantRoomNames.add(generateRoomName(participant, false));
+//        }
+//        relevantRoomNames.removeAll(notSubscribedRooms);
+//
+//        // Get messages of relevant room
+//        for (String roomName : relevantRoomNames) {
+//            receiveFromRoom(roomName);
+//        }      
     }
 
     /**
