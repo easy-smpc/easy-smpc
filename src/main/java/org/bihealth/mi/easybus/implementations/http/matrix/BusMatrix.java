@@ -1,13 +1,17 @@
 package org.bihealth.mi.easybus.implementations.http.matrix;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
@@ -30,7 +34,9 @@ import jakarta.ws.rs.core.Response;
  *
  */
 public class BusMatrix extends Bus{
-    
+
+    /** Logger */
+    private static final Logger LOGGER = LogManager.getLogger(BusMatrix.class);    
     /** Path to create a room */
     private final static String     PATH_CREATE_ROOM      = "";
     /** Path to sync */
@@ -66,7 +72,12 @@ public class BusMatrix extends Bus{
             public void run() {
                 try {
                     while (!stop) {
-                        receive();
+                        try {
+                            receive();
+                        } catch (BusException e) {
+                            // Log exception
+                            LOGGER.error("Error receiving messages", e);
+                        }
                         Thread.sleep(millis);
                     }
                 } catch (InterruptedException e) {
@@ -112,25 +123,7 @@ public class BusMatrix extends Bus{
         if(generateRoomName == null) {
             return;
         }
-        
-        // TODO Generate actual data
-        String inputData = null;
-
-        // Create task
-        FutureTask<Void> future = new ExecutHTTPRequest<Void>(this.connection.getBuilder(PATH_CREATE_ROOM),
-                                                               ExecutHTTPRequest.REST_TYPE.POST,
-                                                               () -> getExecutor(),
-                                                               inputData,
-                                                               null,
-                                                               ConnectionMatrix.DEFAULT_ERROR_HANDLER,
-                                                               this.connection).execute();
-        
-        // Wait for task end or exception
-        try {
-            future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new BusException("Unable to create room", e);
-        }
+        // TODO Implement
     }
 
     /**
@@ -205,55 +198,50 @@ public class BusMatrix extends Bus{
     
     /**
      * Receives message from rooms
+     * @throws BusException, InterruptedException 
      */
-    private void receive() {
+    private void receive() throws BusException, InterruptedException {
 
+        // Create URL path and parameter
+        jakarta.ws.rs.client.Invocation.Builder request;
+        
+        if (this.lastSynchronized == null) {
+            request = this.connection.getBuilder(PATH_SYNC);
+        } else {
+            Map<String, String> parameters = new HashMap<String, String>();
+            parameters.put("since", this.lastSynchronized);
+            request = this.connection.getBuilder(PATH_SYNC, parameters);
+        }
+    
         // Create task
-        FutureTask<String> future = new ExecutHTTPRequest<String>(this.connection.getBuilder(PATH_SYNC),
-                                                               ExecutHTTPRequest.REST_TYPE.GET,
-                                                               () -> getExecutor(),
-                                                               null,
-                                                               new Function<Response, String>() {
+        FutureTask<Sync> future = new ExecutHTTPRequest<Sync>(request,
+                                                              ExecutHTTPRequest.REST_TYPE.GET,
+                                                              () -> getExecutor(),
+                                                              null,
+                                                              new Function<Response, Sync>() {
 
-                                                                @Override
-                                                                public String apply(Response reponse) {          
-                                                                    return reponse.readEntity(String.class);
-                                                                }
-                                                            } ,
-                                                               ConnectionMatrix.DEFAULT_ERROR_HANDLER,
-                                                               this.connection).execute();
+                                                                  @Override
+                                                                  public Sync
+                                                                         apply(Response reponse) {
+                                                                      try {
+                                                                          return new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                                                                                                   .readValue(reponse.readEntity(String.class), Sync.class);
+                                                                      } catch (JsonProcessingException e) {
+                                                                          throw new IllegalStateException("Unable to understand response body!", e);
+                                                                      }
+                                                                  }
+                                                              },
+                                                              ConnectionMatrix.DEFAULT_ERROR_HANDLER,
+                                                              this.connection).execute();
         
         // Wait for task end or exception
         try {
-            System.out.println("Before");
-            String result = future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);
-            Sync tmp = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(result, Sync.class);           
-            System.out.println("My result " + new ObjectMapper().writeValueAsString(tmp));
-            System.out.println("After");
-        } catch (InterruptedException | ExecutionException | TimeoutException | JsonProcessingException e) {
-            System.out.println(e);
+            Sync sync = future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);           
+            this.lastSynchronized = sync.getNextBatch();
+            System.out.println(this.lastSynchronized);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new BusException("Error in http connection!", e);
         }
-        System.out.println("Done receiving");
-
-//        // Get subscribed rooms
-//        List<String> notSubscribedRooms = getNotSubscribedRooms();
-//
-//        // Check if possible to join relevant rooms not joined so far
-//        if (notSubscribedRooms != null) {
-//            checkAcceptInvites(notSubscribedRooms);
-//        }
-//
-//        // Get subscribed and relevant rooms
-//        List<String> relevantRoomNames = new ArrayList<>();
-//        for (Participant participant : subscribedParticipant) {
-//            relevantRoomNames.add(generateRoomName(participant, false));
-//        }
-//        relevantRoomNames.removeAll(notSubscribedRooms);
-//
-//        // Get messages of relevant room
-//        for (String roomName : relevantRoomNames) {
-//            receiveFromRoom(roomName);
-//        }      
     }
 
     /**

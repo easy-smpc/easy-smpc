@@ -1,6 +1,8 @@
 package org.bihealth.mi.easybus.implementations.http.matrix;
 
 import java.net.URI;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -106,17 +108,39 @@ public class ConnectionMatrix implements UnaryOperator<Builder> {
         return self;
     }
 
+
     /**
-     * Returns a new builder for path provided
+     * Returns a new builder for path and query provided
      * 
+     * @param pathParameters - only path and query part will be used  
      * @return
      */
     public Builder getBuilder(String path) {
-        // Add external path and internal authorization
-        return client.target(server).path(path)
-                     .request().header("Authorization", String.format("Bearer %s", this.loggedIn.getAccessToken()));
+        return getBuilder(path, null);
     }
+    
+    /**
+     * Returns a new builder for path and query provided
+     * 
+     * @param path
+     * @param parameters
+     * @return
+     */
+    public Builder getBuilder(String path, Map<String, String> parameters) {
+        
+        // Set path
+        WebTarget target = client.target(server).path(path);
 
+        // Set parameters
+        if (parameters != null && !parameters.isEmpty()) {
+            for (Entry<String, String> parameter : parameters.entrySet()) {
+                target = target.queryParam(parameter.getKey(), parameter.getValue());
+            }
+        }       
+
+        // Set auth and return
+        return target.request().header("Authorization", String.format("Bearer %s", this.loggedIn.getAccessToken()));
+    }
 
     @Override
     public Builder apply(Builder builder) {        
