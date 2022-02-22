@@ -1,11 +1,11 @@
 package org.bihealth.mi.easybus.implementations.http;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -63,7 +63,11 @@ public class ExecutHTTPRequest<T> {
     private Function<Response, String>        errorHandler;
     /** Authorization handler */
     private UnaryOperator<Builder>            authentificationHandler;
-
+    /** Indicates if task was started - remains true after it was finished */
+    private boolean                           started             = false;
+    /** Task */
+    private FutureTask<T>                     task;
+    
     /**
      * Creates a new instance
      * 
@@ -106,9 +110,11 @@ public class ExecutHTTPRequest<T> {
      * @return
      */
     public FutureTask<T> execute() {
-
+        // Init
+        this.started = true;
+        
         // Create future task
-        FutureTask<T> task = new FutureTask<>(new Callable<T>() {
+        task = new FutureTask<>(new Callable<T>() {
 
             @Override
             public T call() throws Exception {
@@ -166,87 +172,68 @@ public class ExecutHTTPRequest<T> {
     }
     
     /**
-     * A class to store only path and query part of a URL
-     * 
-     * @author Felix Wirth
-     *
+     * Is request started? remains true after it was finished 
      */
-    public static class PathParameters {
-        /**  Path */
-        private final String path;
-        /** Query */
-        private final Map<String, String> parameters;
-        
-        public String getPathParameters() {
-            // Init
-            String result = path;
-            
-            // Add parameters
-            if(parameters != null && !parameters.isEmpty()) {
-                result = result + "?";
-                for(Entry<String, String> parameter : this.parameters.entrySet()) {
-                    result = String.format("%s%s=%s,", result, parameter.getKey() , parameter.getValue());
-                }
-                result = result.substring(0, result.length() - 2);
-            }
-            
-            // Return
-            return result;
-        }
-       
-        /**
-         * Creates a new instance
-         * 
-         * @param path
-         * @param queries
-         */
-        private PathParameters(String path, Map<String, String> parameters){
-            this.path = path;
-            this.parameters = parameters;
-        }
-        
-        /** Builder
-         * @author Felix Wirth
-         *
-         */
-        public static class Builder {
-            
-            /**  Path */
-            private String path;
-            /** Parameters */
-            private Map<String, String> parameters = new HashMap<>();
-            /**
-             * @return the path
-             */
-            public String getPath() {
-                return path;
-            }
-            /**
-             * @param path the path to set
-             * @return 
-             */
-            public Builder setPath(String path) {
-                this.path = path;
-                return this;
-            }
-            /**
-             * @return the queries
-             */
-            public Map<String, String> getParameters() {
-                return parameters;
-            }
-            /**
-             * @param queries the queries to set
-             * @return 
-             */
-            public Builder setParameter(String key, String value) {
-                this.parameters.put(key, value);
-                return this;
-            }
-            
-            public PathParameters build() {
-                return new PathParameters(this.path, this.parameters);
-            }
-        }
+     public boolean isStarted() {
+        return this.started;
     }
+     
+     /**
+      * Is request finished?
+      */
+      public boolean isFinished() {
+          return task == null ? false : task.isCancelled() || task.isDone();
+     }
+     
+     /**
+      * Will execute and return after all requests have been finished
+      */
+     public static void executeRequestPackage(List<ExecutHTTPRequest<?>> requests,
+                                              long timeoutMatrixActivity,
+                                              Consumer<Exception> errorHandler) {    
+        
+         // Prepare
+         boolean finished = false;
+         
+         // Check all tasks
+         int index = 0;
+         for(ExecutHTTPRequest<?> request : requests) {
+             if(request.isStarted()) {
+                 throw new IllegalArgumentException(String.format("Request at position %d has already been started. Aborting", index));
+             }
+             index++;
+         }
+         
+         // Execute
+         for(ExecutHTTPRequest<?> request : requests) {
+             
+             // Create thread, which waits for future to finish
+             new Thread(new Runnable() {
+                @Override
+                public void run() {
+                     // Execute
+                     FutureTask<?> future = request.execute();
+                     try {
+                         future.get(timeoutMatrixActivity, TimeUnit.MILLISECONDS);
+                     } catch (Exception e) {
+                         if(errorHandler != null) {
+                             errorHandler.accept(e);
+                         }
+                     }
+                }
+            }).start();
+         }         
+         
+         // Loop until finished
+         while (!finished) {
+             finished = true;
+
+             for (ExecutHTTPRequest<?> request : requests) {
+                 if (!request.isFinished()) {
+                     finished = false;
+                     break;
+                 }
+             }
+         }    
+     }
 }

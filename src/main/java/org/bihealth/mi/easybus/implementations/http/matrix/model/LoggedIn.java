@@ -4,6 +4,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+/**
+ * A model for logged in data in matrix
+ * 
+ * @author Felix Wirth
+ *
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "user_id", "access_token", "home_server", "device_id", "well_known" })
 public class LoggedIn {

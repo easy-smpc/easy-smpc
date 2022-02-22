@@ -196,7 +196,7 @@ public abstract class ConnectionEmail {
     public static String createSubject(Scope scope, Participant receiver) {
         return EMAIL_SUBJECT_PREFIX + SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG +
                " " + PARTICIPANT_NAME_START_TAG + receiver.getName() + PARTICIPANT_NAME_END_TAG +
-               " " + PARTICIPANT_EMAIL_START_TAG + receiver.getEmailAddress() +
+               " " + PARTICIPANT_EMAIL_START_TAG + receiver.getIdentifier() +
                PARTICIPANT_EMAIL_END_TAG;
     }
 
@@ -407,7 +407,7 @@ public abstract class ConnectionEmail {
     protected void send(Message message, Scope scope, Participant receiver) throws BusException {
         
         // Recipient
-        String recipient = sharedMailbox ? getEmailAddress() : receiver.getEmailAddress();
+        String recipient = sharedMailbox ? getEmailAddress() : receiver.getIdentifier();
         
         // Subject
         String subject = createSubject(scope, receiver);       
@@ -415,7 +415,7 @@ public abstract class ConnectionEmail {
         // Body
         String body = SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + "\n" + 
                       PARTICIPANT_NAME_START_TAG + receiver.getName() + PARTICIPANT_NAME_END_TAG + "\n" + 
-                      PARTICIPANT_EMAIL_START_TAG + receiver.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG;
+                      PARTICIPANT_EMAIL_START_TAG + receiver.getIdentifier() + PARTICIPANT_EMAIL_END_TAG;
         
         // Send
         this.send(recipient, subject, body, message);

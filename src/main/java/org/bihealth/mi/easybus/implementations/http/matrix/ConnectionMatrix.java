@@ -31,6 +31,9 @@ import jakarta.ws.rs.core.Response;;
  */
 public class ConnectionMatrix implements UnaryOperator<Builder> {
     
+    /**
+     * Default error handler for matrix connections
+     */
     public static Function<Response, String> DEFAULT_ERROR_HANDLER = new Function<>() {
 
         @Override
@@ -78,22 +81,21 @@ public class ConnectionMatrix implements UnaryOperator<Builder> {
     /**
      * Creates a new instance
      * 
-     * @param server
-     * @param self
-     * @param username
+     * @param server - server URI
+     * @param self - participant of own identity. Participants identifier will also be the user name for the matrix server
      * @param password
      */
-    public ConnectionMatrix(URI server, Participant self, String username, String password) throws IllegalStateException{
+    public ConnectionMatrix(URI server, Participant self, String password) throws IllegalStateException {
         // Check
-        if (server == null || self == null || username == null || password == null) {
+        if (server == null || self == null || password == null) {
             throw new IllegalArgumentException("All parameters must not be null!");
-        }
+        }        
         
         // Store
         this.self = self;
         this.server = server;
         this.client = ClientBuilder.newClient();
-        this.auth = new AuthentificationUserPassword(new Identifier(username), password);
+        this.auth = new AuthentificationUserPassword(new Identifier(getSelf().getIdentifier()), password);
         
         // Check config and throw exception if wrong
         authenticate(null);            
