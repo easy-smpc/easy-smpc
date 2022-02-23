@@ -15,11 +15,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
                      "join_rule",
                      "displayname",
                      "membership",
-                     "name" })
+                     "name",
+                     "body",
+                     "msgtyp",
+                     "scope"})
 public class Content {
-
-    @JsonProperty("creator")
-    private String creator;
     @JsonProperty("room_version")
     private String roomVersion;
     @JsonProperty("algorithm")
@@ -32,6 +32,14 @@ public class Content {
     private String membership;
     @JsonProperty("name")
     private String name;
+    @JsonProperty("body")
+    private String body;
+    @JsonProperty("msgtype")
+    private String msgType;
+    @JsonProperty("org.bihealth.mi.scope")
+    private String scope;
+    @JsonProperty("creator")
+    private String creator;
 
     /**
      * No args constructor for use in serialization
@@ -135,5 +143,53 @@ public class Content {
     @JsonProperty("name")
     public void setName(String name) {
         this.name = name;
+    }
+    
+    /**
+     * @return the body
+     */
+    @JsonProperty("body")
+    public String getBody() {
+        return body;
+    }
+
+    /**
+     * @param body the body to set
+     */
+    @JsonProperty("body")
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    /**
+     * @return the msgtype
+     */
+    @JsonProperty("msgtype")
+    public String getMsgType() {
+        return msgType;
+    }
+    
+    /**
+     * @param msgtype the msgtype to set
+     */
+    @JsonProperty("msgtype")
+    public void setMsgType(String msgType) {
+        this.msgType = msgType;
+    }
+    
+    /**
+     * @return the scope
+     */
+    @JsonProperty("org.bihealth.mi.scope")
+    public String getScope() {
+        return scope;
+    }
+
+    /**
+     * @param scope the scope to set
+     */
+    @JsonProperty("org.bihealth.mi.scope")
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 }

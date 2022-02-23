@@ -158,7 +158,7 @@ public class Resources {
     public static final Duration  CACHE_TIME_MATRIX                   = Duration.ofSeconds(1);
     
     /** Timeout for a single matrix activity  */
-    public static final long TIMEOUT_MATRIX_ACTIVITY = 30000;
+    public static final long TIMEOUT_MATRIX_ACTIVITY = 60000;
         
     /**
      * Returns all available languages
