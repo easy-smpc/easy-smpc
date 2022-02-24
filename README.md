@@ -14,8 +14,9 @@
 
 ## Prerequisites
 
-EasySMPC requires [Java](https://adoptopenjdk.net/), at least in version 13. The Java
+EasySMPC requires [Java](https://adoptopenjdk.net/), at least in version 14. The Java
 runtime is bundled in our Installer package.
+Moreover, to use EasySMPC in automated mode, an e-mail account is required, which is accessible via SMTP and IMAP from the system executing EasySMPC.
 
 To compile the app from source in addition to the Java JDK the [Maven build
 system](https://maven.apache.org/) is required.
