@@ -23,13 +23,15 @@ import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.http.ExecutHTTPRequest;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.CreateMessage;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.CreateRoom;
-import org.bihealth.mi.easybus.implementations.http.matrix.model.RoomEvent;
-import org.bihealth.mi.easybus.implementations.http.matrix.model.sync.Invitation;
-import org.bihealth.mi.easybus.implementations.http.matrix.model.sync.JoinedRoom;
+import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.invited.EventInvited;
+import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.invited.Invitation;
+import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined.EventJoined;
+import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined.JoinedRoom;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -77,7 +79,7 @@ public class BusMatrix extends Bus{
     private String                         lastSynchronized            = null;
     // TODO ObjectMapper is thread safe. However, will a single instance impact performance?
     /** Jackson object mapper */
-    private ObjectMapper                   mapper                      = new ObjectMapper();
+    private ObjectMapper                   mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     /** Join rooms */
     private Map<String, JoinedRoom>        joinedRooms;
     /** First sync complete? */
@@ -147,13 +149,13 @@ public class BusMatrix extends Bus{
         
         // Check if room exists
         if(joinedRooms != null) {
-            for (Entry<String, JoinedRoom> invitation : joinedRooms.entrySet()) {
+            for (Entry<String, JoinedRoom> joinedRoom : joinedRooms.entrySet()) {
                 
                 // Check room name
-                for (RoomEvent event : invitation.getValue().getTimeline().getEvents()) {
+                for (EventJoined event : joinedRoom.getValue().getTimeline().getEvents()) {
                     if (event.getType().equals("m.room.name") &&
                             event.getContent().getName().equals(generateRoomName(participant, true))) {
-                        roomId = invitation.getKey();
+                        roomId = joinedRoom.getKey();
                         break;
                     }
                 }
@@ -321,9 +323,14 @@ public class BusMatrix extends Bus{
         JsonNode sync = getSyncTree(true);
 
         // Set joined rooms
-        // TODO Since the joinedRoom can be set from two direction it is a ConcurrentHashMap and is set within synchronized. Better use  
+        // TODO Since the joinedRoom can be set from two direction it is a ConcurrentHashMap and is set within synchronized. Better use remove and addAll instead?
         synchronized (this.connection) {
-            this.joinedRooms = mapper.convertValue(sync.get("rooms").get("join"), new TypeReference<ConcurrentHashMap<String, JoinedRoom>>(){});
+            try {
+                this.joinedRooms = mapper.convertValue(sync.get("rooms").get("join"), new TypeReference<ConcurrentHashMap<String, JoinedRoom>>(){});
+            } catch(Exception e) {
+                e.printStackTrace();
+                System.out.println(e);
+            }
         }
         
         // Get and accept invitations for relevant rooms
@@ -333,10 +340,27 @@ public class BusMatrix extends Bus{
                                                 (e) -> LOGGER.error("Unable to join room", e));
         
         // Check joined rooms for new messages
+        checkNewMessages();
+        
+        // Set first sync done
+        firstSync = true;
+    }
+
+    /**
+     * Check for new messages in joined rooms
+     */
+    private void checkNewMessages() {
+        
+        // Check
+        if(this.joinedRooms == null) {
+            return;
+        }
+        
+        // Loop over room
         for(Entry<String, JoinedRoom> room : this.joinedRooms.entrySet()) {
 
             // Loop over events
-            for (RoomEvent event : room.getValue().getTimeline().getEvents()) {
+            for (EventJoined event : room.getValue().getTimeline().getEvents()) {
                 // If element can be processed and is relevant
                 if (event.getType() != null && event.getType().equals("m.room.message") &&
                     event.getContent().getMsgType() != null &&
@@ -365,9 +389,6 @@ public class BusMatrix extends Bus{
                 }
             }
         }
-        
-        // Set first sync done
-        firstSync = true;
     }
 
     /**
@@ -472,7 +493,7 @@ public class BusMatrix extends Bus{
             String expectedRoomName = null;
 
             // Check inviter is relevant
-            for(RoomEvent event : invitation.getValue().getInviteState().getEvents()) {
+            for(EventInvited event : invitation.getValue().getInviteState().getEvents()) {
                 if(event.getType().equals("m.room.create") && participantNames.contains(event.getContent().getCreator())) {
                     expectedRoomName = generateRoomName(this.subscribedParticipants.get(event.getContent().getCreator()), false);
                     break;
@@ -485,7 +506,7 @@ public class BusMatrix extends Bus{
             }
 
             // Check room name
-            for(RoomEvent event : invitation.getValue().getInviteState().getEvents()) {
+            for(EventInvited event : invitation.getValue().getInviteState().getEvents()) {
                 if(event.getType().equals("m.room.name") && event.getContent().getName().equals(expectedRoomName)) {
                     accept.add(invitation.getKey());
                 }

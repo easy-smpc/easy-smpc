@@ -1,4 +1,4 @@
-package org.bihealth.mi.easybus.implementations.http.matrix.model.sync;
+package org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.invited;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

@@ -1,4 +1,4 @@
-package org.bihealth.mi.easybus.implementations.http.matrix.model.sync;
+package org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -13,15 +13,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class JoinedRoom {
 
     @JsonProperty("timeline")
-    private Timeline timeline;
-
+    private Timeline timeline;    
+    
     @JsonProperty("timeline")
     public Timeline getTimeline() {
         return timeline;
     }
 
     @JsonProperty("timeline")
-    public void timeline(Timeline timeline) {
+    public void setTimeline(Timeline timeline) {
         this.timeline = timeline;
     }
 }

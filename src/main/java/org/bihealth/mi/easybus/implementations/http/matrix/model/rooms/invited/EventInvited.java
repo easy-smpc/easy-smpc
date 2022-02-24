@@ -1,56 +1,56 @@
-package org.bihealth.mi.easybus.implementations.http.matrix.model;
 
+package org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.invited;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-/**
- * A model for a room event in matrix
- * 
- * @author Felix Wirth
- *
- */
-@JsonPropertyOrder({ "type",
-                     "state_key",
-                     "content",
-                     "sender",
-                     "origin_server_ts",
-                     "unsigned",
-                     "event_id" })
-public class RoomEvent {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({
+    "type",
+    "state_key",
+    "content",
+    "sender",
+    "origin_server_ts",
+    "unsigned",
+    "event_id"
+})
+
+public class EventInvited {
 
     @JsonProperty("type")
-    private String   type;
+    private String type;
     @JsonProperty("state_key")
-    private String   stateKey;
+    private String stateKey;
     @JsonProperty("content")
-    private Content  content;
+    private Content content;
     @JsonProperty("sender")
-    private String   sender;
+    private String sender;
     @JsonProperty("origin_server_ts")
-    private Long     originServerTs;
-    @JsonProperty("event_id")
-    private String   eventId;
+    private Long originServerTs;
     @JsonProperty("unsigned")
     private Unsigned unsigned;
+    @JsonProperty("event_id")
+    private String eventId;
 
     /**
-    * No args constructor for use in serialization
-    *
-    */
-    public RoomEvent() {
+     * No args constructor for use in serialization
+     * 
+     */
+    public EventInvited() {
     }
 
     /**
-    *
-    * @param originServerTs
-    * @param eventId
-    * @param sender
-    * @param unsigned
-    * @param type
-    * @param content
-    * @param stateKey
-    */
-    public RoomEvent(String type, String stateKey, Content content, String sender, Long originServerTs, Unsigned unsigned, String eventId) {
+     * 
+     * @param originServerTs
+     * @param eventId
+     * @param sender
+     * @param unsigned
+     * @param type
+     * @param content
+     * @param stateKey
+     */
+    public EventInvited(String type, String stateKey, Content content, String sender, Long originServerTs, Unsigned unsigned, String eventId) {
         super();
         this.type = type;
         this.stateKey = stateKey;
@@ -59,81 +59,76 @@ public class RoomEvent {
         this.originServerTs = originServerTs;
         this.unsigned = unsigned;
         this.eventId = eventId;
-        }
+    }
 
     @JsonProperty("type")
     public String getType() {
-        System.out.println("gettype!");        
-
-            System.out.println("type:" + type);
-
         return type;
     }
 
     @JsonProperty("type")
     public void setType(String type) {
-        System.out.println("settype!");
         this.type = type;
     }
 
     @JsonProperty("state_key")
     public String getStateKey() {
-        System.out.println("state_key!");
         return stateKey;
     }
 
     @JsonProperty("state_key")
     public void setStateKey(String stateKey) {
-        System.out.println("state_key!");
         this.stateKey = stateKey;
     }
 
     @JsonProperty("content")
     public Content getContent() {
-        System.out.println("content!");
         return content;
     }
 
     @JsonProperty("content")
     public void setContent(Content content) {
-        System.out.println("content!");
         this.content = content;
     }
 
     @JsonProperty("sender")
     public String getSender() {
-        System.out.println("sender!");
         return sender;
     }
 
     @JsonProperty("sender")
     public void setSender(String sender) {
-        System.out.println("sender!");
         this.sender = sender;
     }
 
     @JsonProperty("origin_server_ts")
     public Long getOriginServerTs() {
-        System.out.println("origin_server_ts!");
         return originServerTs;
     }
 
     @JsonProperty("origin_server_ts")
     public void setOriginServerTs(Long originServerTs) {
-        System.out.println("origin_server_ts!");
         this.originServerTs = originServerTs;
     }
 
+    @JsonProperty("unsigned")
+    public Unsigned getUnsigned() {
+        return unsigned;
+    }
+
+    @JsonProperty("unsigned")
+    public void setUnsigned(Unsigned unsigned) {
+        this.unsigned = unsigned;
+    }
 
     @JsonProperty("event_id")
     public String getEventId() {
-        System.out.println("event_id!");
         return eventId;
     }
 
     @JsonProperty("event_id")
     public void setEventId(String eventId) {
-        System.out.println("event_id!");
         this.eventId = eventId;
     }
+
 }

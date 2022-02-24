@@ -1,8 +1,6 @@
-package org.bihealth.mi.easybus.implementations.http.matrix.model.sync;
+package org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined;
 
 import java.util.List;
-
-import org.bihealth.mi.easybus.implementations.http.matrix.model.RoomEvent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -17,24 +15,31 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class Timeline {
     
     @JsonProperty("events")
-    private List<RoomEvent> events = null;
+    private List<EventJoined> events = null;
+    
+    /**
+     * No args constructor for use in serialization
+     *
+     */
+    public Timeline() {
+    }
     
     /**
     *
     * @param events
     */
-   public Timeline(List<RoomEvent> events) {
+   public Timeline(List<EventJoined> events) {
        super();
        this.events = events;
    }
 
    @JsonProperty("events")
-   public List<RoomEvent> getEvents() {
+   public List<EventJoined> getEvents() {
        return events;
    }
 
    @JsonProperty("events")
-   public void setEvents(List<RoomEvent> events) {
+   public void setEvents(List<EventJoined> events) {
        this.events = events;
    }
 
