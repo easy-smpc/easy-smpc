@@ -1,5 +1,7 @@
 package org.bihealth.mi.easybus.implementations.http.matrix;
 
+import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URI;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,6 +13,8 @@ import org.bihealth.mi.easybus.implementations.http.matrix.model.Authentificatio
 import org.bihealth.mi.easybus.implementations.http.matrix.model.AuthentificationUserPassword.Identifier;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.Error;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.LoggedIn;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.HttpUrlConnectorProvider;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -85,17 +89,40 @@ public class ConnectionMatrix implements AuthHandler {
      * @param self - participant of own identity. Participants identifier will also be the user name for the matrix server
      * @param password
      */
-    public ConnectionMatrix(URI server, Participant self, String password) throws IllegalStateException {
+    public ConnectionMatrix(URI server,
+                            Participant self,
+                            String password) throws IllegalStateException {
+        this(server, self, password, null);
+    }
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param server - server URI
+     * @param self - participant of own identity. Participants identifier will also be the user name for the matrix server
+     * @param password
+     * @param proxy - a proxy object which can be null. Consider trying to guess proxy with ConnectionHTTPProxy.getProxy()
+     */
+    public ConnectionMatrix(URI server,
+                            Participant self,
+                            String password,
+                            Proxy proxy) throws IllegalStateException {
         // Check
         if (server == null || self == null || password == null) {
-            throw new IllegalArgumentException("All parameters must not be null!");
+            throw new IllegalArgumentException("All parameters but proxy must not be null!");
         }        
         
         // Store
         this.self = self;
-        this.server = server;
-        this.client = ClientBuilder.newClient();
+        this.server = server;       
         this.auth = new AuthentificationUserPassword(new Identifier(getSelf().getIdentifier()), password);
+        
+        // Store proxy
+        if (proxy == null) {
+            this.client = ClientBuilder.newClient();
+        } else {
+            client = ClientBuilder.newClient(new ClientConfig().connectorProvider(new HttpUrlConnectorProvider().connectionFactory(url -> (HttpURLConnection) url.openConnection(proxy))));
+        }       
         
         // Check config and throw exception if wrong
         try {
@@ -135,7 +162,7 @@ public class ConnectionMatrix implements AuthHandler {
     public Builder getBuilder(String path, Map<String, String> parameters) {
         
         // Set path
-        WebTarget target = client.target(server).path(path);
+        WebTarget target = client.target(server).path(path);        
 
         // Set parameters
         if (parameters != null && !parameters.isEmpty()) {

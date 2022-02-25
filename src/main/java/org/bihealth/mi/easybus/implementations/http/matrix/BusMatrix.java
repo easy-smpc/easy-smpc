@@ -420,7 +420,7 @@ public class BusMatrix extends Bus{
                     } catch (BusException e) {
                         LOGGER.error(String.format("Unable to redact message with id %s in room %s", event.getEventId(), room.getKey()), e);
                     }
-                    // TODO: Create a package of redact message to redact in paralell
+                    // TODO: Create a package of redact message to redact in parallel
                 }
             }
         }
