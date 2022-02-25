@@ -76,7 +76,6 @@ public class BusMatrix extends Bus{
     boolean                                stop                        = false;
     /** Last time synchronized */
     private String                         lastSynchronized            = null;
-    // TODO ObjectMapper is thread safe. However, will a single instance impact performance?
     /** Jackson object mapper */
     private ObjectMapper                   mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     /** Join rooms */
@@ -207,7 +206,7 @@ public class BusMatrix extends Bus{
         try {
             CreateMessage createMessage = new CreateMessage().setBody(message.serialize())
                                                              .setScope(scope.getName());
-            payload = mapper.writeValueAsString(createMessage);
+            payload = mapper.writer().writeValueAsString(createMessage);
         } catch (IOException e) {
             throw new BusException("Unable to send serialize message!", e);
         }
@@ -252,7 +251,7 @@ public class BusMatrix extends Bus{
         
         // Serialize room to create
         try {
-            createRoomSerialized = mapper.writeValueAsString(createRoom);
+            createRoomSerialized = mapper.writer().writeValueAsString(createRoom);
         } catch (JsonProcessingException e) {
             throw new BusException("Unable to serialize createRoom object", e);
         }
@@ -443,7 +442,7 @@ public class BusMatrix extends Bus{
         String createRedactedSerialized;
         
         try {
-            createRedactedSerialized = mapper.writeValueAsString(createRedacted);
+            createRedactedSerialized = mapper.writer().writeValueAsString(createRedacted);
         } catch (JsonProcessingException e) {
             throw new BusException("Unable to serialize createRedactedSerialized", e);
         }
@@ -506,7 +505,7 @@ public class BusMatrix extends Bus{
         // Understand sync
         JsonNode sync;
         try {
-            sync = mapper.readTree(syncString);
+            sync = mapper.reader().readTree(syncString);
         } catch (JsonProcessingException e) {
             throw new BusException("Error deserializing sync string!", e);
         }
