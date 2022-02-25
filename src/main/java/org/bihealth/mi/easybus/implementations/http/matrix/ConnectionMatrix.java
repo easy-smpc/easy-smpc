@@ -112,7 +112,7 @@ public class ConnectionMatrix implements UnaryOperator<Builder> {
 
 
     /**
-     * Returns a new builder for path and query provided
+     * Returns a new builder for the path provided
      * 
      * @param pathParameters - only path and query part will be used  
      * @return

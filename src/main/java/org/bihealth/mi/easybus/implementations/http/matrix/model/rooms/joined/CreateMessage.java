@@ -1,4 +1,4 @@
-package org.bihealth.mi.easybus.implementations.http.matrix.model;
+package org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

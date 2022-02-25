@@ -159,6 +159,9 @@ public class Resources {
     
     /** Timeout for a single matrix activity  */
     public static final long TIMEOUT_MATRIX_ACTIVITY = 60000;
+    
+    /** Reason to redact a message in matrix */
+    public static final String REASON_REDACTED_READ = "WAS_READ";
         
     /**
      * Returns all available languages

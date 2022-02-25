@@ -21,10 +21,11 @@ import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.http.ExecutHTTPRequest;
-import org.bihealth.mi.easybus.implementations.http.matrix.model.CreateMessage;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.CreateRoom;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.invited.EventInvited;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.invited.Invitation;
+import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined.CreateMessage;
+import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined.CreateRedacted;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined.EventJoined;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined.JoinedRoom;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -82,8 +83,6 @@ public class BusMatrix extends Bus{
     private ObjectMapper                   mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     /** Join rooms */
     private Map<String, JoinedRoom>        joinedRooms;
-    /** First sync complete? */
-    private boolean                        firstSync                   = false;
 
     /**
      * Creates a new instance
@@ -135,41 +134,19 @@ public class BusMatrix extends Bus{
         // Prepare
         String roomId = null;
         
-        // Get joined rooms if necessary
-        if (!firstSync) {
-            
-            // Get sync
-            JsonNode sync = getSyncTree(false);
-
-            // Set joined rooms
-            synchronized (this.connection) {
-                joinedRooms = mapper.convertValue(sync.get("rooms").get("join"), new TypeReference<ConcurrentHashMap<String, JoinedRoom>>(){});
-            }
-        }
-        
         // Check if room exists
-        if(joinedRooms != null) {
-            for (Entry<String, JoinedRoom> joinedRoom : joinedRooms.entrySet()) {
-                
-                // Check room name
-                for (EventJoined event : joinedRoom.getValue().getTimeline().getEvents()) {
-                    if (event.getType().equals("m.room.name") &&
-                            event.getContent().getName().equals(generateRoomName(participant, true))) {
-                        roomId = joinedRoom.getKey();
-                        break;
-                    }
-                }
-
-                // Stop loop if found
-                if (roomId != null) {
-                    break;
-                }
-            } 
-        }
+        roomId = searchForRoomName(participant);
         
-        // Create room if necessary
+        // If not found update room and search again
         if(roomId == null) {
-            createRoom(new CreateRoom().setName(generateRoomName(participant, true)).addInvite(participant.getIdentifier()));
+            updateJoinedRooms(getSyncTree(false));
+            roomId = searchForRoomName(participant);
+        }        
+        
+        // If necessary create room and update joined rooms 
+        if(roomId == null) {
+            roomId = createRoom(new CreateRoom().setName(generateRoomName(participant, true)).addInvite(participant.getIdentifier()));
+            updateJoinedRooms(getSyncTree(false));
         }
         
         // Send message and return
@@ -177,6 +154,44 @@ public class BusMatrix extends Bus{
         
         // Return
         return null;
+    }
+
+    /**
+     * Search id of a room with a name
+     * 
+     * @param participant
+     * @return
+     */
+    private String searchForRoomName(Participant participant) {
+        
+        // Check
+        if(this.joinedRooms == null) {
+            return null;
+        }
+        
+        // Prepare
+        String roomId = null;
+            
+        // Loop over rooms
+        for (Entry<String, JoinedRoom> joinedRoom : joinedRooms.entrySet()) {
+
+            // Check room name
+            for (EventJoined event : joinedRoom.getValue().getTimeline().getEvents()) {
+                if (event.getType().equals("m.room.name") &&
+                    event.getContent().getName().equals(generateRoomName(participant, true))) {
+                    roomId = joinedRoom.getKey();
+                    break;
+                }
+            }
+
+            // Stop loop if found
+            if (roomId != null) {
+                break;
+            }
+        }
+            
+        // Return
+        return roomId;
     }
 
     /**
@@ -193,7 +208,7 @@ public class BusMatrix extends Bus{
         String payload;
         try {
             CreateMessage createMessage = new CreateMessage().setBody(message.serialize())
-                                                             .setScope(scope.getName());            
+                                                             .setScope(scope.getName());
             payload = mapper.writeValueAsString(createMessage);
         } catch (IOException e) {
             throw new BusException("Unable to send serialize message!", e);
@@ -228,6 +243,7 @@ public class BusMatrix extends Bus{
      * @throws BusException 
      */
     private String createRoom(CreateRoom createRoom) throws BusException {
+       
         // Check
         if(createRoom == null) {
             throw new BusException("createRoom cann not be null");
@@ -237,7 +253,7 @@ public class BusMatrix extends Bus{
         String createRoomSerialized;
         String roomId = null;
         
-        // Serialize roomt to create
+        // Serialize room to create
         try {
             createRoomSerialized = mapper.writeValueAsString(createRoom);
         } catch (JsonProcessingException e) {
@@ -321,29 +337,46 @@ public class BusMatrix extends Bus{
     private void receive() throws BusException, InterruptedException {
         // Get sync data
         JsonNode sync = getSyncTree(true);
-
-        // Set joined rooms
-        // TODO Since the joinedRoom can be set from two direction it is a ConcurrentHashMap and is set within synchronized. Better use remove and addAll instead?
-        synchronized (this.connection) {
-            try {
-                this.joinedRooms = mapper.convertValue(sync.get("rooms").get("join"), new TypeReference<ConcurrentHashMap<String, JoinedRoom>>(){});
-            } catch(Exception e) {
-                e.printStackTrace();
-                System.out.println(e);
-            }
-        }
+        
+        // Update joined rooms
+        updateJoinedRooms(sync);
         
         // Get and accept invitations for relevant rooms
-        Map<String, Invitation> invitations = mapper.convertValue(sync.get("rooms").get("invite"), new TypeReference<Map<String, Invitation>>(){});
-        ExecutHTTPRequest.executeRequestPackage(joinRooms(checkAcceptInvites(invitations)),
-                                                Resources.TIMEOUT_MATRIX_ACTIVITY,
-                                                (e) -> LOGGER.error("Unable to join room", e));
+        processInvitations(sync);
         
         // Check joined rooms for new messages
-        checkNewMessages();
-        
-        // Set first sync done
-        firstSync = true;
+        checkNewMessages();        
+    }
+
+    /**
+     *  Read matrix room invitations and accept relevant ones 
+     * 
+     * @param sync
+     */
+    private void processInvitations(JsonNode sync) {
+        if (sync.path("rooms").path("invite") != null && !sync.path("rooms").path("invite").isMissingNode()) {
+            Map<String, Invitation> invitations = mapper.convertValue(sync.path("rooms")
+                                                                          .path("invite"),
+                                                                      new TypeReference<Map<String, Invitation>>() {
+                                                                      });
+            ExecutHTTPRequest.executeRequestPackage(joinRooms(checkAcceptInvites(invitations)),
+                                                    Resources.TIMEOUT_MATRIX_ACTIVITY,
+                                                    (e) -> LOGGER.error("Unable to join room", e));
+        }
+    }
+
+    /**
+     * Reads the joined rooms from a sync node and stores it
+     * 
+     * @param sync
+     */
+    private synchronized void updateJoinedRooms(JsonNode sync) {
+
+        // TODO Since the joinedRoom can be set from two direction it is a ConcurrentHashMap this method is synchronized. Better use remove and addAll instead?
+        // Set if content is available
+        if (sync.path("rooms").path("path") != null && !sync.path("rooms").path("join").isMissingNode()) {
+            this.joinedRooms = mapper.convertValue(sync.path("rooms").path("join"), new TypeReference<ConcurrentHashMap<String, JoinedRoom>>() {});
+        }
     }
 
     /**
@@ -381,7 +414,7 @@ public class BusMatrix extends Bus{
                     
                     // Redact message
                     try {
-                        redactMessage(room.getKey(), event.getEventId());
+                        redactMessage(room.getKey(), event.getEventId(), new CreateRedacted(Resources.REASON_REDACTED_READ));
                     } catch (BusException e) {
                         LOGGER.error(String.format("Unable to redact message with id %s in room %s", event.getEventId(), room.getKey()), e);
                     }
@@ -394,20 +427,29 @@ public class BusMatrix extends Bus{
     /**
      * Redacts respectively "deletes" a message (see matrix documentation for explanation of redact 
      * 
-     * @param key
+     * @param roomId
      * @param eventId
      * @throws BusException 
      */
-    private void redactMessage(String key, String eventId) throws BusException {
+    private void redactMessage(String roomId, String eventId, CreateRedacted createRedacted ) throws BusException {
         
         // Prepare request
-        Builder request = this.connection.getBuilder(String.format(PATH_REDACT_MESSAGE_PATTERN, key, eventId, UIDGenerator.generateShortUID(10)));
+        Builder request = this.connection.getBuilder(String.format(PATH_REDACT_MESSAGE_PATTERN, roomId, eventId, UIDGenerator.generateShortUID(10)));
+        
+        // Serialize redact message
+        String createRedactedSerialized;
+        
+        try {
+            createRedactedSerialized = mapper.writeValueAsString(createRedacted);
+        } catch (JsonProcessingException e) {
+            throw new BusException("Unable to serialize createRedactedSerialized", e);
+        }
         
         // Create task to get sync
         FutureTask<String> future = new ExecutHTTPRequest<String>(request,
                                                               ExecutHTTPRequest.REST_TYPE.PUT,
                                                               () -> getExecutor(),
-                                                              null,
+                                                              createRedactedSerialized,
                                                               (response) -> response.readEntity(String.class),
                                                               ConnectionMatrix.DEFAULT_ERROR_HANDLER,
                                                               this.connection).execute();
@@ -423,11 +465,12 @@ public class BusMatrix extends Bus{
     /**
      * Gets the sync tree
      * 
-     * @param UpdateSince - should the since variable be updated
+     * @param UpdateSince - should the since variable be updated. Only set true if all messages in the tree are processed
      * @return
      * @throws BusException
      */
     private JsonNode getSyncTree(boolean UpdateSince) throws BusException {
+        
         // Prepare
         String syncString;       
         Builder request;
