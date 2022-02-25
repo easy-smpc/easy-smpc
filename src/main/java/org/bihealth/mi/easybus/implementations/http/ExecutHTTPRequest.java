@@ -8,7 +8,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
+
+import org.bihealth.mi.easybus.implementations.http.matrix.AuthHandler;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
@@ -30,12 +31,12 @@ public class ExecutHTTPRequest<T> {
      *
      */
     public enum REST_TYPE {
-                           GET,
-                           POST,
-                           PUT,
-                           DELETE
+        GET,
+        POST,
+        PUT,
+        DELETE
     };
-    
+
     /** Default error handler */
     private static Function<Response, String> defaultErrorHandler = new Function<>() {
         @Override
@@ -62,12 +63,12 @@ public class ExecutHTTPRequest<T> {
     /** Error handler */
     private Function<Response, String>        errorHandler;
     /** Authorization handler */
-    private UnaryOperator<Builder>            authentificationHandler;
+    private AuthHandler                      authentificationHandler;
     /** Indicates if task was started - remains true after it was finished */
     private boolean                           started             = false;
     /** Task */
     private FutureTask<T>                     task;
-    
+
     /**
      * Creates a new instance
      * 
@@ -78,16 +79,16 @@ public class ExecutHTTPRequest<T> {
      * @param data
      */
     public ExecutHTTPRequest(Builder requestBuilder,
-                              REST_TYPE type,
-                              Supplier<ExecutorService> executorSupplier,
-                              String inputData,
-                              Function<Response, T> resultHandler,
-                              Function<Response, String> errorHandler,
-                              UnaryOperator<Builder> authentificationHandler) {
-        
+                             REST_TYPE type,
+                             Supplier<ExecutorService> executorSupplier,
+                             String inputData,
+                             Function<Response, T> resultHandler,
+                             Function<Response, String> errorHandler,
+                             AuthHandler authentificationHandler) {
+
         // Check
         if (requestBuilder == null || type == null || executorSupplier == null) {
-            throw new IllegalArgumentException("Please provide non-null values for requestbuilder, type and executorSupplier");
+            throw new IllegalArgumentException("Requestbuilder, type and executorSupplier must not be null!");
         }
 
         // Store
@@ -112,7 +113,7 @@ public class ExecutHTTPRequest<T> {
     public FutureTask<T> execute() {
         // Init
         this.started = true;
-        
+
         // Create future task
         task = new FutureTask<>(new Callable<T>() {
 
@@ -126,12 +127,12 @@ public class ExecutHTTPRequest<T> {
                 if (response.getStatus() == 401 && authentificationHandler != null) {
 
                     // Replace builder with new authorization
-                    requestBuilder = authentificationHandler.apply(requestBuilder);
+                    requestBuilder = authentificationHandler.authenticate(requestBuilder);
 
                     // Successful authorization, execute request again
                     response = executeRequest();
                 }
-                
+
                 // General error handling
                 if (response.getStatus() != 200 && response.getStatus() != 201 && response.getStatus() != 202) {
                     throw new IllegalStateException(String.format("Error executing HTTP request: %s", errorHandler.apply(response)));
@@ -170,70 +171,76 @@ public class ExecutHTTPRequest<T> {
             throw new IllegalArgumentException("Request type unknown");
         }
     }
-    
+
     /**
-     * Is request started? remains true after it was finished 
+     * Is request started? Remains true after it was finished
+     * 
+     * @return
      */
-     public boolean isStarted() {
+    public boolean isStarted() {
         return this.started;
     }
-     
-     /**
-      * Is request finished?
-      */
-      public boolean isFinished() {
-          return task == null ? false : task.isCancelled() || task.isDone();
-     }
-     
-     /**
-      * Will execute and return after all requests have been finished
-      */
-     public static void executeRequestPackage(List<ExecutHTTPRequest<?>> requests,
-                                              long timeoutMatrixActivity,
-                                              Consumer<Exception> errorHandler) {    
-        
-         // Prepare
-         boolean finished = false;
-         
-         // Check all tasks
-         int index = 0;
-         for(ExecutHTTPRequest<?> request : requests) {
-             if(request.isStarted()) {
-                 throw new IllegalArgumentException(String.format("Request at position %d has already been started. Aborting", index));
-             }
-             index++;
-         }
-         
-         // Execute
-         for(ExecutHTTPRequest<?> request : requests) {
-             
-             // Create thread, which waits for future to finish
-             new Thread(new Runnable() {
+
+    /**
+     * Is request finished?
+     */
+    public boolean isFinished() {
+        return task == null ? false : task.isCancelled() || task.isDone();
+    }
+
+    /**
+     * Will execute the provided requests and return after all requests have been finished
+     * 
+     * @param requests
+     * @param timeout
+     * @param errorHandler
+     */
+    public static void executeRequestPackage(List<ExecutHTTPRequest<?>> requests,
+                                             long timeout,
+                                             Consumer<Exception> errorHandler) {
+
+        // Prepare
+        boolean finished = false;
+
+        // Check all tasks
+        int index = 0;
+        for(ExecutHTTPRequest<?> request : requests) {
+            if(request.isStarted()) {
+                throw new IllegalArgumentException(String.format("Request at position %d has already been started. Aborting", index));
+            }
+            index++;
+        }
+
+        // Execute
+        for(ExecutHTTPRequest<?> request : requests) {
+
+            // Create thread, which waits for future to finish
+            new Thread(new Runnable() {
                 @Override
                 public void run() {
-                     // Execute
-                     FutureTask<?> future = request.execute();
-                     try {
-                         future.get(timeoutMatrixActivity, TimeUnit.MILLISECONDS);
-                     } catch (Exception e) {
-                         if(errorHandler != null) {
-                             errorHandler.accept(e);
-                         }
-                     }
+                    // Execute
+                    FutureTask<?> future = request.execute();
+                    try {
+                        future.get(timeout, TimeUnit.MILLISECONDS);
+                    } catch (Exception e) {
+                        if(errorHandler != null) {
+                            errorHandler.accept(e);
+                        }
+                    }
                 }
             }).start();
-         }         
-         
-         // Loop until finished
-         while (!finished) {
-             finished = true;
+        }         
 
-             for (ExecutHTTPRequest<?> request : requests) {
-                 if (!request.isFinished()) {
-                     finished = false;
-                     break;
-                 }
-             }
-         }    
-     }
+        // Loop until finished
+        while (!finished) {
+            finished = true;
+
+            for (ExecutHTTPRequest<?> request : requests) {
+                if (!request.isFinished()) {
+                    finished = false;
+                    break;
+                }
+            }
+        }    
+    }
 }

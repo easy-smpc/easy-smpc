@@ -74,8 +74,6 @@ public class BusMatrix extends Bus{
     private final Thread                   thread;
     /** Stop flag */
     boolean                                stop                        = false;
-    /** Subscribed users */
-    private final Map<String, Participant> subscribedParticipants      = new ConcurrentHashMap<>();
     /** Last time synchronized */
     private String                         lastSynchronized            = null;
     // TODO ObjectMapper is thread safe. However, will a single instance impact performance?
@@ -157,10 +155,10 @@ public class BusMatrix extends Bus{
     }
 
     /**
-     * Search id of a room with a name
+     * Search id of a room by the generated room name for the remote participant
      * 
      * @param participant
-     * @return
+     * @return roomId
      */
     private String searchForRoomName(Participant participant) {
         
@@ -195,7 +193,7 @@ public class BusMatrix extends Bus{
     }
 
     /**
-     * Send a message in the standard matrix text format
+     * Send a message to a matrix chat
      * 
      * @param roomId
      * @param scope
@@ -231,8 +229,7 @@ public class BusMatrix extends Bus{
             future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new BusException("Error while executing HTTP request!", e);
-        }
-        
+        }        
     }
 
     /**
@@ -260,7 +257,7 @@ public class BusMatrix extends Bus{
             throw new BusException("Unable to serialize createRoom object", e);
         }
         
-        // Create task to get sync
+        // Create task
         FutureTask<String> future = new ExecutHTTPRequest<String>(this.connection.getBuilder(PATH_CREATE_ROOM),
                                                               ExecutHTTPRequest.REST_TYPE.POST,
                                                               () -> getExecutor(),
@@ -301,7 +298,7 @@ public class BusMatrix extends Bus{
     }
 
     /**
-     * Generates a room name
+     * Generates a room name with the remote participant and the "self" participant
      * 
      * @param participant
      * @param isSender
@@ -335,6 +332,10 @@ public class BusMatrix extends Bus{
      * @throws BusException, InterruptedException 
      */
     private void receive() throws BusException, InterruptedException {
+        
+        // Log
+        LOGGER.debug("Started receiving");
+        
         // Get sync data
         JsonNode sync = getSyncTree(true);
         
@@ -355,10 +356,12 @@ public class BusMatrix extends Bus{
      */
     private void processInvitations(JsonNode sync) {
         if (sync.path("rooms").path("invite") != null && !sync.path("rooms").path("invite").isMissingNode()) {
+            // Read invitations
             Map<String, Invitation> invitations = mapper.convertValue(sync.path("rooms")
                                                                           .path("invite"),
                                                                       new TypeReference<Map<String, Invitation>>() {
                                                                       });
+            // Check invitations and join rooms
             ExecutHTTPRequest.executeRequestPackage(joinRooms(checkAcceptInvites(invitations)),
                                                     Resources.TIMEOUT_MATRIX_ACTIVITY,
                                                     (e) -> LOGGER.error("Unable to join room", e));
@@ -372,7 +375,7 @@ public class BusMatrix extends Bus{
      */
     private synchronized void updateJoinedRooms(JsonNode sync) {
 
-        // TODO Since the joinedRoom can be set from two direction it is a ConcurrentHashMap this method is synchronized. Better use remove and addAll instead?
+        // TODO Since the joinedRoom can be set in parallel it is a ConcurrentHashMap AND this method is synchronized. Better use remove and addAll instead?
         // Set if content is available
         if (sync.path("rooms").path("path") != null && !sync.path("rooms").path("join").isMissingNode()) {
             this.joinedRooms = mapper.convertValue(sync.path("rooms").path("join"), new TypeReference<ConcurrentHashMap<String, JoinedRoom>>() {});
@@ -400,13 +403,13 @@ public class BusMatrix extends Bus{
                     event.getContent().getMsgType().equals("m.text") && event.getSender() != null &&
                     event.getContent().getScope() != null &&
                     isParticipantScopeRegistered(new Scope(event.getContent().getScope()),
-                                                 this.subscribedParticipants.get(event.getSender()))) {
+                                                 getParticipantsMap().get(event.getSender()))) {
 
                     // Try to receive message internal
                     try {
                         this.receiveInternal(Message.deserializeMessage(event.getContent().getBody()),
                                              new Scope(event.getContent().getScope()),
-                                             this.subscribedParticipants.get(event.getSender()));
+                                             getParticipantsMap().get(event.getSender()));
                     } catch (ClassNotFoundException | InterruptedException | IOException e) {
                         LOGGER.error(String.format("Unable to understand message with id %s in room %s", event.getEventId(), room.getKey()), e);
                         continue;
@@ -509,9 +512,9 @@ public class BusMatrix extends Bus{
         }
         
         // Update since if necessary
-        if (UpdateSince && !sync.get("next_batch").isMissingNode()) {
+        if (UpdateSince && !sync.path("next_batch").isMissingNode()) {
             synchronized (this.connection) {
-                this.lastSynchronized = sync.get("next_batch").asText();
+                this.lastSynchronized = sync.path("next_batch").asText();
             }
         }
         
@@ -528,8 +531,8 @@ public class BusMatrix extends Bus{
     private List<String> checkAcceptInvites(Map<String, Invitation> invitations) {
         // Prepare
         List<String> accept = new ArrayList<>();
-        List<String> participantNames = new ArrayList<>();
-        this.subscribedParticipants.forEach((k, v) -> participantNames.add(k));
+        List<String> participantIdentifier = new ArrayList<>();
+        getAllParticipants().forEach((e) -> participantIdentifier.add(e.getIdentifier()));
         
         // Loop over invitations
         for (Entry<String, Invitation> invitation : invitations.entrySet()) {
@@ -537,8 +540,8 @@ public class BusMatrix extends Bus{
 
             // Check inviter is relevant
             for(EventInvited event : invitation.getValue().getInviteState().getEvents()) {
-                if(event.getType().equals("m.room.create") && participantNames.contains(event.getContent().getCreator())) {
-                    expectedRoomName = generateRoomName(this.subscribedParticipants.get(event.getContent().getCreator()), false);
+                if(event.getType().equals("m.room.create") && participantIdentifier.contains(event.getContent().getCreator())) {
+                    expectedRoomName = generateRoomName(getParticipantsMap().get(event.getContent().getCreator()), false);
                     break;
                 }               
             }
@@ -563,8 +566,8 @@ public class BusMatrix extends Bus{
     /**
      * Joins rooms
      * 
-     * @param ids
-     * @return 
+     * @param room ids
+     * @return prepared, but not started requests
      */
     private List<ExecutHTTPRequest<?>> joinRooms(List<String> ids) {
         
@@ -587,11 +590,6 @@ public class BusMatrix extends Bus{
         
         // Return
         return requests;
-    }
-    
-    @Override
-    protected synchronized void receivePostActivities(Participant participant) {
-        this.subscribedParticipants.put(participant.getIdentifier(), participant);
     }
     
     @Override
@@ -621,5 +619,23 @@ public class BusMatrix extends Bus{
                 }
             }
         }
-    }   
+    }
+    
+    /**
+     * Gets all participants in form of a map with the identifier as a key
+     * 
+     * @return
+     */
+    private Map<String, Participant> getParticipantsMap() {
+        // Prepare
+        Map<String, Participant> result = new HashMap<>();
+        
+        // Create map
+        for( Participant participant : getAllParticipants()) {
+            result.put(participant.getIdentifier(), participant);
+        }
+        
+        // Return
+        return result;
+    }
 }

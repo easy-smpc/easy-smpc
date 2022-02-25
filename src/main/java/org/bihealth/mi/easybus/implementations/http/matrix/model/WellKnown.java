@@ -11,6 +11,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+/**
+ * A model for the well-known data in matrix
+ * 
+ * @author Felix Wirth
+ *
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "m.homeserver", "m.identity_server", "org.example.custom.property" })
 public class WellKnown {

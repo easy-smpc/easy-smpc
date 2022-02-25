@@ -13,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({ "type", "identifier", "password" })
-
 public class AuthentificationUserPassword {
     
     @JsonProperty("type")

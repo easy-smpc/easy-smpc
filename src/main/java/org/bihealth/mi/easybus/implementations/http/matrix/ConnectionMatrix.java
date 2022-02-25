@@ -4,8 +4,8 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
+import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.AuthentificationUserPassword;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.AuthentificationUserPassword.Identifier;
@@ -29,7 +29,7 @@ import jakarta.ws.rs.core.Response;;
  * @author Felix Wirth
  *
  */
-public class ConnectionMatrix implements UnaryOperator<Builder> {
+public class ConnectionMatrix implements AuthHandler {
     
     /**
      * Default error handler for matrix connections
@@ -98,7 +98,11 @@ public class ConnectionMatrix implements UnaryOperator<Builder> {
         this.auth = new AuthentificationUserPassword(new Identifier(getSelf().getIdentifier()), password);
         
         // Check config and throw exception if wrong
-        authenticate(null);            
+        try {
+            authenticate(null);
+        } catch (BusException e) {
+            throw new IllegalStateException("Unable to authenticate!", e);
+        }            
     }
 
     /**
@@ -145,17 +149,7 @@ public class ConnectionMatrix implements UnaryOperator<Builder> {
     }
 
     @Override
-    public Builder apply(Builder builder) {        
-        return authenticate(builder);
-    }
-
-    /**
-     * Tries to (re-)authenticate and returns a builder with new authorization bearer
-     * 
-     * @param builder
-     * @return
-     */
-    public Builder authenticate(Builder builder) {
+    public Builder authenticate(Builder builder) throws BusException {
         // Prepare
         WebTarget target = client.target(server).path(AUTHENTICATE_PATH);
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -167,14 +161,14 @@ public class ConnectionMatrix implements UnaryOperator<Builder> {
             
             // Check code
             if(response.getStatus() != 200) {
-                throw new IllegalStateException(DEFAULT_ERROR_HANDLER.apply(response));
+                throw new BusException(DEFAULT_ERROR_HANDLER.apply(response));
             }
             
             // Make and store object out of string
             setloggedIn(mapper.readValue(response.readEntity(String.class), LoggedIn.class));           
                         
         } catch (Exception e) {
-            throw new IllegalStateException("Unable to execute authentification request", e);
+            throw new BusException("Unable to execute authentification request", e);
         }
         
         // Remove old authorization, add new and return
@@ -182,23 +176,6 @@ public class ConnectionMatrix implements UnaryOperator<Builder> {
                 : builder.header("Authorization", null)
                          .header("Authorization",
                                  String.format("Bearer %s", this.loggedIn.getAccessToken()));
-    }
-    
-    /**
-     * Tries to authenticate
-     * 
-     * @return true if successful
-     */
-    public boolean authenticate() {
-        try {
-            this.apply(null);
-        } catch (IllegalStateException e) {
-            // Unsuccessful
-            return false;
-        }
-        
-        // Successful
-        return true;
     }
     
     /**

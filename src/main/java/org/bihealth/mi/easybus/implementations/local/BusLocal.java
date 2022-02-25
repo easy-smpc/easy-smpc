@@ -47,9 +47,4 @@ public class BusLocal extends Bus {
     public void stop() {
         // Empty by design
     }
-
-    @Override
-    protected void receivePostActivities(Participant participant) {
-        // Empty by design
-    }
 }
