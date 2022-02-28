@@ -81,6 +81,8 @@ public class ConnectionMatrix implements AuthHandler {
     private AuthentificationUserPassword     auth;
     /** Logged in data */
     private LoggedIn                         loggedIn;
+    /** Jackson object mapper */
+    private ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     /**
      * Creates a new instance
@@ -116,6 +118,7 @@ public class ConnectionMatrix implements AuthHandler {
         this.self = self;
         this.server = server;       
         this.auth = new AuthentificationUserPassword(new Identifier(getSelf().getIdentifier()), password);
+        this.mapper = new ObjectMapper();
         
         // Store proxy
         if (proxy == null) {
@@ -179,12 +182,11 @@ public class ConnectionMatrix implements AuthHandler {
     public Builder authenticate(Builder builder) throws BusException {
         // Prepare
         WebTarget target = client.target(server).path(AUTHENTICATE_PATH);
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         
         // Try to authenticate and obtain data
         try {
             // Execute request
-            Response response =  target.request().post(Entity.entity(mapper.writeValueAsString(auth), MediaType.TEXT_PLAIN));
+            Response response =  target.request().post(Entity.entity(mapper.writer().writeValueAsString(auth), MediaType.TEXT_PLAIN));
             
             // Check code
             if(response.getStatus() != 200) {
@@ -192,7 +194,7 @@ public class ConnectionMatrix implements AuthHandler {
             }
             
             // Make and store object out of string
-            setloggedIn(mapper.readValue(response.readEntity(String.class), LoggedIn.class));           
+            setloggedIn(mapper.reader().readValue(response.readEntity(String.class), LoggedIn.class));           
                         
         } catch (Exception e) {
             throw new BusException("Unable to execute authentification request", e);
