@@ -13,7 +13,15 @@
  */
 package org.bihealth.mi.easybus;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Base64;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * The message a party is sending
@@ -64,5 +72,46 @@ public class Message implements Serializable {
      */
     public String getReplyID(){
         return this.replyID;
+    }
+    
+    /**
+     * Serializes this messages to string
+     * 
+     * @return
+     * @throws IOException
+     */
+    public String serialize() throws IOException {
+        return serializeMessage(this);
+    }
+    
+    /**
+     * Serialize message as base64 encoded string
+     *
+     * @param msg the msg
+     * @return the string
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public static String serializeMessage(Message msg) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(bos));
+        oos.writeObject(msg);
+        oos.close();
+        return Base64.getEncoder().encodeToString(bos.toByteArray());
+    }
+    
+    /**
+     * Deserialize message from base64 encoded string
+     *
+     * @param msg the msg
+     * @return the message
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ClassNotFoundException the class not found exception
+     */
+    public static Message deserializeMessage(String msg) throws IOException, ClassNotFoundException {
+        byte[] data = Base64.getDecoder().decode(msg);
+        ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(data)));
+        Message message = (Message) ois.readObject();
+        ois.close();
+        return message;
     }
 }

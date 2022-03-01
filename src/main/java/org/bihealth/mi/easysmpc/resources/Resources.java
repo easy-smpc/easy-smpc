@@ -47,14 +47,18 @@ public class Resources {
     private static ResourceBundle resource_bundle                     = ResourceBundle.getBundle(BUNDLE_NAME);
 
     /** Invalid border */
-    public static final Border    INVALID_BORDER                      = BorderFactory.createLineBorder(new Color(255, 69, 0));
+    public static final Border    INVALID_BORDER                      = BorderFactory.createLineBorder(new Color(255,
+                                                                                                                 69,
+                                                                                                                 0));
 
     /** Default border */
-    public static final Border    DEFAULT_BORDER                      = UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border");       //$NON-NLS-1$
+    public static final Border    DEFAULT_BORDER                      = UIManager.getLookAndFeel()
+                                                                                 .getDefaults()
+                                                                                 .getBorder("TextField.border");       //$NON-NLS-1$
 
     /** Row gap */
     public static final int       ROW_GAP                             = 2;
-    
+
     /** Row gap large */
     public static final int       ROW_GAP_LARGE                       = 5;
 
@@ -87,18 +91,19 @@ public class Resources {
 
     /** The charset used to read the license text */
     private final static Charset  CHARSET                             = StandardCharsets.UTF_8;
-    
+
     /** Size of loading animation */
     public static final int       SIZE_LOADING_ANIMATION              = 15;
-    
+
     /** Size of checkmark clipart x */
     public static final int       SIZE_CHECKMARK_X                    = 15;
 
     /** Size of checkmark clipart y */
     public static final int       SIZE_CHECKMARK_Y                    = 12;
     /** Available languages */
-    private static final Locale[] AVAILABLE_LANGUAGES                 = { Locale.ENGLISH, Locale.GERMAN };
-    
+    private static final Locale[] AVAILABLE_LANGUAGES                 = { Locale.ENGLISH,
+                                                                          Locale.GERMAN };
+
     /** Interval schedule for tasks in background */
     public static final long      INTERVAL_SCHEDULER_MILLISECONDS     = 200;
 
@@ -118,12 +123,21 @@ public class Resources {
     public static final int       MAX_COUNT_COLUMNS                   = 250000;
 
     /** Delimiters considered for CSV files */
-    public static final char[]    DELIMITERS                          = { ';', ',', '|', '\t' };                       // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+    public static final char[]    DELIMITERS                          = { ';', ',', '|', '\t' };                       // $NON-NLS-1$
+                                                                                                                       // //$NON-NLS-2$
+                                                                                                                       // //$NON-NLS-3$
+                                                                                                                       // //$NON-NLS-4$
 
-    /** Maximum number of lines to be loaded for preview purposes for CSV file detection. */
+    /**
+     * Maximum number of lines to be loaded for preview purposes for CSV file
+     * detection.
+     */
     public static final int       PREVIEW_MAX_LINES                   = 25;
 
-    /** Maximum number of chars to be loaded for detecting separators for CSV file detection. */
+    /**
+     * Maximum number of chars to be loaded for detecting separators for CSV
+     * file detection.
+     */
     public static final int       DETECT_MAX_CHARS                    = 100000;
 
     /** Interval to check mail box automatically */
@@ -137,22 +151,25 @@ public class Resources {
 
     /** Light green color */
     public static final Color     COLOR_LIGHT_GREEN                   = new Color(82, 153, 75);
-    
+
     /** Interval to wait for sending e-mails */
-    public static final long TIMEOUT_SEND_EMAILS = 60000;
-    
+    public static final long      TIMEOUT_SEND_EMAILS                 = 60000;
+
     /** Fetch size for messages with IMAP */
-    public static final int FETCH_SIZE_IMAP = 1048576;
-    
+    public static final int       FETCH_SIZE_IMAP                     = 1048576;
+
     /** Number of threads in thread pool */
-    public static final int SIZE_THREADPOOL = 1;
+    public static final int       SIZE_THREADPOOL                     = 1;
 
     /** Fractional bits for decimal values */
-    public static final int FRACTIONAL_BITS = 32;
-    
+    public static final int       FRACTIONAL_BITS                     = 32;
+
     /** Aggregation delimiter */
-    public static final String AGGREGATION_DELIMITER = "X";
-        
+    public static final String    AGGREGATION_DELIMITER               = "X";
+
+    /** Default message size for e-mails */
+    public static final int       EMAIL_DEFAULT_MESSAGE_SIZE          = 1024 * 1024;
+
     /**
      * Returns all available languages
      * 
