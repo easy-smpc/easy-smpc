@@ -96,7 +96,7 @@ prime.
 4. The final perspective shows the result of the secure addition of all variables.
 
 ## Command line version
-There is also a command line version of EasySMPC. After [building](#build-from-source) use the jar easy-smpc-cli-*{Version}*.jar as a creator and as two participants or more.
+There is also a command line version of EasySMPC. After [building](#build-from-source) use the jar easy-smpc-cli-*{Version}*.jar as a creator and as two participants or more. The command line version only supports the automated mode.
 
 ### Creator
 Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -create -l STUDY_NAME -b FILES_PATH_VARIABLES -d FILES_PATH_DATA -f PARTICIPANTS -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. The parameters mean to the following:
