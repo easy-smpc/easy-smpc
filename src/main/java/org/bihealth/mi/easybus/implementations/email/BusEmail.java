@@ -13,15 +13,12 @@
  */
 package org.bihealth.mi.easybus.implementations.email;
 
-import java.util.Date;
 import java.util.concurrent.FutureTask;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageFilter;
+import org.bihealth.mi.easybus.MessageFragment;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -41,22 +38,22 @@ public class BusEmail extends Bus {
     protected abstract static class BusEmailMessage {
         
         /** Receiver */
-        protected final Participant receiver;
+        protected final Participant     receiver;
         /** Scope */
-        protected final Scope       scope;
+        protected final Scope           scope;
         /** Message */
-        protected final Message     message;
+        protected final MessageFragment message;
         /** Subject */
-        protected final String     subject;
+        protected final String          subject;
         
         
         /**
          * Message
          * @param receiver
          * @param scope
-         * @param message
+         * @param attachment
          */
-        BusEmailMessage(Participant receiver, Scope scope, Message message, String subject) {
+        BusEmailMessage(Participant receiver, Scope scope, MessageFragment message, String subject) {
             this.receiver = receiver;
             this.scope = scope;
             this.message = message;
@@ -70,11 +67,18 @@ public class BusEmail extends Bus {
     
         /** Expunges all deleted messages on the server
          * @throws BusException */
-        protected abstract void expunge() throws BusException;        
+        protected abstract void expunge() throws BusException;
+        
+        /**
+         * Create a MessageFragmentFinishEmail
+         * 
+         * @return
+         */
+        protected MessageFragmentFinishEmail getMessageFragmentFinish() 
+        {
+            return new MessageFragmentFinishEmail(this);
+        }
     }
-
-    /** Logger */
-    private static final Logger logger = LogManager.getLogger(BusEmail.class);
 
     /** Connection */
     private ConnectionEmail connection;
@@ -100,9 +104,21 @@ public class BusEmail extends Bus {
      * @param sizeThreadpool
      */
     public BusEmail(ConnectionEmail connection, int millis, int sizeThreadpool) {
+        this(connection, millis, sizeThreadpool, Resources.EMAIL_DEFAULT_MESSAGE_SIZE);
+    }
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param connection
+     * @param millis
+     * @param sizeThreadpool
+     *      * @param maxMessageSize
+     */
+    public BusEmail(ConnectionEmail connection, int millis, int sizeThreadpool, int maxMessageSize) {
         
         // Super
-        super(sizeThreadpool);
+        super(sizeThreadpool, maxMessageSize);
         
         // Check
         if(millis <= 0) {
@@ -169,7 +185,7 @@ public class BusEmail extends Bus {
     
     
     @Override
-    protected Void sendInternal(Message message, Scope scope, Participant participant) throws BusException {
+    protected Void sendInternal(MessageFragment message, Scope scope, Participant participant) throws BusException {
         this.connection.send(message, scope, participant);
         return null;
     }    
@@ -257,37 +273,17 @@ public class BusEmail extends Bus {
 
         try {
             // Get mails
-            BusEmail.BusEmailMessage deleted = null;
             for (BusEmail.BusEmailMessage message : connection.receive(filter)) {
 
                 // Check for interrupt
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }
-
-                // Mark
-                boolean received = false;
                 
                 // Send to scope and participant
-                received |= receiveInternal(message.message, message.scope, message.receiver);
-
-                // Delete 
-                if (received) {
-                    try {
-                        message.delete();
-                        logger.debug("Message deleted logged", new Date(),"Message deleted", message.scope.getName(),  message.receiver.getName(), message.subject);
-                        deleted = message;
-                    } catch (BusException e) {
-                        logger.error("Deletion error logged", new Date(), message.scope.getName(), message.receiver.getName(), message.subject);
-                    }
-
-                }
+                receiveInternal(message.getMessageFragmentFinish(), message.scope, message.receiver);
             }
-
-            // Expunge
-            if (deleted != null) {
-                deleted.expunge();
-            }
+            
         } catch (BusException e) {
             // Pass error over
             this.receiveErrorInternal(e);

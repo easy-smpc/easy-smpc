@@ -13,15 +13,20 @@
  */
 package org.bihealth.mi.easybus;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The Bus collecting and sending the messages
@@ -31,26 +36,39 @@ import java.util.concurrent.FutureTask;
  */
 public abstract class Bus {
     
+    /** Logger */
+    private static final Logger LOGGER = LogManager.getLogger(Bus.class);
     /** Stores the subscriptions with  known participants*/    
     private final Map<Scope, Map<Participant, List<MessageListener>>> subscriptions;   
     /** Executor service */
     private final ExecutorService executor;
+    /** Maximal size of a message to transfer in bytes*/
+    private final int maxMessageSize;
+    /** Message fragments */
+    private final Map<String, MessageFragmentFinish[]> messagesFragments;
     
     /**
      * Creates a new instance
      * 
      * @param sizeThreadpool
+     * @param maxMessageSize
      */
-    public Bus(int sizeThreadpool) {
+    public Bus(int sizeThreadpool, int maxMessageSize) {
         
         // Check
         if (sizeThreadpool <= 0) {
             throw new IllegalArgumentException("sizeThreadpool must be a positive number");
         }
         
+        if(maxMessageSize <= 0) {
+            throw new IllegalArgumentException("maxMessageSize must be a positive number");
+        }
+        
         // Create
         this.executor = Executors.newFixedThreadPool(sizeThreadpool);
         this.subscriptions = new HashMap<>();
+        this.maxMessageSize = maxMessageSize;
+        this.messagesFragments = new ConcurrentHashMap<>();
     }
 
     /**
@@ -118,13 +136,16 @@ public abstract class Bus {
             @Override
             public Void call() throws Exception {
                 // Init
-                boolean sent = false;
+                List<MessageFragment> messagesInternal = MessageFragment.createInternalMessagesFromMessage(message, maxMessageSize);                
+                int successCounter = 0;
                 
                 // Retry until sent successful or interrupted
-                while(!sent && !Thread.interrupted()) {
+                while(messagesInternal.size() != successCounter  && !Thread.interrupted()) {
                     try {
-                        sendInternal(message, scope, participant);
-                        sent = true;
+                        for(MessageFragment messageInternal : messagesInternal) {
+                            sendInternal(messageInternal, scope, participant);
+                            successCounter++;
+                        }
                     } catch (BusException e) {
                         // Ignore and repeat
                     }
@@ -141,13 +162,13 @@ public abstract class Bus {
     /**
      * Abstract method to send a message
      * 
-     * @param message
+     * @param messageInternal
      * @param scope
      * @param participant
      * @return task
      * @throws Exception
      */
-    protected abstract Void sendInternal(Message message, Scope scope, Participant participant) throws Exception;
+    protected abstract Void sendInternal(MessageFragment messageInternal, Scope scope, Participant participant) throws Exception;
     
     /**
      * Stops all backend services that might be running
@@ -193,28 +214,95 @@ public abstract class Bus {
     /**
      * Receives an external received message
      * 
-     * @param message
+     * @param messageFragment
      * @param scope
      * @param participant
      * @throws InterruptedException 
+     * @throws BusException 
      */
-    protected synchronized boolean receiveInternal(Message message, Scope scope, Participant participant) throws InterruptedException {
+    protected synchronized boolean receiveInternal(MessageFragmentFinish messageFragment, Scope scope, Participant participant) throws InterruptedException, BusException {                       
         
-        // Mark received
+        // Get or create fragments array
+        MessageFragmentFinish[] messageFragments = this.messagesFragments.computeIfAbsent(messageFragment.getId(), (key) -> new MessageFragmentFinish[messageFragment.getSplitTotal()]);
+        
+        // Check
+        if (messageFragment.getSplitTotal() > messageFragments.length) {
+            throw new BusException(String.format("Index for number of messages %d for new fragment does not suit to total number of messages %d message id %s",
+                                                 messageFragment.getSplitNr(),
+                                                 messageFragments.length,
+                                                 messageFragment.getId()));
+        }
+
+        // Add to list
+        messageFragments[messageFragment.getSplitNr()] = messageFragment;
+        
+        // TODO Do this in an own thread? Rearrange Thread.interrupted() accordingly
+        // If message complete receive internal
+        if(messageComplete(messageFragments)) {            
+            return receiveCompleteMessage(messageFragment.getId(), scope, participant);
+        }
+        
+        // Return
+        return false;
+    }
+
+    /**
+     * Receives a complete messages for subscribers
+     * 
+     * @param messageId
+     * @param scope
+     * @param participant
+     * @return
+     * @throws BusException
+     * @throws InterruptedException
+     */
+    private boolean receiveCompleteMessage(String messageId, Scope scope, Participant participant) throws BusException, InterruptedException {
+        
+        // Init
+        MessageFragmentFinish[] messageFragments = this.messagesFragments.get(messageId);
+        String messageSerialized = "";
+        Message message;
         boolean received = false;
-        
+
+        // Loop over fragments to re-assemble string
+        for (int index = 0; index < messageFragments.length; index++) {
+            messageSerialized = messageSerialized + messageFragments[index].getContent();
+        }
+
+        // Recreate message
+        try {
+            message = Message.deserializeMessage(messageSerialized);
+        } catch (ClassNotFoundException | IOException e) {
+            throw new BusException("Unable to deserialize message", e);
+        }
+
         // Send to subscribers
         if (subscriptions.get(scope) != null && subscriptions.get(scope).get(participant) != null) {
             for (MessageListener messageListener : subscriptions.get(scope).get(participant)) {
 
                 // Check for interrupt
-                if (Thread.interrupted()) { 
-                    throw new InterruptedException();
-                }
+                if (Thread.interrupted()) { throw new InterruptedException(); }
 
                 messageListener.receive(message);
                 received = true;
             }
+        }
+        
+        if (received) {
+            // Loop over fragments to delete messages
+            for (int index = 0; index < messageFragments.length; index++) {
+                try {
+                    messageFragments[index].delete();
+                } catch (BusException e) {
+                    LOGGER.error("Unable to delete message fragment", e);
+                }
+            }
+
+            // Finalize
+            messageFragments[0].finalize();
+
+            // Remove from map
+            this.messagesFragments.remove(messageFragments[0].getId());
         }
 
         // Done
@@ -240,6 +328,24 @@ public abstract class Bus {
         }
         
         // Return
-        return result;
+        return result;       
+    }
+    /**
+     * Is a message complete?
+     * 
+     * @param messageFragement
+     * @return
+     */
+    private boolean messageComplete(MessageFragmentFinish[] messageFragement) {
+        
+        // Loop over array
+        for(int index = 0; index < messageFragement.length; index++) {
+            if(messageFragement[index] == null) {
+                return false;
+            }
+        }  
+        
+        // Finished
+        return true;
     }
 }

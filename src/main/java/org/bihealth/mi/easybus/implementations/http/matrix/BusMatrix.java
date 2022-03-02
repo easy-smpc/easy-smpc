@@ -17,7 +17,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.Message;
+import org.bihealth.mi.easybus.MessageFragment;
+import org.bihealth.mi.easybus.MessageFragmentFinish;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.http.ExecutHTTPRequest;
@@ -80,7 +81,7 @@ public class BusMatrix extends Bus{
     private ObjectMapper                   mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     /** Join rooms */
     private Map<String, JoinedRoom>        joinedRooms;
-
+    
     /**
      * Creates a new instance
      * 
@@ -89,8 +90,20 @@ public class BusMatrix extends Bus{
      * @param connection
      */
     public BusMatrix(int sizeThreadpool, int millis, ConnectionMatrix connection) {
+        this(sizeThreadpool, millis, connection, Resources.MATRIX_DEFAULT_MESSAGE_SIZE);
+    }
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param sizeThreadpool
+     * @param millis
+     * @param connection
+     * @param maxMessageSize
+     */
+    public BusMatrix(int sizeThreadpool, int millis, ConnectionMatrix connection,  int maxMessageSize) {
         // Super
-        super(sizeThreadpool);
+        super(sizeThreadpool, maxMessageSize);
         
         // Store
         this.connection = connection;
@@ -126,7 +139,7 @@ public class BusMatrix extends Bus{
     }
 
     @Override
-    protected Void sendInternal(Message message, Scope scope, Participant participant) throws Exception {
+    protected Void sendInternal(MessageFragment message, Scope scope, Participant participant) throws Exception {
 
         // Prepare
         String roomId = null;
@@ -199,7 +212,7 @@ public class BusMatrix extends Bus{
      * @param message
      * @throws BusException 
      */
-    private void sendMessageToMatrixChat(String roomId, Scope scope, Message message) throws BusException {
+    private void sendMessageToMatrixChat(String roomId, Scope scope, MessageFragment message) throws BusException {
         
         // Prepare payload as string
         String payload;
@@ -228,7 +241,7 @@ public class BusMatrix extends Bus{
             future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new BusException("Error while executing HTTP request!", e);
-        }        
+        }
     }
 
     /**
@@ -404,36 +417,53 @@ public class BusMatrix extends Bus{
                     isParticipantScopeRegistered(new Scope(event.getContent().getScope()),
                                                  getParticipantsMap().get(event.getSender()))) {
 
-                    // Try to receive message internal
+                    // Process message
                     try {
-                        this.receiveInternal(Message.deserializeMessage(event.getContent().getBody()),
-                                             new Scope(event.getContent().getScope()),
-                                             getParticipantsMap().get(event.getSender()));
+                        
+                        // Prepare message fragment
+                        MessageFragmentFinish fragmentFinish = new MessageFragmentFinish(MessageFragment.deserializeMessage(event.getContent().getBody())) {
+
+                            /** SVUID */
+                            private static final long serialVersionUID = 1L;
+
+                            @Override
+                            public void delete() throws BusException {
+                                try {
+                                    // TODO: Create a package of redact messages to redact in parallel?
+                                    redactMessage(room.getKey(), event.getEventId(), CreateRedacted.DEFAULT);
+                                } catch (BusException e) {
+                                    LOGGER.error(String.format("Unable to redact message with id %s in room %s", event.getEventId(), room.getKey()), e);
+                                }
+                            }
+
+                            @Override
+                            public void finalize() throws BusException {
+                                // Empty
+                            }
+                        };
+                        
+                        // Try to receive message internal
+                        this.receiveInternal(fragmentFinish, new Scope(event.getContent().getScope()), getParticipantsMap().get(event.getSender()));
                     } catch (ClassNotFoundException | InterruptedException | IOException e) {
                         LOGGER.error(String.format("Unable to understand message with id %s in room %s", event.getEventId(), room.getKey()), e);
                         continue;
-                    }
-                    
-                    // Redact message
-                    try {
-                        redactMessage(room.getKey(), event.getEventId(), new CreateRedacted(Resources.REASON_REDACTED_READ));
                     } catch (BusException e) {
-                        LOGGER.error(String.format("Unable to redact message with id %s in room %s", event.getEventId(), room.getKey()), e);
+                        LOGGER.error(String.format("Unable to receive message internally", event.getEventId(), room.getKey()), e);
+                        continue;
                     }
-                    // TODO: Create a package of redact message to redact in parallel
                 }
             }
         }
     }
 
     /**
-     * Redacts respectively "deletes" a message (see matrix documentation for explanation of redact 
+     * Redacts respectively "deletes" a message (see matrix documentation for explanation of redact)
      * 
      * @param roomId
      * @param eventId
      * @throws BusException 
      */
-    private void redactMessage(String roomId, String eventId, CreateRedacted createRedacted ) throws BusException {
+    protected void redactMessage(String roomId, String eventId, CreateRedacted createRedacted ) throws BusException {
         
         // Prepare request
         Builder request = this.connection.getBuilder(String.format(PATH_REDACT_MESSAGE_PATTERN, roomId, eventId, UIDGenerator.generateShortUID(10)));

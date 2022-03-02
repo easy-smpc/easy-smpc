@@ -27,8 +27,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageFilter;
+import org.bihealth.mi.easybus.MessageFragment;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easybus.Scope;
@@ -374,7 +374,7 @@ public abstract class ConnectionEmail {
                 // Pass on
                 final ConnectionEmailMessage _message = message;
 
-                result.add(new BusEmail.BusEmailMessage(participant, scope, (Message) attachment, message.text) {
+                result.add(new BusEmail.BusEmailMessage(participant, scope, (MessageFragment) attachment, message.text) {
 
                     @Override
                     protected void delete() throws BusException {
@@ -404,7 +404,7 @@ public abstract class ConnectionEmail {
      * @param sender 
      * @throws BusException 
      */
-    protected void send(Message message, Scope scope, Participant receiver) throws BusException {
+    protected void send(MessageFragment message, Scope scope, Participant receiver) throws BusException {
         
         // Recipient
         String recipient = sharedMailbox ? getEmailAddress() : receiver.getIdentifier();

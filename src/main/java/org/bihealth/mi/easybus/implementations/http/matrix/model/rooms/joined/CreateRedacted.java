@@ -1,5 +1,8 @@
 
 package org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined;
+import org.bihealth.mi.easysmpc.resources.Resources;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -18,7 +21,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class CreateRedacted {
 
     @JsonProperty("reason")
-    private String reason;
+    private String reason;    
+    /** Default event to redact message */
+    @JsonIgnore
+    public static final CreateRedacted DEFAULT = new CreateRedacted(Resources.REASON_REDACTED_READ);
 
     /**
      * No args constructor for use in serialization

@@ -85,7 +85,7 @@ public class Message implements Serializable {
     }
     
     /**
-     * Serialize message.
+     * Serialize message as base64 encoded string
      *
      * @param msg the msg
      * @return the string
@@ -100,7 +100,7 @@ public class Message implements Serializable {
     }
     
     /**
-     * Deserialize message.
+     * Deserialize message from base64 encoded string
      *
      * @param msg the msg
      * @return the message

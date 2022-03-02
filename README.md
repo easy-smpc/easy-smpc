@@ -106,7 +106,7 @@ public issue, send us an email.
 EasySMPC's core development team consists of:
 
 * [Tobias Kussel](https://github.com/TKussel) - Cryptography - [tobias.kussel@cysec.de](tobias.kussel@cysec.de)
-* [Armin Müller](https://github.com/burgadon) - Graphical user interface - [armin.mueller@charite.de](armin.mueller@charite.de)
+* [Armin Müller](https://github.com/muellerarmin) - Graphical user interface - [armin.mueller@charite.de](armin.mueller@charite.de)
 * [Fabian Prasser](https://github.com/prasser) - Software design and architecture -[fabian.prasser@charite.de](fabian.prasser@charite.de)
 * [Felix Nikolaus Wirth](https://github.com/fnwirth) - Graphical user interface - [felix-nikolaus.wirth@charite.de](felix-nikolaus.wirth@charite.de)
 
