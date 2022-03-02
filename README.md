@@ -58,7 +58,7 @@ already established and configured communication medium.
 * Easy to use
 * Communication using established channels, e.g. emails
 * Excel and CSV import and export
-* Automation of the protocol using a shared IMAP-Mailbox
+* Automation of the protocol using IMAP-Mailboxes
 * Automatic Proxy-Detection
 
 ### Security
