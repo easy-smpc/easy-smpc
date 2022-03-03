@@ -18,10 +18,20 @@ public class MessageFragmentFinishEmail extends MessageFragmentFinish {
     /** Bus email message */
     private BusEmailMessage busEmailMessage;
 
+    /**
+     * Creates a new instance
+     * 
+     * @param fragment
+     */
     public MessageFragmentFinishEmail(MessageFragment fragment) {
         super(fragment);
     }
 
+    /**
+     * Creates a new instance
+     * 
+     * @param busEmailMessage
+     */
     public MessageFragmentFinishEmail(BusEmailMessage busEmailMessage) {
         this(busEmailMessage.message);
         

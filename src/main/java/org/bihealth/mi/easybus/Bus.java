@@ -51,6 +51,7 @@ public abstract class Bus {
      * Creates a new instance
      * 
      * @param sizeThreadpool
+     * @param  maxMessageSize
      */
     public Bus(int sizeThreadpool, int maxMessageSize) {
         
