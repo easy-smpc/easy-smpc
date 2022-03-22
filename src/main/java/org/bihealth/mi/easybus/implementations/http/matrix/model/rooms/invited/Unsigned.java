@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class Unsigned {
 
     @JsonProperty("age")
-    private Integer age;
+    private long age;
 
     /**
      * No args constructor for use in serialization
@@ -33,18 +33,18 @@ public class Unsigned {
      * 
      * @param age
      */
-    public Unsigned(Integer age) {
+    public Unsigned(long age) {
         super();
         this.age = age;
     }
 
     @JsonProperty("age")
-    public Integer getAge() {
+    public long getAge() {
         return age;
     }
 
     @JsonProperty("age")
-    public void setAge(Integer age) {
+    public void setAge(long age) {
         this.age = age;
     }
 

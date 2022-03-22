@@ -61,6 +61,10 @@ public class BusMatrix extends Bus{
     private static final String            PATH_SEND_MESSAGE_PATTERN   = "_matrix/client/v3/rooms/%s/send/m.room.message/%s";
     /** Path pattern to redact a message */
     private static final String            PATH_REDACT_MESSAGE_PATTERN = "_matrix/client/v3/rooms/%s/redact/%s/%s";
+    /** Path pattern to leave a room */
+	private static final String			   PATH_LEAVE_ROOM             = "_matrix/client/v3/rooms/%s/leave";
+    /** Path pattern to forget a room */
+	private static final String			   PATH_FORGET_ROOM            = "_matrix/client/v3/rooms/%s/forget";
     /** String indicating start of scope */
     public static final String             SCOPE_NAME_START_TAG        = "BEGIN_NAME_SCOPE";
     /** String indicating end of scope */
@@ -78,10 +82,10 @@ public class BusMatrix extends Bus{
     /** Last time synchronized */
     private String                         lastSynchronized            = null;
     /** Jackson object mapper */
-    private ObjectMapper                   mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    /** Join rooms */
-    private Map<String, JoinedRoom>        joinedRooms;
-    
+	private ObjectMapper 				   mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	/** Join rooms */
+    private final Map<String, JoinedRoom>  joinedRooms 				   = new ConcurrentHashMap<>();
+
     /**
      * Creates a new instance
      * 
@@ -141,67 +145,68 @@ public class BusMatrix extends Bus{
     @Override
     protected Void sendInternal(MessageFragment message, Scope scope, Participant participant) throws Exception {
 
-        // Prepare
-        String roomId = null;
+        // Prepare room id list, only first entry is relevant
+        List<String> roomId = null;
         
-        // Check if room exists
-        roomId = searchForRoomName(participant);
+        // Check if room exists        
+        roomId = searchForRoomName(generateRoomName(participant, true), true);
         
         // If not found update room and search again
-        if(roomId == null) {
+        if(roomId == null || roomId.size() == 0) {
             updateJoinedRooms(getSyncTree(false));
-            roomId = searchForRoomName(participant);
+            roomId = searchForRoomName(generateRoomName(participant, true), true);
         }        
         
         // If necessary create room and update joined rooms 
-        if(roomId == null) {
-            roomId = createRoom(new CreateRoom().setName(generateRoomName(participant, true)).addInvite(participant.getIdentifier()));
+        if(roomId == null || roomId.size() == 0) {
+            roomId.add(createRoom(new CreateRoom().setName(generateRoomName(participant, true)).addInvite(participant.getIdentifier())));
             updateJoinedRooms(getSyncTree(false));
         }
         
         // Send message and return
-        sendMessageToMatrixChat(roomId, scope, message);
+        sendMessageToMatrixChat(roomId.get(0), scope, message);
         
         // Return
         return null;
     }
 
     /**
-     * Search id of a room by the generated room name for the remote participant
+     * Search id of a room by room name pattern
      * 
-     * @param participant
+     * @param room pattern
+     * @param breakAfterFirstFinding
      * @return roomId
      */
-    private String searchForRoomName(Participant participant) {
-        
-        // Check
-        if(this.joinedRooms == null) {
-            return null;
-        }
+    private List<String> searchForRoomName(String pattern, boolean breakAfterFirstFinding) {
         
         // Prepare
-        String roomId = null;
+        List<String> roomIds = new ArrayList<>();
             
         // Loop over rooms
-        for (Entry<String, JoinedRoom> joinedRoom : joinedRooms.entrySet()) {
+        for (Entry<String, JoinedRoom> joinedRoom : joinedRooms.entrySet()) {            
+            
+            // Aggregate all events
+            List<EventJoined> events = new ArrayList<>();
+            events.addAll(joinedRoom.getValue().getState().getEvents());
+            events.addAll(joinedRoom.getValue().getTimeline().getEvents());            
 
             // Check room name
-            for (EventJoined event : joinedRoom.getValue().getTimeline().getEvents()) {
+            for (EventJoined event : events) {
                 if (event.getType().equals("m.room.name") &&
-                    event.getContent().getName().equals(generateRoomName(participant, true))) {
-                    roomId = joinedRoom.getKey();
+                    event.getContent().getName().matches(pattern)) {
+                    roomIds.add(joinedRoom.getKey());
                     break;
                 }
             }
 
             // Stop loop if found
-            if (roomId != null) {
+            if (breakAfterFirstFinding && roomIds.size() > 0) {
                 break;
             }
         }
             
         // Return
-        return roomId;
+        return roomIds;
     }
 
     /**
@@ -215,7 +220,7 @@ public class BusMatrix extends Bus{
     private void sendMessageToMatrixChat(String roomId, Scope scope, MessageFragment message) throws BusException {
         
         // Prepare payload as string
-        String payload;
+        String payload;        
         try {
             CreateMessage createMessage = new CreateMessage().setBody(message.serialize())
                                                              .setScope(scope.getName());
@@ -234,7 +239,9 @@ public class BusMatrix extends Bus{
                                                               payload,
                                                               null,
                                                               ConnectionMatrix.DEFAULT_ERROR_HANDLER,
-                                                              this.connection).execute();
+                                                              this.connection,
+                                                              Resources.RETRY_MATRIX_ACTIVITY_NUMBER,
+                                                              Resources.RETRY_MATRIX_ACTIVITY_WAIT).execute();
         
         // Wait for task end or exception
         try {
@@ -293,11 +300,13 @@ public class BusMatrix extends Bus{
                                                                     }
                                                                     
                                                                     // Return
-                                                                    return responseString;
+                                                                    return responseTree.get("room_id").textValue();
                                                                 }
                                                             },
                                                               ConnectionMatrix.DEFAULT_ERROR_HANDLER,
-                                                              this.connection).execute();
+                                                              this.connection,
+                                                              Resources.RETRY_MATRIX_ACTIVITY_NUMBER,
+                                                              Resources.RETRY_MATRIX_ACTIVITY_WAIT).execute();
         // Wait for task end or exception
         try {
             roomId = future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);
@@ -360,6 +369,53 @@ public class BusMatrix extends Bus{
         // Check joined rooms for new messages
         checkNewMessages();        
     }
+    
+    /**
+     * Leaves and forgets all EasySMPC relevant rooms
+     */
+    @Override
+    public void purge() throws BusException {
+    	// Init
+    	List<String> ids = new ArrayList<>();
+    	
+        // Get sync data
+        JsonNode sync = getSyncTree(true);
+        
+        // Update joined rooms
+        updateJoinedRooms(sync);
+        
+        // Loop over joined rooms
+        ids.addAll(searchForRoomName("EasySMPC.{0,}", false));
+        
+        // Loop over invitations if existing
+        if (sync.path("rooms").path("invite") != null && !sync.path("rooms").path("invite").isMissingNode()) {
+            // Read invitations
+            Map<String, Invitation> invitations = mapper.convertValue(sync.path("rooms")
+                                                                          .path("invite"),
+                                                                      new TypeReference<Map<String, Invitation>>() {
+                                                                      });
+            for (Entry<String, Invitation> invitation : invitations.entrySet()) {
+
+                // Check room name
+                for(EventInvited event : invitation.getValue().getInviteState().getEvents()) {
+                    if(event.getType().equals("m.room.name") && event.getContent().getName().startsWith("EasySMPC")) {
+                    	ids.add(invitation.getKey());
+                    }
+                }
+            }
+        }
+        
+        // Leave rooms
+        ExecutHTTPRequest.executeRequestPackage(leaveRooms(ids),
+                                                Resources.TIMEOUT_MATRIX_ACTIVITY,
+                                                (e) -> LOGGER.error("Unable to leave room", e));
+        
+        // Forget rooms
+        ExecutHTTPRequest.executeRequestPackage(forgetRooms(ids),
+                                                Resources.TIMEOUT_MATRIX_ACTIVITY,
+                                                (e) -> LOGGER.error("Unable to forget room", e));
+    	
+    }
 
     /**
      *  Read matrix room invitations and accept relevant ones 
@@ -385,12 +441,11 @@ public class BusMatrix extends Bus{
      * 
      * @param sync
      */
-    private synchronized void updateJoinedRooms(JsonNode sync) {
+    private void updateJoinedRooms(JsonNode sync) {
 
-        // TODO Since the joinedRoom can be set in parallel it is a ConcurrentHashMap AND this method is synchronized. Better use remove and addAll instead?
         // Set if content is available
         if (sync.path("rooms").path("path") != null && !sync.path("rooms").path("join").isMissingNode()) {
-            this.joinedRooms = mapper.convertValue(sync.path("rooms").path("join"), new TypeReference<ConcurrentHashMap<String, JoinedRoom>>() {});
+            this.joinedRooms.putAll(mapper.convertValue(sync.path("rooms").path("join"), new TypeReference<HashMap<String, JoinedRoom>>() {}));
         }
     }
 
@@ -484,7 +539,9 @@ public class BusMatrix extends Bus{
                                                               createRedactedSerialized,
                                                               (response) -> response.readEntity(String.class),
                                                               ConnectionMatrix.DEFAULT_ERROR_HANDLER,
-                                                              this.connection).execute();
+                                                              this.connection,
+                                                              Resources.RETRY_MATRIX_ACTIVITY_NUMBER,
+                                                              Resources.RETRY_MATRIX_ACTIVITY_WAIT).execute();
         
         // Wait for task end or exception
         try {
@@ -523,7 +580,9 @@ public class BusMatrix extends Bus{
                                                               null,
                                                               (response) -> response.readEntity(String.class),
                                                               ConnectionMatrix.DEFAULT_ERROR_HANDLER,
-                                                              this.connection).execute();
+                                                              this.connection,
+                                                              Resources.RETRY_MATRIX_ACTIVITY_NUMBER,
+                                                              Resources.RETRY_MATRIX_ACTIVITY_WAIT).execute();
         
         // Wait for task end or exception
         try {
@@ -614,7 +673,9 @@ public class BusMatrix extends Bus{
                     null,
                     (response) -> null,
                     ConnectionMatrix.DEFAULT_ERROR_HANDLER,
-                    this.connection));
+                    this.connection,
+                    Resources.RETRY_MATRIX_ACTIVITY_NUMBER,
+                    Resources.RETRY_MATRIX_ACTIVITY_WAIT));
         }
         
         // Return
@@ -666,5 +727,67 @@ public class BusMatrix extends Bus{
         
         // Return
         return result;
+    }
+    
+    /**
+     * Leave rooms
+     * 
+     * @param room ids
+     * @return prepared, but not started requests
+     */
+    private List<ExecutHTTPRequest<?>> leaveRooms(List<String> ids) {
+        
+        // Prepare
+        List<ExecutHTTPRequest<?>> requests = new ArrayList<>();
+
+        for(String id: ids) {
+            // Create URL path and parameter
+            final Builder request = this.connection.getBuilder(String.format(PATH_LEAVE_ROOM, id));
+
+            // Create task and add to list
+            requests.add(new ExecutHTTPRequest<Void>(request,
+                    ExecutHTTPRequest.REST_TYPE.POST,
+                    () -> getExecutor(),
+                    null,
+                    (response) -> null,
+                    ConnectionMatrix.DEFAULT_ERROR_HANDLER,
+                    this.connection,
+                    Resources.RETRY_MATRIX_ACTIVITY_NUMBER,
+                    Resources.RETRY_MATRIX_ACTIVITY_WAIT));
+        }
+        
+        // Return
+        return requests;    
+    }
+    
+    /**
+     * Forget rooms
+     * 
+     * @param room ids
+     * @return prepared, but not started requests
+     */
+    private List<ExecutHTTPRequest<?>> forgetRooms(List<String> ids) {
+        
+        // Prepare
+        List<ExecutHTTPRequest<?>> requests = new ArrayList<>();
+
+        for(String id: ids) {
+            // Create URL path and parameter
+            final Builder request = this.connection.getBuilder(String.format(PATH_FORGET_ROOM, id));
+
+            // Create task and add to list
+            requests.add(new ExecutHTTPRequest<Void>(request,
+                    ExecutHTTPRequest.REST_TYPE.POST,
+                    () -> getExecutor(),
+                    null,
+                    (response) -> null,
+                    ConnectionMatrix.DEFAULT_ERROR_HANDLER,
+                    this.connection,
+                    Resources.RETRY_MATRIX_ACTIVITY_NUMBER,
+                    Resources.RETRY_MATRIX_ACTIVITY_WAIT));
+        }
+        
+        // Return
+        return requests;    
     }
 }

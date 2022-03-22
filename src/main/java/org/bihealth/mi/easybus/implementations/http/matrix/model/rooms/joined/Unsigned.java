@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class Unsigned {
 
     @JsonProperty("age")
-    private Integer age;
+    private long age;
     @JsonProperty("transaction_id")
     private String transactionId;
     @JsonProperty("redacted_by")
@@ -44,7 +44,7 @@ public class Unsigned {
      * @param age
      * @param transactionId
      */
-    public Unsigned(Integer age, String transactionId, String redactedBy, RedactedBecause redactedBecause) {
+    public Unsigned(long age, String transactionId, String redactedBy, RedactedBecause redactedBecause) {
         super();
         this.age = age;
         this.transactionId = transactionId;
@@ -53,12 +53,12 @@ public class Unsigned {
     }
 
     @JsonProperty("age")
-    public Integer getAge() {
+    public long getAge() {
         return age;
     }
 
     @JsonProperty("age")
-    public void setAge(Integer age) {
+    public void setAge(long age) {
         this.age = age;
     }
 

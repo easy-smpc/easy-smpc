@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Felix Wirth
  *
  */
-@JsonPropertyOrder({ "timeline" })
+@JsonPropertyOrder({ "timeline", "state" })
 public class JoinedRoom {
 
     @JsonProperty("timeline")
@@ -23,5 +23,18 @@ public class JoinedRoom {
     @JsonProperty("timeline")
     public void setTimeline(Timeline timeline) {
         this.timeline = timeline;
+    }
+    
+    @JsonProperty("state")
+    private State state;    
+    
+    @JsonProperty("state")
+    public State getState() {
+        return state;
+    }
+
+    @JsonProperty("state")
+    public void setState(State state) {
+        this.state = state;
     }
 }

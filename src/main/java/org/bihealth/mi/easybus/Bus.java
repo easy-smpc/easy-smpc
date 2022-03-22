@@ -348,4 +348,12 @@ public abstract class Bus {
         // Finished
         return true;
     }
+
+    /**
+     * Deletes all EasyBus relevant data - use with care
+     * 
+     * @throws BusException
+     * @throws InterruptedException
+     */
+    public abstract void purge() throws Exception;
 }

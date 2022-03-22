@@ -64,6 +64,12 @@ public class BusLocal extends Bus {
 
     @Override
     public void stop() {
+     // Empty by designthrow new UnsupportedMe
+    }
+    
+    @Override
+    public void purge() {
         // Empty by design
     }
+    
 }

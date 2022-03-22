@@ -63,20 +63,28 @@ public class ExecutHTTPRequest<T> {
     /** Error handler */
     private Function<Response, String>        errorHandler;
     /** Authorization handler */
-    private AuthHandler                      authentificationHandler;
+    private AuthHandler                       authentificationHandler;
     /** Indicates if task was started - remains true after it was finished */
     private boolean                           started             = false;
     /** Task */
     private FutureTask<T>                     task;
-
+    /** Sleep time to re-try request */
+    private long                              sleepTimeRetry;
+    /** Number of retries */
+    private int                               numberRetry;
+    
     /**
      * Creates a new instance
      * 
-     * @param connection
-     * @param currentAuthorization
-     * @param pathCreateRoom
-     * @param authorizationUpdater
-     * @param data
+     * @param requestBuilder
+     * @param type
+     * @param executorSupplier
+     * @param inputData
+     * @param resultHandler
+     * @param errorHandler
+     * @param authentificationHandler
+     * @param sleepTimeRetry
+     * @param numberRetry
      */
     public ExecutHTTPRequest(Builder requestBuilder,
                              REST_TYPE type,
@@ -84,11 +92,20 @@ public class ExecutHTTPRequest<T> {
                              String inputData,
                              Function<Response, T> resultHandler,
                              Function<Response, String> errorHandler,
-                             AuthHandler authentificationHandler) {
+                             AuthHandler authentificationHandler,
+                             int numberRetry,
+                             long sleepTimeRetry) {
 
         // Check
         if (requestBuilder == null || type == null || executorSupplier == null) {
             throw new IllegalArgumentException("Requestbuilder, type and executorSupplier must not be null!");
+        }
+        if(numberRetry < 0 || sleepTimeRetry < 0) {
+        	throw new IllegalArgumentException("Number retry and sleep time retry must no be smaller than 0");
+        }
+        
+        if(numberRetry > 0 && sleepTimeRetry == 0) {
+            throw new IllegalArgumentException("If number retry given, sleep time must be greater than 0");
         }
 
         // Store
@@ -98,6 +115,8 @@ public class ExecutHTTPRequest<T> {
         this.resultHandler = resultHandler;       
         this.type = type;
         this.authentificationHandler = authentificationHandler;
+        this.sleepTimeRetry = sleepTimeRetry;
+        this.numberRetry = numberRetry;
         if (errorHandler != null) {
             this.errorHandler = errorHandler;
         } else {
@@ -131,6 +150,35 @@ public class ExecutHTTPRequest<T> {
 
                     // Successful authorization, execute request again
                     response = executeRequest();
+                }
+                
+                // Wait and retry once if too many requests
+                if (response.getStatus() == 429 && numberRetry > 0) {
+                    int retryCounter = 0;
+                    
+                    while(true) {
+                        
+                        // Check to make more retries
+                        if(retryCounter >= numberRetry) {
+                            throw new IllegalStateException(String.format("Error executing HTTP request: %s", errorHandler.apply(response)));
+                        }
+                        
+                        // Sleep
+                        try {
+                            Thread.sleep(sleepTimeRetry);
+                        } catch (InterruptedException e) {
+                            // Ignore
+                        }
+
+                        // Execute request again
+                        response = executeRequest();
+                        retryCounter++;
+                        
+                        // If error is not "too many requests" anymore, proceed
+                        if(response.getStatus() == 429) {
+                            break;
+                        }
+                    }
                 }
 
                 // General error handling
