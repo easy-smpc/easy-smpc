@@ -50,41 +50,46 @@ import jakarta.ws.rs.core.Response;
 public class BusMatrix extends Bus{
 
     /** Logger */
-    private static final Logger            LOGGER                      = LogManager.getLogger(BusMatrix.class);
+    private static final Logger           LOGGER                      = LogManager.getLogger(BusMatrix.class);
     /** Path to create a room */
-    private final static String            PATH_CREATE_ROOM            = "_matrix/client/v3/createRoom";
+    private final static String           PATH_CREATE_ROOM            = "_matrix/client/v3/createRoom";
     /** Path to sync */
-    private static final String            PATH_SYNC                   = "_matrix/client/r0/sync";
+    private static final String           PATH_SYNC                   = "_matrix/client/r0/sync";
     /** Path pattern to join a room */
-    private static final String            PATH_JOIN_ROOM_PATTERN      = "_matrix/client/v3/join/%s";
+    private static final String           PATH_JOIN_ROOM_PATTERN      = "_matrix/client/v3/join/%s";
     /** Path pattern to send a message */
-    private static final String            PATH_SEND_MESSAGE_PATTERN   = "_matrix/client/v3/rooms/%s/send/m.room.message/%s";
+    private static final String           PATH_SEND_MESSAGE_PATTERN   = "_matrix/client/v3/rooms/%s/send/m.room.message/%s";
     /** Path pattern to redact a message */
-    private static final String            PATH_REDACT_MESSAGE_PATTERN = "_matrix/client/v3/rooms/%s/redact/%s/%s";
+    private static final String           PATH_REDACT_MESSAGE_PATTERN = "_matrix/client/v3/rooms/%s/redact/%s/%s";
     /** Path pattern to leave a room */
-	private static final String			   PATH_LEAVE_ROOM             = "_matrix/client/v3/rooms/%s/leave";
+    private static final String           PATH_LEAVE_ROOM             = "_matrix/client/v3/rooms/%s/leave";
+    /** Path pattern to manage account data */
+    private static final String           PATH_TAG_PATTERN            = "_matrix/client/r0/user/%s/account_data/%s";
     /** Path pattern to forget a room */
-	private static final String			   PATH_FORGET_ROOM            = "_matrix/client/v3/rooms/%s/forget";
+    private static final String           PATH_FORGET_ROOM            = "_matrix/client/v3/rooms/%s/forget";
     /** String indicating start of scope */
-    public static final String             SCOPE_NAME_START_TAG        = "BEGIN_NAME_SCOPE";
+    public static final String            SCOPE_NAME_START_TAG        = "BEGIN_NAME_SCOPE";
     /** String indicating end of scope */
-    public static final String             SCOPE_NAME_END_TAG          = "END_NAME_SCOPE";
+    public static final String            SCOPE_NAME_END_TAG          = "END_NAME_SCOPE";
     /** String indicating start of the content */
-    public static final String             CONTENT_START_TAG           = "BEGIN_CONTENT";
+    public static final String            CONTENT_START_TAG           = "BEGIN_CONTENT";
     /** String indicating end of the content */
-    public static final String             CONTENT_END_TAG             = "END_CONTENT";
+    public static final String            CONTENT_END_TAG             = "END_CONTENT";
+    /** Name of custom account data field to manage room ids per user */
+    public static final String            ROOM_IDS_USER_TAG           = "org.bihealth.mi.roomids";
     /** Connection details */
-    private final ConnectionMatrix         connection;
+    private final ConnectionMatrix        connection;
     /** Thread */
-    private final Thread                   thread;
+    private final Thread                  thread;
     /** Stop flag */
-    boolean                                stop                        = false;
+    boolean                               stop                        = false;
     /** Last time synchronized */
-    private String                         lastSynchronized            = null;
+    private String                        lastSynchronized            = null;
     /** Jackson object mapper */
-	private ObjectMapper 				   mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-	/** Join rooms */
-    private final Map<String, JoinedRoom>  joinedRooms 				   = new ConcurrentHashMap<>();
+    private ObjectMapper                  mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                                                                                                     false);
+    /** Join rooms */
+    private final Map<String, JoinedRoom> joinedRooms                 = new ConcurrentHashMap<>();
 
     /**
      * Creates a new instance
@@ -291,7 +296,7 @@ public class BusMatrix extends Bus{
                                                                     
                                                                     // Understand response
                                                                     try {
-                                                                        responseTree = new ObjectMapper().readTree(responseString);
+                                                                        responseTree = mapper.reader().readTree(responseString);
                                                                     } catch (JsonProcessingException e) {
                                                                         throw new IllegalStateException("Unable to understand response!", e);
                                                                     }
@@ -789,5 +794,88 @@ public class BusMatrix extends Bus{
         
         // Return
         return requests;    
+    }
+    
+    /**
+     * Get participant/room ids from the account data tag
+     * 
+     * @return
+     * @throws BusException
+     */
+    private Map<String, String> getRoomIds() throws BusException {
+
+        // Prepare request
+        Builder request = this.connection.getBuilder(String.format(PATH_TAG_PATTERN, this.connection.getSelf().getIdentifier(), ROOM_IDS_USER_TAG));
+
+
+        // Create task to get sync
+        FutureTask<Map<String, String>> future = new ExecutHTTPRequest<Map<String, String>>(request,
+                ExecutHTTPRequest.REST_TYPE.GET,
+                () -> getExecutor(),
+                null,
+                new Function<Response, Map<String, String>>() {
+
+                    @Override
+                    public Map<String, String>
+                    apply(Response response) {
+                        try {
+                            return mapper.readValue(response.readEntity(String.class),
+                                                    new TypeReference<Map<String, String>>() {});
+                        } catch (JsonProcessingException e) {
+                            throw new IllegalStateException("Unable to understand response!", e);
+                        }
+                    }
+
+                },
+                ConnectionMatrix.DEFAULT_ERROR_HANDLER,
+                this.connection,
+                Resources.RETRY_MATRIX_ACTIVITY_NUMBER,
+                Resources.RETRY_MATRIX_ACTIVITY_WAIT).execute();
+
+        // Wait for task end or exception
+        try {
+            return future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new BusException("Error while executing HTTP request!", e);
+        }        
+    }
+    
+    /**
+     * Set participant/room ids from the account data tag
+     * 
+     * @param ids
+     * @throws BusException
+     */
+    private void setRoomIds(Map<String, String> ids) throws BusException {
+
+        // Prepare request
+        Builder request = this.connection.getBuilder(String.format(PATH_TAG_PATTERN, this.connection.getSelf().getIdentifier(), ROOM_IDS_USER_TAG));
+        
+        // Serialize redact message
+        String idsSerialized;
+        
+        try {
+            idsSerialized = mapper.writer().writeValueAsString(ids);
+        } catch (JsonProcessingException e) {
+            throw new BusException("Unable to serialize ids", e);
+        }
+        
+        // Create task to get sync
+        FutureTask<Void> future = new ExecutHTTPRequest<Void>(request,
+                ExecutHTTPRequest.REST_TYPE.PUT,
+                () -> getExecutor(),
+                idsSerialized,
+                (response) -> null,
+                ConnectionMatrix.DEFAULT_ERROR_HANDLER,
+                this.connection,
+                Resources.RETRY_MATRIX_ACTIVITY_NUMBER,
+                Resources.RETRY_MATRIX_ACTIVITY_WAIT).execute();
+
+        // Wait for task end or exception
+        try {
+            future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new BusException("Error while executing HTTP request!", e);
+        }        
     }
 }

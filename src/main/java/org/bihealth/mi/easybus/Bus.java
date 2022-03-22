@@ -154,7 +154,8 @@ public abstract class Bus {
                         }
                         
                     } catch (BusException e) {
-                    	e.printStackTrace();
+                        // TODO Remove
+                        LOGGER.error("Unable to send message. Will be re-retried", e);
                         // Ignore and repeat
                     }
                 }
@@ -351,7 +352,7 @@ public abstract class Bus {
             if(messageFragement[index] == null) {
                 return false;
             }
-        }  
+        }
         
         // Finished
         return true;
