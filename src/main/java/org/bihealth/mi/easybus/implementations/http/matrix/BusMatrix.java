@@ -1,6 +1,8 @@
 package org.bihealth.mi.easybus.implementations.http.matrix;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,10 +88,11 @@ public class BusMatrix extends Bus{
     /** Last time synchronized */
     private String                        lastSynchronized            = null;
     /** Jackson object mapper */
-    private ObjectMapper                  mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-                                                                                                     false);
+    private ObjectMapper                  mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     /** Join rooms */
     private final Map<String, JoinedRoom> joinedRooms                 = new ConcurrentHashMap<>();
+    /** Maps participant names to room ids */
+    private final Map<String, String>     ids                         = new ConcurrentHashMap<>();    
 
     /**
      * Creates a new instance
@@ -148,28 +151,31 @@ public class BusMatrix extends Bus{
     }
 
     @Override
-    protected Void sendInternal(MessageFragment message, Scope scope, Participant participant) throws Exception {
+    protected Void sendInternal(MessageFragment fragment, Scope scope, Participant participant) throws Exception {
 
         // Prepare room id list, only first entry is relevant
-        List<String> roomId = null;
+        String roomId = null;
         
         // Check if room exists        
-        roomId = searchForRoomName(generateRoomName(participant, true), true);
+        roomId = this.ids.get(participant.getIdentifier());
         
-        // If not found update room and search again
-        if(roomId == null || roomId.size() == 0) {
-            updateJoinedRooms(getSyncTree(false));
-            roomId = searchForRoomName(generateRoomName(participant, true), true);
+        // If not found update and search again
+        if(roomId == null) {
+            //updateJoinedRooms(getSyncTree(false));
+            this.ids.putAll(getParticipantRoomIds());
+            roomId = this.ids.get(participant.getIdentifier());
         }        
         
         // If necessary create room and update joined rooms 
-        if(roomId == null || roomId.size() == 0) {
-            roomId.add(createRoom(new CreateRoom().setName(generateRoomName(participant, true)).addInvite(participant.getIdentifier())));
-            updateJoinedRooms(getSyncTree(false));
+        if (roomId == null) {
+            roomId = createRoom(new CreateRoom().setName(generateRoomName(participant, true)).addInvite(participant.getIdentifier()));
+            this.ids.put(participant.getIdentifier(), roomId);
+            setParticipantRoomIds(this.ids);
+            // updateJoinedRooms(getSyncTree(false));
         }
         
         // Send message and return
-        sendMessageToMatrixChat(roomId.get(0), scope, message);
+        sendMessageToMatrixChat(roomId, scope, fragment);
         
         // Return
         return null;
@@ -362,6 +368,9 @@ public class BusMatrix extends Bus{
         // Log
         LOGGER.debug("Started receiving");
         
+        // Get participant/rooms mapping
+        this.ids.putAll(getParticipantRoomIds());
+        
         // Get sync data
         JsonNode sync = getSyncTree(true);
         
@@ -419,7 +428,9 @@ public class BusMatrix extends Bus{
         ExecutHTTPRequest.executeRequestPackage(forgetRooms(ids),
                                                 Resources.TIMEOUT_MATRIX_ACTIVITY,
                                                 (e) -> LOGGER.error("Unable to forget room", e));
-    	
+        
+        // TODO Remove rooms from tag list automatically when left
+        setParticipantRoomIds(new HashMap<String, String>());
     }
 
     /**
@@ -484,7 +495,7 @@ public class BusMatrix extends Bus{
                         MessageFragmentFinish fragmentFinish = new MessageFragmentFinish(MessageFragment.deserializeMessage(event.getContent().getBody())) {
 
                             /** SVUID */
-                            private static final long serialVersionUID = 1L;
+                            private static final long serialVersionUID = -2403372330378795710L;
 
                             @Override
                             public void delete() throws BusException {
@@ -802,12 +813,17 @@ public class BusMatrix extends Bus{
      * @return
      * @throws BusException
      */
-    private Map<String, String> getRoomIds() throws BusException {
+    private Map<String, String> getParticipantRoomIds() throws BusException {
 
         // Prepare request
-        Builder request = this.connection.getBuilder(String.format(PATH_TAG_PATTERN, this.connection.getSelf().getIdentifier(), ROOM_IDS_USER_TAG));
-
-
+        String encodedUserName;
+        try {
+            encodedUserName = URLEncoder.encode(this.connection.getSelf().getIdentifier(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new BusException("Unable to encode user name", e);
+        }
+        Builder request = this.connection.getBuilder(String.format(PATH_TAG_PATTERN, encodedUserName, ROOM_IDS_USER_TAG));        
+        
         // Create task to get sync
         FutureTask<Map<String, String>> future = new ExecutHTTPRequest<Map<String, String>>(request,
                 ExecutHTTPRequest.REST_TYPE.GET,
@@ -836,7 +852,9 @@ public class BusMatrix extends Bus{
         try {
             return future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new BusException("Error while executing HTTP request!", e);
+            // TODO improve error handling
+            // Ignore
+            return new HashMap<>();
         }        
     }
     
@@ -846,12 +864,18 @@ public class BusMatrix extends Bus{
      * @param ids
      * @throws BusException
      */
-    private void setRoomIds(Map<String, String> ids) throws BusException {
+    private void setParticipantRoomIds(Map<String, String> ids) throws BusException {
 
         // Prepare request
-        Builder request = this.connection.getBuilder(String.format(PATH_TAG_PATTERN, this.connection.getSelf().getIdentifier(), ROOM_IDS_USER_TAG));
+        String encodedUserName;
+        try {
+            encodedUserName = URLEncoder.encode(this.connection.getSelf().getIdentifier(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new BusException("Unable to encode user name", e);
+        }
+        Builder request = this.connection.getBuilder(String.format(PATH_TAG_PATTERN, encodedUserName, ROOM_IDS_USER_TAG));
         
-        // Serialize redact message
+        // Serialize ids
         String idsSerialized;
         
         try {
