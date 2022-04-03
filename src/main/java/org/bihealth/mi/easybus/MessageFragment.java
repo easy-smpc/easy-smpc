@@ -14,6 +14,7 @@ import java.nio.charset.CoderResult;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -202,4 +203,19 @@ public class MessageFragment implements Serializable {
         ois.close();
         return message;
     }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(content, id, splitNr, splitTotal);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        MessageFragment other = (MessageFragment) obj;
+        return Objects.equals(content, other.content) && Objects.equals(id, other.id) &&
+               splitNr == other.splitNr && splitTotal == other.splitTotal;
+    }  
 }
