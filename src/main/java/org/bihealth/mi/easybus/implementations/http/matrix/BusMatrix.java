@@ -258,6 +258,7 @@ public class BusMatrix extends Bus{
         try {
             future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            // TODO If fails due to non-existing roomId remove from participants/room mapping
             throw new BusException("Error while executing HTTP request!", e);
         }
     }
