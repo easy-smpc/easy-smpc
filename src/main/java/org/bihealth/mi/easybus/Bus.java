@@ -135,18 +135,27 @@ public abstract class Bus {
         FutureTask<Void> task = new FutureTask<>(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
+                
                 // Init
-                List<MessageFragment> messagesInternal = MessageFragment.createInternalMessagesFromMessage(message, maxMessageSize);                
-                int successCounter = 0;
+                List<MessageFragment> fragments = MessageFragment.createInternalMessagesFromMessage(message, maxMessageSize);                
+                List<MessageFragment> successFragments = new ArrayList<>(); 
                 
                 // Retry until sent successful or interrupted
-                while(messagesInternal.size() != successCounter  && !Thread.interrupted()) {
+                while(fragments.size() > 0  && !Thread.interrupted()) {
                     try {
-                        for(MessageFragment messageInternal : messagesInternal) {
-                            sendInternal(messageInternal, scope, participant);
-                            successCounter++;
+                        // Remove sent fragments
+                        fragments.removeAll(successFragments);
+                        successFragments.clear();
+
+                        // Send single fragments
+                        for (MessageFragment fragment : fragments) {
+                            sendInternal(fragment, scope, participant);
+                            successFragments.add(fragment);
                         }
+                        
                     } catch (BusException e) {
+                        // TODO Remove
+                        LOGGER.error("Unable to send message. Will be re-retried", e);
                         // Ignore and repeat
                     }
                 }
