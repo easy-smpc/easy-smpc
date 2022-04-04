@@ -57,25 +57,27 @@ import jakarta.mail.util.ByteArrayDataSource;
 public class ConnectionIMAP extends ConnectionEmail {
 
     /** File name of the attached message */
-    private static final String FILENAME_MESSAGE = "message";
+    private static final String           FILENAME_MESSAGE = "message";
     /** Logger */
-    private static final Logger logger = LogManager.getLogger(ConnectionIMAP.class);
-    /** Properties t o receive*/
-    private final Properties    propertiesReceiving;
-    /** Properties to send*/
-    private final Properties    propertiesSending;
+    private static final Logger           logger           = LogManager.getLogger(ConnectionIMAP.class);
+    /** Properties t o receive */
+    private final Properties              propertiesReceiving;
+    /** Properties to send */
+    private final Properties              propertiesSending;
     /** Store object to access e-mail server */
-    private Store               store;
-    /** Folder receiving*/
-    private Folder				folder;
+    private Store                         store;
+    /** Folder receiving */
+    private Folder                        folder;
     /** Session to send e-mails */
-    private Session             sessionSending;
+    private Session                       sessionSending;
     /** Session to receive e-mails */
-    private Session             sessionReceiving;
-    /** Password of the user */
-    private String              password;
-    /** Performance listener*/
-	private transient PerformanceListener listener;	
+    private Session                       sessionReceiving;
+    /** Password of the receiving user */
+    private String                        receivingPassword;
+    /** Performance listener */
+    private transient PerformanceListener listener;
+    /** Password of the sending user */
+    private String                        sendingPassword;
    
     /**
      * Create a new instance
@@ -89,13 +91,14 @@ public class ConnectionIMAP extends ConnectionEmail {
                           boolean sharedMailbox) throws BusException {
 
         // Super
-        super(sharedMailbox, settings.getEmailAddress(), settings.getPerformanceListener());
+        super(sharedMailbox, settings.getIMAPEmailAddress(), settings.getSMTPEmailAddress(),settings.getPerformanceListener());
         
         // Check
         settings.check();
         
         // Store
-        this.password = settings.getPassword();
+        this.receivingPassword = settings.getIMAPPassword();
+        this.sendingPassword = settings.getSMTPPassword();
         this.listener = settings.getPerformanceListener();
         
         // Search for proxy
@@ -107,8 +110,8 @@ public class ConnectionIMAP extends ConnectionEmail {
         // Create properties of receiving connection
         this.propertiesReceiving = new Properties();
         this.propertiesReceiving.put("mail.store.protocol", "imap");
-        this.propertiesReceiving.put("mail.user", getEmailAddress());
-        this.propertiesReceiving.put("mail.from", getEmailAddress());
+        this.propertiesReceiving.put("mail.user", getReceivingEmailAddress());
+        this.propertiesReceiving.put("mail.from", getReceivingEmailAddress());
         this.propertiesReceiving.put("mail.imap.host", settings.getIMAPServer());
         this.propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));        
         this.propertiesReceiving.put("mail.imap.partialfetch", "false");
@@ -127,8 +130,8 @@ public class ConnectionIMAP extends ConnectionEmail {
         // Create properties of sending connection
         this.propertiesSending = new Properties();
         this.propertiesSending.put("mail.transport.protocol", "smtp");
-        this.propertiesSending.put("mail.user", getEmailAddress());
-        this.propertiesSending.put("mail.from", getEmailAddress());        
+        this.propertiesSending.put("mail.user", getSendingEmailAddress());
+        this.propertiesSending.put("mail.from", getSendingEmailAddress());        
         this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
         this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
         this.propertiesSending.put("mail.smtp.auth", "true");
@@ -203,7 +206,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 Store store = sessionReceiving.getStore();
 
                 // Connect store
-                store.connect(getEmailAddress(), password);
+                store.connect(getReceivingEmailAddress(), receivingPassword);
 
                 // Create new folder for every call to get latest state
                 folder = store.getFolder("INBOX");
@@ -242,7 +245,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 store = sessionReceiving.getStore();
                 
                 // Connect store
-                store.connect(getEmailAddress(), password);
+                store.connect(getReceivingEmailAddress(), receivingPassword);
                 
                 // Create folder new for every call to get latest state
                 folder = store.getFolder("INBOX");
@@ -311,8 +314,8 @@ public class ConnectionIMAP extends ConnectionEmail {
                
                 // Add sender and recipient
                 email.setRecipient(RecipientType.TO, new InternetAddress(recipient));
-                email.setSender(new InternetAddress(getEmailAddress()));
-                email.setFrom(new InternetAddress(getEmailAddress()));
+                email.setSender(new InternetAddress(getSendingEmailAddress()));
+                email.setFrom(new InternetAddress(getSendingEmailAddress()));
                 email.setSubject(subject);
                 
                 // Add body
@@ -338,7 +341,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 email.setContent(multipart);
     
                 // Send
-                Transport.send(email, getEmailAddress(), password);
+                Transport.send(email, getSendingEmailAddress(), sendingPassword);
                 if (listener != null) {
                     listener.messageSent(attachmentSize);
                 }

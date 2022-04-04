@@ -47,7 +47,7 @@ public class BusEmail extends Bus {
         /** Message */
         protected final Message     message;
         /** Subject */
-        protected final String     subject;
+        protected final String      subject;
         
         
         /**

@@ -42,7 +42,7 @@ public class ConnectionIMAPProxy {
             String scheme = "imap+ssl+";
                    
             // TODO: Other auth types would be available
-            String userInfo = "PLAIN:" + settings.getEmailAddress() + ":" + settings.getPassword();
+            String userInfo = "PLAIN:" + settings.getIMAPEmailAddress() + ":" + settings.getIMAPPassword();
             
             // TODO: Other paths would be available
             String path = "/1|";

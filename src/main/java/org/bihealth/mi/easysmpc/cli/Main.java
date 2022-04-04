@@ -50,192 +50,208 @@ public class Main {
     /** Logger */
     private static final Logger LOGGER                  = LogManager.getLogger(Main.class);
     /** Command line option */
-    private static final Option OPTION_CREATE           = Option.builder("c")
-                                                                .desc("Create a new study")
-                                                                .longOpt("create")
-                                                                .hasArg(false)
-                                                                .required(false)
-                                                                .build();
+    private static final Option OPTION_CREATE                = Option.builder("c")
+                                                                     .desc("Create a new study")
+                                                                     .longOpt("create")
+                                                                     .hasArg(false)
+                                                                     .required(false)
+                                                                     .build();
     /** Command line option */
-    private static final Option OPTION_PARTICIPATE      = Option.builder("p")
-                                                                .desc("Participate in a study")
-                                                                .longOpt("participate")
-                                                                .hasArg(false)
-                                                                .required(false)
-                                                                .build();
+    private static final Option OPTION_PARTICIPATE           = Option.builder("p")
+                                                                     .desc("Participate in a study")
+                                                                     .longOpt("participate")
+                                                                     .hasArg(false)
+                                                                     .required(false)
+                                                                     .build();
 
     /** Command line option */
-    private static final Option OPTION_RESUME           = Option.builder("g")
-                                                                .desc("Load and resume an existing study")
-                                                                .longOpt("resume")
-                                                                .hasArg(false)
-                                                                .required(false)
-                                                                .build();
+    private static final Option OPTION_RESUME                = Option.builder("g")
+                                                                     .desc("Load and resume an existing study")
+                                                                     .longOpt("resume")
+                                                                     .hasArg(false)
+                                                                     .required(false)
+                                                                     .build();
     /** Command line option */
-    private static final Option OPTION_CREATE_REQUIRED  = Option.builder(OPTION_CREATE.getOpt())
-                                                                .desc(OPTION_CREATE.getDescription())
-                                                                .longOpt(OPTION_CREATE.getLongOpt())
-                                                                .hasArg(OPTION_CREATE.hasArg())
-                                                                .required(true)
-                                                                .build();
+    private static final Option OPTION_CREATE_REQUIRED       = Option.builder(OPTION_CREATE.getOpt())
+                                                                     .desc(OPTION_CREATE.getDescription())
+                                                                     .longOpt(OPTION_CREATE.getLongOpt())
+                                                                     .hasArg(OPTION_CREATE.hasArg())
+                                                                     .required(true)
+                                                                     .build();
     /** Command line option */
     private static final Option OPTION_PARTICIPATE_REQUIRED  = Option.builder(OPTION_PARTICIPATE.getOpt())
-                                                                .desc(OPTION_PARTICIPATE.getDescription())
-                                                                .longOpt(OPTION_PARTICIPATE.getLongOpt())
-                                                                .hasArg(OPTION_PARTICIPATE.hasArg())
-                                                                .required(true)
-                                                                .build();
+                                                                     .desc(OPTION_PARTICIPATE.getDescription())
+                                                                     .longOpt(OPTION_PARTICIPATE.getLongOpt())
+                                                                     .hasArg(OPTION_PARTICIPATE.hasArg())
+                                                                     .required(true)
+                                                                     .build();
     /** Command line option */
-    private static final Option OPTION_RESUME_REQUIRED  = Option.builder(OPTION_RESUME.getOpt())
-                                                                .desc(OPTION_RESUME.getDescription())
-                                                                .longOpt(OPTION_RESUME.getLongOpt())
-                                                                .hasArg(OPTION_RESUME.hasArg())
-                                                                .required(true)
-                                                                .build();    
+    private static final Option OPTION_RESUME_REQUIRED       = Option.builder(OPTION_RESUME.getOpt())
+                                                                     .desc(OPTION_RESUME.getDescription())
+                                                                     .longOpt(OPTION_RESUME.getLongOpt())
+                                                                     .hasArg(OPTION_RESUME.hasArg())
+                                                                     .required(true)
+                                                                     .build();
     /** Command line option */
-    private static final Option OPTION_DATA_FILE       = Option.builder("d")
-                                                                .desc("Data file(s) when creating or participating")
-                                                                .longOpt("data-files")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
+    private static final Option OPTION_DATA_FILE             = Option.builder("d")
+                                                                     .desc("Data file(s) when creating or participating")
+                                                                     .longOpt("data-files")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
     /** Command line option */
-    private static final Option OPTION_PARTICIPANTS     = Option.builder("f")
-                                                                .desc("Participants file")
-                                                                .longOpt("participants-file")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
+    private static final Option OPTION_PARTICIPANTS          = Option.builder("f")
+                                                                     .desc("Participants file")
+                                                                     .longOpt("participants-file")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
     /** Command line option */
-    private static final Option OPTION_BINS_NAMES       = Option.builder("b")
-                                                                .desc("Variable names files")
-                                                                .longOpt("variables-files")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
+    private static final Option OPTION_BINS_NAMES            = Option.builder("b")
+                                                                     .desc("Variable names files")
+                                                                     .longOpt("variables-files")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
     /** Command line option */
-    private static final Option OPTION_MAILADDRESS      = Option.builder("a")
-                                                                .desc("E-mail address")
-                                                                .longOpt("email")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
+    private static final Option OPTION_MAILADDRESS_RECEIVING = Option.builder("a")
+                                                                     .desc("(receiving) E-mail address")
+                                                                     .longOpt("email")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
     /** Command line option */
-    private static final Option OPTION_PASSWORD         = Option.builder("p")
-                                                                .desc("Password for email box")
-                                                                .longOpt("password")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
-    /** Command line option */
-    private static final Option OPTION_IMAP_SERVER      = Option.builder("i")
-                                                                .desc("IMAP server for email box")
-                                                                .longOpt("imap-server")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
-    /** Command line option */
-    private static final Option OPTION_IMAP_PORT        = Option.builder("x")
-                                                                .desc("IMAP port for email box")
-                                                                .longOpt("imap-port")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
-    /** Command line option */
-    private static final Option OPTION_IMAP_ENCRYPTION  = Option.builder("y")
-                                                                .desc("IMAP encryption for email box")
-                                                                .longOpt("imap-encryption")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
-    /** Command line option */
-    private static final Option OPTION_SMTP_SERVER      = Option.builder("s")
-                                                                .desc("SMTP server for email box")
-                                                                .longOpt("smtp-server")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
-    /** Command line option */
-    private static final Option OPTION_SMTP_PORT        = Option.builder("z")
-                                                                .desc("SMTP port for email box")
-                                                                .longOpt("smtp-port")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
-    /** Command line option */
-    private static final Option OPTION_SMTP_ENCRYPTION  = Option.builder("q")
-                                                                .desc("SMTP encryption for email box")
-                                                                .longOpt("smtp-encryption")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
-    /** Command line option */
-    private static final Option OPTION_USE_PROXY        = Option.builder("u")
-                                                                .desc("Use proxy")
-                                                                .longOpt("use-proxy")
-                                                                .required(false)
-                                                                .hasArg(false)
-                                                                .build();
-    /** Command line option */
-    private static final Option OPTION_SELF_SIGNED      = Option.builder("r")
-                                                                .desc("Accept self-signed certificates")
-                                                                .longOpt("use-proxy")
-                                                                .required(false)
-                                                                .hasArg(false)
-                                                                .build();
-    /** Command line option */
-    private static final Option OPTION_PARTICIPANT_NAME = Option.builder("o")
-                                                                .desc("Name of participant")
-                                                                .longOpt("participant-name")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
+    private static final Option OPTION_PASSWORD_RECEIVING    = Option.builder("p")
+                                                                     .desc("Password for (receiving) email box")
+                                                                     .longOpt("password")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
 
     /** Command line option */
-    private static final Option OPTION_STUDY_NAME       = Option.builder("l")
-                                                                .desc("Study name")
-                                                                .longOpt("study-name")
-                                                                .required(true)
-                                                                .hasArg(true)
-                                                                .build();
+    private static final Option OPTION_MAILADDRESS_SENDING   = Option.builder("v")
+                                                                     .desc("Sending e-mail address")
+                                                                     .longOpt("emailSending")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
+    /** Command line option */
+    private static final Option OPTION_PASSWORD_SENDING      = Option.builder("m")
+                                                                     .desc("Password for sending email box")
+                                                                     .longOpt("passwordSending")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
 
     /** Command line option */
-    private static final Option OPTION_DATA_COLUMN      = Option.builder("h")
-                                                                .desc("Indicates column-oriented data")
-                                                                .longOpt("column-oriented")
-                                                                .required(false)
-                                                                .hasArg(false)
-                                                                .build();
+    private static final Option OPTION_IMAP_SERVER           = Option.builder("i")
+                                                                     .desc("IMAP server for email box")
+                                                                     .longOpt("imap-server")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
+    /** Command line option */
+    private static final Option OPTION_IMAP_PORT             = Option.builder("x")
+                                                                     .desc("IMAP port for email box")
+                                                                     .longOpt("imap-port")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
+    /** Command line option */
+    private static final Option OPTION_IMAP_ENCRYPTION       = Option.builder("y")
+                                                                     .desc("IMAP encryption for email box")
+                                                                     .longOpt("imap-encryption")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
+    /** Command line option */
+    private static final Option OPTION_SMTP_SERVER           = Option.builder("s")
+                                                                     .desc("SMTP server for email box")
+                                                                     .longOpt("smtp-server")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
+    /** Command line option */
+    private static final Option OPTION_SMTP_PORT             = Option.builder("z")
+                                                                     .desc("SMTP port for email box")
+                                                                     .longOpt("smtp-port")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
+    /** Command line option */
+    private static final Option OPTION_SMTP_ENCRYPTION       = Option.builder("q")
+                                                                     .desc("SMTP encryption for email box")
+                                                                     .longOpt("smtp-encryption")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
+    /** Command line option */
+    private static final Option OPTION_USE_PROXY             = Option.builder("u")
+                                                                     .desc("Use proxy")
+                                                                     .longOpt("use-proxy")
+                                                                     .required(false)
+                                                                     .hasArg(false)
+                                                                     .build();
+    /** Command line option */
+    private static final Option OPTION_SELF_SIGNED           = Option.builder("r")
+                                                                     .desc("Accept self-signed certificates")
+                                                                     .longOpt("use-proxy")
+                                                                     .required(false)
+                                                                     .hasArg(false)
+                                                                     .build();
+    /** Command line option */
+    private static final Option OPTION_PARTICIPANT_NAME      = Option.builder("o")
+                                                                     .desc("Name of participant")
+                                                                     .longOpt("participant-name")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
 
     /** Command line option */
-    private static final Option OPTION_HAS_HEADER       = Option.builder("e")
-                                                                .desc("Indicates that data has a header to skip")
-                                                                .longOpt("has-header")
-                                                                .required(false)
-                                                                .hasArg(false)
-                                                                .build();
+    private static final Option OPTION_STUDY_NAME            = Option.builder("l")
+                                                                     .desc("Study name")
+                                                                     .longOpt("study-name")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
 
     /** Command line option */
-    private static final Option OPTION_SKIP_COLUMNS     = Option.builder("j")
-                                                                .desc("Indicates the numbers of columns to skip")
-                                                                .longOpt("skip-columns")
-                                                                .required(false)
-                                                                .hasArg(true)
-                                                                .build();
-    
+    private static final Option OPTION_DATA_COLUMN           = Option.builder("h")
+                                                                     .desc("Indicates column-oriented data")
+                                                                     .longOpt("column-oriented")
+                                                                     .required(false)
+                                                                     .hasArg(false)
+                                                                     .build();
+
     /** Command line option */
-    private static final Option OPTION_RESUME_FILE          = Option.builder("k")
-                                                                    .desc("Data file to resume")
-                                                                    .longOpt("resume-file")
-                                                                    .required(true)
-                                                                    .hasArg(true)
-                                                                    .build();
+    private static final Option OPTION_HAS_HEADER            = Option.builder("e")
+                                                                     .desc("Indicates that data has a header to skip")
+                                                                     .longOpt("has-header")
+                                                                     .required(false)
+                                                                     .hasArg(false)
+                                                                     .build();
+
+    /** Command line option */
+    private static final Option OPTION_SKIP_COLUMNS          = Option.builder("j")
+                                                                     .desc("Indicates the numbers of columns to skip")
+                                                                     .longOpt("skip-columns")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
+
+    /** Command line option */
+    private static final Option OPTION_RESUME_FILE           = Option.builder("k")
+                                                                     .desc("Data file to resume")
+                                                                     .longOpt("resume-file")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
     /** Options when in creating mode */
-    private static Options      optionsCreate               = new Options();
+    private static Options      optionsCreate                = new Options();
     /** Options when in participating mode */
-    private static Options      optionsParticipate          = new Options();
+    private static Options      optionsParticipate           = new Options();
     /** Options when in resuming mode */
-    private static Options      optionsResume               = new Options();
+    private static Options      optionsResume                = new Options();
 
     /**
      * Starts an EasySMPC process
@@ -263,10 +279,10 @@ public class Main {
                      .addOption(OPTION_STUDY_NAME)
                      .addOption(OPTION_DATA_FILE)
                      .addOption(OPTION_BINS_NAMES)
-                     .addOption(OPTION_MAILADDRESS)
+                     .addOption(OPTION_MAILADDRESS_RECEIVING)
                      .addOption(OPTION_PARTICIPANTS)
                      .addOption(OPTION_BINS_NAMES)
-                     .addOption(OPTION_PASSWORD)
+                     .addOption(OPTION_PASSWORD_RECEIVING)
                      .addOption(OPTION_IMAP_SERVER)
                      .addOption(OPTION_IMAP_PORT)
                      .addOption(OPTION_IMAP_ENCRYPTION)
@@ -277,15 +293,17 @@ public class Main {
                      .addOption(OPTION_SELF_SIGNED)
                      .addOption(OPTION_DATA_COLUMN)
                      .addOption(OPTION_HAS_HEADER)
-                     .addOption(OPTION_SKIP_COLUMNS);
+                     .addOption(OPTION_SKIP_COLUMNS)
+                     .addOption(OPTION_MAILADDRESS_SENDING)
+                     .addOption(OPTION_PASSWORD_SENDING);
 
         // Add options when participating
         optionsParticipate.addOption(OPTION_PARTICIPATE_REQUIRED)
                           .addOption(OPTION_STUDY_NAME)
                           .addOption(OPTION_PARTICIPANT_NAME)
                           .addOption(OPTION_DATA_FILE)
-                          .addOption(OPTION_MAILADDRESS)
-                          .addOption(OPTION_PASSWORD)
+                          .addOption(OPTION_MAILADDRESS_RECEIVING)
+                          .addOption(OPTION_PASSWORD_RECEIVING)
                           .addOption(OPTION_IMAP_SERVER)
                           .addOption(OPTION_IMAP_PORT)
                           .addOption(OPTION_IMAP_ENCRYPTION)
@@ -296,12 +314,14 @@ public class Main {
                           .addOption(OPTION_SELF_SIGNED)
                           .addOption(OPTION_DATA_COLUMN)
                           .addOption(OPTION_HAS_HEADER)
-                          .addOption(OPTION_SKIP_COLUMNS);
+                          .addOption(OPTION_SKIP_COLUMNS)
+                          .addOption(OPTION_MAILADDRESS_SENDING)
+                          .addOption(OPTION_PASSWORD_SENDING);
         
-        // Add options when participating
+        // Add options when resuming
         optionsResume.addOption(OPTION_RESUME_REQUIRED)
                      .addOption(OPTION_RESUME_FILE)
-                     .addOption(OPTION_PASSWORD);
+                     .addOption(OPTION_PASSWORD_RECEIVING);
 	    
         try {
             // Parse arguments
@@ -367,7 +387,7 @@ public class Main {
             Participant participant;
             try {
                 participant = new Participant(cli.getOptionValue(OPTION_PARTICIPANT_NAME),
-                                              cli.getOptionValue(OPTION_MAILADDRESS));
+                                              cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING));
             } catch (BusException e1) {
                 throw new IllegalArgumentException(e1);
             }
@@ -401,9 +421,13 @@ public class Main {
         if (cli.hasOption(OPTION_RESUME)) {
             try {
                 
-                // Create study from file and set password
+                // Create study from file and set password(s)
                 Study study = Study.loadModel(new File(cli.getOptionValue(OPTION_RESUME_FILE)));                
-                study.getConnectionIMAPSettings().setPassword(cli.getOptionValue(OPTION_PASSWORD));
+                study.getConnectionIMAPSettings().setIMAPPassword(cli.getOptionValue(OPTION_PASSWORD_RECEIVING));
+                study.getConnectionIMAPSettings()
+                     .setIMAPPassword(cli.hasOption(OPTION_PASSWORD_SENDING)
+                             ? cli.getOptionValue(OPTION_PASSWORD_SENDING)
+                             : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));
                 
                 // Start process
                 new User(study, MAILBOX_CHECK_INTERVAL);
@@ -498,7 +522,7 @@ public class Main {
             }
             
             // Check participant name and e-mail address
-            new Participant(cli.hasOption(OPTION_PARTICIPANT_NAME) ? cli.getOptionValue(OPTION_PARTICIPANT_NAME) : "Creator", cli.getOptionValue(OPTION_MAILADDRESS));            
+            new Participant(cli.hasOption(OPTION_PARTICIPANT_NAME) ? cli.getOptionValue(OPTION_PARTICIPANT_NAME) : "Creator", cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING));                        
             
             // Check encryption for IMAP
             if(!(cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(SSL_TLS) || cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(START_TLS))) {
@@ -525,17 +549,31 @@ public class Main {
      * @return
      */
     public static ConnectionIMAPSettings getConnectionIMAPSettingsFromCLI(CommandLine cli) {
-
-        return new ConnectionIMAPSettings(cli.getOptionValue(OPTION_MAILADDRESS),null)
-                                            .setPassword(cli.getOptionValue(OPTION_PASSWORD))
-                                            .setIMAPServer(cli.getOptionValue(OPTION_IMAP_SERVER))
-                                            .setIMAPPort(Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT)))
-                                            .setSSLTLSIMAP(cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(SSL_TLS))
-                                            .setSMTPServer(cli.getOptionValue(OPTION_SMTP_SERVER))
-                                            .setSMTPPort(Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT)))
-                                            .setSSLTLSSMTP(cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(SSL_TLS))
-                                            .setSearchForProxy(cli.hasOption(OPTION_USE_PROXY))
-                                            .setAcceptSelfSignedCertificates(cli.hasOption(OPTION_SELF_SIGNED));
+        
+        // Set email address and password either from the receiving parameter or from different receiving and sending parameters
+        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings(cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING),
+                                                                                   null,
+                                                                                   cli.hasOption(OPTION_MAILADDRESS_SENDING)
+                                                                                           ? cli.getOptionValue(OPTION_MAILADDRESS_SENDING)
+                                                                                           : cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING),
+                                                                                   null).setIMAPPassword(cli.getOptionValue(OPTION_PASSWORD_RECEIVING))
+                                                                                        .setSMTPPassword(cli.hasOption(OPTION_PASSWORD_SENDING)
+                                                                                                ? cli.getOptionValue(OPTION_PASSWORD_SENDING)
+                                                                                                : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));     
+        
+        // Set remaining parameters
+        connectionIMAPSettings.setIMAPServer(cli.getOptionValue(OPTION_IMAP_SERVER))
+                                               .setIMAPPort(Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT)))
+                                               .setSSLTLSIMAP(cli.getOptionValue(OPTION_IMAP_ENCRYPTION)
+                                                                 .equals(SSL_TLS))
+                                               .setSMTPServer(cli.getOptionValue(OPTION_SMTP_SERVER))
+                                               .setSMTPPort(Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT)))
+                                               .setSSLTLSSMTP(cli.getOptionValue(OPTION_SMTP_ENCRYPTION)
+                                                                 .equals(SSL_TLS))
+                                               .setSearchForProxy(cli.hasOption(OPTION_USE_PROXY))
+                                               .setAcceptSelfSignedCertificates(cli.hasOption(OPTION_SELF_SIGNED));
+        // Return
+        return connectionIMAPSettings;
     }
 
     /**

@@ -257,13 +257,13 @@ public abstract class ConnectionEmail {
     }
 
     /** Use several or exactly one mail box for the bus */
-	private boolean sharedMailbox;
-    
-    /** Mail address of the user */
-	private String emailAddress;
-    
+	private boolean sharedMailbox;    
+    /** Mail address of receiving user */
+	private String receivingEmailAddress;    
 	/** Performance listener */
 	private PerformanceListener listener;
+	/** Mail address of sending user */
+    private String sendingEmailAddress;
     
     /**
      * Creates a new instance
@@ -276,19 +276,37 @@ public abstract class ConnectionEmail {
     }
     
     /**
-     * Creates a new instance
+     * Creates a new instance with same mail address to receive and to send
+     * 
      * @param sharedMailBox
      * @param emailAddress
      * @param listener
      * @throws BusException
      */
     protected ConnectionEmail(boolean sharedMailBox, String emailAddress, PerformanceListener listener) {
+        this(sharedMailBox, emailAddress, emailAddress, listener);
+    }
+    
+    /**
+     * Creates a new instance
+     * @param sharedMailBox
+     * @param receivingEmailAddress
+     * @param listener
+     * @throws BusException
+     */
+    protected ConnectionEmail(boolean sharedMailBox, String receivingEmailAddress, String sendEmailAddress, PerformanceListener listener) {
         // Check
-        if (emailAddress == null) {
+        if (receivingEmailAddress == null) {
             throw new NullPointerException("Email address must not be null");
         }
+        if (sendEmailAddress == null) {
+            throw new NullPointerException("Email address must not be null");
+        }
+        
+        // Store
         this.sharedMailbox = sharedMailBox;
-        this.emailAddress = emailAddress;
+        this.receivingEmailAddress = receivingEmailAddress;
+        this.sendingEmailAddress = sendEmailAddress;
         this.listener = listener;
     }
     
@@ -298,11 +316,19 @@ public abstract class ConnectionEmail {
     protected abstract void close();
 
     /**
-     * Returns the associated email address
+     * Returns the associated email address for sending
      * @return
      */
-    protected String getEmailAddress() {
-        return this.emailAddress;
+    protected String getReceivingEmailAddress() {
+        return this.receivingEmailAddress;
+    }
+    
+    /**
+     * Returns the associated email address for receiving
+     * @return
+     */
+    protected String getSendingEmailAddress() {
+        return this.sendingEmailAddress;
     }
     
     /**
@@ -407,7 +433,7 @@ public abstract class ConnectionEmail {
     protected void send(Message message, Scope scope, Participant receiver) throws BusException {
         
         // Recipient
-        String recipient = sharedMailbox ? getEmailAddress() : receiver.getEmailAddress();
+        String recipient = sharedMailbox ? getReceivingEmailAddress() : receiver.getEmailAddress();
         
         // Subject
         String subject = createSubject(scope, receiver);       

@@ -50,7 +50,7 @@ public class Connections {
         // Get node
         Preferences node = Preferences.userRoot()
                                       .node(Connections.class.getPackage().getName())
-                                      .node(settings.getEmailAddress());
+                                      .node(settings.getIMAPEmailAddress());
         
         // Add details
         node.put(IMAP_SERVER_KEY, settings.getIMAPServer());
@@ -95,7 +95,7 @@ public class Connections {
     public static void remove(ConnectionIMAPSettings settings) throws BackingStoreException {
         Preferences.userRoot()
                    .node(Connections.class.getPackage().getName())
-                   .node(settings.getEmailAddress())
+                   .node(settings.getIMAPEmailAddress())
                    .removeNode();
     }    
 }
