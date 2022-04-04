@@ -507,7 +507,7 @@ public class Main {
             
             // Check encryption for SMTP
             if(!(cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(SSL_TLS) || cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(START_TLS))) {
-                throw new IllegalArgumentException(String.format("Please enter either %s or s% for SMTP encryption", SSL_TLS, START_TLS));
+                throw new IllegalArgumentException(String.format("Please enter either %s or %s for SMTP encryption", SSL_TLS, START_TLS));
             }            
             
         } catch(Exception e) {
