@@ -131,6 +131,10 @@ public class ConnectionIMAPSettings implements Serializable {
     private PasswordProvider              smtpProvider;
     /** IMAP Password */
     private transient String              smtpPassword;
+    /** Logon name for IMAP */
+    private String                        imapLogonName        = null;
+    /** Logon name for SMTP */
+    private String                        smtpLogonName        = null;
 
     /**
      * Creates a new instance with same mail address for sending and receiving
@@ -309,6 +313,24 @@ public class ConnectionIMAPSettings implements Serializable {
      */
     public String getSMTPServer() {
         return smtpServer;
+    }
+    
+    /**
+     * Return SMTP logon name
+     * 
+     * @return
+     */
+    public String getSMTPLogonName() {
+        return smtpLogonName != null ? smtpLogonName : smptEmailAddress;
+    }
+    
+    /**
+     * Return IMAP logon name
+     * 
+     * @return
+     */
+    public String getIMAPLogonName() {
+        return imapLogonName != null ? imapLogonName : imapEmailAddress;
     }
     
     /**
@@ -525,6 +547,28 @@ public class ConnectionIMAPSettings implements Serializable {
     public ConnectionIMAPSettings setSMTPPassword(String password) {
         this.smtpPassword = password;
         return this;        
+    }
+    
+    /**
+     * Set IMAP logon name
+     * 
+     * @param imapLogonName
+     * @return
+     */
+    public ConnectionIMAPSettings setIMAPLogonName(String imapLogonName) {
+        this.imapLogonName = imapLogonName;
+        return this;
+    }
+    
+    /**
+     * Set SMTP logon name
+     * 
+     * @param smtpLogonName
+     * @return
+     */
+    public ConnectionIMAPSettings setSMTPLogonName(String smtpLogonName) {
+        this.smtpLogonName = smtpLogonName;
+        return this;
     }
     
     /**

@@ -246,6 +246,23 @@ public class Main {
                                                                      .required(true)
                                                                      .hasArg(true)
                                                                      .build();
+    
+    /** Command line option */
+    private static final Option OPTION_IMAP_LOGON_NAME         = Option.builder("n")
+                                                                     .desc("IMAP logon name (only if logon name deviates from IMAP e-mail address)")
+                                                                     .longOpt("impa-logon-name")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
+    
+    /** Command line option */
+    private static final Option OPTION_SMTP_LOGON_NAME         = Option.builder("w")
+                                                                     .desc("SMTP logon name (only if logon name deviates from IMAP e-mail address)")
+                                                                     .longOpt("smtp-logon-name")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
+    
     /** Options when in creating mode */
     private static Options      optionsCreate                = new Options();
     /** Options when in participating mode */
@@ -295,7 +312,9 @@ public class Main {
                      .addOption(OPTION_HAS_HEADER)
                      .addOption(OPTION_SKIP_COLUMNS)
                      .addOption(OPTION_MAILADDRESS_SENDING)
-                     .addOption(OPTION_PASSWORD_SENDING);
+                     .addOption(OPTION_PASSWORD_SENDING)
+                     .addOption(OPTION_IMAP_LOGON_NAME)
+                     .addOption(OPTION_SMTP_LOGON_NAME);
 
         // Add options when participating
         optionsParticipate.addOption(OPTION_PARTICIPATE_REQUIRED)
@@ -316,8 +335,10 @@ public class Main {
                           .addOption(OPTION_HAS_HEADER)
                           .addOption(OPTION_SKIP_COLUMNS)
                           .addOption(OPTION_MAILADDRESS_SENDING)
-                          .addOption(OPTION_PASSWORD_SENDING);
-        
+                          .addOption(OPTION_PASSWORD_SENDING)
+                          .addOption(OPTION_IMAP_LOGON_NAME)
+                          .addOption(OPTION_SMTP_LOGON_NAME);
+
         // Add options when resuming
         optionsResume.addOption(OPTION_RESUME_REQUIRED)
                      .addOption(OPTION_RESUME_FILE)
@@ -559,19 +580,21 @@ public class Main {
                                                                                    null).setIMAPPassword(cli.getOptionValue(OPTION_PASSWORD_RECEIVING))
                                                                                         .setSMTPPassword(cli.hasOption(OPTION_PASSWORD_SENDING)
                                                                                                 ? cli.getOptionValue(OPTION_PASSWORD_SENDING)
-                                                                                                : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));     
-        
+                                                                                                : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));      
         // Set remaining parameters
         connectionIMAPSettings.setIMAPServer(cli.getOptionValue(OPTION_IMAP_SERVER))
                                                .setIMAPPort(Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT)))
                                                .setSSLTLSIMAP(cli.getOptionValue(OPTION_IMAP_ENCRYPTION)
                                                                  .equals(SSL_TLS))
+                                               .setIMAPLogonName(cli.hasOption(OPTION_IMAP_LOGON_NAME) ? cli.getOptionValue(OPTION_IMAP_LOGON_NAME) : null)
                                                .setSMTPServer(cli.getOptionValue(OPTION_SMTP_SERVER))
-                                               .setSMTPPort(Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT)))
+                                               .setSMTPPort(Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT)))                                              
                                                .setSSLTLSSMTP(cli.getOptionValue(OPTION_SMTP_ENCRYPTION)
                                                                  .equals(SSL_TLS))
+                                               .setSMTPLogonName(cli.hasOption(OPTION_SMTP_LOGON_NAME) ? cli.getOptionValue(OPTION_SMTP_LOGON_NAME) : null)
                                                .setSearchForProxy(cli.hasOption(OPTION_USE_PROXY))
                                                .setAcceptSelfSignedCertificates(cli.hasOption(OPTION_SELF_SIGNED));
+        
         // Return
         return connectionIMAPSettings;
     }

@@ -257,16 +257,21 @@ public abstract class ConnectionEmail {
     }
 
     /** Use several or exactly one mail box for the bus */
-	private boolean sharedMailbox;    
+    private boolean             sharedMailbox;
     /** Mail address of receiving user */
-	private String receivingEmailAddress;    
-	/** Performance listener */
-	private PerformanceListener listener;
-	/** Mail address of sending user */
-    private String sendingEmailAddress;
+    private String              receivingEmailAddress;
+    /** Performance listener */
+    private PerformanceListener listener;
+    /** Mail address of sending user */
+    private String              sendingEmailAddress;
+    /** Receiving logon name */
+    private String              receivingLogonName;
+    /** Sending logon name */
+    private String              sendingLogonName;
     
     /**
-     * Creates a new instance
+     * Creates a new instance with same mail address to receive and to send
+     * 
      * @param sharedMailBox
      * @param emailAddress
      * @throws BusException
@@ -276,7 +281,7 @@ public abstract class ConnectionEmail {
     }
     
     /**
-     * Creates a new instance with same mail address to receive and to send
+     * Creates a new instance with same mail address and logon name to receive and to send and a performance listener
      * 
      * @param sharedMailBox
      * @param emailAddress
@@ -289,24 +294,47 @@ public abstract class ConnectionEmail {
     
     /**
      * Creates a new instance
+     * 
      * @param sharedMailBox
      * @param receivingEmailAddress
+     * @param sendingEmailAddress
      * @param listener
      * @throws BusException
      */
-    protected ConnectionEmail(boolean sharedMailBox, String receivingEmailAddress, String sendEmailAddress, PerformanceListener listener) {
+    protected ConnectionEmail(boolean sharedMailBox, String receivingEmailAddress, String sendingEmailAddress, PerformanceListener listener) {
+        this(sharedMailBox, receivingEmailAddress, sendingEmailAddress, null, null, listener);
+    }
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param sharedMailBox
+     * @param receivingEmailAddress
+     * @param sendingEmailAddress
+     * @param receivingLogonName - only necessary if deviates from receivingEmailAddress
+     * @param sendingLogonName - only necessary if deviates from sendingEmailAddress
+     * @param listener
+     */
+    protected ConnectionEmail(boolean sharedMailBox,
+                              String receivingEmailAddress,
+                              String sendingEmailAddress,
+                              String receivingLogonName,
+                              String sendingLogonName,
+                              PerformanceListener listener) {
         // Check
         if (receivingEmailAddress == null) {
             throw new NullPointerException("Email address must not be null");
         }
-        if (sendEmailAddress == null) {
+        if (sendingEmailAddress == null) {
             throw new NullPointerException("Email address must not be null");
         }
         
         // Store
         this.sharedMailbox = sharedMailBox;
         this.receivingEmailAddress = receivingEmailAddress;
-        this.sendingEmailAddress = sendEmailAddress;
+        this.sendingEmailAddress = sendingEmailAddress;
+        this.receivingLogonName = receivingLogonName;
+        this.sendingLogonName = sendingLogonName;
         this.listener = listener;
     }
     
@@ -329,6 +357,24 @@ public abstract class ConnectionEmail {
      */
     protected String getSendingEmailAddress() {
         return this.sendingEmailAddress;
+    }
+    
+    /**
+     * Returns the logon name for receiving
+     * 
+     * @return
+     */
+    protected String getReceivingLogonName() {
+        return this.receivingLogonName != null ? this.receivingLogonName : this.receivingEmailAddress;
+    }
+    
+    /**
+     * Returns the logon name for sending
+     * 
+     * @return
+     */
+    protected String getSendingLogonName() {
+        return this.sendingLogonName != null ? this.sendingLogonName : this.sendingLogonName;
     }
     
     /**
