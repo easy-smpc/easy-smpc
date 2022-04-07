@@ -74,14 +74,14 @@ public class BusEmail extends Bus {
     }
 
     /** Logger */
-    private static final Logger logger = LogManager.getLogger(BusEmail.class);
+    private static final Logger LOGGER = LogManager.getLogger(BusEmail.class);
 
     /** Connection */
-    private ConnectionEmail connection;
+    private ConnectionEmail     connection;
     /** Thread */
-    private Thread          thread;
+    private Thread              thread;
     /** Stop flag */
-    private boolean         stop = false;
+    private boolean             stop   = false;
     
     /**
      * Creates a new instance
@@ -197,7 +197,8 @@ public class BusEmail extends Bus {
                         connection.send(recipient, subject, body, null);
                         sent = true;
                     } catch (BusException e) {
-                        // Ignore and repeat
+                        // Log and repeat
+                        LOGGER.error("Error sending plain e-mail", e);
                     }
                 }
             }
@@ -275,10 +276,10 @@ public class BusEmail extends Bus {
                 if (received) {
                     try {
                         message.delete();
-                        logger.debug("Message deleted logged", new Date(),"Message deleted", message.scope.getName(),  message.receiver.getName(), message.subject);
+                        LOGGER.debug("Message deleted logged", new Date(),"Message deleted", message.scope.getName(),  message.receiver.getName(), message.subject);
                         deleted = message;
                     } catch (BusException e) {
-                        logger.error("Deletion error logged", new Date(), message.scope.getName(), message.receiver.getName(), message.subject);
+                        LOGGER.error("Deletion error logged", new Date(), message.scope.getName(), message.receiver.getName(), message.subject);
                     }
 
                 }

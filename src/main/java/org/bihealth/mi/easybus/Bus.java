@@ -23,6 +23,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * The Bus collecting and sending the messages
  * 
@@ -31,10 +34,12 @@ import java.util.concurrent.FutureTask;
  */
 public abstract class Bus {
     
-    /** Stores the subscriptions with  known participants*/    
-    private final Map<Scope, Map<Participant, List<MessageListener>>> subscriptions;   
+    /** Stores the subscriptions with known participants */
+    private final Map<Scope, Map<Participant, List<MessageListener>>> subscriptions;
     /** Executor service */
-    private final ExecutorService executor;
+    private final ExecutorService                                     executor;
+    /** Logger */
+    private static final Logger                                       LOGGER = LogManager.getLogger(Bus.class);
     
     /**
      * Creates a new instance
@@ -121,12 +126,13 @@ public abstract class Bus {
                 boolean sent = false;
                 
                 // Retry until sent successful or interrupted
-                while(!sent && !Thread.interrupted()) {
+                while (!sent && !Thread.interrupted()) {
                     try {
                         sendInternal(message, scope, participant);
                         sent = true;
                     } catch (BusException e) {
-                        // Ignore and repeat
+                        // Log and repeat
+                        LOGGER.error("Error sending message", e);
                     }
                 }
                 return null;

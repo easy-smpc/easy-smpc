@@ -195,7 +195,7 @@ public class Main {
     /** Command line option */
     private static final Option OPTION_SELF_SIGNED           = Option.builder("r")
                                                                      .desc("Accept self-signed certificates")
-                                                                     .longOpt("use-proxy")
+                                                                     .longOpt("self-signed")
                                                                      .required(false)
                                                                      .hasArg(false)
                                                                      .build();
