@@ -208,7 +208,6 @@ public class User implements MessageListener {
     @Override
     public void receiveError(Exception e) {
         LOGGER.error("Error receiveing e-mails",e);
-        this.stop = true;
     }
 
     /**
