@@ -105,8 +105,8 @@ Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -create -l STU
 3. `-b FILE_PATH_VARIABLES`: The names of the variables to exchange in Excel or CSV-files with one row or column in the format *firstFile.xlsx,secondFile.csv*
 4. `-d FILE_PATH_DATA`: The data to add in Excel or CSV-files with two rows or columns in the format *firstFile.xlsx,secondFile.csv*. The first row/column will be used as the name of the variable, the second will be used as the value with only numbers and a point or comma as decimal separator. Variables for which no value can be found will be set to zero for the creator.
 5. `-f FILE_PATH_PARTICIPANTS`: The names and e-mail addresses of the participants in the form *name1,emailAddress1;name2,emailAddress2;name3,emailAddress3...*. The first name and e-mail address will be the creator. The e-mail addresses in this parameter will always be the e-mail addresses used for receiving (see parameters `-a` and `-v`). 
-6. `-a EMAIL_ADDRESS`: E-mail address to be used. If the parameter `-v` is set, this parameter will be used for the receiving mail address.
-7. `-p PASSWORD`: Password of the e-mail address used. If the parameter `-v` is set, this parameter will be used as password for the receiving mail address.
+6. `-a EMAIL_ADDRESS`: E-mail address to be used. If the parameter `-v` is set, this parameter will only be used for the receiving mail address.
+7. `-m PASSWORD`: Password of the e-mail address used. If the parameter `-v` is set, this parameter will be used as password for the receiving mail address.
 8. `-i IMAP_HOST`: Hostname of the IMAP server.
 9. `-x IMAP_PORT`: Port of the IMAP server.
 10. `-y IMAP_ENCRYPTION`: IMAP server uses SSL/TLS or Starttls. Use either SSLTLS or STARTTLS.
