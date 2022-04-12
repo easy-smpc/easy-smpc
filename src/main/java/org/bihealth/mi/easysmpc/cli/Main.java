@@ -185,13 +185,7 @@ public class Main {
                                                                      .required(true)
                                                                      .hasArg(true)
                                                                      .build();
-    /** Command line option */
-    private static final Option OPTION_USE_PROXY             = Option.builder("u")
-                                                                     .desc("Use proxy")
-                                                                     .longOpt("use-proxy")
-                                                                     .required(false)
-                                                                     .hasArg(false)
-                                                                     .build();
+    
     /** Command line option */
     private static final Option OPTION_SELF_SIGNED           = Option.builder("r")
                                                                      .desc("Accept self-signed certificates")
@@ -262,6 +256,21 @@ public class Main {
                                                                      .required(false)
                                                                      .hasArg(true)
                                                                      .build();
+    /** Command line option */
+    private static final Option OPTION_IMAP_LOGIN_MECHANISMS = Option.builder("u")
+                                                                     .desc("Set auth mechanisms for imap")
+                                                                     .longOpt("impap-mechanisms")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
+
+    /** Command line option */
+    private static final Option OPTION_SMTP_LOGIN_MECHANISMS = Option.builder("t")
+                                                                     .desc("Set auth mechanisms for smtp")
+                                                                     .longOpt("smtp-mechanisms")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
     
     /** Options when in creating mode */
     private static Options      optionsCreate                = new Options();
@@ -306,7 +315,6 @@ public class Main {
                      .addOption(OPTION_SMTP_SERVER)
                      .addOption(OPTION_SMTP_PORT)
                      .addOption(OPTION_SMTP_ENCRYPTION)
-                     .addOption(OPTION_USE_PROXY)
                      .addOption(OPTION_SELF_SIGNED)
                      .addOption(OPTION_DATA_COLUMN)
                      .addOption(OPTION_HAS_HEADER)
@@ -314,7 +322,9 @@ public class Main {
                      .addOption(OPTION_MAILADDRESS_SENDING)
                      .addOption(OPTION_PASSWORD_SENDING)
                      .addOption(OPTION_IMAP_LOGON_NAME)
-                     .addOption(OPTION_SMTP_LOGON_NAME);
+                     .addOption(OPTION_SMTP_LOGON_NAME)
+                     .addOption(OPTION_IMAP_LOGIN_MECHANISMS)
+                     .addOption(OPTION_SMTP_LOGIN_MECHANISMS);
 
         // Add options when participating
         optionsParticipate.addOption(OPTION_PARTICIPATE_REQUIRED)
@@ -329,7 +339,6 @@ public class Main {
                           .addOption(OPTION_SMTP_SERVER)
                           .addOption(OPTION_SMTP_PORT)
                           .addOption(OPTION_SMTP_ENCRYPTION)
-                          .addOption(OPTION_USE_PROXY)
                           .addOption(OPTION_SELF_SIGNED)
                           .addOption(OPTION_DATA_COLUMN)
                           .addOption(OPTION_HAS_HEADER)
@@ -337,7 +346,9 @@ public class Main {
                           .addOption(OPTION_MAILADDRESS_SENDING)
                           .addOption(OPTION_PASSWORD_SENDING)
                           .addOption(OPTION_IMAP_LOGON_NAME)
-                          .addOption(OPTION_SMTP_LOGON_NAME);
+                          .addOption(OPTION_SMTP_LOGON_NAME)
+                          .addOption(OPTION_IMAP_LOGIN_MECHANISMS)
+                          .addOption(OPTION_SMTP_LOGIN_MECHANISMS);
 
         // Add options when resuming
         optionsResume.addOption(OPTION_RESUME_REQUIRED)
@@ -592,8 +603,9 @@ public class Main {
                                                .setSSLTLSSMTP(cli.getOptionValue(OPTION_SMTP_ENCRYPTION)
                                                                  .equals(SSL_TLS))
                                                .setSMTPLogonName(cli.hasOption(OPTION_SMTP_LOGON_NAME) ? cli.getOptionValue(OPTION_SMTP_LOGON_NAME) : null)
-                                               .setSearchForProxy(cli.hasOption(OPTION_USE_PROXY))
-                                               .setAcceptSelfSignedCertificates(cli.hasOption(OPTION_SELF_SIGNED));
+                                               .setAcceptSelfSignedCertificates(cli.hasOption(OPTION_SELF_SIGNED))
+                                               .setIMAPAuthMechanisms(cli.getOptionValue(OPTION_IMAP_LOGIN_MECHANISMS))
+                                               .setSMTPAuthMechanisms(cli.getOptionValue(OPTION_SMTP_LOGIN_MECHANISMS));
         
         // Return
         return connectionIMAPSettings;

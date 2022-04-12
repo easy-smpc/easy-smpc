@@ -135,6 +135,10 @@ public class ConnectionIMAPSettings implements Serializable {
     private String                        imapLogonName        = null;
     /** Logon name for SMTP */
     private String                        smtpLogonName        = null;
+    /** Auth mechanisms for IMAP */
+    private String                        imapAuthMechanisms   = null;
+    /** Auth mechanisms for SMTP */
+    private String                        smtpAuthMechanisms   = null;
 
     /**
      * Creates a new instance with same mail address for sending and receiving
@@ -331,6 +335,28 @@ public class ConnectionIMAPSettings implements Serializable {
      */
     public String getIMAPLogonName() {
         return imapLogonName != null ? imapLogonName : imapEmailAddress;
+    }
+    
+    /**
+     * Return IMAP auth mechanisms
+     * 
+     * @see "mail.imap.auth.mechanisms" at <a href="https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/imap/package-summary.html"> Jakarta mail doc </a>
+     * 
+     * @return
+     */
+    public String getIMAPAuthMechanisms() {
+        return imapAuthMechanisms;
+    }
+    
+    /**
+     * Return SMTP auth mechanisms
+     *
+     * @see "mail.smtp.auth.mechanisms" at <a href="https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/smtp/package-summary.html"> Jakarta mail doc </a>
+     * 
+     * @return
+     */
+    public String getSMTPAuthMechanisms() {
+        return smtpAuthMechanisms;
     }
     
     /**
@@ -643,6 +669,29 @@ public class ConnectionIMAPSettings implements Serializable {
         this.ssltlsSMTP = ssltlsSMTP;
         
         // Done
+        return this;
+    }
+    
+    /**
+     * Set IMAP auth mechanisms
+     * @see "mail.imap.auth.mechanisms" at <a href="https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/imap/package-summary.html"> Jakarta mail doc </a>
+     * 
+     * @return
+     */
+    public ConnectionIMAPSettings setIMAPAuthMechanisms(String imapAuthMechanisms) {
+        this.imapAuthMechanisms = imapAuthMechanisms;
+        return this;
+    }
+    
+    /**
+     * Set SMTP auth mechanisms
+     *
+     * @see "mail.smtp.auth.mechanisms" at <a href="https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/smtp/package-summary.html"> Jakarta mail doc </a>
+     * 
+     * @return
+     */
+    public ConnectionIMAPSettings setSMTPAuthMechanisms(String smtpAuthMechanisms) {
+        this.smtpAuthMechanisms = smtpAuthMechanisms;
         return this;
     }
 

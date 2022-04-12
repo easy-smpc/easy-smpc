@@ -126,6 +126,11 @@ public class ConnectionIMAP extends ConnectionEmail {
             this.propertiesReceiving.put("mail.imap.ssl.trust", "*");
         }
         
+        // Set IMAP auth mechanisms if present in settings
+        if (settings.getIMAPAuthMechanisms() != null) {
+            this.propertiesReceiving.put("mail.imap.auth.mechanisms", settings.getIMAPAuthMechanisms());
+        }        
+        
         // Set proxy
         if (proxy != null) {
             this.propertiesReceiving.setProperty("mail.imap.proxy.host", proxy.getFirst());
@@ -149,6 +154,11 @@ public class ConnectionIMAP extends ConnectionEmail {
         if (proxy != null) {
             this.propertiesSending.setProperty("mail.smtp.proxy.host", proxy.getFirst());
             this.propertiesSending.setProperty("mail.smtp.proxy.port", String.valueOf(proxy.getSecond()));
+        }
+        
+        // Set SMTP auth mechanisms if present in settings
+        if (settings.getSMTPAuthMechanisms() != null) {
+            this.propertiesSending.put("mail.smtp.auth.mechanisms", settings.getSMTPAuthMechanisms());
         }
     }
 
