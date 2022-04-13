@@ -372,7 +372,7 @@ public class Main {
             
             // Check minimal participants of three
             if(cli.hasOption(OPTION_PARTICIPANTS) && UserCreating.createParticipantsFromCSVString(cli.getOptionValue(OPTION_PARTICIPANTS)).length < 3){
-                throw new ParseException(String.format("Please provide at least the participants in the option \"-%s\" respective \"-%s\"", OPTION_PARTICIPANTS.getLongOpt(), OPTION_PARTICIPANTS.getOpt()));
+                throw new ParseException(String.format("Please provide at least three participants in the option \"-%s\" respective \"-%s\"", OPTION_PARTICIPANTS.getLongOpt(), OPTION_PARTICIPANTS.getOpt()));
             }
             
             // Check arguments
