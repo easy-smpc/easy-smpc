@@ -116,21 +116,22 @@ Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -create -l STU
  
 After executing check the result in the file `result_<study name>_<timestamp>.xlsx` or check the file easy-smpc.log for details of errors.
 
-Please note that in addition to the parameters mentioned above the following optional parameters exists:
-1. `-u`: Pass this parameter if an automatically detected proxy server will be used contact the e-mail server. This feature is experimental.
-2. `-h`: Pass this parameter if the data in the data and variables files are oriented horizontally.
-3. `-e`: Pass this parameter if the data in the data and variables files have headers, which need to be skipped.
-4. `-j N_COLUMNS_TO_SKIP`: Pass this parameter to skip the first n columns.
-5. `-v EMAIL_ADDRESS_SENDING`: Pass this parameter if the e-mail address used to send the e-mails is supposed to differ from the receiving e-mail address.
-6. `-p PASSWORD_SENDING`: Pass this as the password for the receiving e-mail address if the parameter `-v` is set.
-7. `-n LOGON_NAME_RECEIVING`: Pass this parameter if the logon name to the receiving e-mail servers deviates from the e-mail address used (e.g. the logon name is `name` and not `name@domain.org`). The receiving e-mail address still needs to be passed.
-8. `-w LOGON_NAME_SENDING`: The same as parameter ´-n´ for the sending e-mail address. The sending e-mail address still needs to be passed. The logon name is not copied from the parameter ´-n´. Thus, if the same logon name is used for receiving and sending the parameters ´-n´ and ´-w´ need both to be set.
+Please note that in addition to the parameters mentioned above the following *optional* parameters exists:
+1. `-h`: Pass this parameter if the data in the data and variables files are oriented horizontally.
+1. `-e`: Pass this parameter if the data in the data and variables files have headers, which need to be skipped.
+1. `-j N_COLUMNS_TO_SKIP`: Pass this parameter to skip the first n columns.
+1. `-v EMAIL_ADDRESS_SENDING`: Pass this parameter if the e-mail address used to send the e-mails is supposed to differ from the receiving e-mail address.
+1. `-p PASSWORD_SENDING`: Pass this as the password for the receiving e-mail address if the parameter `-v` is set.
+1. `-n LOGON_NAME_RECEIVING`: Pass this parameter if the logon name to the receiving e-mail servers deviates from the e-mail address used (e.g. the logon name is `name` and not `name@domain.org`). The receiving e-mail address still needs to be passed.
+1. `-w LOGON_NAME_SENDING`: The same as parameter ´-n´ for the sending e-mail address. The sending e-mail address still needs to be passed. The logon name is not copied from the parameter ´-n´. Thus, if the same logon name is used for receiving and sending the parameters ´-n´ and ´-w´ need both to be set.
+1. `-t AUTH_MECHANISMS_RECEIVING`: Pass this parameter to set the IMAP auth mechanisms of the receiving e-mail account. For details, we refer to the property `mail.imap.auth.mechanisms` in the [Jakarta e-mail documentation](https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/imap/package-summary.html).
+1. `-u AUTH_MECHANISMS_SENDING`: Pass this parameter to set the SMTP auth mechanisms of the sending e-mail account. For details, we refer to the property `mail.smtp.auth.mechanisms` in the [Jakarta e-mail documentation](https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/smtp/package-summary.html).
 
 ### Participant
-Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -participate -l STUDY_NAME -d FILE_PATH_DATA -o PARTICIPANT_NAME -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. Most parameters are explained in [Creator](#Creator), other parameters are described below:
+Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -participate -l STUDY_NAME -d FILE_PATH_DATA -o PARTICIPANT_NAME -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. Most parameters are explained in the section [Creator](#creator), other parameters are described below:
 1. `-participate`: Indicates the participation in a new EasySMPC process.
 3. `-o PARTICIPANT_NAME`: Name of the participant as defined in the participants files by the creator.
-4. `-d FILE_PATH_DATA`: The data of the participant to add. The format is the same as for the [Creator](#Creator).
+4. `-d FILE_PATH_DATA`: The data of the participant to add. The format is the same as for the [Creator](#creator).
 
 After executing check the result in the file `result_<study name>_<timestamp>.xlsx` or check the file easy-smpc.log for details of errors.
 
