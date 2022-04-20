@@ -175,7 +175,7 @@ public class ExecutHTTPRequest<T> {
                         retryCounter++;
                         
                         // If error is not "too many requests" anymore, proceed
-                        if(response.getStatus() == 429) {
+                        if(response.getStatus() != 429) {
                             break;
                         }
                     }
