@@ -31,6 +31,7 @@ import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined.Cr
 import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined.CreateRedacted;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined.EventJoined;
 import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined.JoinedRoom;
+import org.bihealth.mi.easybus.implementations.http.matrix.model.rooms.joined.Messages;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -52,47 +53,49 @@ import jakarta.ws.rs.core.Response;
 public class BusMatrix extends Bus{
 
     /** Logger */
-    private static final Logger           LOGGER                      = LogManager.getLogger(BusMatrix.class);
+    private static final Logger           LOGGER                              = LogManager.getLogger(BusMatrix.class);
     /** Path to create a room */
-    private final static String           PATH_CREATE_ROOM            = "_matrix/client/v3/createRoom";
+    private final static String           PATH_CREATE_ROOM                    = "_matrix/client/v3/createRoom";
     /** Path to sync */
-    private static final String           PATH_SYNC                   = "_matrix/client/r0/sync";
+    private static final String           PATH_SYNC                           = "_matrix/client/r0/sync";
     /** Path pattern to join a room */
-    private static final String           PATH_JOIN_ROOM_PATTERN      = "_matrix/client/v3/join/%s";
+    private static final String           PATH_JOIN_ROOM_PATTERN              = "_matrix/client/v3/join/%s";
     /** Path pattern to send a message */
-    private static final String           PATH_SEND_MESSAGE_PATTERN   = "_matrix/client/v3/rooms/%s/send/m.room.message/%s";
+    private static final String           PATH_SEND_MESSAGE_PATTERN           = "_matrix/client/v3/rooms/%s/send/m.room.message/%s";
     /** Path pattern to redact a message */
-    private static final String           PATH_REDACT_MESSAGE_PATTERN = "_matrix/client/v3/rooms/%s/redact/%s/%s";
+    private static final String           PATH_REDACT_MESSAGE_PATTERN_PATTERN = "_matrix/client/v3/rooms/%s/redact/%s/%s";
     /** Path pattern to leave a room */
-    private static final String           PATH_LEAVE_ROOM             = "_matrix/client/v3/rooms/%s/leave";
+    private static final String           PATH_LEAVE_ROOM_PATTERN             = "_matrix/client/v3/rooms/%s/leave";
     /** Path pattern to manage account data */
-    private static final String           PATH_TAG_PATTERN            = "_matrix/client/r0/user/%s/account_data/%s";
+    private static final String           PATH_TAG_PATTERN                    = "_matrix/client/r0/user/%s/account_data/%s";
     /** Path pattern to forget a room */
-    private static final String           PATH_FORGET_ROOM            = "_matrix/client/v3/rooms/%s/forget";
+    private static final String           PATH_FORGET_ROOM_PATTERN            = "_matrix/client/v3/rooms/%s/forget";
+    /** Path pattern to forget a room */
+    private static final String           PATH_GET_MESSAGES_FROM_ROOM_PATTERN = "_matrix/client/v3/rooms/%s/messages";
     /** String indicating start of scope */
-    public static final String            SCOPE_NAME_START_TAG        = "BEGIN_NAME_SCOPE";
+    public static final String            SCOPE_NAME_START_TAG                = "BEGIN_NAME_SCOPE";
     /** String indicating end of scope */
-    public static final String            SCOPE_NAME_END_TAG          = "END_NAME_SCOPE";
+    public static final String            SCOPE_NAME_END_TAG                  = "END_NAME_SCOPE";
     /** String indicating start of the content */
-    public static final String            CONTENT_START_TAG           = "BEGIN_CONTENT";
+    public static final String            CONTENT_START_TAG                   = "BEGIN_CONTENT";
     /** String indicating end of the content */
-    public static final String            CONTENT_END_TAG             = "END_CONTENT";
+    public static final String            CONTENT_END_TAG                     = "END_CONTENT";
     /** Name of custom account data field to manage room ids per user */
-    public static final String            ROOM_IDS_USER_TAG           = "org.bihealth.mi.roomids";
+    public static final String            ROOM_IDS_USER_TAG                   = "org.bihealth.mi.roomids";
     /** Connection details */
     private final ConnectionMatrix        connection;
     /** Thread */
     private final Thread                  thread;
     /** Stop flag */
-    boolean                               stop                        = false;
+    boolean                               stop                                = false;
     /** Last time synchronized */
-    private String                        lastSynchronized            = null;
+    private String                        lastSynchronized                    = null;
     /** Jackson object mapper */
-    private ObjectMapper                  mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private ObjectMapper                  mapper                              = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     /** Join rooms */
-    private final Map<String, JoinedRoom> joinedRooms                 = new ConcurrentHashMap<>();
+    private final Map<String, JoinedRoom> joinedRooms                         = new ConcurrentHashMap<>();
     /** Maps participant names to room ids */
-    private final Map<String, String>     ids                         = new ConcurrentHashMap<>();    
+    private final Map<String, String>     ids                                 = new ConcurrentHashMap<>();
 
     /**
      * Creates a new instance
@@ -537,7 +540,7 @@ public class BusMatrix extends Bus{
     protected void redactMessage(String roomId, String eventId, CreateRedacted createRedacted ) throws BusException {
         
         // Prepare request
-        Builder request = this.connection.getBuilder(String.format(PATH_REDACT_MESSAGE_PATTERN, roomId, eventId, UIDGenerator.generateShortUID(10)));
+        Builder request = this.connection.getBuilder(String.format(PATH_REDACT_MESSAGE_PATTERN_PATTERN, roomId, eventId, UIDGenerator.generateShortUID(10)));
         
         // Serialize redact message
         String createRedactedSerialized;
@@ -760,7 +763,7 @@ public class BusMatrix extends Bus{
 
         for(String id: ids) {
             // Create URL path and parameter
-            final Builder request = this.connection.getBuilder(String.format(PATH_LEAVE_ROOM, id));
+            final Builder request = this.connection.getBuilder(String.format(PATH_LEAVE_ROOM_PATTERN, id));
 
             // Create task and add to list
             requests.add(new ExecutHTTPRequest<Void>(request,
@@ -791,7 +794,7 @@ public class BusMatrix extends Bus{
 
         for(String id: ids) {
             // Create URL path and parameter
-            final Builder request = this.connection.getBuilder(String.format(PATH_FORGET_ROOM, id));
+            final Builder request = this.connection.getBuilder(String.format(PATH_FORGET_ROOM_PATTERN, id));
 
             // Create task and add to list
             requests.add(new ExecutHTTPRequest<Void>(request,
@@ -903,5 +906,59 @@ public class BusMatrix extends Bus{
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new BusException("Error while executing HTTP request!", e);
         }        
+    }
+    
+    /**
+     * Gets the messages for a room. User from and to parameters to paginate. Direction is always backwards
+     * 
+     * @param roomId
+     * @param from
+     * @param to
+     * @throws BusException 
+     */
+    private Messages getMessagesFromRoom(String roomId, String from, String to) throws BusException {
+        
+        // Init
+        Map<String, String> parameters = new HashMap<String, String>();
+        Builder request;
+        
+        // Prepare request including parameters
+        if (from != null) {
+            parameters.put("from", from);
+        }
+        if (to != null) {
+            parameters.put("to", to);
+        }
+        parameters.put("dir", "b");
+        request = this.connection.getBuilder(String.format(PATH_GET_MESSAGES_FROM_ROOM_PATTERN, roomId), parameters);
+
+        // Execute request
+        FutureTask<Messages> future = new ExecutHTTPRequest<Messages>(request,
+                ExecutHTTPRequest.REST_TYPE.PUT,
+                () -> getExecutor(),
+                null,
+                new Function<Response, Messages>() {
+
+                    @Override
+                    public Messages apply(Response response) {                        
+                        try {
+                            return  mapper.reader().readValue(response.readEntity(String.class), Messages.class);
+                        } catch (IOException e) {
+                            throw new IllegalStateException("Unable to understand response", e);
+                        }
+                    }
+                    
+                },
+                ConnectionMatrix.DEFAULT_ERROR_HANDLER,
+                this.connection,
+                Resources.RETRY_MATRIX_ACTIVITY_NUMBER,
+                Resources.RETRY_MATRIX_ACTIVITY_WAIT).execute();
+        
+        // Wait for task end or exception
+        try {
+            return future.get(Resources.TIMEOUT_MATRIX_ACTIVITY, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new BusException("Error while executing HTTP request!", e);
+        }
     }
 }
