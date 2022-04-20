@@ -161,7 +161,6 @@ public class BusMatrix extends Bus{
         
         // If not found update and search again
         if(roomId == null) {
-            //updateJoinedRooms(getSyncTree(false));
             this.ids.putAll(getParticipantRoomIds());
             roomId = this.ids.get(participant.getIdentifier());
         }        
@@ -171,7 +170,6 @@ public class BusMatrix extends Bus{
             roomId = createRoom(new CreateRoom().setName(generateRoomName(participant, true)).addInvite(participant.getIdentifier()));
             this.ids.put(participant.getIdentifier(), roomId);
             setParticipantRoomIds(this.ids);
-            // updateJoinedRooms(getSyncTree(false));
         }
         
         // Send message and return
@@ -365,6 +363,7 @@ public class BusMatrix extends Bus{
      * @throws BusException, InterruptedException 
      */
     private void receive() throws BusException, InterruptedException {
+        // TODO Make this method synchronized?
         
         // Log
         LOGGER.debug("Started receiving");
@@ -373,7 +372,7 @@ public class BusMatrix extends Bus{
         this.ids.putAll(getParticipantRoomIds());
         
         // Get sync data
-        JsonNode sync = getSyncTree(true);
+        JsonNode sync = getSyncTree(true, null);
         
         // Update joined rooms
         updateJoinedRooms(sync);
@@ -394,7 +393,7 @@ public class BusMatrix extends Bus{
     	List<String> ids = new ArrayList<>();
     	
         // Get sync data
-        JsonNode sync = getSyncTree(true);
+        JsonNode sync = getSyncTree(true, null);
         
         // Update joined rooms
         updateJoinedRooms(sync);
@@ -572,23 +571,25 @@ public class BusMatrix extends Bus{
      * Gets the sync tree
      * 
      * @param UpdateSince - should the since variable be updated. Only set true if all messages in the tree are processed
+     * @param Filter - Id of filter
      * @return
      * @throws BusException
      */
-    private JsonNode getSyncTree(boolean UpdateSince) throws BusException {
+    private JsonNode getSyncTree(boolean UpdateSince, String filter) throws BusException {
         
         // Prepare
         String syncString;       
         Builder request;
+        Map<String, String> parameters = new HashMap<String, String>();
         
-        // Create URL path and parameter 
-        if (this.lastSynchronized == null) {
-            request = this.connection.getBuilder(PATH_SYNC);
-        } else {
-            Map<String, String> parameters = new HashMap<String, String>();
+        // Set since parameter to only get delta
+        if (this.lastSynchronized != null) {
             parameters.put("since", this.lastSynchronized);
-            request = this.connection.getBuilder(PATH_SYNC, parameters);
         }
+
+        // Set filter and create request
+        parameters.put("filter", filter != null ? filter : "0");
+        request = this.connection.getBuilder(PATH_SYNC, parameters);
     
         // Create task to get sync
         FutureTask<String> future = new ExecutHTTPRequest<String>(request,

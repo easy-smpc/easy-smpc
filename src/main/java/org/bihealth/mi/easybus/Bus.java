@@ -154,7 +154,6 @@ public abstract class Bus {
                         }
                         
                     } catch (BusException e) {
-                        // TODO Remove
                         LOGGER.error("Unable to send message. Will be re-retried", e);
                         // Ignore and repeat
                     }
