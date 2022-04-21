@@ -11,11 +11,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Felix Wirth
  *
  */
-@JsonPropertyOrder({ "events" })
+@JsonPropertyOrder({ "events", "prev_batch", "limited"})
 public class Timeline {
     
     @JsonProperty("events")
-    private List<EventJoined> events = null;
+    private List<EventJoined> events    = null;
+    @JsonProperty("prev_batch")
+    private String            prevBatch = null;
+    @JsonProperty("limited")
+    private boolean           limited;
     
     /**
      * No args constructor for use in serialization
@@ -25,12 +29,17 @@ public class Timeline {
     }
     
     /**
+    * Creates a new instance
     *
     * @param events
+    * @param prevBatch
+    * @param limited
     */
-   public Timeline(List<EventJoined> events) {
+   public Timeline(List<EventJoined> events, String prevBatch, boolean limited) {
        super();
        this.events = events;
+       this.prevBatch = prevBatch;
+       this.limited = limited;
    }
 
    @JsonProperty("events")
@@ -42,5 +51,24 @@ public class Timeline {
    public void setEvents(List<EventJoined> events) {
        this.events = events;
    }
+   
+   @JsonProperty("prev_batch")
+   public String getPrevBatch() {
+       return prevBatch;
+   }
 
+   @JsonProperty("prev_batch")
+   public void setPrevBatch(String prevBatch) {
+       this.prevBatch = prevBatch;
+   }
+
+   @JsonProperty("limited")
+   public boolean getLimited() {
+       return this.limited;
+   }
+
+   @JsonProperty("limited")
+   public void setLimited(boolean limited) {
+       this.limited = limited;
+   }
 }
