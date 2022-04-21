@@ -11,13 +11,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Felix Wirth
  *
  */
-@JsonPropertyOrder({ "chunk","end"})
+@JsonPropertyOrder({ "chunk", "start", "end" })
 public class Messages {
     
     // TODO Arrange model packages by API endpoints and business objects
     
     @JsonProperty("chunk")
     private List<EventJoined> chunk = null;
+    @JsonProperty("start")
+    private String start = null;
     @JsonProperty("end")
     private String end = null;
     
@@ -34,9 +36,10 @@ public class Messages {
      * @param chunk
      * @param end
      */
-   public Messages(List<EventJoined> chunk, String end) {
+   public Messages(List<EventJoined> chunk, String start, String end) {
        super();
        this.chunk = chunk;
+       this.start = start;
        this.end = end;
    }
 
@@ -58,5 +61,15 @@ public class Messages {
    @JsonProperty("end")
    public void setEnd(String end) {
        this.end = end;
+   }
+   
+   @JsonProperty("start")
+   public String getStart() {
+       return start;
+   }
+
+   @JsonProperty("start")
+   public void setStart(String start) {
+       this.start = start;
    }
 }

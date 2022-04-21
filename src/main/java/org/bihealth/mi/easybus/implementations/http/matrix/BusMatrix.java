@@ -375,7 +375,7 @@ public class BusMatrix extends Bus{
         this.ids.putAll(getParticipantRoomIds());
         
         // Get sync data
-        JsonNode sync = getSyncTree(true, null);
+        JsonNode sync = getSyncTree(null);
         
         // Update joined rooms
         updateJoinedRooms(sync);
@@ -384,7 +384,14 @@ public class BusMatrix extends Bus{
         processInvitations(sync);
         
         // Check joined rooms for new messages
-        checkNewMessages();        
+        checkNewMessages();
+        
+        // Update since if necessary
+        if (!sync.path("next_batch").isMissingNode()) {
+            synchronized (this.connection) {
+                this.lastSynchronized = sync.path("next_batch").asText();
+            }
+        }
     }
     
     /**
@@ -396,7 +403,7 @@ public class BusMatrix extends Bus{
     	List<String> ids = new ArrayList<>();
     	
         // Get sync data
-        JsonNode sync = getSyncTree(true, null);
+        JsonNode sync = getSyncTree(null);
         
         // Update joined rooms
         updateJoinedRooms(sync);
@@ -469,7 +476,8 @@ public class BusMatrix extends Bus{
     }
 
     /**
-     * Check for new messages in joined rooms
+     * Check for new messages in joined rooms from the sync API
+     * If the sync result is indicated as limited for one or more rooms, the messages API will be called for the respective rooms
      */
     private void checkNewMessages() {
         
@@ -478,9 +486,20 @@ public class BusMatrix extends Bus{
             return;
         }
         
+        // Init
+        Map<String, String> roomIdPrevBatchMap = new HashMap<>();
+        
         // Loop over room
         for(Entry<String, JoinedRoom> room : this.joinedRooms.entrySet()) {
-
+            // Init
+            List<EventJoined> successfulReadEvents = new ArrayList<>();
+            
+            // If result is limited, further messages must be read with the messages api later on
+            if(room.getValue().getTimeline().getLimited()) {
+                roomIdPrevBatchMap.put(room.getKey(), room.getValue().getTimeline().getPrevBatch());
+            }
+            
+            
             // Loop over events
             for (EventJoined event : room.getValue().getTimeline().getEvents()) {
                 // If element can be processed and is relevant
@@ -495,29 +514,11 @@ public class BusMatrix extends Bus{
                     try {
                         
                         // Prepare message fragment
-                        MessageFragmentFinish fragmentFinish = new MessageFragmentFinish(MessageFragment.deserializeMessage(event.getContent().getBody())) {
-
-                            /** SVUID */
-                            private static final long serialVersionUID = -2403372330378795710L;
-
-                            @Override
-                            public void delete() throws BusException {
-                                try {
-                                    // TODO: Create a package of redact messages to redact in parallel?
-                                    redactMessage(room.getKey(), event.getEventId(), CreateRedacted.DEFAULT);
-                                } catch (BusException e) {
-                                    LOGGER.error(String.format("Unable to redact message with id %s in room %s", event.getEventId(), room.getKey()), e);
-                                }
-                            }
-
-                            @Override
-                            public void finalize() throws BusException {
-                                // Empty
-                            }
-                        };
+                        MessageFragmentFinish fragmentFinish = createMessageFragmentFromEvent(event, room.getKey());
                         
-                        // Try to receive message internal
+                        // Receive message internally
                         this.receiveInternal(fragmentFinish, new Scope(event.getContent().getScope()), getParticipantsMap().get(event.getSender()));
+                        successfulReadEvents.add(event);
                     } catch (ClassNotFoundException | InterruptedException | IOException e) {
                         LOGGER.error(String.format("Unable to understand message with id %s in room %s", event.getEventId(), room.getKey()), e);
                         continue;
@@ -527,7 +528,95 @@ public class BusMatrix extends Bus{
                     }
                 }
             }
+            // Remove successful read events
+            room.getValue().getTimeline().getEvents().removeAll(successfulReadEvents);
         }
+        
+        // Read messages for rooms with limited entries
+        checkNewMessagesFromMessagesAPI(roomIdPrevBatchMap);
+    }
+
+    /**
+     * Check new messages with the messages API
+     * 
+     * @param roomIdPrevBatchMap - Contains a mapping from the room id to the prevBatch id to start reading from 
+     */
+    private void checkNewMessagesFromMessagesAPI(Map<String, String> roomIdPrevBatchMap) {
+        // Loop over rooms
+        for(Entry<String, String> entry : roomIdPrevBatchMap.entrySet()) {
+            String fromBatch = entry.getValue();
+            while (fromBatch != null) {                
+                try {
+                    // Get messages object
+                    Messages messages = getMessagesFromRoom(entry.getKey(), fromBatch, this.lastSynchronized);
+                    
+                    // Loop over events
+                    for(EventJoined event : messages.getChunk()) {
+                        // If element can be processed and is relevant
+                        if (event.getType() != null && event.getType().equals("m.room.message") &&
+                                event.getContent().getMsgType() != null &&
+                                event.getContent().getMsgType().equals("m.text") && event.getSender() != null &&
+                                event.getContent().getScope() != null &&
+                                isParticipantScopeRegistered(new Scope(event.getContent().getScope()),
+                                                             getParticipantsMap().get(event.getSender()))) {
+
+                            // Try to receive message internally
+                            try {
+                                // Prepare message fragment
+                                MessageFragmentFinish fragmentFinish = createMessageFragmentFromEvent(event, entry.getKey());
+
+                                // Receive message internally
+                                this.receiveInternal(fragmentFinish, new Scope(event.getContent().getScope()), getParticipantsMap().get(event.getSender()));
+                            }  catch (ClassNotFoundException | InterruptedException | IOException e) {
+                                LOGGER.error(String.format("Unable to understand message with id %s in room %s", event.getEventId(), entry.getKey()), e);
+                            } catch (BusException e) {
+                                LOGGER.error(String.format("Unable to receive message internally", event.getEventId(), entry.getKey()), e);
+                            }
+                        }
+                    }
+                    
+                    // End of messages in this room reached?
+                    fromBatch = messages.getEnd() == null ||
+                                messages.getEnd().equals(messages.getStart()) ? null
+                                        : messages.getEnd();
+                } catch (BusException e) {
+                    LOGGER.error(String.format("Unable to read messages for room %s with from value %s", entry.getKey(), fromBatch), e);
+                }
+            }            
+        }        
+    }
+
+    /**
+     * Creates a message fragment out of an joined room event
+     * 
+     * @param event
+     * @param roomKey
+     * @return
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private MessageFragmentFinish createMessageFragmentFromEvent(EventJoined event, String roomKey) throws IOException, ClassNotFoundException {
+        
+        // Create fragment and return
+        return new MessageFragmentFinish(MessageFragment.deserializeMessage(event.getContent().getBody())) {
+
+            /** SVUID */
+            private static final long serialVersionUID = -2403372330378795710L;
+
+            @Override
+            public void delete() throws BusException {
+                try {
+                    redactMessage(roomKey, event.getEventId(), CreateRedacted.DEFAULT);
+                } catch (BusException e) {
+                    LOGGER.error(String.format("Unable to redact message with id %s in room %s", event.getEventId(), roomKey), e);
+                }
+            }
+
+            @Override
+            public void finalize() throws BusException {
+                // Empty
+            }
+        };
     }
 
     /**
@@ -573,12 +662,11 @@ public class BusMatrix extends Bus{
     /**
      * Gets the sync tree
      * 
-     * @param UpdateSince - should the since variable be updated. Only set true if all messages in the tree are processed
      * @param Filter - Id of filter
      * @return
      * @throws BusException
      */
-    private JsonNode getSyncTree(boolean UpdateSince, String filter) throws BusException {
+    private JsonNode getSyncTree(String filter) throws BusException {
         
         // Prepare
         String syncString;       
@@ -618,14 +706,7 @@ public class BusMatrix extends Bus{
             sync = mapper.reader().readTree(syncString);
         } catch (JsonProcessingException e) {
             throw new BusException("Error deserializing sync string!", e);
-        }
-        
-        // Update since if necessary
-        if (UpdateSince && !sync.path("next_batch").isMissingNode()) {
-            synchronized (this.connection) {
-                this.lastSynchronized = sync.path("next_batch").asText();
-            }
-        }
+        }        
         
         // Return
         return sync;
@@ -909,7 +990,7 @@ public class BusMatrix extends Bus{
     }
     
     /**
-     * Gets the messages for a room. User from and to parameters to paginate. Direction is always backwards
+     * Gets the messages for a room. Use from and to parameters to paginate. Direction is always backwards.
      * 
      * @param roomId
      * @param from
@@ -934,7 +1015,7 @@ public class BusMatrix extends Bus{
 
         // Execute request
         FutureTask<Messages> future = new ExecutHTTPRequest<Messages>(request,
-                ExecutHTTPRequest.REST_TYPE.PUT,
+                ExecutHTTPRequest.REST_TYPE.GET,
                 () -> getExecutor(),
                 null,
                 new Function<Response, Messages>() {
