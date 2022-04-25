@@ -380,14 +380,14 @@ public class Main {
             
         } catch (ParseException | IllegalArgumentException e) {
             // Log exception
-            LOGGER.error("Unable to parse cli arguments", e);
+            LOGGER.error("Unable to parse CLI arguments", e);
             
             // Output help message
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("easy-smpc-cli", optionsCreate);
             
             // Throw exception
-            throw new IllegalStateException("Unable to parse cli arguments");
+            throw new IllegalStateException("Unable to parse CLI arguments");
         }
                 
         // Start creation if applicable
@@ -475,7 +475,7 @@ public class Main {
     /**
      * Return the options suiting the mode chosen by the user
      * 
-     * @param cli
+     * @param CLI
      * @param parser
      * @param args
      * @return
@@ -533,18 +533,16 @@ public class Main {
     }
 
     /**
-     * Check parameters in cli and throws an exception if wrong
+     * Check parameters in CLI and throws an exception if wrong
      * 
      * @param cli
      * @return
      */
 	public static boolean checkCliArguments(CommandLine cli) throws IllegalArgumentException {
         
-	    // Check only for create and participate
-	    if(cli.hasOption(OPTION_RESUME)) {
-	        return true;
-	    }
-	    
+        // Check only for create and participate
+        if (cli.hasOption(OPTION_RESUME)) { return true; }
+
         try {
             // Check integer
             Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT));
@@ -552,32 +550,40 @@ public class Main {
             if (cli.hasOption(cli.getOptionValue(OPTION_SKIP_COLUMNS))) {
                 Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS));
             }
-            
+
             // Check participant name and e-mail address
-            new Participant(cli.hasOption(OPTION_PARTICIPANT_NAME) ? cli.getOptionValue(OPTION_PARTICIPANT_NAME) : "Creator", cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING));                        
-            
+            new Participant(cli.hasOption(OPTION_PARTICIPANT_NAME)
+                    ? cli.getOptionValue(OPTION_PARTICIPANT_NAME)
+                    : "Creator", cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING));
+
             // Check encryption for IMAP
-            if(!(cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(SSL_TLS) || cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(START_TLS))) {
-                throw new IllegalArgumentException(String.format("Please enter either %s or %s for IMAP encryption", SSL_TLS, START_TLS));
+            if (!(cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(SSL_TLS) ||
+                  cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(START_TLS))) {
+                throw new IllegalArgumentException(String.format("Please enter either %s or %s for IMAP encryption",
+                                                                 SSL_TLS,
+                                                                 START_TLS));
             }
-            
+
             // Check encryption for SMTP
-            if(!(cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(SSL_TLS) || cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(START_TLS))) {
-                throw new IllegalArgumentException(String.format("Please enter either %s or %s for SMTP encryption", SSL_TLS, START_TLS));
-            }            
-            
-        } catch(Exception e) {
+            if (!(cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(SSL_TLS) ||
+                  cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(START_TLS))) {
+                throw new IllegalArgumentException(String.format("Please enter either %s or %s for SMTP encryption",
+                                                                 SSL_TLS,
+                                                                 START_TLS));
+            }
+
+        } catch (Exception e) {
             throw new IllegalArgumentException("Arguments were not correct!", e);
         }
-        
+
         // Return true if no exception
-        return true;        
+        return true;     
     }
 
     /**
      *  Reads IMAP connection settings from command line options
      * 
-     * @param cli
+     * @param CLI
      * @return
      */
     public static ConnectionIMAPSettings getConnectionIMAPSettingsFromCLI(CommandLine cli) {

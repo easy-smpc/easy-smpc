@@ -259,7 +259,7 @@ public class User implements MessageListener {
         while (!areSharesComplete()) {
             
             // Check for error while receiving and throw exception
-            if(this.stop) {
+            if (this.stop) {
                 throw new InterruptedException("Process stopped");
             }
             
@@ -296,7 +296,7 @@ public class User implements MessageListener {
             if (index != getModel().getOwnId()) {
 
                 // Check for error while receiving and throw exception
-                if(this.stop) {
+                if (this.stop) {
                     throw new InterruptedException("Process stopped");
                 }
                 
@@ -340,7 +340,7 @@ public class User implements MessageListener {
             registerKeyboardListenerThread();
             
             // Sends the messages for the first round and proceeds the model
-            if((model.getState() == StudyState.INITIAL_SENDING || model.getState() == StudyState.SENDING_SHARE) && !this.stop) {
+            if ((model.getState() == StudyState.INITIAL_SENDING || model.getState() == StudyState.SENDING_SHARE) && !this.stop) {
                 LOGGER.info(String.format("1. round sending started for study %s", getModel().getName()));
                 sendMessages(Resources.ROUND_1);
                 this.model.toRecievingShares();
@@ -349,7 +349,7 @@ public class User implements MessageListener {
             }
             
             // Receives the messages for the first round and proceeds the model
-            if(model.getState() == StudyState.RECIEVING_SHARE && !this.stop) {
+            if (model.getState() == StudyState.RECIEVING_SHARE && !this.stop) {
                 LOGGER.info(String.format("1. round receiving started for study %s", getModel().getName()));
                 receiveMessages(Resources.ROUND_1);
                 this.model.toSendingResult();
@@ -358,7 +358,7 @@ public class User implements MessageListener {
             }
             
             // Sends the messages for the second round and proceeds the model
-            if(getModel().getState() == StudyState.SENDING_RESULT && !this.stop) {
+            if (getModel().getState() == StudyState.SENDING_RESULT && !this.stop) {
                 LOGGER.info(String.format("2. round sending started for study %s", getModel().getName()));
                 sendMessages(Resources.ROUND_2);
                 this.model.toRecievingResult();
@@ -367,17 +367,17 @@ public class User implements MessageListener {
             }
             
             // Receives the messages for the second round, stops the bus and finalizes the model
-            if(getModel().getState() == StudyState.RECIEVING_RESULT && !this.stop) {
+            if (getModel().getState() == StudyState.RECIEVING_RESULT && !this.stop) {
                 LOGGER.info(String.format("2. round receiving started for study %s", getModel().getName()));
                 receiveMessages(Resources.ROUND_2);
                 getModel().stopBus();
                 this.model.toFinished();
                 this.save();
                 LOGGER.info(String.format("2. round receiving finished for study %s", getModel().getName()));
-            }            
+            }
             
             // Calculate & write result, delete file model
-            if(getModel().getState() == StudyState.FINISHED) {
+            if (getModel().getState() == StudyState.FINISHED) {
                 LOGGER.info("Start calculating and writing result");
                 exportResult();
                 model.getFilename().delete();
@@ -404,14 +404,12 @@ public class User implements MessageListener {
         // Load data into list
         List<List<String>> list = new ArrayList<>();
         for (BinResult result : getModel().getAllResults()) {
-            list.add(new ArrayList<String>(Arrays.asList(result.name,
-                                                         String.valueOf(result.value))));
+            list.add(new ArrayList<String>(Arrays.asList(result.name, String.valueOf(result.value))));
         }
         
         // Export
         try {
-            ExportFile.toFile(new File(createResultFileName()))
-                      .exportData(list);
+            ExportFile.toFile(new File(createResultFileName())).exportData(list);
         } catch (IOException e) {
             LOGGER.error("Unable to write result file", e);
         }
@@ -423,9 +421,7 @@ public class User implements MessageListener {
      * @return
      */
     private String createResultFileName() {
-        return "result_" + getModel().getName() + "_" +
-               DateTimeFormatter.ofPattern("yyyy.MM.dd HH.mm.ss").format(LocalDateTime.now()) +
-               ".xlsx";
+        return "result_" + getModel().getName() + "_" + DateTimeFormatter.ofPattern("yyyy.MM.dd HH.mm.ss").format(LocalDateTime.now()) + ".xlsx";
     }
 
     /**
