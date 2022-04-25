@@ -59,7 +59,7 @@ already established and configured communication medium.
 * Easy to use
 * Communication using established channels, e.g. emails
 * Excel and CSV import and export
-* Automation of the protocol using a IMAP-Mailboxes
+* Automation of the protocol using IMAP-Mailboxes
 * Automatic Proxy-Detection
 
 ### Security
@@ -134,7 +134,6 @@ Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -participate -
 4. `-d FILE_PATH_DATA`: The data of the participant to add. The format is the same as for the [Creator](#creator).
 
 After executing check the result in the file `result_<study name>_<timestamp>.xlsx` or check the file easy-smpc.log for details of errors.
-
 
 ### Sample 
 Data for a sample can be found in the folder `sample-cli`. A sample process with this data might can be started with these three commands: 

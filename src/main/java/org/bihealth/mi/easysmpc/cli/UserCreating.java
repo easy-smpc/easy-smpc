@@ -41,7 +41,6 @@ public class UserCreating extends User {
     /** Logger */
     private static final Logger LOGGER = LogManager.getLogger(UserCreating.class);
 
-
     /**
      * Create a new instance
      * 
@@ -126,9 +125,7 @@ public class UserCreating extends User {
             // Set either zero or the data found in data map
             if (dataMap.get(binsNameEntry.getKey()) != null) {
                 try {
-                    bins[i].shareValue(new BigDecimal(dataMap.get(binsNameEntry.getKey())
-                                                             .trim()
-                                                             .replace(',', '.')),
+                    bins[i].shareValue(new BigDecimal(dataMap.get(binsNameEntry.getKey()).trim().replace(',', '.')),
                                        Resources.FRACTIONAL_BITS);
                 } catch (NumberFormatException e) {
                     LOGGER.error(String.format("Unable to understand value %s for variable %s", dataMap.get(binsNameEntry.getKey()), binsNameEntry.getKey()));
@@ -142,7 +139,7 @@ public class UserCreating extends User {
         }
         
         // Warning about unmapped variables
-        for(Entry<String, String> entry : workingCopyData.entrySet()) {
+        for (Entry<String, String> entry : workingCopyData.entrySet()) {
             LOGGER.warn(String.format("Data for variable \"%s\" was provided, but variable was not found in variable definition", entry.getKey()));
         }
         
@@ -180,8 +177,7 @@ public class UserCreating extends User {
 
             // Check
             if (nameEMailSplit.length != 2) {
-                throw new IllegalArgumentException(String.format("Participant/e-mail part s% is incorrectly formated",
-                                                                 nameEMail));
+                throw new IllegalArgumentException(String.format("Participant/e-mail part s% is incorrectly formated", nameEMail));
             }
 
             // Add participant an increase index

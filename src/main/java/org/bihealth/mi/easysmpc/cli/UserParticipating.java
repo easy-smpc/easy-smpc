@@ -75,8 +75,7 @@ public class UserParticipating extends User {
         
         try {
             // Register for initial e-mail
-            BusEmail interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false),
-                                               getMailboxCheckInterval());
+            BusEmail interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false), getMailboxCheckInterval());
 
             interimBus.receive(new Scope(studyTitle + ROUND_0), participant, new MessageListener() {
                 boolean received = false;

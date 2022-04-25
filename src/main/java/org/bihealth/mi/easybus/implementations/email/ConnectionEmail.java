@@ -374,7 +374,7 @@ public abstract class ConnectionEmail {
      * @return
      */
     protected String getSendingLogonName() {
-        return this.sendingLogonName != null ? this.sendingLogonName : this.sendingLogonName;
+        return sendingLogonName;
     }
     
     /**
