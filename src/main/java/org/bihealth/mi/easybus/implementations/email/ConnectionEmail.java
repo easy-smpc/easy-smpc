@@ -264,10 +264,10 @@ public abstract class ConnectionEmail {
     private PerformanceListener listener;
     /** Mail address of sending user */
     private String              sendingEmailAddress;
-    /** Receiving logon name */
-    private String              receivingLogonName;
-    /** Sending logon name */
-    private String              sendingLogonName;
+    /** Receiving user name */
+    private String              receivingUserName;
+    /** Sending user name */
+    private String              sendingUserName;
     
     /**
      * Creates a new instance with same mail address to receive and to send
@@ -281,7 +281,7 @@ public abstract class ConnectionEmail {
     }
     
     /**
-     * Creates a new instance with same mail address and logon name to receive and to send and a performance listener
+     * Creates a new instance with same mail address and user name to receive and to send and a performance listener
      * 
      * @param sharedMailBox
      * @param emailAddress
@@ -311,15 +311,15 @@ public abstract class ConnectionEmail {
      * @param sharedMailBox
      * @param receivingEmailAddress
      * @param sendingEmailAddress
-     * @param receivingLogonName - only necessary if deviates from receivingEmailAddress
-     * @param sendingLogonName - only necessary if deviates from sendingEmailAddress
+     * @param receivingUserName - only necessary if deviates from receivingEmailAddress
+     * @param sendingUserName - only necessary if deviates from sendingEmailAddress
      * @param listener
      */
     protected ConnectionEmail(boolean sharedMailBox,
                               String receivingEmailAddress,
                               String sendingEmailAddress,
-                              String receivingLogonName,
-                              String sendingLogonName,
+                              String receivingUserName,
+                              String sendingUserName,
                               PerformanceListener listener) {
         // Check
         if (receivingEmailAddress == null) {
@@ -333,8 +333,8 @@ public abstract class ConnectionEmail {
         this.sharedMailbox = sharedMailBox;
         this.receivingEmailAddress = receivingEmailAddress;
         this.sendingEmailAddress = sendingEmailAddress;
-        this.receivingLogonName = receivingLogonName;
-        this.sendingLogonName = sendingLogonName;
+        this.receivingUserName = receivingUserName;
+        this.sendingUserName = sendingUserName;
         this.listener = listener;
     }
     
@@ -360,21 +360,21 @@ public abstract class ConnectionEmail {
     }
     
     /**
-     * Returns the logon name for receiving
+     * Returns the user name for receiving
      * 
      * @return
      */
-    protected String getReceivingLogonName() {
-        return this.receivingLogonName != null ? this.receivingLogonName : this.receivingEmailAddress;
+    protected String getReceivingUserName() {
+        return this.receivingUserName != null ? this.receivingUserName : this.receivingEmailAddress;
     }
     
     /**
-     * Returns the logon name for sending
+     * Returns the user name for sending
      * 
      * @return
      */
-    protected String getSendingLogonName() {
-        return sendingLogonName;
+    protected String getSendingUserName() {
+        return sendingUserName;
     }
     
     /**

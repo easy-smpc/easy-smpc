@@ -131,10 +131,10 @@ public class ConnectionIMAPSettings implements Serializable {
     private PasswordProvider              smtpProvider;
     /** IMAP Password */
     private transient String              smtpPassword;
-    /** Logon name for IMAP */
-    private String                        imapLogonName        = null;
-    /** Logon name for SMTP */
-    private String                        smtpLogonName        = null;
+    /** User name for IMAP */
+    private String                        imapUserName         = null;
+    /** User name for SMTP */
+    private String                        smtpUserName         = null;
     /** Auth mechanisms for IMAP */
     private String                        imapAuthMechanisms   = null;
     /** Auth mechanisms for SMTP */
@@ -320,21 +320,21 @@ public class ConnectionIMAPSettings implements Serializable {
     }
     
     /**
-     * Return SMTP logon name
+     * Return SMTP user name
      * 
      * @return
      */
-    public String getSMTPLogonName() {
-        return smtpLogonName != null ? smtpLogonName : smptEmailAddress;
+    public String getSMTPUserName() {
+        return smtpUserName != null ? smtpUserName : smptEmailAddress;
     }
     
     /**
-     * Return IMAP logon name
+     * Return IMAP user name
      * 
      * @return
      */
-    public String getIMAPLogonName() {
-        return imapLogonName != null ? imapLogonName : imapEmailAddress;
+    public String getIMAPUserName() {
+        return imapUserName != null ? imapUserName : imapEmailAddress;
     }
     
     /**
@@ -576,24 +576,24 @@ public class ConnectionIMAPSettings implements Serializable {
     }
     
     /**
-     * Set IMAP logon name
+     * Set IMAP user name
      * 
-     * @param imapLogonName
+     * @param imapUserName
      * @return
      */
-    public ConnectionIMAPSettings setIMAPLogonName(String imapLogonName) {
-        this.imapLogonName = imapLogonName;
+    public ConnectionIMAPSettings setIMAPUserName(String imapUserName) {
+        this.imapUserName = imapUserName;
         return this;
     }
     
     /**
-     * Set SMTP logon name
+     * Set SMTP user name
      * 
-     * @param smtpLogonName
+     * @param smtpUserName
      * @return
      */
-    public ConnectionIMAPSettings setSMTPLogonName(String smtpLogonName) {
-        this.smtpLogonName = smtpLogonName;
+    public ConnectionIMAPSettings setSMTPUserName(String smtpUserName) {
+        this.smtpUserName = smtpUserName;
         return this;
     }
     

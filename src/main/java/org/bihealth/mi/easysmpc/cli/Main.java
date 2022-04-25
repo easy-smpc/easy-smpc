@@ -242,17 +242,17 @@ public class Main {
                                                                      .build();
     
     /** Command line option */
-    private static final Option OPTION_IMAP_LOGON_NAME         = Option.builder("n")
-                                                                     .desc("IMAP logon name (only if logon name deviates from IMAP e-mail address)")
-                                                                     .longOpt("impa-logon-name")
+    private static final Option OPTION_IMAP_USER_NAME        = Option.builder("n")
+                                                                     .desc("IMAP user name (only if user name deviates from IMAP e-mail address)")
+                                                                     .longOpt("impa-user-name")
                                                                      .required(false)
                                                                      .hasArg(true)
                                                                      .build();
     
     /** Command line option */
-    private static final Option OPTION_SMTP_LOGON_NAME         = Option.builder("w")
-                                                                     .desc("SMTP logon name (only if logon name deviates from IMAP e-mail address)")
-                                                                     .longOpt("smtp-logon-name")
+    private static final Option OPTION_SMTP_USER_NAME        = Option.builder("w")
+                                                                     .desc("SMTP user name (only if user name deviates from IMAP e-mail address)")
+                                                                     .longOpt("smtp-user-name")
                                                                      .required(false)
                                                                      .hasArg(true)
                                                                      .build();
@@ -321,8 +321,8 @@ public class Main {
                      .addOption(OPTION_SKIP_COLUMNS)
                      .addOption(OPTION_MAILADDRESS_SENDING)
                      .addOption(OPTION_PASSWORD_SENDING)
-                     .addOption(OPTION_IMAP_LOGON_NAME)
-                     .addOption(OPTION_SMTP_LOGON_NAME)
+                     .addOption(OPTION_IMAP_USER_NAME)
+                     .addOption(OPTION_SMTP_USER_NAME)
                      .addOption(OPTION_IMAP_LOGIN_MECHANISMS)
                      .addOption(OPTION_SMTP_LOGIN_MECHANISMS);
 
@@ -345,8 +345,8 @@ public class Main {
                           .addOption(OPTION_SKIP_COLUMNS)
                           .addOption(OPTION_MAILADDRESS_SENDING)
                           .addOption(OPTION_PASSWORD_SENDING)
-                          .addOption(OPTION_IMAP_LOGON_NAME)
-                          .addOption(OPTION_SMTP_LOGON_NAME)
+                          .addOption(OPTION_IMAP_USER_NAME)
+                          .addOption(OPTION_SMTP_USER_NAME)
                           .addOption(OPTION_IMAP_LOGIN_MECHANISMS)
                           .addOption(OPTION_SMTP_LOGIN_MECHANISMS);
 
@@ -597,12 +597,12 @@ public class Main {
                                                .setIMAPPort(Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT)))
                                                .setSSLTLSIMAP(cli.getOptionValue(OPTION_IMAP_ENCRYPTION)
                                                                  .equals(SSL_TLS))
-                                               .setIMAPLogonName(cli.hasOption(OPTION_IMAP_LOGON_NAME) ? cli.getOptionValue(OPTION_IMAP_LOGON_NAME) : null)
+                                               .setIMAPUserName(cli.hasOption(OPTION_IMAP_USER_NAME) ? cli.getOptionValue(OPTION_IMAP_USER_NAME) : null)
                                                .setSMTPServer(cli.getOptionValue(OPTION_SMTP_SERVER))
                                                .setSMTPPort(Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT)))                                              
                                                .setSSLTLSSMTP(cli.getOptionValue(OPTION_SMTP_ENCRYPTION)
                                                                  .equals(SSL_TLS))
-                                               .setSMTPLogonName(cli.hasOption(OPTION_SMTP_LOGON_NAME) ? cli.getOptionValue(OPTION_SMTP_LOGON_NAME) : null)
+                                               .setSMTPUserName(cli.hasOption(OPTION_SMTP_USER_NAME) ? cli.getOptionValue(OPTION_SMTP_USER_NAME) : null)
                                                .setAcceptSelfSignedCertificates(cli.hasOption(OPTION_SELF_SIGNED))
                                                .setIMAPAuthMechanisms(cli.getOptionValue(OPTION_IMAP_LOGIN_MECHANISMS))
                                                .setSMTPAuthMechanisms(cli.getOptionValue(OPTION_SMTP_LOGIN_MECHANISMS));

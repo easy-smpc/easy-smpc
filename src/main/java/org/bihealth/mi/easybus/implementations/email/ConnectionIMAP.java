@@ -94,8 +94,8 @@ public class ConnectionIMAP extends ConnectionEmail {
         super(sharedMailbox,
               settings.getIMAPEmailAddress(),
               settings.getSMTPEmailAddress(),
-              settings.getIMAPLogonName(),
-              settings.getSMTPLogonName(),
+              settings.getIMAPUserName(),
+              settings.getSMTPUserName(),
               settings.getPerformanceListener());
         
         // Check
@@ -115,7 +115,7 @@ public class ConnectionIMAP extends ConnectionEmail {
         // Create properties of receiving connection
         this.propertiesReceiving = new Properties();
         this.propertiesReceiving.put("mail.store.protocol", "imap");
-        this.propertiesReceiving.put("mail.user", getReceivingLogonName());
+        this.propertiesReceiving.put("mail.user", getReceivingUserName());
         this.propertiesReceiving.put("mail.from", getReceivingEmailAddress());
         this.propertiesReceiving.put("mail.imap.host", settings.getIMAPServer());
         this.propertiesReceiving.put("mail.imap.port", String.valueOf(settings.getIMAPPort()));        
@@ -140,7 +140,7 @@ public class ConnectionIMAP extends ConnectionEmail {
         // Create properties of sending connection
         this.propertiesSending = new Properties();
         this.propertiesSending.put("mail.transport.protocol", "smtp");
-        this.propertiesSending.put("mail.user", getSendingLogonName());
+        this.propertiesSending.put("mail.user", getSendingUserName());
         this.propertiesSending.put("mail.from", getSendingEmailAddress());        
         this.propertiesSending.put("mail.smtp.host", settings.getSMTPServer());
         this.propertiesSending.put("mail.smtp.port", String.valueOf(settings.getSMTPPort()));
@@ -221,7 +221,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 Store store = sessionReceiving.getStore();
 
                 // Connect store
-                store.connect(getReceivingLogonName(), receivingPassword);
+                store.connect(getReceivingUserName(), receivingPassword);
 
                 // Create new folder for every call to get latest state
                 folder = store.getFolder("INBOX");
@@ -260,7 +260,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 store = sessionReceiving.getStore();
                 
                 // Connect store
-                store.connect(getReceivingLogonName(), receivingPassword);
+                store.connect(getReceivingUserName(), receivingPassword);
                 
                 // Create folder new for every call to get latest state
                 folder = store.getFolder("INBOX");
@@ -356,7 +356,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 email.setContent(multipart);
     
                 // Send
-                Transport.send(email, getSendingLogonName(), sendingPassword);
+                Transport.send(email, getSendingUserName(), sendingPassword);
                 if (listener != null) {
                     listener.messageSent(attachmentSize);
                 }

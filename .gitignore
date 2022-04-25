@@ -41,9 +41,5 @@ testing.dat
 /performanceEvaluation
 /password.txt
 /dependency-reduced-pom.xml
-<<<<<<< HEAD
 /*.csv
 /*.smpc
-=======
-*.csv
->>>>>>> refs/remotes/origin/master
