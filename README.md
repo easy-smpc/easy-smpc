@@ -148,6 +148,32 @@ The single commands are expected to start on different folders or better differe
 Should the program wit for an unreasonable time without throwing an error, first check whether EasySMPC-related e-mails are in a spam folder (the title of the e-mails start with [EasySMPC]). If so just copy them into the regular inbox.
 If nothing can be found in the spam folder, it is likely that the different programs are using different EasySMPC studies with the same name. To solve the issues either (1) delete all e-mails in all mailboxes starting with [EasySMPC] in the title or (2) restart the process with a new name for all participants as well as the creator.
 
+#### Command line version: Error writing the result into an Excel file
+When executing the command line version on Linux systems the following entries can appear in the log:
+````
+2022-01-01 12:00:00.000 INFO Start calculating and writing result
+Exception in thread "Thread-1" java.lang.InternalError: java.lang.reflect.InvocationTargetException
+        at java.desktop/sun.font.FontManagerFactory$1.run(FontManagerFactory.java:86)
+        at java.base/java.security.AccessController.doPrivileged(AccessController.java:312)
+        at java.desktop/sun.font.FontManagerFactory.getInstance(FontManagerFactory.java:74)
+        at java.desktop/java.awt.Font.getFont2D(Font.java:497)
+        at java.desktop/java.awt.Font.canDisplayUpTo(Font.java:2244)
+        at java.desktop/java.awt.font.TextLayout.singleFont(TextLayout.java:469)
+        at java.desktop/java.awt.font.TextLayout.<init>(TextLayout.java:530)
+        at org.apache.poi.ss.util.SheetUtil.getDefaultCharWidth(SheetUtil.java:273)
+        at org.apache.poi.ss.util.SheetUtil.getColumnWidth(SheetUtil.java:248)
+        at org.apache.poi.ss.util.SheetUtil.getColumnWidth(SheetUtil.java:233)
+        at org.apache.poi.xssf.usermodel.XSSFSheet.autoSizeColumn(XSSFSheet.java:555)
+        at org.apache.poi.xssf.usermodel.XSSFSheet.autoSizeColumn(XSSFSheet.java:537)
+        at org.bihealth.mi.easysmpc.dataexport.ExportExcel.exportData(ExportExcel.java:70)
+        at org.bihealth.mi.easysmpc.cli.User.exportResult(User.java:414)
+        at org.bihealth.mi.easysmpc.cli.User.performCommonSteps(User.java:382)
+        at org.bihealth.mi.easysmpc.cli.UserCreating$1.run(UserCreating.java:101)
+        at java.base/java.lang.Thread.run(Thread.java:832)
+        ...
+````
+To resolve this please install the package `libfontconfig1` (see e.g. also [here](https://bz.apache.org/bugzilla/show_bug.cgi?id=62576))
+
 ## Contact
 
 If you have questions or problems, we would like to invite you to
