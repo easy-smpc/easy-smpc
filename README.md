@@ -58,7 +58,7 @@ already established and configured communication medium.
 
 * Easy to use
 * Communication using established channels, e.g. emails
-* Excel and CSV import and export
+* Microsoft Excel and CSV import and export
 * Automation of the protocol using IMAP-Mailboxes
 * Automatic Proxy-Detection
 
@@ -74,8 +74,6 @@ prime.
 ### We are working on
 
   - Differential Privacy
-  - Automate email communication with private mailboxes
-  - Support for decimal numbers
   - Use EasySMPC with Slack/Mattermost/IRC/...
   - Examples and Getting Started guides
   - Further Documentation
@@ -96,14 +94,15 @@ prime.
 4. The final perspective shows the result of the secure addition of all variables.
 
 ## Command line version
-There is also a command line version of EasySMPC. After [building](#build-from-source) use the jar easy-smpc-cli-*{Version}*.jar as a creator and as two participants or more. The command line version only supports the automated mode.
+There is also a command line version of EasySMPC. After [building](#build-from-source) or downloading from [our releases
+page](https://github.com/prasser/easy-smpc/releases) use the jar easy-smpc-cli-*{Version}*.jar either as a creator or a participant. The command line version only supports the _automatic mode_.
 
 ### Creator
 Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -create -l STUDY_NAME -b FILES_PATH_VARIABLES -d FILES_PATH_DATA -f PARTICIPANTS -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. The parameters mean to the following:
-1. `-create`: Indicates the creation of a new EasySMPC process
+1. `-create`: Indicates the creation of a new EasySMPC process.
 2. `-l STUDY_NAME`: Name/title of the study. Muste be same same for the creator and all participants.
-3. `-b FILE_PATH_VARIABLES`: The names of the variables to exchange in Excel or CSV-files with one row or column in the format *firstFile.xlsx,secondFile.csv*
-4. `-d FILE_PATH_DATA`: The data to add in Excel or CSV-files with two rows or columns in the format *firstFile.xlsx,secondFile.csv*. The first row/column will be used as the name of the variable, the second will be used as the value with only numbers and a point or comma as decimal separator. Variables for which no value can be found will be set to zero for the creator.
+3. `-b FILE_PATH_VARIABLES`: The path to the Excel or CSV-files storing the variable names in the format *firstFile.xlsx,secondFile.csv,...*. The data needs to be row-oriented and must have at least one column. In the case of more than one column, EasySMPC will concatenate all columns of a row into single column and use this as the name of the variable. The variable names are shared with all participants.
+4. `-d FILE_PATH_DATA`: The path to the Excel or CSV-files storing the creator's data in the format *firstFile.xlsx,secondFile.csv,...*. The data needs to be row-oriented and must have at least two columns. The last column is regarded as the data value and therefore must always contain numbers only. One dot a as a decimal separator is allowed but not necessary. In case of exact two columns, the first column will be regarded as the sole name. In the case of more than two columns, EasySMPC will concatenate all columns of a row but the last column to a single column and match this name with the variable names defined with `-b`. Variable names for which no value can be found will be set to zero.
 5. `-f FILE_PATH_PARTICIPANTS`: The names and e-mail addresses of the participants in the form *name1,emailAddress1;name2,emailAddress2;name3,emailAddress3...*. The first name and e-mail address will be the creator. The e-mail addresses in this parameter will always be the e-mail addresses used for receiving (see parameters `-a` and `-v`). 
 6. `-a EMAIL_ADDRESS`: E-mail address to be used. If the parameter `-v` is set, this parameter will only be used for the receiving mail address.
 7. `-m PASSWORD`: Password of the e-mail address used. If the parameter `-v` is set, this parameter will be used as password for the receiving mail address.
