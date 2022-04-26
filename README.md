@@ -101,19 +101,19 @@ page](https://github.com/prasser/easy-smpc/releases) use the jar easy-smpc-cli-*
 Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -create -l STUDY_NAME -b FILES_PATH_VARIABLES -d FILES_PATH_DATA -f PARTICIPANTS -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. The parameters mean to the following:
 1. `-create`: Indicates the creation of a new EasySMPC process.
 2. `-l STUDY_NAME`: Name/title of the study. Muste be same same for the creator and all participants.
-3. `-b FILE_PATH_VARIABLES`: The path to the Excel or CSV-files storing the variable names in the format *firstFile.xlsx,secondFile.csv,...*. The data needs to be row-oriented and must have at least one column. In the case of more than one column, EasySMPC will concatenate all columns of a row into single column and use this as the name of the variable. The variable names are shared with all participants.
-4. `-d FILE_PATH_DATA`: The path to the Excel or CSV-files storing the creator's data in the format *firstFile.xlsx,secondFile.csv,...*. The data needs to be row-oriented and must have at least two columns. The last column is regarded as the data value and therefore must always contain numbers only. One dot a as a decimal separator is allowed but not necessary. In case of exact two columns, the first column will be regarded as the sole name. In the case of more than two columns, EasySMPC will concatenate all columns of a row but the last column to a single column and match this name with the variable names defined with `-b`. Variable names for which no value can be found will be set to zero.
-5. `-f FILE_PATH_PARTICIPANTS`: The names and e-mail addresses of the participants in the form *name1,emailAddress1;name2,emailAddress2;name3,emailAddress3...*. The first name and e-mail address will be the creator. The e-mail addresses in this parameter will always be the e-mail addresses used for receiving (see parameters `-a` and `-v`). 
+3. `-b FILE_PATH_VARIABLES`: The path to the Excel or CSV-files storing the variable names in the format *firstFile.xlsx,secondFile.csv,...* The data needs to be row-oriented and thus must have at least one column. In the case of more than one column, EasySMPC will concatenate all columns of a row into a single column and use this as the name of the variable. The variable names are shared with all participants.
+4. `-d FILE_PATH_DATA`: The path to the Excel or CSV-files storing the creator's data in the format *firstFile.xlsx,secondFile.csv,...* The data needs to be row-oriented and must have at least two columns. The last column is regarded as the data value and therefore must always contain numbers only. One dot a as a decimal separator is allowed but not necessary. In case of exact two columns, the first column will be regarded as the sole name. In the case of more than two columns, EasySMPC will concatenate all columns of a row but the last column to a single column and match this name with the variable names defined with `-b`. Variable names for which no value can be found will be set to zero. The data will not be shared with other participants.
+5. `-f FILE_PATH_PARTICIPANTS`: The names and e-mail addresses of the participants in the form *name1,emailAddress1;name2,emailAddress2;name3,emailAddress3...*. The first name and e-mail address will be the creator. In case of separate e-mail adresses for sending and receiving, the e-mail addresses in this parameter will be the e-mail addresses used for receiving (see parameters `-a` and `-v`). 
 6. `-a EMAIL_ADDRESS`: E-mail address to be used. If the parameter `-v` is set, this parameter will only be used for the receiving mail address.
 7. `-m PASSWORD`: Password of the e-mail address used. If the parameter `-v` is set, this parameter will be used as password for the receiving mail address.
 8. `-i IMAP_HOST`: Hostname of the IMAP server.
 9. `-x IMAP_PORT`: Port of the IMAP server.
-10. `-y IMAP_ENCRYPTION`: IMAP server uses SSL/TLS or Starttls. Use either SSLTLS or STARTTLS.
+10. `-y IMAP_ENCRYPTION`: IMAP server uses SSL/TLS or Starttls. Use either *SSLTLS* or *STARTTLS*.
 11. `-s SMTP_HOST`: Hostname of the SMTP server.
 12. `-z SMTP_PORT`: Port of the SMTP server.
 13. `-q SMTP_ENCRYPTION`: SMTP server uses SSL/TLS or Starttls. Use either SSLTLS or STARTTLS.
  
-After executing check the result in the file `result_<study name>_<timestamp>.xlsx` or check the file easy-smpc.log for details of errors.
+After running a successful EasySMPC process, check the result in the file `result_<study name>_<timestamp>.xlsx` or check the file easy-smpc.log for details of errors.
 
 Please note that in addition to the parameters mentioned above the following *optional* parameters exists:
 1. `-h`: Pass this parameter if the data in the data and variables files are oriented horizontally.
@@ -121,26 +121,25 @@ Please note that in addition to the parameters mentioned above the following *op
 1. `-j N_COLUMNS_TO_SKIP`: Pass this parameter to skip the first n columns.
 1. `-v EMAIL_ADDRESS_SENDING`: Pass this parameter if the e-mail address used to send the e-mails is supposed to differ from the receiving e-mail address.
 1. `-p PASSWORD_SENDING`: Pass this as the password for the receiving e-mail address if the parameter `-v` is set.
-1. `-n LOGON_NAME_RECEIVING`: Pass this parameter if the logon name to the receiving e-mail servers deviates from the e-mail address used (e.g. the logon name is `name` and not `name@domain.org`). The receiving e-mail address still needs to be passed.
-1. `-w LOGON_NAME_SENDING`: The same as parameter ´-n´ for the sending e-mail address. The sending e-mail address still needs to be passed. The logon name is not copied from the parameter ´-n´. Thus, if the same logon name is used for receiving and sending the parameters ´-n´ and ´-w´ need both to be set.
+1. `-n LOGON_NAME_RECEIVING`: Pass this parameter if the user name to the receiving e-mail servers deviates from the e-mail address used (e.g. the user name is `name` and not `name@domain.org`). The receiving e-mail address still needs to be passed.
+1. `-w LOGON_NAME_SENDING`: The same as parameter ´-n´ for the sending e-mail address. The sending e-mail address still needs to be passed. The user name is not copied from the parameter ´-n´. Thus, if the same user name is used for receiving and sending the parameters ´-n´ and ´-w´ need both to be set.
 1. `-t AUTH_MECHANISMS_RECEIVING`: Pass this parameter to set the IMAP auth mechanisms of the receiving e-mail account. For details, we refer to the property `mail.imap.auth.mechanisms` in the [Jakarta e-mail documentation](https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/imap/package-summary.html).
 1. `-u AUTH_MECHANISMS_SENDING`: Pass this parameter to set the SMTP auth mechanisms of the sending e-mail account. For details, we refer to the property `mail.smtp.auth.mechanisms` in the [Jakarta e-mail documentation](https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/smtp/package-summary.html).
 
 ### Participant
 Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -participate -l STUDY_NAME -d FILE_PATH_DATA -o PARTICIPANT_NAME -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. Most parameters are explained in the section [Creator](#creator), other parameters are described below:
 1. `-participate`: Indicates the participation in a new EasySMPC process.
-3. `-o PARTICIPANT_NAME`: Name of the participant as defined in the participants files by the creator.
-4. `-d FILE_PATH_DATA`: The data of the participant to add. The format is the same as for the [Creator](#creator).
+1. `-o PARTICIPANT_NAME`: Name of the participant as defined in the option `-f` by the creator.
 
 After executing check the result in the file `result_<study name>_<timestamp>.xlsx` or check the file easy-smpc.log for details of errors.
 
 ### Sample 
-Data for a sample can be found in the folder `sample-cli`. A sample process with this data might can be started with these three commands: 
+Data for a sample can be found in the folder `sample-cli`. A sample process with this data  can be started with these three commands: 
  1. `java -jar easy-smpc-cli-*{Version}*.jar -create -b "-create -l "sample Study" -b ./sample/variables.xlsx -d "./sample/PKU comorbidities.xlsx" -f "Creator,easysmpc.dev0@gmail.com;Participant1,easysmpc.dev1@gmail.com;Participant2,easysmpc.dev2@gmail.com" -a easysmpc.dev0@gmail.com -p thePassword -i imap.gmail.com -x 993 -y SSLTLS -s smtp.gmail.com -z 465 -q SSLTLS`
 2. `java -jar easy-smpc-cli-*{Version}*.jar -participate -l "sample Study" -d "./sample/PKU comorbidities.xlsx" -o Participant1 -a easysmpc.dev1@gmail.com -p thePassword-i imap.ionos.de -x 993 -y SSLTLS -s smtp.ionos.de -z 465 -q SSLTLS5`
 3. `java -jar easy-smpc-cli-*{Version}*.jar -participate -l "sample Study" -d "./sample/PKU comorbidities.xlsx" -o Participant2 -a easysmpc.dev2@gmail.com -p &r6=Jbh9 -i imap.ionos.de -x 993 -y SSLTLS -s smtp.ionos.de -z 465 -q SSLTLS`
 
-The single commands are expected to start on different folders or better different computers. If they start on one computer, errors of writing log and result files can happen. Also in this minimal test the same data file `PKU comorbidities.xlsx` is used for each party. However, in a real-world usage each participant would use different data in the file
+The single commands are expected to start on different computers. If they start on one computer (i.e. as a dry run), please use different folders for the three parties, since errors of writing log and result files can happen. Also in this minimal test the same data file `PKU comorbidities.xlsx` is used for each party. However, in a real-world usage each party would use different data in the file.
 
 ### Troubleshooting
 #### Neither an error nor a result
