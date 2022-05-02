@@ -8,9 +8,7 @@
 
 ---
 
-**Contents:**
-
-[[_TOC_]]
+### [Prerequisites](#prerequisites) ⚫ [Installation](#installation) ⚫ [Features](#features) ⚫ [Screenshot](#screenshot) ⚫ [Quick start guide](#quick-start-guide) ⚫ [Command line version](#command-line-version) ⚫ [Contact](#contact) ⚫ [License](#license) ⚫ [Acknowledgements](#acknowledgments) ⚫ [Cite as](#cite-as)
 
 ---
 
