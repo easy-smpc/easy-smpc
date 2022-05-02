@@ -590,24 +590,17 @@ public class Main {
         
         // Set email address and password either from the receiving parameter or from different receiving and sending parameters
         ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings(cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING),
-                                                                                   null,
-                                                                                   cli.hasOption(OPTION_MAILADDRESS_SENDING)
-                                                                                           ? cli.getOptionValue(OPTION_MAILADDRESS_SENDING)
-                                                                                           : cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING),
+                                                                                   null, cli.hasOption(OPTION_MAILADDRESS_SENDING) ? cli.getOptionValue(OPTION_MAILADDRESS_SENDING) : cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING),
                                                                                    null).setIMAPPassword(cli.getOptionValue(OPTION_PASSWORD_RECEIVING))
-                                                                                        .setSMTPPassword(cli.hasOption(OPTION_PASSWORD_SENDING)
-                                                                                                ? cli.getOptionValue(OPTION_PASSWORD_SENDING)
-                                                                                                : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));      
+                                                                                        .setSMTPPassword(cli.hasOption(OPTION_PASSWORD_SENDING) ? cli.getOptionValue(OPTION_PASSWORD_SENDING) : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));     
         // Set remaining parameters
         connectionIMAPSettings.setIMAPServer(cli.getOptionValue(OPTION_IMAP_SERVER))
                                                .setIMAPPort(Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT)))
-                                               .setSSLTLSIMAP(cli.getOptionValue(OPTION_IMAP_ENCRYPTION)
-                                                                 .equals(SSL_TLS))
+                                               .setSSLTLSIMAP(cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(SSL_TLS))
                                                .setIMAPUserName(cli.hasOption(OPTION_IMAP_USER_NAME) ? cli.getOptionValue(OPTION_IMAP_USER_NAME) : null)
                                                .setSMTPServer(cli.getOptionValue(OPTION_SMTP_SERVER))
                                                .setSMTPPort(Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT)))                                              
-                                               .setSSLTLSSMTP(cli.getOptionValue(OPTION_SMTP_ENCRYPTION)
-                                                                 .equals(SSL_TLS))
+                                               .setSSLTLSSMTP(cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(SSL_TLS))
                                                .setSMTPUserName(cli.hasOption(OPTION_SMTP_USER_NAME) ? cli.getOptionValue(OPTION_SMTP_USER_NAME) : null)
                                                .setAcceptSelfSignedCertificates(cli.hasOption(OPTION_SELF_SIGNED))
                                                .setIMAPAuthMechanisms(cli.getOptionValue(OPTION_IMAP_LOGIN_MECHANISMS))
