@@ -143,7 +143,7 @@ Data for an example can be found in the folder `example-cli`. An exemplary proce
 All three commands are expected to start on different computers. If you want to try it on a single computer (i.e. as a dry run), please use different folders for the three parties, since otherwise errors of writing log and result files can happen. Also, in this minimal test the same data file `example-cli/PKU comorbidities.xlsx` is used for each party. However, in a real-world usage each party would use different data in the file.
 
 ### Troubleshooting
-#### Neither an error nor a result
+#### Neither an error nor a result in automated mode
 Should the program wait for an unreasonable time without throwing an error, first check whether EasySMPC-related e-mails are in a spam folder (the title of the e-mails start with [EasySMPC]). If so just copy them into the regular inbox.
 If nothing can be found in the spam folder, it is likely that the different programs are using different EasySMPC studies with the same name. To solve the issues either (1) delete all e-mails in all mailboxes starting with [EasySMPC] in the title or (2) restart the process with a new name for all participants as well as the creator.
 
