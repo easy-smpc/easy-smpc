@@ -15,38 +15,40 @@ package org.bihealth.mi.easysmpc.components;
 
 import javax.swing.JPanel;
 
-import org.bihealth.mi.easysmpc.resources.Resources;
-
 /**
- * Entry servers
+ * Entry texts with same validation for both fields
  * 
  * @author Felix Wirth
  */
-public class EntryServers extends ComponentEntry {
+public class EntryTextMonoValidation extends ComponentEntry {
     
     /** SVID */
-    private static final long serialVersionUID = -1491960197508114210L;
-
+    private static final long serialVersionUID = 466453564994174241L;
+    
     /**
      * Creates a new instance
+     * 
+     * @param titleleft
+     * @param titleRight
+     * @param validator - can be null
      */
-    public EntryServers() {
-        super(Resources.getString("EmailConfig.3"),
+    public EntryTextMonoValidation(String titleleft, String titleRight, ComponentTextFieldValidator validator) {
+        super(titleleft,
               "",
               true,
-              new ComponentTextFieldValidator() {
+              validator != null ? validator : new ComponentTextFieldValidator() {
                     @Override
                     public boolean validate(String text) {
-                        return text != null && text.isBlank();
+                        return true;
                     }
                 }, 
-              Resources.getString("EmailConfig.4"), 
+              titleRight, 
               "",
               true,
-              new ComponentTextFieldValidator() {
+              validator != null ? validator : new ComponentTextFieldValidator() {
                 @Override
                 public boolean validate(String text) {
-                    return text != null && text.isBlank();
+                    return true;
                 }
               },
               false,

@@ -259,4 +259,12 @@ public abstract class ComponentEntry extends JPanel {
      * @return
      */
     protected abstract JPanel createAdditionalControls();
+    
+    /**
+     * Resets the value of the left and the right field
+     */
+    public void reset() {
+        this.fieldLeft.setText(null);
+        this.fieldRight.setText(null);
+    }
 }
