@@ -39,10 +39,10 @@ import de.tu_darmstadt.cbs.emailsmpc.MessageInitial;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class UserParticipating extends User {
+public class UserProcessParticipating extends UserProcess {
 
     /** Logger */
-    private static final Logger LOGGER = LogManager.getLogger(UserParticipating.class);
+    private static final Logger LOGGER = LogManager.getLogger(UserProcessParticipating.class);
     /** User's values to add */
     private Map<String, String> data;
 
@@ -55,7 +55,7 @@ public class UserParticipating extends User {
      * @param connectionIMAPSettings
      * @param mailboxCheckInterval
      */
-    public UserParticipating(String studyTitle,
+    public UserProcessParticipating(String studyTitle,
                              Participant participant,
                              Map<String, String> data, 
                              ConnectionIMAPSettings connectionIMAPSettings,

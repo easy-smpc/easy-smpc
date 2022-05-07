@@ -371,7 +371,7 @@ public class Main {
             cli = returnSpecificCli(cli, parser, args);            
             
             // Check minimal participants of three
-            if(cli.hasOption(OPTION_PARTICIPANTS) && UserCreating.createParticipantsFromCSVString(cli.getOptionValue(OPTION_PARTICIPANTS)).length < 3){
+            if(cli.hasOption(OPTION_PARTICIPANTS) && UserProcessCreating.createParticipantsFromCSVString(cli.getOptionValue(OPTION_PARTICIPANTS)).length < 3){
                 throw new ParseException(String.format("Please provide at least three participants in the option \"-%s\" respective \"-%s\"", OPTION_PARTICIPANTS.getLongOpt(), OPTION_PARTICIPANTS.getOpt()));
             }
             
@@ -393,8 +393,8 @@ public class Main {
         // Start creation if applicable
         if (cli.hasOption(OPTION_CREATE)) {
 
-            new UserCreating(cli.getOptionValue(OPTION_STUDY_NAME),
-                             UserCreating.createParticipantsFromCSVString(cli.getOptionValue(OPTION_PARTICIPANTS)),
+            new UserProcessCreating(cli.getOptionValue(OPTION_STUDY_NAME),
+                             UserProcessCreating.createParticipantsFromCSVString(cli.getOptionValue(OPTION_PARTICIPANTS)),
                              getDataFromFiles(cli.getOptionValue(OPTION_BINS_NAMES),
                                               !cli.hasOption(OPTION_DATA_COLUMN),
                                               true,
@@ -425,7 +425,7 @@ public class Main {
             }
             
             // Create participating user
-            UserParticipating participatingUser = new UserParticipating(cli.getOptionValue(OPTION_STUDY_NAME),
+            UserProcessParticipating participatingUser = new UserProcessParticipating(cli.getOptionValue(OPTION_STUDY_NAME),
                                                                         participant,
                                                                         getDataFromFiles(cli.getOptionValue(OPTION_DATA_FILE),
                                                                                          !cli.hasOption(OPTION_DATA_COLUMN),
@@ -462,7 +462,7 @@ public class Main {
                              : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));
                 
                 // Start process
-                new User(study, MAILBOX_CHECK_INTERVAL);
+                new UserProcess(study, MAILBOX_CHECK_INTERVAL);
             } catch (ClassNotFoundException | IllegalArgumentException | IOException e) {
                 LOGGER.error("Unable to resume with given file", e);
             }

@@ -47,10 +47,10 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class User implements MessageListener {
+public class UserProcess implements MessageListener {
 
     /** Logger */
-    private static final Logger    LOGGER  = LogManager.getLogger(User.class);
+    private static final Logger    LOGGER  = LogManager.getLogger(UserProcess.class);
     /** Round for initial e-mails */
     public static final String     ROUND_0 = "_round0";
     /** The study model */
@@ -68,7 +68,7 @@ public class User implements MessageListener {
      * @param mailboxCheckInterval
      * @param connectionIMAPSettings
      */
-    protected User(int mailboxCheckInterval, ConnectionIMAPSettings connectionIMAPSettings) {
+    protected UserProcess(int mailboxCheckInterval, ConnectionIMAPSettings connectionIMAPSettings) {
 
         // Store
         this.mailBoxCheckInterval = mailboxCheckInterval;
@@ -85,7 +85,7 @@ public class User implements MessageListener {
      * @throws IllegalArgumentException 
      * @throws ClassNotFoundException 
      */
-    public User(Study model, int mailboxCheckInterval) throws ClassNotFoundException, IllegalArgumentException, IOException {
+    public UserProcess(Study model, int mailboxCheckInterval) throws ClassNotFoundException, IllegalArgumentException, IOException {
         this(mailboxCheckInterval, model.getConnectionIMAPSettings());
         
         // Store

@@ -36,10 +36,10 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class UserCreating extends User {
+public class UserProcessCreating extends UserProcess {
 
     /** Logger */
-    private static final Logger LOGGER = LogManager.getLogger(UserCreating.class);
+    private static final Logger LOGGER = LogManager.getLogger(UserProcessCreating.class);
 
     /**
      * Create a new instance
@@ -52,7 +52,7 @@ public class UserCreating extends User {
      * @param mailboxCheckInterval
      * @throws IllegalStateException
      */
-    public UserCreating(String studyTitle,
+    public UserProcessCreating(String studyTitle,
                         Participant[] participants,
                         Map<String, String> binsNames,
                         Map<String, String> data,
