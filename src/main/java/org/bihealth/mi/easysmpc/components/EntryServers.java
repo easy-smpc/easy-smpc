@@ -37,7 +37,7 @@ public class EntryServers extends ComponentEntry {
               new ComponentTextFieldValidator() {
                     @Override
                     public boolean validate(String text) {
-                        return text != null && text.isBlank();
+                        return text != null && !text.isBlank();
                     }
                 }, 
               Resources.getString("EmailConfig.4"), 
@@ -46,7 +46,7 @@ public class EntryServers extends ComponentEntry {
               new ComponentTextFieldValidator() {
                 @Override
                 public boolean validate(String text) {
-                    return text != null && text.isBlank();
+                    return text != null && !text.isBlank();
                 }
               },
               false,
