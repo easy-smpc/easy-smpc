@@ -51,6 +51,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /** SVUID */
     private static final long       serialVersionUID = -5892937473681272650L;
     /** E-Mail and password entry */
+    private EntryEMailPassword      emailPasswordEntryGeneric;
+    /** E-Mail and password entry */
     private EntryEMailPassword      emailPasswordEntryIMAP;
     /** E-Mail and password entry */
     private EntryEMailPassword      emailPasswordEntrySMTP;
@@ -84,11 +86,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /**
      * Create a new instance
      * 
-     * @param settings
-     *            to fill as default in the fields and deactivate the email
-     *            field
-     * @param parent
-     *            Component to set the location of JDialog relative to
+     * @param settings to fill as default in the fields and deactivate the email field
+     * @param parent Component to set the location of JDialog relative to
      */
     public DialogEmailConfig(ConnectionIMAPSettings settings, JFrame parent) {
         this(parent);
@@ -110,8 +109,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /**
      * Create a new instance
      * 
-     * @param parent
-     *            Component to set the location of JDialog relative to
+     * @param parent Component to set the location of JDialog relative to
      */
     public DialogEmailConfig(JFrame parent) {
 
@@ -144,9 +142,10 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                                                            }
                                                        },
                                                        false);
-        this.emailPasswordEntryIMAP = new EntryEMailPassword();
+        this.emailPasswordEntryGeneric = new EntryEMailPassword(Resources.getString("EmailConfig.1"), Resources.getString("EmailConfig.2"));
+        this.emailPasswordEntryIMAP = new EntryEMailPassword(Resources.getString("EmailConfig.32"), Resources.getString("EmailConfig.33"));
         this.emailPasswordEntryIMAP.setChangeListener(this);
-        this.emailPasswordEntrySMTP = new EntryEMailPassword();
+        this.emailPasswordEntrySMTP = new EntryEMailPassword(Resources.getString("EmailConfig.34"), Resources.getString("EmailConfig.35"));
         this.emailPasswordEntrySMTP.setChangeListener(this);        
         this.serversEntry = new EntryServers();
         this.serversEntry.setChangeListener(this);
@@ -175,7 +174,11 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         top.add(radioDialogType);
         main.add(top, BorderLayout.NORTH);
 
-        // Add
+        // Add central
+        central.add(emailPasswordEntryGeneric);
+        central.add(serversEntry);
+        central.add(serverPortsEntry);
+        central.add(encryptionTypePanel);   
         main.add(central, BorderLayout.CENTER);
 
         // Buttons
@@ -278,54 +281,50 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             this.buttonOK.setEnabled(areValuesValid());
         }
         
-        // Store current entered data interimswise
+        // Check init already done
         if (!initFinished) {
             return;
         }
-        ConnectionSettingsIMAPUnchecked data = new ConnectionSettingsIMAPUnchecked(this.emailPasswordEntryIMAP.getLeftValue(),
-                                                                                   this.emailPasswordEntryIMAP.getRightValue(),
-                                                                                   this.emailPasswordEntrySMTP.getLeftValue(),
-                                                                                   this.emailPasswordEntryIMAP.getRightValue(),
-                                                                                   this.serversEntry.getLeftValue(),
-                                                                                   this.serversEntry.getRightValue(),
-                                                                                   this.serverPortsEntry.getLeftValue(),
-                                                                                   this.serverPortsEntry.getRightValue(),
-                                                                                   this.radioEncryptionIMAP.isFirstOptionSelected(),
-                                                                                   this.radioEncryptionSMTP.isFirstOptionSelected(),
-                                                                                   this.userNamesEntry.getLeftValue(),
-                                                                                   this.userNamesEntry.getRightValue(),
-                                                                                   null,
-                                                                                   null);
-
         
+        // Store current data input
+        ConnectionSettingsIMAPUnchecked settings = new ConnectionSettingsIMAPUnchecked(this.emailPasswordEntryIMAP.getLeftValue(),
+                                                                                       this.emailPasswordEntryIMAP.getRightValue(),
+                                                                                       this.emailPasswordEntrySMTP.getLeftValue(),
+                                                                                       this.emailPasswordEntryIMAP.getRightValue(),
+                                                                                       this.serversEntry.getLeftValue(),
+                                                                                       this.serversEntry.getRightValue(),
+                                                                                       this.serverPortsEntry.getLeftValue(),
+                                                                                       this.serverPortsEntry.getRightValue(),
+                                                                                       this.radioEncryptionIMAP.isFirstOptionSelected(),
+                                                                                       this.radioEncryptionSMTP.isFirstOptionSelected(),
+                                                                                       this.userNamesEntry.getLeftValue(),
+                                                                                       this.userNamesEntry.getRightValue(),
+                                                                                       null,
+                                                                                       null);
+        
+        // Change between simple and complex dialog
+        central.removeAll();
+        central.setLayout(new BoxLayout(central, BoxLayout.Y_AXIS));
         // Display simple dialog
         if (this.radioDialogType.isFirstOptionSelected()) {
-            central.add(emailPasswordEntryIMAP);
-            central.add(serversEntry);
-            central.add(serverPortsEntry);
-            central.add(encryptionTypePanel);
-//            SwingUtilities.invokeLater(new Runnable() {
-//
-//                @Override
-//                public void run() {
-//                    emailPasswordEntrySMTP.reset();
-//                    userNamesEntry.reset();
-//                    authMechanismEntry.reset();
-//                }
-//            });
-            
+                    central.add(emailPasswordEntryGeneric);
+                    central.add(serversEntry);
+                    central.add(serverPortsEntry);
+                    central.add(encryptionTypePanel);
         } else {
-            central.add(emailPasswordEntryIMAP);
-            central.add(emailPasswordEntrySMTP);
-            central.add(userNamesEntry);
-            central.add(serversEntry);
-            central.add(serverPortsEntry);
-            central.add(encryptionTypePanel);
-            central.add(authMechanismEntry);            
+                    central.add(emailPasswordEntryIMAP);
+                    central.add(emailPasswordEntrySMTP);
+                    central.add(userNamesEntry);
+                    central.add(serversEntry);
+                    central.add(serverPortsEntry);
+                    central.add(authMechanismEntry);
+                    central.add(encryptionTypePanel);
         }
+        
+        // Repaint
         this.revalidate();
         this.repaint();
-        
+        this.pack();
     }
 
     /**

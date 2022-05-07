@@ -28,12 +28,12 @@ public class EntryTextMonoValidation extends ComponentEntry {
     /**
      * Creates a new instance
      * 
-     * @param titleleft
-     * @param titleRight
+     * @param textLeft
+     * @param textRight
      * @param validator - can be null
      */
-    public EntryTextMonoValidation(String titleleft, String titleRight, ComponentTextFieldValidator validator) {
-        super(titleleft,
+    public EntryTextMonoValidation(String textLeft, String textRight, ComponentTextFieldValidator validator) {
+        super(textLeft,
               "",
               true,
               validator != null ? validator : new ComponentTextFieldValidator() {
@@ -42,7 +42,7 @@ public class EntryTextMonoValidation extends ComponentEntry {
                         return true;
                     }
                 }, 
-              titleRight, 
+              textRight, 
               "",
               true,
               validator != null ? validator : new ComponentTextFieldValidator() {
