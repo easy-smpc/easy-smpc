@@ -313,8 +313,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                     central.add(encryptionTypePanel);
         } else {
                     central.add(emailPasswordEntryIMAP);
-                    central.add(emailPasswordEntrySMTP);
                     central.add(userNamesEntry);
+                    central.add(emailPasswordEntrySMTP);
                     central.add(serversEntry);
                     central.add(serverPortsEntry);
                     central.add(authMechanismEntry);
