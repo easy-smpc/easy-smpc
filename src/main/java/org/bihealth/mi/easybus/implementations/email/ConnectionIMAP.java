@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -58,24 +59,27 @@ public class ConnectionIMAP extends ConnectionEmail {
 
     /** File name of the attached message */
     private static final String FILENAME_MESSAGE = "message";
+    /** Regex to check whether start of contains the e-mail subject prefix */
+    Pattern                               START_CONTAIN_PREFIX_PATTERN = Pattern.compile(".*" + EMAIL_SUBJECT_PREFIX.replace("[", "\\[")
+                                                                                                                    .replace("]", "\\]"));
     /** Logger */
-    private static final Logger logger = LogManager.getLogger(ConnectionIMAP.class);
-    /** Properties t o receive*/
-    private final Properties    propertiesReceiving;
-    /** Properties to send*/
-    private final Properties    propertiesSending;
+    private static final Logger           LOGGER                       = LogManager.getLogger(ConnectionIMAP.class);
+    /** Properties t o receive */
+    private final Properties              propertiesReceiving;
+    /** Properties to send */
+    private final Properties              propertiesSending;
     /** Store object to access e-mail server */
-    private Store               store;
-    /** Folder receiving*/
-    private Folder				folder;
+    private Store                         store;
+    /** Folder receiving */
+    private Folder                        folder;
     /** Session to send e-mails */
-    private Session             sessionSending;
+    private Session                       sessionSending;
     /** Session to receive e-mails */
-    private Session             sessionReceiving;
+    private Session                       sessionReceiving;
     /** Password of the user */
-    private String              password;
-    /** Performance listener*/
-	private transient PerformanceListener listener;	
+    private String                        password;
+    /** Performance listener */
+    private transient PerformanceListener listener;
    
     /**
      * Create a new instance
@@ -179,7 +183,7 @@ public class ConnectionIMAP extends ConnectionEmail {
             }                        
         } catch (MessagingException e) {
             // Ignore
-            logger.debug("Closing connection failed logged", new Date(), "Closing connection failed ", ExceptionUtils.getStackTrace(e));
+            LOGGER.debug("Closing connection failed logged", new Date(), "Closing connection failed ", ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -266,7 +270,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 for (Message message : folder.getMessages()) {
                     String subject = message.getSubject();
                     long uid = ((UIDFolder)  folder).getUID(message);
-                    logger.debug("Message considered logged", new Date(), "Message considered", uid, subject);
+                    LOGGER.debug("Message considered logged", new Date(), "Message considered", uid, subject);
                     // Check for interrupt
                     if (Thread.interrupted()) { 
                         throw new InterruptedException();
@@ -274,14 +278,14 @@ public class ConnectionIMAP extends ConnectionEmail {
 
                     // Select relevant messages
                     try {
-                        if (subject.startsWith(EMAIL_SUBJECT_PREFIX) &&
+                        if (START_CONTAIN_PREFIX_PATTERN.matcher(subject).matches() &&
                                 (filter == null || filter.accepts(subject))) {                                
-                                logger.debug("Message received logged", new Date(), "Message received", uid, subject);
+                                LOGGER.debug("Message received logged", new Date(), "Message received", uid, subject);
                                 result.add(new ConnectionEmailMessage(message, folder));
                         }
                     } catch (Exception e) {
                         // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-                        logger.debug("message.getSubject() failed logged", new Date(), "message.getSubject() failed", ExceptionUtils.getStackTrace(e));
+                        LOGGER.debug("message.getSubject() failed logged", new Date(), "message.getSubject() failed", ExceptionUtils.getStackTrace(e));
                     }
                 }
                 
@@ -342,7 +346,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                 if (listener != null) {
                     listener.messageSent(attachmentSize);
                 }
-                logger.debug("Message sent logged", new Date(), "Message sent", subject);
+                LOGGER.debug("Message sent logged", new Date(), "Message sent", subject);
             } catch (Exception e) {
                 throw new BusException("Unable to send message", e);
             }
