@@ -77,7 +77,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
                                                                        isSelected,
                                                                        cellHasFocus);
             if (value != null) {
-                label.setText(((ConnectionIMAPSettings) value).getEmailAddress());
+                label.setText(((ConnectionIMAPSettings) value).getIMAPEmailAddress());
             }
             else {
                 label.setText(Resources.getString("EmailConfig.19"));
@@ -157,8 +157,8 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
                 this.comboSelectMailbox.addItem(settings);
                 
                 // Set selected
-                if(settings != null && settings.getEmailAddress().equals(newSettings.getEmailAddress())) {
-                    settings.setPassword(newSettings.getPassword());
+                if(settings != null && settings.getIMAPEmailAddress().equals(newSettings.getIMAPEmailAddress())) {
+                    settings.setIMAPPassword(newSettings.getIMAPPassword());
                     this.comboSelectMailbox.setSelectedItem(settings);
                 }
             }
@@ -191,8 +191,8 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
                 this.comboSelectMailbox.addItem(settings);
 
                 // Set selected
-                if (settings != null && settings.getEmailAddress().equals(newSettings.getEmailAddress())) {
-                    settings.setPassword(newSettings.getPassword());
+                if (settings != null && settings.getIMAPEmailAddress().equals(newSettings.getIMAPEmailAddress())) {
+                    settings.setIMAPPassword(newSettings.getIMAPPassword());
                     this.comboSelectMailbox.setSelectedItem(settings);
                 }
             }
@@ -255,7 +255,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         // If automated mode: Check e-mail address used as defined by study creator
         if (getApp().getModel().isAutomatedMode() &&
             (this.comboSelectMailbox.getSelectedItem() == null ||
-             !((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getEmailAddress()
+             !((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getIMAPEmailAddress()
                                                                              .equals(getApp().getModel().getParticipants()[getApp().getModel().getOwnId()].emailAddress))) {
             JOptionPane.showMessageDialog(getPanel(),
                                           Resources.getString("PerspectiveParticipate.wrongEMailaddress"));
@@ -477,7 +477,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             for (int index = 0; index < comboSelectMailbox.getItemCount(); index++) {
                 if (comboSelectMailbox.getItemAt(index) != null &&
                     comboSelectMailbox.getItemAt(index)
-                                      .getEmailAddress()
+                                      .getIMAPEmailAddress()
                                       .equals(getApp().getModel()
                                                       .getParticipantFromId(getApp().getModel()
                                                                                     .getOwnId()).emailAddress)) {

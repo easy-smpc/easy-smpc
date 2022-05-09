@@ -152,6 +152,9 @@ public class Resources {
     
     /** Aggregation delimiter */
     public static final String AGGREGATION_DELIMITER = "X";
+    
+    /**  */
+    public static final String STOP_CLI_PROCESS_STRING = "stop";
         
     /**
      * Returns all available languages

@@ -81,7 +81,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                                                                        isSelected,
                                                                        cellHasFocus);
             if (value != null) {
-                label.setText(((ConnectionIMAPSettings) value).getEmailAddress());
+                label.setText(((ConnectionIMAPSettings) value).getIMAPEmailAddress());
             }
             else {
                 label.setText(Resources.getString("EmailConfig.19"));
@@ -157,7 +157,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             
             if (this.comboSelectMailbox.getSelectedItem() != null) {
                 // Set email address and deactivate if not already done
-                String emailAddress = ((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getEmailAddress();
+                String emailAddress = ((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getIMAPEmailAddress();
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         // No entry in field allowed
@@ -202,8 +202,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 this.comboSelectMailbox.addItem(settings);
                 
                 // Set selected
-                if(settings != null && settings.getEmailAddress().equals(newSettings.getEmailAddress())) {
-                    settings.setPassword(newSettings.getPassword());
+                if(settings != null && settings.getIMAPEmailAddress().equals(newSettings.getIMAPEmailAddress())) {
+                    settings.setIMAPPassword(newSettings.getIMAPPassword());
                     this.comboSelectMailbox.setSelectedItem(settings);
                 }
             }
@@ -234,8 +234,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 this.comboSelectMailbox.addItem(settings);
                 
                 // Set selected
-                if(settings != null && settings.getEmailAddress().equals(newSettings.getEmailAddress())) {
-                    settings.setPassword(newSettings.getPassword());
+                if(settings != null && settings.getIMAPEmailAddress().equals(newSettings.getIMAPEmailAddress())) {
+                    settings.setIMAPPassword(newSettings.getIMAPPassword());
                     this.comboSelectMailbox.setSelectedItem(settings);
                 }
             }

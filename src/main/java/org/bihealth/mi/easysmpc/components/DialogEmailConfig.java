@@ -76,8 +76,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     public DialogEmailConfig(ConnectionIMAPSettings settings, JFrame parent) {
         this(parent);
         if (settings != null) {
-            emailPasswordEntry.setLeftValue(settings.getEmailAddress());
-            emailPasswordEntry.setRightValue(settings.getPassword(false));
+            emailPasswordEntry.setLeftValue(settings.getIMAPEmailAddress());
+            emailPasswordEntry.setRightValue(settings.getIMAPPassword(false));
             serversEntry.setLeftValue(settings.getIMAPServer());
             serversEntry.setRightValue(settings.getSMTPServer());
             serverPortsEntry.setLeftValue(Integer.toString(settings.getIMAPPort()));
@@ -309,7 +309,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     private ConnectionIMAPSettings getConnectionSettings() throws BusException {
         return new ConnectionIMAPSettings(emailPasswordEntry.getLeftValue(),
-                                          new AppPasswordProvider()).setPassword(emailPasswordEntry.getRightValue())
+                                          new AppPasswordProvider()).setIMAPPassword(emailPasswordEntry.getRightValue())
                                                                     .setIMAPServer(serversEntry.getLeftValue())
                                                                     .setIMAPPort(Integer.valueOf(serverPortsEntry.getLeftValue()))
                                                                     .setSMTPServer(serversEntry.getRightValue())

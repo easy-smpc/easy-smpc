@@ -43,21 +43,26 @@ public class ImportExcel extends ImportFile {
      * @throws IllegalArgumentException
      */
     protected ImportExcel(File file) throws IOException, IllegalArgumentException {
-        this(file, true, false, false);
+        this(file, true, false, false, 0);
     }
 
     /**
      * Creates a new instance
      * 
      * @param file
-     * @param oneRowCol 
-     * @param rowOriented 
+     * @param oneRowCol
+     * @param rowOriented
      * @param hasHeader
+     * @param skipCol - Ignore first n columns
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    protected ImportExcel(File file, boolean rowOriented, boolean oneRowCol, boolean hasHeader) throws IOException, IllegalArgumentException {
-        super(file, rowOriented, oneRowCol, hasHeader);
+    protected ImportExcel(File file,
+                          boolean rowOriented,
+                          boolean oneRowCol,
+                          boolean hasHeader,
+                          int skipCol) throws IOException, IllegalArgumentException {
+        super(file, rowOriented, oneRowCol, hasHeader, skipCol);
     }
 
     /**
