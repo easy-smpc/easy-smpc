@@ -97,7 +97,7 @@ public abstract class ConnectionEmail {
                 }
             } catch (Exception e) {
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-                logger.debug("Load message failed logged", new Date(), "load message failed", ExceptionUtils.getStackTrace(e));
+                LOGGER.debug("Load message failed logged", new Date(), "load message failed", ExceptionUtils.getStackTrace(e));
             }
             
             // Pass to listener
@@ -130,7 +130,7 @@ public abstract class ConnectionEmail {
             try {
                 message.setFlag(Flag.DELETED, true);
             } catch (MessagingException e) {
-                logger.debug("Delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
+                LOGGER.debug("Delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
         }    
@@ -144,7 +144,7 @@ public abstract class ConnectionEmail {
                     folder.close(true);
                 }
             } catch (MessagingException e) {
-                logger.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
+                LOGGER.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
         }        
@@ -185,12 +185,13 @@ public abstract class ConnectionEmail {
     /** String indicating end of participant address */
     public static final String PARTICIPANT_EMAIL_END_TAG   = "END_EMAIL_PARTICIPANT";
     /** Logger */
-    private static final Logger logger = LogManager.getLogger(ConnectionEmail.class);
+    private static final Logger LOGGER = LogManager.getLogger(ConnectionEmail.class);
 
 	/**
+	 * Generates the subject line
+	 * 
      * @param scope
      * @param receiver
-     * @param sender
      * @return
      */
     public static String createSubject(Scope scope, Participant receiver) {
@@ -419,7 +420,7 @@ public abstract class ConnectionEmail {
                 Object attachment = message.getAttachment();
 
                 if (text == null || attachment == null) {
-                    logger.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
+                    LOGGER.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
                     continue;
                 }
                 
@@ -439,7 +440,7 @@ public abstract class ConnectionEmail {
                 }                        
 
                 if (scope == null || participant == null) {
-                    logger.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
+                    LOGGER.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
                     continue;
                 }
                 

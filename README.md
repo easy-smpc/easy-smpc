@@ -58,7 +58,11 @@ already established and configured communication medium.
 
 * Easy to use
 * Communication using established channels, e.g. emails
+<<<<<<< HEAD
 * Microsoft Excel and CSV import and export
+=======
+* Excel and CSV import and export
+>>>>>>> refs/remotes/origin/master
 * Automation of the protocol using IMAP-Mailboxes
 * Automatic Proxy-Detection
 

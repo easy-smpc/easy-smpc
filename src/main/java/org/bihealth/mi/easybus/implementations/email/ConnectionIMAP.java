@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -57,9 +58,14 @@ import jakarta.mail.util.ByteArrayDataSource;
 public class ConnectionIMAP extends ConnectionEmail {
 
     /** File name of the attached message */
-    private static final String           FILENAME_MESSAGE = "message";
+    private static final String           FILENAME_MESSAGE             = "message";
+    /** Regex to check whether start of contains the e-mail subject prefix */
+    Pattern                               START_CONTAIN_PREFIX_PATTERN = Pattern.compile(".*" +
+                                                                                         EMAIL_SUBJECT_PREFIX.replace("[",
+                                                                                                                      "\\[")
+                                                                                                                    .replace("]", "\\]"));
     /** Logger */
-    private static final Logger           LOGGER           = LogManager.getLogger(ConnectionIMAP.class);
+    private static final Logger           LOGGER                       = LogManager.getLogger(ConnectionIMAP.class);
     /** Properties t o receive */
     private final Properties              propertiesReceiving;
     /** Properties to send */
@@ -78,6 +84,8 @@ public class ConnectionIMAP extends ConnectionEmail {
     private transient PerformanceListener listener;
     /** Password of the sending user */
     private String                        sendingPassword;
+    /** Password of the user */
+    private String                        password;
    
     /**
      * Create a new instance
@@ -292,7 +300,7 @@ public class ConnectionIMAP extends ConnectionEmail {
 
                     // Select relevant messages
                     try {
-                        if (subject.startsWith(EMAIL_SUBJECT_PREFIX) &&
+                        if (START_CONTAIN_PREFIX_PATTERN.matcher(subject).matches() &&
                                 (filter == null || filter.accepts(subject))) {                                
                                 LOGGER.debug("Message received logged", new Date(), "Message received", uid, subject);
                                 result.add(new ConnectionEmailMessage(message, folder));
