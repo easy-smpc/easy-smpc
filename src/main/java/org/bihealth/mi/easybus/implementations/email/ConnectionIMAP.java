@@ -60,10 +60,7 @@ public class ConnectionIMAP extends ConnectionEmail {
     /** File name of the attached message */
     private static final String           FILENAME_MESSAGE             = "message";
     /** Regex to check whether start of contains the e-mail subject prefix */
-    Pattern                               START_CONTAIN_PREFIX_PATTERN = Pattern.compile(".*" +
-                                                                                         EMAIL_SUBJECT_PREFIX.replace("[",
-                                                                                                                      "\\[")
-                                                                                                                    .replace("]", "\\]"));
+    private static Pattern                START_CONTAIN_PREFIX_PATTERN = Pattern.compile(".*" + EMAIL_SUBJECT_PREFIX.replace("[", "\\[") .replace("]", "\\]") + ".*");
     /** Logger */
     private static final Logger           LOGGER                       = LogManager.getLogger(ConnectionIMAP.class);
     /** Properties t o receive */
