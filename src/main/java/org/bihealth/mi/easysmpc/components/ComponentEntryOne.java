@@ -136,4 +136,13 @@ public class ComponentEntryOne extends JPanel {
             setBackgroundAllSubComponents(childComponent);
         }
     }
+    
+    /**
+     * Set field enabled
+     * 
+     * @param enabled
+     */
+    public void setFieldEnabled(boolean enabled) {
+        this.field.setEnabled(enabled);
+    }
 }

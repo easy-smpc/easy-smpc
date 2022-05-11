@@ -42,7 +42,7 @@ public class EntryEMailDetails extends JPanel implements ChangeListener {
               public boolean validate(String text) {
                   return text != null && !text.isBlank();
               }
-          }, true, false);
+          }, false, false);
         this.add(serverEntry);
         
         // Port entry

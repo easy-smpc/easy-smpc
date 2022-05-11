@@ -1,6 +1,8 @@
 package org.bihealth.mi.easysmpc.components;
 
 import java.awt.GridLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -8,71 +10,77 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easysmpc.resources.Resources;
 
-public class ComponentRadioEntry extends JPanel {
+public class ComponentRadioEntry extends JPanel implements ItemListener {
 
     /** SVUID */
     private static final long serialVersionUID = -3142722039116254922L;
     
     /** Radio button group */
     private  ButtonGroup group;
-    /** Upper option */
-    private JRadioButton upperOption;
-    /** Lower option */
-    private JRadioButton lowerOption;
+    /** First option */
+    private JRadioButton firstOption;
+    /** Second option */
+    private JRadioButton secondOption;
     /** Radio panel */
     private JPanel radioPanel;
+    /** Change listener */
+    private ChangeListener listener;
     
     /**
      * Create a new instance with y-axis oriented radios
      * 
      * @param title
-     * @param upperOptionText
-     * @param lowerOptionText
+     * @param firstOptionText
+     * @param secondOptionText
      * @param listener
      */
     ComponentRadioEntry(String title,
-                        String upperOptionText,
-                        String lowerOptionText,
+                        String firstOptionText,
+                        String secondOptionText,
                         ChangeListener listener) {
-        this(title, upperOptionText, lowerOptionText, listener, true);
+        this(title, firstOptionText, secondOptionText, listener, true);
     }
     
     /**
      * Create a new instance
      * 
      * @param title
-     * @param upperOptionText
-     * @param lowerOptionText
+     * @param firstOptionText
+     * @param secondOptionText
      * @param listener
      * @param orientationRadiosYAxis  
      */
     ComponentRadioEntry(String title,
-                        String upperOptionText,
-                        String lowerOptionText,
+                        String firstOptionText,
+                        String secondOptionText,
                         ChangeListener listener,
                         boolean orientationRadiosYAxis) {
-        // Init
+        // Init and store
+        this.listener = listener;
         JPanel titlePanel = null;
         
         // Create Button groups with options
         group = new ButtonGroup();
-        upperOption = new JRadioButton(upperOptionText);
-        upperOption.addChangeListener(listener);
-        upperOption.setSelected(true);
-        lowerOption = new JRadioButton(lowerOptionText);
-        lowerOption.addChangeListener(listener);
-        group.add(upperOption);
-        group.add(lowerOption);
+        firstOption = new JRadioButton(firstOptionText);
+        firstOption.addChangeListener(listener);
+        firstOption.addItemListener(this);
+        firstOption.setSelected(true);
+        secondOption = new JRadioButton(secondOptionText);
+        secondOption.addChangeListener(listener);
+        secondOption.addItemListener(this);
+        group.add(firstOption);
+        group.add(secondOption);
         
         // Create radio panel
         radioPanel = new JPanel();
         radioPanel.setLayout(new BoxLayout(radioPanel, orientationRadiosYAxis ? BoxLayout.Y_AXIS : BoxLayout.X_AXIS));
-        radioPanel.add(upperOption);
-        radioPanel.add(lowerOption);
+        radioPanel.add(firstOption);
+        radioPanel.add(secondOption);
         
         // Create title panel
         if (title != null) {
@@ -91,21 +99,29 @@ public class ComponentRadioEntry extends JPanel {
     }
     
     /**
-     * Is upper option selected?
+     * Is first option selected?
      * 
      * @return
      */
     public boolean isFirstOptionSelected() {
-        return upperOption.isSelected();
+        return firstOption.isSelected();
     }
     
     /**
-     * Set or unset upper option and the respective inverse for the lower option
+     * Set or unset first option and the respective inverse for the second option
      * 
      * @param selected
      */
     public void setFirstOptionSelected(boolean selected) {
-        this.upperOption.setSelected(selected);
-        this.lowerOption.setSelected(!selected);
+        this.firstOption.setSelected(selected);
+        this.secondOption.setSelected(!selected);
+    }    
+
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+       if(this.listener != null) {
+           this.listener.stateChanged(new ChangeEvent(this));
+       }
+        
     }
 }

@@ -39,7 +39,6 @@ import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
-import org.bihealth.mi.easysmpc.AppPasswordProvider;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -50,27 +49,27 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class DialogEmailConfig extends JDialog implements ChangeListener {
 
     /** SVUID */
-    private static final long       serialVersionUID = -5892937473681272650L;
+    private static final long      serialVersionUID = -5892937473681272650L;
     /** E-Mail and password entry */
-    private EntryEMailPassword      emailPasswordEntry;    
+    private EntryEMailPassword     emailPasswordEntry;
     /** Button */
-    private JButton                 buttonOK;
+    private JButton                buttonOK;
     /** Result */
-    private ConnectionIMAPSettings  result;
+    private ConnectionIMAPSettings result;
     /** Parent frame */
-    private JFrame                  parent;
+    private JFrame                 parent;
     /** Radio button group dialog type simple/complex */
-    private ComponentRadioEntry     radioDialogType;
+    private ComponentRadioEntry    radioDialogType;
     /** Central panel */
-    JPanel                          central;
+    JPanel                         central;
     /** Encryption type panel */
-    JPanel                          encryptionTypePanel;
+    JPanel                         encryptionTypePanel;
     /** Init finished */
-    private boolean                 initFinished     = false;
+    private boolean                initFinished     = false;
     /** Entry for IMAP details */
-    EntryEMailDetails entryIMAPDetails;
+    EntryEMailDetails              entryIMAPDetails;
     /** Entry for SMTP details */
-    EntryEMailDetails entrySMTPDetails;
+    EntryEMailDetails              entrySMTPDetails;
     
     /**
      * Create a new instance
@@ -313,10 +312,12 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
 
 
         // Change between simple and complex dialog
-        if (this.radioDialogType.isFirstOptionSelected()) {
-            displaySimpleDialog();
-        } else {
-            displayAdvancedDialog();
+        if (e.getSource() == radioDialogType) {
+            if (this.radioDialogType.isFirstOptionSelected()) {
+                displaySimpleDialog();
+            } else {
+                displayAdvancedDialog();
+            }
         }
         
         // Repaint
@@ -395,6 +396,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * @return
      */
     private boolean areValuesValid() {
+        return true;
+        // TODO
 //        return this.emailPasswordEntryIMAP.areValuesValid() && this.serversEntry.areValuesValid() &&
 //               this.serverPortsEntry.areValuesValid();
     }
@@ -406,14 +409,16 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * @throws BusException
      */
     private ConnectionIMAPSettings getConnectionSettings() throws BusException {
-        return new ConnectionIMAPSettings(emailPasswordEntryIMAP.getLeftValue(),
-                                          new AppPasswordProvider()).setIMAPPassword(emailPasswordEntryIMAP.getRightValue())
-                                                                    .setIMAPServer(serversEntry.getLeftValue())
-                                                                    .setIMAPPort(Integer.valueOf(serverPortsEntry.getLeftValue()))
-                                                                    .setSMTPServer(serversEntry.getRightValue())
-                                                                    .setSMTPPort(Integer.valueOf(serverPortsEntry.getRightValue()))
-                                                                    .setSSLTLSIMAP(radioEncryptionIMAP.isFirstOptionSelected())
-                                                                    .setSSLTLSSMTP(radioEncryptionSMTP.isFirstOptionSelected());
+        return null;
+        // TODO
+//        return new ConnectionIMAPSettings(emailPasswordEntryIMAP.getLeftValue(),
+//                                          new AppPasswordProvider()).setIMAPPassword(emailPasswordEntryIMAP.getRightValue())
+//                                                                    .setIMAPServer(serversEntry.getLeftValue())
+//                                                                    .setIMAPPort(Integer.valueOf(serverPortsEntry.getLeftValue()))
+//                                                                    .setSMTPServer(serversEntry.getRightValue())
+//                                                                    .setSMTPPort(Integer.valueOf(serverPortsEntry.getRightValue()))
+//                                                                    .setSSLTLSIMAP(radioEncryptionIMAP.isFirstOptionSelected())
+//                                                                    .setSSLTLSSMTP(radioEncryptionSMTP.isFirstOptionSelected());
     }
 
     private static class ConnectionSettingsIMAPUnchecked {

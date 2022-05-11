@@ -1,9 +1,15 @@
 package org.bihealth.mi.easysmpc.components;
 
+import java.awt.BorderLayout;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -11,15 +17,15 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
     
     /** SVUID */
-    private static final long serialVersionUID = -7005095447195643542L;
+    private static final long       serialVersionUID = -7005095447195643542L;
     /** E-mail entry */
     private final ComponentEntryOne emailEntry;
     /** Password entry */
-    private ComponentEntryOne passwordEntry;
+    private ComponentEntryOne       passwordEntry;
     /** user name entry */
-    private ComponentEntryOne userNameEntry;
+    private ComponentEntryOne       userNameEntry;
     /** Auth mechanism entry */
-    private ComponentEntryOne authMechEntry;
+    private ComponentEntryOne       authMechEntry;
 
     EntryEMailDetailsAdvanced(String title, int standardPort) {
         // Super
@@ -42,7 +48,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
               public boolean validate(String text) {
                   return Participant.isEmailValid(text);
               }
-          }, true, false);
+          }, false, false);
         this.add(emailEntry);
         
         // Password entry
@@ -72,6 +78,25 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
                                               },
                                               false,
                                               false);
+        userNameEntry.setFieldEnabled(false);
+        
+        // Checkbox user name and panel
+        JCheckBox userNameCheckBox = new JCheckBox();
+        userNameCheckBox.addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if(userNameCheckBox.isSelected()) {
+                    userNameEntry.setFieldEnabled(true);
+                } else {
+                    userNameEntry.setFieldEnabled(false);
+                    userNameEntry.setValue(null);
+                }
+            }
+        });        
+        JPanel userNamePanel = new JPanel();
+        userNamePanel.setLayout(new BorderLayout());
+        
         // Auth mechanism entry
         authMechEntry = new ComponentEntryOne(Resources.getString("EmailConfig.30"),
                                               null,
@@ -86,14 +111,36 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
                                               },
                                               false,
                                               false);
+        authMechEntry.setFieldEnabled(false);
+        
+        // Checkbox auth mechanism and panel
+        JCheckBox authMechcheckBox = new JCheckBox();
+        authMechcheckBox.addChangeListener(new ChangeListener() {
+
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if(authMechcheckBox.isSelected()) {
+                    authMechEntry.setFieldEnabled(true);
+                } else {
+                    authMechEntry.setFieldEnabled(false);
+                    authMechEntry.setValue(null);
+                }
+            }
+        });
+        JPanel authMechanismPanel = new JPanel();
+        authMechanismPanel.setLayout(new BorderLayout());
         
         // Add
         this.add(emailEntry);
-        this.add(userNameEntry);
+        userNamePanel.add(userNameCheckBox, BorderLayout.WEST);
+        userNamePanel.add(userNameEntry, BorderLayout.CENTER);
+        this.add(userNamePanel);
         this.add(passwordEntry);
         this.add(getServerEntry());
         this.add(getPortEntry());
-        this.add(authMechEntry);
+        authMechanismPanel.add(authMechcheckBox, BorderLayout.WEST);
+        authMechanismPanel.add(authMechEntry, BorderLayout.CENTER);
+        this.add(authMechanismPanel);
         this.add(getRadioEncryptionType());                
     }
 }
