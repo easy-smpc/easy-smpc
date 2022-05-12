@@ -12,24 +12,122 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.Participant;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
     
     /** SVUID */
-    private static final long       serialVersionUID = -7005095447195643542L;
+    private static final long serialVersionUID = -7005095447195643542L;
     /** E-mail entry */
-    private final ComponentEntryOne emailEntry;
+    private ComponentEntryOne emailEntry;
     /** Password entry */
-    private ComponentEntryOne       passwordEntry;
+    private ComponentEntryOne passwordEntry;
     /** user name entry */
-    private ComponentEntryOne       userNameEntry;
+    private ComponentEntryOne userNameEntry;
     /** Auth mechanism entry */
-    private ComponentEntryOne       authMechEntry;
+    private ComponentEntryOne authMechEntry;
 
+    /**
+     * Creates a new instance
+     * 
+     * @param title
+     * @param standardPort
+     */
     EntryEMailDetailsAdvanced(String title, int standardPort) {
         // Super
         super(title, standardPort);
+        
+        // Create elements
+        createAdditionalgElements(title);
+    }
+    
+    /**
+     * Creates a new instance. If settings is not null fields are pre-filled from it
+     * 
+     * @param title
+     * @param standardPort
+     * @param settings
+     * @param isIMAP 
+     */
+    EntryEMailDetailsAdvanced(String title, int standardPort, ConnectionIMAPSettings settings, boolean isIMAP) {
+        // Super
+        super(title, standardPort, settings);
+        
+        // Create element
+        createAdditionalgElements(title);
+        
+        // Check
+        if(settings == null) {
+            return;
+        }
+        
+        // Set values
+        if (isIMAP) {
+
+            // Set values from IMAP
+            this.emailEntry.setValue(settings.getIMAPEmailAddress());
+            this.passwordEntry.setValue(settings.getIMAPPassword());
+            this.userNameEntry.setValue(settings.getIMAPUserName());
+            this.authMechEntry.setValue(settings.getIMAPAuthMechanisms());
+        }
+        {
+            // Set values from SMTP
+            this.emailEntry.setValue(settings.getSMTPEmailAddress());
+            this.passwordEntry.setValue(settings.getSMTPPassword());
+            this.userNameEntry.setValue(settings.getSMTPUserName());
+            this.authMechEntry.setValue(settings.getSMTPAuthMechanisms());
+        }
+    }
+    
+    /**
+     * Creates a new instance. If oldDetails is not null fields are pre-filled from it
+     * 
+     * @param title
+     * @param standardPort
+     * @param oldDetails
+     */
+    EntryEMailDetailsAdvanced(String title, int standardPort, EntryEMailDetails oldDetails) {
+        // Super
+        super(title, standardPort, oldDetails);
+        
+        // Create element
+        createAdditionalgElements(title);
+        
+        // Check
+        if(oldDetails == null) {
+            return;
+        }
+        
+        this.emailEntry.setValue(oldDetails.getEmailaddress());
+        this.passwordEntry.setValue(oldDetails.getPassword());
+        this.userNameEntry.setValue(oldDetails.getUserName());
+        this.authMechEntry.setValue(oldDetails.getAuthMechanisms());
+        
+    }
+    
+    /**
+     * Creates a new instance. If oldDetails is not null fields are pre-filled from it. Finally the parameters emailAddress and password overwrite the values from oldDetails again
+     * 
+     * @param title
+     * @param standardPort
+     * @param oldDetails
+     * @param eMailAddress
+     * @param password
+    EntryEMailDetailsAdvanced(String title, int standardPort, EntryEMailDetails oldDetails, String emailAddress, String password) {
+        this(title, standardPort, oldDetails);
+        
+        // Overwrite values
+        emailEntry.setValue(emailAddress);
+        passwordEntry.setValue(password);
+    }
+
+    /**
+     * Creates the additional elements
+     * 
+     * @param title
+     */
+    private void createAdditionalgElements(String title) {
         
         // Reset
         this.removeAll();
@@ -141,7 +239,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
         authMechanismPanel.add(authMechcheckBox, BorderLayout.WEST);
         authMechanismPanel.add(authMechEntry, BorderLayout.CENTER);
         this.add(authMechanismPanel);
-        this.add(getRadioEncryptionType());                
+        this.add(getRadioEncryptionType());
     }
     
     /**
@@ -169,5 +267,45 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
         this.userNameEntry.setChangeListener(listener);
         this.passwordEntry.setChangeListener(listener);
         this.authMechEntry.setChangeListener(listener);
+    }
+    
+    /**
+     * Returns e-mail address
+     * 
+     * @return
+     */
+    @Override
+    public String getEmailaddress() {
+        return emailEntry.getValue();
+    }
+
+    /**
+     * Return password
+     * 
+     * @return
+     */
+    @Override
+    public String getPassword() {
+        return passwordEntry.getValue();
+    }    
+    
+    /**
+     * Get user name
+     * 
+     * @return
+     */
+    @Override
+    public String getUserName() {
+        return userNameEntry.getValue();
+    }
+
+    /**
+     * Get auth mechansism
+     * 
+     * @return
+     */
+    @Override
+    public String getAuthMechanisms() {
+        return authMechEntry.getValue();
     }
 }

@@ -21,6 +21,12 @@ public class EntryEMailDetails extends JPanel {
     /** Encryption type radio */
     private final ComponentRadioEntry radioEncryptionType;
     
+    /**
+     * Creates a new instance
+     * 
+     * @param title
+     * @param standardPort
+     */
     EntryEMailDetails(String title, int standardPort) {
         
         // General
@@ -69,6 +75,48 @@ public class EntryEMailDetails extends JPanel {
     }
 
     /**
+     * Creates a new instance. If settings is not null fields are pre-filled from it
+     * 
+     * @param title
+     * @param defaultPortImap
+     * @param settings
+     */
+    public EntryEMailDetails(String title, int defaultPort, ConnectionIMAPSettings settings) {
+        this(title, defaultPort);       
+        
+        // Check
+        if(settings == null) {
+            return;
+        }
+        
+        // Set values
+        this.serverEntry.setValue(settings.getIMAPServer());
+        this.portEntry.setValue(Integer.toString(settings.getIMAPPort()));
+        this.radioEncryptionType.setFirstOptionSelected(settings.isSSLTLSIMAP());
+    }
+
+    /**
+     * Creates a new instance. If oldDetails is not null fields are pre-filled from it
+     * 
+     * @param title
+     * @param defaultPort
+     * @param oldDetails
+     */
+    public EntryEMailDetails(String title, int defaultPort, EntryEMailDetails oldDetails) {
+        this(title, defaultPort);
+        
+        // Check
+        if(oldDetails == null) {
+            return;
+        }
+        
+        // Set values
+        this.serverEntry.setValue(oldDetails.getServerEntry().getValue());
+        this.portEntry.setValue(oldDetails.getPortEntry().getValue());
+        this.radioEncryptionType.setFirstOptionSelected(oldDetails.getRadioEncryptionType().isFirstOptionSelected());
+    }
+
+    /**
      * @return the serverEntry
      */
     protected ComponentEntryOne getServerEntry() {
@@ -83,7 +131,7 @@ public class EntryEMailDetails extends JPanel {
     }
 
     /**
-     * @return the radioEncryptionIMAP
+     * @return the radioEncryption
      */
     protected ComponentRadioEntry getRadioEncryptionType() {
         return radioEncryptionType;
@@ -107,4 +155,65 @@ public class EntryEMailDetails extends JPanel {
     public boolean areValuesValid() {
         return serverEntry.isValueValid() && portEntry.isValueValid();          
     }
+    
+    /**
+     * Get e-mail address
+     * 
+     * @return
+     */
+    public String getEmailaddress() {
+        return null;
+    }
+
+    /**
+     * Get password
+     * 
+     * @return
+     */
+    public String getPassword() {
+        return null;
+    }    
+    
+    /**
+     * Get user name
+     * 
+     * @return
+     */
+    public String getUserName() {
+        return null;
+    }
+
+    /**
+     * Get auth mechansism
+     * 
+     * @return
+     */
+    public String getAuthMechanisms() {
+        return null;
+    }
+    
+    /**
+     * Get server
+     * 
+     * @return
+     */
+    public String getServer() {
+        return this.serverEntry.getValue();
+    }
+    
+    /**
+     * Get server port
+     * 
+     * @return
+     */
+    public int getPort() {
+        return portEntry.isValueValid() ? Integer.valueOf(portEntry.getValue()) : null;
+    }
+    
+    /**
+     * Is SSL/TLS set?
+     */
+    public boolean isSSLTLSIMAP() {
+        return radioEncryptionType.isFirstOptionSelected();
+    }    
 }

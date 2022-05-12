@@ -80,11 +80,35 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     public DialogEmailConfig(ConnectionIMAPSettings settings, JFrame parent) {
         this(parent);
         if (settings != null) {
-            // TODO set values
-
-            // Deactivate e-mail field
-            entryEmailPassword.setLefttEnabled(false);
+            
+            // Display simple or advanced dialog
+            if (!advancedDialogNecessary(settings)) {
+                displaySimpleDialog(settings.getIMAPEmailAddress(),
+                                    settings.getIMAPPassword(),
+                                    new EntryEMailDetails(null, 0, settings),
+                                    new EntryEMailDetails(null, 0, settings));
+            }
+            {
+                displayAdvancedDialog(null,
+                                      null,
+                                      new EntryEMailDetailsAdvanced(null, 0, settings, true),
+                                      new EntryEMailDetailsAdvanced(null, 0, settings, false));
+            }
         }
+    }
+
+    /**
+     * Is the advanced dialog necessary?
+     * 
+     * @param settings
+     * @return
+     */
+    public static boolean advancedDialogNecessary(ConnectionIMAPSettings settings) {
+        // Deviate the IMAP/SMTP addresses from each other or from the user name or is an auth mechanism set?
+        return !settings.getIMAPEmailAddress().equals(settings.getSMTPEmailAddress()) ||
+               !settings.getIMAPEmailAddress().equals(settings.getIMAPUserName()) ||
+               !settings.getSMTPEmailAddress().equals(settings.getSMTPUserName()) ||
+               settings.getIMAPAuthMechanisms() != null || settings.getSMTPAuthMechanisms() != null;
     }
 
     /**
@@ -107,11 +131,11 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         JPanel main = new JPanel();
         main.setLayout(new BorderLayout());
         
-        // Create central panel and simple/complex radio 
+        // Create central panel and simple/advanced radio 
         central.setLayout(new BoxLayout(central, BoxLayout.Y_AXIS));
         
 
-        
+        // Create switch between simple and advanced dialog
         this.radioDialogType = new ComponentRadioEntry(null,
                                                        Resources.getString("EmailConfig.26"),
                                                        Resources.getString("EmailConfig.27"),
@@ -198,8 +222,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             }
         });
         
-         // Display simple dialog
-         displaySimpleDialog();
+         // Display empty simple dialog
+         displaySimpleDialog(null, null, null, null);
 
         // Set init finished
         this.initFinished = true;
@@ -207,8 +231,13 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
 
     /**
      * Display simple dialog
+     * 
+     * @param emailAddress
+     * @param password
+     * @param oldDetailsIMAP
+     * @param oldDetailsSMTP
      */
-    private void displaySimpleDialog() {
+    private void displaySimpleDialog(String emailAddress, String password, EntryEMailDetails oldDetailsIMAP, EntryEMailDetails oldDetailsSMTP) {
         // Remove
         central.removeAll();
         
@@ -221,14 +250,18 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                                                                       TitledBorder.DEFAULT_POSITION));
         this.entryEmailPassword = new EntryEMailPassword(Resources.getString("EmailConfig.1"), Resources.getString("EmailConfig.2"));
         this.entryEmailPassword.setChangeListener(this);
-        emailPasswordPanel.add(entryEmailPassword);        
+        emailPasswordPanel.add(entryEmailPassword);
+        
+        // Set e-mail and password data
+        this.entryEmailPassword.setLeftValue(emailAddress);
+        this.entryEmailPassword.setRightValue(password);
         
         // Create send and receive panel
         JPanel receiveSendPanel = new JPanel();     
         receiveSendPanel.setLayout(new BoxLayout(receiveSendPanel, BoxLayout.X_AXIS));
         
         // Add IMAP panel
-        entryIMAPDetails = new EntryEMailDetails(Resources.getString("EmailConfig.37"), ConnectionIMAPSettings.DEFAULT_PORT_IMAP);
+        entryIMAPDetails = new EntryEMailDetails(Resources.getString("EmailConfig.37"), ConnectionIMAPSettings.DEFAULT_PORT_IMAP, oldDetailsIMAP);
         entryIMAPDetails.setChangeListener(this);
         receiveSendPanel.add(entryIMAPDetails);                
         
@@ -236,7 +269,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         receiveSendPanel.add(Box.createRigidArea(new Dimension(6, 0)));
         
         // Add SMTP panel
-        entrySMTPDetails = new EntryEMailDetails(Resources.getString("EmailConfig.38"), ConnectionIMAPSettings.DEFAULT_PORT_SMTP);
+        entrySMTPDetails = new EntryEMailDetails(Resources.getString("EmailConfig.38"), ConnectionIMAPSettings.DEFAULT_PORT_SMTP, oldDetailsSMTP);
         entrySMTPDetails.setChangeListener(this);
         receiveSendPanel.add(entrySMTPDetails);
         
@@ -247,8 +280,10 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     
     /**
      * Display advanced dialog
+     * @param password 
+     * @param emailAddress 
      */
-    private void displayAdvancedDialog() {
+    private void displayAdvancedDialog(String emailAddress, String password, EntryEMailDetails oldIMAPDetails, EntryEMailDetails oldSMTPDetails) {
         // Remove
         central.removeAll();
         entryEmailPassword = null;
@@ -258,7 +293,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         receiveSendPanel.setLayout(new BoxLayout(receiveSendPanel, BoxLayout.X_AXIS));
         
         // Add IMAP panel
-        entryIMAPDetails = new EntryEMailDetailsAdvanced(Resources.getString("EmailConfig.37"), ConnectionIMAPSettings.DEFAULT_PORT_IMAP);
+        entryIMAPDetails = new EntryEMailDetailsAdvanced(Resources.getString("EmailConfig.37"), ConnectionIMAPSettings.DEFAULT_PORT_IMAP, oldIMAPDetails, emailAddress, password);
         entryIMAPDetails.setChangeListener(this);
         receiveSendPanel.add(entryIMAPDetails);
         
@@ -266,9 +301,9 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         receiveSendPanel.add(Box.createRigidArea(new Dimension(6, 0)));
         
         // Add SMTP panel
-        entrySMTPDetails = new EntryEMailDetailsAdvanced(Resources.getString("EmailConfig.38"), ConnectionIMAPSettings.DEFAULT_PORT_SMTP);
+        entrySMTPDetails = new EntryEMailDetailsAdvanced(Resources.getString("EmailConfig.38"), ConnectionIMAPSettings.DEFAULT_PORT_SMTP, oldSMTPDetails, emailAddress, password);
         entrySMTPDetails.setChangeListener(this);
-        receiveSendPanel.add(entrySMTPDetails);
+        receiveSendPanel.add(entrySMTPDetails);        
         
         // Add to central
         central.add(receiveSendPanel);
@@ -303,16 +338,19 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         }
         
         // Store current data input
-        // TODO
-        
+        // TODO        
 
-
-        // Change between simple and complex dialog
+        // Change between simple and advanced dialog
         if (e.getSource() == radioDialogType) {
             if (this.radioDialogType.isFirstOptionSelected()) {
-                displaySimpleDialog();
+                displaySimpleDialog(entryIMAPDetails.getEmailaddress(),
+                                    entryIMAPDetails.getPassword(),
+                                    entryIMAPDetails,
+                                    entrySMTPDetails);
             } else {
-                displayAdvancedDialog();
+                displayAdvancedDialog(entryEmailPassword != null ? entryEmailPassword.getLeftValue() : entryIMAPDetails.getEmailaddress(),
+                                      entryEmailPassword != null ? entryEmailPassword.getRightValue() : entryIMAPDetails.getEmailaddress(),
+                                      entryIMAPDetails, entrySMTPDetails);
             }
         }
         
@@ -414,50 +452,5 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
 //                                                                    .setSMTPPort(Integer.valueOf(serverPortsEntry.getRightValue()))
 //                                                                    .setSSLTLSIMAP(radioEncryptionIMAP.isFirstOptionSelected())
 //                                                                    .setSSLTLSSMTP(radioEncryptionSMTP.isFirstOptionSelected());
-    }
-
-    private static class ConnectionSettingsIMAPUnchecked {
-        String  imapPassword;
-        String  imapServer;
-        String  imapPort;
-        String  smtpServer;
-        String  smtpPort;
-        boolean ssltlsIMAP;
-        boolean ssltlsSMTP;
-        String  smptEmailAddress;
-        String  smtpPassword;
-        String  imapUserName;
-        String  smtpUserName;
-        String  imapAuthMechanisms;
-        String  smtpAuthMechanisms;
-
-        ConnectionSettingsIMAPUnchecked(String imapEmailAddress,
-                                        String imapPassword,
-                                        String smptEmailAddress,
-                                        String smtpPassword,
-                                        String imapServer,
-                                        String smtpServer,
-                                        String imapPort,
-                                        String smtpPort,
-                                        boolean ssltlsIMAP,
-                                        boolean ssltlsSMTP,
-                                        String imapUserName,
-                                        String smtpUserName,
-                                        String imapAuthMechanisms,
-                                        String smtpAuthMechanisms) {
-            imapPassword = this.imapPassword;
-            imapServer = this.imapServer;
-            imapPort = this.imapPort;
-            smtpServer = this.smtpServer;
-            smtpPort = this.smtpPort;
-            ssltlsIMAP = this.ssltlsIMAP;
-            ssltlsSMTP = this.ssltlsSMTP;
-            smptEmailAddress = this.smptEmailAddress;
-            smtpPassword = this.smtpPassword;
-            imapUserName = this.imapUserName;
-            smtpUserName = this.smtpUserName;
-            imapAuthMechanisms = this.imapAuthMechanisms;
-            smtpAuthMechanisms = this.smtpAuthMechanisms;
-        }
     }
 }
