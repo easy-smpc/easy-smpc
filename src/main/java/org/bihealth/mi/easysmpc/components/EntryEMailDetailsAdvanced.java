@@ -143,4 +143,31 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
         this.add(authMechanismPanel);
         this.add(getRadioEncryptionType());                
     }
+    
+    /**
+     *  Returns whether the settings are valid
+     * 
+     * @return
+     */
+    @Override
+    public boolean areValuesValid() {
+        return super.areValuesValid() 
+                && emailEntry.isValueValid()
+                && userNameEntry.isValueValid()
+                && passwordEntry.isValueValid()
+                && authMechEntry.isValueValid();
+    }
+    
+    /**
+     * Sets a change listener
+     * @param listener
+     */
+    @Override
+    public void setChangeListener(ChangeListener listener) {
+        super.setChangeListener(listener);
+        this.emailEntry.setChangeListener(listener);
+        this.userNameEntry.setChangeListener(listener);
+        this.passwordEntry.setChangeListener(listener);
+        this.authMechEntry.setChangeListener(listener);
+    }
 }

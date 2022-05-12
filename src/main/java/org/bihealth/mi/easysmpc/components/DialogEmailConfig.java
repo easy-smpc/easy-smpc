@@ -50,8 +50,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
 
     /** SVUID */
     private static final long      serialVersionUID = -5892937473681272650L;
-    /** E-Mail and password entry */
-    private EntryEMailPassword     emailPasswordEntry;
     /** Button */
     private JButton                buttonOK;
     /** Result */
@@ -70,6 +68,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     EntryEMailDetails              entryIMAPDetails;
     /** Entry for SMTP details */
     EntryEMailDetails              entrySMTPDetails;
+    /** E-Mail and password entry */
+    private EntryEMailPassword     entryEmailPassword;
     
     /**
      * Create a new instance
@@ -83,7 +83,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             // TODO set values
 
             // Deactivate e-mail field
-            emailPasswordEntry.setLefttEnabled(false);
+            entryEmailPassword.setLefttEnabled(false);
         }
     }
 
@@ -115,14 +115,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         this.radioDialogType = new ComponentRadioEntry(null,
                                                        Resources.getString("EmailConfig.26"),
                                                        Resources.getString("EmailConfig.27"),
-                                                       new ChangeListener() {
-
-                                                           @Override
-                                                           public void stateChanged(ChangeEvent e) {
-                                                               DialogEmailConfig.this.stateChanged(e);
-                                                           }
-                                                       },
-                                                       false);               
+                                                       false);
+        this.radioDialogType.setChangeListener(this);
         
         // Add
         top.add(radioDialogType);
@@ -225,8 +219,9 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                                                                       Resources.getString("EmailConfig.36"),
                                                                       TitledBorder.LEFT,
                                                                       TitledBorder.DEFAULT_POSITION));
-        this.emailPasswordEntry = new EntryEMailPassword(Resources.getString("EmailConfig.1"), Resources.getString("EmailConfig.2"));
-        emailPasswordPanel.add(emailPasswordEntry);        
+        this.entryEmailPassword = new EntryEMailPassword(Resources.getString("EmailConfig.1"), Resources.getString("EmailConfig.2"));
+        this.entryEmailPassword.setChangeListener(this);
+        emailPasswordPanel.add(entryEmailPassword);        
         
         // Create send and receive panel
         JPanel receiveSendPanel = new JPanel();     
@@ -256,6 +251,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private void displayAdvancedDialog() {
         // Remove
         central.removeAll();
+        entryEmailPassword = null;
                 
         // Create send and receive panel
         JPanel receiveSendPanel = new JPanel();     
@@ -296,14 +292,14 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     @Override
     public void stateChanged(ChangeEvent e) {
         
-        // Check button enabled
-        if (this.buttonOK != null) {
-            this.buttonOK.setEnabled(areValuesValid());
-        }
-        
         // Check init already done
         if (!initFinished) {
             return;
+        }
+        
+        // Check button enabled
+        if (this.buttonOK != null) {
+            this.buttonOK.setEnabled(areValuesValid());
         }
         
         // Store current data input
@@ -396,10 +392,9 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * @return
      */
     private boolean areValuesValid() {
-        return true;
-        // TODO
-//        return this.emailPasswordEntryIMAP.areValuesValid() && this.serversEntry.areValuesValid() &&
-//               this.serverPortsEntry.areValuesValid();
+        return  (entryEmailPassword != null ? entryEmailPassword.areValuesValid() : true)
+                && entryIMAPDetails.areValuesValid() 
+                && entrySMTPDetails.areValuesValid();
     }
 
     /**

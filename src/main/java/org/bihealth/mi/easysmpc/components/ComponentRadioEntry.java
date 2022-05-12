@@ -37,13 +37,11 @@ public class ComponentRadioEntry extends JPanel implements ItemListener {
      * @param title
      * @param firstOptionText
      * @param secondOptionText
-     * @param listener
      */
     ComponentRadioEntry(String title,
                         String firstOptionText,
-                        String secondOptionText,
-                        ChangeListener listener) {
-        this(title, firstOptionText, secondOptionText, listener, true);
+                        String secondOptionText) {
+        this(title, firstOptionText, secondOptionText, true);
     }
     
     /**
@@ -51,17 +49,14 @@ public class ComponentRadioEntry extends JPanel implements ItemListener {
      * 
      * @param title
      * @param firstOptionText
-     * @param secondOptionText
-     * @param listener
+     * @param secondOptionText 
      * @param orientationRadiosYAxis  
      */
     ComponentRadioEntry(String title,
                         String firstOptionText,
                         String secondOptionText,
-                        ChangeListener listener,
                         boolean orientationRadiosYAxis) {
-        // Init and store
-        this.listener = listener;
+        // Init
         JPanel titlePanel = null;
         
         // Create Button groups with options
@@ -121,7 +116,16 @@ public class ComponentRadioEntry extends JPanel implements ItemListener {
     public void itemStateChanged(ItemEvent e) {
        if(this.listener != null) {
            this.listener.stateChanged(new ChangeEvent(this));
-       }
-        
+       }        
+    }
+    
+    /**
+     * Sets a change listener
+     * @param listener
+     */
+    public void setChangeListener(ChangeListener listener) {
+        this.firstOption.addChangeListener(listener);
+        this.secondOption.addChangeListener(listener);
+        this.listener = listener;
     }
 }

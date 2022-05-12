@@ -5,18 +5,15 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
-public class EntryEMailDetails extends JPanel implements ChangeListener {
+public class EntryEMailDetails extends JPanel {
 
     /** SVUID */
     private static final long serialVersionUID = 3375406542374186905L;
-    /** Listener */
-    private ChangeListener listener;
     /** Server entry */
     private final ComponentEntryOne serverEntry;
     /** Port entry */
@@ -66,16 +63,9 @@ public class EntryEMailDetails extends JPanel implements ChangeListener {
         // Encryption entry
         radioEncryptionType = new ComponentRadioEntry(Resources.getString("EmailConfig.20"),
                                                       Resources.getString("EmailConfig.21"),
-                                                      Resources.getString("EmailConfig.22"),
-                                                      this);
+                                                      Resources.getString("EmailConfig.22"));
+        //radioEncryptionType.setChangeListener(this);
         this.add(radioEncryptionType);
-    }
-
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        if (this.listener != null) {
-            this.listener.stateChanged(e);
-        }
     }
 
     /**
@@ -104,6 +94,17 @@ public class EntryEMailDetails extends JPanel implements ChangeListener {
      * @param listener
      */
     public void setChangeListener(ChangeListener listener) {
-        this.listener = listener;
+        this.portEntry.setChangeListener(listener);
+        this.serverEntry.setChangeListener(listener);
+        this.radioEncryptionType.setChangeListener(listener);
+    }
+        
+    /**
+     *  Returns whether the settings are valid
+     * 
+     * @return
+     */
+    public boolean areValuesValid() {
+        return serverEntry.isValueValid() && portEntry.isValueValid();          
     }
 }

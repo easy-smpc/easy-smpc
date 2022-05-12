@@ -35,11 +35,9 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class ComponentEntryOne extends JPanel {
 
     /** SVUID */
-    private static final long serialVersionUID = 1L;
-
+    private static final long serialVersionUID = -695284447513253698L;
     /** Field */
     private ComponentTextField field;
-
 
     /**
      * Creates a new instance
