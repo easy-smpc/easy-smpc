@@ -94,8 +94,8 @@ public class ConnectionIMAP extends ConnectionEmail {
         super(sharedMailbox,
               settings.getIMAPEmailAddress(),
               settings.getSMTPEmailAddress(),
-              settings.getIMAPUserName(),
-              settings.getSMTPUserName(),
+              settings.getIMAPUserName() != null ? settings.getIMAPUserName() : settings.getIMAPEmailAddress(),
+              settings.getSMTPUserName() != null ? settings.getSMTPUserName() : settings.getSMTPEmailAddress(),
               settings.getPerformanceListener());
         
         // Check

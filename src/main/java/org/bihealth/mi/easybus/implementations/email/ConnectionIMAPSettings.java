@@ -325,7 +325,7 @@ public class ConnectionIMAPSettings implements Serializable {
      * @return
      */
     public String getSMTPUserName() {
-        return smtpUserName != null ? smtpUserName : smptEmailAddress;
+        return smtpUserName;
     }
     
     /**
@@ -334,7 +334,7 @@ public class ConnectionIMAPSettings implements Serializable {
      * @return
      */
     public String getIMAPUserName() {
-        return imapUserName != null ? imapUserName : imapEmailAddress;
+        return imapUserName;
     }
     
     /**

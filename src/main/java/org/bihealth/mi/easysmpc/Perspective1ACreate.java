@@ -196,7 +196,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             // Update connections in preferences
             Connections.addOrUpdate(newSettings);
             
-            // Reset combo  box
+            // Reset combo box
             comboSelectMailbox.removeAllItems();
             for(ConnectionIMAPSettings settings: getEmailConfig()) {
                 this.comboSelectMailbox.addItem(settings);

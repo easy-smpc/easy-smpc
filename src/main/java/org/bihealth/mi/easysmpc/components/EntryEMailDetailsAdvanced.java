@@ -78,14 +78,13 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
 
             // Set values from IMAP
             this.emailEntry.setValue(settings.getIMAPEmailAddress());
-            this.passwordEntry.setValue(settings.getIMAPPassword());
+            this.passwordEntry.setValue(settings.getIMAPPassword(false));
             this.userNameEntry.setValue(settings.getIMAPUserName());
             this.authMechEntry.setValue(settings.getIMAPAuthMechanisms());
-        }
-        {
+        } else {
             // Set values from SMTP
             this.emailEntry.setValue(settings.getSMTPEmailAddress());
-            this.passwordEntry.setValue(settings.getSMTPPassword());
+            this.passwordEntry.setValue(settings.getSMTPPassword(false));
             this.userNameEntry.setValue(settings.getSMTPUserName());
             this.authMechEntry.setValue(settings.getSMTPAuthMechanisms());
         }
@@ -121,7 +120,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
     }
     
     /**
-     * Creates a new instance. If oldDetails is not null fields are pre-filled from it. Finally the parameters emailAddress and password overwrite the values from oldDetails again
+     * Creates a new instance. If oldDetails is not null fields are pre-filled from it. Finally the parameters emailAddress and password overwrite the values from oldDetails again if not null
      * 
      * @param title
      * @param standardPort
@@ -134,8 +133,8 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
         this(title, standardPort, oldDetails);
         
         // Overwrite values
-        emailEntry.setValue(emailAddress);
-        passwordEntry.setValue(password);
+        if(emailAddress != null) emailEntry.setValue(emailAddress);
+        if(password != null) passwordEntry.setValue(password);
         emailEntry.setFieldEnabled(emailEnabled);        
     }
 
@@ -313,7 +312,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
      */
     @Override
     public String getUserName() {
-        return userNameEntry.getValue();
+        return userNameEntry.getValue() == null || userNameEntry.getValue().isBlank() ? null : userNameEntry.getValue();
     }
 
     /**
@@ -323,6 +322,6 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
      */
     @Override
     public String getAuthMechanisms() {
-        return authMechEntry.getValue();
+        return authMechEntry.getValue() == null || authMechEntry.getValue().isBlank() ? null : authMechEntry.getValue();
     }
 }

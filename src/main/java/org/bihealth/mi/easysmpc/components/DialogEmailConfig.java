@@ -97,6 +97,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                                     new EntryEMailDetails(null, 0, settings, true),
                                     new EntryEMailDetails(null, 0, settings, false));
             } else {
+                this.radioDialogType.setFirstOptionSelected(false);
                 displayAdvancedDialog(null,
                                       null,
                                       new EntryEMailDetailsAdvanced(null, 0, settings, true, this.createMode),
@@ -114,10 +115,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     public static boolean isAdvancedDialogNecessary(ConnectionIMAPSettings settings) {
         // Deviate the IMAP/SMTP addresses from each other or from the user name or is an auth mechanism set?
         return !settings.getIMAPEmailAddress().equals(settings.getSMTPEmailAddress()) ||
-                !settings.getIMAPEmailAddress().equals(settings.getIMAPUserName()) ||
-                !settings.getSMTPEmailAddress().equals(settings.getSMTPUserName()) ||
-               settings.getIMAPAuthMechanisms() != null ||
-               settings.getSMTPAuthMechanisms() != null;
+               settings.getIMAPUserName() != null || settings.getSMTPUserName() != null ||
+               settings.getIMAPAuthMechanisms() != null || settings.getSMTPAuthMechanisms() != null;
     }
 
     /**
@@ -488,9 +487,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         if(entryEmailPassword != null) {
             result = new ConnectionIMAPSettings(entryEmailPassword.getLeftValue(), new AppPasswordProvider())
                                                 .setIMAPPassword(entryEmailPassword.getRightValue())
-                                                .setSMTPPassword(entryEmailPassword.getRightValue())
-                                                .setIMAPUserName(entryEmailPassword.getLeftValue())
-                                                .setIMAPUserName(entryEmailPassword.getLeftValue());
+                                                .setSMTPPassword(entryEmailPassword.getRightValue());
         }
         else {
             AppPasswordProvider provider = new AppPasswordProvider();
