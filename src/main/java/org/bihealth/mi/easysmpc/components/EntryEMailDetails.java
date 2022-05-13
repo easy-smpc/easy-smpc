@@ -10,6 +10,12 @@ import javax.swing.event.ChangeListener;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
+/**
+ * Enter e-mail details
+ * 
+ * @author Felix Wirth
+ *
+ */
 public class EntryEMailDetails extends JPanel {
 
     /** SVUID */
@@ -80,8 +86,9 @@ public class EntryEMailDetails extends JPanel {
      * @param title
      * @param defaultPortImap
      * @param settings
+     * @param isIMAP
      */
-    public EntryEMailDetails(String title, int defaultPort, ConnectionIMAPSettings settings) {
+    public EntryEMailDetails(String title, int defaultPort, ConnectionIMAPSettings settings, boolean isIMAP) {
         this(title, defaultPort);       
         
         // Check
@@ -90,10 +97,16 @@ public class EntryEMailDetails extends JPanel {
         }
         
         // Set values
-        this.serverEntry.setValue(settings.getIMAPServer());
-        this.portEntry.setValue(Integer.toString(settings.getIMAPPort()));
-        this.radioEncryptionType.setFirstOptionSelected(settings.isSSLTLSIMAP());
-    }
+        if (isIMAP) {
+            this.serverEntry.setValue(settings.getIMAPServer());
+            this.portEntry.setValue(Integer.toString(settings.getIMAPPort()));
+            this.radioEncryptionType.setFirstOptionSelected(settings.isSSLTLSIMAP());
+        } else {
+            this.serverEntry.setValue(settings.getSMTPServer());
+            this.portEntry.setValue(Integer.toString(settings.getSMTPPort()));
+            this.radioEncryptionType.setFirstOptionSelected(settings.isSSLTLSSMTP());
+        }
+    }    
 
     /**
      * Creates a new instance. If oldDetails is not null fields are pre-filled from it
@@ -213,7 +226,7 @@ public class EntryEMailDetails extends JPanel {
     /**
      * Is SSL/TLS set?
      */
-    public boolean isSSLTLSIMAP() {
+    public boolean isSSLTLS() {
         return radioEncryptionType.isFirstOptionSelected();
     }    
 }

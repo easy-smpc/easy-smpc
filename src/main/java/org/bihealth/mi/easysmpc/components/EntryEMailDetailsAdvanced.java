@@ -15,6 +15,12 @@ import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
+/**
+ * Enter advanced e-mail details
+ * 
+ * @author Felix Wirth
+ *
+ */
 public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
     
     /** SVUID */
@@ -48,11 +54,16 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
      * @param title
      * @param standardPort
      * @param settings
-     * @param isIMAP 
+     * @param isIMAP
+     * @param emailEnabled
      */
-    EntryEMailDetailsAdvanced(String title, int standardPort, ConnectionIMAPSettings settings, boolean isIMAP) {
+    EntryEMailDetailsAdvanced(String title,
+                              int standardPort,
+                              ConnectionIMAPSettings settings,
+                              boolean isIMAP,
+                              boolean emailEnabled) {
         // Super
-        super(title, standardPort, settings);
+        super(title, standardPort, settings, isIMAP);
         
         // Create element
         createAdditionalgElements(title);
@@ -78,6 +89,9 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
             this.userNameEntry.setValue(settings.getSMTPUserName());
             this.authMechEntry.setValue(settings.getSMTPAuthMechanisms());
         }
+        
+        // Moodify e-mail enabled
+        this.emailEntry.setFieldEnabled(emailEnabled);
     }
     
     /**
@@ -114,12 +128,15 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
      * @param oldDetails
      * @param eMailAddress
      * @param password
-    EntryEMailDetailsAdvanced(String title, int standardPort, EntryEMailDetails oldDetails, String emailAddress, String password) {
+     * @param emailEnabled
+     */
+    EntryEMailDetailsAdvanced(String title, int standardPort, EntryEMailDetails oldDetails, String emailAddress, String password, boolean emailEnabled) {
         this(title, standardPort, oldDetails);
         
         // Overwrite values
         emailEntry.setValue(emailAddress);
         passwordEntry.setValue(password);
+        emailEntry.setFieldEnabled(emailEnabled);        
     }
 
     /**

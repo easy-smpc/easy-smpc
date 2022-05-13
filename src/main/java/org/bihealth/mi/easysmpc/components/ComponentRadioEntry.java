@@ -67,7 +67,6 @@ public class ComponentRadioEntry extends JPanel implements ItemListener {
         firstOption.setSelected(true);
         secondOption = new JRadioButton(secondOptionText);
         secondOption.addChangeListener(listener);
-        secondOption.addItemListener(this);
         group.add(firstOption);
         group.add(secondOption);
         
