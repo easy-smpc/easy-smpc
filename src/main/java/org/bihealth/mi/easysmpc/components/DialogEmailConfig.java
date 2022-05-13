@@ -38,6 +38,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.AppPasswordProvider;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -82,7 +83,11 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     public DialogEmailConfig(ConnectionIMAPSettings settings, JFrame parent) {
         this(parent);
+        
+        // Fill fields
         if (settings != null) {
+            
+            // Editing, not creating
             this.createMode = false;
             
             // Display simple or advanced dialog
@@ -253,7 +258,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                                                                       TitledBorder.LEFT,
                                                                       TitledBorder.DEFAULT_POSITION));
         this.entryEmailPassword = new EntryEMailPassword(Resources.getString("EmailConfig.1"), Resources.getString("EmailConfig.2"));        
-        this.entryEmailPassword.setChangeListener(this);
         emailPasswordPanel.add(entryEmailPassword);
         
         // Set e-mail and password data and enable or disable e-mail field
@@ -267,7 +271,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         
         // Add IMAP panel
         entryIMAPDetails = new EntryEMailDetails(Resources.getString("EmailConfig.37"), ConnectionIMAPSettings.DEFAULT_PORT_IMAP, oldDetailsIMAP);
-        entryIMAPDetails.setChangeListener(this);
         receiveSendPanel.add(entryIMAPDetails);                
         
         // Add box to separate
@@ -275,12 +278,20 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         
         // Add SMTP panel
         entrySMTPDetails = new EntryEMailDetails(Resources.getString("EmailConfig.38"), ConnectionIMAPSettings.DEFAULT_PORT_SMTP, oldDetailsSMTP);
-        entrySMTPDetails.setChangeListener(this);
-        receiveSendPanel.add(entrySMTPDetails);
+        receiveSendPanel.add(entrySMTPDetails);        
         
         // Add to central
         central.add(emailPasswordPanel);
         central.add(receiveSendPanel);
+        
+        // Add listeners
+        this.entryEmailPassword.setChangeListener(this);
+        entryIMAPDetails.setChangeListener(this);
+        entrySMTPDetails.setChangeListener(this);
+        
+        // Repaint
+        this.revalidate();
+        this.repaint();
     }
     
     /**
@@ -299,7 +310,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         
         // Add IMAP panel
         entryIMAPDetails = new EntryEMailDetailsAdvanced(Resources.getString("EmailConfig.37"), ConnectionIMAPSettings.DEFAULT_PORT_IMAP, oldIMAPDetails, emailAddress, password, this.createMode);
-        entryIMAPDetails.setChangeListener(this);
         receiveSendPanel.add(entryIMAPDetails);
         
         // Add box to separate
@@ -307,11 +317,18 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         
         // Add SMTP panel
         entrySMTPDetails = new EntryEMailDetailsAdvanced(Resources.getString("EmailConfig.38"), ConnectionIMAPSettings.DEFAULT_PORT_SMTP, oldSMTPDetails, emailAddress, password, true);
-        entrySMTPDetails.setChangeListener(this);
-        receiveSendPanel.add(entrySMTPDetails);        
+        receiveSendPanel.add(entrySMTPDetails);
         
         // Add to central
         central.add(receiveSendPanel);
+        
+        // Add listeners
+        entryIMAPDetails.setChangeListener(this);
+        entrySMTPDetails.setChangeListener(this);
+        
+        // Repaint
+        this.revalidate();
+        this.repaint();
         
     }
 
@@ -356,37 +373,10 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                                       entryIMAPDetails, entrySMTPDetails);
             }
             
-            // Repaint
-            this.revalidate();
-            this.repaint();
+            // Resize dialog
             this.pack();
         }        
     }
-
-//    /**
-//     * Process switch to simple dialog
-//     */
-//    private void processSwitchToSimpleDialog() {
-//
-//        // If advanced dialog necessary ask for confirmation
-//        if (isAdvancedDialogNecessary(getConnectionSettings()) &&
-//            JOptionPane.showConfirmDialog(this,
-//                                          Resources.getString("EmailConfig.41"),
-//                                          Resources.getString("EmailConfig.42"),
-//                                          JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
-//            // Reset to advanced option
-//            this.radioDialogType.setFirstOptionSelected(false);
-//
-//            // Return
-//            return;
-//        }
-//
-//        // Display simple dialog
-//        displaySimpleDialog(entryIMAPDetails.getEmailaddress(),
-//                            entryIMAPDetails.getPassword(),
-//                            entryIMAPDetails,
-//                            entrySMTPDetails);
-//    }
 
     /**
      * Cancel action
@@ -419,37 +409,57 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      * Action determine e-mail configuration
      */
     private void actionGuessConfig() {
-        // TODO Adapt
+        
+        // Get an entered e-mail address
+        String eMailEntered = this.entryEmailPassword != null
+                ? this.entryEmailPassword.getLeftValue()
+                : this.entryIMAPDetails.getEmailaddress() != null
+                        ? this.entryIMAPDetails.getEmailaddress()
+                        : this.entrySMTPDetails.getEmailaddress();
+        
         // Check
-//        if (this.emailPasswordEntryIMAP.getLeftValue() == null ||
-//            !Participant.isEmailValid(this.emailPasswordEntryIMAP.getLeftValue())) {
-//            JOptionPane.showMessageDialog(this,
-//                                          Resources.getString("EmailConfig.9"),
-//                                          Resources.getString("EmailConfig.10"),
-//                                          JOptionPane.WARNING_MESSAGE);
-//            return;
-//        }
-//
-//        // Try to determine and set
-//        try {
-//            ConnectionIMAPSettings connectionSettings = new ConnectionIMAPSettings(this.emailPasswordEntryIMAP.getLeftValue(),
-//                                                                                   new AppPasswordProvider());
-//            if (connectionSettings.guess()) {
-//                serversEntry.setLeftValue(connectionSettings.getIMAPServer());
-//                serversEntry.setRightValue(connectionSettings.getSMTPServer());
-//                serverPortsEntry.setLeftValue(Integer.toString(connectionSettings.getIMAPPort()));
-//                serverPortsEntry.setRightValue(Integer.toString(connectionSettings.getSMTPPort()));
-//                radioEncryptionIMAP.setFirstOptionSelected(connectionSettings.isSSLTLSIMAP());
-//                radioEncryptionSMTP.setFirstOptionSelected(connectionSettings.isSSLTLSSMTP());
-//            } else {
-//                throw new IllegalArgumentException("Configuration could not be guessed");
-//            }
-//        } catch (IllegalArgumentException e) {
-//            JOptionPane.showMessageDialog(this,
-//                                          Resources.getString("EmailConfig.11"),
-//                                          Resources.getString("EmailConfig.10"),
-//                                          JOptionPane.WARNING_MESSAGE);
-//        }
+        if (eMailEntered == null || !Participant.isEmailValid(eMailEntered)) {
+            
+            // Show error message
+            JOptionPane.showMessageDialog(this,
+                                          Resources.getString("EmailConfig.9"),
+                                          Resources.getString("EmailConfig.10"),
+                                          JOptionPane.WARNING_MESSAGE);
+            // Return
+            return;
+        }
+
+        // Try to determine and set
+        try {
+            ConnectionIMAPSettings settings = new ConnectionIMAPSettings(eMailEntered, new AppPasswordProvider());
+            if (settings.guess()) {
+                // Delete
+                entryEmailPassword = null;
+                entryIMAPDetails = null;
+                entrySMTPDetails = null;
+                
+                // Display simple or advanced dialog
+                if (!isAdvancedDialogNecessary(settings)) {
+                    displaySimpleDialog(settings.getIMAPEmailAddress(),
+                                        settings.getIMAPPassword(false),
+                                        new EntryEMailDetails(null, 0, settings, true),
+                                        new EntryEMailDetails(null, 0, settings, false));
+                } else {
+                    displayAdvancedDialog(null,
+                                          null,
+                                          new EntryEMailDetailsAdvanced(null, 0, settings, true, this.createMode),
+                                          new EntryEMailDetailsAdvanced(null, 0, settings, false, true));
+                }
+
+            } else {
+                throw new IllegalArgumentException("Configuration could not be guessed");
+            }
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this,
+                                          Resources.getString("EmailConfig.11"),
+                                          Resources.getString("EmailConfig.10"),
+                                          JOptionPane.WARNING_MESSAGE);
+        }
     }
 
     /**
@@ -474,7 +484,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         // Init
         ConnectionIMAPSettings result;
         
-        // Take data from either entryEMail password or only from IMAP and SMTP entry
+        // Take data from either entryEMail password or from IMAP and SMTP entries
         if(entryEmailPassword != null) {
             result = new ConnectionIMAPSettings(entryEmailPassword.getLeftValue(), new AppPasswordProvider())
                                                 .setIMAPPassword(entryEmailPassword.getRightValue())
@@ -491,7 +501,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                     .setSMTPUserName(entrySMTPDetails.getUserName());
         };
         
-        // Set data always coming from IMAP and SMTP entry and return
+        // Take data always coming from IMAP and SMTP entries and return
         return result.setIMAPPort(entryIMAPDetails.getPort())
               .setSMTPPort(entrySMTPDetails.getPort())
               .setIMAPServer(entryIMAPDetails.getServer())
