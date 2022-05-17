@@ -1,14 +1,9 @@
 package org.bihealth.mi.easysmpc.components;
 
-import java.awt.BorderLayout;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.Participant;
@@ -24,15 +19,15 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
     
     /** SVUID */
-    private static final long serialVersionUID = -7005095447195643542L;
+    private static final long         serialVersionUID = -7005095447195643542L;
     /** E-mail entry */
-    private ComponentEntryOne emailEntry;
+    private ComponentEntryOne         emailEntry;
     /** Password entry */
-    private ComponentEntryOne passwordEntry;
+    private ComponentEntryOne         passwordEntry;
     /** user name entry */
-    private ComponentEntryOne userNameEntry;
+    private ComponentEntryOneCheckBox userNameEntry;
     /** Auth mechanism entry */
-    private ComponentEntryOne authMechEntry;
+    private ComponentEntryOneCheckBox authMechEntry;
 
     /**
      * Creates a new instance
@@ -180,81 +175,31 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
                                               false);
 
         // User name entry
-        userNameEntry = new ComponentEntryOne(Resources.getString("EmailConfig.28"),
-                                              null,
-                                              true,
+        userNameEntry = new ComponentEntryOneCheckBox(Resources.getString("EmailConfig.28"),
                                               new ComponentTextFieldValidator() {
 
                                                   @Override
                                                   public boolean validate(String text) {
                                                       return true;
                                                   }
-                                              },
-                                              false,
-                                              false);
-        userNameEntry.setFieldEnabled(false);
-        
-        // Checkbox user name and panel
-        JCheckBox userNameCheckBox = new JCheckBox();
-        userNameCheckBox.addChangeListener(new ChangeListener() {
-
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                if(userNameCheckBox.isSelected()) {
-                    userNameEntry.setFieldEnabled(true);
-                } else {
-                    userNameEntry.setFieldEnabled(false);
-                    userNameEntry.setValue(null);
-                }
-            }
-        });        
-        JPanel userNamePanel = new JPanel();
-        userNamePanel.setLayout(new BorderLayout());
+                                              });        
         
         // Auth mechanism entry
-        authMechEntry = new ComponentEntryOne(Resources.getString("EmailConfig.30"),
-                                              null,
-                                              true,
-                                              new ComponentTextFieldValidator() {
-
-                                                  @Override
-                                                  public boolean validate(String text) {
-                                                      // TODO Validate auth mechanism
-                                                      return true;
-                                                  }
-                                              },
-                                              false,
-                                              false);
-        authMechEntry.setFieldEnabled(false);
-        
-        // Checkbox auth mechanism and panel
-        JCheckBox authMechcheckBox = new JCheckBox();
-        authMechcheckBox.addChangeListener(new ChangeListener() {
-
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                if(authMechcheckBox.isSelected()) {
-                    authMechEntry.setFieldEnabled(true);
-                } else {
-                    authMechEntry.setFieldEnabled(false);
-                    authMechEntry.setValue(null);
-                }
-            }
-        });
-        JPanel authMechanismPanel = new JPanel();
-        authMechanismPanel.setLayout(new BorderLayout());
+        authMechEntry = new ComponentEntryOneCheckBox(Resources.getString("EmailConfig.30"), new ComponentTextFieldValidator() {
+            
+          @Override
+          public boolean validate(String text) {
+              return true;
+          }
+      });               
         
         // Add
         this.add(emailEntry);
-        userNamePanel.add(userNameCheckBox, BorderLayout.WEST);
-        userNamePanel.add(userNameEntry, BorderLayout.CENTER);
-        this.add(userNamePanel);
+        this.add(userNameEntry);
         this.add(passwordEntry);
         this.add(getServerEntry());
         this.add(getPortEntry());
-        authMechanismPanel.add(authMechcheckBox, BorderLayout.WEST);
-        authMechanismPanel.add(authMechEntry, BorderLayout.CENTER);
-        this.add(authMechanismPanel);
+        this.add(authMechEntry);
         this.add(getRadioEncryptionType());
     }
     

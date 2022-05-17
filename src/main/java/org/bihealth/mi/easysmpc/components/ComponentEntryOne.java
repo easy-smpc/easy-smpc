@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.event.MouseListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -38,6 +39,8 @@ public class ComponentEntryOne extends JPanel {
     private static final long serialVersionUID = -695284447513253698L;
     /** Field */
     private ComponentTextField field;
+    /** Label */
+    private JLabel label;
 
     /**
      * Creates a new instance
@@ -62,7 +65,7 @@ public class ComponentEntryOne extends JPanel {
         
         
         // Label
-        JLabel label = new JLabel(labelText); //$NON-NLS-1$
+        label = new JLabel(labelText); //$NON-NLS-1$
         
         // Field
         field = new ComponentTextField(validator, leftIsPassword);
@@ -109,7 +112,7 @@ public class ComponentEntryOne extends JPanel {
     }
     
     /**
-     * Sets a change listener
+     * Sets the change listener to the text field
      * @param listener
      */
     public void setChangeListener(ChangeListener listener) {
@@ -142,5 +145,13 @@ public class ComponentEntryOne extends JPanel {
      */
     public void setFieldEnabled(boolean enabled) {
         this.field.setEnabled(enabled);
+    }
+    
+    /**
+     * Sets the mouse listener to the label
+     * @param listener
+     */
+    public void setMouseListener(MouseListener listener) {
+        this.label.addMouseListener(listener);
     }
 }
