@@ -1,8 +1,8 @@
 package org.bihealth.mi.easysmpc.components;
 
 import java.awt.GridLayout;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -10,16 +10,20 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easysmpc.resources.Resources;
 
-public class ComponentRadioEntry extends JPanel implements ItemListener {
+/**
+ * Choose between two radio buttons
+ * 
+ * @author Felix Wirth
+ *
+ */
+public class ComponentRadioEntry extends JPanel implements ActionListener {
 
     /** SVUID */
-    private static final long serialVersionUID = -3142722039116254922L;
-    
+    private static final long serialVersionUID = -3142722039116254922L;   
     /** Radio button group */
     private  ButtonGroup group;
     /** First option */
@@ -38,7 +42,7 @@ public class ComponentRadioEntry extends JPanel implements ItemListener {
      * @param firstOptionText
      * @param secondOptionText
      */
-    ComponentRadioEntry(String title,
+    public ComponentRadioEntry(String title,
                         String firstOptionText,
                         String secondOptionText) {
         this(title, firstOptionText, secondOptionText, true);
@@ -52,7 +56,7 @@ public class ComponentRadioEntry extends JPanel implements ItemListener {
      * @param secondOptionText 
      * @param orientationRadiosYAxis  
      */
-    ComponentRadioEntry(String title,
+    public ComponentRadioEntry(String title,
                         String firstOptionText,
                         String secondOptionText,
                         boolean orientationRadiosYAxis) {
@@ -63,10 +67,11 @@ public class ComponentRadioEntry extends JPanel implements ItemListener {
         group = new ButtonGroup();
         firstOption = new JRadioButton(firstOptionText);
         firstOption.addChangeListener(listener);
-        firstOption.addItemListener(this);
+        firstOption.addActionListener(this);
         firstOption.setSelected(true);
         secondOption = new JRadioButton(secondOptionText);
         secondOption.addChangeListener(listener);
+        secondOption.addActionListener(this);
         group.add(firstOption);
         group.add(secondOption);
         
@@ -98,7 +103,7 @@ public class ComponentRadioEntry extends JPanel implements ItemListener {
      * @return
      */
     public boolean isFirstOptionSelected() {
-        return firstOption.isSelected();
+        return firstOption == null ? false : firstOption.isSelected();
     }
     
     /**
@@ -109,13 +114,6 @@ public class ComponentRadioEntry extends JPanel implements ItemListener {
     public void setFirstOptionSelected(boolean selected) {
         this.firstOption.setSelected(selected);
         this.secondOption.setSelected(!selected);
-    }    
-
-    @Override
-    public void itemStateChanged(ItemEvent e) {
-       if(this.listener != null) {
-           this.listener.stateChanged(new ChangeEvent(this));
-       }        
     }
     
     /**
@@ -126,5 +124,20 @@ public class ComponentRadioEntry extends JPanel implements ItemListener {
         this.firstOption.addChangeListener(listener);
         this.secondOption.addChangeListener(listener);
         this.listener = listener;
+    }
+    
+    /**
+     * Returns the change listener
+     * 
+     * @return
+     */
+    public ChangeListener getChangeListener() {
+        return this.listener;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        // Empty
     }
 }
