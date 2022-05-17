@@ -45,7 +45,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
         super(title, standardPort);
         
         // Create elements
-        createAdditionalgElements(title);
+        createAdditionalElements(title);
     }
     
     /**
@@ -66,7 +66,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
         super(title, standardPort, settings, isIMAP);
         
         // Create element
-        createAdditionalgElements(title);
+        createAdditionalElements(title);
         
         // Check
         if(settings == null) {
@@ -105,14 +105,14 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
         super(title, standardPort, oldDetails);
         
         // Create element
-        createAdditionalgElements(title);
+        createAdditionalElements(title);
         
         // Check
         if(oldDetails == null) {
             return;
         }
         
-        this.emailEntry.setValue(oldDetails.getEmailaddress());
+        this.emailEntry.setValue(oldDetails.getEmailAddress());
         this.passwordEntry.setValue(oldDetails.getPassword());
         this.userNameEntry.setValue(oldDetails.getUserName());
         this.authMechEntry.setValue(oldDetails.getAuthMechanisms());
@@ -143,7 +143,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
      * 
      * @param title
      */
-    private void createAdditionalgElements(String title) {
+    private void createAdditionalElements(String title) {
         
         // Reset
         this.removeAll();
@@ -291,7 +291,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
      * @return
      */
     @Override
-    public String getEmailaddress() {
+    public String getEmailAddress() {
         return emailEntry.getValue();
     }
 

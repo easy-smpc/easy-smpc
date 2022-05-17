@@ -362,13 +362,13 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         if (e.getSource() == radioDialogType) {            
             if (this.radioDialogType.isFirstOptionSelected()) {
                 // Display simple dialog
-                displaySimpleDialog(entryIMAPDetails.getEmailaddress(),
+                displaySimpleDialog(entryIMAPDetails.getEmailAddress(),
                                     entryIMAPDetails.getPassword(),
                                     entryIMAPDetails,
                                     entrySMTPDetails);
             } else {
-                displayAdvancedDialog(entryEmailPassword != null ? entryEmailPassword.getLeftValue() : entryIMAPDetails.getEmailaddress(),
-                                      entryEmailPassword != null ? entryEmailPassword.getRightValue() : entryIMAPDetails.getEmailaddress(),
+                displayAdvancedDialog(entryEmailPassword != null ? entryEmailPassword.getLeftValue() : entryIMAPDetails.getEmailAddress(),
+                                      entryEmailPassword != null ? entryEmailPassword.getRightValue() : entryIMAPDetails.getEmailAddress(),
                                       entryIMAPDetails, entrySMTPDetails);
             }
             
@@ -412,9 +412,9 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         // Get an entered e-mail address
         String eMailEntered = this.entryEmailPassword != null
                 ? this.entryEmailPassword.getLeftValue()
-                : this.entryIMAPDetails.getEmailaddress() != null
-                        ? this.entryIMAPDetails.getEmailaddress()
-                        : this.entrySMTPDetails.getEmailaddress();
+                : this.entryIMAPDetails.getEmailAddress() != null
+                        ? this.entryIMAPDetails.getEmailAddress()
+                        : this.entrySMTPDetails.getEmailAddress();
         
         // Check
         if (eMailEntered == null || !Participant.isEmailValid(eMailEntered)) {
@@ -491,7 +491,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         }
         else {
             AppPasswordProvider provider = new AppPasswordProvider();
-            result = new ConnectionIMAPSettings(entryIMAPDetails.getEmailaddress(), provider, entrySMTPDetails.getEmailaddress(), provider)
+            result = new ConnectionIMAPSettings(entryIMAPDetails.getEmailAddress(), provider, entrySMTPDetails.getEmailAddress(), provider)
                     .setIMAPPassword(entryIMAPDetails.getPassword())
                     .setSMTPPassword(entrySMTPDetails.getPassword())
                     .setIMAPUserName(entryIMAPDetails.getUserName())

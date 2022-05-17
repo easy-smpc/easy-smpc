@@ -174,7 +174,7 @@ public class EntryEMailDetails extends JPanel {
      * 
      * @return
      */
-    public String getEmailaddress() {
+    public String getEmailAddress() {
         return null;
     }
 
