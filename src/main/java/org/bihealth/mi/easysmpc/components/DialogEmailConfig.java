@@ -199,7 +199,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         buttonsPane.add(okCancelPane);
         getContentPane().add(buttonsPane, BorderLayout.SOUTH);
         getContentPane().add(main);
-        this.stateChanged(new ChangeEvent(this));
 
         // Listeners
         buttonGuessConfig.addActionListener(new ActionListener() {
@@ -263,6 +262,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
 
         // Set init finished
         this.initFinished = true;
+        this.stateChanged(new ChangeEvent(this));
     }
 
     /**

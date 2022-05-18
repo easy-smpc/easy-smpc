@@ -183,7 +183,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
                                                               return text != null &&
                                                                      !text.isBlank();
                                                           }
-                                                      });   
+                                                      });
         
         // Auth mechanism entry
         authMechEntry = new ComponentEntryOneCheckBox(Resources.getString("EmailConfig.30"),
@@ -194,7 +194,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
                                                               return text != null &&
                                                                      !text.isBlank();
                                                           }
-                                                      });              
+                                                      });
         
         // Add
         this.add(emailEntry);

@@ -103,23 +103,18 @@ public class ComponentEntryOneCheckBox extends JPanel {
         
         // Create check box
         checkBox = new JCheckBox();
-        checkBox.addChangeListener(new ChangeListener() {
-
+        checkBox.addActionListener(new ActionListener() {
+            
             @Override
-            public void stateChanged(ChangeEvent e) {
+            public void actionPerformed(ActionEvent e) {
                 if (checkBox.isSelected()) {
                     field.setFieldEnabled(selectCheckBoxToEdit);
                     field.setValue(field.getValue());
                 } else {
                     field.setFieldEnabled(!selectCheckBoxToEdit);
                     field.setValue(null);
-                }                
-            }
-        });
-        checkBox.addActionListener(new ActionListener() {
-            
-            @Override
-            public void actionPerformed(ActionEvent e) {
+                }
+                
                 if(listener != null) {                    
                     listener.stateChanged(new ChangeEvent(this));
                 }
@@ -134,9 +129,9 @@ public class ComponentEntryOneCheckBox extends JPanel {
         this.add(field, BorderLayout.CENTER);
 
         // Set default
-        checkBox.setSelected(!selectCheckBoxToEdit);      
+        setValue(null);
     }
-
+    
     /**
      * Returns whether the field is valid
      * 
