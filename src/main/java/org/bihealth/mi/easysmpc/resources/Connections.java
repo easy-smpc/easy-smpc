@@ -70,12 +70,29 @@ public class Connections {
         node.putInt(SMTP_PORT_KEY, settings.getSMTPPort());
         node.putBoolean(IMAP_ENCRYPTION_TYPE, settings.isSSLTLSIMAP());
         node.putBoolean(SMTP_ENCRYPTION_TYPE, settings.isSSLTLSSMTP());
-        if(settings.getIMAPUserName() != null) node.put(IMAP_USER_NAME_KEY, settings.getIMAPUserName());
-        if(settings.getSMTPUserName() != null) node.put(SMTP_USER_NAME_KEY, settings.getSMTPUserName());
-        if(settings.getIMAPAuthMechanisms() != null) node.put(IMAP_AUTH_MECH_KEY, settings.getIMAPAuthMechanisms());
-        if(settings.getSMTPAuthMechanisms() != null) node.put(SMTP_AUTH_MECH_KEY, settings.getSMTPAuthMechanisms());
+        setOrDeleteKey(node, IMAP_USER_NAME_KEY, settings.getIMAPUserName());
+        setOrDeleteKey(node, SMTP_USER_NAME_KEY, settings.getSMTPUserName());
+        setOrDeleteKey(node, IMAP_AUTH_MECH_KEY, settings.getIMAPAuthMechanisms());
+        setOrDeleteKey(node, SMTP_AUTH_MECH_KEY, settings.getSMTPAuthMechanisms());        
     }
     
+    /**
+     * Sets a value if not null and deletes key if null
+     * 
+     * @param node
+     * @param key
+     * @param value
+     */
+    private static void setOrDeleteKey(Preferences node, String key, String value) {
+        if(value != null) {
+            node.put(key, value);
+        } else {
+            if(node.get(key, null) != null) {
+                node.remove(key);
+            }
+        }
+    }
+
     /**
      * Lists all available settings
      * @return
