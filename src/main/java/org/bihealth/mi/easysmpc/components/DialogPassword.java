@@ -97,7 +97,7 @@ public class DialogPassword extends JDialog implements ChangeListener {
                                                    true,
                                                    false);
         this.add(this.passwordEntry, BorderLayout.CENTER);
-        passwordEntry.setChangeListener(this);   
+        passwordEntry.setChangeListener(this);
         
         
         // Buttons 
@@ -154,7 +154,7 @@ public class DialogPassword extends JDialog implements ChangeListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionProceed();
+                buttonOK.doClick();
             }
         });
         
