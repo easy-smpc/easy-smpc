@@ -254,7 +254,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionCheckAndProceed();
+                buttonOK.doClick();
             }
         });
         
@@ -521,9 +521,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             AppPasswordProvider provider = new AppPasswordProvider();
             result = new ConnectionIMAPSettings(entryIMAPDetails.getEmailAddress(), provider, entrySMTPDetails.getEmailAddress(), provider)
                     .setIMAPPassword(entryIMAPDetails.getPassword())
-                    .setSMTPPassword(entrySMTPDetails.getPassword())
-                    .setIMAPUserName(entryIMAPDetails.getUserName())
-                    .setSMTPUserName(entrySMTPDetails.getUserName());
+                    .setSMTPPassword(entrySMTPDetails.getPassword());
         };
         
         // Take data always coming from IMAP and SMTP entries and return
@@ -533,6 +531,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
               .setSMTPServer(entrySMTPDetails.getServer())
               .setSSLTLSIMAP(entryIMAPDetails.isSSLTLS())
               .setSSLTLSSMTP(entrySMTPDetails.isSSLTLS())
+              .setIMAPUserName(entryIMAPDetails.getUserName())
+              .setSMTPUserName(entrySMTPDetails.getUserName())
               .setIMAPAuthMechanisms(entryIMAPDetails.getAuthMechanisms())
               .setSMTPAuthMechanisms(entrySMTPDetails.getAuthMechanisms());            
     }
