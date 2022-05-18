@@ -1,6 +1,8 @@
 package org.bihealth.mi.easysmpc.components;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -18,11 +20,15 @@ import javax.swing.event.ChangeListener;
 public class ComponentEntryOneCheckBox extends JPanel {
 
     /** SVUID */
-    private static final long serialVersionUID = -5270653689813794513L;
+    private static final long       serialVersionUID = -5270653689813794513L;
     /** Field */
-    private ComponentEntryOne field;
+    private final ComponentEntryOne field;
     /** Check box */
-    private JCheckBox         checkBox;
+    private final JCheckBox         checkBox;
+    /** Target bit */
+    private final boolean           selectCheckBoxToEdit;
+    /** Change listener */
+    private ChangeListener          listener;
     
     /**
      * Creates a new instance
@@ -31,9 +37,42 @@ public class ComponentEntryOneCheckBox extends JPanel {
      * @param validator
      */
     public ComponentEntryOneCheckBox(String text, ComponentTextFieldValidator validator) {
+        this(text, validator, true, false);
+    }
+        
+    /**
+     * Creates a new instance
+     * 
+     * @param text
+     * @param validator
+     * @param selectCheckBoxToEdit - if true the text field is enabled if check box is selected, if false the text field is enabled if check box is not selected
+     * @param isPasswordField
+     */
+    public ComponentEntryOneCheckBox(String text,
+                                     ComponentTextFieldValidator validator,
+                                     boolean selectCheckBoxToEdit,
+                                     boolean isPasswordField) {
+        // Store
+        this.selectCheckBoxToEdit = selectCheckBoxToEdit;
+        
+        // Create validator wrapper        
+        ComponentTextFieldValidator validatorWrapper = new ComponentTextFieldValidator() {
+
+            @Override
+            public boolean validate(String text) {
+                
+                // Is field validator necessary?
+                if (checkBox != null && selectCheckBoxToEdit == !checkBox.isSelected()) {
+                    return true;
+                }
+
+                // Return validator result
+                return validator != null ? validator.validate(text) : true;
+            }            
+        };
         
         // Create field
-        field = new ComponentEntryOne(text, null, true, validator, false, false);
+        field = new ComponentEntryOne(text, null, true, validatorWrapper, isPasswordField, false);
         field.setMouseListener(new MouseListener() {
 
             @Override
@@ -69,10 +108,20 @@ public class ComponentEntryOneCheckBox extends JPanel {
             @Override
             public void stateChanged(ChangeEvent e) {
                 if (checkBox.isSelected()) {
-                    field.setFieldEnabled(true);
+                    field.setFieldEnabled(selectCheckBoxToEdit);
+                    field.setValue(field.getValue());
                 } else {
-                    field.setFieldEnabled(false);
+                    field.setFieldEnabled(!selectCheckBoxToEdit);
                     field.setValue(null);
+                }                
+            }
+        });
+        checkBox.addActionListener(new ActionListener() {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(listener != null) {                    
+                    listener.stateChanged(new ChangeEvent(this));
                 }
             }
         });
@@ -84,8 +133,8 @@ public class ComponentEntryOneCheckBox extends JPanel {
         this.add(checkBox, BorderLayout.WEST);
         this.add(field, BorderLayout.CENTER);
 
-        // Deactivate as default
-        checkBox.setSelected(false);      
+        // Set default
+        checkBox.setSelected(!selectCheckBoxToEdit);      
     }
 
     /**
@@ -97,7 +146,6 @@ public class ComponentEntryOneCheckBox extends JPanel {
         return this.field.isValueValid();
     }
 
-
     /**
      * Set change listener
      * 
@@ -105,8 +153,8 @@ public class ComponentEntryOneCheckBox extends JPanel {
      */
     public void setChangeListener(ChangeListener listener) {
         this.field.setChangeListener(listener);
+        this.listener = listener;
     }
-
 
     /**
      * Get value
@@ -126,13 +174,13 @@ public class ComponentEntryOneCheckBox extends JPanel {
         // Set text field value
         this.field.setValue(text);
 
-        // Set field enabled and checkbox clicked if not null and vv
+        // Set field enabled and check box clicked if not null and vv
         if (text != null) {
-            field.setFieldEnabled(true);
-            checkBox.setSelected(true);
+            field.setFieldEnabled(selectCheckBoxToEdit);
+            checkBox.setSelected(selectCheckBoxToEdit);
         } else {
-            field.setFieldEnabled(false);
-            checkBox.setSelected(false);
+            field.setFieldEnabled(!selectCheckBoxToEdit);
+            checkBox.setSelected(!selectCheckBoxToEdit);
         }
     }
 }

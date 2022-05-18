@@ -176,22 +176,25 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
 
         // User name entry
         userNameEntry = new ComponentEntryOneCheckBox(Resources.getString("EmailConfig.28"),
-                                              new ComponentTextFieldValidator() {
+                                                      new ComponentTextFieldValidator() {
 
-                                                  @Override
-                                                  public boolean validate(String text) {
-                                                      return true;
-                                                  }
-                                              });        
+                                                          @Override
+                                                          public boolean validate(String text) {
+                                                              return text != null &&
+                                                                     !text.isBlank();
+                                                          }
+                                                      });   
         
         // Auth mechanism entry
-        authMechEntry = new ComponentEntryOneCheckBox(Resources.getString("EmailConfig.30"), new ComponentTextFieldValidator() {
-            
-          @Override
-          public boolean validate(String text) {
-              return true;
-          }
-      });               
+        authMechEntry = new ComponentEntryOneCheckBox(Resources.getString("EmailConfig.30"),
+                                                      new ComponentTextFieldValidator() {
+
+                                                          @Override
+                                                          public boolean validate(String text) {
+                                                              return text != null &&
+                                                                     !text.isBlank();
+                                                          }
+                                                      });              
         
         // Add
         this.add(emailEntry);
