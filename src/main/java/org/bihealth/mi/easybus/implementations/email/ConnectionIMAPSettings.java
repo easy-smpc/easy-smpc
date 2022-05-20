@@ -169,6 +169,9 @@ public class ConnectionIMAPSettings implements Serializable {
         if (!Participant.isEmailValid(emailAddressSMTP)) {
             throw new IllegalArgumentException("Invalid e-mail address for SMTP");
         }
+        if (!Participant.isEmailValid(emailAddressSMTP)) {
+            throw new IllegalArgumentException("Invalid e-mail address for SMTP");
+        }        
         
         // Store
         this.imapEmailAddress = emailAddressIMAP;
