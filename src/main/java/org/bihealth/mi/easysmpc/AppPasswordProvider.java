@@ -31,7 +31,7 @@ public class AppPasswordProvider implements PasswordProvider, Serializable {
     private static final long serialVersionUID = -7455626179379349238L;
 
     @Override
-    public String getPassword() {
+    public PasswordsStore getPassword() {
         return new DialogPassword(getParent()).showDialog();
     }
 
@@ -46,5 +46,5 @@ public class AppPasswordProvider implements PasswordProvider, Serializable {
             }
         }
         throw new IllegalStateException("Could not determine parent window");
-    }
+    }   
 }

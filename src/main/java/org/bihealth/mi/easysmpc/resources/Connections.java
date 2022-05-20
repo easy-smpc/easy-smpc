@@ -107,7 +107,7 @@ public class Connections {
         // Loop each sub node
         for(String children : rootPreferences.childrenNames()) {
             Preferences child = rootPreferences.node(children);
-            result.add(new ConnectionIMAPSettings(children, new AppPasswordProvider(), child.get(SMTP_EMAIL_KEY, children), new AppPasswordProvider())
+            result.add(new ConnectionIMAPSettings(children, new AppPasswordProvider(), child.get(SMTP_EMAIL_KEY, children))
                        .setIMAPServer(child.get(IMAP_SERVER_KEY, null))
                                                            .setIMAPPort(child.getInt(IMAP_PORT_KEY, 0))
                                                            .setSSLTLSIMAP(child.getBoolean(IMAP_ENCRYPTION_TYPE, true))

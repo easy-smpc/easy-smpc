@@ -583,7 +583,7 @@ public class Main {
     /**
      *  Reads IMAP connection settings from command line options
      * 
-     * @param CLI
+     * @param cli
      * @return
      */
     public static ConnectionIMAPSettings getConnectionIMAPSettingsFromCLI(CommandLine cli) {
@@ -593,8 +593,8 @@ public class Main {
                                                                                    null,
                                                                                    cli.hasOption(OPTION_MAILADDRESS_SENDING)
                                                                                            ? cli.getOptionValue(OPTION_MAILADDRESS_SENDING)
-                                                                                           : cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING),
-                                                                                   null).setIMAPPassword(cli.getOptionValue(OPTION_PASSWORD_RECEIVING))
+                                                                                           : cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING))
+                                                                                        .setIMAPPassword(cli.getOptionValue(OPTION_PASSWORD_RECEIVING))
                                                                                         .setSMTPPassword(cli.hasOption(OPTION_PASSWORD_SENDING)
                                                                                                 ? cli.getOptionValue(OPTION_PASSWORD_SENDING)
                                                                                                 : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));      

@@ -35,6 +35,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.bihealth.mi.easybus.implementations.email.PasswordProvider.PasswordsStore;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -50,7 +51,7 @@ public class DialogPassword extends JDialog implements ChangeListener {
     /** Component to enter IMAP password */
     private ComponentEntryOne         passwordEntryIMAP;
     /** Result */
-    private String                    result;
+    private PasswordsStore            result;
     /** Button */
     private JButton                   buttonOK;
     /** Parent */
@@ -201,7 +202,7 @@ public class DialogPassword extends JDialog implements ChangeListener {
     /**
      * Show this dialog
      */
-    public String showDialog(){
+    public PasswordsStore showDialog(){
         this.setModal(true);
         this.setLocationRelativeTo(this.parent);
         this.setVisible(true);
@@ -238,7 +239,7 @@ public class DialogPassword extends JDialog implements ChangeListener {
      * Action proceed and close
      */
     protected void actionProceed() {
-        this.result = passwordEntryIMAP.getValue();
+        this.result = new PasswordsStore(passwordEntryIMAP.getValue(), passwordEntrySMTP.getValue());
         this.dispose();
     }
 }
