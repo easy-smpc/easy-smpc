@@ -15,6 +15,7 @@ package org.bihealth.mi.easysmpc.components;
 
 import javax.swing.JPanel;
 
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -25,7 +26,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class EntryServers extends ComponentEntry {
     
     /** SVID */
-    private static final long serialVersionUID = -1491960197508114210L;
+    private static final long serialVersionUID = 466453564994174241L;
 
     /**
      * Creates a new instance
@@ -37,7 +38,12 @@ public class EntryServers extends ComponentEntry {
               new ComponentTextFieldValidator() {
                     @Override
                     public boolean validate(String text) {
-                        return text != null && !text.isBlank();
+                        try {
+                            ConnectionIMAPSettings.checkDNSName(text);
+                            return true;
+                        } catch (IllegalArgumentException e) {
+                            return false;
+                        }
                     }
                 }, 
               Resources.getString("EmailConfig.4"), 
@@ -46,7 +52,12 @@ public class EntryServers extends ComponentEntry {
               new ComponentTextFieldValidator() {
                 @Override
                 public boolean validate(String text) {
-                    return text != null && !text.isBlank();
+                    try {
+                        ConnectionIMAPSettings.checkDNSName(text);
+                        return true;
+                    } catch (IllegalArgumentException e) {
+                        return false;
+                    }
                 }
               },
               false,

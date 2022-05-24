@@ -29,6 +29,9 @@ public class EntryEMailPassword extends ComponentEntry {
     
     /**
      * Creates a new instance
+     * 
+     * @param leftString - text for left label
+     * @param rightString - text for right label
      */
     public EntryEMailPassword(String leftString, String rightString) {
         super(leftString,
