@@ -147,19 +147,19 @@ public class ConnectionIMAPSettings implements Serializable {
      */
     public ConnectionIMAPSettings(String emailAddress, PasswordProvider provider) {
         
-        this(emailAddress, provider, emailAddress);
+        this(emailAddress, emailAddress, provider);
     }    
     
     /**
      * Creates a new instance
      * 
      * @param emailAddressIMAP
-     * @param provider
      * @param emailAddressSMPT
+     * @param provider
      */
     public ConnectionIMAPSettings(String emailAddressIMAP,
-                                  PasswordProvider provider,
-                                  String emailAddressSMTP) {
+                                  String emailAddressSMTP,
+                                  PasswordProvider provider) {
         // Checks
         checkNonNull(emailAddressIMAP);
         checkNonNull(emailAddressSMTP);
@@ -168,10 +168,7 @@ public class ConnectionIMAPSettings implements Serializable {
         }
         if (!Participant.isEmailValid(emailAddressSMTP)) {
             throw new IllegalArgumentException("Invalid e-mail address for SMTP");
-        }
-        if (!Participant.isEmailValid(emailAddressSMTP)) {
-            throw new IllegalArgumentException("Invalid e-mail address for SMTP");
-        }        
+        }      
         
         // Store
         this.imapEmailAddress = emailAddressIMAP;
@@ -799,5 +796,5 @@ public class ConnectionIMAPSettings implements Serializable {
     @Override
     public String toString() {
         return String.format("IMAP connections for e-mail address %s", this.imapEmailAddress);
-    }    
+    }
 }

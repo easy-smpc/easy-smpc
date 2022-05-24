@@ -519,7 +519,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         }
         else {
             AppPasswordProvider provider = new AppPasswordProvider();
-            result = new ConnectionIMAPSettings(entryIMAPDetails.getEmailAddress(), provider, entrySMTPDetails.getEmailAddress())
+            result = new ConnectionIMAPSettings(entryIMAPDetails.getEmailAddress(), entrySMTPDetails.getEmailAddress(), provider)
                     .setIMAPPassword(entryIMAPDetails.getPassword())
                     .setSMTPPassword(entrySMTPDetails.getPassword());
         };
