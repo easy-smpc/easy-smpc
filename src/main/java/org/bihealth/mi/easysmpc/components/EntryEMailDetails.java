@@ -24,7 +24,8 @@ import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
- * Enter e-mail details
+ * Entry to enter the followng e-mail details: server name, port, host
+ * For user name, password etc. please use EntryEMailDetailsAdvanced
  * 
  * @author Felix Wirth
  *
@@ -233,7 +234,7 @@ public class EntryEMailDetails extends JPanel {
      * @return
      */
     public int getPort() {
-        return portEntry.isValueValid() ? Integer.valueOf(portEntry.getValue()) : null;
+        return portEntry.isValueValid() ? Integer.valueOf(portEntry.getValue()) : 0;
     }
     
     /**

@@ -63,8 +63,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     private ComponentRadioComfirmSwitchEntry radioDialogType;
     /** Central panel */
     JPanel                                   central;
-    /** Encryption type panel */
-    JPanel                                   encryptionTypePanel;
     /** Init finished */
     private boolean                          initFinished     = false;
     /** Entry for IMAP details */
@@ -292,7 +290,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         this.entryEmailPassword.setRightValue(password);
         this.entryEmailPassword.setLefttEnabled(this.createMode);
         
-        // Create send and receive panel
+        // Create receive and send panel
         JPanel receiveSendPanel = new JPanel();     
         receiveSendPanel.setLayout(new BoxLayout(receiveSendPanel, BoxLayout.X_AXIS));
         
@@ -323,8 +321,11 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     
     /**
      * Display advanced dialog
-     * @param password 
-     * @param emailAddress 
+     * 
+     * @param emailAddress
+     * @param password
+     * @param oldIMAPDetails
+     * @param oldSMTPDetails
      */
     private void displayAdvancedDialog(String emailAddress, String password, EntryEMailDetails oldIMAPDetails, EntryEMailDetails oldSMTPDetails) {
         // Remove
@@ -420,14 +421,13 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
 
         try {
             ConnectionIMAPSettings settings = getConnectionSettings();
-            if (!settings.isValid()) { throw new BusException("Connection error"); }
+            if (!settings.isValid()) {
+                throw new BusException("Connection error");
+            }
             this.result = settings;
             this.dispose();
         } catch (BusException e) {
-            JOptionPane.showMessageDialog(this,
-                                          Resources.getString("EmailConfig.14"),
-                                          Resources.getString("EmailConfig.12"),
-                                          JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, Resources.getString("EmailConfig.14"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
             return;
         }
     }
@@ -482,10 +482,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                 throw new IllegalArgumentException("Configuration could not be guessed");
             }
         } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(this,
-                                          Resources.getString("EmailConfig.11"),
-                                          Resources.getString("EmailConfig.10"),
-                                          JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Resources.getString("EmailConfig.11"), Resources.getString("EmailConfig.10"), JOptionPane.WARNING_MESSAGE);
         }
     }
 

@@ -39,11 +39,12 @@ import org.bihealth.mi.easybus.implementations.email.PasswordProvider.PasswordsS
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
- * Dialog for entering a string
+ * Dialog for entering IMAP and SMTP password
  * 
  * @author Felix Wirth
  * @author Fabian Prasser
  */
+
 public class DialogPassword extends JDialog implements ChangeListener {
 
     /** SVUID */
