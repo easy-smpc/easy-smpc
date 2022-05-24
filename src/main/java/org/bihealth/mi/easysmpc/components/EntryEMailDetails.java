@@ -49,9 +49,6 @@ public class EntryEMailDetails extends JPanel {
      */
     EntryEMailDetails(String title, int standardPort) {
         
-        // create additional elements
-        createAdditionalElements(null);
-        
         // General
         this.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                         title,
@@ -245,14 +242,5 @@ public class EntryEMailDetails extends JPanel {
      */
     public boolean isSSLTLS() {
         return radioEncryptionType.isFirstOptionSelected();
-    }
-    
-    /**
-     * Creates the additional elements
-     * 
-     * @param title
-     */
-    protected void createAdditionalElements(String title) {
-        // Empty
-    }
+    }    
 }

@@ -50,7 +50,10 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
      */
     EntryEMailDetailsAdvanced(String title, int standardPort) {
         // Super
-        super(title, standardPort);        
+        super(title, standardPort);
+        
+        // Create elements
+        createAdditionalElements(title);
     }
     
     /**
@@ -69,7 +72,10 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
                               boolean emailEnabled) {
         // Super
         super(title, standardPort, settings, isIMAP);
-                
+        
+        // Create element
+        createAdditionalElements(title);
+        
         // Check
         if(settings == null) {
             return;
@@ -105,7 +111,10 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
     EntryEMailDetailsAdvanced(String title, int standardPort, EntryEMailDetails oldDetails) {
         // Super
         super(title, standardPort, oldDetails);
-                
+        
+        // Create element
+        createAdditionalElements(title);
+        
         // Check
         if(oldDetails == null) {
             return;
@@ -134,11 +143,15 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
         // Overwrite values
         if(emailAddress != null) emailEntry.setValue(emailAddress);
         if(password != null) passwordEntry.setValue(password);
-        emailEntry.setFieldEnabled(emailEnabled);
+        emailEntry.setFieldEnabled(emailEnabled);        
     }
 
-    @Override
-    protected void createAdditionalElements(String title) {
+    /**
+     * Creates the additional elements
+     * 
+     * @param title
+     */
+    private void createAdditionalElements(String title) {
         
         // Reset
         this.removeAll();
