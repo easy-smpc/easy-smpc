@@ -62,13 +62,13 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /** Radio button group dialog type simple/advanced */
     private ComponentRadioComfirmSwitchEntry radioDialogType;
     /** Central panel */
-    JPanel                                   central;
+    private JPanel                                   central;
     /** Init finished */
     private boolean                          initFinished     = false;
     /** Entry for IMAP details */
-    EntryEMailDetails                        entryIMAPDetails;
+    private EntryEMailDetails                        entryIMAPDetails;
     /** Entry for SMTP details */
-    EntryEMailDetails                        entrySMTPDetails;
+    private EntryEMailDetails                        entrySMTPDetails;
     /** E-Mail and password entry */
     private EntryEMailPassword               entryEmailPassword;
     /** Edit or create mode? */

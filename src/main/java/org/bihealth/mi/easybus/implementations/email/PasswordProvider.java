@@ -25,7 +25,7 @@ public interface PasswordProvider {
      * @param settings 
      * @return
      */
-    public PasswordsStore getPassword();
+    public PasswordStore getPassword();
     
     /**
      * Stores e-mail passwords
@@ -33,7 +33,7 @@ public interface PasswordProvider {
      * @author Felix Wirth
      *
      */
-    public class PasswordsStore {
+    public class PasswordStore {
         /** IMAP password */
         private final String imapPassword;
         
@@ -46,7 +46,7 @@ public interface PasswordProvider {
          * @param imapPassword
          * @param smtpPassword
          */
-        public PasswordsStore(String imapPassword, String smtpPassword) {
+        public PasswordStore(String imapPassword, String smtpPassword) {
             
             // Check
             if(imapPassword == null || imapPassword.isBlank()) {

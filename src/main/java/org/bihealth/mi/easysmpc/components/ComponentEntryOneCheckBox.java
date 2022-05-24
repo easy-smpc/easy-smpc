@@ -86,7 +86,7 @@ public class ComponentEntryOneCheckBox extends JPanel {
         
         // Create field
         field = new ComponentEntryOne(text, null, true, validatorWrapper, isPasswordField, false);
-        field.setMouseListener(new MouseListener() {
+        field.addMouseListener(new MouseListener() {
 
             @Override
             public void mouseReleased(MouseEvent e) {

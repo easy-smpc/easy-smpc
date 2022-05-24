@@ -48,7 +48,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
      * @param title
      * @param standardPort
      */
-    EntryEMailDetailsAdvanced(String title, int standardPort) {
+    public EntryEMailDetailsAdvanced(String title, int standardPort) {
         // Super
         super(title, standardPort);
         
@@ -108,7 +108,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
      * @param standardPort
      * @param oldDetails
      */
-    EntryEMailDetailsAdvanced(String title, int standardPort, EntryEMailDetails oldDetails) {
+    public EntryEMailDetailsAdvanced(String title, int standardPort, EntryEMailDetails oldDetails) {
         // Super
         super(title, standardPort, oldDetails);
         
@@ -137,7 +137,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
      * @param password
      * @param emailEnabled
      */
-    EntryEMailDetailsAdvanced(String title, int standardPort, EntryEMailDetails oldDetails, String emailAddress, String password, boolean emailEnabled) {
+    public EntryEMailDetailsAdvanced(String title, int standardPort, EntryEMailDetails oldDetails, String emailAddress, String password, boolean emailEnabled) {
         this(title, standardPort, oldDetails);
         
         // Overwrite values

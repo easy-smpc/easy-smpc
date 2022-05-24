@@ -152,7 +152,7 @@ public class ComponentEntryOne extends JPanel {
      * 
      * @param listener
      */
-    public void setMouseListener(MouseListener listener) {
+    public void addMouseListener(MouseListener listener) {
         this.label.addMouseListener(listener);
     }
 }

@@ -28,7 +28,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PerformanceListener;
-import org.bihealth.mi.easybus.implementations.email.PasswordProvider.PasswordsStore;
+import org.bihealth.mi.easybus.implementations.email.PasswordProvider.PasswordStore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -259,7 +259,7 @@ public class ConnectionIMAPSettings implements Serializable {
         // Potentially ask for password
         if (this.imapPassword == null && this.provider != null && usePasswordProvider) {
             // Get passwords
-            PasswordsStore store = this.provider.getPassword();
+            PasswordStore store = this.provider.getPassword();
             this.imapPassword = store.getIMAPPassword();
             this.smtpPassword = store.getSMTPPassword();
             
@@ -283,7 +283,7 @@ public class ConnectionIMAPSettings implements Serializable {
         // Potentially ask for password
         if (this.smtpPassword == null && this.provider != null && usePasswordProvider) {
             // Get passwords
-            PasswordsStore store = this.provider.getPassword();
+            PasswordStore store = this.provider.getPassword();
             this.imapPassword = store.getIMAPPassword();
             this.smtpPassword = store.getSMTPPassword();
             

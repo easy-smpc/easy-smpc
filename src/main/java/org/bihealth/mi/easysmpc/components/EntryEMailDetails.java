@@ -47,7 +47,7 @@ public class EntryEMailDetails extends JPanel {
      * @param title
      * @param standardPort
      */
-    EntryEMailDetails(String title, int standardPort) {
+    public EntryEMailDetails(String title, int standardPort) {
         
         // General
         this.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
