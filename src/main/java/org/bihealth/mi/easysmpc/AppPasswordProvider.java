@@ -46,5 +46,5 @@ public class AppPasswordProvider implements PasswordProvider, Serializable {
             }
         }
         throw new IllegalStateException("Could not determine parent window");
-    }   
+    }
 }
