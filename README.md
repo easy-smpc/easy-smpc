@@ -93,7 +93,6 @@ prime.
 3. As an initiator or participant, you now click on proceed. If running in automated mode, EasySMPC will automatically perform all steps until the final result is displayed. If running in manual mode, all users need to send and receive e-mails prepared by EasySMPC to perform the computation.
 4. The final perspective shows the result of the secure addition of all variables.
 
-### Creator
 ## Command line version
 There is also a command line version of EasySMPC. After [building](#build-from-source) or downloading from [our release
 page](https://github.com/prasser/easy-smpc/releases), use the jar easy-smpc-cli-*{Version}*.jar either as a creator or a participant. The command line version only supports the [automatic mode](#quick-start-guide).
