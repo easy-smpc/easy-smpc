@@ -21,8 +21,9 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 
 /**
- * Choose between two radio buttons and ask a before a change from the second to the first happens 
- * When a change happens the set listener is called with the instance of this class 
+ * Choose between two radio buttons and asks with a confirm dialog (if dialog is necessary) before a change from the second to the first happens.
+ * If the change is confirmed, the set listener is called with the instance of this class.
+ * A change from the first to second happens without a dialog.
  * 
  * @author Felix Wirth
  *
@@ -40,16 +41,28 @@ public class ComponentRadioComfirmSwitchEntry extends ComponentRadioEntry {
     /** Allows to check whether a dialog is necessary*/
     private BooleanSupplier dialogNecessary;
 
+    /**
+     * Creates a new instance
+     * 
+     * @param title
+     * @param firstOptionText
+     * @param secondOptionText
+     * @param orientationRadios - true if y-oriented, else x-oriented
+     * @param parent
+     * @param confirmMessage
+     * @param confirmTitle
+     * @param dialogNecessary - Boolean supplier to check wether a confirm dialog is necessary
+     */
     public ComponentRadioComfirmSwitchEntry(String title,
                                   String firstOptionText,
                                   String secondOptionText,
-                                  boolean orientationRadiosYAxi,
+                                  boolean orientationRadios,
                                   JPanel parent,
                                   String confirmMessage,
                                   String confirmTitle,
                                   BooleanSupplier dialogNecessary) {
         // Super
-        super(title, firstOptionText, secondOptionText, orientationRadiosYAxi);
+        super(title, firstOptionText, secondOptionText, orientationRadios);
         
         // Store
         this.parent = parent;

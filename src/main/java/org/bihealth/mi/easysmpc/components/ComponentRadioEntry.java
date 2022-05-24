@@ -54,12 +54,12 @@ public class ComponentRadioEntry extends JPanel implements ActionListener {
      * @param title
      * @param firstOptionText
      * @param secondOptionText 
-     * @param orientationRadiosYAxis  
+     * @param orientationRadios - true if y-oriented, else x-oriented
      */
     public ComponentRadioEntry(String title,
                         String firstOptionText,
                         String secondOptionText,
-                        boolean orientationRadiosYAxis) {
+                        boolean orientationRadios) {
         // Init
         JPanel titlePanel = null;
         
@@ -77,7 +77,7 @@ public class ComponentRadioEntry extends JPanel implements ActionListener {
         
         // Create radio panel
         radioPanel = new JPanel();
-        radioPanel.setLayout(new BoxLayout(radioPanel, orientationRadiosYAxis ? BoxLayout.Y_AXIS : BoxLayout.X_AXIS));
+        radioPanel.setLayout(new BoxLayout(radioPanel, orientationRadios ? BoxLayout.Y_AXIS : BoxLayout.X_AXIS));
         radioPanel.add(firstOption);
         radioPanel.add(secondOption);
         

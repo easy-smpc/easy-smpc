@@ -112,7 +112,7 @@ public class ComponentEntryOne extends JPanel {
     }
     
     /**
-     * Sets the change listener to the text field
+     * Sets a change listener to the text field
      * @param listener
      */
     public void setChangeListener(ChangeListener listener) {
@@ -149,6 +149,7 @@ public class ComponentEntryOne extends JPanel {
     
     /**
      * Sets the mouse listener to the label
+     * 
      * @param listener
      */
     public void setMouseListener(MouseListener listener) {
