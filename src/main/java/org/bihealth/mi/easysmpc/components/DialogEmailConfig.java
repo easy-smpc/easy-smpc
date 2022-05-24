@@ -20,7 +20,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.function.BooleanSupplier;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -60,20 +59,20 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /** Parent frame */
     private JFrame                           parent;
     /** Radio button group dialog type simple/advanced */
-    private ComponentRadioComfirmSwitchEntry radioDialogType;
+    private ComponentRadioEntry    radioDialogType;
     /** Central panel */
-    private JPanel                                   central;
+    private JPanel                           central;
     /** Init finished */
     private boolean                          initFinished     = false;
     /** Entry for IMAP details */
-    private EntryEMailDetails                        entryIMAPDetails;
+    private EntryEMailDetails                entryIMAPDetails;
     /** Entry for SMTP details */
-    private EntryEMailDetails                        entrySMTPDetails;
+    private EntryEMailDetails                entrySMTPDetails;
     /** E-Mail and password entry */
     private EntryEMailPassword               entryEmailPassword;
     /** Edit or create mode? */
     private boolean                          createMode       = true;
-    
+
     /**
      * Create a new instance
      * 
@@ -159,22 +158,54 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         central.setLayout(new BoxLayout(central, BoxLayout.Y_AXIS));
         
 
-        // Create switch between simple and advanced dialog
-        this.radioDialogType = new ComponentRadioComfirmSwitchEntry(null,
+        // Create switch between simple and advanced dialog        
+        this.radioDialogType = new ComponentRadioEntry(null,
                                                        Resources.getString("EmailConfig.26"),
                                                        Resources.getString("EmailConfig.27"),
-                                                       false,
-                                                       central,
-                                                       Resources.getString("EmailConfig.41"),
-                                                       Resources.getString("EmailConfig.42"),
-                                                       new BooleanSupplier() {
-                                                        
-                                                        @Override
-                                                        public boolean getAsBoolean() {
-                                                            return entryEmailPassword == null && isAdvancedDialogNecessary(entryIMAPDetails, entrySMTPDetails); 
-                                                        }
-                                                    });
-        this.radioDialogType.setChangeListener(this);
+                                                       false);
+        this.radioDialogType.addActionListener(new ActionListener() {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+                // If swap from simple to advanced display simple dialog
+                if (!radioDialogType.isFirstOptionSelected()) {
+                        displayAdvancedDialog(entryEmailPassword.getLeftValue(),
+                                              entryEmailPassword.getRightValue(),
+                                              entryIMAPDetails,
+                                              entrySMTPDetails);
+                    return;
+                }
+                
+                // If swap from advanced to simple and no dialog necessary
+                if (!isAdvancedDialogNecessary(entrySMTPDetails, entryIMAPDetails) && radioDialogType.isFirstOptionSelected()) {
+                    displaySimpleDialog(entryIMAPDetails.getEmailAddress(),
+                                          entryIMAPDetails.getPassword(),
+                                          entryIMAPDetails,
+                                          entrySMTPDetails);
+                    return;
+                }
+                
+                // If swap from advanced to simple ask before
+                if (radioDialogType.isFirstOptionSelected() &&
+                    isAdvancedDialogNecessary(entrySMTPDetails, entryIMAPDetails) &&
+                    JOptionPane.showConfirmDialog(DialogEmailConfig.this,
+                                                  Resources.getString("EmailConfig.41"),
+                                                  Resources.getString("EmailConfig.42"),
+                                                  JOptionPane.OK_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
+                    // Display dialog
+                    displaySimpleDialog(entryIMAPDetails.getEmailAddress(),
+                                          entryIMAPDetails.getPassword(),
+                                          entryIMAPDetails,
+                                          entrySMTPDetails);
+                    return;
+                } else {
+                    // Reset
+                    radioDialogType.setFirstOptionSelected(false);
+                }
+
+            }
+        });
         
         // Add
         top.add(radioDialogType);
@@ -357,7 +388,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         // Repaint
         this.revalidate();
         this.repaint();
-        
+        this.pack();        
     }
 
     /**
@@ -385,24 +416,6 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         // Check button enabled
         if (this.buttonOK != null) {
             this.buttonOK.setEnabled(areValuesValid());
-        }
-
-        // Change between simple and advanced dialog
-        if (e.getSource() == radioDialogType) {            
-            if (this.radioDialogType.isFirstOptionSelected()) {
-                // Display simple dialog
-                displaySimpleDialog(entryIMAPDetails.getEmailAddress(),
-                                    entryIMAPDetails.getPassword(),
-                                    entryIMAPDetails,
-                                    entrySMTPDetails);
-            } else {
-                displayAdvancedDialog(entryEmailPassword != null ? entryEmailPassword.getLeftValue() : entryIMAPDetails.getEmailAddress(),
-                                      entryEmailPassword != null ? entryEmailPassword.getRightValue() : entryIMAPDetails.getEmailAddress(),
-                                      entryIMAPDetails, entrySMTPDetails);
-            }
-            
-            // Resize dialog
-            this.pack();
         }        
     }
 

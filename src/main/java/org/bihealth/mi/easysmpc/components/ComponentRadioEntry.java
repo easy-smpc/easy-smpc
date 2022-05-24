@@ -23,17 +23,19 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class ComponentRadioEntry extends JPanel implements ActionListener {
 
     /** SVUID */
-    private static final long serialVersionUID = -3142722039116254922L;   
+    private static final long serialVersionUID = -3142722039116254922L;
     /** Radio button group */
-    private  ButtonGroup group;
+    private ButtonGroup       group;
     /** First option */
-    private JRadioButton firstOption;
+    private JRadioButton      firstOption;
     /** Second option */
-    private JRadioButton secondOption;
+    private JRadioButton      secondOption;
     /** Radio panel */
-    private JPanel radioPanel;
+    private JPanel            radioPanel;
     /** Change listener */
-    private ChangeListener listener;
+    private ChangeListener    listener;
+    /** Action listener */
+    private ActionListener    actionListener;
     
     /**
      * Create a new instance with y-axis oriented radios
@@ -137,7 +139,17 @@ public class ComponentRadioEntry extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
-        // Empty
+        if (this.actionListener != null) {
+            actionListener.actionPerformed(e);
+        }
+    }
+    
+    /**
+     * Set action listener
+     * 
+     * @param actionListener
+     */
+    public void addActionListener(ActionListener actionListener) {
+        this.actionListener = actionListener;
     }
 }
