@@ -108,16 +108,16 @@ public class Connections {
         for(String children : rootPreferences.childrenNames()) {
             Preferences child = rootPreferences.node(children);
             result.add(new ConnectionIMAPSettings(children, child.get(SMTP_EMAIL_KEY, children), new AppPasswordProvider())
-                       .setIMAPServer(child.get(IMAP_SERVER_KEY, null))
-                                                           .setIMAPPort(child.getInt(IMAP_PORT_KEY, 0))
-                                                           .setSSLTLSIMAP(child.getBoolean(IMAP_ENCRYPTION_TYPE, true))
-                                                           .setSMTPServer(child.get(SMTP_SERVER_KEY, null))
-                                                           .setSMTPPort(child.getInt(SMTP_PORT_KEY, 0))
-                                                           .setSSLTLSSMTP(child.getBoolean(SMTP_ENCRYPTION_TYPE, true))
-                                                           .setIMAPUserName(child.get(IMAP_USER_NAME_KEY, null))
-                                                           .setSMTPUserName(child.get(SMTP_USER_NAME_KEY, null))
-                                                           .setIMAPAuthMechanisms(child.get(IMAP_AUTH_MECH_KEY, null))
-                                                           .setSMTPAuthMechanisms(child.get(SMTP_AUTH_MECH_KEY, null)));
+                                                 .setIMAPServer(child.get(IMAP_SERVER_KEY, null))
+                                                 .setIMAPPort(child.getInt(IMAP_PORT_KEY, 0))
+                                                 .setSSLTLSIMAP(child.getBoolean(IMAP_ENCRYPTION_TYPE, true))
+                                                 .setSMTPServer(child.get(SMTP_SERVER_KEY, null))
+                                                 .setSMTPPort(child.getInt(SMTP_PORT_KEY, 0))
+                                                 .setSSLTLSSMTP(child.getBoolean(SMTP_ENCRYPTION_TYPE, true))
+                                                 .setIMAPUserName(child.get(IMAP_USER_NAME_KEY, null))
+                                                 .setSMTPUserName(child.get(SMTP_USER_NAME_KEY, null))
+                                                 .setIMAPAuthMechanisms(child.get(IMAP_AUTH_MECH_KEY, null))
+                                                 .setSMTPAuthMechanisms(child.get(SMTP_AUTH_MECH_KEY, null)));
         }
         
         // Return
