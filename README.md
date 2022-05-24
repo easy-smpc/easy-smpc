@@ -94,10 +94,6 @@ prime.
 4. The final perspective shows the result of the secure addition of all variables.
 
 ## Command line version
-There is also a command line version of EasySMPC. After [building](#build-from-source) use the jar easy-smpc-cli-*{Version}*.jar as a creator and as two participants or more. The command line version only supports the automated mode.
-
-### Creator
-## Command line version
 There is also a command line version of EasySMPC. After [building](#build-from-source) or downloading from [our release
 page](https://github.com/prasser/easy-smpc/releases), use the jar easy-smpc-cli-*{Version}*.jar either as a creator or a participant. The command line version only supports the [automatic mode](#quick-start-guide).
 
