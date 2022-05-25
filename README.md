@@ -8,7 +8,7 @@
 
 ---
 
-### [Prerequisites](#prerequisites) ⚫ [Installation](#installation) ⚫ [Features](#features) ⚫ [Screenshot](#screenshot) ⚫ [Quick start guide](#quick-start-guide) ⚫ [Step-by-step tutorial](#tutorial) ⚫ [Command line version](#command-line-version) ⚫ [Contact](#contact) ⚫ [License](#license) ⚫ [Acknowledgements](#acknowledgments) ⚫ [Cite as](#cite-as)
+### [Prerequisites](#prerequisites) ⚫ [Installation](#installation) ⚫ [Features](#features) ⚫ [Screenshot](#screenshot) ⚫ [Quick start guide](#quick-start-guide) ⚫ [Tutorial](#tutorial) ⚫ [Command line version](#command-line-version) ⚫ [Contact](#contact) ⚫ [License](#license) ⚫ [Acknowledgements](#acknowledgments) ⚫ [Cite as](#cite-as)
 
 ---
 
