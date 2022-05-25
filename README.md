@@ -8,7 +8,7 @@
 
 ---
 
-### [Prerequisites](#prerequisites) ⚫ [Installation](#installation) ⚫ [Features](#features) ⚫ [Screenshot](#screenshot) ⚫ [Quick start guide](#quick-start-guide) ⚫ [Command line version](#command-line-version) ⚫ [Contact](#contact) ⚫ [License](#license) ⚫ [Acknowledgements](#acknowledgments) ⚫ [Cite as](#cite-as)
+### [Prerequisites](#prerequisites) ⚫ [Installation](#installation) ⚫ [Features](#features) ⚫ [Screenshot](#screenshot) ⚫ [Quick start guide](#quick-start-guide) ⚫ [Step-by-step tutorial](#tutorial) ⚫ [Command line version](#command-line-version) ⚫ [Contact](#contact) ⚫ [License](#license) ⚫ [Acknowledgements](#acknowledgments) ⚫ [Cite as](#cite-as)
 
 ---
 
@@ -92,6 +92,9 @@ prime.
 2. As a participant, you copy the message you received via email into the clipboard, click on _Participate in project_ in EasySMPC and paste the content. You will now see the study definition and can enter your own confidential data and mail box details if applicable.
 3. As an initiator or participant, you now click on proceed. If running in automated mode, EasySMPC will automatically perform all steps until the final result is displayed. If running in manual mode, all users need to send and receive e-mails prepared by EasySMPC to perform the computation.
 4. The final perspective shows the result of the secure addition of all variables.
+
+## Tutorial
+Please see the attached [tutorial](https://raw.githubusercontent.com/prasser/easy-smpc/35d86ee491f895c56bfebf42897e9418f9e05d26/tutorial/EasySMPC%20step-by-step%20tutorial.pdf) for a step-by-step guide using EasySMPC.
 
 ## Command line version
 There is also a command line version of EasySMPC. After [building](#build-from-source) or downloading from [our release
