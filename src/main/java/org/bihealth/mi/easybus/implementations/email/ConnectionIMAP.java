@@ -58,11 +58,11 @@ import jakarta.mail.util.ByteArrayDataSource;
 public class ConnectionIMAP extends ConnectionEmail {
 
     /** File name of the attached message */
-    private static final String           FILENAME_MESSAGE             = "message";
+    private static final String           FILENAME_MESSAGE = "message";
     /** Regex to check whether start of contains the e-mail subject prefix */
     private static Pattern                START_CONTAIN_PREFIX_PATTERN = Pattern.compile(".*" + EMAIL_SUBJECT_PREFIX.replace("[", "\\[") .replace("]", "\\]") + ".*");
     /** Logger */
-    private static final Logger           LOGGER                       = LogManager.getLogger(ConnectionIMAP.class);
+    private static final Logger           LOGGER           = LogManager.getLogger(ConnectionIMAP.class);
     /** Properties t o receive */
     private final Properties              propertiesReceiving;
     /** Properties to send */
@@ -81,8 +81,6 @@ public class ConnectionIMAP extends ConnectionEmail {
     private transient PerformanceListener listener;
     /** Password of the sending user */
     private String                        sendingPassword;
-    /** Password of the user */
-    private String                        password;
    
     /**
      * Create a new instance
@@ -99,8 +97,8 @@ public class ConnectionIMAP extends ConnectionEmail {
         super(sharedMailbox,
               settings.getIMAPEmailAddress(),
               settings.getSMTPEmailAddress(),
-              settings.getIMAPUserName(),
-              settings.getSMTPUserName(),
+              settings.getIMAPUserName() != null ? settings.getIMAPUserName() : settings.getIMAPEmailAddress(),
+              settings.getSMTPUserName() != null ? settings.getSMTPUserName() : settings.getSMTPEmailAddress(),
               settings.getPerformanceListener());
         
         // Check

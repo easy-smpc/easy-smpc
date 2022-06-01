@@ -16,7 +16,6 @@ package org.bihealth.mi.easysmpc.components;
 import javax.swing.JPanel;
 
 import org.bihealth.mi.easybus.Participant;
-import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
  * Entry of E-Mail address and password
@@ -30,9 +29,12 @@ public class EntryEMailPassword extends ComponentEntry {
     
     /**
      * Creates a new instance
+     * 
+     * @param leftString - text for left label
+     * @param rightString - text for right label
      */
-    public EntryEMailPassword() {
-        super(Resources.getString("EmailConfig.1"),
+    public EntryEMailPassword(String leftString, String rightString) {
+        super(leftString,
               "",
               true,
               new ComponentTextFieldValidator() {
@@ -42,7 +44,7 @@ public class EntryEMailPassword extends ComponentEntry {
                     }
                 }, 
               false,
-              Resources.getString("EmailConfig.2"), 
+              rightString, 
               "",
               true,
               new ComponentTextFieldValidator() {

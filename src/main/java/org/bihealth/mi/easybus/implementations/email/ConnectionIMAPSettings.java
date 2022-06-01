@@ -28,6 +28,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PerformanceListener;
+import org.bihealth.mi.easybus.implementations.email.PasswordProvider.PasswordStore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -124,11 +125,9 @@ public class ConnectionIMAPSettings implements Serializable {
     /** Use ssl/tls (=true) or starttls (=false) for SMTP connection */
     private boolean                       ssltlsSMTP           = true;
     /** Password accessor for receiving */
-    private PasswordProvider              imapProvider;
+    private PasswordProvider              provider;
     /** E-mail address sending */
     private String                        smptEmailAddress;
-    /** Password accessor for sending */
-    private PasswordProvider              smtpProvider;
     /** IMAP Password */
     private transient String              smtpPassword;
     /** User name for IMAP */
@@ -148,21 +147,19 @@ public class ConnectionIMAPSettings implements Serializable {
      */
     public ConnectionIMAPSettings(String emailAddress, PasswordProvider provider) {
         
-        this(emailAddress, provider, emailAddress, provider);
+        this(emailAddress, emailAddress, provider);
     }    
     
     /**
      * Creates a new instance
      * 
      * @param emailAddressIMAP
-     * @param providerIMAP
      * @param emailAddressSMPT
-     * @param providerSMPT
+     * @param provider
      */
     public ConnectionIMAPSettings(String emailAddressIMAP,
-                                  PasswordProvider providerIMAP,
                                   String emailAddressSMTP,
-                                  PasswordProvider providerSMTP) {
+                                  PasswordProvider provider) {
         // Checks
         checkNonNull(emailAddressIMAP);
         checkNonNull(emailAddressSMTP);
@@ -171,13 +168,12 @@ public class ConnectionIMAPSettings implements Serializable {
         }
         if (!Participant.isEmailValid(emailAddressSMTP)) {
             throw new IllegalArgumentException("Invalid e-mail address for SMTP");
-        }        
+        }      
         
         // Store
         this.imapEmailAddress = emailAddressIMAP;
-        this.imapProvider = providerIMAP;
+        this.provider = provider;
         this.smptEmailAddress = emailAddressSMTP;
-        this.smtpProvider = providerSMTP;
     }
     
     /**
@@ -261,8 +257,11 @@ public class ConnectionIMAPSettings implements Serializable {
     public String getIMAPPassword(boolean usePasswordProvider) {
         
         // Potentially ask for password
-        if (this.imapPassword == null && this.imapProvider != null && usePasswordProvider) {
-            this.imapPassword = this.imapProvider.getPassword();
+        if (this.imapPassword == null && this.provider != null && usePasswordProvider) {
+            // Get passwords
+            PasswordStore store = this.provider.getPassword();
+            this.imapPassword = store.getIMAPPassword();
+            this.smtpPassword = store.getSMTPPassword();
             
             // Check connection settings
             if (!this.isValid()) {
@@ -282,8 +281,11 @@ public class ConnectionIMAPSettings implements Serializable {
     public String getSMTPPassword(boolean usePasswordProvider) {
         
         // Potentially ask for password
-        if (this.smtpPassword == null && this.smtpProvider != null && usePasswordProvider) {
-            this.smtpPassword = this.smtpProvider.getPassword();
+        if (this.smtpPassword == null && this.provider != null && usePasswordProvider) {
+            // Get passwords
+            PasswordStore store = this.provider.getPassword();
+            this.imapPassword = store.getIMAPPassword();
+            this.smtpPassword = store.getSMTPPassword();
             
             // Check connection settings
             if (!this.isValid()) {
@@ -325,7 +327,7 @@ public class ConnectionIMAPSettings implements Serializable {
      * @return
      */
     public String getSMTPUserName() {
-        return smtpUserName != null ? smtpUserName : smptEmailAddress;
+        return smtpUserName;
     }
     
     /**
@@ -334,7 +336,7 @@ public class ConnectionIMAPSettings implements Serializable {
      * @return
      */
     public String getIMAPUserName() {
-        return imapUserName != null ? imapUserName : imapEmailAddress;
+        return imapUserName;
     }
     
     /**

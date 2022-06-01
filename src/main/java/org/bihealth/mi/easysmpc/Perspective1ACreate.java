@@ -196,7 +196,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             // Update connections in preferences
             Connections.addOrUpdate(newSettings);
             
-            // Reset combo  box
+            // Reset combo box
             comboSelectMailbox.removeAllItems();
             for(ConnectionIMAPSettings settings: getEmailConfig()) {
                 this.comboSelectMailbox.addItem(settings);
@@ -236,6 +236,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 // Set selected
                 if(settings != null && settings.getIMAPEmailAddress().equals(newSettings.getIMAPEmailAddress())) {
                     settings.setIMAPPassword(newSettings.getIMAPPassword());
+                    settings.setSMTPPassword(newSettings.getSMTPPassword());
                     this.comboSelectMailbox.setSelectedItem(settings);
                 }
             }

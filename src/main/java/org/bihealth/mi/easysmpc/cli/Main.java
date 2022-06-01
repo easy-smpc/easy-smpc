@@ -590,9 +590,9 @@ public class Main {
         
         // Set email address and password either from the receiving parameter or from different receiving and sending parameters
         ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings(cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING),
-                                                                                   null, cli.hasOption(OPTION_MAILADDRESS_SENDING) ? cli.getOptionValue(OPTION_MAILADDRESS_SENDING) : cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING),
-                                                                                   null).setIMAPPassword(cli.getOptionValue(OPTION_PASSWORD_RECEIVING))
-                                                                                        .setSMTPPassword(cli.hasOption(OPTION_PASSWORD_SENDING) ? cli.getOptionValue(OPTION_PASSWORD_SENDING) : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));     
+                                                                                   cli.hasOption(OPTION_MAILADDRESS_SENDING) ? cli.getOptionValue(OPTION_MAILADDRESS_SENDING) : cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING), null)
+                                                                                   .setIMAPPassword(cli.getOptionValue(OPTION_PASSWORD_RECEIVING))
+                                                                                   .setSMTPPassword(cli.hasOption(OPTION_PASSWORD_SENDING) ? cli.getOptionValue(OPTION_PASSWORD_SENDING) : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));     
         // Set remaining parameters
         connectionIMAPSettings.setIMAPServer(cli.getOptionValue(OPTION_IMAP_SERVER))
                                                .setIMAPPort(Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT)))
