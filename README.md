@@ -94,7 +94,7 @@ prime.
 4. The final perspective shows the result of the secure addition of all variables.
 
 ## Tutorial
-Please see the attached [tutorial](https://raw.githubusercontent.com/prasser/easy-smpc/35d86ee491f895c56bfebf42897e9418f9e05d26/tutorial/EasySMPC%20step-by-step%20tutorial.pdf) for a step-by-step guide using EasySMPC.
+Please see the attached [tutorial](https://raw.githubusercontent.com/prasser/easy-smpc/master/tutorial/EasySMPC%20step-by-step%20tutorial.pdf) for a step-by-step guide using EasySMPC.
 
 ## Command line version
 There is also a command line version of EasySMPC. After [building](#build-from-source) or downloading from [our release
