@@ -348,6 +348,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         // Repaint
         this.revalidate();
         this.repaint();
+        this.pack();
     }
     
     /**
@@ -388,7 +389,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         // Repaint
         this.revalidate();
         this.repaint();
-        this.pack();        
+        this.pack();
     }
 
     /**
