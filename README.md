@@ -8,7 +8,7 @@
 
 ---
 
-### [Prerequisites](#prerequisites) ⚫ [Installation](#installation) ⚫ [Features](#features) ⚫ [Screenshot](#screenshot) ⚫ [Quick start guide](#quick-start-guide) ⚫ [Tutorial](#tutorial) ⚫ [Command line version](#command-line-version) ⚫ [Contact](#contact) ⚫ [License](#license) ⚫ [Acknowledgements](#acknowledgments) ⚫ [Cite as](#cite-as)
+### [Prerequisites](#prerequisites) ⚫ [Installation](#installation) ⚫ [Features](#features) ⚫ [Screenshot](#screenshot) ⚫ [Quick start guide](#quick-start-guide) ⚫ [Tutorial](#tutorial) ⚫ [Command line version](#command-line-version) ⚫ [Troubleshooting](#troubleshooting)⚫ [Contact](#contact) ⚫ [License](#license) ⚫ [Acknowledgements](#acknowledgments) ⚫ [Cite as](#cite-as)
 
 ---
 
@@ -75,8 +75,6 @@ prime.
 
   - Differential Privacy
   - Use EasySMPC with Slack/Mattermost/IRC/...
-  - Examples and Getting Started guides
-  - Further Documentation
 
 ## Screenshot
 
@@ -94,11 +92,11 @@ prime.
 4. The final perspective shows the result of the secure addition of all variables.
 
 ## Tutorial
-Please see the attached [tutorial](https://raw.githubusercontent.com/prasser/easy-smpc/master/tutorial/EasySMPC%20step-by-step%20tutorial.pdf) for a step-by-step guide using EasySMPC.
+Please see the attached ![tutorial](doc/EasySMPC%20step-by-step%20tutorial.pdf) for a step-by-step guide using EasySMPC.
 
 ## Command line version
 There is also a command line version of EasySMPC. After [building](#build-from-source) or downloading from [our release
-page](https://github.com/prasser/easy-smpc/releases), use the jar easy-smpc-cli-*{Version}*.jar either as a creator or a participant. The command line version only supports the [automatic mode](#quick-start-guide).
+page](https://github.com/prasser/easy-smpc/releases), use the jar easy-smpc-cli-*{Version}*.jar either as a creator or a participant. The command line version only supports the [automatic mode](#quick-start-guide). Please note that the command line version will delete all previous EasySMPC relevant e-mails (subject of the e-mails start with *[EasySMPC]*).
 
 ### Creator
 Execute the program with `java -jar easy-smpc-cli-{Version}.jar -create -l STUDY_NAME -b FILES_PATH_VARIABLES -d FILES_PATH_DATA -f PARTICIPANTS -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. The parameters have the following meaning:
@@ -145,12 +143,12 @@ Data for an example can be found in the folder `example-cli`. An exemplary proce
 
 All three commands are expected to start on different computers. If you want to try it on a single computer (i.e. as a dry run), please use different folders for the three parties, since otherwise errors of writing log and result files can happen. Also, in this minimal test the same data file `example-cli/PKU comorbidities.xlsx` is used for each party. However, in a real-world usage each party would use different data in the file.
 
-### Troubleshooting
-#### Neither an error nor a result in automated mode
-Should the program wait for an unreasonable time without throwing an error, first check whether EasySMPC-related e-mails are in a spam folder (the title of the e-mails start with [EasySMPC]). If so just copy them into the regular inbox.
+## Troubleshooting
+### Neither an error nor a result in automated mode
+Should the program wait for an unreasonable time without throwing an error, first check whether EasySMPC-related e-mails are in a spam folder (the subject of the e-mails start with *[EasySMPC]*). If so just copy them into the regular inbox.
 If nothing can be found in the spam folder, it is likely that the different programs are using different EasySMPC studies with the same name. To solve the issues either (1) delete all e-mails in all mailboxes starting with [EasySMPC] in the title or (2) restart the process with a new name for all participants as well as the creator.
 
-#### Command line version: Error writing the result into an Excel file
+### Command line version: Error writing the result into an Excel file
 When executing the command line version on Linux systems the following entries can appear in the log:
 ```
 2022-01-01 12:00:00.000 INFO Start calculating and writing result
