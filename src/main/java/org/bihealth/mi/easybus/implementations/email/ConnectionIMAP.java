@@ -86,7 +86,7 @@ public class ConnectionIMAP extends ConnectionEmail {
      * Create a new instance
      * 
      * @param settings of mailbox
-     * @param sharedMailbox - use shared mailbox or separared mailboxes
+     * @param sharedMailbox - use shared mailbox or separated mailboxes
      * @param listener
      * @throws BusException
      */
@@ -103,6 +103,9 @@ public class ConnectionIMAP extends ConnectionEmail {
         
         // Check
         settings.check();
+        if(settings.getIMAPPassword() == null || settings.getSMTPPassword() == null) {
+            throw new IllegalArgumentException("Passwords cannot be null");
+        }
         
         // Store
         this.receivingPassword = settings.getIMAPPassword();

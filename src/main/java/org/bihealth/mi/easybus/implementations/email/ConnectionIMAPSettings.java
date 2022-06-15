@@ -260,6 +260,13 @@ public class ConnectionIMAPSettings implements Serializable {
         if (this.imapPassword == null && this.provider != null && usePasswordProvider) {
             // Get passwords
             PasswordStore store = this.provider.getPassword();
+            
+            // Check
+            if(store == null) {
+                return null;
+            }
+            
+            // Store
             this.imapPassword = store.getIMAPPassword();
             this.smtpPassword = store.getSMTPPassword();
             
@@ -284,6 +291,13 @@ public class ConnectionIMAPSettings implements Serializable {
         if (this.smtpPassword == null && this.provider != null && usePasswordProvider) {
             // Get passwords
             PasswordStore store = this.provider.getPassword();
+            
+            // Check
+            if(store == null) {
+                return null;
+            }
+            
+            // Store password
             this.imapPassword = store.getIMAPPassword();
             this.smtpPassword = store.getSMTPPassword();
             

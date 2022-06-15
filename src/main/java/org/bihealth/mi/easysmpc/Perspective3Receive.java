@@ -74,6 +74,44 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
 
     /** Button poll manually */
     private JButton            buttonPollManually;
+    
+    /** Runnable for handling automatic e-mail processing errors */
+    private final Runnable errorHandlingRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // Stop bus and reset status message
+            getApp().setStatusMessage(Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"), true, false);            
+            getApp().getModel().stopBus();
+            
+
+            // Ask to change settings
+            if (JOptionPane.showConfirmDialog(getPanel(),
+                                              String.format(Resources.getString("PerspectiveReceive.errorAutomaticEmail")),
+                                              "",
+                                              JOptionPane.OK_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
+                
+                // Get new settings
+                ConnectionIMAPSettings newSettings = new DialogEmailConfig(getApp().getModel().getConnectionIMAPSettings(), getApp()).showDialog();
+                
+                // Use new settings if given
+                if(newSettings != null) {
+                    getApp().getModel().setConnectionIMAPSettings(newSettings);
+
+                    // Restart bus
+                    new SwingWorker<Void, Void>() {
+                        @Override
+                        protected Void doInBackground() throws Exception {
+                            // Restart
+                            startAutomatedMailImport();
+
+                            // Return null
+                            return null;
+                        }
+                    }.execute();
+                }
+            }
+        }
+    };
 
     /**
      * Creates the perspective
@@ -140,7 +178,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     @Override
     public void receive(Message message) {
         
-        // Set error message in EDT 
+        // Set error message 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -164,44 +202,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
     @Override
     public void receiveError(Exception exception) {
         
-        // Error handling in EDT 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                // Stop bus and reset status message
-                getApp().setStatusMessage("", false, false);
-                getApp().getModel().stopBus();
-                
-
-                // Ask to change settings
-                if (JOptionPane.showConfirmDialog(getPanel(),
-                                                  String.format(Resources.getString("PerspectiveReceive.errorAutomaticEmail")),
-                                                  "",
-                                                  JOptionPane.OK_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
-                    
-                    // Get new settings
-                    ConnectionIMAPSettings newSettings = new DialogEmailConfig(getApp().getModel().getConnectionIMAPSettings(), getApp()).showDialog();
-                    
-                    // Use new settings if given
-                    if(newSettings != null) {
-                        getApp().getModel().setConnectionIMAPSettings(newSettings);
-
-                        // Restart bus
-                        new SwingWorker<Void, Void>() {
-                            @Override
-                            protected Void doInBackground() throws Exception {
-
-                                getApp().getModel().stopBus();
-                                startAutomatedMailImport();
-
-                                // Return null
-                                return null;
-                            }
-                        }.execute();
-                    }
-                }
-            }
-        });
+        // Error handling in new thread 
+        SwingUtilities.invokeLater(errorHandlingRunnable);
     }
     
     @Override
@@ -268,25 +270,8 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                                                 this);
             
         } catch (IllegalArgumentException | BusException e) {
-
-            // Error message in EDT
-            if (!SwingUtilities.isEventDispatchThread()) {
-                SwingUtilities.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        JOptionPane.showMessageDialog(getPanel(),
-                                                      Resources.getString("PerspectiveReceive.AutomaticEmailErrorRegistering"),
-                                                      Resources.getString("PerspectiveReceive.AutomaticEmail"),
-                                                      JOptionPane.ERROR_MESSAGE);
-                        getApp().setStatusMessage(Resources.getString("PerspectiveReceive.errorAutomaticEmail"),
-                                                  true,
-                                                  false);
-
-                    }
-                });
-            }
-
+            // Error handling in new thread
+            SwingUtilities.invokeLater(errorHandlingRunnable);
         }
     }
 
@@ -343,7 +328,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         // Layout
         panel.setLayout(new BorderLayout());
 
-        // General data data of study
+        // General data of study
         JPanel generalDataPanel = new JPanel();
         generalDataPanel.setLayout(new GridLayout(1, 1, Resources.ROW_GAP, Resources.ROW_GAP));
         panel.add(generalDataPanel, BorderLayout.NORTH);
