@@ -102,6 +102,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                                       new EntryEMailDetailsAdvanced(null, 0, settings, true, this.createMode),
                                       new EntryEMailDetailsAdvanced(null, 0, settings, false, true));
             }
+            stateChanged(new ChangeEvent(this));
         }
     }
 
