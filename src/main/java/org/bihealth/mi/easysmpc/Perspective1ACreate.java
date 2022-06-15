@@ -204,6 +204,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                 // Set selected
                 if(settings != null && settings.getIMAPEmailAddress().equals(newSettings.getIMAPEmailAddress())) {
                     settings.setIMAPPassword(newSettings.getIMAPPassword());
+                    settings.setSMTPPassword(newSettings.getSMTPPassword());
                     this.comboSelectMailbox.setSelectedItem(settings);
                 }
             }

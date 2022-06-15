@@ -159,7 +159,8 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
                 // Set selected
                 if(settings != null && settings.getIMAPEmailAddress().equals(newSettings.getIMAPEmailAddress())) {
                     settings.setIMAPPassword(newSettings.getIMAPPassword());
-                    this.comboSelectMailbox.setSelectedItem(settings);
+                    settings.setIMAPPassword(newSettings.getIMAPPassword());
+                    settings.setSMTPPassword(newSettings.getSMTPPassword());
                 }
             }
             
