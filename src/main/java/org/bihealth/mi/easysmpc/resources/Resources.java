@@ -139,7 +139,7 @@ public class Resources {
     public static final Color     COLOR_LIGHT_GREEN                   = new Color(82, 153, 75);
     
     /** Interval to wait for sending e-mails */
-    public static final long TIMEOUT_SEND_EMAILS = 60000;
+    public static final long TIMEOUT_SEND_EMAILS = 15000;
     
     /** Fetch size for messages with IMAP */
     public static final int FETCH_SIZE_IMAP = 1048576;
