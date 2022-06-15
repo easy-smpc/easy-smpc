@@ -174,11 +174,10 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
      * Edits an e-mail configuration
      */
     private void actionEditEMailConf() {
-        // Store current settings
-        ConnectionIMAPSettings oldSettings = (ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem();
         
         // Get new settings
-        ConnectionIMAPSettings newSettings = new DialogEmailConfig(oldSettings, getApp()).showDialog();
+        ConnectionIMAPSettings newSettings = new DialogEmailConfig((ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem(),
+                                                                   getApp()).showDialog();
         
         // Alter combo box if new settings given
         if (newSettings != null) {
@@ -193,6 +192,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
                 // Set selected
                 if (settings != null && settings.getIMAPEmailAddress().equals(newSettings.getIMAPEmailAddress())) {
                     settings.setIMAPPassword(newSettings.getIMAPPassword());
+                    settings.setSMTPPassword(newSettings.getSMTPPassword());
                     this.comboSelectMailbox.setSelectedItem(settings);
                 }
             }
