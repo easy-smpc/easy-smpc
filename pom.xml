@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.bihealth.mi</groupId>
 	<artifactId>easy-smpc</artifactId>
-	<version>1.0.6</version>
+	<version>1.0.7</version>
 	<packaging>jar</packaging>
 	<build>
 		<sourceDirectory>src/main/java</sourceDirectory>
@@ -30,6 +30,7 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+							<outputFile>target/${project.artifactId}-${project.version}-gui-generic.jar</outputFile>
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -91,7 +92,7 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
-							<outputFile>target/${project.artifactId}-cli-${project.version}.jar</outputFile>
+							<outputFile>target/${project.artifactId}-${project.version}-cli.jar</outputFile>
 							<createDependencyReducedPom>false</createDependencyReducedPom>
 							<transformers>
 								<transformer

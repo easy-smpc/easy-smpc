@@ -4,10 +4,10 @@
 #Usually only the version variable and the type (RPM or DEB) needs to be adapted
 #==================================
 VERSION="1.0"
-MINOR_VERSION="6" # if left out for deb packages a "1" is added
+MINOR_VERSION="7" # if left out for deb packages a "1" is added
 TYPE="deb"
 BUILD_PATH="../target"
-MAIN_JAR="easy-smpc-1.0.6-gui-generic.jar"
+MAIN_JAR="easy-smpc-1.0.7-gui-generic.jar"
 MAIN_CLASS="org.bihealth.mi.easysmpc.App"
 APPLICATION_NAME="EasySMPC"
 DESCRIPTION_TEXT="No-Code Approach to Secure Multi-Party Computation"
