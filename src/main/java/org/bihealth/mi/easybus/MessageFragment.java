@@ -1,22 +1,14 @@
 package org.bihealth.mi.easybus;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import de.tu_darmstadt.cbs.emailsmpc.UIDGenerator;
 
@@ -26,7 +18,7 @@ import de.tu_darmstadt.cbs.emailsmpc.UIDGenerator;
  * @author Felix Wirth
  *
  */
-public class MessageFragment implements Serializable {
+public class MessageFragment extends Message {
     
     /** SVUID */
     private static final long serialVersionUID = -14070272349211270L;
@@ -48,6 +40,9 @@ public class MessageFragment implements Serializable {
      * @param content
      */
     public MessageFragment(String id, int splitNr, int splitTotal, String content) {
+        // Super
+        super(content);
+        
         // Check
         if(id == null || content == null) {
             throw new IllegalArgumentException("Id and content can not be null!");
@@ -83,14 +78,7 @@ public class MessageFragment implements Serializable {
      */
     public String getId() {
         return id;
-    }
-
-    /**
-     * @return the content
-     */
-    public String getContent() {
-        return content;
-    }       
+    }  
 
     /**
      * Creates the number of fragments necessary when splitting the message into the given size 
@@ -100,7 +88,7 @@ public class MessageFragment implements Serializable {
      * @return the fragments
      * @throws IOException 
      */
-    public static List<MessageFragment> createInternalMessagesFromMessage(Message message, int sizeFragement) throws IOException {
+    public static List<MessageFragment> createMessageFragmentsFromMessage(Message message, int sizeFragement) throws IOException {
         
         // Prepare
         List<MessageFragment> result = new ArrayList<>();
@@ -171,37 +159,6 @@ public class MessageFragment implements Serializable {
      */
     public String serialize() throws IOException {
         return serializeMessage(this);
-    }
-    
-    /**
-     * Serialize message as base64 encoded string
-     *
-     * @param msg the msg
-     * @return the string
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    public static String serializeMessage(MessageFragment msg) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(bos));
-        oos.writeObject(msg);
-        oos.close();
-        return Base64.getEncoder().encodeToString(bos.toByteArray());
-    }
-    
-    /**
-     * Deserialize message from base64 encoded string
-     *
-     * @param msg the msg
-     * @return the message
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws ClassNotFoundException the class not found exception
-     */
-    public static MessageFragment deserializeMessage(String msg) throws IOException, ClassNotFoundException {
-        byte[] data = Base64.getDecoder().decode(msg);
-        ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(data)));
-        MessageFragment message = (MessageFragment) ois.readObject();
-        ois.close();
-        return message;
     }
 
     @Override

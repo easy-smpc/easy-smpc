@@ -137,7 +137,7 @@ public abstract class Bus {
             public Void call() throws Exception {
                 
                 // Init
-                List<MessageFragment> fragments = MessageFragment.createInternalMessagesFromMessage(message, maxMessageSize);                
+                List<MessageFragment> fragments = MessageFragment.createMessageFragmentsFromMessage(message, maxMessageSize);                
                 List<MessageFragment> successFragments = new ArrayList<>(); 
                 
                 // Retry until sent successful or interrupted
@@ -275,7 +275,7 @@ public abstract class Bus {
 
         // Loop over fragments to re-assemble string
         for (int index = 0; index < messageFragments.length; index++) {
-            messageSerialized = messageSerialized + messageFragments[index].getContent();
+            messageSerialized = messageSerialized + (String) messageFragments[index].getMessage();
         }
 
         // Recreate message

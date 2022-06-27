@@ -22,7 +22,7 @@ public abstract class MessageFragmentFinish extends MessageFragment {
      */
     public MessageFragmentFinish(MessageFragment fragment){
         // Super
-        super(fragment.getId(), fragment.getSplitNr(), fragment.getSplitTotal(), fragment.getContent());
+        super(fragment.getId(), fragment.getSplitNr(), fragment.getSplitTotal(), (String) fragment.getMessage());
     }
     
     /**
