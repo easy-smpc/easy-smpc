@@ -47,14 +47,10 @@ public class Resources {
     private static ResourceBundle resource_bundle                     = ResourceBundle.getBundle(BUNDLE_NAME);
 
     /** Invalid border */
-    public static final Border    INVALID_BORDER                      = BorderFactory.createLineBorder(new Color(255,
-                                                                                                                 69,
-                                                                                                                 0));
+    public static final Border    INVALID_BORDER                      = BorderFactory.createLineBorder(new Color(255, 69, 0));
 
     /** Default border */
-    public static final Border    DEFAULT_BORDER                      = UIManager.getLookAndFeel()
-                                                                                 .getDefaults()
-                                                                                 .getBorder("TextField.border");       //$NON-NLS-1$
+    public static final Border    DEFAULT_BORDER                      = UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border");       //$NON-NLS-1$
 
     /** Row gap */
     public static final int       ROW_GAP                             = 2;
@@ -101,8 +97,7 @@ public class Resources {
     /** Size of checkmark clipart y */
     public static final int       SIZE_CHECKMARK_Y                    = 12;
     /** Available languages */
-    private static final Locale[] AVAILABLE_LANGUAGES                 = { Locale.ENGLISH,
-                                                                          Locale.GERMAN };
+    private static final Locale[] AVAILABLE_LANGUAGES                 = { Locale.ENGLISH, Locale.GERMAN };
 
     /** Interval schedule for tasks in background */
     public static final long      INTERVAL_SCHEDULER_MILLISECONDS     = 200;
@@ -124,20 +119,11 @@ public class Resources {
 
     /** Delimiters considered for CSV files */
     public static final char[]    DELIMITERS                          = { ';', ',', '|', '\t' };                       // $NON-NLS-1$
-                                                                                                                       // //$NON-NLS-2$
-                                                                                                                       // //$NON-NLS-3$
-                                                                                                                       // //$NON-NLS-4$
 
-    /**
-     * Maximum number of lines to be loaded for preview purposes for CSV file
-     * detection.
-     */
+    /** Maximum number of lines to be loaded for preview purposes for CSV file detection. */
     public static final int       PREVIEW_MAX_LINES                   = 25;
 
-    /**
-     * Maximum number of chars to be loaded for detecting separators for CSV
-     * file detection.
-     */
+    /** Maximum number of chars to be loaded for detecting separators for CSV file detection. */
     public static final int       DETECT_MAX_CHARS                    = 100000;
 
     /** Interval to check mail box automatically */
