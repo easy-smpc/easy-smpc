@@ -13,12 +13,15 @@
  */
 package org.bihealth.mi.easybus.implementations.email;
 
+import java.io.IOException;
 import java.util.concurrent.FutureTask;
 
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.MessageFragment;
+import org.bihealth.mi.easybus.MessageManager;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -74,9 +77,9 @@ public class BusEmail extends Bus {
          * 
          * @return
          */
-        protected MessageFragmentFinishEmail getMessageFragmentFinish() 
+        protected MessageFragmentEmail getMessageFragment() 
         {
-            return new MessageFragmentFinishEmail(this);
+            return new MessageFragmentEmail(this);
         }
     }
 
@@ -86,6 +89,8 @@ public class BusEmail extends Bus {
     private Thread          thread;
     /** Stop flag */
     private boolean         stop = false;
+    /** Message manager */
+    private MessageManager  messageManager;
     
     /**
      * Creates a new instance
@@ -113,20 +118,21 @@ public class BusEmail extends Bus {
      * @param connection
      * @param millis
      * @param sizeThreadpool
-     *      * @param maxMessageSize
+     * @param maxMessageSize
      */
     public BusEmail(ConnectionEmail connection, int millis, int sizeThreadpool, int maxMessageSize) {
         
         // Super
-        super(sizeThreadpool, maxMessageSize);
+        super(sizeThreadpool);
         
         // Check
         if(millis <= 0) {
             throw new IllegalArgumentException("millis must be a positive number");
         }
         
-        // Store
+        // Store and create
         this.connection = connection;
+        messageManager = new MessageManager(maxMessageSize);
         
         // Create thread
         this.thread = new Thread(new Runnable() {
@@ -185,8 +191,18 @@ public class BusEmail extends Bus {
     
     
     @Override
-    protected Void sendInternal(MessageFragment message, Scope scope, Participant participant) throws BusException {
-        this.connection.send(message, scope, participant);
+    protected Void sendInternal(Message message, Scope scope, Participant participant) throws BusException {
+
+        // Send message in fragments
+        try {
+            for (MessageFragment m : messageManager.splitMessage(message)) {
+                this.connection.send(m, scope, participant);
+            }
+        } catch (IOException | BusException e) {
+            throw new BusException("Unable to send message", e);
+        }
+        
+        // Return
         return null;
     }    
     
@@ -280,8 +296,13 @@ public class BusEmail extends Bus {
                     throw new InterruptedException();
                 }
                 
+                // Process with message manager
+                Message messageComplete = messageManager.mergeMessage(message.getMessageFragment());
+                
                 // Send to scope and participant
-                receiveInternal(message.getMessageFragmentFinish(), message.scope, message.receiver);
+                if (messageComplete != null) {
+                    receiveInternal(messageComplete, message.scope, message.receiver);
+                }
             }
             
         } catch (BusException e) {

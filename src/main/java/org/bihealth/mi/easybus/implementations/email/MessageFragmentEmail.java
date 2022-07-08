@@ -2,7 +2,6 @@ package org.bihealth.mi.easybus.implementations.email;
 
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.MessageFragment;
-import org.bihealth.mi.easybus.MessageFragmentFinish;
 import org.bihealth.mi.easybus.implementations.email.BusEmail.BusEmailMessage;
 
 /**
@@ -11,7 +10,7 @@ import org.bihealth.mi.easybus.implementations.email.BusEmail.BusEmailMessage;
  * @author Felix Wirth
  *
  */
-public class MessageFragmentFinishEmail extends MessageFragmentFinish {
+public class MessageFragmentEmail extends MessageFragment {
 
     /** SVUID */
     private static final long serialVersionUID = 4271457895164547161L;
@@ -23,8 +22,8 @@ public class MessageFragmentFinishEmail extends MessageFragmentFinish {
      * 
      * @param fragment
      */
-    public MessageFragmentFinishEmail(MessageFragment fragment) {
-        super(fragment);
+    public MessageFragmentEmail(MessageFragment fragment) {
+        super(fragment.getId(), fragment.getSplitNr(), fragment.getSplitTotal(), (String) fragment.getMessage());
     }
 
     /**
@@ -32,7 +31,7 @@ public class MessageFragmentFinishEmail extends MessageFragmentFinish {
      * 
      * @param busEmailMessage
      */
-    public MessageFragmentFinishEmail(BusEmailMessage busEmailMessage) {
+    public MessageFragmentEmail(BusEmailMessage busEmailMessage) {
         this(busEmailMessage.message);
         
         this.busEmailMessage = busEmailMessage;

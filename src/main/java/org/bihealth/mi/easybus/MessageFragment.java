@@ -1,16 +1,7 @@
 package org.bihealth.mi.easybus;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CoderResult;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-
-import de.tu_darmstadt.cbs.emailsmpc.UIDGenerator;
 
 /**
  * Represents a fragment/splitted part of a { @link org.bihealth.mi.easybus.message message}
@@ -78,77 +69,6 @@ public class MessageFragment extends Message {
      */
     public String getId() {
         return id;
-    }  
-
-    /**
-     * Creates the number of fragments necessary when splitting the message into the given size 
-     * 
-     * @param message
-     * @param sizeFragement - Size of fragment
-     * @return the fragments
-     * @throws IOException 
-     */
-    public static List<MessageFragment> createMessageFragmentsFromMessage(Message message, int sizeFragement) throws IOException {
-        
-        // Prepare
-        List<MessageFragment> result = new ArrayList<>();
-        
-        // Create fragments of the serialized message
-        List<String> fragmentList = SplitStringByByteLength(message.serialize(), sizeFragement);
-        
-        // Create objects from fragments
-        int index = 0;
-        String id = UIDGenerator.generateShortUID(10);
-        for(String fragment : fragmentList) {
-            result.add(new MessageFragment(id, index, fragmentList.size(), fragment));
-            index++;
-        }        
-        
-        // Return 
-        return result;
-    }
-    
-    /**
-     * Splits a string into a list of strings suiting the size limit
-     * Derived from: https://stackoverflow.com/questions/48868721/splitting-a-string-with-byte-length-limits-in-java
-     * 
-     * @param src
-     * @param encoding
-     * @param maxsize
-     * @return
-     */
-    public static List<String> SplitStringByByteLength(String src, int maxsize) {
-        
-        // Prepare
-        Charset cs = Charset.forName("UTF-8");
-        CharsetEncoder coder = cs.newEncoder();
-        ByteBuffer out = ByteBuffer.allocate(maxsize);
-        CharBuffer in = CharBuffer.wrap(src);
-        List<String> stringList = new ArrayList<>();
-        int pos = 0;
-        
-        // Create result
-        while (true) {
-            // Encode a current chunk
-            CoderResult cr = coder.encode(in, out, true); 
-            int newpos = src.length() - in.length();
-            String s = src.substring(pos, newpos);
-            
-            // Add
-            stringList.add(s);
-            
-            // Set new start position and rewind buffer
-            pos = newpos; 
-            out.rewind();
-            
-            // Finished
-            if (!cr.isOverflow()) {
-                break; 
-            }
-        }
-        
-        // Return
-        return stringList;
     }
     
     /**
@@ -174,5 +94,22 @@ public class MessageFragment extends Message {
         MessageFragment other = (MessageFragment) obj;
         return Objects.equals(content, other.content) && Objects.equals(id, other.id) &&
                splitNr == other.splitNr && splitTotal == other.splitTotal;
-    }    
+    }
+    
+    /**
+     * Action to delete the message after it was read
+     * 
+     * @throws BusException
+     */
+    public void delete() throws BusException {
+        // Empty
+    }
+    
+    /**
+     * Action to finish up message deletion. Usually only called for one fragment after delete() has been called for several messages
+     *
+     */
+    public void finalize() throws BusException {
+        // Empty
+    }
 }

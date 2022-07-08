@@ -14,9 +14,7 @@
 package org.bihealth.mi.easybus.implementations.local;
 
 import org.bihealth.mi.easybus.Bus;
-import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.MessageFragment;
-import org.bihealth.mi.easybus.MessageFragmentFinish;
+import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 
@@ -33,8 +31,8 @@ public class BusLocal extends Bus {
      * @param sizeThreadpool
      * @param maxMessageSize
      */
-    public BusLocal(int sizeThreadpool, int maxMessageSize){
-        super(sizeThreadpool, maxMessageSize);
+    public BusLocal(int sizeThreadpool){
+        super(sizeThreadpool);
     }
 
     @Override
@@ -43,22 +41,8 @@ public class BusLocal extends Bus {
     }
 
     @Override
-    protected Void sendInternal(MessageFragment message, Scope scope, Participant participant) throws Exception {
-        receiveInternal(new MessageFragmentFinish(message) {
-            
-            /** SVUID */
-            private static final long serialVersionUID = -6679946774576062591L;
-
-            @Override
-            public void finalize() throws BusException {
-                // Empty by design
-            }
-            
-            @Override
-            public void delete() throws BusException {
-                // Empty by design
-            }
-        }, scope, participant);
+    protected Void sendInternal(Message message, Scope scope, Participant participant) throws Exception {
+        receiveInternal(message, scope, participant);
         return null;
     }
 
