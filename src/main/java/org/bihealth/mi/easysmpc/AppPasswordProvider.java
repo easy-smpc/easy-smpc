@@ -31,7 +31,7 @@ public class AppPasswordProvider implements PasswordProvider, Serializable {
     private static final long serialVersionUID = -7455626179379349238L;
 
     @Override
-    public String getPassword() {
+    public PasswordStore getPassword() {
         return new DialogPassword(getParent()).showDialog();
     }
 

@@ -42,16 +42,17 @@ public abstract class ImportFile {
      * @throws IllegalArgumentException 
      */
     public static ImportFile forFile(File file) throws IllegalArgumentException, IOException {        
-        return forFile(file, true, false, false);
+        return forFile(file, true, false, false, 0);
     }
     
     /**
      * Creates a new extractor for a given file
      * 
      * @param file
-     * @param rowOriented - is data row or column oriented?
+     * @param rowOriented - is data row or column oriented? If column oriented if will be transposed before it is altered
      * @param oneRowCol - Is the result supposed to be two or one column. If this parameter is set all data is merge together, if it is unset the last column will be handled separately
-     * @param hasHeader - skip first line since it contains the header  
+     * @param hasHeader - skip first line since it contains the header. If rowOriented  
+     * @param skipCol - Ignore first n columns
      * @return
      * @throws IllegalArgumentException
      * @throws IOException
@@ -59,15 +60,15 @@ public abstract class ImportFile {
     public static ImportFile forFile(File file,
                                      boolean rowOriented,
                                      boolean oneRowCol,
-                                     boolean hasHeader) throws IllegalArgumentException,
-                                                        IOException {
+                                     boolean hasHeader,
+                                     int skipCol) throws IllegalArgumentException, IOException {
         
         // Choose correct extractor
         if (file.getName().endsWith(Resources.FILE_ENDING_EXCEL_XLS) || file.getName().endsWith(Resources.FILE_ENDING_EXCEL_XLSX)) {
-            return new ImportExcel(file, rowOriented, oneRowCol, hasHeader);
+            return new ImportExcel(file, rowOriented, oneRowCol, hasHeader, skipCol);
         }
         else {
-            return new ImportCSV(file, rowOriented, oneRowCol, hasHeader);
+            return new ImportCSV(file, rowOriented, oneRowCol, hasHeader, skipCol);
         }   
     }
 
@@ -79,6 +80,7 @@ public abstract class ImportFile {
     private boolean oneRowCol;
     /** Has data a header line? */
     private boolean hasHeader;
+    private int skipCol;
 
     /**
      * Creates a new instance
@@ -87,17 +89,19 @@ public abstract class ImportFile {
      * @param rowOriented - is data row or column oriented?
      * @param oneRowCol - Is the result supposed to be two or one column. If this parameter is set all data is merge together, if it is unset the last column will be handled separately
      * @param hasHeader - skip first line since it contains the header 
+     * @param skipCol 
      * @throws IOException
      * @throws EncryptedDocumentException
      */
     protected ImportFile(File file,
                          boolean rowOriented,
                          boolean oneRowCol,
-                         boolean hasHeader) throws IOException, IllegalArgumentException {
+                         boolean hasHeader, int skipCol) throws IOException, IllegalArgumentException {
         this.file = file;
         this.rowOriented = rowOriented;
         this.oneRowCol = oneRowCol;
         this.hasHeader = hasHeader;
+        this.skipCol = skipCol;
     }
 
     /**
@@ -125,7 +129,7 @@ public abstract class ImportFile {
         // Transpose if necessary
         if(!this.rowOriented) {
             data = transposeMatrix(data);
-        }
+        }        
 
         // Remove empty rows
         for (String[] row : data) {
@@ -143,7 +147,20 @@ public abstract class ImportFile {
                 }
             }
         }
-
+        
+        // Remove first n columns if necessary
+        if(this.skipCol > 0) {
+            
+            // Remove for each row
+            for (List<String> row : rows) {
+                for(int index = 0; index < this.skipCol; index++)
+                row.remove(0);
+            }
+            
+            // Decrease columns
+            columns = columns - this.skipCol;
+        }
+        
         // Remove empty columns
         for (int column = 0; column < columns; column++) {
 

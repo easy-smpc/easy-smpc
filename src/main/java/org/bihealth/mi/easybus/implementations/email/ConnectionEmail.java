@@ -97,7 +97,7 @@ public abstract class ConnectionEmail {
                 }
             } catch (Exception e) {
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-                logger.debug("Load message failed logged", new Date(), "load message failed", ExceptionUtils.getStackTrace(e));
+                LOGGER.debug("Load message failed logged", new Date(), "load message failed", ExceptionUtils.getStackTrace(e));
             }
             
             // Pass to listener
@@ -130,7 +130,7 @@ public abstract class ConnectionEmail {
             try {
                 message.setFlag(Flag.DELETED, true);
             } catch (MessagingException e) {
-                logger.debug("Delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
+                LOGGER.debug("Delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
         }    
@@ -144,7 +144,7 @@ public abstract class ConnectionEmail {
                     folder.close(true);
                 }
             } catch (MessagingException e) {
-                logger.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
+                LOGGER.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
             }
         }        
@@ -185,12 +185,13 @@ public abstract class ConnectionEmail {
     /** String indicating end of participant address */
     public static final String PARTICIPANT_EMAIL_END_TAG   = "END_EMAIL_PARTICIPANT";
     /** Logger */
-    private static final Logger logger = LogManager.getLogger(ConnectionEmail.class);
+    private static final Logger LOGGER = LogManager.getLogger(ConnectionEmail.class);
 
 	/**
+	 * Generates the subject line
+	 * 
      * @param scope
      * @param receiver
-     * @param sender
      * @return
      */
     public static String createSubject(Scope scope, Participant receiver) {
@@ -257,16 +258,21 @@ public abstract class ConnectionEmail {
     }
 
     /** Use several or exactly one mail box for the bus */
-	private boolean sharedMailbox;
-    
-    /** Mail address of the user */
-	private String emailAddress;
-    
-	/** Performance listener */
-	private PerformanceListener listener;
+    private boolean             sharedMailbox;
+    /** Mail address of receiving user */
+    private String              receivingEmailAddress;
+    /** Performance listener */
+    private PerformanceListener listener;
+    /** Mail address of sending user */
+    private String              sendingEmailAddress;
+    /** Receiving user name */
+    private String              receivingUserName;
+    /** Sending user name */
+    private String              sendingUserName;
     
     /**
-     * Creates a new instance
+     * Creates a new instance with same mail address to receive and to send
+     * 
      * @param sharedMailBox
      * @param emailAddress
      * @throws BusException
@@ -276,19 +282,60 @@ public abstract class ConnectionEmail {
     }
     
     /**
-     * Creates a new instance
+     * Creates a new instance with same mail address and user name to receive and to send and a performance listener
+     * 
      * @param sharedMailBox
      * @param emailAddress
      * @param listener
      * @throws BusException
      */
     protected ConnectionEmail(boolean sharedMailBox, String emailAddress, PerformanceListener listener) {
+        this(sharedMailBox, emailAddress, emailAddress, listener);
+    }
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param sharedMailBox
+     * @param receivingEmailAddress
+     * @param sendingEmailAddress
+     * @param listener
+     * @throws BusException
+     */
+    protected ConnectionEmail(boolean sharedMailBox, String receivingEmailAddress, String sendingEmailAddress, PerformanceListener listener) {
+        this(sharedMailBox, receivingEmailAddress, sendingEmailAddress, null, null, listener);
+    }
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param sharedMailBox
+     * @param receivingEmailAddress
+     * @param sendingEmailAddress
+     * @param receivingUserName - only necessary if deviates from receivingEmailAddress
+     * @param sendingUserName - only necessary if deviates from sendingEmailAddress
+     * @param listener
+     */
+    protected ConnectionEmail(boolean sharedMailBox,
+                              String receivingEmailAddress,
+                              String sendingEmailAddress,
+                              String receivingUserName,
+                              String sendingUserName,
+                              PerformanceListener listener) {
         // Check
-        if (emailAddress == null) {
+        if (receivingEmailAddress == null) {
             throw new NullPointerException("Email address must not be null");
         }
+        if (sendingEmailAddress == null) {
+            throw new NullPointerException("Email address must not be null");
+        }
+        
+        // Store
         this.sharedMailbox = sharedMailBox;
-        this.emailAddress = emailAddress;
+        this.receivingEmailAddress = receivingEmailAddress;
+        this.sendingEmailAddress = sendingEmailAddress;
+        this.receivingUserName = receivingUserName;
+        this.sendingUserName = sendingUserName;
         this.listener = listener;
     }
     
@@ -298,11 +345,37 @@ public abstract class ConnectionEmail {
     protected abstract void close();
 
     /**
-     * Returns the associated email address
+     * Returns the associated email address for sending
      * @return
      */
-    protected String getEmailAddress() {
-        return this.emailAddress;
+    protected String getReceivingEmailAddress() {
+        return this.receivingEmailAddress;
+    }
+    
+    /**
+     * Returns the associated email address for receiving
+     * @return
+     */
+    protected String getSendingEmailAddress() {
+        return this.sendingEmailAddress;
+    }
+    
+    /**
+     * Returns the user name for receiving
+     * 
+     * @return
+     */
+    protected String getReceivingUserName() {
+        return this.receivingUserName != null ? this.receivingUserName : this.receivingEmailAddress;
+    }
+    
+    /**
+     * Returns the user name for sending
+     * 
+     * @return
+     */
+    protected String getSendingUserName() {
+        return sendingUserName;
     }
     
     /**
@@ -347,7 +420,7 @@ public abstract class ConnectionEmail {
                 Object attachment = message.getAttachment();
 
                 if (text == null || attachment == null) {
-                    logger.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
+                    LOGGER.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
                     continue;
                 }
                 
@@ -367,7 +440,7 @@ public abstract class ConnectionEmail {
                 }                        
 
                 if (scope == null || participant == null) {
-                    logger.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
+                    LOGGER.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
                     continue;
                 }
                 
@@ -407,7 +480,7 @@ public abstract class ConnectionEmail {
     protected void send(MessageFragment message, Scope scope, Participant receiver) throws BusException {
         
         // Recipient
-        String recipient = sharedMailbox ? getEmailAddress() : receiver.getEmailAddress();
+        String recipient = sharedMailbox ? getReceivingEmailAddress() : receiver.getEmailAddress();
         
         // Subject
         String subject = createSubject(scope, receiver);       

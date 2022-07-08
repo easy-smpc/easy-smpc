@@ -16,6 +16,8 @@ package org.bihealth.mi.easybus.implementations.email;
 import java.io.IOException;
 import java.util.concurrent.FutureTask;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
@@ -84,13 +86,15 @@ public class BusEmail extends Bus {
     }
 
     /** Connection */
-    private ConnectionEmail connection;
+    private ConnectionEmail     connection;
     /** Thread */
-    private Thread          thread;
+    private Thread              thread;
     /** Stop flag */
-    private boolean         stop = false;
+    private boolean             stop   = false;
     /** Message manager */
-    private MessageManager  messageManager;
+    private MessageManager      messageManager;
+    /** Logger */
+    private static final Logger LOGGER = LogManager.getLogger(BusEmail.class);
     
     /**
      * Creates a new instance
@@ -229,7 +233,8 @@ public class BusEmail extends Bus {
                         connection.send(recipient, subject, body, null);
                         sent = true;
                     } catch (BusException e) {
-                        // Ignore and repeat
+                        // Log and repeat
+                        LOGGER.error("Error sending plain e-mail", e);
                     }
                 }
             }

@@ -3,10 +3,10 @@
 #Create an EasySMPC installer for MacOS
 #Usually only the version variable and the type (RPM or DEB) needs to be adapted
 #==================================
-VERSION="1.0.4"
+VERSION="1.0.7"
 TYPE="dmg"
 BUILD_PATH="../target"
-MAIN_JAR="easy-smpc-1.0.4-generic.jar"
+MAIN_JAR="easy-smpc-1.0.7-gui-generic.jar"
 MAIN_CLASS="org.bihealth.mi.easysmpc.App"
 APPLICATION_NAME="EasySMPC"
 DESCRIPTION_TEXT="No-Code Approach to Secure Multi-Party Computation"
