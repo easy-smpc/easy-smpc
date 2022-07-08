@@ -117,18 +117,26 @@ public class MessageManager {
         // Init
         MessageFragment[] messageFragments = this.messagesFragments.get(messageId);
         String messageSerialized = "";
+        Message message;
 
         // Loop over fragments to re-assemble string
         for (int index = 0; index < messageFragments.length; index++) {
             messageSerialized = messageSerialized + (String) messageFragments[index].getMessage();
+            messageFragments[index].delete();
         }
 
         // Recreate message
         try {
-            return Message.deserializeMessage(messageSerialized);
+            message =  Message.deserializeMessage(messageSerialized);            
         } catch (ClassNotFoundException | IOException e) {
             throw new BusException("Unable to deserialize message", e);
         }
+        
+        // Finish
+        messageFragments[0].finalize();
+        
+        // Return
+        return message;
     }
     
     /**
