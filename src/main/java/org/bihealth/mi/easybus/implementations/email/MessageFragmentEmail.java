@@ -23,7 +23,7 @@ public class MessageFragmentEmail extends MessageFragment {
      * @param fragment
      */
     public MessageFragmentEmail(MessageFragment fragment) {
-        super(fragment.getId(), fragment.getSplitNr(), fragment.getSplitTotal(), (String) fragment.getMessage());
+        super(fragment.getMessageID(), fragment.getFragmentNumber(), fragment.getNumberOfFragments(), (String) fragment.getMessage());
     }
 
     /**

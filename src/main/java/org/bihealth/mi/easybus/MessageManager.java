@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import de.tu_darmstadt.cbs.emailsmpc.UIDGenerator;
 
@@ -33,9 +34,9 @@ import de.tu_darmstadt.cbs.emailsmpc.UIDGenerator;
  *
  */
 public class MessageManager {
-    
+
     /** Maximal size of a single message in byte */
-    private int maxMessageSize;
+    private int                                  maxMessageSize;
     /** Message fragments */
     private final Map<String, MessageFragment[]> messagesFragments;
 
@@ -88,31 +89,37 @@ public class MessageManager {
     public Message mergeMessage(MessageFragment messageFragment) throws BusException {
         
         // Get or create fragments array
-        MessageFragment[] messageFragments = this.messagesFragments.computeIfAbsent(messageFragment.getId(), (key) -> new MessageFragment[messageFragment.getSplitTotal()]);
+        MessageFragment[] messageFragments = this.messagesFragments.computeIfAbsent(messageFragment.getMessageID(), new Function<String, MessageFragment[]>() {
+
+            @Override
+            public MessageFragment[] apply(String key) {
+                return new MessageFragment[messageFragment.getNumberOfFragments()];
+            }            
+        });               
         
         // Check
-        if (messageFragment.getSplitTotal() > messageFragments.length) {
-            throw new BusException(String.format("Index for number of messages %d for new fragment does not suit to total number of messages %d message id %s",
-                                                 messageFragment.getSplitNr(),
+        if (messageFragment.getNumberOfFragments() > messageFragments.length) {
+            throw new BusException(String.format("Index for number of messages %d for new fragment does not suit to total number of messages %d for message %s",
+                                                 messageFragment.getFragmentNumber(),
                                                  messageFragments.length,
-                                                 messageFragment.getId()));
+                                                 messageFragment.getMessageID()));
         }
 
         // Add to list
-        messageFragments[messageFragment.getSplitNr()] = messageFragment;
+        messageFragments[messageFragment.getFragmentNumber()] = messageFragment;
         
         // If message complete return or return null
-        return messageComplete(messageFragments) ? recreateMessage(messageFragment.getId()) : null;              
+        return messageComplete(messageFragments) ? buildMessage(messageFragment.getMessageID()) : null;              
     }
     
     /**
-     * Is a message complete?
+     * Builds a message object from a string
      * 
      * @param messageFragement
      * @return
      * @throws BusException 
      */
-    private Message recreateMessage(String messageId) throws BusException {
+    private Message buildMessage(String messageId) throws BusException {
         
         // Init
         MessageFragment[] messageFragments = this.messagesFragments.get(messageId);

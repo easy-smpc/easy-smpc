@@ -75,29 +75,18 @@ public class Message implements Serializable {
     }
     
     /**
-     * Serializes this messages to string
+     * Serializes this messages to a string
      * 
      * @return
      * @throws IOException
      */
     public String serialize() throws IOException {
-        return serializeMessage(this);
-    }
-    
-    /**
-     * Serialize message as base64 encoded string
-     *
-     * @param msg the msg
-     * @return the string
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    public static String serializeMessage(Message msg) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(bos));
-        oos.writeObject(msg);
+        oos.writeObject(this);
         oos.close();
         return Base64.getEncoder().encodeToString(bos.toByteArray());
-    }
+    }    
     
     /**
      * Deserialize message from base64 encoded string
