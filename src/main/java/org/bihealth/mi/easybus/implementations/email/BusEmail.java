@@ -43,13 +43,13 @@ public class BusEmail extends Bus {
     protected abstract static class BusEmailMessage {
         
         /** Receiver */
-        protected final Participant receiver;
+        protected final Participant     receiver;
         /** Scope */
-        protected final Scope       scope;
+        protected final Scope           scope;
         /** Message */
-        protected final Message     message;
+        protected final MessageFragment message;
         /** Subject */
-        protected final String      subject;
+        protected final String          subject;
         
         /**
          * Message
@@ -57,7 +57,7 @@ public class BusEmail extends Bus {
          * @param scope
          * @param attachment
          */
-        BusEmailMessage(Participant receiver, Scope scope, Message message, String subject) {
+        BusEmailMessage(Participant receiver, Scope scope, MessageFragment message, String subject) {
             this.receiver = receiver;
             this.scope = scope;
             this.message = message;

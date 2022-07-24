@@ -31,7 +31,6 @@ import de.tu_darmstadt.cbs.emailsmpc.UIDGenerator;
  * A message manager for the bus implementations
  * 
  * @author Felix Wirth
- *
  */
 public class MessageManager {
 
