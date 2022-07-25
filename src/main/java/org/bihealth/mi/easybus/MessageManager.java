@@ -61,7 +61,7 @@ public class MessageManager {
     public MessageFragment[] splitMessage(Message message) throws IOException {
 
         // Create fragments of the serialized message
-        List<String> fragmentList = SplitStringByByteLength(message.serialize(),
+        List<String> fragmentList = splitStringByByteLength(message.serialize(),
                                                             this.maxMessageSize);
 
         // Create objects from fragments
@@ -173,7 +173,7 @@ public class MessageManager {
      * @param maxsize
      * @return
      */
-    public static List<String> SplitStringByByteLength(String src, int maxsize) {
+    private List<String> splitStringByByteLength(String src, int maxsize) {
         
         // Prepare
         Charset cs = Charset.forName("UTF-8");
