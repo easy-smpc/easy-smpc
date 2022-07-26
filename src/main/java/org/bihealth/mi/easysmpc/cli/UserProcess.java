@@ -55,8 +55,6 @@ public class UserProcess implements MessageListener {
     public static final String     ROUND_0 = "_round0";
     /** The study model */
     private Study                  model   = new Study();
-    /** The mailbox check interval in milliseconds */
-    private final int              mailBoxCheckInterval;
     /** connectionIMAPSettings */
     private ConnectionIMAPSettings connectionIMAPSettings;
     /** Error flag */
@@ -68,10 +66,9 @@ public class UserProcess implements MessageListener {
      * @param mailboxCheckInterval
      * @param connectionIMAPSettings
      */
-    protected UserProcess(int mailboxCheckInterval, ConnectionIMAPSettings connectionIMAPSettings) {
+    protected UserProcess(ConnectionIMAPSettings connectionIMAPSettings) {
 
         // Store
-        this.mailBoxCheckInterval = mailboxCheckInterval;
         this.connectionIMAPSettings = connectionIMAPSettings;               
     }
     
@@ -86,7 +83,7 @@ public class UserProcess implements MessageListener {
      * @throws ClassNotFoundException 
      */
     public UserProcess(Study model, int mailboxCheckInterval) throws ClassNotFoundException, IllegalArgumentException, IOException {
-        this(mailboxCheckInterval, model.getConnectionIMAPSettings());
+        this(model.getConnectionIMAPSettings());
         
         // Store
         this.model = model;
@@ -160,14 +157,6 @@ public class UserProcess implements MessageListener {
         LOGGER.info(String.format("Process stopped. Restart with \"-resume -d %s\"", model.getFilename()));
     }
 
-
-
-    /**
-     * @return the mailBoxCheckInterval
-     */
-    public int getMailboxCheckInterval() {
-        return mailBoxCheckInterval;
-    }
         
     /**
      * Gets the model
@@ -250,7 +239,7 @@ public class UserProcess implements MessageListener {
      * @throws InterruptedException 
      */
     private void receiveMessages(String roundIdentifier) throws IllegalArgumentException, BusException, InterruptedException {
-        getModel().getBus(this.mailBoxCheckInterval, false).receive(new Scope(getModel().getName() + roundIdentifier),
+        getModel().getBus(getModel().getConnectionIMAPSettings().getCheckInterval(), false).receive(new Scope(getModel().getName() + roundIdentifier),
                            new org.bihealth.mi.easybus.Participant(getModel().getParticipantFromId(getModel().getOwnId()).name,
                                                                    getModel().getParticipantFromId(getModel().getOwnId()).emailAddress),
                            this);
@@ -307,13 +296,13 @@ public class UserProcess implements MessageListener {
                 
                 try {
                     // Retrieve bus and send message
-                    future = getModel().getBus(this.mailBoxCheckInterval, false).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
+                    future = getModel().getBus(getModel().getConnectionIMAPSettings().getCheckInterval(), false).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
                                     new Scope(getModel().getName() + (getModel().getState() == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().getParticipants()[index].name,
                                                                             getModel().getParticipants()[index].emailAddress));
                     
-                    // Wait for result with a timeout time
-                    future.get(Resources.TIMEOUT_SEND_EMAILS, TimeUnit.MILLISECONDS);
+                    // Wait for result with a timeout time                    
+                    future.get(getModel().getConnectionIMAPSettings().getEmailSendTimeout(), TimeUnit.SECONDS);
                     
                     // Mark message as sent
                     model.markMessageSent(index);

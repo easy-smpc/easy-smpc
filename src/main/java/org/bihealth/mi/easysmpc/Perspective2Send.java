@@ -289,8 +289,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                     }
 
                     try {
+                        
                         // Wait for result with a timeout time
-                        long endTime = System.currentTimeMillis() + Resources.TIMEOUT_SEND_EMAILS;
+                        long endTime = System.currentTimeMillis() + getApp().getModel().getConnectionIMAPSettings().getEmailSendTimeout();
                         while (true){
                             if(future.isDone()) {
                                 break;

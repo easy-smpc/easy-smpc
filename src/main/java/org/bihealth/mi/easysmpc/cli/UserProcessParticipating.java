@@ -62,7 +62,7 @@ public class UserProcessParticipating extends UserProcess {
                              int mailboxCheckInterval) {    
 
         // Store
-        super(mailboxCheckInterval, connectionIMAPSettings);
+        super(connectionIMAPSettings);
         this.data = data;
         
         // Delete pre-existing bus emails
@@ -75,7 +75,7 @@ public class UserProcessParticipating extends UserProcess {
         
         try {
             // Register for initial e-mail
-            BusEmail interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false), getMailboxCheckInterval());
+            BusEmail interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false), connectionIMAPSettings.getCheckInterval());
 
             interimBus.receive(new Scope(studyTitle + ROUND_0), participant, new MessageListener() {
                 boolean received = false;

@@ -111,7 +111,7 @@ public class BusEmail extends Bus {
      * @param sizeThreadpool
      */
     public BusEmail(ConnectionEmail connection, int millis, int sizeThreadpool) {
-        this(connection, millis, sizeThreadpool, Resources.EMAIL_DEFAULT_MESSAGE_SIZE);
+        this(connection, millis, sizeThreadpool, Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT);
     }
     
     /**

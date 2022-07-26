@@ -59,7 +59,7 @@ public class UserProcessCreating extends UserProcess {
                         ConnectionIMAPSettings connectionIMAPSettings,
                         int mailboxCheckInterval) throws IllegalStateException {
 
-        super(mailboxCheckInterval, connectionIMAPSettings);
+        super(connectionIMAPSettings);
         
         // Check
         if (participants == null || binsNames == null || participants.length < 3 || binsNames.size() < 1) {

@@ -206,5 +206,4 @@ public class MessageManager {
         // Return
         return stringList;
     }
-
 }
