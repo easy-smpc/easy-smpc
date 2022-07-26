@@ -82,22 +82,5 @@ public class MessageFragment extends Message {
         MessageFragment other = (MessageFragment) obj;
         return Objects.equals(content, other.content) && Objects.equals(messageID, other.messageID) &&
                fragmentNumber == other.fragmentNumber && numberOfFragments == other.numberOfFragments;
-    }
-    
-    /**
-     * Action to delete the message after it was read
-     * 
-     * @throws BusException
-     */
-    public void delete() throws BusException {
-        // Empty
-    }
-    
-    /**
-     * Action to finish up message deletion. Usually only called for one fragment after delete() has been called for several messages
-     *
-     */
-    public void finalize() throws BusException {
-        // Empty
-    }
+    }    
 }

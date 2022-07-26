@@ -58,16 +58,22 @@ public class MessageManager {
      * @return
      * @throws IOException
      */
-    public MessageFragment[] splitMessage(Message message) throws IOException {
-
+    public Message[] splitMessage(Message message) throws IOException {
+        
         // Create fragments of the serialized message
-        List<String> fragmentList = splitStringByByteLength(message.serialize(),
-                                                            this.maxMessageSize);
+        List<String> fragmentList = splitStringByByteLength(message.serialize(), this.maxMessageSize);
+        Message[] result = new Message[fragmentList.size()];
 
-        // Create objects from fragments
+        
+        // If only one fragment send non-fragmented message
+        if(fragmentList.size() == 1) {
+            result[0] = message;
+            return result;
+        }
+        
+        // Create result from fragments
         int index = 0;
         String id = UIDGenerator.generateShortUID(10);
-        MessageFragment[] result = new MessageFragment[fragmentList.size()];
 
         for (String fragment : fragmentList) {
             result[index] = new MessageFragment(id, index, fragmentList.size(), fragment);
@@ -85,7 +91,17 @@ public class MessageManager {
      * @return
      * @throws BusException 
      */
-    public Message mergeMessage(MessageFragment messageFragment) throws BusException {
+    public Message mergeMessage(Message message) throws BusException {
+        
+        // Check if plain Message
+        if(message.getClass().equals(Message.class)) {
+            message.delete();
+            message.finalize();
+            return message;
+        }
+        
+        // Message is a MessageFragment
+        MessageFragment messageFragment = (MessageFragment) message;
         
         // Get or create fragments array
         MessageFragment[] messageFragments = this.messagesFragments.computeIfAbsent(messageFragment.getMessageID(), new Function<String, MessageFragment[]>() {

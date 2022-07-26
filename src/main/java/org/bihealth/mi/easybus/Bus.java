@@ -181,7 +181,7 @@ public abstract class Bus {
         }
         
         // Check if scope exists
-        Map<Participant,List<MessageListener>> subscriptionsForScope = subscriptions.get(scope);        
+        Map<Participant,List<MessageListener>> subscriptionsForScope = subscriptions.get(scope);
         if (subscriptionsForScope == null) {
            return false;
         }

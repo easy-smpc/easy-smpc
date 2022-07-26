@@ -22,7 +22,6 @@ import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageFilter;
-import org.bihealth.mi.easybus.MessageFragment;
 import org.bihealth.mi.easybus.MessageManager;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
@@ -43,13 +42,11 @@ public class BusEmail extends Bus {
     protected abstract static class BusEmailMessage {
         
         /** Receiver */
-        protected final Participant     receiver;
+        protected final Participant receiver;
         /** Scope */
-        protected final Scope           scope;
+        protected final Scope       scope;
         /** Message */
-        protected final MessageFragment message;
-        /** Subject */
-        protected final String          subject;
+        protected final Message     message;
         
         /**
          * Message
@@ -57,11 +54,10 @@ public class BusEmail extends Bus {
          * @param scope
          * @param attachment
          */
-        BusEmailMessage(Participant receiver, Scope scope, MessageFragment message, String subject) {
+        BusEmailMessage(Participant receiver, Scope scope, Message message) {
             this.receiver = receiver;
             this.scope = scope;
             this.message = message;
-            this.subject = subject;
         }
     
         /** Deletes the message on the server
@@ -78,8 +74,8 @@ public class BusEmail extends Bus {
          * 
          * @return
          */
-        protected MessageFragmentEmail getMessageFragment() {
-            return new MessageFragmentEmail(this);
+        protected Message getMessage() {
+            return this.message;
         }
     }
 
@@ -197,7 +193,7 @@ public class BusEmail extends Bus {
 
         // Send message in fragments
         try {
-            for (MessageFragment m : messageManager.splitMessage(message)) {
+            for (Message m : messageManager.splitMessage(message)) {
                 this.connection.send(m, scope, participant);
             }
         } catch (IOException | BusException e) {
@@ -300,7 +296,7 @@ public class BusEmail extends Bus {
                 }
                 
                 // Process with message manager
-                Message messageComplete = messageManager.mergeMessage(message.getMessageFragment());
+                Message messageComplete = messageManager.mergeMessage(message.getMessage());
                 
                 // Send to scope and participant
                 if (messageComplete != null) {
