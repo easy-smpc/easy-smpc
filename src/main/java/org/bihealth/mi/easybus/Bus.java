@@ -34,12 +34,12 @@ import org.apache.logging.log4j.Logger;
  */
 public abstract class Bus {
     
+    /** Logger */
+    private static final Logger                                       LOGGER = LogManager.getLogger(Bus.class);
     /** Stores the subscriptions with known participants */
     private final Map<Scope, Map<Participant, List<MessageListener>>> subscriptions;
     /** Executor service */
     private final ExecutorService                                     executor;
-    /** Logger */
-    private static final Logger                                       LOGGER = LogManager.getLogger(Bus.class);
     
     /**
      * Creates a new instance
@@ -128,7 +128,7 @@ public abstract class Bus {
                 // Retry until sent successful or interrupted
                 while (!sent && !Thread.interrupted()) {
                     try {
-                        sendInternal(message, scope, participant);
+                        sendInternal(new BusMessage(participant, scope, message));
                         sent = true;
                     } catch (BusException e) {
                         // Log and repeat
@@ -145,17 +145,6 @@ public abstract class Bus {
     }
     
     /**
-     * Abstract method to send a message
-     * 
-     * @param message
-     * @param scope
-     * @param participant
-     * @return task
-     * @throws Exception
-     */
-    protected abstract Void sendInternal(Message message, Scope scope, Participant participant) throws Exception;
-    
-    /**
      * Stops all backend services that might be running
      */
     public abstract void stop();
@@ -165,7 +154,7 @@ public abstract class Bus {
      */
     protected ExecutorService getExecutor() {
         return executor;
-    }    
+    }
     
     /**
      * Is there a listener for the participant and scope registered
@@ -194,17 +183,18 @@ public abstract class Bus {
         
         // At least one listener is registered for scope and participant tuple
         return true;
-    }
-
+    }    
+    
     /**
      * Receives an external received message
      * 
      * @param message
-     * @param scope
-     * @param participant
      * @throws InterruptedException 
      */
-    protected synchronized boolean receiveInternal(Message message, Scope scope, Participant participant) throws InterruptedException {
+    protected synchronized boolean receiveInternal(BusMessage message) throws InterruptedException {
+        
+        Scope scope = message.getScope();
+        Participant participant = message.getReceiver();
         
         // Mark received
         boolean received = false;
@@ -218,7 +208,7 @@ public abstract class Bus {
                     throw new InterruptedException();
                 }
 
-                messageListener.receive(message);
+                messageListener.receive(message.getMessage());
                 received = true;
             }
         }
@@ -226,4 +216,13 @@ public abstract class Bus {
         // Done
         return received;
     }
+
+    /**
+     * Abstract method to send a message
+     * 
+     * @param message
+     * @return task
+     * @throws Exception
+     */
+    protected abstract Void sendInternal(BusMessage message) throws Exception;
 }

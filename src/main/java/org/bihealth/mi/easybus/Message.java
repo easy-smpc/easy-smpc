@@ -13,80 +13,16 @@
  */
 package org.bihealth.mi.easybus;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.Base64;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
- * The message a party is sending
+ * The message a party is sending.
+ * TODO: This class can be removed as it is just
+ * TODO: a wrapper around a string
  * 
  * @author Felix Wirth
- *
  */
-public class Message implements Serializable {
-    
-    /** SVUID */
-    private static final long serialVersionUID = 1557145500504512577L;    
-    /** The message content */
-    private Object messageContent;
-    /** Participant to respond to on this message */
-    private Participant respondTo;
-    /** A response will be sent with this reply id */
-    private String replyID;
-    
-    /**
-     * Creates a new instance
-     */
-    public Message(Object messageContent){
-       this(messageContent, null, null);
-    }
-    
-    public Message(Object messageContent, Participant respondTo, String replyID) {
-        this.messageContent = messageContent;
-        this.respondTo = respondTo;
-        this.replyID = replyID;
-    }
-    
-    /**
-     * Returns the message
-     */
-    public Object getMessage(){
-        return this.messageContent;
-    }
-    
-    /**
-     * Returns the respond to participant
-     */
-    public Participant getRespondTo(){
-        return this.respondTo;
-    }
-    
-    /**
-     * Returns the reply id
-     */
-    public String getReplyID(){
-        return this.replyID;
-    }
-    
-    /**
-     * Serializes this messages to a string
-     * 
-     * @return
-     * @throws IOException
-     */
-    public String serialize() throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(bos));
-        oos.writeObject(this);
-        oos.close();
-        return Base64.getEncoder().encodeToString(bos.toByteArray());
-    }    
+public class Message {
     
     /**
      * Deserialize message from base64 encoded string
@@ -97,10 +33,53 @@ public class Message implements Serializable {
      * @throws ClassNotFoundException the class not found exception
      */
     public static Message deserializeMessage(String msg) throws IOException, ClassNotFoundException {
-        byte[] data = Base64.getDecoder().decode(msg);
-        ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(data)));
-        Message message = (Message) ois.readObject();
-        ois.close();
-        return message;
+        return new Message(msg);
+    }
+    
+    /** The message content */
+    private String messageContent;
+    
+    /**
+     * Creates a new instance
+     */
+    public Message(String messageContent){
+       this.messageContent = messageContent;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        Message other = (Message) obj;
+        if (messageContent == null) {
+            if (other.messageContent != null) return false;
+        } else if (!messageContent.equals(other.messageContent)) return false;
+        return true;
+    }    
+    
+    /**
+     * Returns the message
+     */
+    public String getMessage(){
+        return this.messageContent;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((messageContent == null) ? 0 : messageContent.hashCode());
+        return result;
+    }
+
+    /**
+     * Serializes this messages to a string
+     * 
+     * @return
+     * @throws IOException
+     */
+    public String serialize() throws IOException {
+        return messageContent;
     }
 }
