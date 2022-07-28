@@ -28,16 +28,19 @@ import java.util.function.Function;
 import de.tu_darmstadt.cbs.emailsmpc.UIDGenerator;
 
 /**
- * A message manager for the bus implementations
+ * A message manager for the bus implementations.
+ * Can be used to split larger messages into a series
+ * of smaller message fragments.
  * 
  * @author Felix Wirth
+ * @author Fabian Prasser
  */
 public class MessageManager {
 
     /** Maximal size of a single message in byte */
-    private int                                  maxMessageSize;
+    private int                                     maxMessageSize;
     /** Message fragments */
-    private final Map<String, MessageFragment[]> messagesFragments;
+    private final Map<String, BusMessageFragment[]> messagesFragments;
 
     /**
      * Creates a new instance
@@ -48,51 +51,32 @@ public class MessageManager {
         
         // Store and init
         this.maxMessageSize = maxMessageSize;
-        this.messagesFragments = new ConcurrentHashMap<>();       
+        this.messagesFragments = new ConcurrentHashMap<>();
     }
-    
-    /**
-     * Splits a message into one or several MessageFragments
-     * 
-     * @param message
-     * @return
-     * @throws IOException
-     */
-    public MessageFragment[] splitMessage(Message message) throws IOException {
-
-        // Create fragments of the serialized message
-        List<String> fragmentList = splitStringByByteLength(message.serialize(),
-                                                            this.maxMessageSize);
-
-        // Create objects from fragments
-        int index = 0;
-        String id = UIDGenerator.generateShortUID(10);
-        MessageFragment[] result = new MessageFragment[fragmentList.size()];
-
-        for (String fragment : fragmentList) {
-            result[index] = new MessageFragment(id, index, fragmentList.size(), fragment);
-            index++;
-        }
-
-        // Return
-        return result;
-    }    
     
     /**
      * Merges message fragments into a message 
      * 
-     * @param message - null if not complete message or complete message
-     * @return
+     * @param message
+     * @return A message or null if the parameter was a fragment and the message is not complete, yet.
      * @throws BusException 
      */
-    public Message mergeMessage(MessageFragment messageFragment) throws BusException {
+    public BusMessage mergeMessage(BusMessage message) throws BusException {
+        
+        // Check if fragment
+        if (!(message instanceof BusMessageFragment)) {
+            return message;
+        }
+        
+        // Convert to fragment
+        BusMessageFragment messageFragment = (BusMessageFragment)message;
         
         // Get or create fragments array
-        MessageFragment[] messageFragments = this.messagesFragments.computeIfAbsent(messageFragment.getMessageID(), new Function<String, MessageFragment[]>() {
+        BusMessageFragment[] messageFragments = this.messagesFragments.computeIfAbsent(messageFragment.getMessageID(), new Function<String, BusMessageFragment[]>() {
 
             @Override
-            public MessageFragment[] apply(String key) {
-                return new MessageFragment[messageFragment.getNumberOfFragments()];
+            public BusMessageFragment[] apply(String key) {
+                return new BusMessageFragment[messageFragment.getNumberOfFragments()];
             }            
         });               
         
@@ -108,54 +92,79 @@ public class MessageManager {
         messageFragments[messageFragment.getFragmentNumber()] = messageFragment;
         
         // If message complete return or return null
-        return messageComplete(messageFragments) ? buildMessage(messageFragment.getMessageID()) : null;              
+        return messageComplete(messageFragments) ? buildMessage(messageFragment.getMessageID()) : null;
+    }    
+    
+    /**
+     * Splits a message into one or several MessageFragments
+     * 
+     * @param message
+     * @return
+     * @throws IOException
+     */
+    public BusMessage[] splitMessage(BusMessage message) throws IOException {
+
+        // Create fragments of the serialized message
+        List<String> fragments = splitStringByByteLength(message.getMessage(),
+                                                         this.maxMessageSize);
+        
+        // Create objects from fragments
+        int index = 0;
+        String id = UIDGenerator.generateShortUID(10);
+        BusMessage[] result = new BusMessage[fragments.size()];
+
+        for (String fragment : fragments) {
+            result[index] = new BusMessageFragment(message.getReceiver(),
+                                                   message.getScope(),
+                                                   fragment,
+                                                   id, 
+                                                   index++,
+                                                   fragments.size());
+        }
+
+        // Return
+        return result;
     }
     
     /**
-     * Builds a message object from a string
+     * Builds a message object from all fragments
      * 
-     * @param messageFragement
+     * @param messageId
      * @return
      * @throws BusException 
      */
-    private Message buildMessage(String messageId) throws BusException {
+    private BusMessage buildMessage(String messageId) throws BusException {
         
         // Init
-        MessageFragment[] messageFragments = this.messagesFragments.get(messageId);
-        String messageSerialized = "";
-        Message message;
+        BusMessageFragment[] messageFragments = this.messagesFragments.get(messageId);
+        String messageContent = "";
 
         // Loop over fragments to re-assemble string
         for (int index = 0; index < messageFragments.length; index++) {
-            messageSerialized = messageSerialized + (String) messageFragments[index].getMessage();
+            messageContent = messageContent + messageFragments[index].getMessage();
             messageFragments[index].delete();
-        }
-
-        // Recreate message
-        try {
-            message =  Message.deserializeMessage(messageSerialized);            
-        } catch (ClassNotFoundException | IOException e) {
-            throw new BusException("Unable to deserialize message", e);
         }
         
         // Finish
         messageFragments[0].finalize();
         
         // Return
-        return message;
+        return new BusMessage(messageFragments[0].getReceiver(),
+                              messageFragments[0].getScope(),
+                              messageContent);
     }
     
     /**
      * Is a message complete?
      * 
-     * @param messageFragement
+     * @param fragments
      * @return
      */
-    private boolean messageComplete(MessageFragment[] messageFragement) {
+    private boolean messageComplete(BusMessageFragment[] fragments) {
         
         // Loop over array
-        for(int index = 0; index < messageFragement.length; index++) {
-            if(messageFragement[index] == null) {
+        for(int index = 0; index < fragments.length; index++) {
+            if(fragments[index] == null) {
                 return false;
             }
         }  
@@ -185,6 +194,7 @@ public class MessageManager {
         
         // Create result
         while (true) {
+            
             // Encode a current chunk
             CoderResult cr = coder.encode(in, out, true); 
             int newpos = src.length() - in.length();
@@ -206,4 +216,5 @@ public class MessageManager {
         // Return
         return stringList;
     }
+
 }

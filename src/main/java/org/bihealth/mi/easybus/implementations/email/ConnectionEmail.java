@@ -27,9 +27,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.Message;
+import org.bihealth.mi.easybus.BusMessage;
+import org.bihealth.mi.easybus.BusMessageFragment;
 import org.bihealth.mi.easybus.MessageFilter;
-import org.bihealth.mi.easybus.MessageFragment;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easybus.Scope;
@@ -78,7 +78,7 @@ public abstract class ConnectionEmail {
             // Store
             this.message = message;
             this.folder = folder;
-        	long size = 0;
+            long size = 0;
     
             try {
                 
@@ -103,7 +103,7 @@ public abstract class ConnectionEmail {
             
             // Pass to listener
             if (listener != null) {
-            	listener.messageReceived(size);
+                listener.messageReceived(size);
             }
         }
     
@@ -188,9 +188,9 @@ public abstract class ConnectionEmail {
     /** Logger */
     private static final Logger LOGGER = LogManager.getLogger(ConnectionEmail.class);
 
-	/**
-	 * Generates the subject line
-	 * 
+    /**
+     * Generates the subject line
+     * 
      * @param scope
      * @param receiver
      * @return
@@ -202,7 +202,7 @@ public abstract class ConnectionEmail {
                PARTICIPANT_EMAIL_END_TAG;
     }
 
-	/**
+    /**
      * Create participant from body
      * 
      * @param body
@@ -232,7 +232,7 @@ public abstract class ConnectionEmail {
         }
     }
 
-	/**
+    /**
      * Create scope from body
      * 
      * @param body
@@ -279,7 +279,7 @@ public abstract class ConnectionEmail {
      * @throws BusException
      */
     protected ConnectionEmail(boolean sharedMailBox, String emailAddress) {
-    	this(sharedMailBox, emailAddress, null);
+        this(sharedMailBox, emailAddress, null);
     }
     
     /**
@@ -354,20 +354,20 @@ public abstract class ConnectionEmail {
     }
     
     /**
-     * Returns the associated email address for receiving
-     * @return
-     */
-    protected String getSendingEmailAddress() {
-        return this.sendingEmailAddress;
-    }
-    
-    /**
      * Returns the user name for receiving
      * 
      * @return
      */
     protected String getReceivingUserName() {
         return this.receivingUserName != null ? this.receivingUserName : this.receivingEmailAddress;
+    }
+    
+    /**
+     * Returns the associated email address for receiving
+     * @return
+     */
+    protected String getSendingEmailAddress() {
+        return this.sendingEmailAddress;
     }
     
     /**
@@ -394,10 +394,10 @@ public abstract class ConnectionEmail {
      * @return
      * @throws InterruptedException 
      */
-    protected List<BusEmail.BusEmailMessage> receive(MessageFilter filter) throws BusException, InterruptedException {
+    protected List<BusMessage> receive(MessageFilter filter) throws BusException, InterruptedException {
         
         // Prepare
-        List<BusEmail.BusEmailMessage> result = new ArrayList<>();
+        List<BusMessage> result = new ArrayList<>();
         
         try {
             
@@ -447,17 +447,35 @@ public abstract class ConnectionEmail {
                 // Pass on
                 final ConnectionEmailMessage _message = message;
 
-                result.add(new BusEmail.BusEmailMessage(participant, scope, (MessageFragment) attachment, message.text) {
-
-                    @Override
-                    protected void delete() throws BusException {
-                        _message.delete();
-                    }
-                    @Override
-                    protected void expunge() throws BusException {
-                        _message.expunge();
-                    }
-                });
+                if (attachment instanceof BusMessageFragment) {
+                    result.add(new BusMessageFragment((BusMessageFragment)attachment) {
+                        
+                        /** SVUID */
+                        private static final long serialVersionUID = 2663872683179080953L;
+                        
+                        @Override
+                        public void delete() throws BusException {
+                            _message.delete();
+                        }
+                        @Override
+                        public void expunge() throws BusException {
+                            _message.expunge();
+                        }
+                    });
+                } else {
+                    result.add(new BusMessage((BusMessage)attachment) {
+                        /** SVUID */
+                        private static final long serialVersionUID = -2294147052332533758L;
+                        @Override
+                        public void delete() throws BusException {
+                            _message.delete();
+                        }
+                        @Override
+                        public void expunge() throws BusException {
+                            _message.expunge();
+                        }
+                    });
+                }
             }
 
         } catch (BusException e) {
@@ -472,12 +490,13 @@ public abstract class ConnectionEmail {
     /**
      * Send message to participant
      * @param message
-     * @param scope
-     * @param receiver
-     * @param sender
      * @throws BusException
      */
-    protected void send(Message message, Scope scope, Participant receiver) throws BusException {
+    protected void send(BusMessage message) throws BusException {
+        
+        // Prepare
+        Participant receiver = message.getReceiver();
+        Scope scope = message.getScope();
         
         // Recipient
         String recipient = sharedMailbox ? getReceivingEmailAddress() : receiver.getEmailAddress();

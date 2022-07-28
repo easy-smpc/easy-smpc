@@ -20,12 +20,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.Message;
+import org.bihealth.mi.easybus.BusMessage;
 import org.bihealth.mi.easybus.MessageFilter;
-import org.bihealth.mi.easybus.MessageFragment;
 import org.bihealth.mi.easybus.MessageManager;
-import org.bihealth.mi.easybus.Participant;
-import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -35,54 +32,7 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Fabian Prasser
  */
 public class BusEmail extends Bus {
-    /**
-     * Internal message used by email-based implementations
-     * 
-     * @author Fabian Prasser
-     */
-    protected abstract static class BusEmailMessage {
-        
-        /** Receiver */
-        protected final Participant     receiver;
-        /** Scope */
-        protected final Scope           scope;
-        /** Message */
-        protected final MessageFragment message;
-        /** Subject */
-        protected final String          subject;
-        
-        /**
-         * Message
-         * @param receiver
-         * @param scope
-         * @param attachment
-         */
-        BusEmailMessage(Participant receiver, Scope scope, MessageFragment message, String subject) {
-            this.receiver = receiver;
-            this.scope = scope;
-            this.message = message;
-            this.subject = subject;
-        }
     
-        /** Deletes the message on the server
-         * @throws BusException */
-        protected abstract void delete() throws BusException;
-        
-    
-        /** Expunges all deleted messages on the server
-         * @throws BusException */
-        protected abstract void expunge() throws BusException;
-        
-        /**
-         * Create a MessageFragmentFinishEmail
-         * 
-         * @return
-         */
-        protected MessageFragmentEmail getMessageFragment() {
-            return new MessageFragmentEmail(this);
-        }
-    }
-
     /** Connection */
     private ConnectionEmail     connection;
     /** Thread */
@@ -122,7 +72,7 @@ public class BusEmail extends Bus {
      * @param sizeThreadpool
      * @param maxMessageSize
      */
-    public BusEmail(ConnectionEmail connection, int millis, int sizeThreadpool, int maxMessageSize) {
+    public BusEmail(ConnectionEmail connection, int millis, int sizeThreadpool, int maxMessageSize) {    
         
         // Super
         super(sizeThreadpool);
@@ -177,8 +127,8 @@ public class BusEmail extends Bus {
     public void purgeEmails(MessageFilter filter) throws BusException, InterruptedException {
 
             // Get mails
-            BusEmail.BusEmailMessage deleted = null;
-            for (BusEmail.BusEmailMessage message : connection.receive(filter)) {
+            BusMessage deleted = null;
+            for (BusMessage message : connection.receive(filter)) {
                 // Delete
                 message.delete();
                 deleted = message;
@@ -192,13 +142,13 @@ public class BusEmail extends Bus {
     
     
     
-    @Override
-    protected Void sendInternal(Message message, Scope scope, Participant participant) throws BusException {
+    @Override   
+    protected Void sendInternal(BusMessage message) throws BusException {
 
         // Send message in fragments
         try {
-            for (MessageFragment m : messageManager.splitMessage(message)) {
-                this.connection.send(m, scope, participant);
+            for (BusMessage m : messageManager.splitMessage(message)) {
+                this.connection.send(m);
             }
         } catch (IOException | BusException e) {
             throw new BusException("Unable to send message", e);
@@ -292,7 +242,7 @@ public class BusEmail extends Bus {
 
         try {
             // Get mails
-            for (BusEmail.BusEmailMessage message : connection.receive(filter)) {
+            for (BusMessage message : connection.receive(filter)) {
 
                 // Check for interrupt
                 if (Thread.interrupted()) {
@@ -300,14 +250,13 @@ public class BusEmail extends Bus {
                 }
                 
                 // Process with message manager
-                Message messageComplete = messageManager.mergeMessage(message.getMessageFragment());
+                BusMessage messageComplete = messageManager.mergeMessage(message);
                 
-                // Send to scope and participant
+                // Send to scope and participant               
                 if (messageComplete != null) {
-                    receiveInternal(messageComplete, message.scope, message.receiver);
+                    receiveInternal(messageComplete);
                 }
-            }
-            
+            }            
         } catch (BusException e) {
             // Pass error over
             this.receiveErrorInternal(e);

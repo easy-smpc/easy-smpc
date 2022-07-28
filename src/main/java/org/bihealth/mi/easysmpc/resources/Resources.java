@@ -160,7 +160,7 @@ public class Resources {
     public static final String    AGGREGATION_DELIMITER           = "X";
 
     /** Default message size for e-mails in  bytes */
-    public static final int       EMAIL_MAX_MESSAGE_SIZE_DEFAULT  = 5 * 1024 * 1024;
+    public static final int       EMAIL_MAX_MESSAGE_SIZE_DEFAULT  = 1024 * 1024;
 
     /** CLI stop processing string */
     public static final String STOP_CLI_PROCESS_STRING = "stop";
