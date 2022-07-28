@@ -53,7 +53,20 @@ public class BusMessageFragment extends BusMessage implements Serializable {
         this.fragmentNumber = fragmentNumber;
         this.numberOfFragments = numberOfFragments;
     }
-
+    
+    /**
+     * Create from other message
+     * @param other
+     */
+    public BusMessageFragment(BusMessageFragment other) {
+        this(other.receiver,
+             other.scope,
+             other.message,
+             other.messageID,
+             other.fragmentNumber,
+             other.numberOfFragments);
+    }
+    
     /**
      * Action to delete the message after it was read
      * 

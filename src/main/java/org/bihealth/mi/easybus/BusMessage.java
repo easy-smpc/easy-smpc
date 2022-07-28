@@ -48,9 +48,7 @@ public class BusMessage implements Serializable {
      * @param other
      */
     public BusMessage(BusMessage other) {
-        this.receiver = other.receiver;
-        this.scope = other.scope;
-        this.message = other.message;
+        this(other.receiver, other.scope, other.message);
     }
     
     /** 

@@ -28,6 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.BusMessage;
+import org.bihealth.mi.easybus.BusMessageFragment;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PerformanceListener;
@@ -446,19 +447,35 @@ public abstract class ConnectionEmail {
                 // Pass on
                 final ConnectionEmailMessage _message = message;
 
-                result.add(new BusMessage((BusMessage)attachment) {
-
-                    /** SVUID */
-                    private static final long serialVersionUID = -2294147052332533758L;
-                    @Override
-                    public void delete() throws BusException {
-                        _message.delete();
-                    }
-                    @Override
-                    public void expunge() throws BusException {
-                        _message.expunge();
-                    }
-                });
+                if (attachment instanceof BusMessageFragment) {
+                    result.add(new BusMessageFragment((BusMessageFragment)attachment) {
+                        
+                        /** SVUID */
+                        private static final long serialVersionUID = 2663872683179080953L;
+                        
+                        @Override
+                        public void delete() throws BusException {
+                            _message.delete();
+                        }
+                        @Override
+                        public void expunge() throws BusException {
+                            _message.expunge();
+                        }
+                    });
+                } else {
+                    result.add(new BusMessage((BusMessage)attachment) {
+                        /** SVUID */
+                        private static final long serialVersionUID = -2294147052332533758L;
+                        @Override
+                        public void delete() throws BusException {
+                            _message.delete();
+                        }
+                        @Override
+                        public void expunge() throws BusException {
+                            _message.expunge();
+                        }
+                    });
+                }
             }
 
         } catch (BusException e) {
