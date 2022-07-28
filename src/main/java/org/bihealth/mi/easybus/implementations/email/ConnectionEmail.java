@@ -28,8 +28,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Message;
-import org.bihealth.mi.easybus.Message.MessageActions;
 import org.bihealth.mi.easybus.MessageFilter;
+import org.bihealth.mi.easybus.MessageFragment;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easybus.Scope;
@@ -446,24 +446,8 @@ public abstract class ConnectionEmail {
                 
                 // Pass on
                 final ConnectionEmailMessage _message = message;
-                
-                Message messageInternal = (Message) attachment;
-                messageInternal.setActions(new MessageActions() {
-                    
-                    @Override
-                    public void delete() throws BusException {
-                        _message.delete();
-                        
-                    }
-                    
-                    @Override
-                    public void finalize() throws BusException {
-                        _message.expunge();
-                    }
-                });
-                
-                // TODO: Convert BusEmailMessage to a generic BusMessage without a delete/expunge and let ConnectionEmailMessage inherit from BusMessage   
-                result.add(new BusEmail.BusEmailMessage(participant, scope, messageInternal) {
+
+                result.add(new BusEmail.BusEmailMessage(participant, scope, (MessageFragment) attachment, message.text) {
 
                     @Override
                     protected void delete() throws BusException {

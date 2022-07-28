@@ -39,9 +39,6 @@ public class Message implements Serializable {
     private Participant respondTo;
     /** A response will be sent with this reply id */
     private String replyID;
-    /** Actions */
-    private MessageActions actions;
-    
     
     /**
      * Creates a new instance
@@ -105,55 +102,5 @@ public class Message implements Serializable {
         Message message = (Message) ois.readObject();
         ois.close();
         return message;
-    }
-    
-    /**
-     * Action to delete the message after it was read
-     * 
-     * @throws BusException
-     */
-    public void delete() throws BusException {
-        if(actions != null) {
-            actions.delete();
-        }
-    }
-    
-    /**
-     * Action to finish up message deletion. Usually only called for one fragment after delete() has been called for several messages
-     *
-     */
-    public void finalize() throws BusException {
-        if(actions != null) {
-            actions.finalize();
-        }
-    }
-    
-    /**
-     * Set actions
-     */
-    public void setActions(MessageActions actions) {
-        this.actions = actions;
-    }
-    
-    /**
-     * Message Actions
-     * 
-     * @author Felix Wirth
-     *
-     */
-    public interface MessageActions {
-        
-        /** Deletes the message from the source
-         * @throws BusException
-         */
-        public void delete() throws BusException;
-        
-        
-        /**
-         * Finalizes
-         * 
-         * @throws BusException
-         */
-        public void finalize() throws BusException;
     }
 }
