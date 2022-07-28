@@ -449,6 +449,8 @@ public abstract class ConnectionEmail {
 
                 result.add(new BusEmail.BusEmailMessage(participant, scope, (Message) attachment, message.text) {
 
+                    /** SVUID */
+                    private static final long serialVersionUID = -2294147052332533758L;
                     @Override
                     public void delete() throws BusException {
                         _message.delete();

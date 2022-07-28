@@ -14,6 +14,7 @@
 package org.bihealth.mi.easybus;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * The message a party is sending.
@@ -22,8 +23,11 @@ import java.io.IOException;
  * 
  * @author Felix Wirth
  */
-public class Message {
+public class Message implements Serializable {
     
+    /** SVUID */
+    private static final long serialVersionUID = 7569290904692958620L;
+
     /**
      * Deserialize message from base64 encoded string
      *

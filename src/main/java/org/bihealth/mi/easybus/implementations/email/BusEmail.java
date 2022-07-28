@@ -43,6 +43,8 @@ public class BusEmail extends Bus {
      */
     protected abstract static class BusEmailMessage extends BusMessage {
         
+        /** SVUID */
+        private static final long serialVersionUID = 5085400673320410210L;
         /** Subject */
         protected final String          subject;
         

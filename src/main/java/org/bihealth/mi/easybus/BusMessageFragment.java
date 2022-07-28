@@ -7,6 +7,8 @@ package org.bihealth.mi.easybus;
  */
 public class BusMessageFragment extends BusMessage {
     
+    /** SVUID */
+    private static final long serialVersionUID = 8935224381534818963L;
     /** Number of this message fragment */
     private final int         fragmentNumber;
     /** Total of fragments */

@@ -13,14 +13,18 @@
  */
 package org.bihealth.mi.easybus;
 
+import java.io.Serializable;
+
 /**
  * Identifies the scope of a message
  * 
  * @author Felix Wirth
  *
  */
-public class Scope {
+public class Scope implements Serializable {
 
+    /** SVUID */
+    private static final long serialVersionUID = -2127462409172617852L;
     /** Name of the Scope */
     private String name;
 

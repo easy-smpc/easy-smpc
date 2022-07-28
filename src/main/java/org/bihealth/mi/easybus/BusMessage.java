@@ -13,13 +13,17 @@
  */
 package org.bihealth.mi.easybus;
 
+import java.io.Serializable;
+
 /**
  * Internal message used by bus implementations
  * 
  * @author Fabian Prasser
  */
-public class BusMessage {
+public class BusMessage implements Serializable {
     
+    /** SVUID */
+    private static final long serialVersionUID = 8541645750687762860L;
     /** Receiver */
     protected final Participant     receiver;
     /** Scope */
@@ -33,10 +37,10 @@ public class BusMessage {
      * @param scope
      * @param attachment
      */
-    public BusMessage(Participant receiver, Scope scope, Message message) {
+    public BusMessage(Participant receiver, Scope scope, Message attachment) {
         this.receiver = receiver;
         this.scope = scope;
-        this.message = message;
+        this.message = attachment;
     }
     
     /** 
