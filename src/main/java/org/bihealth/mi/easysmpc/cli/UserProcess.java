@@ -188,8 +188,8 @@ public class UserProcess implements MessageListener {
     }
     
     @Override
-    public void receive(org.bihealth.mi.easybus.Message message) {
-        String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
+    public void receive(String message) {
+        String messageStripped = ImportClipboard.getStrippedExchangeMessage(message);
         
         // Check if valid
         if (isMessageShareResultValid(messageStripped)) {
@@ -307,7 +307,7 @@ public class UserProcess implements MessageListener {
                 
                 try {
                     // Retrieve bus and send message
-                    future = getModel().getBus(this.mailBoxCheckInterval, false).send(new org.bihealth.mi.easybus.Message(Message.serializeMessage(getModel().getUnsentMessageFor(index))),
+                    future = getModel().getBus(this.mailBoxCheckInterval, false).send(Message.serializeMessage(getModel().getUnsentMessageFor(index)),
                                     new Scope(getModel().getName() + (getModel().getState() == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().getParticipants()[index].name,
                                                                             getModel().getParticipants()[index].emailAddress));

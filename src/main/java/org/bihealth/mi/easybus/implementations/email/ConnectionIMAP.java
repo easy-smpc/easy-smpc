@@ -75,7 +75,7 @@ public class ConnectionIMAP extends ConnectionEmail {
     private Session                       sessionSending;
     /** Session to receive e-mails */
     private Session                       sessionReceiving;
-    /** Password of the receiving user */
+    /** Password of the user */
     private String                        receivingPassword;
     /** Performance listener */
     private transient PerformanceListener listener;

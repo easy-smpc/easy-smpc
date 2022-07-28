@@ -24,7 +24,7 @@ public interface MessageListener {
     /**
      * Needs to be implemented in order to receive a message
      */
-    public void receive(Message message);
+    public void receive(String message);
     
     /**
      * Needs to be implemented in order to process an error
