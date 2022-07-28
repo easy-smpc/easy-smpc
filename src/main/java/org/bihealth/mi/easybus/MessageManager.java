@@ -105,7 +105,7 @@ public class MessageManager {
     public BusMessage[] splitMessage(BusMessage message) throws IOException {
 
         // Create fragments of the serialized message
-        List<String> fragments = splitStringByByteLength(message.getMessage().serialize(),
+        List<String> fragments = splitStringByByteLength(message.getMessage(),
                                                          this.maxMessageSize);
         
         // Create objects from fragments
@@ -116,7 +116,7 @@ public class MessageManager {
         for (String fragment : fragments) {
             result[index] = new BusMessageFragment(message.getReceiver(),
                                                    message.getScope(),
-                                                   new Message(fragment),
+                                                   fragment,
                                                    id, 
                                                    index++,
                                                    fragments.size());
@@ -141,11 +141,7 @@ public class MessageManager {
 
         // Loop over fragments to re-assemble string
         for (int index = 0; index < messageFragments.length; index++) {
-            try {
-                messageContent = messageContent + (String) messageFragments[index].getMessage().serialize();
-            } catch (IOException e) {
-                throw new BusException("Cannot deserialize fragment", e);
-            }
+            messageContent = messageContent + messageFragments[index].getMessage();
             messageFragments[index].delete();
         }
         
@@ -155,7 +151,7 @@ public class MessageManager {
         // Return
         return new BusMessage(messageFragments[0].getReceiver(),
                               messageFragments[0].getScope(),
-                              new Message(messageContent));
+                              messageContent);
     }
     
     /**

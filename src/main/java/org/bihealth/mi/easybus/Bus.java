@@ -117,7 +117,7 @@ public abstract class Bus {
      * @return 
      * @throws BusException
      */
-    public FutureTask<Void> send(Message message, Scope scope, Participant participant) throws BusException {
+    public FutureTask<Void> send(String message, Scope scope, Participant participant) throws BusException {
         // Create future task 
         FutureTask<Void> task = new FutureTask<>(new Callable<Void>() {
             @Override

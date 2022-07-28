@@ -30,7 +30,7 @@ public class BusMessageFragment extends BusMessage {
      */
     public BusMessageFragment(Participant receiver,
                               Scope scope,
-                              Message message,
+                              String message,
                               String messageID,
                               int fragmentNumber,
                               int numberOfFragments) {

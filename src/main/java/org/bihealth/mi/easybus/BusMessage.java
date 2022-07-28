@@ -28,19 +28,29 @@ public class BusMessage implements Serializable {
     protected final Participant     receiver;
     /** Scope */
     protected final Scope           scope;
-    /** Message */
-    protected final Message         message;
+    /** Message: A serialized base 64 encoded blob */
+    protected final String          message;
     
     /**
      * Message
      * @param receiver
      * @param scope
-     * @param attachment
+     * @param message
      */
-    public BusMessage(Participant receiver, Scope scope, Message attachment) {
+    public BusMessage(Participant receiver, Scope scope, String message) {
         this.receiver = receiver;
         this.scope = scope;
-        this.message = attachment;
+        this.message = message;
+    }
+    
+    /**
+     * Create from other message
+     * @param other
+     */
+    public BusMessage(BusMessage other) {
+        this.receiver = other.receiver;
+        this.scope = other.scope;
+        this.message = other.message;
     }
     
     /** 
@@ -85,7 +95,7 @@ public class BusMessage implements Serializable {
      * Return the message
      * @return the message
      */
-    public Message getMessage() {
+    public String getMessage() {
         return message;
     }
     

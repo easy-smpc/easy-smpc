@@ -21,11 +21,8 @@ import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.BusMessage;
-import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.MessageManager;
-import org.bihealth.mi.easybus.Participant;
-import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -36,30 +33,6 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  */
 public class BusEmail extends Bus {
     
-    /**
-     * Internal message used by email-based implementations
-     * 
-     * @author Fabian Prasser
-     */
-    protected abstract static class BusEmailMessage extends BusMessage {
-        
-        /** SVUID */
-        private static final long serialVersionUID = 5085400673320410210L;
-        /** Subject */
-        protected final String          subject;
-        
-        /**
-         * Message with subject
-         * @param receiver
-         * @param scope
-         * @param attachment
-         */
-        BusEmailMessage(Participant receiver, Scope scope, Message message, String subject) {
-            super (receiver, scope, message);
-            this.subject = subject;
-        }
-    }
-
     /** Connection */
     private ConnectionEmail     connection;
     /** Thread */
@@ -154,8 +127,8 @@ public class BusEmail extends Bus {
     public void purgeEmails(MessageFilter filter) throws BusException, InterruptedException {
 
             // Get mails
-            BusEmail.BusEmailMessage deleted = null;
-            for (BusEmail.BusEmailMessage message : connection.receive(filter)) {
+            BusMessage deleted = null;
+            for (BusMessage message : connection.receive(filter)) {
                 // Delete
                 message.delete();
                 deleted = message;
@@ -269,7 +242,7 @@ public class BusEmail extends Bus {
 
         try {
             // Get mails
-            for (BusEmail.BusEmailMessage message : connection.receive(filter)) {
+            for (BusMessage message : connection.receive(filter)) {
 
                 // Check for interrupt
                 if (Thread.interrupted()) {

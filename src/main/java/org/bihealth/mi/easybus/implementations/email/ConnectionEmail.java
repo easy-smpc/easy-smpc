@@ -28,7 +28,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.BusMessage;
-import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PerformanceListener;
@@ -394,10 +393,10 @@ public abstract class ConnectionEmail {
      * @return
      * @throws InterruptedException 
      */
-    protected List<BusEmail.BusEmailMessage> receive(MessageFilter filter) throws BusException, InterruptedException {
+    protected List<BusMessage> receive(MessageFilter filter) throws BusException, InterruptedException {
         
         // Prepare
-        List<BusEmail.BusEmailMessage> result = new ArrayList<>();
+        List<BusMessage> result = new ArrayList<>();
         
         try {
             
@@ -447,7 +446,7 @@ public abstract class ConnectionEmail {
                 // Pass on
                 final ConnectionEmailMessage _message = message;
 
-                result.add(new BusEmail.BusEmailMessage(participant, scope, (Message) attachment, message.text) {
+                result.add(new BusMessage((BusMessage)attachment) {
 
                     /** SVUID */
                     private static final long serialVersionUID = -2294147052332533758L;

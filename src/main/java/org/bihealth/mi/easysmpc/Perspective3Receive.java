@@ -34,7 +34,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
@@ -176,13 +175,13 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
         }
      
     @Override
-    public void receive(Message message) {
+    public void receive(String message) {
         
         // Set error message 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message.getMessage());
+                String messageStripped = ImportClipboard.getStrippedExchangeMessage((String) message);
                 if (getApp().isMessageShareResultValid(messageStripped)) {
                     getApp().setMessageShare(messageStripped);
                     getApp().actionSave();
