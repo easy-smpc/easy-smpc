@@ -1,11 +1,13 @@
 package org.bihealth.mi.easybus;
 
+import java.io.Serializable;
+
 /**
  * Represents a fragment/splitted part of a BusMessage
  * 
  * @author Felix Wirth
  */
-public class BusMessageFragment extends BusMessage {
+public class BusMessageFragment extends BusMessage implements Serializable {
     
     /** SVUID */
     private static final long serialVersionUID = 8935224381534818963L;
