@@ -66,15 +66,6 @@ public class BusMessageFragment extends BusMessage implements Serializable {
              other.fragmentNumber,
              other.numberOfFragments);
     }
-    
-    /**
-     * Action to delete the message after it was read
-     * 
-     * @throws BusException
-     */
-    public void delete() throws BusException {
-        // Empty
-    }
 
     @Override
     public boolean equals(Object obj) {
@@ -88,14 +79,6 @@ public class BusMessageFragment extends BusMessage implements Serializable {
         } else if (!messageID.equals(other.messageID)) return false;
         if (numberOfFragments != other.numberOfFragments) return false;
         return true;
-    }
-
-    /**
-     * Action to finish up message deletion. Usually only called for one fragment after delete() has been called for several messages
-     *
-     */
-    public void finalize() throws BusException {
-        // Empty
     }
     
     /**

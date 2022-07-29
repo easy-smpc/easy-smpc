@@ -65,6 +65,8 @@ public class MessageManager {
         
         // Check if fragment
         if (!(message instanceof BusMessageFragment)) {
+            message.delete();
+            message.expunge();
             return message;
         }
         
@@ -146,7 +148,7 @@ public class MessageManager {
         }
         
         // Finish
-        messageFragments[0].finalize();
+        messageFragments[0].expunge();
         
         // Return
         return new BusMessage(messageFragments[0].getReceiver(),
