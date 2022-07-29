@@ -142,7 +142,7 @@ public class BusEmail extends Bus {
     
     
     
-    @Override   
+    @Override
     protected Void sendInternal(BusMessage message) throws BusException {
 
         // Send message in fragments
@@ -252,11 +252,11 @@ public class BusEmail extends Bus {
                 // Process with message manager
                 BusMessage messageComplete = messageManager.mergeMessage(message);
                 
-                // Send to scope and participant               
+                // Send to scope and participant
                 if (messageComplete != null) {
                     receiveInternal(messageComplete);
                 }
-            }            
+            }
         } catch (BusException e) {
             // Pass error over
             this.receiveErrorInternal(e);

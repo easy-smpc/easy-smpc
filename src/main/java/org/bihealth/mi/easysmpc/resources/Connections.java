@@ -28,7 +28,7 @@ import org.bihealth.mi.easysmpc.AppPasswordProvider;
 public class Connections {
 
     /** Key */
-    private static final String IMAP_SERVER_KEY      = "imap_server";
+    private static final String IMAP_SERVER_KEY            = "imap_server";
     /** Key */
     private static final String IMAP_PORT_KEY              = "imap_port";
     /** Key */
@@ -83,7 +83,6 @@ public class Connections {
         setOrDeleteKey(node, SMTP_USER_NAME_KEY, settings.getSMTPUserName());
         setOrDeleteKey(node, IMAP_AUTH_MECH_KEY, settings.getIMAPAuthMechanisms());
         setOrDeleteKey(node, SMTP_AUTH_MECH_KEY, settings.getSMTPAuthMechanisms());
-        
     }
     
     /**

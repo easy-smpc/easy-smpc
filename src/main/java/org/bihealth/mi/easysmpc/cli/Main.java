@@ -42,8 +42,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  * @author Fabian Prasser
  */
 public class Main {
-    /** The mailbox check interval in milliseconds */
-    public static final int     MAILBOX_CHECK_INTERVAL  = 3000;
+
     /** Encryption ssl/tls */
     private static final String SSL_TLS                 = "SSLTLS";
     /** Encryption starttls */
@@ -436,8 +435,7 @@ public class Main {
                                               false,
                                               cli.hasOption(OPTION_HAS_HEADER),
                                               cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
-                             getConnectionIMAPSettingsFromCLI(cli),
-                             MAILBOX_CHECK_INTERVAL);
+                             getConnectionIMAPSettingsFromCLI(cli));
             
             // Done
             return;
@@ -463,8 +461,7 @@ public class Main {
                                                                                          false,
                                                                                          cli.hasOption(OPTION_HAS_HEADER),
                                                                                          cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
-                                                                  getConnectionIMAPSettingsFromCLI(cli),
-                                                                  MAILBOX_CHECK_INTERVAL);
+                                                                  getConnectionIMAPSettingsFromCLI(cli));
            
             // Wait for participant to be initialized
             LOGGER.info("Waiting for initial email to participate");
@@ -493,7 +490,7 @@ public class Main {
                              : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));
                 
                 // Start process
-                new UserProcess(study, MAILBOX_CHECK_INTERVAL);
+                new UserProcess(study);
             } catch (ClassNotFoundException | IllegalArgumentException | IOException e) {
                 LOGGER.error("Unable to resume with given file", e);
             }

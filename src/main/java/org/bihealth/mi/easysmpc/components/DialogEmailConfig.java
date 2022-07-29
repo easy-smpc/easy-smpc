@@ -76,11 +76,11 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
     /** Tabbed pane */
     JTabbedPane                    tabbedPane       = new JTabbedPane();
     /** Entry for message size */
-    private ComponentEntryOne entryMessageSize;
+    private ComponentEntryOne      entryMessageSize;
     /** Entry for check interval */
-    private ComponentEntryOne entryCheckInterval;
+    private ComponentEntryOne      entryCheckInterval;
     /** Entry for e-mail sending timeout */
-    private ComponentEntryOne entrySendTimeout;
+    private ComponentEntryOne      entrySendTimeout;
 
     /**
      * Create a new instance
@@ -163,7 +163,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         this.setTitle(Resources.getString("EmailConfig.0"));
         this.getContentPane().setLayout(new BorderLayout());
         this.setIconImage(this.parent.getIconImage());
-        this.setResizable(false);        
+        this.setResizable(false);
         
         // Base settings panes
         centralBase = new JPanel();

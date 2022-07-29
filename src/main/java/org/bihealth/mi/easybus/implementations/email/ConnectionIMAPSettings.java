@@ -374,9 +374,7 @@ public class ConnectionIMAPSettings implements Serializable {
     /**
      * Return SMTP auth mechanisms
      *
-     * @see "mail.smtp.auth.mechanisms" at <a href=
-     *      "https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/smtp/package-summary.html">
-     *      Jakarta mail doc </a>
+     * @see "mail.smtp.auth.mechanisms" at <a href="https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/smtp/package-summary.html">Jakarta mail doc </a>
      * 
      * @return
      */
@@ -408,8 +406,7 @@ public class ConnectionIMAPSettings implements Serializable {
     /**
      * Tries to guess the connection settings from the email address provider
      * 
-     * @param Whether
-     *            settings could be guessed successfully
+     * @param Whether settings could be guessed successfully
      */
     public boolean guess() {
         // Auto discovery for proxy connections
@@ -751,7 +748,6 @@ public class ConnectionIMAPSettings implements Serializable {
         this.checkInterval = checkInterval;
         return this;
     }
-
     
     /**
      * @param emailSendTimeout the emailSendTimeout to set

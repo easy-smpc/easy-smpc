@@ -53,14 +53,11 @@ public class UserProcessParticipating extends UserProcess {
      * @param participant
      * @param data 
      * @param connectionIMAPSettings
-     * @param mailboxCheckInterval
      */
     public UserProcessParticipating(String studyTitle,
-                             Participant participant,
-                             Map<String, String> data, 
-                             ConnectionIMAPSettings connectionIMAPSettings,
-                             int mailboxCheckInterval) {    
-
+                                    Participant participant,
+                                    Map<String, String> data,
+                                    ConnectionIMAPSettings connectionIMAPSettings) {
         // Store
         super(connectionIMAPSettings);
         this.data = data;

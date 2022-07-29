@@ -49,15 +49,13 @@ public class UserProcessCreating extends UserProcess {
      * @param binsNames
      * @param data
      * @param connectionIMAPSettings
-     * @param mailboxCheckInterval
      * @throws IllegalStateException
      */
     public UserProcessCreating(String studyTitle,
                         Participant[] participants,
                         Map<String, String> binsNames,
                         Map<String, String> data,
-                        ConnectionIMAPSettings connectionIMAPSettings,
-                        int mailboxCheckInterval) throws IllegalStateException {
+                        ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException {
 
         super(connectionIMAPSettings);
         

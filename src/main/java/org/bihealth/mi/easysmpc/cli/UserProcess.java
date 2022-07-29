@@ -63,7 +63,6 @@ public class UserProcess implements MessageListener {
     /**
      * Creates a new instance
      * 
-     * @param mailboxCheckInterval
      * @param connectionIMAPSettings
      */
     protected UserProcess(ConnectionIMAPSettings connectionIMAPSettings) {
@@ -77,12 +76,12 @@ public class UserProcess implements MessageListener {
     /**
      * Create a new instance from an existing model
      * 
-     * @param file
+     * @param model
      * @throws IOException 
      * @throws IllegalArgumentException 
      * @throws ClassNotFoundException 
      */
-    public UserProcess(Study model, int mailboxCheckInterval) throws ClassNotFoundException, IllegalArgumentException, IOException {
+    public UserProcess(Study model) throws ClassNotFoundException, IllegalArgumentException, IOException {
         this(model.getConnectionIMAPSettings());
         
         // Store
@@ -302,8 +301,8 @@ public class UserProcess implements MessageListener {
                                     new org.bihealth.mi.easybus.Participant(getModel().getParticipants()[index].name,
                                                                             getModel().getParticipants()[index].emailAddress));
                     
-                    // Wait for result with a timeout time                    
-                    future.get(getModel().getConnectionIMAPSettings().getEmailSendTimeout(), TimeUnit.SECONDS);
+                    // Wait for result with a timeout time
+                    future.get(getModel().getConnectionIMAPSettings().getEmailSendTimeout(), TimeUnit.MILLISECONDS);
                     
                     // Mark message as sent
                     model.markMessageSent(index);

@@ -74,7 +74,7 @@ public abstract class ConnectionEmail {
          * @param folder
          */
         public ConnectionEmailMessage(jakarta.mail.Message message, Folder folder) {
-            
+
             // Store
             this.message = message;
             this.folder = folder;
