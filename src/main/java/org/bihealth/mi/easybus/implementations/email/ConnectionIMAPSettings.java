@@ -29,6 +29,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easybus.implementations.email.PasswordProvider.PasswordStore;
+import org.bihealth.mi.easysmpc.resources.Resources;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -138,6 +139,12 @@ public class ConnectionIMAPSettings implements Serializable {
     private String                        imapAuthMechanisms   = null;
     /** Auth mechanisms for SMTP */
     private String                        smtpAuthMechanisms   = null;
+    /** Maximal e-mail message size in bytes */
+    private int                           maxMessageSize;
+    /** E-mail check interval in milliseconds */
+    private int                           checkInterval;
+    /** E-mail send timeout in milliseconds */
+    private int                           emailSendTimeout;
 
     /**
      * Creates a new instance with same mail address for sending and receiving
@@ -367,16 +374,38 @@ public class ConnectionIMAPSettings implements Serializable {
     /**
      * Return SMTP auth mechanisms
      *
-     * @see "mail.smtp.auth.mechanisms" at <a href="https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/smtp/package-summary.html"> Jakarta mail doc </a>
+     * @see "mail.smtp.auth.mechanisms" at <a href="https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/smtp/package-summary.html">Jakarta mail doc </a>
      * 
      * @return
      */
     public String getSMTPAuthMechanisms() {
         return smtpAuthMechanisms;
     }
+
+    /**
+     * @return the emailSendTimeout
+     */
+    public int getEmailSendTimeout() {
+        return emailSendTimeout;
+    }
     
     /**
+     * @return the maxMessageSize
+     */
+    public int getMaxMessageSize() {
+        return maxMessageSize > 0 ? maxMessageSize : Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT;
+    }
+    
+    /**
+     * @return the checkInterval
+     */
+    public int getCheckInterval() {
+        return checkInterval;
+    }
+
+    /**
      * Tries to guess the connection settings from the email address provider
+     * 
      * @param Whether settings could be guessed successfully
      */
     public boolean guess() {
@@ -708,6 +737,33 @@ public class ConnectionIMAPSettings implements Serializable {
      */
     public ConnectionIMAPSettings setSMTPAuthMechanisms(String smtpAuthMechanisms) {
         this.smtpAuthMechanisms = smtpAuthMechanisms;
+        return this;
+    }
+    
+    /**
+     * @param checkInterval the checkInterval to set
+     * @return 
+     */
+    public ConnectionIMAPSettings setCheckInterval(int checkInterval) {
+        this.checkInterval = checkInterval;
+        return this;
+    }
+    
+    /**
+     * @param emailSendTimeout the emailSendTimeout to set
+     * @return 
+     */
+    public ConnectionIMAPSettings setEmailSendTimeout(int emailSendTimeout) {
+        this.emailSendTimeout = emailSendTimeout;
+        return this;
+    }
+
+    /**
+     * @param maxMessageSize the maxMessageSize to set
+     * @return 
+     */
+    public ConnectionIMAPSettings setMaxMessageSize(int maxMessageSize) {
+        this.maxMessageSize = maxMessageSize;
         return this;
     }
 

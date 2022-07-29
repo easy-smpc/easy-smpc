@@ -61,7 +61,7 @@ public class BusEmail extends Bus {
      * @param sizeThreadpool
      */
     public BusEmail(ConnectionEmail connection, int millis, int sizeThreadpool) {
-        this(connection, millis, sizeThreadpool, Resources.EMAIL_DEFAULT_MESSAGE_SIZE);
+        this(connection, millis, sizeThreadpool, Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT);
     }
     
     /**
@@ -72,7 +72,7 @@ public class BusEmail extends Bus {
      * @param sizeThreadpool
      * @param maxMessageSize
      */
-    public BusEmail(ConnectionEmail connection, int millis, int sizeThreadpool, int maxMessageSize) {
+    public BusEmail(ConnectionEmail connection, int millis, int sizeThreadpool, int maxMessageSize) {    
         
         // Super
         super(sizeThreadpool);
