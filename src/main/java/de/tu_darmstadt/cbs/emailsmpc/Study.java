@@ -308,7 +308,7 @@ public class Study implements Serializable, Cloneable {
      * @throws BusException 
      */
     public synchronized Bus getBus() throws BusException {
-        return getBus(Resources.INTERVAL_CHECK_MAILBOX_MILLISECONDS);
+        return getBus(getConnectionIMAPSettings().getCheckInterval());
     }
 
     /**
@@ -334,7 +334,9 @@ public class Study implements Serializable, Cloneable {
         if ((this.bus == null || !this.bus.isAlive()) && this.getConnectionIMAPSettings() != null) {
             this.bus = new BusEmail(new ConnectionIMAP(this.getConnectionIMAPSettings(),
                                                        isSharedMailbox),
-                                    millis);
+                                    millis,
+                                    Resources.SIZE_THREADPOOL,
+                                    this.connectionIMAPSettings.getMaxMessageSize());
         }
         return this.bus;
     }

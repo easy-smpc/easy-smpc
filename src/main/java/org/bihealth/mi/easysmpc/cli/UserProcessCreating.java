@@ -49,17 +49,15 @@ public class UserProcessCreating extends UserProcess {
      * @param binsNames
      * @param data
      * @param connectionIMAPSettings
-     * @param mailboxCheckInterval
      * @throws IllegalStateException
      */
     public UserProcessCreating(String studyTitle,
                         Participant[] participants,
                         Map<String, String> binsNames,
                         Map<String, String> data,
-                        ConnectionIMAPSettings connectionIMAPSettings,
-                        int mailboxCheckInterval) throws IllegalStateException {
+                        ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException {
 
-        super(mailboxCheckInterval, connectionIMAPSettings);
+        super(connectionIMAPSettings);
         
         // Check
         if (participants == null || binsNames == null || participants.length < 3 || binsNames.size() < 1) {

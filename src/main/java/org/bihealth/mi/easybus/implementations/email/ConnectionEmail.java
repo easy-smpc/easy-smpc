@@ -72,7 +72,6 @@ public abstract class ConnectionEmail {
          * @param folderManager
          */
         public ConnectionEmailMessage(jakarta.mail.Message message, FolderManager folderManager) {
-            
             // Store
             this.message = message;
             this.folderManager = folderManager;
@@ -101,7 +100,7 @@ public abstract class ConnectionEmail {
             
             // Pass to listener
             if (listener != null) {
-            	listener.messageReceived(size);
+                listener.messageReceived(size);
             }
             
             // Add to folder manager
@@ -183,9 +182,9 @@ public abstract class ConnectionEmail {
     /** Logger */
     private static final Logger LOGGER = LogManager.getLogger(ConnectionEmail.class);
 
-	/**
-	 * Generates the subject line
-	 * 
+    /**
+     * Generates the subject line
+     * 
      * @param scope
      * @param receiver
      * @return
@@ -197,7 +196,7 @@ public abstract class ConnectionEmail {
                PARTICIPANT_EMAIL_END_TAG;
     }
 
-	/**
+    /**
      * Create participant from body
      * 
      * @param body
@@ -227,7 +226,7 @@ public abstract class ConnectionEmail {
         }
     }
 
-	/**
+    /**
      * Create scope from body
      * 
      * @param body
@@ -274,7 +273,7 @@ public abstract class ConnectionEmail {
      * @throws BusException
      */
     protected ConnectionEmail(boolean sharedMailBox, String emailAddress) {
-    	this(sharedMailBox, emailAddress, null);
+        this(sharedMailBox, emailAddress, null);
     }
     
     /**

@@ -31,6 +31,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -51,27 +52,35 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class DialogEmailConfig extends JDialog implements ChangeListener {
 
     /** SVUID */
-    private static final long                serialVersionUID = -5892937473681272650L;
+    private static final long      serialVersionUID = -5892937473681272650L;
     /** Button */
-    private JButton                          buttonOK;
+    private JButton                buttonOK;
     /** Result */
-    private ConnectionIMAPSettings           result;
+    private ConnectionIMAPSettings result;
     /** Parent frame */
-    private JFrame                           parent;
+    private JFrame                 parent;
     /** Radio button group dialog type simple/advanced */
     private ComponentRadioEntry    radioDialogType;
     /** Central panel */
-    private JPanel                           central;
+    private JPanel                 centralBase;
     /** Init finished */
-    private boolean                          initFinished     = false;
+    private boolean                initFinished     = false;
     /** Entry for IMAP details */
-    private EntryEMailDetails                entryIMAPDetails;
+    private EntryEMailDetails      entryIMAPDetails;
     /** Entry for SMTP details */
-    private EntryEMailDetails                entrySMTPDetails;
+    private EntryEMailDetails      entrySMTPDetails;
     /** E-Mail and password entry */
-    private EntryEMailPassword               entryEmailPassword;
+    private EntryEMailPassword     entryEmailPassword;
     /** Edit or create mode? */
-    private boolean                          createMode       = true;
+    private boolean                createMode       = true;
+    /** Tabbed pane */
+    JTabbedPane                    tabbedPane       = new JTabbedPane();
+    /** Entry for message size */
+    private ComponentEntryOne      entryMessageSize;
+    /** Entry for check interval */
+    private ComponentEntryOne      entryCheckInterval;
+    /** Entry for e-mail sending timeout */
+    private ComponentEntryOne      entrySendTimeout;
 
     /**
      * Create a new instance
@@ -102,6 +111,13 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                                       new EntryEMailDetailsAdvanced(null, 0, settings, true, this.createMode),
                                       new EntryEMailDetailsAdvanced(null, 0, settings, false, true));
             }
+            
+            // Set fields for further options
+            entryMessageSize.setValue(String.valueOf(settings.getMaxMessageSize() / (1024 * 1024)));
+            entryCheckInterval.setValue(String.valueOf(settings.getCheckInterval() / 1000));
+            entrySendTimeout.setValue(String.valueOf(settings.getEmailSendTimeout() / 1000));
+            
+            // Update state
             stateChanged(new ChangeEvent(this));
         }
     }
@@ -148,15 +164,15 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         this.getContentPane().setLayout(new BorderLayout());
         this.setIconImage(this.parent.getIconImage());
         this.setResizable(false);
-
-        // Title
-        central = new JPanel();
+        
+        // Base settings panes
+        centralBase = new JPanel();
         JPanel top = new JPanel();
-        JPanel main = new JPanel();
-        main.setLayout(new BorderLayout());
+        JPanel mainBase = new JPanel();
+        mainBase.setLayout(new BorderLayout());
         
         // Create central panel and simple/advanced radio 
-        central.setLayout(new BoxLayout(central, BoxLayout.Y_AXIS));
+        centralBase.setLayout(new BoxLayout(centralBase, BoxLayout.Y_AXIS));
         
 
         // Create switch between simple and advanced dialog        
@@ -208,11 +224,88 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
             }
         });
         
-        // Add
+        // Add base settings pane
         top.add(radioDialogType);
-        main.add(top, BorderLayout.NORTH);
-        main.add(central, BorderLayout.CENTER);
+        mainBase.add(top, BorderLayout.NORTH);
+        mainBase.add(centralBase, BorderLayout.CENTER);
+        
+        // Create further settings pane
+        JPanel mainFurther = new JPanel();
+        JPanel centralFurther = new JPanel();
+        centralFurther.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                                  Resources.getString("EmailConfig.44"),
+                                                                  TitledBorder.LEFT,
+                                                                  TitledBorder.DEFAULT_POSITION));
+        entryMessageSize = new ComponentEntryOne(Resources.getString("EmailConfig.45"),
+                                            null,
+                                            true,
+                                            new ComponentTextFieldValidator() {
 
+                                                @Override
+                                                public boolean validate(String text) {
+                                                    try {
+                                                        Integer.parseInt(text);
+                                                        return true;
+                                                    } catch (Exception e) {
+                                                        return false;
+                                                    }
+                                                }
+                                            },
+                                            false,
+                                            false);
+        entryCheckInterval = new ComponentEntryOne(Resources.getString("EmailConfig.46"),
+                                              null,
+                                              true,
+                                              new ComponentTextFieldValidator() {
+
+                                                  @Override
+                                                  public boolean validate(String text) {
+                                                      try {
+                                                          Integer.parseInt(text);
+                                                          return true;
+                                                      } catch (Exception e) {
+                                                          return false;
+                                                      }
+                                                  }
+                                              },
+                                              false,
+                                              false);
+        entrySendTimeout = new ComponentEntryOne(Resources.getString("EmailConfig.47"),
+                                                 null,
+                                                 true,
+                                                 new ComponentTextFieldValidator() {
+
+                                                     @Override
+                                                     public boolean validate(String text) {
+                                                         try {
+                                                             Integer.parseInt(text);
+                                                             return true;
+                                                         } catch (Exception e) {
+                                                             return false;
+                                                         }
+                                                     }
+                                                 },
+                                                 false,
+                                                 false);
+        
+        // Set default values for further settings
+        entryMessageSize.setValue(String.valueOf(Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT/ (1024 * 1024)));
+        entryCheckInterval.setValue(String.valueOf(Resources.INTERVAL_CHECK_MAILBOX_DEFAULT / 1000));
+        entrySendTimeout.setValue(String.valueOf(Resources.TIMEOUT_SEND_EMAILS_DEFAULT / 1000));
+        
+        // Add further settings pane
+        centralFurther.setLayout(new BoxLayout(centralFurther, BoxLayout.Y_AXIS));
+        mainFurther.setLayout(new BorderLayout());
+        centralFurther.add(entryMessageSize);
+        centralFurther.add(entryCheckInterval);
+        centralFurther.add(entrySendTimeout);
+        mainFurther.add(centralFurther, BorderLayout.CENTER);
+
+        
+        // Add tabbed panes
+        tabbedPane.add(Resources.getString("EmailConfig.43"), mainBase);
+        tabbedPane.add(Resources.getString("EmailConfig.44"), mainFurther);
+        
         // Buttons
         JPanel buttonsPane = new JPanel();
         buttonsPane.setLayout(new GridLayout(2, 1));
@@ -228,7 +321,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         okCancelPane.add(buttonOK);
         buttonsPane.add(okCancelPane);
         getContentPane().add(buttonsPane, BorderLayout.SOUTH);
-        getContentPane().add(main);
+        getContentPane().add(tabbedPane);
 
         // Listeners
         buttonGuessConfig.addActionListener(new ActionListener() {
@@ -305,7 +398,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     private void displaySimpleDialog(String emailAddress, String password, EntryEMailDetails oldDetailsIMAP, EntryEMailDetails oldDetailsSMTP) {
         // Remove
-        central.removeAll();
+        centralBase.removeAll();
         
         // Add e-mail password panel
         JPanel emailPasswordPanel = new JPanel();
@@ -338,8 +431,8 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         receiveSendPanel.add(entrySMTPDetails);        
         
         // Add to central
-        central.add(emailPasswordPanel);
-        central.add(receiveSendPanel);
+        centralBase.add(emailPasswordPanel);
+        centralBase.add(receiveSendPanel);
         
         // Add listeners
         this.entryEmailPassword.setChangeListener(this);
@@ -362,7 +455,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
      */
     private void displayAdvancedDialog(String emailAddress, String password, EntryEMailDetails oldIMAPDetails, EntryEMailDetails oldSMTPDetails) {
         // Remove
-        central.removeAll();
+        centralBase.removeAll();
         entryEmailPassword = null;
                 
         // Create send and receive panel
@@ -381,7 +474,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         receiveSendPanel.add(entrySMTPDetails);
         
         // Add to central
-        central.add(receiveSendPanel);
+        centralBase.add(receiveSendPanel);
         
         // Add listeners
         entryIMAPDetails.setChangeListener(this);
@@ -475,6 +568,9 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         try {
             ConnectionIMAPSettings settings = new ConnectionIMAPSettings(eMailEntered, new AppPasswordProvider());
             if (settings.guess()) {
+                // Choose first tab
+                tabbedPane.setSelectedIndex(0);
+                
                 // Delete
                 entryEmailPassword = null;
                 entryIMAPDetails = null;
@@ -538,14 +634,17 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         
         // Take data always coming from IMAP and SMTP entries and return
         return result.setIMAPPort(entryIMAPDetails.getPort())
-              .setSMTPPort(entrySMTPDetails.getPort())
-              .setIMAPServer(entryIMAPDetails.getServer())
-              .setSMTPServer(entrySMTPDetails.getServer())
-              .setSSLTLSIMAP(entryIMAPDetails.isSSLTLS())
-              .setSSLTLSSMTP(entrySMTPDetails.isSSLTLS())
-              .setIMAPUserName(entryIMAPDetails.getUserName())
-              .setSMTPUserName(entrySMTPDetails.getUserName())
-              .setIMAPAuthMechanisms(entryIMAPDetails.getAuthMechanisms())
-              .setSMTPAuthMechanisms(entrySMTPDetails.getAuthMechanisms());            
+                     .setSMTPPort(entrySMTPDetails.getPort())
+                     .setIMAPServer(entryIMAPDetails.getServer())
+                     .setSMTPServer(entrySMTPDetails.getServer())
+                     .setSSLTLSIMAP(entryIMAPDetails.isSSLTLS())
+                     .setSSLTLSSMTP(entrySMTPDetails.isSSLTLS())
+                     .setIMAPUserName(entryIMAPDetails.getUserName())
+                     .setSMTPUserName(entrySMTPDetails.getUserName())
+                     .setIMAPAuthMechanisms(entryIMAPDetails.getAuthMechanisms())
+                     .setSMTPAuthMechanisms(entrySMTPDetails.getAuthMechanisms())
+                     .setMaxMessageSize(Integer.valueOf(entryMessageSize.getValue()) * 1024 * 1024)
+                     .setCheckInterval(Integer.valueOf(entryCheckInterval.getValue()) * 1000)
+                     .setEmailSendTimeout(Integer.valueOf(entrySendTimeout.getValue()) * 1000);
     }
 }

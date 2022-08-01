@@ -31,6 +31,7 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.dataimport.ImportFile;
+import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Study;
 import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
@@ -41,8 +42,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  * @author Fabian Prasser
  */
 public class Main {
-    /** The mailbox check interval in milliseconds */
-    public static final int     MAILBOX_CHECK_INTERVAL  = 3000;
+
     /** Encryption ssl/tls */
     private static final String SSL_TLS                 = "SSLTLS";
     /** Encryption starttls */
@@ -271,6 +271,30 @@ public class Main {
                                                                      .required(false)
                                                                      .hasArg(true)
                                                                      .build();
+
+    /** Command line option */
+    private static final Option OPTION_CHECK_INTERVAL   = Option.builder("mbc")
+                                                                     .desc("Mailbox check interval (sec)")
+                                                                     .longOpt("mailbox-check-interval")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
+
+    /** Command line option */
+    private static final Option OPTION_SEND_TIMEOUT          = Option.builder("tm")
+                                                                     .desc("E-mail Send timeout sec)")
+                                                                     .longOpt("send-time-out")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
+
+    /** Command line option */
+    private static final Option OPTION_MAX_MESSAGE_SIZE      = Option.builder("ms")
+                                                                     .desc("Message size (MB)")
+                                                                     .longOpt("max-message-size")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
     
     /** Options when in creating mode */
     private static Options      optionsCreate                = new Options();
@@ -324,7 +348,10 @@ public class Main {
                      .addOption(OPTION_IMAP_USER_NAME)
                      .addOption(OPTION_SMTP_USER_NAME)
                      .addOption(OPTION_IMAP_LOGIN_MECHANISMS)
-                     .addOption(OPTION_SMTP_LOGIN_MECHANISMS);
+                     .addOption(OPTION_SMTP_LOGIN_MECHANISMS)
+                     .addOption(OPTION_CHECK_INTERVAL)
+                     .addOption(OPTION_SEND_TIMEOUT)
+                     .addOption(OPTION_MAX_MESSAGE_SIZE);
 
         // Add options when participating
         optionsParticipate.addOption(OPTION_PARTICIPATE_REQUIRED)
@@ -348,7 +375,10 @@ public class Main {
                           .addOption(OPTION_IMAP_USER_NAME)
                           .addOption(OPTION_SMTP_USER_NAME)
                           .addOption(OPTION_IMAP_LOGIN_MECHANISMS)
-                          .addOption(OPTION_SMTP_LOGIN_MECHANISMS);
+                          .addOption(OPTION_SMTP_LOGIN_MECHANISMS)
+                          .addOption(OPTION_CHECK_INTERVAL)
+                          .addOption(OPTION_SEND_TIMEOUT)
+                          .addOption(OPTION_MAX_MESSAGE_SIZE);
 
         // Add options when resuming
         optionsResume.addOption(OPTION_RESUME_REQUIRED)
@@ -405,8 +435,7 @@ public class Main {
                                               false,
                                               cli.hasOption(OPTION_HAS_HEADER),
                                               cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
-                             getConnectionIMAPSettingsFromCLI(cli),
-                             MAILBOX_CHECK_INTERVAL);
+                             getConnectionIMAPSettingsFromCLI(cli));
             
             // Done
             return;
@@ -432,8 +461,7 @@ public class Main {
                                                                                          false,
                                                                                          cli.hasOption(OPTION_HAS_HEADER),
                                                                                          cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
-                                                                  getConnectionIMAPSettingsFromCLI(cli),
-                                                                  MAILBOX_CHECK_INTERVAL);
+                                                                  getConnectionIMAPSettingsFromCLI(cli));
            
             // Wait for participant to be initialized
             LOGGER.info("Waiting for initial email to participate");
@@ -462,7 +490,7 @@ public class Main {
                              : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));
                 
                 // Start process
-                new UserProcess(study, MAILBOX_CHECK_INTERVAL);
+                new UserProcess(study);
             } catch (ClassNotFoundException | IllegalArgumentException | IOException e) {
                 LOGGER.error("Unable to resume with given file", e);
             }
@@ -550,6 +578,16 @@ public class Main {
             if (cli.hasOption(cli.getOptionValue(OPTION_SKIP_COLUMNS))) {
                 Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS));
             }
+            if(cli.hasOption(OPTION_MAX_MESSAGE_SIZE)) {
+                Integer.valueOf(cli.getOptionValue(OPTION_MAX_MESSAGE_SIZE));
+            }
+            if(cli.hasOption(OPTION_SEND_TIMEOUT)) {
+                Integer.valueOf(cli.getOptionValue(OPTION_SEND_TIMEOUT));
+            }
+            if(cli.hasOption(OPTION_CHECK_INTERVAL)) {
+                Integer.valueOf(cli.getOptionValue(OPTION_CHECK_INTERVAL));
+            }
+            
 
             // Check participant name and e-mail address
             new Participant(cli.hasOption(OPTION_PARTICIPANT_NAME)
@@ -595,16 +633,19 @@ public class Main {
                                                                                    .setSMTPPassword(cli.hasOption(OPTION_PASSWORD_SENDING) ? cli.getOptionValue(OPTION_PASSWORD_SENDING) : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));     
         // Set remaining parameters
         connectionIMAPSettings.setIMAPServer(cli.getOptionValue(OPTION_IMAP_SERVER))
-                                               .setIMAPPort(Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT)))
-                                               .setSSLTLSIMAP(cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(SSL_TLS))
-                                               .setIMAPUserName(cli.hasOption(OPTION_IMAP_USER_NAME) ? cli.getOptionValue(OPTION_IMAP_USER_NAME) : null)
-                                               .setSMTPServer(cli.getOptionValue(OPTION_SMTP_SERVER))
-                                               .setSMTPPort(Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT)))                                              
-                                               .setSSLTLSSMTP(cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(SSL_TLS))
-                                               .setSMTPUserName(cli.hasOption(OPTION_SMTP_USER_NAME) ? cli.getOptionValue(OPTION_SMTP_USER_NAME) : null)
-                                               .setAcceptSelfSignedCertificates(cli.hasOption(OPTION_SELF_SIGNED))
-                                               .setIMAPAuthMechanisms(cli.getOptionValue(OPTION_IMAP_LOGIN_MECHANISMS))
-                                               .setSMTPAuthMechanisms(cli.getOptionValue(OPTION_SMTP_LOGIN_MECHANISMS));
+        .setIMAPPort(Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT)))
+        .setSSLTLSIMAP(cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(SSL_TLS))
+        .setIMAPUserName(cli.hasOption(OPTION_IMAP_USER_NAME) ? cli.getOptionValue(OPTION_IMAP_USER_NAME) : null)
+        .setSMTPServer(cli.getOptionValue(OPTION_SMTP_SERVER))
+        .setSMTPPort(Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT)))                                              
+        .setSSLTLSSMTP(cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(SSL_TLS))
+        .setSMTPUserName(cli.hasOption(OPTION_SMTP_USER_NAME) ? cli.getOptionValue(OPTION_SMTP_USER_NAME) : null)
+        .setAcceptSelfSignedCertificates(cli.hasOption(OPTION_SELF_SIGNED))
+        .setIMAPAuthMechanisms(cli.getOptionValue(OPTION_IMAP_LOGIN_MECHANISMS))
+        .setSMTPAuthMechanisms(cli.getOptionValue(OPTION_SMTP_LOGIN_MECHANISMS))
+        .setMaxMessageSize(cli.hasOption(OPTION_MAX_MESSAGE_SIZE) ? Integer.valueOf(cli.getOptionValue(OPTION_MAX_MESSAGE_SIZE))* 1024 * 1024 : Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT)
+        .setEmailSendTimeout(cli.hasOption(OPTION_SEND_TIMEOUT) ? Integer.valueOf(cli.getOptionValue(OPTION_SEND_TIMEOUT)) * 1000 : Resources.TIMEOUT_SEND_EMAILS_DEFAULT)
+        .setCheckInterval(cli.hasOption(OPTION_CHECK_INTERVAL) ? Integer.valueOf(cli.getOptionValue(OPTION_CHECK_INTERVAL)) * 1000 : Resources.INTERVAL_CHECK_MAILBOX_DEFAULT );
         
         // Return
         return connectionIMAPSettings;

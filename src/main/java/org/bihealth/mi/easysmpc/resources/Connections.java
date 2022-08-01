@@ -28,27 +28,33 @@ import org.bihealth.mi.easysmpc.AppPasswordProvider;
 public class Connections {
 
     /** Key */
-    private static final String IMAP_SERVER_KEY      = "imap_server";
+    private static final String IMAP_SERVER_KEY            = "imap_server";
     /** Key */
-    private static final String IMAP_PORT_KEY        = "imap_port";
+    private static final String IMAP_PORT_KEY              = "imap_port";
     /** Key */
-    private static final String IMAP_ENCRYPTION_TYPE = "imap_encryption";
+    private static final String IMAP_ENCRYPTION_TYPE       = "imap_encryption";
     /** Key */
-    private static final String SMTP_SERVER_KEY      = "smtp_server";
+    private static final String SMTP_SERVER_KEY            = "smtp_server";
     /** Key */
-    private static final String SMTP_PORT_KEY        = "smtp_port";
+    private static final String SMTP_PORT_KEY              = "smtp_port";
     /** Key */
-    private static final String SMTP_ENCRYPTION_TYPE = "smtp_encryption";
+    private static final String SMTP_ENCRYPTION_TYPE       = "smtp_encryption";
     /** Key */
-    private static final String SMTP_EMAIL_KEY       = "smtp_email_address";
+    private static final String SMTP_EMAIL_KEY             = "smtp_email_address";
     /** Key */
-    private static final String IMAP_USER_NAME_KEY   = "imap_user_name";
+    private static final String IMAP_USER_NAME_KEY         = "imap_user_name";
     /** Key */
-    private static final String SMTP_USER_NAME_KEY   = "smtp_user_name";
+    private static final String SMTP_USER_NAME_KEY         = "smtp_user_name";
     /** Key */
-    private static final String IMAP_AUTH_MECH_KEY   = "imap_auth_mech";
+    private static final String IMAP_AUTH_MECH_KEY         = "imap_auth_mech";
     /** Key */
-    private static final String SMTP_AUTH_MECH_KEY   = "smtp_auth_mech_key";
+    private static final String SMTP_AUTH_MECH_KEY         = "smtp_auth_mech_key";
+    /** Key */
+    private static final String EMAIL_MESSAGE_MAXIMUM_SIZE = "email_message_maximum_size ";
+    /** Key */
+    private static final String EMAIL_CHECK_INTERVAL       = "email_check_interval ";
+    /** Key */
+    private static final String EMAIL_SEND_TIMEOUT         = "email_send_timeout ";
 
 
     /**
@@ -70,10 +76,13 @@ public class Connections {
         node.putInt(SMTP_PORT_KEY, settings.getSMTPPort());
         node.putBoolean(IMAP_ENCRYPTION_TYPE, settings.isSSLTLSIMAP());
         node.putBoolean(SMTP_ENCRYPTION_TYPE, settings.isSSLTLSSMTP());
+        node.putInt(EMAIL_MESSAGE_MAXIMUM_SIZE, settings.getMaxMessageSize());
+        node.putInt(EMAIL_CHECK_INTERVAL, settings.getCheckInterval());
+        node.putInt(EMAIL_SEND_TIMEOUT, settings.getEmailSendTimeout());
         setOrDeleteKey(node, IMAP_USER_NAME_KEY, settings.getIMAPUserName());
         setOrDeleteKey(node, SMTP_USER_NAME_KEY, settings.getSMTPUserName());
         setOrDeleteKey(node, IMAP_AUTH_MECH_KEY, settings.getIMAPAuthMechanisms());
-        setOrDeleteKey(node, SMTP_AUTH_MECH_KEY, settings.getSMTPAuthMechanisms());        
+        setOrDeleteKey(node, SMTP_AUTH_MECH_KEY, settings.getSMTPAuthMechanisms());
     }
     
     /**
@@ -117,7 +126,10 @@ public class Connections {
                                                  .setIMAPUserName(child.get(IMAP_USER_NAME_KEY, null))
                                                  .setSMTPUserName(child.get(SMTP_USER_NAME_KEY, null))
                                                  .setIMAPAuthMechanisms(child.get(IMAP_AUTH_MECH_KEY, null))
-                                                 .setSMTPAuthMechanisms(child.get(SMTP_AUTH_MECH_KEY, null)));
+                                                 .setSMTPAuthMechanisms(child.get(SMTP_AUTH_MECH_KEY, null))
+                                                 .setMaxMessageSize(child.getInt(EMAIL_MESSAGE_MAXIMUM_SIZE, Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT))
+                                                 .setCheckInterval(child.getInt(EMAIL_CHECK_INTERVAL, Resources.INTERVAL_CHECK_MAILBOX_DEFAULT))
+                                                 .setEmailSendTimeout(child.getInt(EMAIL_SEND_TIMEOUT, Resources.TIMEOUT_SEND_EMAILS_DEFAULT)));
         }
         
         // Return
