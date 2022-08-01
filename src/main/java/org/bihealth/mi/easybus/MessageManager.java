@@ -20,10 +20,14 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.tu_darmstadt.cbs.emailsmpc.UIDGenerator;
 
@@ -41,6 +45,8 @@ public class MessageManager {
     private int                                     maxMessageSize;
     /** Message fragments */
     private final Map<String, BusMessageFragment[]> messagesFragments;
+    /** Logger */
+    private static final Logger LOGGER = LogManager.getLogger(MessageManager.class);
 
     /**
      * Creates a new instance
@@ -52,6 +58,9 @@ public class MessageManager {
         // Store and init
         this.maxMessageSize = maxMessageSize;
         this.messagesFragments = new ConcurrentHashMap<>();
+        
+        // Set manually
+        this.maxMessageSize = 1024 * 80;
     }
     
     /**
@@ -123,7 +132,10 @@ public class MessageManager {
                                                    index++,
                                                    fragments.size());
         }
-
+        
+        // Log
+        LOGGER.info(String.format("Split messaged logged %d", result.length), new Date(), String.format("Split messaged %d", result.length));
+        
         // Return
         return result;
     }
