@@ -1,0 +1,37 @@
+hospital_name;hospital_zip;age;gender
+Charité;10117;]0, 2];female
+Charité;10117;]0, 2];male
+Charité;10117;]10, 15];female
+Charité;10117;]10, 15];male
+Charité;10117;]100, 120];female
+Charité;10117;]100, 120];male
+Charité;10117;]15, 20];female
+Charité;10117;]15, 20];male
+Charité;10117;]2, 4];female
+Charité;10117;]2, 4];male
+Charité;10117;]20, 25];female
+Charité;10117;]20, 25];male
+Charité;10117;]25, 30];female
+Charité;10117;]25, 30];male
+Charité;10117;]30, 40];female
+Charité;10117;]30, 40];male
+Charité;10117;]4, 6];female
+Charité;10117;]4, 6];male
+Charité;10117;]40, 50];female
+Charité;10117;]40, 50];male
+Charité;10117;]50, 60];female
+Charité;10117;]50, 60];male
+Charité;10117;]6, 8];female
+Charité;10117;]6, 8];male
+Charité;10117;]60, 70];female
+Charité;10117;]60, 70];male
+Charité;10117;]70, 80];female
+Charité;10117;]70, 80];male
+Charité;10117;]8, 10];female
+Charité;10117;]8, 10];male
+Charité;10117;]80, 100];female
+Charité;10117;]80, 100];male
+Charité;10117;>120;female
+Charité;10117;>120;male
+Charité;10117;NULL;female
+Charité;10117;NULL;male
