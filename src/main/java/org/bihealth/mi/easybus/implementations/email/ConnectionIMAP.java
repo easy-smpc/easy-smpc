@@ -283,6 +283,7 @@ public class ConnectionIMAP extends ConnectionEmail {
             
             // Init
             List<ConnectionEmailMessage> result = new ArrayList<>();
+            FolderManager folderManager = new FolderManager(folder);
             
             try {
                 
@@ -301,7 +302,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                         if (START_CONTAIN_PREFIX_PATTERN.matcher(subject).matches() &&
                                 (filter == null || filter.accepts(subject))) {                                
                                 LOGGER.debug("Message received logged", new Date(), "Message received", uid, subject);
-                                result.add(new ConnectionEmailMessage(message, folder));
+                                result.add(new ConnectionEmailMessage(message, folderManager));
                         }
                     } catch (Exception e) {
                         // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
