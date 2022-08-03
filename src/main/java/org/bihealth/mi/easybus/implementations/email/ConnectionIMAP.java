@@ -281,13 +281,15 @@ public class ConnectionIMAP extends ConnectionEmail {
                 }                
                 
                 // Create folder new if necessary
-                if (folder == null || !folder.isOpen()) {
+                if (folder == null) {
                     folder = store.getFolder("INBOX");
                     if (!folder.exists()) {
                         throw new BusException("Unable to identify inbox folder of mail box");
                     }
-
-                    // Open folder
+                }
+                
+                // Open folder
+                if(!folder.isOpen()) {
                     folder.open(Folder.READ_WRITE);
                 }
     
