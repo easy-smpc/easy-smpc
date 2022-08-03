@@ -35,7 +35,9 @@ import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easybus.Scope;
 
 import jakarta.mail.BodyPart;
-import jakarta.mail.Message;
+import jakarta.mail.Flags.Flag;
+import jakarta.mail.Folder;
+import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
 import jakarta.mail.internet.MimeBodyPart;
 
@@ -57,8 +59,8 @@ public abstract class ConnectionEmail {
         /** Message */
         private final jakarta.mail.Message message;
 
-        /** Folder manager */
-        private final FolderManager        folderManager;
+        /** Folder */
+        private final Folder               folder;
 
         /** Text */
         private String                     text       = null;
@@ -69,13 +71,14 @@ public abstract class ConnectionEmail {
         /**
          * Creates a new instance
          * @param message
-         * @param folderManager
+         * @param folder
          */
-        public ConnectionEmailMessage(jakarta.mail.Message message, FolderManager folderManager) {
+        public ConnectionEmailMessage(jakarta.mail.Message message, Folder folder) {
+
             // Store
             this.message = message;
-            this.folderManager = folderManager;
-        	long size = 0;
+            this.folder = folder;
+            long size = 0;
     
             try {
                 
@@ -102,9 +105,6 @@ public abstract class ConnectionEmail {
             if (listener != null) {
                 listener.messageReceived(size);
             }
-            
-            // Add to folder manager
-            this.folderManager.addMessage(this);
         }
     
         /**
@@ -122,27 +122,32 @@ public abstract class ConnectionEmail {
             Object result = ois.readObject();
             ois.close();
             return result;
-        }        
-        
-        /**
-         * @return the Message
-         */
-        public Message getMessage() {
-            return this.message;
         }
         
         /** 
          * Deletes the message on the server
          */
         protected void delete() {
-            this.folderManager.delete(this);
+            try {
+                message.setFlag(Flag.DELETED, true);
+            } catch (MessagingException e) {
+                LOGGER.debug("Delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
+                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+            }
         }    
         /** 
          * Expunges all deleted messages on the server
          */
         protected void expunge() {
-            this.folderManager.expunge(this);
-        }
+            try {
+                if (folder != null && folder.isOpen()) {
+                    folder.expunge();
+                }
+            } catch (MessagingException e) {
+                LOGGER.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
+                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
+            }
+        }        
     
         /**
          * Returns the attachment
