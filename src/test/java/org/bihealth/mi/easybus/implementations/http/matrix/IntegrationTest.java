@@ -13,6 +13,8 @@
  */
 package org.bihealth.mi.easybus.implementations.http.matrix;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URI;
 import java.util.Properties;
 import java.util.Scanner;
@@ -20,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.Message;
+import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 
@@ -49,34 +52,34 @@ public class IntegrationTest {
         //ConnectionHTTPProxy.getProxy(new URI("https://matrix-client.matrix.org"));
         
         // Create receiving bus
-//        Bus busReceive = new BusMatrix(5, 1000, new ConnectionMatrix(new URI(prop.getProperty("matrix.url")),
-//                                                     Participant.createMXIDParticipant("first",
-//                                                                                       prop.getProperty("first.user")),
-//                                                     prop.getProperty("first.password"),
-//                                                     null));
-//        //busReceive.purge();
-//        busReceive.receive(new Scope("MyFancyScope"),
-//                           Participant.createMXIDParticipant("second",
-//                                                             prop.getProperty("second.user")),
-//                           new MessageListener() {
-//                               @Override
-//                               public void receiveError(Exception exception) {
-//                                   throw new IllegalStateException(exception);
-//                               }
-//
-//                               @Override
-//                               public void receive(Message message) {
-//                                   System.out.println("Received!");
-//
-//                                   try (FileWriter fw = new FileWriter("out.txt")) {
-//                                       fw.write((String) message.getMessage());
-//                                       fw.close();
-//                                   } catch (IOException e) {
-//                                       e.printStackTrace();
-//                                   }
-//
-//                               }
-//                           });
+        Bus busReceive = new BusMatrix(5, 1000, new ConnectionMatrix(new URI(prop.getProperty("matrix.url")),
+                                                     Participant.createMXIDParticipant("first",
+                                                                                       prop.getProperty("first.user")),
+                                                     prop.getProperty("first.password"),
+                                                     null));
+        //busReceive.purge();
+        busReceive.receive(new Scope("MyFancyScope"),
+                           Participant.createMXIDParticipant("first",
+                                                             prop.getProperty("first.user")),
+                           new MessageListener() {
+                               @Override
+                               public void receiveError(Exception exception) {
+                                   throw new IllegalStateException(exception);
+                               }
+
+                               @Override
+                               public void receive(Message message) {
+                                   System.out.println("Received!");
+
+                                   try (FileWriter fw = new FileWriter("out.txt")) {
+                                       fw.write((String) message.getMessage());
+                                       fw.close();
+                                   } catch (IOException e) {
+                                       e.printStackTrace();
+                                   }
+
+                               }
+                           });
         
         // Read input file
         StringBuilder builder = new StringBuilder();
@@ -95,7 +98,7 @@ public class IntegrationTest {
                                                          null));
         busSend.send(new Message(message),
                      new Scope("MyFancyScope"),
-                     Participant.createMXIDParticipant("second", prop.getProperty("second.user")))
+                     Participant.createMXIDParticipant("first", prop.getProperty("first.user")))
                .get(1500000, TimeUnit.MILLISECONDS);
 
         System.out.println("sent");

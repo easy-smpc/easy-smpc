@@ -340,8 +340,8 @@ public class BusMatrix extends Bus{
      */
     private String generateRoomName(Participant participant, boolean isSender) {
         // Check
-        if(participant == null) {
-            throw new IllegalArgumentException("Participant can not be null");
+        if(isSender && participant == null) {
+            throw new IllegalArgumentException("Participant can not be null if sender is set");
         }
         
         // Return if sender
@@ -354,8 +354,8 @@ public class BusMatrix extends Bus{
         }
         
         return String.format("EasySMPC%s.%sTO%s.%s",
-                             participant.getName(),
-                             participant.getIdentifier(),
+                             "*",
+                             "*",
                              this.connection.getSelf().getName(),
                              this.connection.getSelf().getIdentifier());
     }
@@ -508,7 +508,7 @@ public class BusMatrix extends Bus{
                     event.getContent().getMsgType().equals("m.text") && event.getSender() != null &&
                     event.getContent().getScope() != null &&
                     isParticipantScopeRegistered(new Scope(event.getContent().getScope()),
-                                                 getParticipantsMap().get(event.getSender()))) {
+                                                 this.connection.getSelf())) {
 
                     // Process message
                     try {
@@ -517,7 +517,7 @@ public class BusMatrix extends Bus{
                         MessageFragmentFinish fragmentFinish = createMessageFragmentFromEvent(event, room.getKey());
                         
                         // Receive message internally
-                        this.receiveInternal(fragmentFinish, new Scope(event.getContent().getScope()), getParticipantsMap().get(event.getSender()));
+                        this.receiveInternal(fragmentFinish, new Scope(event.getContent().getScope()), this.connection.getSelf());
                         successfulReadEvents.add(event);
                     } catch (ClassNotFoundException | InterruptedException | IOException e) {
                         LOGGER.error(String.format("Unable to understand message with id %s in room %s", event.getEventId(), room.getKey()), e);
@@ -726,25 +726,13 @@ public class BusMatrix extends Bus{
         
         // Loop over invitations
         for (Entry<String, Invitation> invitation : invitations.entrySet()) {
-            String expectedRoomName = null;
-
-            // Check inviter is relevant
-            for(EventInvited event : invitation.getValue().getInviteState().getEvents()) {
-                if(event.getType().equals("m.room.create") && participantIdentifier.contains(event.getContent().getCreator())) {
-                    expectedRoomName = generateRoomName(getParticipantsMap().get(event.getContent().getCreator()), false);
-                    break;
-                }               
-            }
-
-            // If inviter not relevant proceed to next invitation
-            if(expectedRoomName == null) {
-                continue;
-            }
-
+            
             // Check room name
             for(EventInvited event : invitation.getValue().getInviteState().getEvents()) {
-                if(event.getType().equals("m.room.name") && event.getContent().getName().equals(expectedRoomName)) {
+                if(event.getType().equals("m.room.name") 
+                        && event.getContent().getName().matches(generateRoomName(null, false))) {
                     accept.add(invitation.getKey());
+                    continue;
                 }
             }
         }
