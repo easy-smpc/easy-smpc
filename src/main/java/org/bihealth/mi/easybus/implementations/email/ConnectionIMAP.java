@@ -315,7 +315,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                         if (START_CONTAIN_PREFIX_PATTERN.matcher(subject).matches() &&
                                 (filter == null || filter.accepts(subject))) {                                
                                 LOGGER.debug("Message received logged", new Date(), "Message received", uid, subject);
-                                result.add(new ConnectionEmailMessage(message, folder));
+                                result.add(new ConnectionEmailMessage(message));
                         }
                     } catch (Exception e) {
                         // Ignore, as this may be a result of non-transactional properties of the IMAP protocol

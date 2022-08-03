@@ -36,7 +36,6 @@ import org.bihealth.mi.easybus.Scope;
 
 import jakarta.mail.BodyPart;
 import jakarta.mail.Flags.Flag;
-import jakarta.mail.Folder;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
 import jakarta.mail.internet.MimeBodyPart;
@@ -59,9 +58,6 @@ public abstract class ConnectionEmail {
         /** Message */
         private final jakarta.mail.Message message;
 
-        /** Folder */
-        private final Folder               folder;
-
         /** Text */
         private String                     text       = null;
 
@@ -73,11 +69,10 @@ public abstract class ConnectionEmail {
          * @param message
          * @param folder
          */
-        public ConnectionEmailMessage(jakarta.mail.Message message, Folder folder) {
+        public ConnectionEmailMessage(jakarta.mail.Message message) {
 
             // Store
             this.message = message;
-            this.folder = folder;
             long size = 0;
     
             try {
@@ -140,8 +135,8 @@ public abstract class ConnectionEmail {
          */
         protected void expunge() {
             try {
-                if (folder != null && folder.isOpen()) {
-                    folder.expunge();
+                if (message.getFolder() != null && message.getFolder().isOpen()) {
+                    message.getFolder().expunge();
                 }
             } catch (MessagingException e) {
                 LOGGER.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
