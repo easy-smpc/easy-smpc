@@ -33,9 +33,11 @@ import org.bihealth.mi.easybus.Scope;
  *
  */
 public class IntegrationTest {
-    
+
     /** Name of file to send */
     public static final String FILENAME = "sampleSmall.txt";
+    /** Received */
+    public static boolean      RECEIVED = false;
 
     /**
      * Starts the test
@@ -77,7 +79,8 @@ public class IntegrationTest {
                                    } catch (IOException e) {
                                        e.printStackTrace();
                                    }
-
+                                   
+                                   RECEIVED = true;
                                }
                            });
         
@@ -104,9 +107,13 @@ public class IntegrationTest {
         System.out.println("sent");
 
        // Wait
-      while (true) {
+      while (!RECEIVED) {
           Thread.sleep(10000);
-      }        
+      }
+      
+      busReceive.stop();
+      busSend.stop();
+      System.out.println("Finished");
     }
 
 }
