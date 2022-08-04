@@ -27,16 +27,15 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.BusMessage;
+import org.bihealth.mi.easybus.BusMessageFragment;
 import org.bihealth.mi.easybus.MessageFilter;
-import org.bihealth.mi.easybus.MessageFragment;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easybus.Scope;
 
 import jakarta.mail.BodyPart;
-import jakarta.mail.Flags.Flag;
-import jakarta.mail.Folder;
-import jakarta.mail.MessagingException;
+import jakarta.mail.Message;
 import jakarta.mail.Multipart;
 import jakarta.mail.internet.MimeBodyPart;
 
@@ -58,25 +57,24 @@ public abstract class ConnectionEmail {
         /** Message */
         private final jakarta.mail.Message message;
 
-        /** Folder */
-        private final Folder             folder;
+        /** Folder manager */
+        private final FolderManager        folderManager;
 
         /** Text */
-        private String                   text       = null;
+        private String                     text       = null;
 
         /** Attachment */
-        private Object                   attachment = null;
+        private Object                     attachment = null;
     
         /**
          * Creates a new instance
          * @param message
-         * @param folder
+         * @param folderManager
          */
-        public ConnectionEmailMessage(jakarta.mail.Message message, Folder folder) {
-            
+        public ConnectionEmailMessage(jakarta.mail.Message message, FolderManager folderManager) {
             // Store
             this.message = message;
-            this.folder = folder;
+            this.folderManager = folderManager;
         	long size = 0;
     
             try {
@@ -97,13 +95,16 @@ public abstract class ConnectionEmail {
                 }
             } catch (Exception e) {
                 // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-                logger.debug("Load message failed logged", new Date(), "load message failed", ExceptionUtils.getStackTrace(e));
+                LOGGER.debug("Load message failed logged", new Date(), "load message failed", ExceptionUtils.getStackTrace(e));
             }
             
             // Pass to listener
             if (listener != null) {
-            	listener.messageReceived(size);
+                listener.messageReceived(size);
             }
+            
+            // Add to folder manager
+            this.folderManager.addMessage(this);
         }
     
         /**
@@ -121,33 +122,27 @@ public abstract class ConnectionEmail {
             Object result = ois.readObject();
             ois.close();
             return result;
+        }        
+        
+        /**
+         * @return the Message
+         */
+        public Message getMessage() {
+            return this.message;
         }
         
         /** 
          * Deletes the message on the server
          */
         protected void delete() {
-            try {
-                message.setFlag(Flag.DELETED, true);
-            } catch (MessagingException e) {
-                logger.debug("Delete failed logged", new Date(), "delete failed", ExceptionUtils.getStackTrace(e));
-                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-            }
+            this.folderManager.delete(this);
         }    
         /** 
          * Expunges all deleted messages on the server
          */
         protected void expunge() {
-    
-            try {
-                if (folder != null && folder.isOpen()) {
-                    folder.close(true);
-                }
-            } catch (MessagingException e) {
-                logger.debug("Expunge failed logged", new Date(), "expunge failed", ExceptionUtils.getStackTrace(e));
-                // Ignore, as this may be a result of non-transactional properties of the IMAP protocol
-            }
-        }        
+            this.folderManager.expunge(this);
+        }
     
         /**
          * Returns the attachment
@@ -185,12 +180,13 @@ public abstract class ConnectionEmail {
     /** String indicating end of participant address */
     public static final String PARTICIPANT_EMAIL_END_TAG   = "END_EMAIL_PARTICIPANT";
     /** Logger */
-    private static final Logger logger = LogManager.getLogger(ConnectionEmail.class);
+    private static final Logger LOGGER = LogManager.getLogger(ConnectionEmail.class);
 
-	/**
+    /**
+     * Generates the subject line
+     * 
      * @param scope
      * @param receiver
-     * @param sender
      * @return
      */
     public static String createSubject(Scope scope, Participant receiver) {
@@ -200,7 +196,7 @@ public abstract class ConnectionEmail {
                PARTICIPANT_EMAIL_END_TAG;
     }
 
-	/**
+    /**
      * Create participant from body
      * 
      * @param body
@@ -230,7 +226,7 @@ public abstract class ConnectionEmail {
         }
     }
 
-	/**
+    /**
      * Create scope from body
      * 
      * @param body
@@ -257,38 +253,84 @@ public abstract class ConnectionEmail {
     }
 
     /** Use several or exactly one mail box for the bus */
-	private boolean sharedMailbox;
-    
-    /** Mail address of the user */
-	private String emailAddress;
-    
-	/** Performance listener */
-	private PerformanceListener listener;
+    private boolean             sharedMailbox;
+    /** Mail address of receiving user */
+    private String              receivingEmailAddress;
+    /** Performance listener */
+    private PerformanceListener listener;
+    /** Mail address of sending user */
+    private String              sendingEmailAddress;
+    /** Receiving user name */
+    private String              receivingUserName;
+    /** Sending user name */
+    private String              sendingUserName;
     
     /**
-     * Creates a new instance
+     * Creates a new instance with same mail address to receive and to send
+     * 
      * @param sharedMailBox
      * @param emailAddress
      * @throws BusException
      */
     protected ConnectionEmail(boolean sharedMailBox, String emailAddress) {
-    	this(sharedMailBox, emailAddress, null);
+        this(sharedMailBox, emailAddress, null);
     }
     
     /**
-     * Creates a new instance
+     * Creates a new instance with same mail address and user name to receive and to send and a performance listener
+     * 
      * @param sharedMailBox
      * @param emailAddress
      * @param listener
      * @throws BusException
      */
     protected ConnectionEmail(boolean sharedMailBox, String emailAddress, PerformanceListener listener) {
+        this(sharedMailBox, emailAddress, emailAddress, listener);
+    }
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param sharedMailBox
+     * @param receivingEmailAddress
+     * @param sendingEmailAddress
+     * @param listener
+     * @throws BusException
+     */
+    protected ConnectionEmail(boolean sharedMailBox, String receivingEmailAddress, String sendingEmailAddress, PerformanceListener listener) {
+        this(sharedMailBox, receivingEmailAddress, sendingEmailAddress, null, null, listener);
+    }
+    
+    /**
+     * Creates a new instance
+     * 
+     * @param sharedMailBox
+     * @param receivingEmailAddress
+     * @param sendingEmailAddress
+     * @param receivingUserName - only necessary if deviates from receivingEmailAddress
+     * @param sendingUserName - only necessary if deviates from sendingEmailAddress
+     * @param listener
+     */
+    protected ConnectionEmail(boolean sharedMailBox,
+                              String receivingEmailAddress,
+                              String sendingEmailAddress,
+                              String receivingUserName,
+                              String sendingUserName,
+                              PerformanceListener listener) {
         // Check
-        if (emailAddress == null) {
+        if (receivingEmailAddress == null) {
             throw new NullPointerException("Email address must not be null");
         }
+        if (sendingEmailAddress == null) {
+            throw new NullPointerException("Email address must not be null");
+        }
+        
+        // Store
         this.sharedMailbox = sharedMailBox;
-        this.emailAddress = emailAddress;
+        this.receivingEmailAddress = receivingEmailAddress;
+        this.sendingEmailAddress = sendingEmailAddress;
+        this.receivingUserName = receivingUserName;
+        this.sendingUserName = sendingUserName;
         this.listener = listener;
     }
     
@@ -298,17 +340,42 @@ public abstract class ConnectionEmail {
     protected abstract void close();
 
     /**
-     * Returns the associated email address
+     * Returns the associated email address for sending
      * @return
      */
-    protected String getEmailAddress() {
-        return this.emailAddress;
+    protected String getReceivingEmailAddress() {
+        return this.receivingEmailAddress;
+    }
+    
+    /**
+     * Returns the user name for receiving
+     * 
+     * @return
+     */
+    protected String getReceivingUserName() {
+        return this.receivingUserName != null ? this.receivingUserName : this.receivingEmailAddress;
+    }
+    
+    /**
+     * Returns the associated email address for receiving
+     * @return
+     */
+    protected String getSendingEmailAddress() {
+        return this.sendingEmailAddress;
+    }
+    
+    /**
+     * Returns the user name for sending
+     * 
+     * @return
+     */
+    protected String getSendingUserName() {
+        return sendingUserName;
     }
     
     /**
      * Lists all relevant e-mails
-     * @param filter 
-     * 
+     * @param filter
      * @return relevant e-mails
      * @throws BusException 
      * @throws InterruptedException 
@@ -321,10 +388,10 @@ public abstract class ConnectionEmail {
      * @return
      * @throws InterruptedException 
      */
-    protected List<BusEmail.BusEmailMessage> receive(MessageFilter filter) throws BusException, InterruptedException {
+    protected List<BusMessage> receive(MessageFilter filter) throws BusException, InterruptedException {
         
         // Prepare
-        List<BusEmail.BusEmailMessage> result = new ArrayList<>();
+        List<BusMessage> result = new ArrayList<>();
         
         try {
             
@@ -347,7 +414,7 @@ public abstract class ConnectionEmail {
                 Object attachment = message.getAttachment();
 
                 if (text == null || attachment == null) {
-                    logger.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
+                    LOGGER.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
                     continue;
                 }
                 
@@ -367,24 +434,42 @@ public abstract class ConnectionEmail {
                 }                        
 
                 if (scope == null || participant == null) {
-                    logger.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
+                    LOGGER.debug("Malformated message skipped logged", new Date(), "Malformated message skipped");
                     continue;
                 }
                 
                 // Pass on
                 final ConnectionEmailMessage _message = message;
 
-                result.add(new BusEmail.BusEmailMessage(participant, scope, (MessageFragment) attachment, message.text) {
-
-                    @Override
-                    protected void delete() throws BusException {
-                        _message.delete();
-                    }
-                    @Override
-                    protected void expunge() throws BusException {
-                        _message.expunge();
-                    }
-                });
+                if (attachment instanceof BusMessageFragment) {
+                    result.add(new BusMessageFragment((BusMessageFragment)attachment) {
+                        
+                        /** SVUID */
+                        private static final long serialVersionUID = 2663872683179080953L;
+                        
+                        @Override
+                        public void delete() throws BusException {
+                            _message.delete();
+                        }
+                        @Override
+                        public void expunge() throws BusException {
+                            _message.expunge();
+                        }
+                    });
+                } else {
+                    result.add(new BusMessage((BusMessage)attachment) {
+                        /** SVUID */
+                        private static final long serialVersionUID = -2294147052332533758L;
+                        @Override
+                        public void delete() throws BusException {
+                            _message.delete();
+                        }
+                        @Override
+                        public void expunge() throws BusException {
+                            _message.expunge();
+                        }
+                    });
+                }
             }
 
         } catch (BusException e) {
@@ -399,15 +484,16 @@ public abstract class ConnectionEmail {
     /**
      * Send message to participant
      * @param message
-     * @param scope
-     * @param receiver
-     * @param sender 
-     * @throws BusException 
+     * @throws BusException
      */
-    protected void send(MessageFragment message, Scope scope, Participant receiver) throws BusException {
+    protected void send(BusMessage message) throws BusException {
+        
+        // Prepare
+        Participant receiver = message.getReceiver();
+        Scope scope = message.getScope();
         
         // Recipient
-        String recipient = sharedMailbox ? getEmailAddress() : receiver.getIdentifier();
+        String recipient = sharedMailbox ? getReceivingEmailAddress() : receiver.getIdentifier();
         
         // Subject
         String subject = createSubject(scope, receiver);       

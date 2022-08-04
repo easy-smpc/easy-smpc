@@ -26,17 +26,10 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class EntryServers extends ComponentEntry {
     
     /** SVID */
-    private static final long serialVersionUID = 466453564994174241L;    
+    private static final long serialVersionUID = 466453564994174241L;
+
     /**
-     * @param leftString
-     * @param leftValue
-     * @param leftEnabled
-     * @param leftValidator
-     * @param rightString
-     * @param rightValue
-     * @param rightEnabled
-     * @param rightValidator
-     * @param additionalControlsEnabled
+     * Creates a new instance
      */
     public EntryServers() {
         super(Resources.getString("EmailConfig.3"),

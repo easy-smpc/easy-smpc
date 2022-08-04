@@ -25,5 +25,51 @@ public interface PasswordProvider {
      * @param settings 
      * @return
      */
-    public String getPassword();
+    public PasswordStore getPassword();
+    
+    /**
+     * Stores e-mail passwords
+     * 
+     * @author Felix Wirth
+     *
+     */
+    public class PasswordStore {
+        /** IMAP password */
+        private final String imapPassword;
+        
+        /** SMTP password */
+        private final String smtpPassword; 
+        
+        /**
+         * Creates a new instance. If smtpPassword is null, imapPassword will be assumed as smtpPassword
+         * 
+         * @param imapPassword
+         * @param smtpPassword
+         */
+        public PasswordStore(String imapPassword, String smtpPassword) {
+            
+            // Check
+            if(imapPassword == null || imapPassword.isBlank()) {
+                throw new IllegalArgumentException("IMAP password must not be null");
+            }
+            
+            // Store
+            this.imapPassword = imapPassword;            
+            this.smtpPassword = smtpPassword != null && !smtpPassword.isBlank() ? smtpPassword : imapPassword;            
+        }
+
+        /**
+         * @return the imapPassword
+         */
+        protected String getIMAPPassword() {
+            return imapPassword;
+        }
+
+        /**
+         * @return the smtpPassword
+         */
+        protected String getSMTPPassword() {
+            return smtpPassword;
+        }
+    }
 }

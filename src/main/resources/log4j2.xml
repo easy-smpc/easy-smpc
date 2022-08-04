@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
+<Configuration status="warn">
+	<Properties>
+		<Property name="loggerLayout">%d{yyyy-MM-dd HH:mm:ss.SSS} %p %msg%n</Property>
+	</Properties>
+
+	<Appenders>
+		<RollingFile name="fileLogger" fileName="easy-smpc.log"
+			filePattern="easySMPC-%i.log">
+			<Policies>
+				<SizeBasedTriggeringPolicy size="50MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="50" />
+			<PatternLayout>
+				<pattern>${loggerLayout}</pattern>
+			</PatternLayout>
+		</RollingFile>
+
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout>
+				<pattern>${loggerLayout}</pattern>
+			</PatternLayout>
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Logger name="org.bihealth.mi.easysmpc" level="debug" additivity="false">
+			<appender-ref ref="fileLogger" level="debug" />
+			<appender-ref ref="console" />
+		</Logger>
+		<Root level="info" additivity="false">
+			<appender-ref ref="fileLogger" level="debug" />
+			<appender-ref ref="console" />
+		</Root>
+	</Loggers>
+</Configuration>

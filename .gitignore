@@ -43,3 +43,6 @@ testing.dat
 /dependency-reduced-pom.xml
 *.csv
 /out.txt
+/*.csv
+/*.smpc
+/*.xlsx

@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -231,7 +230,16 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                         }
                     }
                 }
+                
+                // Finalize
+                monitor.setProgress(list.size());                
+                wrapUp();
+            }
 
+            /**
+             * Finalizes after the worker thread
+             */
+            private void wrapUp() {
                 // Re-activate buttons
                 buttonSendAllAutomatically.setEnabled(true);
                 buttonSendAllManually.setEnabled(true);
@@ -239,10 +247,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                     if (!isOwnEntry(c)) {
                         ((EntryParticipantCheckmarkSendMail) c).setButtonEnabled(true);
                     }
-                }
-
-                // Finalize
-                monitor.setProgress(list.size());
+                }                
                 stateChanged(new ChangeEvent(this));
             }
             
@@ -257,6 +262,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                     
                     // Stop if cancel button hit
                     if(monitor.isCanceled()) {
+                        wrapUp();
                         break;
                     }
                     
@@ -267,9 +273,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                         // Send message in bus mode
                         future = getApp().getModel()
                                          .getBus()
-                                         .send(new org.bihealth.mi.easybus.Message(getExchangeString(entry)),
-                                               new Scope(getApp().getModel().getStudyUID() +
-                                                         getRoundIdentifier()),
+                                         .send(getExchangeString(entry),
+                                               new Scope(getApp().getModel().getStudyUID() + getRoundIdentifier()),
                                                new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
                                                                                        entry.getRightValue()));
                     } else {
@@ -283,16 +288,25 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                     }
 
                     try {
+                        
                         // Wait for result with a timeout time
-                        future.get(Resources.TIMEOUT_SEND_EMAILS, TimeUnit.MILLISECONDS);
-
+                        long endTime = System.currentTimeMillis() + getApp().getModel().getConnectionIMAPSettings().getEmailSendTimeout();
+                        while (true){
+                            if(future.isDone()) {
+                                break;
+                            }
+                            if(monitor.isCanceled() || endTime < System.currentTimeMillis()) {
+                                throw new InterruptedException();
+                            }
+                        }
+                        
                         // Mark message sent
                         int index = Arrays.asList(panelParticipants.getComponents()).indexOf(entry);
                         getApp().actionMarkMessageRetrieved(index);
                         messageSent = true;
                     } catch (Exception e) {
                         future.cancel(true);
-                        error = true;
+                        error = !monitor.isCanceled();
                     }
                     this.setProgress((++workDone / list.size()) * 100);
                 }              

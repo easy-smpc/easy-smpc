@@ -16,7 +16,6 @@ package org.bihealth.mi.easysmpc.dataimport;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ public class ImportCSV extends ImportFile {
      * @throws IllegalArgumentException
      */
     protected ImportCSV(File file) throws IOException, IllegalArgumentException {
-        this(file, true, false, false);
+        this(file, true, false, false, 0);
     }
     
     /**
@@ -55,11 +54,16 @@ public class ImportCSV extends ImportFile {
      * @param rowOriented - is data row or column oriented?
      * @param oneRowCol - Is the result supposed to be two or one column. If this parameter is set all data is merge together, if it is unset the last column will be handled separately  
      * @param hasHeader - skip first line since it contains the header     
+     * @param skipCol - Ignore first n columns
      * @throws IOException
      * @throws IllegalArgumentException
      */
-    protected ImportCSV(File file, boolean rowOriented, boolean oneRowCol, boolean hasHeader) throws IOException, IllegalArgumentException {
-        super(file, rowOriented, oneRowCol, hasHeader);
+    protected ImportCSV(File file,
+                        boolean rowOriented,
+                        boolean oneRowCol,
+                        boolean hasHeader,
+                        int skipCol) throws IOException, IllegalArgumentException {
+        super(file, rowOriented, oneRowCol, hasHeader, skipCol);
     }
     
 
