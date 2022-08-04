@@ -153,7 +153,7 @@ public class UserProcessCreating extends UserProcess {
      */
     private void purgeEmails() throws BusException, InterruptedException {
         BusEmail bus = new BusEmail(new ConnectionIMAP(getConnectionIMAPSettings(), false), 1000);
-        bus.purgeEmails();
+        bus.purge();
         bus.stop();
     }
 

@@ -42,11 +42,6 @@ public class BusLocal extends Bus {
     public void stop() {
         // Empty by design
     }
-
-    @Override
-    public void stop() {
-     // Empty by design
-    }
     
     @Override
     public void purge() {

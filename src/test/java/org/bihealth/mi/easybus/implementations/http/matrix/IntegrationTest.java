@@ -21,7 +21,6 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import org.bihealth.mi.easybus.Bus;
-import org.bihealth.mi.easybus.Message;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
@@ -35,7 +34,7 @@ import org.bihealth.mi.easybus.Scope;
 public class IntegrationTest {
 
     /** Name of file to send */
-    public static final String FILENAME = "sampleSmall.txt";
+    public static final String FILENAME = "sampleBig.txt";
     /** Received */
     public static boolean      RECEIVED = false;
 
@@ -70,11 +69,11 @@ public class IntegrationTest {
                                }
 
                                @Override
-                               public void receive(Message message) {
+                               public void receive(String message) {
                                    System.out.println("Received!");
 
                                    try (FileWriter fw = new FileWriter("out.txt")) {
-                                       fw.write((String) message.getMessage());
+                                       fw.write(message);
                                        fw.close();
                                    } catch (IOException e) {
                                        e.printStackTrace();
@@ -99,7 +98,7 @@ public class IntegrationTest {
                                                                                            prop.getProperty("second.user")),
                                                          prop.getProperty("second.password"),
                                                          null));
-        busSend.send(new Message(message),
+        busSend.send(message,
                      new Scope("MyFancyScope"),
                      Participant.createMXIDParticipant("first", prop.getProperty("first.user")))
                .get(1500000, TimeUnit.MILLISECONDS);
@@ -111,9 +110,6 @@ public class IntegrationTest {
           Thread.sleep(10000);
       }
       
-      busReceive.stop();
-      busSend.stop();
       System.out.println("Finished");
     }
-
 }

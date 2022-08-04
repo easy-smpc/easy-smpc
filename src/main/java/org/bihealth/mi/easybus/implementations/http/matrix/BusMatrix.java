@@ -1,9 +1,14 @@
 package org.bihealth.mi.easybus.implementations.http.matrix;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,13 +19,16 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.MessageFragment;
-import org.bihealth.mi.easybus.MessageFragmentFinish;
+import org.bihealth.mi.easybus.BusMessage;
+import org.bihealth.mi.easybus.BusMessageFragment;
+import org.bihealth.mi.easybus.MessageManager;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.http.ExecutHTTPRequest;
@@ -96,6 +104,8 @@ public class BusMatrix extends Bus{
     private final Map<String, JoinedRoom> joinedRooms                         = new ConcurrentHashMap<>();
     /** Maps participant names to room ids */
     private final Map<String, String>     ids                                 = new ConcurrentHashMap<>();
+    /** Message manager */
+    private MessageManager messageManager;
 
     /**
      * Creates a new instance
@@ -118,10 +128,11 @@ public class BusMatrix extends Bus{
      */
     public BusMatrix(int sizeThreadpool, int millis, ConnectionMatrix connection,  int maxMessageSize) {
         // Super
-        super(sizeThreadpool, maxMessageSize);
+        super(sizeThreadpool);
         
         // Store
         this.connection = connection;
+        messageManager = new MessageManager(maxMessageSize);
         
         // Create thread
         this.thread = new Thread(new Runnable() {
@@ -154,29 +165,36 @@ public class BusMatrix extends Bus{
     }
 
     @Override
-    protected Void sendInternal(MessageFragment fragment, Scope scope, Participant participant) throws Exception {
+    protected Void sendInternal(BusMessage message) throws Exception {
 
         // Prepare room id list, only first entry is relevant
         String roomId = null;
         
         // Check if room exists        
-        roomId = this.ids.get(participant.getIdentifier());
+        roomId = this.ids.get(message.getReceiver().getIdentifier());
         
         // If not found update and search again
         if(roomId == null) {
             this.ids.putAll(getParticipantRoomIds());
-            roomId = this.ids.get(participant.getIdentifier());
+            roomId = this.ids.get(message.getReceiver().getIdentifier());
         }        
         
         // If necessary create room and update joined rooms 
         if (roomId == null) {
-            roomId = createRoom(new CreateRoom().setName(generateRoomName(participant, true)).addInvite(participant.getIdentifier()));
-            this.ids.put(participant.getIdentifier(), roomId);
+            roomId = createRoom(new CreateRoom().setName(generateRoomName(message.getReceiver(), true)).addInvite(message.getReceiver().getIdentifier()));
+            this.ids.put(message.getReceiver().getIdentifier(), roomId);
             setParticipantRoomIds(this.ids);
         }
         
         // Send message and return
-        sendMessageToMatrixChat(roomId, scope, fragment);
+        try {
+            for (BusMessage m : messageManager.splitMessage(message)) {
+                send(roomId, message.getScope(), m);
+            }
+        } catch (IOException | BusException e) {
+            throw new BusException("Unable to send message", e);
+        }
+        
         
         // Return
         return null;
@@ -229,12 +247,12 @@ public class BusMatrix extends Bus{
      * @param message
      * @throws BusException 
      */
-    private void sendMessageToMatrixChat(String roomId, Scope scope, MessageFragment message) throws BusException {
+    private void send(String roomId, Scope scope, Object message) throws BusException {
         
         // Prepare payload as string
         String payload;        
         try {
-            CreateMessage createMessage = new CreateMessage().setBody(message.serialize())
+            CreateMessage createMessage = new CreateMessage().setBody(serializeObject(message))
                                                              .setScope(scope.getName());
             payload = mapper.writer().writeValueAsString(createMessage);
         } catch (IOException e) {
@@ -513,11 +531,13 @@ public class BusMatrix extends Bus{
                     // Process message
                     try {
                         
-                        // Prepare message fragment
-                        MessageFragmentFinish fragmentFinish = createMessageFragmentFromEvent(event, room.getKey());
+                        // Process with message manager
+                        BusMessage messageComplete = messageManager.mergeMessage(createMessageFragmentFromEvent(event, room.getKey()));
                         
-                        // Receive message internally
-                        this.receiveInternal(fragmentFinish, new Scope(event.getContent().getScope()), this.connection.getSelf());
+                        // Send to scope and participant
+                        if (messageComplete != null) {
+                            receiveInternal(messageComplete);
+                        }
                         successfulReadEvents.add(event);
                     } catch (ClassNotFoundException | InterruptedException | IOException e) {
                         LOGGER.error(String.format("Unable to understand message with id %s in room %s", event.getEventId(), room.getKey()), e);
@@ -562,11 +582,15 @@ public class BusMatrix extends Bus{
 
                             // Try to receive message internally
                             try {
-                                // Prepare message fragment
-                                MessageFragmentFinish fragmentFinish = createMessageFragmentFromEvent(event, entry.getKey());
-
-                                // Receive message internally
-                                this.receiveInternal(fragmentFinish, new Scope(event.getContent().getScope()), getParticipantsMap().get(event.getSender()));
+                                
+                                // Process with message manager
+                                BusMessage messageComplete = messageManager.mergeMessage(createMessageFragmentFromEvent(event, entry.getKey()));
+                                
+                                // Send to scope and participant
+                                if (messageComplete != null) {
+                                    receiveInternal(messageComplete);
+                                }
+                                
                             }  catch (ClassNotFoundException | InterruptedException | IOException e) {
                                 LOGGER.error(String.format("Unable to understand message with id %s in room %s", event.getEventId(), entry.getKey()), e);
                             } catch (BusException e) {
@@ -595,28 +619,52 @@ public class BusMatrix extends Bus{
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    private MessageFragmentFinish createMessageFragmentFromEvent(EventJoined event, String roomKey) throws IOException, ClassNotFoundException {
+    private BusMessage createMessageFragmentFromEvent(EventJoined event, String roomKey) throws IOException, ClassNotFoundException {
         
         // Create fragment and return
-        return new MessageFragmentFinish(MessageFragment.deserializeMessage(event.getContent().getBody())) {
+        Object o = deserializeMessage(event.getContent().getBody());
+        
+        
+        
+        if (o instanceof BusMessageFragment) {
+            return new BusMessageFragment((BusMessageFragment) o) {
+                
+                /** SVUID */
+                private static final long serialVersionUID = -2294134512332533758L;
 
-            /** SVUID */
-            private static final long serialVersionUID = -2403372330378795710L;
-
-            @Override
-            public void delete() throws BusException {
-                try {
-                    redactMessage(roomKey, event.getEventId(), CreateRedacted.DEFAULT);
-                } catch (BusException e) {
-                    LOGGER.error(String.format("Unable to redact message with id %s in room %s", event.getEventId(), roomKey), e);
+                @Override
+                public void delete() throws BusException {
+                    try {
+                        redactMessage(roomKey, event.getEventId(), CreateRedacted.DEFAULT);
+                    } catch (BusException e) {
+                        LOGGER.error(String.format("Unable to redact message with id %s in room %s", event.getEventId(), roomKey), e);
+                    }
                 }
-            }
+                @Override
+                public void expunge() throws BusException {
+                    // Empty
+                }
+            };
+        } else {
+            return new BusMessage((BusMessage) o) {
 
-            @Override
-            public void finalize() throws BusException {
-                // Empty
-            }
-        };
+                /** SVUID */
+                private static final long serialVersionUID = 2247134512332533758L;
+
+                @Override
+                public void delete() throws BusException {
+                    try {
+                        redactMessage(roomKey, event.getEventId(), CreateRedacted.DEFAULT);
+                    } catch (BusException e) {
+                        LOGGER.error(String.format("Unable to redact message with id %s in room %s", event.getEventId(), roomKey), e);
+                    }
+                }
+                @Override
+                public void expunge() throws BusException {
+                    // Empty
+                }
+            };
+        }
     }
 
     /**
@@ -1029,5 +1077,36 @@ public class BusMatrix extends Bus{
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new BusException("Error while executing HTTP request!", e);
         }
+    }
+    
+    /**
+     * Serialize an object.
+     *
+     * @param object
+     * @return the string
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    private String serializeObject(Object o) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(bos));
+        oos.writeObject(o);
+        oos.close();
+        return Base64.getEncoder().encodeToString(bos.toByteArray());
+    }
+    
+    /**
+     * Deserialize an object
+     *
+     * @param serialued object
+     * @return the object
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ClassNotFoundException the class not found exception
+     */
+    private Object deserializeMessage(String msg) throws IOException, ClassNotFoundException {
+        byte[] data = Base64.getDecoder().decode(msg);
+        ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(data)));
+        Object o = ois.readObject();
+        ois.close();
+        return o;
     }
 }
