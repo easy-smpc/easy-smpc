@@ -59,6 +59,7 @@ public class IntegrationTest {
                                                      prop.getProperty("first.password"),
                                                      null));
         //busReceive.purge();
+        //busReceive.purge();
         busReceive.receive(new Scope("MyFancyScope"),
                            Participant.createMXIDParticipant("first",
                                                              prop.getProperty("first.user")),
@@ -87,7 +88,7 @@ public class IntegrationTest {
         StringBuilder builder = new StringBuilder();
         Scanner scanner = new Scanner(IntegrationTest.class.getResourceAsStream(FILENAME));
         while(scanner.hasNext()) {
-            builder.append(scanner.nextLine());
+            builder.append(scanner.nextLine() + System.lineSeparator());
         }
         scanner.close();
         String message = builder.toString(); 
@@ -98,6 +99,7 @@ public class IntegrationTest {
                                                                                            prop.getProperty("second.user")),
                                                          prop.getProperty("second.password"),
                                                          null));
+        //busSend.purge();
         busSend.send(message,
                      new Scope("MyFancyScope"),
                      Participant.createMXIDParticipant("first", prop.getProperty("first.user")))
@@ -108,8 +110,6 @@ public class IntegrationTest {
        // Wait
       while (!RECEIVED) {
           Thread.sleep(10000);
-      }
-      
-      System.out.println("Finished");
+      }      
     }
 }
