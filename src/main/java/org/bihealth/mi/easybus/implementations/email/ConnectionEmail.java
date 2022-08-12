@@ -206,7 +206,7 @@ public abstract class ConnectionEmail {
 
         // Check
         if(!body.contains(PARTICIPANT_NAME_END_TAG) || !body.contains(PARTICIPANT_NAME_END_TAG) ||
-           !body.contains(PARTICIPANT_EMAIL_END_TAG) || !body.contains(PARTICIPANT_EMAIL_END_TAG)) {            
+           !body.contains(PARTICIPANT_EMAIL_END_TAG) || !body.contains(PARTICIPANT_EMAIL_END_TAG)) {
            return null;
         }
         

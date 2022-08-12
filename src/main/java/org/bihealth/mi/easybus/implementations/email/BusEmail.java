@@ -115,7 +115,8 @@ public class BusEmail extends Bus {
      * @throws BusException 
      * @throws InterruptedException 
      */
-    public void purgeEmails() throws BusException, InterruptedException {
+    @Override
+    public void purge() throws BusException, InterruptedException {
         purgeEmails(null);
     }
     

@@ -14,6 +14,7 @@
 package org.bihealth.mi.easybus.implementations.local;
 
 import org.bihealth.mi.easybus.Bus;
+import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.BusMessage;
 
 /**
@@ -47,5 +48,10 @@ public class BusLocal extends Bus {
     protected Void sendInternal(BusMessage message) throws Exception {
         receiveInternal(message);
         return null;
+    }
+
+    @Override
+    public void purge() throws BusException, InterruptedException {
+     // Empty by design        
     }
 }
