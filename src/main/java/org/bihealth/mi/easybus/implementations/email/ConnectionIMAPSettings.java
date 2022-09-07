@@ -16,7 +16,6 @@ package org.bihealth.mi.easybus.implementations.email;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.ProxySelector;
 import java.net.URL;
@@ -26,6 +25,7 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easybus.implementations.email.PasswordProvider.PasswordStore;
@@ -42,7 +42,7 @@ import com.github.markusbernhardt.proxy.ProxySearch;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class ConnectionIMAPSettings implements Serializable {
+public class ConnectionIMAPSettings extends ConnectionSettings {
 
     /** SVUID */
     private static final long    serialVersionUID            = 3880443185633907293L;
@@ -866,5 +866,10 @@ public class ConnectionIMAPSettings implements Serializable {
     @Override
     public String toString() {
         return String.format("IMAP connections for e-mail address %s", this.imapEmailAddress);
+    }
+
+    @Override
+    public String getIdentifier() {
+        return this.imapEmailAddress;
     }
 }

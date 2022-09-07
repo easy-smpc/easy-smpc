@@ -13,12 +13,19 @@
  */
 package org.bihealth.mi.easysmpc.resources;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
-import org.bihealth.mi.easysmpc.AppPasswordProvider;
+import org.bihealth.mi.easybus.ConnectionSettings;
 
 /**
  * Store and retrieve connections
@@ -27,109 +34,37 @@ import org.bihealth.mi.easysmpc.AppPasswordProvider;
  */
 public class Connections {
 
-    /** Key */
-    private static final String IMAP_SERVER_KEY            = "imap_server";
-    /** Key */
-    private static final String IMAP_PORT_KEY              = "imap_port";
-    /** Key */
-    private static final String IMAP_ENCRYPTION_TYPE       = "imap_encryption";
-    /** Key */
-    private static final String SMTP_SERVER_KEY            = "smtp_server";
-    /** Key */
-    private static final String SMTP_PORT_KEY              = "smtp_port";
-    /** Key */
-    private static final String SMTP_ENCRYPTION_TYPE       = "smtp_encryption";
-    /** Key */
-    private static final String SMTP_EMAIL_KEY             = "smtp_email_address";
-    /** Key */
-    private static final String IMAP_USER_NAME_KEY         = "imap_user_name";
-    /** Key */
-    private static final String SMTP_USER_NAME_KEY         = "smtp_user_name";
-    /** Key */
-    private static final String IMAP_AUTH_MECH_KEY         = "imap_auth_mech";
-    /** Key */
-    private static final String SMTP_AUTH_MECH_KEY         = "smtp_auth_mech_key";
-    /** Key */
-    private static final String EMAIL_MESSAGE_MAXIMUM_SIZE = "email_message_maximum_size ";
-    /** Key */
-    private static final String EMAIL_CHECK_INTERVAL       = "email_check_interval ";
-    /** Key */
-    private static final String EMAIL_SEND_TIMEOUT         = "email_send_timeout ";
-
-
     /**
-     * Adds or updates a certain setting
+     * Adds or updates a specific setting
      * @param settings
+     * @throws IOException 
      */
-    public static void addOrUpdate(ConnectionIMAPSettings settings) {
-        
+    public static void addOrUpdate(ConnectionSettings settings) throws IOException {
         // Get node
         Preferences node = Preferences.userRoot()
-                                      .node(Connections.class.getPackage().getName())
-                                      .node(settings.getIMAPEmailAddress());
-        
+                                      .node(settings.getClass().getPackage().getName());
+
         // Add details
-        node.put(SMTP_EMAIL_KEY, settings.getSMTPEmailAddress());
-        node.put(IMAP_SERVER_KEY, settings.getIMAPServer());
-        node.putInt(IMAP_PORT_KEY, settings.getIMAPPort());
-        node.put(SMTP_SERVER_KEY, settings.getSMTPServer());
-        node.putInt(SMTP_PORT_KEY, settings.getSMTPPort());
-        node.putBoolean(IMAP_ENCRYPTION_TYPE, settings.isSSLTLSIMAP());
-        node.putBoolean(SMTP_ENCRYPTION_TYPE, settings.isSSLTLSSMTP());
-        node.putInt(EMAIL_MESSAGE_MAXIMUM_SIZE, settings.getMaxMessageSize());
-        node.putInt(EMAIL_CHECK_INTERVAL, settings.getCheckInterval());
-        node.putInt(EMAIL_SEND_TIMEOUT, settings.getEmailSendTimeout());
-        setOrDeleteKey(node, IMAP_USER_NAME_KEY, settings.getIMAPUserName());
-        setOrDeleteKey(node, SMTP_USER_NAME_KEY, settings.getSMTPUserName());
-        setOrDeleteKey(node, IMAP_AUTH_MECH_KEY, settings.getIMAPAuthMechanisms());
-        setOrDeleteKey(node, SMTP_AUTH_MECH_KEY, settings.getSMTPAuthMechanisms());
-    }
-    
-    /**
-     * Sets a value if not null and deletes key if null
-     * 
-     * @param node
-     * @param key
-     * @param value
-     */
-    private static void setOrDeleteKey(Preferences node, String key, String value) {
-        if(value != null) {
-            node.put(key, value);
-        } else {
-            if(node.get(key, null) != null) {
-                node.remove(key);
-            }
-        }
+        node.put(settings.getIdentifier(), serializeConnectionSettings(settings));
     }
 
     /**
      * Lists all available settings
+     * @param class1 
      * @return
      * @throws BackingStoreException
+     * @throws IOException 
+     * @throws ClassNotFoundException 
      */
-    public static ArrayList<ConnectionIMAPSettings> list() throws BackingStoreException{
+    public static ArrayList<ConnectionSettings> list(Class<?> settingsClass) throws BackingStoreException, ClassNotFoundException, IOException{
         
         // Prepare
-        ArrayList<ConnectionIMAPSettings> result = new ArrayList<>();
-        Preferences rootPreferences = Preferences.userRoot().node(Connections.class.getPackage().getName());
+        ArrayList<ConnectionSettings> result = new ArrayList<>();
+        Preferences rootPreferences = Preferences.userRoot().node(settingsClass.getPackage().getName());
         
         // Loop each sub node
         for(String children : rootPreferences.childrenNames()) {
-            Preferences child = rootPreferences.node(children);
-            result.add(new ConnectionIMAPSettings(children, child.get(SMTP_EMAIL_KEY, children), new AppPasswordProvider())
-                                                 .setIMAPServer(child.get(IMAP_SERVER_KEY, null))
-                                                 .setIMAPPort(child.getInt(IMAP_PORT_KEY, 0))
-                                                 .setSSLTLSIMAP(child.getBoolean(IMAP_ENCRYPTION_TYPE, true))
-                                                 .setSMTPServer(child.get(SMTP_SERVER_KEY, null))
-                                                 .setSMTPPort(child.getInt(SMTP_PORT_KEY, 0))
-                                                 .setSSLTLSSMTP(child.getBoolean(SMTP_ENCRYPTION_TYPE, true))
-                                                 .setIMAPUserName(child.get(IMAP_USER_NAME_KEY, null))
-                                                 .setSMTPUserName(child.get(SMTP_USER_NAME_KEY, null))
-                                                 .setIMAPAuthMechanisms(child.get(IMAP_AUTH_MECH_KEY, null))
-                                                 .setSMTPAuthMechanisms(child.get(SMTP_AUTH_MECH_KEY, null))
-                                                 .setMaxMessageSize(child.getInt(EMAIL_MESSAGE_MAXIMUM_SIZE, Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT))
-                                                 .setCheckInterval(child.getInt(EMAIL_CHECK_INTERVAL, Resources.INTERVAL_CHECK_MAILBOX_DEFAULT))
-                                                 .setEmailSendTimeout(child.getInt(EMAIL_SEND_TIMEOUT, Resources.TIMEOUT_SEND_EMAILS_DEFAULT)));
+            result.add(deserializeConnectionSettings(rootPreferences.get(children, null)));
         }
         
         // Return
@@ -141,10 +76,41 @@ public class Connections {
      * @param settings
      * @throws BackingStoreException
      */
-    public static void remove(ConnectionIMAPSettings settings) throws BackingStoreException {
+    public static void remove(ConnectionSettings settings) throws BackingStoreException {
         Preferences.userRoot()
-                   .node(Connections.class.getPackage().getName())
-                   .node(settings.getIMAPEmailAddress())
+                   .node(settings.getClass().getPackage().getName())
+                   .node(settings.getIdentifier())
                    .removeNode();
-    }    
+    }
+    
+    /**
+     * Serializes a ConnectionSettings object
+     *
+     * @param the settings
+     * @return the string
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public static String serializeConnectionSettings(ConnectionSettings settings) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(bos));
+        oos.writeObject(settings);
+        oos.close();
+        return Base64.getEncoder().encodeToString(bos.toByteArray());
+    }
+
+    /**
+     * Deserialize a ConnectionSettings object
+     *
+     * @param the string
+     * @return the settings
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws ClassNotFoundException the class not found exception
+     */
+    public static ConnectionSettings deserializeConnectionSettings(String serialized) throws IOException, ClassNotFoundException {
+        byte[] data = Base64.getDecoder().decode(serialized);
+        ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(data)));
+        ConnectionSettings settings = (ConnectionSettings) ois.readObject();
+        ois.close();
+        return settings;
+    }
 }

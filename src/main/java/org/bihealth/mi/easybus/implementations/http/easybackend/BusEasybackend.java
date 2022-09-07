@@ -95,7 +95,7 @@ public class BusEasybackend extends Bus {
         this.connection = connection;
         messageManager = new MessageManager(maxMessageSize);
         
-        // TODO Parts of this implementation might be pulled up to Bus, when making receive() abstract Bus. Do so?
+        // TODO Parts of this implementation might be pulled up to Bus, when making receive() abstract in Bus. Do so?
         // Create thread
         this.thread = new Thread(new Runnable() {
             @Override

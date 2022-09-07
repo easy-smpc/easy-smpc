@@ -50,7 +50,7 @@ import jakarta.ws.rs.core.Response;
 public class ConnectionEasybackend  implements AuthHandler {
     
     /**
-     * Default error handler for matrix connections
+     * Default error handler
      */
     public static Function<Response, String> DEFAULT_ERROR_HANDLER = new Function<>() {
         
