@@ -37,14 +37,11 @@ public class ConnectionIMAPProxy {
      */
     public static Pair<String, Integer> getProxy(ConnectionSettingsIMAP settings) {
         try {
-                
-            // TODO: More options, including STARTTLS would be available
+
             String scheme = "imap+ssl+";
                    
-            // TODO: Other auth types would be available
             String userInfo = "PLAIN:" + settings.getIMAPEmailAddress() + ":" + settings.getIMAPPassword();
             
-            // TODO: Other paths would be available
             String path = "/1|";
 
             // Construct URI

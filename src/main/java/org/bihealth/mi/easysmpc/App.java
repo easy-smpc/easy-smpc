@@ -948,7 +948,7 @@ public class App extends JFrame {
             newSettings = new DialogEmailConfig((ConnectionSettingsIMAP) currentSettings, this).showDialog();
         }
 
-        // TODO Add more
+        // TODO Add others
         
         // Return
         return newSettings;

@@ -186,21 +186,6 @@ public class ConnectionSettingsIMAP extends ConnectionSettings {
         }
     }
 
-    // TODO Regenerate
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        ConnectionSettingsIMAP other = (ConnectionSettingsIMAP) obj;
-        return acceptSelfSignedCert == other.acceptSelfSignedCert &&
-               Objects.equals(imapEmailAddress, other.imapEmailAddress) && imapPort == other.imapPort &&
-               Objects.equals(imapServer, other.imapServer) &&
-               searchForProxy == other.searchForProxy &&
-               smtpPort == other.smtpPort && Objects.equals(smtpServer, other.smtpServer) &&
-               ssltlsIMAP == other.ssltlsIMAP && ssltlsSMTP == other.ssltlsSMTP;
-    }
-
     /**
      * Return config parameter
      * @return the IMAP emailAddress
@@ -472,20 +457,6 @@ public class ConnectionSettingsIMAP extends ConnectionSettings {
             // No success
             return false;
         }
-    }
-    
-    // TODO update
-    @Override
-    public int hashCode() {
-        return Objects.hash(acceptSelfSignedCert,
-                            imapEmailAddress,
-                            imapPort,
-                            imapServer,
-                            searchForProxy,
-                            smtpPort,
-                            smtpServer,
-                            ssltlsIMAP,
-                            ssltlsSMTP);
     }
       
     /**
@@ -827,5 +798,48 @@ public class ConnectionSettingsIMAP extends ConnectionSettings {
     @Override
     public ConnectionTypes getConnectionType() {
         return ConnectionTypes.EMAIL;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(acceptSelfSignedCert,
+                            checkInterval,
+                            emailSendTimeout,
+                            imapAuthMechanisms,
+                            imapEmailAddress,
+                            imapPort,
+                            imapServer,
+                            imapUserName,
+                            maxMessageSize,
+                            provider,
+                            searchForProxy,
+                            smptEmailAddress,
+                            smtpAuthMechanisms,
+                            smtpPort,
+                            smtpServer,
+                            smtpUserName,
+                            ssltlsIMAP,
+                            ssltlsSMTP);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        ConnectionSettingsIMAP other = (ConnectionSettingsIMAP) obj;
+        return acceptSelfSignedCert == other.acceptSelfSignedCert &&
+               checkInterval == other.checkInterval && emailSendTimeout == other.emailSendTimeout &&
+               Objects.equals(imapAuthMechanisms, other.imapAuthMechanisms) &&
+               Objects.equals(imapEmailAddress, other.imapEmailAddress) &&
+               imapPort == other.imapPort && Objects.equals(imapServer, other.imapServer) &&
+               Objects.equals(imapUserName, other.imapUserName) &&
+               maxMessageSize == other.maxMessageSize && Objects.equals(provider, other.provider) &&
+               searchForProxy == other.searchForProxy &&
+               Objects.equals(smptEmailAddress, other.smptEmailAddress) &&
+               Objects.equals(smtpAuthMechanisms, other.smtpAuthMechanisms) &&
+               smtpPort == other.smtpPort && Objects.equals(smtpServer, other.smtpServer) &&
+               Objects.equals(smtpUserName, other.smtpUserName) && ssltlsIMAP == other.ssltlsIMAP &&
+               ssltlsSMTP == other.ssltlsSMTP;
     }
 }

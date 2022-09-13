@@ -324,7 +324,7 @@ public class BusEasybackend extends Bus {
 
     @Override
     public void stop() {
-        // TODO Auto-generated method stub
+        // TODO Implement stop
         
     }
 
@@ -391,7 +391,7 @@ public class BusEasybackend extends Bus {
 
     @Override
     public void purge(MessageFilter filter) throws BusException, InterruptedException {
-        // TODO Auto-generated method stub
+        // TODO Implement purge
     }
     
     
