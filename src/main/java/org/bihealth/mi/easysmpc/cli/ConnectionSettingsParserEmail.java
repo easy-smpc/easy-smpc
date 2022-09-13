@@ -164,14 +164,6 @@ public class ConnectionSettingsParserEmail extends ConnectionSettingsParser {
                                                                      .build();
     
     /** Command line option */
-    private static final Option OPTION_RESUME                = Option.builder("g")
-                                                                     .desc("Load and resume an existing study")
-                                                                     .longOpt("resume")
-                                                                     .hasArg(false)
-                                                                     .required(false)
-                                                                     .build();
-    
-    /** Command line option */
     private static final Option OPTION_PARTICIPANT_NAME      = Option.builder("o")
                                                                      .desc("Name of participant")
                                                                      .longOpt("participant-name")

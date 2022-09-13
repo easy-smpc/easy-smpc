@@ -131,9 +131,6 @@ public class Study implements Serializable, Cloneable {
     
     /** Store whether messages have been retrieved */
     private boolean[] retrievedMessages;
-    
-    /** Are messages processed manually or automatically */
-    private boolean automatedMode = false;
 
     /** Exchange mode */
     private ConnectionTypes exchangeMode = ConnectionTypes.MANUAL;
@@ -503,7 +500,6 @@ public class Study implements Serializable, Cloneable {
             throw new IllegalStateException("Unable to initialize study at state" + getState());
         this.setName(name);
         this.setConnectionSettings(connectionSettings);
-        this.automatedMode = connectionSettings != null ? true: false;
         this.exchangeMode = connectionSettings == null ? ConnectionTypes.MANUAL : connectionSettings.getConnectionType(); 
         setNumParticipants(participants.length);
         unsentMessages = new Message[getNumParticipants()];
@@ -523,7 +519,7 @@ public class Study implements Serializable, Cloneable {
     
     /** @return Is automated mode used? */
     public boolean isAutomatedMode() {
-        return this.automatedMode;
+        return !(this.exchangeMode == null || this.exchangeMode == ConnectionTypes.MANUAL);
     }
     
     /**
@@ -712,13 +708,6 @@ public class Study implements Serializable, Cloneable {
             oos.writeObject(this);
             oos.close();
         }
-    }
-
-    /**
-     * @param automatedMode the automatedMode to sets
-     */
-    public void setAutomatedMode(boolean automatedMode) {
-        this.automatedMode = automatedMode;
     }
 
     /**
