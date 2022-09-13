@@ -567,7 +567,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
 
         // Try to determine and set
         try {
-            ConnectionSettingsIMAP settings = new ConnectionSettingsIMAP(eMailEntered, new AppPasswordProvider());
+            ConnectionSettingsIMAP settings = new ConnectionSettingsIMAP(eMailEntered, new AppPasswordProvider(Resources.getString("EmailConfig.29"), Resources.getString("EmailConfig.31")));
             if (settings.guess()) {
                 // Choose first tab
                 tabbedPane.setSelectedIndex(0);
@@ -622,11 +622,11 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
         
         // Take data from either entryEMail password or from IMAP and SMTP entries
         if(entryEmailPassword != null) {
-            result = new ConnectionSettingsIMAP(entryEmailPassword.getLeftValue(), new AppPasswordProvider());
+            result = new ConnectionSettingsIMAP(entryEmailPassword.getLeftValue(), new AppPasswordProvider(Resources.getString("EmailConfig.29"), Resources.getString("EmailConfig.31")));
             result.setPasswordStore(new PasswordStore(entryEmailPassword.getRightValue(), entryEmailPassword.getRightValue()));
         }
         else {
-            AppPasswordProvider provider = new AppPasswordProvider();
+            AppPasswordProvider provider = new AppPasswordProvider(Resources.getString("EmailConfig.29"), Resources.getString("EmailConfig.31"));
             result = new ConnectionSettingsIMAP(entryIMAPDetails.getEmailAddress(), entrySMTPDetails.getEmailAddress(), provider);
             result.setPasswordStore(new PasswordStore(entryIMAPDetails.getPassword(), entrySMTPDetails.getPassword()));
         };

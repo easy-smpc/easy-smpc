@@ -41,7 +41,7 @@ public class PasswordStore {
         
         // Store
         this.firstPassword = firstPassword;            
-        this.secondPassword = secondPassword != null && !secondPassword.isBlank() ? secondPassword : firstPassword;            
+        this.secondPassword = secondPassword != null && !secondPassword.isBlank() ? secondPassword : firstPassword;
     }
 
     /**

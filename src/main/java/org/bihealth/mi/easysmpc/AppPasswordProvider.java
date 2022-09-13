@@ -30,10 +30,44 @@ public class AppPasswordProvider implements PasswordProvider, Serializable {
 
     /** SVUID*/
     private static final long serialVersionUID = -7455626179379349238L;
-
+    /** First password descriptor */
+    private String firstPasswordDescriptor;
+    /** Second password descriptor */
+    private String secondPasswordDescriptor = null;
+    
+    
+    /**
+     * Creates a new instance to obtain one password
+     * 
+     * @param singlePasswordDescriptor
+     */
+    public AppPasswordProvider(String singlePasswordDescriptor) {
+        // Store
+        this.firstPasswordDescriptor = singlePasswordDescriptor;
+    }
+    
+    /**
+     * Creates a new instance to obtain two passwords
+     * 
+     * @param singlePasswordDescriptor
+     */
+    public AppPasswordProvider(String firstPasswordDescriptor, String secondPasswordDescriptor) {
+        // Store
+        this.firstPasswordDescriptor = firstPasswordDescriptor;
+        this.secondPasswordDescriptor = secondPasswordDescriptor;
+    }
+    
+    /**
+     * Default constructor
+     */
+    @SuppressWarnings("unused")
+    private AppPasswordProvider() {
+        // Empty by design
+    }
+    
     @Override
     public PasswordStore getPassword() {
-        return new DialogPassword(getParent()).showDialog();
+        return new DialogPassword(firstPasswordDescriptor, secondPasswordDescriptor, getParent()).showDialog();
     }
 
     /**
