@@ -27,10 +27,15 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easybus.implementations.email.BusEmail;
+import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
+import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easysmpc.dataexport.ExportFile;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -50,25 +55,25 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 public class UserProcess implements MessageListener {
 
     /** Logger */
-    private static final Logger    LOGGER  = LogManager.getLogger(UserProcess.class);
+    private static final Logger LOGGER  = LogManager.getLogger(UserProcess.class);
     /** Round for initial e-mails */
-    public static final String     ROUND_0 = "_round0";
+    public static final String  ROUND_0 = "_round0";
     /** The study model */
-    private Study                  model   = new Study();
-    /** connectionIMAPSettings */
-    private ConnectionIMAPSettings connectionIMAPSettings;
+    private Study               model   = new Study();
+    /** connection settings */
+    private ConnectionSettings  connectionSettings;
     /** Error flag */
-    private boolean                stop    = false;
+    private boolean             stop    = false;
 
     /**
      * Creates a new instance
      * 
-     * @param connectionIMAPSettings
+     * @param connectionSettings
      */
-    protected UserProcess(ConnectionIMAPSettings connectionIMAPSettings) {
+    protected UserProcess(ConnectionSettings connectionSettings) {
 
         // Store
-        this.connectionIMAPSettings = connectionIMAPSettings;               
+        this.connectionSettings = connectionSettings;               
     }
     
     
@@ -82,7 +87,7 @@ public class UserProcess implements MessageListener {
      * @throws ClassNotFoundException 
      */
     public UserProcess(Study model) throws ClassNotFoundException, IllegalArgumentException, IOException {
-        this(model.getConnectionIMAPSettings());
+        this(model.getConnectionSettings());
         
         // Store
         this.model = model;
@@ -195,7 +200,7 @@ public class UserProcess implements MessageListener {
     
     @Override
     public void receiveError(Exception e) {
-        LOGGER.error("Error receiveing e-mails",e);
+        LOGGER.error("Error receiveing messages",e);
         LOGGER.info("Receiveing will be retried",e);
     }
 
@@ -230,7 +235,7 @@ public class UserProcess implements MessageListener {
     }
 
     /**
-     * Starts receiving a message by means of e-mail bus
+     * Starts receiving a message by means of messages bus
      * 
      * @param roundIdentifier
      * @throws IllegalArgumentException
@@ -238,7 +243,7 @@ public class UserProcess implements MessageListener {
      * @throws InterruptedException 
      */
     private void receiveMessages(String roundIdentifier) throws IllegalArgumentException, BusException, InterruptedException {
-        getModel().getBus(getModel().getConnectionIMAPSettings().getCheckInterval(), false).receive(new Scope(getModel().getName() + roundIdentifier),
+        getModel().getBus(getModel().getConnectionSettings().getCheckInterval(), false).receive(new Scope(getModel().getName() + roundIdentifier),
                            new org.bihealth.mi.easybus.Participant(getModel().getParticipantFromId(getModel().getOwnId()).name,
                                                                    getModel().getParticipantFromId(getModel().getOwnId()).emailAddress),
                            this);
@@ -266,7 +271,7 @@ public class UserProcess implements MessageListener {
     }
     
     /** 
-     * Sends a message by means of e-mail bus
+     * Sends a message by means of bus
      * 
      * @param roundIdentifier
      * @throws InterruptedException 
@@ -296,13 +301,13 @@ public class UserProcess implements MessageListener {
                 try {
                     // Retrieve bus and send message
 
-                    future = getModel().getBus(getModel().getConnectionIMAPSettings().getCheckInterval(), false).send(Message.serializeMessage(getModel().getUnsentMessageFor(index)),
+                    future = getModel().getBus(getModel().getConnectionSettings().getCheckInterval(), false).send(Message.serializeMessage(getModel().getUnsentMessageFor(index)),
                                     new Scope(getModel().getName() + (getModel().getState() == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().getParticipants()[index].name,
                                                                             getModel().getParticipants()[index].emailAddress));
                     
                     // Wait for result with a timeout time
-                    future.get(getModel().getConnectionIMAPSettings().getEmailSendTimeout(), TimeUnit.MILLISECONDS);
+                    future.get(getModel().getConnectionSettings().getSendTimeout(), TimeUnit.MILLISECONDS);
                     
                     // Mark message as sent
                     model.markMessageSent(index);
@@ -311,8 +316,8 @@ public class UserProcess implements MessageListener {
                     save();
                 } catch (Exception e) {
                      future.cancel(true);
-                    LOGGER.error("Unable to send e-mail" ,e);
-                    throw new IllegalStateException("Unable to send e-mail!", e);
+                    LOGGER.error("Unable to send message" ,e);
+                    throw new IllegalStateException("Unable to send message!", e);
                 }
             }
         }
@@ -427,8 +432,8 @@ public class UserProcess implements MessageListener {
      * 
      * @return
      */
-    protected ConnectionIMAPSettings getConnectionIMAPSettings() {
-        return connectionIMAPSettings;
+    protected ConnectionSettings getConnectionSettings() {
+        return connectionSettings;
     }
     
     /**
@@ -449,5 +454,40 @@ public class UserProcess implements MessageListener {
         } catch (IllegalStateException | IOException e) {
             LOGGER.error("Unable to save interim state. Program execution is proceeded but state will be lost if the programm stops", e);
         }
+    }
+    
+    /**
+     * Get an interim bus with 1000 milliseconds check interval
+     * 
+     * @return
+     */
+    public Bus getInterimBus() {
+        // Is e-mails bus?
+        if (this.getConnectionSettings() instanceof ConnectionSettingsIMAP) {
+
+            try {
+                return new BusEmail(new ConnectionIMAP((ConnectionSettingsIMAP) this.getConnectionSettings(),
+                                                       false), 1000);
+            } catch (BusException e) {
+                LOGGER.error("Unable to get interim bus!", e);
+                throw new IllegalStateException("Unable to get interim bus!");
+            }
+        }
+
+        // Nothing found
+        return null;
+    }
+    
+    /**
+     * Deletes all pre-existing messages which are related to the bus
+     * 
+     * @param filter
+     * @throws BusException
+     * @throws InterruptedException
+     */
+    protected void purgeMessages(MessageFilter filter) throws BusException, InterruptedException {
+        Bus bus = getInterimBus();
+        bus.purge(filter);
+        bus.stop();
     }
 }

@@ -25,6 +25,8 @@ import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Objects;
 
+import org.bihealth.mi.easybus.ConnectionSettings.ConnectionTypes;
+
 import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 
 /**
@@ -70,6 +72,7 @@ public class MessageInitial implements Serializable {
         model.setNumParticipants(msg.participants.length);
         model.setOwnId(msg.recipientId);
         model.setAutomatedMode(msg.automatedMode);
+        model.setExchangeMode(msg.exchangeMode);
         model.setState(StudyState.PARTICIPATING);
         model.setBins(new Bin[msg.bins.length]);
         for (int i = 0; i < msg.bins.length; i++) {
@@ -95,6 +98,8 @@ public class MessageInitial implements Serializable {
     
     /** The study UID. */
     public String studyUID;
+    /** Exchange mode */
+    private ConnectionTypes exchangeMode;
     
 
     /**
@@ -109,6 +114,7 @@ public class MessageInitial implements Serializable {
         this.participants = model.getParticipants();
         this.recipientId = recipientId;
         this.automatedMode = model.isAutomatedMode();
+        this.exchangeMode = model.getExchangeMode();
         this.bins = new MessageBin[model.getBins().length];
         for (int i = 0; i < model.getBins().length; i++) {
             bins[i] = new MessageBin(model.getBins()[i], recipientId);

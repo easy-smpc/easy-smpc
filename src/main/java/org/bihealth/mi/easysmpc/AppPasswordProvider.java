@@ -18,6 +18,7 @@ import java.io.Serializable;
 
 import javax.swing.JFrame;
 
+import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easybus.implementations.email.PasswordProvider;
 import org.bihealth.mi.easysmpc.components.DialogPassword;
 

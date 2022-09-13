@@ -17,7 +17,7 @@ import java.io.Serializable;
 
 import org.bihealth.mi.easysmpc.resources.Resources;
 
-/** Generic stettings
+/** Generic settings
  * 
  * @author Felix Wirth
  *
@@ -26,12 +26,57 @@ public abstract class ConnectionSettings implements Serializable {
     
     /** SVUID */
     private static final long serialVersionUID = -3887172032343688839L;
+    /** Password store */
+    private transient PasswordStore passwordStore;
     
+    // TODO Either call this e-mail or change "e-mail" to identifier in entire project
     /**
      * Returns the identifier
      * @return
      */
     public abstract String getIdentifier();
+    
+    /**
+     * Returns whether this connection is valid
+     * 
+     * @return
+     */
+    public abstract boolean isValid();
+    
+    /**
+     * Return the check interval
+     * 
+     * @return
+     */
+    public abstract int getCheckInterval();
+    
+    /**
+     * Get send timeout
+     * 
+     * @return
+     */
+    public abstract int getSendTimeout();
+    /**
+     * @return the passwordStore
+     */
+    public PasswordStore getPasswordStore() {
+        return passwordStore;
+    }
+
+    /**
+     * @param passwordStore the passwordStore to set
+     */
+    public ConnectionSettings setPasswordStore(PasswordStore passwordStore) {
+        this.passwordStore = passwordStore;
+        return this;
+    }
+    
+    /**
+     * Returns the connection type
+     * 
+     * @return
+     */
+    public abstract ConnectionTypes getConnectionType();
     
     /** Connection types */
     public enum ConnectionTypes { 
@@ -41,5 +86,5 @@ public abstract class ConnectionSettings implements Serializable {
         public String toString() {
             return Resources.getString(String.format("ConnectionTypes.%s", this.name()));
         }
-    }; 
+    };    
 }

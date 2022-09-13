@@ -388,7 +388,7 @@ public abstract class ConnectionEmail {
      * @return
      * @throws InterruptedException 
      */
-    protected List<BusMessage> receive(MessageFilter filter) throws BusException, InterruptedException {
+    protected synchronized List<BusMessage> receive(MessageFilter filter) throws BusException, InterruptedException {
         
         // Prepare
         List<BusMessage> result = new ArrayList<>();

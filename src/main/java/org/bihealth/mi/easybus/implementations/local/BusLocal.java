@@ -16,6 +16,7 @@ package org.bihealth.mi.easybus.implementations.local;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.BusMessage;
+import org.bihealth.mi.easybus.MessageFilter;
 
 /**
  * An easy, minimal Bus implementation
@@ -51,7 +52,7 @@ public class BusLocal extends Bus {
     }
 
     @Override
-    public void purge() throws BusException, InterruptedException {
-     // Empty by design        
+    public void purge(MessageFilter filter) throws BusException, InterruptedException {
+     // Empty by design
     }
 }

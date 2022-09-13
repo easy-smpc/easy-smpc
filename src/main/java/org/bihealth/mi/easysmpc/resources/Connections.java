@@ -60,11 +60,11 @@ public class Connections {
         
         // Prepare
         ArrayList<ConnectionSettings> result = new ArrayList<>();
-        Preferences rootPreferences = Preferences.userRoot().node(settingsClass.getPackage().getName());
+        Preferences preferences = Preferences.userRoot().node(settingsClass.getPackage().getName());
         
         // Loop each sub node
-        for(String children : rootPreferences.childrenNames()) {
-            result.add(deserializeConnectionSettings(rootPreferences.get(children, null)));
+        for(String children : preferences.keys()) {
+            result.add(deserializeConnectionSettings(preferences.get(children, null)));
         }
         
         // Return
@@ -72,15 +72,12 @@ public class Connections {
     }
     
     /**
-     * Removes a certain setting
+     * Removes a specific setting
      * @param settings
      * @throws BackingStoreException
      */
     public static void remove(ConnectionSettings settings) throws BackingStoreException {
-        Preferences.userRoot()
-                   .node(settings.getClass().getPackage().getName())
-                   .node(settings.getIdentifier())
-                   .removeNode();
+        Preferences.userRoot().node(settings.getClass().getPackage().getName()).remove(settings.getIdentifier());
     }
     
     /**

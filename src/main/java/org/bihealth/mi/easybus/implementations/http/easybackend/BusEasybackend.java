@@ -37,6 +37,7 @@ import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.BusMessage;
 import org.bihealth.mi.easybus.BusMessageFragment;
+import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.MessageManager;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
@@ -389,7 +390,7 @@ public class BusEasybackend extends Bus {
     }
 
     @Override
-    public void purge() throws BusException, InterruptedException {
+    public void purge(MessageFilter filter) throws BusException, InterruptedException {
         // TODO Auto-generated method stub
     }
     

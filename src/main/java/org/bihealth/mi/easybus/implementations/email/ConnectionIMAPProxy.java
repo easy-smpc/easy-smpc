@@ -35,7 +35,7 @@ public class ConnectionIMAPProxy {
      * Get proxy for email connection
      * @param settings
      */
-    public static Pair<String, Integer> getProxy(ConnectionIMAPSettings settings) {
+    public static Pair<String, Integer> getProxy(ConnectionSettingsIMAP settings) {
         try {
                 
             // TODO: More options, including STARTTLS would be available

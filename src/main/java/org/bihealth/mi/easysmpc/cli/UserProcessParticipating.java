@@ -20,14 +20,13 @@ import java.util.Map.Entry;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
-import org.bihealth.mi.easybus.implementations.email.BusEmail;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
@@ -52,64 +51,63 @@ public class UserProcessParticipating extends UserProcess {
      * @param studyTitle
      * @param participant
      * @param data 
-     * @param connectionIMAPSettings
+     * @param connectionSettings
      */
     public UserProcessParticipating(String studyTitle,
                                     Participant participant,
                                     Map<String, String> data,
-                                    ConnectionIMAPSettings connectionIMAPSettings) {
+                                    ConnectionSettings connectionSettings) {
         // Store
-        super(connectionIMAPSettings);
+        super(connectionSettings);
         this.data = data;
         
-        // Delete pre-existing bus emails
+        // Delete pre-existing bus messages
         try {
-            LOGGER.info("Start deleting pre-existing e-mails");
-            purgeEmails();
-        } catch (BusException | InterruptedException e) {
-            LOGGER.error("Unable to delete pre-existing e-mails", e);
-        }
-        
-        try {
-            // Register for initial e-mail
-            BusEmail interimBus = new BusEmail(new ConnectionIMAP(connectionIMAPSettings, false), connectionIMAPSettings.getCheckInterval());
-
-            interimBus.receive(new Scope(studyTitle + ROUND_0), participant, new MessageListener() {
-                boolean received = false;
-                
+            LOGGER.info("Start deleting pre-existing messages");
+            purgeMessages(new MessageFilter() {
                 @Override
-                public void receive(String message) {
-                    // Stop interim bus
-                    interimBus.stop();
-                    
-                    if (!received) {
-                        // Spawns the following steps in an own thread
-                        Thread thread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                performInitialization(message);
-                            }
-                        });
-                        thread.setDaemon(false);
-                        thread.start();
-                        received = true;
-                    }
-                }
-
-                @Override
-                public void receiveError(Exception e) {
-                    LOGGER.error("Error receiveing e-mails", e);
+                public boolean accepts(String messageDescription) {
+                    return !messageDescription.contains(ROUND_0);
                 }
             });
-        } catch (BusException e) {
-            LOGGER.error("Unable to register to receive initial e-mails", e);
-            throw new IllegalStateException("Unable to register to receive initial e-mails", e);
+        } catch (BusException | InterruptedException e) {
+            LOGGER.error("Unable to delete pre-existing messages", e);
         }
         
+        // Register for initial message
+        Bus interimBus = getInterimBus();
+
+        interimBus.receive(new Scope(studyTitle + ROUND_0), participant, new MessageListener() {
+            boolean received = false;
+
+            @Override
+            public void receive(String message) {
+                // Stop interim bus
+                interimBus.stop();
+
+                if (!received) {
+                    // Spawns the following steps in an own thread
+                    Thread thread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            performInitialization(message);
+                        }
+                    });
+                    thread.setDaemon(false);
+                    thread.start();
+                    received = true;
+                }
+            }
+
+            @Override
+            public void receiveError(Exception e) {
+                LOGGER.error("Error receiveing messages", e);
+            }
+        });
     }
 
     /**
-     * Receives the initial e-mail
+     * Receives the initial message
      * 
      * @param message
      */
@@ -121,7 +119,7 @@ public class UserProcessParticipating extends UserProcess {
 
             // Init model
             setModel(MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data))));
-            getModel().setConnectionIMAPSettings(getConnectionIMAPSettings());
+            getModel().setConnectionSettings(getConnectionSettings());
 
             // Proceed to entering value
             getModel().toEnteringValues(data);
@@ -177,22 +175,5 @@ public class UserProcessParticipating extends UserProcess {
         
         // Return
         return values;
-    }
-
-    /**
-     * Deletes all pre-existing email in the mailbox which are related to the bus
-     * 
-     * @throws BusException 
-     * @throws InterruptedException 
-     */
-    private void purgeEmails() throws BusException, InterruptedException {
-        BusEmail bus = new BusEmail(new ConnectionIMAP(getConnectionIMAPSettings(), false), 1000);
-        bus.purgeEmails(new MessageFilter() {
-            @Override
-            public boolean accepts(String messageDescription) {
-                return !messageDescription.contains(ROUND_0);
-            }
-        });
-        bus.stop();
     }
 }

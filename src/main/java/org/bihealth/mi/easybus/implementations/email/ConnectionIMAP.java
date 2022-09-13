@@ -90,7 +90,7 @@ public class ConnectionIMAP extends ConnectionEmail {
      * @param listener
      * @throws BusException
      */
-    public ConnectionIMAP(ConnectionIMAPSettings settings,
+    public ConnectionIMAP(ConnectionSettingsIMAP settings,
                           boolean sharedMailbox) throws BusException {
 
         // Super

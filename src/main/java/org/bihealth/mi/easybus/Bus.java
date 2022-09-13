@@ -231,7 +231,7 @@ public abstract class Bus {
      * 
      * @throws BusException, InterruptedException 
      */
-    public abstract void purge() throws BusException, InterruptedException;
+    public abstract void purge(MessageFilter filter) throws BusException, InterruptedException;
     
     
     /**

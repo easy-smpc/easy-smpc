@@ -41,11 +41,13 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
+import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.DialogStringPicker;
 import org.bihealth.mi.easysmpc.dataexport.ExportFile;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
@@ -666,12 +668,12 @@ public class App extends JFrame {
      * @param bins
      * @param connectionSettings 
      */
-    protected void actionCreateDone(String title, Participant[] participants, Bin[] bins, ConnectionIMAPSettings connectionIMAPSettings) {
+    protected void actionCreateDone(String title, Participant[] participants, Bin[] bins, ConnectionSettings connectionSettings) {
 
         // Pass over bins and participants
         Study snapshot = this.beginTransaction();
         try {
-            model.toInitialSending(title, participants, bins, connectionIMAPSettings);
+            model.toInitialSending(title, participants, bins, connectionSettings);
             if (actionSave()) {
                 this.showPerspective(Perspective2Send.class);
             } else {
@@ -834,12 +836,12 @@ public class App extends JFrame {
      * Action called when done with participating
      * @param secret
      */
-    protected void actionParticipateDone(BigDecimal[] secret, ConnectionIMAPSettings connectionIMAPSettings) {
+    protected void actionParticipateDone(BigDecimal[] secret, ConnectionSettings connectionSettings) {
 
         // Pass over bins and participants
         Study snapshot = this.beginTransaction();
         try {
-            model.setConnectionIMAPSettings(connectionIMAPSettings);
+            model.setConnectionSettings(connectionSettings);
             model.toSendingShares(secret);
             if (actionSave()) {
                 this.showPerspective(Perspective2Send.class);
@@ -930,5 +932,25 @@ public class App extends JFrame {
             }
         }
         return returnPerspective;
+    }
+
+    /**
+     * Chooses the right connection settings edit dialog and starts it
+     * 
+     * @return
+     */
+    public ConnectionSettings editExchangeConf(ConnectionSettings currentSettings) {
+        // Prepare
+        ConnectionSettings newSettings = null; 
+
+        // Is Email-settings object?
+        if(currentSettings instanceof ConnectionSettingsIMAP) {
+            newSettings = new DialogEmailConfig((ConnectionSettingsIMAP) currentSettings, this).showDialog();
+        }
+
+        // TODO Add more
+        
+        // Return
+        return newSettings;
     }
 }

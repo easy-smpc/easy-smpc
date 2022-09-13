@@ -46,7 +46,7 @@ import javax.swing.event.ChangeListener;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.ConnectionSettings.ConnectionTypes;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
@@ -68,7 +68,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class Perspective1ACreate extends Perspective implements ChangeListener {
 
     /** Allows to set a custom text for each ConnectionSettings object in the list */
-    private class ConnectionSettingsRenderer extends DefaultListCellRenderer {
+    public static class ConnectionSettingsRenderer extends DefaultListCellRenderer {
         
         /** SVUID */
         private static final long serialVersionUID = 779154691407559989L;
@@ -87,43 +87,39 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             if (value != null) {
                 label.setText(((ConnectionSettings) value).getIdentifier());
             }
-            else {
-                // TODO Necessary?
-                label.setText(null);
-            }
             return label;
         }
     }
 
     /** Panel for participants */
-    private ScrollablePanel                   panelParticipants;
+    private ScrollablePanel               panelParticipants;
 
     /** Panel for bins */
-    private ScrollablePanel                   panelBins;
+    private ScrollablePanel               panelBins;
 
     /** Text field containing title of study */
-    private ComponentTextField                fieldTitle;
+    private ComponentTextField            fieldTitle;
 
     /** Save button */
-    private JButton                           buttonSave;
+    private JButton                       buttonSave;
 
     /** Add configuration e-mail box */
-    private JButton                           buttonAddMailbox;
+    private JButton                       buttonAddExchangeConfig;
 
     /** Combo box to select exchange mode */
-    private JComboBox<ConnectionTypes>        comboExchangeMode;
+    private JComboBox<ConnectionTypes>    comboExchangeMode;
 
     /** Combo box to select exchange configuration */
     private JComboBox<ConnectionSettings> comboExchangeConfig;
 
     /** Add configuration e-mail box */
-    private JButton                           buttonRemoveExchangeConfig;
+    private JButton                       buttonRemoveExchangeConfig;
 
     /** Edit configuration e-mail box */
-    private JButton                           buttonEditExchangeConfig;
+    private JButton                       buttonEditExchangeConfig;
 
-    /** Has e-mail config been checked? */
-    private boolean                           emailconfigCheck;
+    /** Has exchange config been checked? */
+    private boolean                       exchangeConfigCheck;
 
     /**
      * Creates the perspective
@@ -139,34 +135,55 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     public void stateChanged(ChangeEvent e) {
         // Is saving possible?
         this.buttonSave.setEnabled(this.areValuesValid());
-        
-        // Is the combo exchange config enabled?
-        if (comboExchangeMode.getSelectedItem() == null || ((ConnectionTypes) comboExchangeMode.getSelectedItem()).equals(ConnectionTypes.MANUAL)) {
-            this.comboExchangeConfig.setEnabled(false);
-            this.buttonAddMailbox.setEnabled(false);
-            this.comboExchangeConfig.setSelectedItem(null);
-        } else {
-            this.comboExchangeConfig.setEnabled(true);
-            this.buttonAddMailbox.setEnabled(true);
+
+        //Change in combo box exchange
+        if (e.getSource() == comboExchangeMode) {
+            // Is the combo exchange config enabled?
+            if (comboExchangeMode.getSelectedItem() == null ||
+                    ((ConnectionTypes) comboExchangeMode.getSelectedItem()).equals(ConnectionTypes.MANUAL)) {
+                comboExchangeConfig.setEnabled(false);
+                buttonAddExchangeConfig.setEnabled(false);
+                comboExchangeConfig.setSelectedItem(null);
+                comboExchangeConfig.removeAllItems();
+            } else {
+
+                // Set enabled
+                comboExchangeConfig.setEnabled(true);
+                buttonAddExchangeConfig.setEnabled(true);
+
+                // Reset combo box
+                ConnectionSettings currentSetting = (ConnectionSettings) comboExchangeConfig.getSelectedItem();
+                comboExchangeConfig.removeAllItems();
+                for (ConnectionSettings settings : getExchangeConfig()) {
+                    comboExchangeConfig.addItem(settings);
+
+                    // Set selected
+                    if (currentSetting != null && settings != null &&
+                            settings.getIdentifier().equals(currentSetting.getIdentifier())) {
+                        settings.setPasswordStore(currentSetting.getPasswordStore());
+                        comboExchangeConfig.setSelectedItem(settings);
+                    }
+                }
+            }
         }
-        
+
         // Can an exchange config be added or removed?
-        if (this.comboExchangeConfig.getSelectedItem() != null) {
-            this.buttonEditExchangeConfig.setEnabled(true);
-            this.buttonRemoveExchangeConfig.setEnabled(true);
+        if (comboExchangeConfig.getSelectedItem() != null) {
+            buttonEditExchangeConfig.setEnabled(true);
+            buttonRemoveExchangeConfig.setEnabled(true);
         } else {
-            this.buttonEditExchangeConfig.setEnabled(false);
-            this.buttonRemoveExchangeConfig.setEnabled(false);
+            buttonEditExchangeConfig.setEnabled(false);
+            buttonRemoveExchangeConfig.setEnabled(false);
         }
         
-        // If participants panels exists and automated mode selected => set e-mail address of creator automatically 
+        // If participants panels exists and automated exchange mode selected => set e-mail address of creator automatically 
         if (this.panelParticipants.getComponents() != null && this.panelParticipants.getComponents().length >= getApp().getModel().getOwnId() + 1) {
             // Get participant entry component           
             final EntryParticipant entry = ((EntryParticipant) this.panelParticipants.getComponents()[getApp().getModel().getOwnId()]);
             
-            if (this.comboExchangeConfig.getSelectedItem() != null) {
-                // Set email address and deactivate if not already done
-                String emailAddress = ((ConnectionSettings) comboExchangeConfig.getSelectedItem()).getIdentifier();
+            if (!((ConnectionTypes) this.comboExchangeMode.getSelectedItem()).equals(ConnectionTypes.MANUAL) && comboExchangeConfig.getSelectedItem() != null) {
+                // Set identifier and deactivate if not already done
+                String identifier = ((ConnectionSettings) comboExchangeConfig.getSelectedItem()).getIdentifier();
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         // No entry in field allowed
@@ -174,9 +191,9 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
                             entry.setRightEnabled(false);
                         }
 
-                        // Set e-mail address
-                        if (!entry.getRightValue().equals(emailAddress)) {
-                            entry.setRightValue(emailAddress);
+                        // Set identifier address
+                        if (!entry.getRightValue().equals(identifier)) {
+                            entry.setRightValue(identifier);
                         }
                     }
                 });
@@ -200,38 +217,42 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void actionAddExchangeConf() {
         // Get new settings
         ConnectionSettings newSettings;
-
         switch ((ConnectionTypes) this.comboExchangeMode.getSelectedItem()) {
         case EASYBACKEND:
+            newSettings = null;
             // TODO
             break;
         case EMAIL:
-            newSettings = new DialogEmailConfig(null).showDialog();
+            newSettings = new DialogEmailConfig(null, getApp()).showDialog();
             break;
         case MANUAL:
             return;
         default:
-            return;}
+            return;
+        }
 
         if (newSettings != null) {
             // Update connections in preferences
-            Connections.addOrUpdate(newSettings);
+            try {
+                Connections.addOrUpdate(newSettings);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorStorePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+            }
 
             // Reset combo box
             comboExchangeConfig.removeAllItems();
             for(ConnectionSettings settings: getExchangeConfig()) {
                 this.comboExchangeConfig.addItem(settings);
-                
+
                 // Set selected
                 if(settings != null && settings.getIdentifier().equals(newSettings.getIdentifier())) {
-                    settings.setIMAPPassword(newSettings.getIMAPPassword());
-                    settings.setSMTPPassword(newSettings.getSMTPPassword());
+                    settings.setPasswordStore(newSettings.getPasswordStore());
                     this.comboExchangeConfig.setSelectedItem(settings);
                 }
             }
-            
+
             // Set checked
-            this.emailconfigCheck = true;
+            this.exchangeConfigCheck = true;
         }
         this.stateChanged(new ChangeEvent(this));
     }
@@ -239,32 +260,34 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     /**
      * Edits an e-mail configuration
      */
-    private void actionEditEMailConf() {
-        
+    private void actionEditExchangeConf() {
         // Get new settings
-        ConnectionIMAPSettings newSettings = new DialogEmailConfig((ConnectionIMAPSettings) this.comboExchangeConfig.getSelectedItem(),
-                                                                   getApp()).showDialog();
+        ConnectionSettings newSettings = getApp().editExchangeConf((ConnectionSettings) this.comboExchangeConfig.getSelectedItem());
+
         
         // Alter combo box if new settings given
         if (newSettings != null) {
             // Update connections in preferences
-            Connections.addOrUpdate(newSettings);
+            try {
+                Connections.addOrUpdate(newSettings);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorStorePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+            }
             
             // Reset combo  box
             comboExchangeConfig.removeAllItems();
-            for(ConnectionIMAPSettings settings: getExchangeConfig()) {
+            for(ConnectionSettings settings: getExchangeConfig()) {
                 this.comboExchangeConfig.addItem(settings);
                 
                 // Set selected
-                if(settings != null && settings.getIMAPEmailAddress().equals(newSettings.getIMAPEmailAddress())) {
-                    settings.setIMAPPassword(newSettings.getIMAPPassword());
-                    settings.setSMTPPassword(newSettings.getSMTPPassword());
+                if(settings != null && settings.getIdentifier().equals(newSettings.getIdentifier())) {
+                    settings.setPasswordStore(newSettings.getPasswordStore());
                     this.comboExchangeConfig.setSelectedItem(settings);
                 }
             }
             
             // Set checked
-            this.emailconfigCheck = true;
+            this.exchangeConfigCheck = true;
         }
         
         // Change state
@@ -295,14 +318,13 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     /**
      * Removes an e-mail configuration
      */
-    private void actionRemoveEMailConf() {
+    private void actionRemoveExchangeConf() {
         try {
-            Connections.remove((ConnectionIMAPSettings) this.comboExchangeConfig.getSelectedItem());
-            this.comboExchangeConfig.removeItem(this.comboExchangeConfig.getSelectedItem());
+            Connections.remove((ConnectionSettings) this.comboExchangeConfig.getSelectedItem());
         } catch (BackingStoreException e) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
         }
-        this.stateChanged(new ChangeEvent(this));  
+        this.stateChanged(new ChangeEvent(this));
     }
 
     /**
@@ -353,15 +375,15 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         }
         
         // Check e-mail configuration if not done so far
-        if (comboExchangeConfig.getSelectedItem() != null && !emailconfigCheck) {
+        if (comboExchangeConfig.getSelectedItem() != null && !exchangeConfigCheck) {
             
             try {
-                if (!((ConnectionIMAPSettings) comboExchangeConfig.getSelectedItem()).isValid(true)) {
+                if (!((ConnectionSettings) comboExchangeConfig.getSelectedItem()).isValid()) {
                     throw new BusException("Connection error");
                 }
             } catch (BusException e) {
                 // Error message
-                JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.emailConnectionNotWorking"));
+                JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.exchangeConnectionNotWorking"));
                 return;
             }
         }
@@ -404,7 +426,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             }
         }
         // Initialize study
-        getApp().actionCreateDone(this.fieldTitle.getText(), participants.toArray(new Participant[participants.size()]), bins.toArray(new Bin[bins.size()]), (ConnectionIMAPSettings) comboExchangeConfig.getSelectedItem());
+        getApp().actionCreateDone(this.fieldTitle.getText(), participants.toArray(new Participant[participants.size()]), bins.toArray(new Bin[bins.size()]), (ConnectionSettings) comboExchangeConfig.getSelectedItem());
     }
 
     /**
@@ -531,17 +553,18 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             
             switch ((ConnectionTypes) this.comboExchangeMode.getSelectedItem()) {
             case EASYBACKEND:
-                configFromPreferences = null;
+                configFromPreferences = new ArrayList<>();
                 // TODO
                 break;
             case EMAIL:
-                configFromPreferences = Connections.list(ConnectionIMAPSettings.class);
+                configFromPreferences = Connections.list(ConnectionSettingsIMAP.class);
                 break;
             case MANUAL:
-                configFromPreferences = null;
+                configFromPreferences = new ArrayList<>();
             default:
-                configFromPreferences = null;}
-            
+                configFromPreferences = new ArrayList<>();
+            }
+
             // Add null for non-automatic
             return configFromPreferences.toArray(new ConnectionSettings[configFromPreferences.size()]);
         } catch (BackingStoreException | ClassNotFoundException | IOException e) {
@@ -618,21 +641,21 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.fieldTitle.setChangeListener(this);
         titlePanel.add(this.fieldTitle, BorderLayout.CENTER);
         
-        // Panel for automatic e-mail config
+        // Panel for exchange config
         JPanel automaticExchangePanel = new JPanel();
         automaticExchangePanel.setLayout(new BoxLayout(automaticExchangePanel, BoxLayout.X_AXIS));
        
-        // Check boxes for transport mode
+        // Combo boxes for exchange mode & config
         comboExchangeMode = new JComboBox<>(ConnectionTypes.values());
         comboExchangeMode.setSelectedItem(ConnectionTypes.MANUAL);
         comboExchangeMode.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                stateChanged(new ChangeEvent(this));
+                stateChanged(new ChangeEvent(comboExchangeMode));
             }
         });
         
-        comboExchangeConfig = new JComboBox<>(getExchangeConfig());
+        comboExchangeConfig = new JComboBox<>();
         comboExchangeConfig.setRenderer(new ConnectionSettingsRenderer());
         comboExchangeConfig.addActionListener(new ActionListener() {            
             @Override
@@ -642,8 +665,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         });
         
         // Button to add e-mail config
-        buttonAddMailbox = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigAdd"));
-        buttonAddMailbox.addActionListener(new ActionListener() {
+        buttonAddExchangeConfig = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigAdd"));
+        buttonAddExchangeConfig.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                actionAddExchangeConf();
@@ -655,7 +678,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         buttonEditExchangeConfig.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionEditEMailConf();
+                actionEditExchangeConf();
             }
         });
         
@@ -664,7 +687,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         buttonRemoveExchangeConfig.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionRemoveEMailConf();
+                actionRemoveExchangeConf();
             }
         });
         
@@ -673,7 +696,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         automaticExchangePanel.add(new JLabel(Resources.getString("PerspectiveCreate.AutomatedMailbox")));
         automaticExchangePanel.add(comboExchangeMode);
         automaticExchangePanel.add(comboExchangeConfig);
-        automaticExchangePanel.add(buttonAddMailbox);
+        automaticExchangePanel.add(buttonAddExchangeConfig);
         automaticExchangePanel.add(buttonEditExchangeConfig);
         automaticExchangePanel.add(buttonRemoveExchangeConfig);
         generalDataPanel.add(automaticExchangePanel);
@@ -753,11 +776,13 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         this.panelParticipants.removeAll();
         this.panelBins.removeAll();
         this.fieldTitle.setText("");
-        this.emailconfigCheck = false;
+        this.exchangeConfigCheck = false;
 
         // Add initial
         this.addParticipant(null, true);
         this.addBin(null, "", "", true);
+        comboExchangeConfig.setEnabled(false);
+        buttonAddExchangeConfig.setEnabled(false);
         
         // Update
         this.stateChanged(new ChangeEvent(this));

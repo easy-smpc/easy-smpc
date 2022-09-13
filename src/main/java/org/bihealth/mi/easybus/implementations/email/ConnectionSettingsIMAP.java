@@ -27,8 +27,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.Participant;
+import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easybus.PerformanceListener;
-import org.bihealth.mi.easybus.implementations.email.PasswordProvider.PasswordStore;
 import org.bihealth.mi.easysmpc.resources.Resources;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -42,7 +42,7 @@ import com.github.markusbernhardt.proxy.ProxySearch;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class ConnectionIMAPSettings extends ConnectionSettings {
+public class ConnectionSettingsIMAP extends ConnectionSettings {
 
     /** SVUID */
     private static final long    serialVersionUID            = 3880443185633907293L;
@@ -56,8 +56,6 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
     private static final Pattern regexDNS                    = Pattern.compile("^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]))*$");
     /** Key */
     private static final String  EMAIL_ADDRESS_KEY           = "email_address";
-    /** Key */
-    private static final String  PASSWORD_KEY                = "password";
     /** Key */
     private static final String  IMAP_SERVER_KEY             = "imap_server";
     /** Key */
@@ -74,8 +72,6 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
     private static final String  ACCEPT_SELF_SIGNED_CERT_KEY = "accept_self_signed_cert";
     /** Key */
     private static final String  USE_PROXY_KEY               = "use_poxy";
-    /** Prefix for system properties */
-    private static final String  PREFIX_SYSTEM_PROPERTIES    = "org.bihealth.mi.easybus.";
     /** Encryption ssl/tls */
     private static final String  SSL_TLS                     = "SSLTLS";
     /** Encryption starttls */
@@ -105,8 +101,6 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
 
     /** E-mail address */
     private String                        imapEmailAddress;
-    /** IMAP Password */
-    private transient String              imapPassword;
     /** IMAP server dns */
     private String                        imapServer;
     /** Port of IMAP server */
@@ -129,8 +123,6 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
     private PasswordProvider              provider;
     /** E-mail address sending */
     private String                        smptEmailAddress;
-    /** IMAP Password */
-    private transient String              smtpPassword;
     /** User name for IMAP */
     private String                        imapUserName         = null;
     /** User name for SMTP */
@@ -152,7 +144,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * @param emailAddress
      * @param provider
      */
-    public ConnectionIMAPSettings(String emailAddress, PasswordProvider provider) {
+    public ConnectionSettingsIMAP(String emailAddress, PasswordProvider provider) {
         
         this(emailAddress, emailAddress, provider);
     }    
@@ -164,7 +156,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * @param emailAddressSMPT
      * @param provider
      */
-    public ConnectionIMAPSettings(String emailAddressIMAP,
+    public ConnectionSettingsIMAP(String emailAddressIMAP,
                                   String emailAddressSMTP,
                                   PasswordProvider provider) {
         // Checks
@@ -194,16 +186,17 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
         }
     }
 
+    // TODO Regenerate
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
-        ConnectionIMAPSettings other = (ConnectionIMAPSettings) obj;
+        ConnectionSettingsIMAP other = (ConnectionSettingsIMAP) obj;
         return acceptSelfSignedCert == other.acceptSelfSignedCert &&
                Objects.equals(imapEmailAddress, other.imapEmailAddress) && imapPort == other.imapPort &&
                Objects.equals(imapServer, other.imapServer) &&
-               Objects.equals(imapPassword, other.imapPassword) && searchForProxy == other.searchForProxy &&
+               searchForProxy == other.searchForProxy &&
                smtpPort == other.smtpPort && Objects.equals(smtpServer, other.smtpServer) &&
                ssltlsIMAP == other.ssltlsIMAP && ssltlsSMTP == other.ssltlsSMTP;
     }
@@ -264,7 +257,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
     public String getIMAPPassword(boolean usePasswordProvider) {
         
         // Potentially ask for password
-        if (this.imapPassword == null && this.provider != null && usePasswordProvider) {
+        if ((this.getPasswordStore() == null || this.getPasswordStore().getFirstPassword() == null) && this.provider != null && usePasswordProvider) {
             // Get passwords
             PasswordStore store = this.provider.getPassword();
             
@@ -274,17 +267,16 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
             }
             
             // Store
-            this.imapPassword = store.getIMAPPassword();
-            this.smtpPassword = store.getSMTPPassword();
+            this.setPasswordStore(store);
             
             // Check connection settings
-            if (!this.isValid()) {
-                this.imapPassword = null;
+            if (!this.isValid(false)) {
+                setPasswordStore(null);
             }
         }
         
         // Return password
-        return this.imapPassword;
+        return getPasswordStore() == null ? null : getPasswordStore().getFirstPassword();
     }
     
     /**
@@ -295,7 +287,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
     public String getSMTPPassword(boolean usePasswordProvider) {
         
         // Potentially ask for password
-        if (this.smtpPassword == null && this.provider != null && usePasswordProvider) {
+        if ((this.getPasswordStore() == null || this.getPasswordStore().getSecondPassword() == null) && this.provider != null && usePasswordProvider) {
             // Get passwords
             PasswordStore store = this.provider.getPassword();
             
@@ -305,17 +297,16 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
             }
             
             // Store password
-            this.imapPassword = store.getIMAPPassword();
-            this.smtpPassword = store.getSMTPPassword();
+            this.setPasswordStore(store);
             
             // Check connection settings
-            if (!this.isValid()) {
-                this.smtpPassword = null;
+            if (!this.isValid(false)) {
+                setPasswordStore(null);
             }
         }
         
         // Return password
-        return this.smtpPassword;
+        return getPasswordStore() == null ? null : getPasswordStore().getSecondPassword();
     }
 
     /**
@@ -385,7 +376,8 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
     /**
      * @return the emailSendTimeout
      */
-    public int getEmailSendTimeout() {
+    @Override
+    public int getSendTimeout() {
         return emailSendTimeout;
     }
     
@@ -399,6 +391,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
     /**
      * @return the checkInterval
      */
+    @Override
     public int getCheckInterval() {
         return checkInterval;
     }
@@ -481,13 +474,13 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
         }
     }
     
+    // TODO update
     @Override
     public int hashCode() {
         return Objects.hash(acceptSelfSignedCert,
                             imapEmailAddress,
                             imapPort,
                             imapServer,
-                            imapPassword,
                             searchForProxy,
                             smtpPort,
                             smtpServer,
@@ -532,8 +525,9 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * 
      * @return
      */
+    @Override
     public boolean isValid() {
-        return isValid(false);
+        return isValid(true);
     }
 
     /**
@@ -544,13 +538,9 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      */
     public boolean isValid(boolean usePasswordProvider) {
         
-        if (this.imapPassword == null && !usePasswordProvider) {
+        if ((this.getPasswordStore() == null || this.getPasswordStore().getFirstPassword() == null) && !usePasswordProvider) {
             return false;
         }
-
-        if (this.imapPassword == null && getIMAPPassword() == null) {
-            return false;
-        }       
 
         try {
             return new ConnectionIMAP(this, false).checkConnection();
@@ -563,7 +553,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * Accept self-signed certificates
      * @param accept
      */
-    public ConnectionIMAPSettings setAcceptSelfSignedCertificates(boolean accept) {
+    public ConnectionSettingsIMAP setAcceptSelfSignedCertificates(boolean accept) {
     	this.acceptSelfSignedCert = accept;
     	return this;
     }
@@ -572,7 +562,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * Set config parameter
      * @param imapPort the IMAP port to set
      */
-    public ConnectionIMAPSettings setIMAPPort(int imapPort) {
+    public ConnectionSettingsIMAP setIMAPPort(int imapPort) {
 
         // Check
         checkNonNull(imapPort);
@@ -589,7 +579,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * Set config parameter
      * @param imapServer the IMAP server to set
      */
-    public ConnectionIMAPSettings setIMAPServer(String imapServer) {
+    public ConnectionSettingsIMAP setIMAPServer(String imapServer) {
         
         // Check
         checkNonNull(imapServer);
@@ -602,23 +592,23 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
         return this;
     }
     
-    /**
-     * Set config parameter
-     * @param IMAP password the IMAP password to set
-     */
-    public ConnectionIMAPSettings setIMAPPassword(String password) {
-        this.imapPassword = password;
-        return this;        
-    }
-    
-    /**
-     * Set config parameter
-     * @param SMTP password the SMTP password to set
-     */
-    public ConnectionIMAPSettings setSMTPPassword(String password) {
-        this.smtpPassword = password;
-        return this;        
-    }
+//    /**
+//     * Set config parameter
+//     * @param IMAP password the IMAP password to set
+//     */
+//    public ConnectionIMAPSettings setIMAPPassword(String password) {
+//        this.imapPassword = password;
+//        return this;        
+//    }
+//    
+//    /**
+//     * Set config parameter
+//     * @param SMTP password the SMTP password to set
+//     */
+//    public ConnectionIMAPSettings setSMTPPassword(String password) {
+//        this.smtpPassword = password;
+//        return this;        
+//    }
     
     /**
      * Set IMAP user name
@@ -626,7 +616,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * @param imapUserName
      * @return
      */
-    public ConnectionIMAPSettings setIMAPUserName(String imapUserName) {
+    public ConnectionSettingsIMAP setIMAPUserName(String imapUserName) {
         this.imapUserName = imapUserName;
         return this;
     }
@@ -637,7 +627,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * @param smtpUserName
      * @return
      */
-    public ConnectionIMAPSettings setSMTPUserName(String smtpUserName) {
+    public ConnectionSettingsIMAP setSMTPUserName(String smtpUserName) {
         this.smtpUserName = smtpUserName;
         return this;
     }
@@ -647,7 +637,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * @param listener
      * @return
      */
-    public ConnectionIMAPSettings setPerformanceListener(PerformanceListener listener) {
+    public ConnectionSettingsIMAP setPerformanceListener(PerformanceListener listener) {
     	this.listener = listener;
     	return this;
     }
@@ -657,7 +647,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * @param search
      * @return
      */
-    public ConnectionIMAPSettings setSearchForProxy(boolean search) {
+    public ConnectionSettingsIMAP setSearchForProxy(boolean search) {
     	this.searchForProxy = search;
     	return this;
     }
@@ -666,7 +656,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * Set config parameter
      * @param smtpPort the SMTP port to set
      */
-    public ConnectionIMAPSettings setSMTPPort(int smtpPort) {
+    public ConnectionSettingsIMAP setSMTPPort(int smtpPort) {
 
         // Check
         checkNonNull(smtpPort);
@@ -683,7 +673,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * Set config parameter
      * @param smtpServer the SMTP server to set
      */
-    public ConnectionIMAPSettings setSMTPServer(String smtpServer) {
+    public ConnectionSettingsIMAP setSMTPServer(String smtpServer) {
 
         // Check
         checkNonNull(smtpServer);
@@ -699,7 +689,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
     /**
      * @param ssltlsIMAP the ssltlsIMAP to set
      */
-    public ConnectionIMAPSettings setSSLTLSIMAP(boolean ssltlsIMAP) {
+    public ConnectionSettingsIMAP setSSLTLSIMAP(boolean ssltlsIMAP) {
         // Set
         this.ssltlsIMAP = ssltlsIMAP;
         
@@ -709,7 +699,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
     /**
      * @param ssltlsSMTP the ssltlsSMTP to set
      */
-    public ConnectionIMAPSettings setSSLTLSSMTP(boolean ssltlsSMTP) {
+    public ConnectionSettingsIMAP setSSLTLSSMTP(boolean ssltlsSMTP) {
         // Set
         this.ssltlsSMTP = ssltlsSMTP;
         
@@ -723,7 +713,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * 
      * @return
      */
-    public ConnectionIMAPSettings setIMAPAuthMechanisms(String imapAuthMechanisms) {
+    public ConnectionSettingsIMAP setIMAPAuthMechanisms(String imapAuthMechanisms) {
         this.imapAuthMechanisms = imapAuthMechanisms;
         return this;
     }
@@ -735,7 +725,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * 
      * @return
      */
-    public ConnectionIMAPSettings setSMTPAuthMechanisms(String smtpAuthMechanisms) {
+    public ConnectionSettingsIMAP setSMTPAuthMechanisms(String smtpAuthMechanisms) {
         this.smtpAuthMechanisms = smtpAuthMechanisms;
         return this;
     }
@@ -744,7 +734,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * @param checkInterval the checkInterval to set
      * @return 
      */
-    public ConnectionIMAPSettings setCheckInterval(int checkInterval) {
+    public ConnectionSettingsIMAP setCheckInterval(int checkInterval) {
         this.checkInterval = checkInterval;
         return this;
     }
@@ -753,7 +743,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * @param emailSendTimeout the emailSendTimeout to set
      * @return 
      */
-    public ConnectionIMAPSettings setEmailSendTimeout(int emailSendTimeout) {
+    public ConnectionSettingsIMAP setEmailSendTimeout(int emailSendTimeout) {
         this.emailSendTimeout = emailSendTimeout;
         return this;
     }
@@ -762,7 +752,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * @param maxMessageSize the maxMessageSize to set
      * @return 
      */
-    public ConnectionIMAPSettings setMaxMessageSize(int maxMessageSize) {
+    public ConnectionSettingsIMAP setMaxMessageSize(int maxMessageSize) {
         this.maxMessageSize = maxMessageSize;
         return this;
     }
@@ -784,7 +774,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
      * @param passwordProvider
      * @return
      */
-    public static ConnectionIMAPSettings getConnectionIMAPSettingsFromFile(File file, PasswordProvider passwordProvider) {
+    public static ConnectionSettingsIMAP getConnectionIMAPSettingsFromFile(File file, PasswordProvider passwordProvider) {
         // Check
         if (file == null) { return null; }
         
@@ -809,7 +799,7 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
         }
         
         // Return
-        return new ConnectionIMAPSettings(prop.getProperty(EMAIL_ADDRESS_KEY),
+        return new ConnectionSettingsIMAP(prop.getProperty(EMAIL_ADDRESS_KEY),
                                           passwordProvider).setIMAPServer(prop.getProperty(IMAP_SERVER_KEY))
                                                            .setIMAPPort(Integer.valueOf(prop.getProperty(IMAP_PORT_KEY)))
                                                            .setSMTPServer(prop.getProperty(SMTP_SERVER_KEY))
@@ -824,45 +814,6 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
                                                                    : false);
     }
     
-    /**
-     * Reads IMAP connection settings from system properties including the password
-     * 
-     * @param file
-     * @return IMAP connection settings
-     */
-    public static ConnectionIMAPSettings getConnectionIMAPSettingsFromSystemProperties() {        
-
-        // Check parameters
-        if (System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + EMAIL_ADDRESS_KEY) == null ||
-                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + PASSWORD_KEY) == null ||
-                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_SERVER_KEY) == null ||
-                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_PORT_KEY) == null ||
-                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_ENCRYPTION_TYPE) == null ||
-                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_SERVER_KEY) == null ||
-                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_PORT_KEY) == null ||
-                System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_ENCRYPTION_TYPE) == null) {
-            throw new IllegalStateException("Properties file does not contain all necessary fields!");
-        }
-        if (!(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_ENCRYPTION_TYPE).equals(SSL_TLS) ||
-              System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_ENCRYPTION_TYPE).equals(START_TLS)) ||
-            !(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_ENCRYPTION_TYPE).equals(SSL_TLS) ||
-              System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_ENCRYPTION_TYPE).equals(SSL_TLS))) {
-            throw new IllegalStateException(String.format("Please set eithr %s or %s for IMAP and SMTP encryption", SSL_TLS, START_TLS));
-        }
-        
-        // Return
-        return new ConnectionIMAPSettings(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + EMAIL_ADDRESS_KEY), null)
-                .setIMAPPassword(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + PASSWORD_KEY))
-                .setIMAPServer(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_SERVER_KEY))
-                .setIMAPPort(Integer.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_PORT_KEY)))
-                .setSMTPServer(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_SERVER_KEY))
-                .setSMTPPort(Integer.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_PORT_KEY)))
-                .setSSLTLSIMAP(Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + IMAP_ENCRYPTION_TYPE).equals(SSL_TLS)))
-                .setSSLTLSSMTP(Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + SMTP_ENCRYPTION_TYPE).equals(SSL_TLS)))
-                .setAcceptSelfSignedCertificates(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + ACCEPT_SELF_SIGNED_CERT_KEY) != null ? Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + ACCEPT_SELF_SIGNED_CERT_KEY)) : false)
-                .setSearchForProxy(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + USE_PROXY_KEY) != null ? Boolean.valueOf(System.getProperties().getProperty(PREFIX_SYSTEM_PROPERTIES + USE_PROXY_KEY)) : false);
-    }
-    
     @Override
     public String toString() {
         return String.format("IMAP connections for e-mail address %s", this.imapEmailAddress);
@@ -871,5 +822,10 @@ public class ConnectionIMAPSettings extends ConnectionSettings {
     @Override
     public String getIdentifier() {
         return this.imapEmailAddress;
+    }
+
+    @Override
+    public ConnectionTypes getConnectionType() {
+        return ConnectionTypes.EMAIL;
     }
 }
