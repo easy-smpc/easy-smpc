@@ -265,6 +265,14 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         } catch (BackingStoreException e) {
             JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
         }
+        
+        // Reset combo box
+        comboExchangeConfig.removeAllItems();
+        for (ConnectionSettings settings : getExchangeConfig()) {
+            this.comboExchangeConfig.addItem(settings);
+        }
+
+        // State changed
         this.stateChanged(new ChangeEvent(this));
     }
 
