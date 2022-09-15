@@ -15,8 +15,6 @@ package org.bihealth.mi.easybus.implementations.http.easybackend;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.Proxy;
-import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -78,10 +76,6 @@ public class ConnectionEasybackend  implements AuthHandler {
     private static final String              AUTHENTICATE_TEMPLATE = "auth/realms/%s/protocol/openid-connect/token";
     /** REST client */
     private final Client                     client;
-    /** URI of the Keycloak auth server */
-    private final URI                        authServer;
-    /** URI of the actual backend server */
-    private final URI                        apiServer;
     /** Auth data */
     private final Form                       auth                  = new Form();
     /** Jackson object mapper */
@@ -90,14 +84,14 @@ public class ConnectionEasybackend  implements AuthHandler {
     private final String                     authenticatePath;
     /** Authentification bearer token */
     private String                           bearer;
-    /** Own participant */
-    private final Participant                self;
+    /** Settings */
+    private final ConnectionSettingsEasybackend settings;
     
     @Override
     public Builder authenticate(Builder builder) throws BusException {
         
         // Prepare
-        WebTarget target = client.target(authServer).path(authenticatePath);
+        WebTarget target = client.target(settings.getAuthServer()).path(authenticatePath);
         target.request(MediaType.APPLICATION_FORM_URLENCODED);
         
         // Try to authenticate and obtain data
@@ -128,52 +122,32 @@ public class ConnectionEasybackend  implements AuthHandler {
     /**
      * Creates a new instance
      * 
-     * @param authServer
-     * @param apiServer
-     * @param realm
-     * @param clientId
-     * @param clientSecret
-     * @param self
-     * @param password
-     * @param proxy
+     * @param settings
      * @throws IllegalStateException
      */
-    public ConnectionEasybackend(URI authServer,
-                                 URI apiServer,
-                                 String realm,
-                                 String clientId,
-                                 String clientSecret,
-                                 Participant self,
-                                 String password,
-                                 Proxy proxy) throws IllegalStateException {
-        // Check
-        if (authServer == null || apiServer == null || realm == null || clientId == null || clientSecret == null || self == null || password == null) {
-            throw new IllegalArgumentException("All parameters but proxy must not be null!");
-        }        
+    public ConnectionEasybackend(ConnectionSettingsEasybackend settings) throws IllegalStateException {
         
         // Store
-        this.authServer = authServer;
-        this.authenticatePath = String.format(AUTHENTICATE_TEMPLATE, realm);
-        this.apiServer = apiServer;
-        this.self = self;
+        this.settings = settings;
+        this.authenticatePath = String.format(AUTHENTICATE_TEMPLATE, settings.getRealm());
         
         // Set auth parameter
-        this.auth.param("client_id", clientId);
-        this.auth.param("client_secret", clientSecret);
+        this.auth.param("client_id", settings.getClientId());
+        this.auth.param("client_secret", settings.getClientSecret());
         this.auth.param("scope", "openid");
         this.auth.param("grant_type", "password");
-        this.auth.param("username", self.getName());
-        this.auth.param("password", password);
+        this.auth.param("username", settings.getSelf().getName());
+        this.auth.param("password", settings.getPassword());
         
         // Store proxy
-        if (proxy == null) {
+        if (settings.getProxy() == null) {
             this.client = ClientBuilder.newClient();
         } else {
             client = ClientBuilder.newClient(new ClientConfig().connectorProvider(new HttpUrlConnectorProvider().connectionFactory(new ConnectionFactory() {
                 
                 @Override
                 public HttpURLConnection getConnection(URL url) throws IOException {
-                    return (HttpURLConnection) url.openConnection(proxy);
+                    return (HttpURLConnection) url.openConnection(settings.getProxy());
                 }
             })));
         }       
@@ -207,7 +181,7 @@ public class ConnectionEasybackend  implements AuthHandler {
     public Builder getBuilder(String path, Map<String, String> parameters) {
         
         // Set path
-        WebTarget target = client.target(apiServer).path(path);
+        WebTarget target = client.target(settings.getAPIServer()).path(path);
 
         // Set parameters
         if (parameters != null && !parameters.isEmpty()) {
@@ -243,6 +217,6 @@ public class ConnectionEasybackend  implements AuthHandler {
      * @return 
      */
     public Participant getSelf() {
-        return this.self;
+        return this.settings.getSelf();
     }
 }

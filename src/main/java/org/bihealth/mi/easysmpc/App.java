@@ -43,10 +43,12 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
 import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
+import org.bihealth.mi.easysmpc.components.DialogEasybackendConfig;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.DialogStringPicker;
 import org.bihealth.mi.easysmpc.dataexport.ExportFile;
@@ -943,12 +945,15 @@ public class App extends JFrame {
         // Prepare
         ConnectionSettings newSettings = null; 
 
-        // Is Email-settings object?
+        // Is email-settings object?
         if(currentSettings instanceof ConnectionSettingsIMAP) {
             newSettings = new DialogEmailConfig((ConnectionSettingsIMAP) currentSettings, this).showDialog();
         }
-
-        // TODO Add others
+        
+        // Is easybackend settings object?
+        if(currentSettings instanceof ConnectionSettingsEasybackend) {
+            newSettings = new DialogEasybackendConfig((ConnectionSettingsEasybackend) currentSettings, this).showDialog();
+        }
         
         // Return
         return newSettings;

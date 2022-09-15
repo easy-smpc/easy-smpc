@@ -47,8 +47,10 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.ConnectionSettings.ConnectionTypes;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
+import org.bihealth.mi.easysmpc.components.DialogEasybackendConfig;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryBin;
 import org.bihealth.mi.easysmpc.components.EntryParticipant;
@@ -219,8 +221,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         ConnectionSettings newSettings;
         switch ((ConnectionTypes) this.comboExchangeMode.getSelectedItem()) {
         case EASYBACKEND:
-            newSettings = null;
-            // TODO
+            newSettings = new DialogEasybackendConfig(null, getApp()).showDialog();
             break;
         case EMAIL:
             newSettings = new DialogEmailConfig(null, getApp()).showDialog();
@@ -316,7 +317,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     }
 
     /**
-     * Removes an e-mail configuration
+     * Removes a configuration
      */
     private void actionRemoveExchangeConf() {
         try {
@@ -561,8 +562,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             
             switch ((ConnectionTypes) this.comboExchangeMode.getSelectedItem()) {
             case EASYBACKEND:
-                configFromPreferences = new ArrayList<>();
-                // TODO
+                configFromPreferences = Connections.list(ConnectionSettingsEasybackend.class);
                 break;
             case EMAIL:
                 configFromPreferences = Connections.list(ConnectionSettingsIMAP.class);

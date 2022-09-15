@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Participant;
+import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easybus.Scope;
 
 /**
@@ -50,17 +51,27 @@ public class IntegrationTest {
         // Add to bus creation if needed 
         //ConnectionHTTPProxy.getProxy(new URI("https://matrix-client.matrix.org"));
         
+        ConnectionSettingsEasybackend settingsReceiver = new ConnectionSettingsEasybackend(receiver, null).setAuthServer(new URI("http://localhost:9090"))
+                                                                                                   .setAPIServer(new URI("http://localhost:8080"))
+                                                                                                   .setRealm("master")
+                                                                                                   .setClientId("easy-client")
+                                                                                                   .setClientSecret("Sg9rJVSaBGjj7nX92lUsqsV4NL3uSLXO");
+        settingsReceiver.setPasswordStore(new PasswordStore("easy"));
+        
+        
+        ConnectionSettingsEasybackend settingsSender = new ConnectionSettingsEasybackend(sender,
+                                                                                         null).setAuthServer(new URI("http://localhost:9090"))
+                                                                                              .setAPIServer(new URI("http://localhost:8080"))
+                                                                                              .setRealm("master")
+                                                                                              .setClientId("easy-client")
+                                                                                              .setClientSecret("Sg9rJVSaBGjj7nX92lUsqsV4NL3uSLXO");
+        settingsReceiver.setPasswordStore(new PasswordStore("test"));
+
+        
         // Create receiving bus
         Bus busReceiving = new BusEasybackend(5,
                                          10,
-                                         new ConnectionEasybackend(new URI("http://localhost:9090"),
-                                                                   new URI("http://localhost:8080"),
-                                                                   "master",
-                                                                   "easy-client",
-                                                                   "Sg9rJVSaBGjj7nX92lUsqsV4NL3uSLXO",
-                                                                   receiver,
-                                                                   "easy",
-                                                                   null),
+                                         new ConnectionEasybackend(settingsReceiver),
                                          1024);
         busReceiving.receive(scope, receiver, new MessageListener() {
             
@@ -76,17 +87,12 @@ public class IntegrationTest {
             }
         });
         
+        
+        
         // Create sending bus
         Bus busSend = new BusEasybackend(5,
                                          10,
-                                         new ConnectionEasybackend(new URI("http://localhost:9090"),
-                                                                   new URI("http://localhost:8080"),
-                                                                   "master",
-                                                                   "easy-client",
-                                                                   "Sg9rJVSaBGjj7nX92lUsqsV4NL3uSLXO",
-                                                                   sender,
-                                                                   "test",
-                                                                   null),
+                                         new ConnectionEasybackend(settingsSender),
                                          1024);
         //busSend.purge();
         busSend.send("My fancy message!",

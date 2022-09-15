@@ -408,7 +408,7 @@ public class DialogEmailConfig extends JDialog implements ChangeListener {
                                                                       Resources.getString("EmailConfig.36"),
                                                                       TitledBorder.LEFT,
                                                                       TitledBorder.DEFAULT_POSITION));
-        this.entryEmailPassword = new EntryEMailPassword(Resources.getString("EmailConfig.1"), Resources.getString("EmailConfig.2"));        
+        this.entryEmailPassword = new EntryEMailPassword(Resources.getString("EmailConfig.1"), Resources.getString("EmailConfig.2"));
         emailPasswordPanel.add(entryEmailPassword);
         
         // Set e-mail and password data and enable or disable e-mail field

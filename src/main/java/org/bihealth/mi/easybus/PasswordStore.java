@@ -27,6 +27,15 @@ public class PasswordStore {
     private final String secondPassword; 
     
     /**
+     * Creates a new instance
+     * 
+     * @param password
+     */
+    public PasswordStore(String password) {
+        this(password, null);
+    }
+
+    /**
      * Creates a new instance. If second password is null, firstPassword will be assumed as secondPassword
      * 
      * @param firstPassword
