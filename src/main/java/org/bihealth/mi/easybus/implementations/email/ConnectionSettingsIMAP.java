@@ -363,13 +363,12 @@ public class ConnectionSettingsIMAP extends ConnectionSettings {
      */
     @Override
     public int getSendTimeout() {
-        return emailSendTimeout > 0 ? emailSendTimeout : Resources.TIMEOUT_SEND_EMAILS_DEFAULT;
+        return emailSendTimeout;
     }
     
     /**
      * @return the maxMessageSize
      */
-    @Override
     public int getMaxMessageSize() {
         return maxMessageSize > 0 ? maxMessageSize : Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT;
     }
@@ -379,7 +378,7 @@ public class ConnectionSettingsIMAP extends ConnectionSettings {
      */
     @Override
     public int getCheckInterval() {
-        return checkInterval > 0 ? checkInterval : Resources.INTERVAL_CHECK_MAILBOX_DEFAULT;
+        return checkInterval;
     }
 
     /**

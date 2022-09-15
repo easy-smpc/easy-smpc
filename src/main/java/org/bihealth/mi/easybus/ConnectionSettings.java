@@ -56,15 +56,6 @@ public abstract class ConnectionSettings implements Serializable {
      * @return
      */
     public abstract int getSendTimeout();
-    
-    
-    /**
-     * Get maximal message size
-     * 
-     * @return
-     */
-    public abstract int getMaxMessageSize(); 
-    
     /**
      * @return the passwordStore
      */
@@ -95,5 +86,5 @@ public abstract class ConnectionSettings implements Serializable {
         public String toString() {
             return Resources.getString(String.format("ConnectionTypes.%s", this.name()));
         }
-    }
+    };    
 }
