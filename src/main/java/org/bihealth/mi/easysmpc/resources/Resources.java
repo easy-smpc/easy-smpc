@@ -164,15 +164,6 @@ public class Resources {
 
     /** CLI stop processing string */
     public static final String    STOP_CLI_PROCESS_STRING         = "stop";
-    
-    /** Retries when sending with HTTP for Easybackend */
-    public static final int RETRY_EASYBACKEND_NUMBER_RETRY = 5;
-
-    /** Wait time between Retries for Easybackend */
-    public static final long RETRY_EASYBACKEND_WAIT_TIME_RETRY = 5000;
-    
-    /** Timeout for Easybackend requests */
-    public static final long TIMEOUT_EASYBACKEND = 30000;
 
     /**
      * Returns all available languages
