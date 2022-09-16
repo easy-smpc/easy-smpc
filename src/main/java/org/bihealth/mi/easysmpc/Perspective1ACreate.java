@@ -387,7 +387,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         if (comboExchangeConfig.getSelectedItem() != null && !exchangeConfigCheck) {
             
             try {
-                if (!((ConnectionSettings) comboExchangeConfig.getSelectedItem()).isValid()) {
+                if (!((ConnectionSettings) comboExchangeConfig.getSelectedItem()).isValid(true)) {
                     throw new BusException("Connection error");
                 }
             } catch (BusException e) {

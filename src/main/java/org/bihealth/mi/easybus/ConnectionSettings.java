@@ -37,11 +37,17 @@ public abstract class ConnectionSettings implements Serializable {
     public abstract String getIdentifier();
     
     /**
-     * Returns whether this connection is valid
-     * 
+     * Can plain (e.g. human-readable messages?)
      * @return
      */
-    public abstract boolean isValid();
+    public abstract boolean isPlainPossible();
+    
+    /**
+     * Returns whether this connection is valid
+     * @param usePasswordProvider
+     * @return
+     */
+    public abstract boolean isValid(boolean usePasswordProvider);
     
     /**
      * Return the check interval

@@ -91,7 +91,7 @@ public class ConnectionEasybackend  implements AuthHandler {
     public Builder authenticate(Builder builder) throws BusException {
         
         // Prepare
-        WebTarget target = client.target(settings.getAuthServer()).path(authenticatePath);
+        WebTarget target = client.target(settings.getAuthServer().toString()).path(authenticatePath);
         target.request(MediaType.APPLICATION_FORM_URLENCODED);
         
         // Try to authenticate and obtain data
@@ -126,6 +126,10 @@ public class ConnectionEasybackend  implements AuthHandler {
      * @throws IllegalStateException
      */
     public ConnectionEasybackend(ConnectionSettingsEasybackend settings) throws IllegalStateException {
+        // Check
+        if(settings.getAPIServer() == null || settings.getSelf() == null || settings.getPassword(true) == null) {
+            throw new IllegalArgumentException("The api server, the user identifiying object (self) and password can not be null");
+        }
         
         // Store
         this.settings = settings;
@@ -133,11 +137,13 @@ public class ConnectionEasybackend  implements AuthHandler {
         
         // Set auth parameter
         this.auth.param("client_id", settings.getClientId());
-        this.auth.param("client_secret", settings.getClientSecret());
         this.auth.param("scope", "openid");
         this.auth.param("grant_type", "password");
-        this.auth.param("username", settings.getSelf().getName());
+        this.auth.param("username", settings.getSelf().getEmailAddress());
         this.auth.param("password", settings.getPassword());
+        if(settings.getClientSecret() != null) {
+            this.auth.param("client_secret", settings.getClientSecret());
+        }
         
         // Store proxy
         if (settings.getProxy() == null) {
@@ -181,7 +187,7 @@ public class ConnectionEasybackend  implements AuthHandler {
     public Builder getBuilder(String path, Map<String, String> parameters) {
         
         // Set path
-        WebTarget target = client.target(settings.getAPIServer()).path(path);
+        WebTarget target = client.target(settings.getAPIServer().toString()).path(path);
 
         // Set parameters
         if (parameters != null && !parameters.isEmpty()) {

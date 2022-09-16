@@ -32,6 +32,9 @@ import org.bihealth.mi.easybus.ConnectionSettings.ConnectionTypes;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.http.easybackend.BusEasybackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionEasybackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -334,17 +337,24 @@ public class Study implements Serializable, Cloneable {
     public synchronized Bus getBus(int millis, boolean isSharedMailbox) throws BusException {
         
         if ((this.bus == null || !this.bus.isAlive()) && this.getConnectionSettings() != null) {
-            
+
             // Is e-mails bus?
             if (this.getConnectionSettings() instanceof ConnectionSettingsIMAP) {
 
                 this.bus = new BusEmail(new ConnectionIMAP((ConnectionSettingsIMAP) this.getConnectionSettings(),
                                                            isSharedMailbox),
-                                        millis,
-                                        Resources.SIZE_THREADPOOL,
-                                        ((ConnectionSettingsIMAP) this.getConnectionSettings()).getMaxMessageSize());
+                                        millis > 0 ? millis : getConnectionSettings().getCheckInterval() ,
+                                                Resources.SIZE_THREADPOOL,
+                                                ((ConnectionSettingsIMAP) this.getConnectionSettings()).getMaxMessageSize());
             }
-            // TODO Add others
+
+            // Is easybackend bus?
+            if (this.getConnectionSettings() instanceof ConnectionSettingsEasybackend) {
+                this.bus = new BusEasybackend(Resources.SIZE_THREADPOOL,
+                                              millis > 0 ? millis : getConnectionSettings().getCheckInterval(),
+                                                      new ConnectionEasybackend((ConnectionSettingsEasybackend) getConnectionSettings()),
+                                                      getConnectionSettings().getMaxMessageSize());
+            }
         }
         
         // Return
@@ -519,7 +529,7 @@ public class Study implements Serializable, Cloneable {
     
     /** @return Is automated mode used? */
     public boolean isAutomatedMode() {
-        return !(this.exchangeMode == null || this.exchangeMode == ConnectionTypes.MANUAL);
+        return !(this.exchangeMode == null || this.exchangeMode == ConnectionTypes.MANUAL && connectionSettings != null);
     }
     
     /**

@@ -159,6 +159,7 @@ public class BusEmail extends Bus {
      * @return 
      * @throws BusException
      */
+    @Override
     public FutureTask<Void> sendPlain(String recipient, String subject, String body) throws BusException {
         // Create future task
         FutureTask<Void> task = new FutureTask<>(new Runnable() {

@@ -13,8 +13,8 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -97,10 +97,13 @@ public class EntryEasybackendBasic extends JPanel {
 
             @Override
             public boolean validate(String text) {
+                if(text == null || text.isBlank()) {
+                    return false;
+                }
+                
                 try {
-                    // TODO Is this sufficient?
-                    new URI(text);
-                } catch (URISyntaxException e) {
+                    ConnectionSettingsEasybackend.checkURL(text);
+                } catch (Exception e) {
                     return false;
                 }
                 return true;
@@ -147,10 +150,10 @@ public class EntryEasybackendBasic extends JPanel {
             result = new ConnectionSettingsEasybackend(new Participant(entryName.getValue(),
                                                                        entryEmailPassword.getLeftValue()),
                                                        new AppPasswordProvider(Resources.getString("EmailConfig.33")))
-                    .setAPIServer(new URI(entryServerURL.getValue()));
+                    .setAPIServer(new URL(entryServerURL.getValue()));
             result.setPasswordStore(new PasswordStore(entryEmailPassword.getRightValue()));
 
-        } catch (BusException | URISyntaxException e) {
+        } catch (BusException | MalformedURLException e) {
             return null;
         }
 

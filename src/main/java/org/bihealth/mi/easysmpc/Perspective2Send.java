@@ -51,7 +51,6 @@ import javax.swing.event.ChangeListener;
 import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.Scope;
-import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmarkSendMail;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
@@ -277,9 +276,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
                                                                                        entry.getRightValue()));
                     } else {
-                        // Send message as regular e-mail
-                        future = ((BusEmail) getApp().getModel()
-                                         .getBus())
+                        // Send plain message
+                        future = getApp().getModel()
+                                         .getBus()
                                          .sendPlain(entry.getRightValue(),
                                                     generateEMailSubject(),
                                                     generateEMailBody(entry,
@@ -288,7 +287,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
 
                     try {
                         
-                        // Wait for result with a timeout time
+                        // Wait for result with a timeout
                         long endTime = System.currentTimeMillis() + getApp().getModel().getConnectionSettings().getSendTimeout();
                         while (true){
                             if(future.isDone()) {
@@ -413,7 +412,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @return enabled
      */
     private boolean isAutomaticProcessingEnabled() {
-        return getApp().getModel().getConnectionSettings() != null;
+        return getApp().getModel().isAutomatedMode() && isInitialSending() &&
+               getApp().getModel().getConnectionSettings().isPlainPossible();
     }
     
      /**

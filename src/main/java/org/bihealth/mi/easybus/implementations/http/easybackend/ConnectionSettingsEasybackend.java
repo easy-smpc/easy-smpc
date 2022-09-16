@@ -13,16 +13,18 @@
  */
 package org.bihealth.mi.easybus.implementations.http.easybackend;
 
+import java.net.MalformedURLException;
 import java.net.Proxy;
-import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 
+import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easybus.implementations.email.PasswordProvider;
 import org.bihealth.mi.easysmpc.resources.Resources;
-
-import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * Settings for Easybackend connections
@@ -35,9 +37,9 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /** SVUID */
     private static final long serialVersionUID = -944743683309534747L;
     /** Auth server URL */
-    private URI               authServer;
+    private URL               authServer;
     /** Easybackend server URL */
-    private URI               apiServer;
+    private URL               apiServer;
     /** Keycloak realm */
     private String            realm            = "easybackend";
     /** Keycloak clien id */
@@ -56,7 +58,9 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     private int               checkInterval;
     /** Password provider */
     private PasswordProvider  provider;
-
+    // TODO Remove http once https is working!
+    /** URL validator */
+    private final static UrlValidator urlValidator = new UrlValidator(new String[]{ "https", "http" }, UrlValidator.ALLOW_LOCAL_URLS);
 
     /**
      * Creates a new instance
@@ -65,9 +69,9 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
      * @param provider
      */
     public ConnectionSettingsEasybackend(Participant self, PasswordProvider provider) {
+        
         // Checks
         checkNonNull(self);
-        checkNonNull(provider);
 
         // Store
         this.self = self;
@@ -77,12 +81,6 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     @Override
     public String getIdentifier() {
         return this.self.getEmailAddress();
-    }
-
-    @Override
-    public boolean isValid() {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     /**
@@ -117,14 +115,18 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @return the authServer
      */
-    public URI getAuthServer() {
-        return authServer;
+    public URL getAuthServer() {
+        try {
+            return authServer != null ? authServer : new URIBuilder(apiServer.toString()).setPort(9090).build().toURL();
+        } catch (MalformedURLException | URISyntaxException e) {
+            return null;
+        }
     }
 
     /**
      * @param authServer the authServer to set
      */
-    public ConnectionSettingsEasybackend setAuthServer(URI authServer) {
+    public ConnectionSettingsEasybackend setAuthServer(URL authServer) {
         this.authServer = authServer;
         return this;
     }
@@ -132,18 +134,48 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @return the apiServer
      */
-    public URI getAPIServer() {
+    public URL getAPIServer() {
         return apiServer;
     }
 
     /**
      * @param apiServer the apiServer to set
      */
-    public ConnectionSettingsEasybackend setAPIServer(URI apiServer) {
-        this.apiServer = apiServer;
-        // TODO
-        authServer = UriBuilder.fromUri(apiServer).port(9090).build();
+    public ConnectionSettingsEasybackend setAPIServer(URL apiServer) {
+        checkURL(apiServer.toString());
+        
+        URIBuilder uriBuilder;
+        try {
+            uriBuilder = new URIBuilder(apiServer.toString());
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("URL not understood");
+        }
+        
+        // Set defaults
+       if(uriBuilder.getPort() == -1 || uriBuilder.getPort() == 0) {
+           uriBuilder.setPort(443);
+       }        
+        
+        // Set
+        try {
+            this.apiServer = uriBuilder.build().toURL();
+        } catch (MalformedURLException | URISyntaxException e) {
+            throw new IllegalArgumentException("URL not understood");
+        }
+        
+        // Return
         return this;
+    }
+    
+    /**
+     * Check if url is valid
+     * 
+     * @param url to check
+     */
+    public static void checkURL(String url) {
+        if(!urlValidator.isValid(url)) {
+            throw new IllegalStateException("URL is not valid!");
+        }
     }
 
     /**
@@ -211,7 +243,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
             this.setPasswordStore(store);
 
             // Check connection settings
-            if (!this.isValid()) {
+            if (!this.isValid(false)) {
                 setPasswordStore(null);
             }
         }
@@ -275,14 +307,29 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
      * Check
      * @param object
      */
-    private void checkNonNull(Object object) {
+    public static void checkNonNull(Object object) {
         if (object == null) {
             throw new IllegalArgumentException("Parameter must not be null");
         }
     }
+    
+    @Override
+    public boolean isValid(boolean usePasswordProvider) {
+        
+        if ((this.getPasswordStore() == null || this.getPasswordStore().getFirstPassword() == null) && !usePasswordProvider) {
+            return false;
+        }
 
-    public boolean isValid(boolean b) {
-        // TODO Necessary?
-        return true;
+        try {
+            new ConnectionEasybackend(this);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isPlainPossible() {
+        return false;
     }
 }

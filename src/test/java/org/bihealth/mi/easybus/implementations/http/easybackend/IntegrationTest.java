@@ -13,7 +13,7 @@
  */
 package org.bihealth.mi.easybus.implementations.http.easybackend;
 
-import java.net.URI;
+import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 import org.bihealth.mi.easybus.Bus;
@@ -44,28 +44,27 @@ public class IntegrationTest {
     public static void main(String[] args) throws Exception {
         
         // Prepare
-        Participant sender = new Participant("test", "test@easysmpc.org");
-        Participant receiver = new Participant("easy", "easy@easy.de");
+        Participant sender = new Participant("easysmpc.dev0", "easysmpc.dev0@insutec.de");
+        Participant receiver = new Participant("easysmpc.dev1", "easysmpc.dev1@insutec.de");
         Scope scope = new Scope("MyFancyScope");
-        
+
         // Add to bus creation if needed 
         //ConnectionHTTPProxy.getProxy(new URI("https://matrix-client.matrix.org"));
         
-        ConnectionSettingsEasybackend settingsReceiver = new ConnectionSettingsEasybackend(receiver, null).setAuthServer(new URI("http://localhost:9090"))
-                                                                                                   .setAPIServer(new URI("http://localhost:8080"))
-                                                                                                   .setRealm("master")
-                                                                                                   .setClientId("easy-client")
-                                                                                                   .setClientSecret("Sg9rJVSaBGjj7nX92lUsqsV4NL3uSLXO");
-        settingsReceiver.setPasswordStore(new PasswordStore("easy"));
-        
-        
-        ConnectionSettingsEasybackend settingsSender = new ConnectionSettingsEasybackend(sender,
-                                                                                         null).setAuthServer(new URI("http://localhost:9090"))
-                                                                                              .setAPIServer(new URI("http://localhost:8080"))
-                                                                                              .setRealm("master")
-                                                                                              .setClientId("easy-client")
-                                                                                              .setClientSecret("Sg9rJVSaBGjj7nX92lUsqsV4NL3uSLXO");
+        // Create connections details receiver
+        ConnectionSettingsEasybackend settingsReceiver = new ConnectionSettingsEasybackend(receiver, null)
+                .setAPIServer(new URL("http://localhost:8080"))
+                .setRealm("easybackend")
+                .setClientId("easy-client");
         settingsReceiver.setPasswordStore(new PasswordStore("test"));
+        
+        // Create connections details sender
+        ConnectionSettingsEasybackend settingsSender = new ConnectionSettingsEasybackend(sender,
+                                                                                         null)
+                .setAPIServer(new URL("http://localhost:8080"))
+                .setRealm("easybackend")
+                .setClientId("easy-client");
+        settingsSender.setPasswordStore(new PasswordStore("test"));
 
         
         // Create receiving bus

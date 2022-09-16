@@ -490,16 +490,6 @@ public class ConnectionSettingsIMAP extends ConnectionSettings {
     public boolean isSSLTLSSMTP() {
         return ssltlsSMTP;
     }
-    
-    /**
-     * Returns whether this connection is valid
-     * 
-     * @return
-     */
-    @Override
-    public boolean isValid() {
-        return isValid(true);
-    }
 
     /**
      * Returns whether this connection is valid
@@ -507,6 +497,7 @@ public class ConnectionSettingsIMAP extends ConnectionSettings {
      * @param usePasswordProvider
      * @return
      */
+    @Override
     public boolean isValid(boolean usePasswordProvider) {
         
         if ((this.getPasswordStore() == null || this.getPasswordStore().getFirstPassword() == null) && !usePasswordProvider) {
@@ -562,24 +553,6 @@ public class ConnectionSettingsIMAP extends ConnectionSettings {
         // Done
         return this;
     }
-    
-//    /**
-//     * Set config parameter
-//     * @param IMAP password the IMAP password to set
-//     */
-//    public ConnectionIMAPSettings setIMAPPassword(String password) {
-//        this.imapPassword = password;
-//        return this;        
-//    }
-//    
-//    /**
-//     * Set config parameter
-//     * @param SMTP password the SMTP password to set
-//     */
-//    public ConnectionIMAPSettings setSMTPPassword(String password) {
-//        this.smtpPassword = password;
-//        return this;        
-//    }
     
     /**
      * Set IMAP user name
@@ -841,5 +814,10 @@ public class ConnectionSettingsIMAP extends ConnectionSettings {
                smtpPort == other.smtpPort && Objects.equals(smtpServer, other.smtpServer) &&
                Objects.equals(smtpUserName, other.smtpUserName) && ssltlsIMAP == other.ssltlsIMAP &&
                ssltlsSMTP == other.ssltlsSMTP;
+    }
+
+    @Override
+    public boolean isPlainPossible() {
+        return true;
     }
 }

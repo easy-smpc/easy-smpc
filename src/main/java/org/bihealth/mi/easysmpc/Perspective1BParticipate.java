@@ -297,7 +297,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         // Check exchange configuration if not done so far
         if (comboExchangeConfig.getSelectedItem() != null && !exchangeConfigCheck) {
             try {
-                if (!((ConnectionSettings) comboExchangeConfig.getSelectedItem()).isValid()) {
+                if (!((ConnectionSettings) comboExchangeConfig.getSelectedItem()).isValid(true)) {
                     throw new BusException("Connection error");
                 }
             } catch (BusException e) {
