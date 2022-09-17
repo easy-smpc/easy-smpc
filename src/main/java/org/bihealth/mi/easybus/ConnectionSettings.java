@@ -29,7 +29,6 @@ public abstract class ConnectionSettings implements Serializable {
     /** Password store */
     private transient PasswordStore passwordStore;
     
-    // TODO Either call this e-mail or change "e-mail" to identifier in entire project
     /**
      * Returns the identifier
      * @return

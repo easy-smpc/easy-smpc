@@ -41,7 +41,7 @@ import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.MessageManager;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
-import org.bihealth.mi.easybus.implementations.http.ExecutHTTPRequest;
+import org.bihealth.mi.easybus.implementations.http.ExecuteHTTPRequest;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -142,8 +142,8 @@ public class BusEasybackend extends Bus {
             request = this.connection.getBuilder(String.format(PATH_GET_MESSAGES_PATTERN, scope));
 
             // Create task to get sync
-            FutureTask<String> future = new ExecutHTTPRequest<String>(request,
-                                                                      ExecutHTTPRequest.REST_TYPE.GET,
+            FutureTask<String> future = new ExecuteHTTPRequest<String>(request,
+                                                                      ExecuteHTTPRequest.REST_TYPE.GET,
                                                                       new Supplier<ExecutorService>() {
 
                                                                           @Override
@@ -285,8 +285,8 @@ public class BusEasybackend extends Bus {
         Builder request = this.connection.getBuilder(String.format(PATH_DELETE_MESSAGE_PATTERN, id));
         
         // Create task to get sync
-        FutureTask<String> future = new ExecutHTTPRequest<String>(request,
-                                                              ExecutHTTPRequest.REST_TYPE.DELETE,
+        FutureTask<String> future = new ExecuteHTTPRequest<String>(request,
+                                                              ExecuteHTTPRequest.REST_TYPE.DELETE,
                                                               new Supplier<ExecutorService>() {
 
                                                                   @Override
@@ -364,8 +364,8 @@ public class BusEasybackend extends Bus {
         Builder request = this.connection.getBuilder(String.format(PATH_SEND_MESSAGE_PATTERN, scope.getName(), receiver.getName()));
         
         // Create task to get sync
-        FutureTask<String> future = new ExecutHTTPRequest<String>(request,
-                                                                  ExecutHTTPRequest.REST_TYPE.POST,
+        FutureTask<String> future = new ExecuteHTTPRequest<String>(request,
+                                                                  ExecuteHTTPRequest.REST_TYPE.POST,
                                                                   new Supplier<ExecutorService>() {
 
                                                                       @Override

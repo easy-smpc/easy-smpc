@@ -118,6 +118,10 @@ public class EntryEasybackendBasic extends JPanel {
         serverPane.add(entryServerURL);
         this.add(loginPane);
         this.add(serverPane);
+        
+        // Repaint
+        this.revalidate();
+        this.repaint();
     }
 
     /**
@@ -151,7 +155,7 @@ public class EntryEasybackendBasic extends JPanel {
                                                                        entryEmailPassword.getLeftValue()),
                                                        new AppPasswordProvider(Resources.getString("EmailConfig.33")))
                     .setAPIServer(new URL(entryServerURL.getValue()));
-            result.setPasswordStore(new PasswordStore(entryEmailPassword.getRightValue()));
+            result.setPasswordStore(new PasswordStore(entryEmailPassword.getRightValue() != null ? entryEmailPassword.getRightValue() : ""));
 
         } catch (BusException | MalformedURLException e) {
             return null;

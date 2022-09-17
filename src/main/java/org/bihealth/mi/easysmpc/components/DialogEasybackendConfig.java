@@ -19,6 +19,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -36,6 +38,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -118,8 +121,19 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
      * @return
      */
     public static boolean isAdvancedDialogNecessary(ConnectionSettingsEasybackend settings) {
-        // TODO Implement
-        return false;
+        // Check
+        if(settings == null) return false;
+        
+        // Check if values deviate from defaults
+        try {
+            return !settings.getClientId().equals(Resources.AUTH_CLIENTID_DEFAULT) ||
+                   !settings.getRealm().equals(Resources.AUTH_REALM_DEFAULT) ||
+                   settings.getProxy() != null || settings.getClientSecret() != null || 
+                   !new URIBuilder(settings.getAPIServer().toString()).setPort(9090).build().toURL().equals(settings.getAuthServer())
+                   ? true : false;
+        } catch (URISyntaxException | MalformedURLException e) {
+            return true;
+        }
     }
 
     /**
@@ -455,8 +469,17 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
      * @return connection settings
      */
     private ConnectionSettingsEasybackend getConnectionSettings() {
-        if (entryEasybackendBasic != null) return entryEasybackendBasic.getSettings();
-        if (entryEasybackendAdvanced != null) return entryEasybackendAdvanced.getSettings();
-        return null;
+        // Collect from active component
+        ConnectionSettingsEasybackend result = entryEasybackendBasic != null
+                ? entryEasybackendBasic.getSettings()
+                : entryEasybackendAdvanced.getSettings();
+        
+        // Read additional options
+        result.setMaxMessageSize(Integer.valueOf(entryMessageSize.getValue()) * (1024 * 1024));
+        result.setCheckInterval(Integer.valueOf(entryCheckInterval.getValue()) * 1000);
+        result.setSendTimeout(Integer.valueOf(entrySendTimeout.getValue()) * 1000);
+
+        // Return
+        return result;
     }
 }

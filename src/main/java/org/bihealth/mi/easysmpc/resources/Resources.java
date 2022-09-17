@@ -151,7 +151,7 @@ public class Resources {
     public static final int       FETCH_SIZE_IMAP                 = 1048576;
 
     /** Number of threads in thread pool */
-    public static final int       SIZE_THREADPOOL                 = 1;
+    public static final int       SIZE_THREADPOOL                 = 5;
 
     /** Fractional bits for decimal values */
     public static final int       FRACTIONAL_BITS                 = 32;
@@ -173,6 +173,12 @@ public class Resources {
     
     /** Timeout for Easybackend requests */
     public static final long TIMEOUT_EASYBACKEND = 30000;
+    
+    /** Auth realm default */
+    public static final String AUTH_REALM_DEFAULT = "easybackend";
+    
+    /** Auth client id */
+    public static final String AUTH_CLIENTID_DEFAULT = "easy-client";
 
     /**
      * Returns all available languages

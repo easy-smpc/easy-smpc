@@ -250,7 +250,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             }
             
             @Override
-            protected Void doInBackground() throws Exception {                
+            protected Void doInBackground() throws Exception {
 
                 // Init loop
                 int workDone = 0;
@@ -412,8 +412,8 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @return enabled
      */
     private boolean isAutomaticProcessingEnabled() {
-        return getApp().getModel().isAutomatedMode() && isInitialSending() &&
-               getApp().getModel().getConnectionSettings().isPlainPossible();
+        return getApp().getModel().isAutomatedMode() && (!isInitialSending() || ( isInitialSending() &&
+               getApp().getModel().getConnectionSettings().isPlainPossible()));
     }
     
      /**

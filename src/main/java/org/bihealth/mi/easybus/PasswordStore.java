@@ -44,7 +44,7 @@ public class PasswordStore {
     public PasswordStore(String firstPassword, String secondPassword) {
         
         // Check
-        if(firstPassword == null || firstPassword.isBlank()) {
+        if(firstPassword == null) {
             throw new IllegalArgumentException("First password must not be null");
         }
         

@@ -20,7 +20,7 @@ import jakarta.ws.rs.core.Response;
  * @author Felix Wirth
  *
  */
-public class ExecutHTTPRequest<T> {
+public class ExecuteHTTPRequest<T> {
 
     /**
      * Type of request
@@ -84,7 +84,7 @@ public class ExecutHTTPRequest<T> {
      * @param sleepTimeRetry
      * @param numberRetry
      */
-    public ExecutHTTPRequest(Builder requestBuilder,
+    public ExecuteHTTPRequest(Builder requestBuilder,
                              REST_TYPE type,
                              Supplier<ExecutorService> executorSupplier,
                              String inputData,
@@ -241,7 +241,7 @@ public class ExecutHTTPRequest<T> {
      * @param timeout
      * @param errorHandler
      */
-    public static void executeRequestPackage(List<ExecutHTTPRequest<?>> requests,
+    public static void executeRequestPackage(List<ExecuteHTTPRequest<?>> requests,
                                              long timeout,
                                              Consumer<Exception> errorHandler) {
 
@@ -250,7 +250,7 @@ public class ExecutHTTPRequest<T> {
 
         // Check all tasks
         int index = 0;
-        for(ExecutHTTPRequest<?> request : requests) {
+        for(ExecuteHTTPRequest<?> request : requests) {
             if(request.isStarted()) {
                 throw new IllegalArgumentException(String.format("Request at position %d has already been started. Aborting", index));
             }
@@ -258,7 +258,7 @@ public class ExecutHTTPRequest<T> {
         }
 
         // Execute
-        for(ExecutHTTPRequest<?> request : requests) {
+        for(ExecuteHTTPRequest<?> request : requests) {
 
             // Create thread, which waits for future to finish
             new Thread(new Runnable() {
@@ -281,7 +281,7 @@ public class ExecutHTTPRequest<T> {
         while (!finished) {
             finished = true;
 
-            for (ExecutHTTPRequest<?> request : requests) {
+            for (ExecuteHTTPRequest<?> request : requests) {
                 if (!request.isFinished()) {
                     finished = false;
                     break;

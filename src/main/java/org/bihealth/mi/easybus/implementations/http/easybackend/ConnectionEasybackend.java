@@ -23,6 +23,7 @@ import java.util.function.Function;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.implementations.http.AuthHandler;
+import org.bihealth.mi.easybus.implementations.http.ConnectionHTTPProxy;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider.ConnectionFactory;
@@ -153,7 +154,7 @@ public class ConnectionEasybackend  implements AuthHandler {
                 
                 @Override
                 public HttpURLConnection getConnection(URL url) throws IOException {
-                    return (HttpURLConnection) url.openConnection(settings.getProxy());
+                    return (HttpURLConnection) url.openConnection(ConnectionHTTPProxy.getProxy(settings.getProxy()));
                 }
             })));
         }       

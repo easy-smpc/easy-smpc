@@ -42,18 +42,19 @@ public class IntegrationTest {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        
+        System.getProperties().setProperty("java.net.preferIPv6Addresses", "true");
+
         // Prepare
         Participant sender = new Participant("easysmpc.dev0", "easysmpc.dev0@insutec.de");
         Participant receiver = new Participant("easysmpc.dev1", "easysmpc.dev1@insutec.de");
         Scope scope = new Scope("MyFancyScope");
 
         // Add to bus creation if needed 
-        //ConnectionHTTPProxy.getProxy(new URI("https://matrix-client.matrix.org"));
+        // ConnectionHTTPProxy.getProxy(new URI("https://matrix-client.matrix.org"));
         
         // Create connections details receiver
         ConnectionSettingsEasybackend settingsReceiver = new ConnectionSettingsEasybackend(receiver, null)
-                .setAPIServer(new URL("http://localhost:8080"))
+                .setAPIServer(new URL("http://127.0.0.1:8080"))
                 .setRealm("easybackend")
                 .setClientId("easy-client");
         settingsReceiver.setPasswordStore(new PasswordStore("test"));
@@ -61,7 +62,7 @@ public class IntegrationTest {
         // Create connections details sender
         ConnectionSettingsEasybackend settingsSender = new ConnectionSettingsEasybackend(sender,
                                                                                          null)
-                .setAPIServer(new URL("http://localhost:8080"))
+                .setAPIServer(new URL("http://127.0.0.1:8080"))
                 .setRealm("easybackend")
                 .setClientId("easy-client");
         settingsSender.setPasswordStore(new PasswordStore("test"));

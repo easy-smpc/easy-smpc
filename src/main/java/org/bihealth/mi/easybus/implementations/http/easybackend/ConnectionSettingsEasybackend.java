@@ -14,7 +14,7 @@
 package org.bihealth.mi.easybus.implementations.http.easybackend;
 
 import java.net.MalformedURLException;
-import java.net.Proxy;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -35,32 +35,32 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class ConnectionSettingsEasybackend  extends ConnectionSettings {
 
     /** SVUID */
-    private static final long serialVersionUID = -944743683309534747L;
+    private static final long         serialVersionUID = -944743683309534747L;
     /** Auth server URL */
-    private URL               authServer;
+    private URL                       authServer;
     /** Easybackend server URL */
-    private URL               apiServer;
+    private URL                       apiServer;
     /** Keycloak realm */
-    private String            realm            = "easybackend";
+    private String                    realm            = Resources.AUTH_REALM_DEFAULT;
     /** Keycloak clien id */
-    private String            clientId         = "easy-client";
+    private String                    clientId         = Resources.AUTH_CLIENTID_DEFAULT;
     /** Keycloak client secret */
-    private String            clientSecret;
+    private String                    clientSecret;
     /** Self */
-    private final Participant self;
+    private final Participant         self;
     /** Proxy */
-    private Proxy             proxy            = null;
+    private URI                       proxy            = null;
     /** Send timeout */
-    private int               sendTimeout;
+    private int                       sendTimeout;
     /** Maximal message size */
-    private int               maxMessageSize;
+    private int                       maxMessageSize;
     /** Check interval */
-    private int               checkInterval;
+    private int                       checkInterval;
     /** Password provider */
-    private PasswordProvider  provider;
+    private PasswordProvider          provider;
     // TODO Remove http once https is working!
     /** URL validator */
-    private final static UrlValidator urlValidator = new UrlValidator(new String[]{ "https", "http" }, UrlValidator.ALLOW_LOCAL_URLS);
+    private final static UrlValidator urlValidator     = new UrlValidator(new String[] { "https", "http" }, UrlValidator.ALLOW_LOCAL_URLS);
 
     /**
      * Creates a new instance
@@ -84,7 +84,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     }
 
     /**
-     * @return the emailSendTimeout
+     * @return the sendTimeout
      */
     @Override
     public int getSendTimeout() {
@@ -255,14 +255,14 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @return the proxy
      */
-    public Proxy getProxy() {
+    public URI getProxy() {
         return proxy;
     }
 
     /**
      * @param proxy the proxy to set
      */
-    public ConnectionSettingsEasybackend setProxy(Proxy proxy) {
+    public ConnectionSettingsEasybackend setProxy(URI proxy) {
         this.proxy = proxy;
         return this;
     }
@@ -291,18 +291,20 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @return the clientSecret
      */
-    protected String getClientSecret() {
+    public String getClientSecret() {
         return clientSecret;
     }
 
     /**
      * @param clientSecret the clientSecret to set
      */
-    protected ConnectionSettingsEasybackend setClientSecret(String clientSecret) {
+    public ConnectionSettingsEasybackend setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
         return this;
     }
-
+    
+    
+    
     /**
      * Check
      * @param object
@@ -321,6 +323,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
         }
 
         try {
+            // Add check to API server
             new ConnectionEasybackend(this);
             return true;
         } catch (Exception e) {
