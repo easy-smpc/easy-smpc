@@ -324,8 +324,32 @@ public class BusEasybackend extends Bus {
 
     @Override
     public void stop() {
-        // TODO Implement stop
-        
+
+        // Set stop flag
+        this.stop = true;
+
+        // Shutdown executor
+        getExecutor().shutdown();
+
+        // If on the same thread, just return
+        if (this.thread == null || Thread.currentThread().equals(this.thread)) {
+            return;
+
+            // If on another thread, interrupt and wait for thread to die
+        } else {
+
+            // Stop thread
+            this.thread.interrupt();
+
+            // Wait for thread to stop
+            while (thread != null && thread.isAlive()) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    // Ignore
+                }
+            }
+        }
     }
 
     @Override
