@@ -21,9 +21,7 @@ import java.util.Map.Entry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.Bus;
-import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.ConnectionSettings;
-import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
@@ -62,17 +60,18 @@ public class UserProcessParticipating extends UserProcess {
         this.data = data;
         
         // Delete pre-existing bus messages
-        try {
-            LOGGER.info("Start deleting pre-existing messages");
-            purgeMessages(new MessageFilter() {
-                @Override
-                public boolean accepts(String messageDescription) {
-                    return !messageDescription.contains(ROUND_0);
-                }
-            });
-        } catch (BusException | InterruptedException e) {
-            LOGGER.error("Unable to delete pre-existing messages", e);
-        }
+        // TODO Improve purging
+//        try {
+//            LOGGER.info("Start deleting pre-existing messages");
+//            purgeMessages(new MessageFilter() {
+//                @Override
+//                public boolean accepts(String messageDescription) {
+//                    return !messageDescription.contains(ROUND_0);
+//                }
+//            });
+//        } catch (BusException | InterruptedException e) {
+//            LOGGER.error("Unable to delete pre-existing messages", e);
+//        }
         
         // Register for initial message
         Bus interimBus = getInterimBus();

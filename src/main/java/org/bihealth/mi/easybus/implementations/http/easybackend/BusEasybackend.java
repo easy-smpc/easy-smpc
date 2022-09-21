@@ -66,6 +66,8 @@ public class BusEasybackend extends Bus {
     private static final String   PATH_GET_MESSAGES_PATTERN   = "api/easybackend/receive/%s";
     /** Delete message */
     private static final String   PATH_DELETE_MESSAGE_PATTERN = "api/easybackend/message/%s";
+    /** Purge all messages */
+    private static final String   PATH_PURGE_PATTERN          = "api/easybackend/message";
     /** Logger */
     private Logger                LOGGER                      = LogManager.getLogger(BusEasybackend.class);
     /** Connection to backend */
@@ -295,14 +297,7 @@ public class BusEasybackend extends Bus {
                                                                   }
                                                                   },
                                                                   null,
-                                                                  new Function<Response, String>() {
-
-                                                                      @Override
-                                                                      public String
-                                                                             apply(Response response) {
-                                                                          return null;
-                                                                      }
-                                                                  },
+                                                                  null,
                                                                   ConnectionEasybackend.DEFAULT_ERROR_HANDLER,
                                                                   this.connection,
                                                                   Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
@@ -415,7 +410,33 @@ public class BusEasybackend extends Bus {
 
     @Override
     public void purge(MessageFilter filter) throws BusException, InterruptedException {
-        // TODO Implement purge
+        
+        // Prepare request
+        Builder request = this.connection.getBuilder(PATH_PURGE_PATTERN);
+        
+        // Create task to get sync
+        FutureTask<String> future = new ExecuteHTTPRequest<String>(request,
+                                                              ExecuteHTTPRequest.REST_TYPE.DELETE,
+                                                              new Supplier<ExecutorService>() {
+
+                                                                  @Override
+                                                                  public ExecutorService get() {
+                                                                      return getExecutor();
+                                                                  }
+                                                                  },
+                                                                  null,
+                                                                  null,
+                                                                  ConnectionEasybackend.DEFAULT_ERROR_HANDLER,
+                                                                  this.connection,
+                                                                  Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
+                                                                  Resources.RETRY_EASYBACKEND_WAIT_TIME_RETRY).execute();
+        
+        // Wait for task end or exception
+        try {
+            future.get(Resources.TIMEOUT_EASYBACKEND, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            LOGGER.error("Error purging messages!", e);
+        }  
     }
     
     

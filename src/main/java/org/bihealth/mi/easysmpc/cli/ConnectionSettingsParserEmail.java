@@ -172,6 +172,13 @@ public class ConnectionSettingsParserEmail extends ConnectionSettingsParser {
                                                                      .build();
     
 
+    /**
+     * Creates a new instance
+     * 
+     * @param args
+     * @param options
+     * @throws ParseException
+     */
     public ConnectionSettingsParserEmail(String[] args, Options options) throws ParseException {
         super(args, options);
     }
@@ -244,9 +251,9 @@ public class ConnectionSettingsParserEmail extends ConnectionSettingsParser {
     }
 
     @Override
-    public ConnectionSettings getConnectionSettings() {
+    public ConnectionSettings getConnectionSettings(Participant self) {
         // Set email address and password either from the receiving parameter or from different receiving and sending parameters
-        ConnectionSettingsIMAP connectionIMAPSettings = new ConnectionSettingsIMAP(getCLI().getOptionValue(OPTION_MAILADDRESS_RECEIVING),
+        ConnectionSettingsIMAP connectionIMAPSettings = new ConnectionSettingsIMAP(self.getEmailAddress(),
                                                                                    getCLI().hasOption(OPTION_MAILADDRESS_SENDING)
                                                                                    ? getCLI().getOptionValue(OPTION_MAILADDRESS_SENDING)
                                                                                            : getCLI().getOptionValue(OPTION_MAILADDRESS_RECEIVING),

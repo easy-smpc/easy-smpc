@@ -198,7 +198,7 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) {
-        // Prefer IPv6 if network (e.g. e-mail) is used
+        // Prefer IPv6
         System.getProperties().setProperty("java.net.preferIPv6Addresses", "true");
 
         // Prepare
@@ -258,7 +258,8 @@ public class Main {
         // Prepare 
         Options options = new Options();
         CommandLine cli;
-        ConnectionSettingsParserEmail connectionSettingsParser = null;
+        ConnectionSettingsParser connectionSettingsParser = null;
+        Participant self;
 
         // Set generic options for creating
         options.addOption(OPTION_CREATE_REQUIRED)
@@ -267,7 +268,6 @@ public class Main {
         .addOption(OPTION_DATA_FILE)
         .addOption(OPTION_BINS_NAMES)
         .addOption(OPTION_PARTICIPANTS)
-        .addOption(OPTION_BINS_NAMES)
         .addOption(OPTION_DATA_COLUMN)
         .addOption(OPTION_HAS_HEADER)
         .addOption(OPTION_SKIP_COLUMNS);
@@ -286,7 +286,7 @@ public class Main {
             // Set correct connection settings parser
             switch(ConnectionTypes.valueOf(cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
             case EASYBACKEND:
-                // TODO
+                connectionSettingsParser = new ConnectionSettingsParserEasybackend(args, options);
                 break;
             case EMAIL:
                 connectionSettingsParser = new ConnectionSettingsParserEmail(args, options);
@@ -309,6 +309,13 @@ public class Main {
             // Check skip columns is integer
             if (cli.hasOption(cli.getOptionValue(OPTION_SKIP_COLUMNS))) {
                 Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS));
+            }
+            
+            try {
+                de.tu_darmstadt.cbs.emailsmpc.Participant participant = UserProcessCreating.createParticipantsFromCSVString(cli.getOptionValue(OPTION_PARTICIPANTS))[0];
+                self = new Participant(participant.name, participant.emailAddress );
+            } catch (BusException e) {
+                throw new IllegalArgumentException(e);
             }
 
             // Check connection settings parameter
@@ -343,7 +350,7 @@ public class Main {
                                                  cli.hasOption(OPTION_SKIP_COLUMNS)
                                                  ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS))
                                                          : 0),
-                                connectionSettingsParser.getConnectionSettings());
+                                connectionSettingsParser.getConnectionSettings(self));
     }
 
     /**
@@ -355,8 +362,8 @@ public class Main {
         // Prepare 
         Options options = new Options();
         CommandLine cli;
-        ConnectionSettingsParserEmail connectionSettingsParser = null;
-        Participant participant;
+        ConnectionSettingsParser connectionSettingsParser = null;
+        Participant self;
 
         // Add options when participating
         options.addOption(OPTION_PARTICIPATE_REQUIRED)
@@ -382,7 +389,7 @@ public class Main {
             // Set correct connection settings parser
             switch(ConnectionTypes.valueOf(cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
             case EASYBACKEND:
-                // TODO
+                connectionSettingsParser = new ConnectionSettingsParserEasybackend(args, options);
                 break;
             case EMAIL:
                 connectionSettingsParser = new ConnectionSettingsParserEmail(args, options);
@@ -397,7 +404,7 @@ public class Main {
             cli = connectionSettingsParser.getCLI();
 
             try {
-                participant = new Participant(cli.getOptionValue(OPTION_PARTICIPANT_NAME),
+                self = new Participant(cli.getOptionValue(OPTION_PARTICIPANT_NAME),
                                               cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING));
             } catch (BusException e) {
                 throw new IllegalArgumentException(e);
@@ -425,16 +432,16 @@ public class Main {
 
         // Create participating user
         UserProcessParticipating participatingUser = new UserProcessParticipating(cli.getOptionValue(OPTION_STUDY_NAME),
-                                                                                  participant,
+                                                                                  self,
                                                                                   getDataFromFiles(cli.getOptionValue(OPTION_DATA_FILE),
                                                                                                    !cli.hasOption(OPTION_DATA_COLUMN),
                                                                                                    false,
                                                                                                    cli.hasOption(OPTION_HAS_HEADER),
                                                                                                    cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
-                                                                                  connectionSettingsParser.getConnectionSettings());
+                                                                                  connectionSettingsParser.getConnectionSettings(self));
 
         // Wait for participant to be initialized
-        LOGGER.info("Waiting for initial email to participate");
+        LOGGER.info("Waiting for initial message to participate");
         while(participatingUser.getModel() == null || participatingUser.getModel().getState() == StudyState.NONE) {
             try {
                 Thread.sleep(200);

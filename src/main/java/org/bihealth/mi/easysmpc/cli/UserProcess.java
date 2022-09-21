@@ -36,6 +36,9 @@ import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.http.easybackend.BusEasybackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionEasybackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
 import org.bihealth.mi.easysmpc.dataexport.ExportFile;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -473,9 +476,17 @@ public class UserProcess implements MessageListener {
                 throw new IllegalStateException("Unable to get interim bus!");
             }
         }
+        
+        // Is easybackend bus?
+        if (this.getConnectionSettings() instanceof ConnectionSettingsEasybackend) {
+            return new BusEasybackend(Resources.SIZE_THREADPOOL,
+                               getConnectionSettings().getCheckInterval(),
+                               new ConnectionEasybackend((ConnectionSettingsEasybackend) getConnectionSettings()),
+                               getConnectionSettings().getMaxMessageSize());
+        }
 
         // Nothing found
-        return null;
+        throw new IllegalStateException("Unable to determine bus type");
     }
     
     /**
