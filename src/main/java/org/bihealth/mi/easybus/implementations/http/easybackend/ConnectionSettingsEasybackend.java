@@ -116,11 +116,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
      * @return the authServer
      */
     public URL getAuthServer() {
-        try {
-            return authServer != null ? authServer : new URIBuilder(apiServer.toString()).setPort(9090).build().toURL();
-        } catch (MalformedURLException | URISyntaxException e) {
-            return null;
-        }
+        return authServer != null ? authServer : apiServer;
     }
 
     /**

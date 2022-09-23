@@ -36,7 +36,7 @@ public abstract class ConnectionSettings implements Serializable {
     public abstract String getIdentifier();
     
     /**
-     * Can plain (e.g. human-readable messages?)
+     * Can send plain (e.g. human-readable messages?)
      * @return
      */
     public abstract boolean isPlainPossible();
