@@ -25,7 +25,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeListener;
 
-import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -143,13 +142,7 @@ public class EntryEasybackendAdvanced extends EntryEasybackendBasic {
         
         // Set values
         if(settings != null) {
-            if (settings.getAPIServer() != null) {
-                try {
-                    entryAuthServerURL.setValue(new URIBuilder(settings.getAPIServer().toString()).setPort(9090).build().toURL().toString());
-                } catch (MalformedURLException | URISyntaxException e) {
-                    // Empty
-                }
-            }
+            entryAuthServerURL.setValue(settings.getAuthServer() != null ? settings.getAuthServer().toString() : settings.getAPIServer().toString());
             entryProxyServerURL.setValue(settings.getProxy()!= null ? settings.getProxy().toString() : null);
             entryRealm.setValue(settings.getRealm());
             entryClientId.setValue(settings.getClientId());
@@ -188,6 +181,13 @@ public class EntryEasybackendAdvanced extends EntryEasybackendBasic {
      * @return
      */
     private URL getAuthServerURL() {
+        
+        // Return null if empty
+        if (entryAuthServerURL.getValue() == null || entryAuthServerURL.getValue().isBlank()) {
+            return null;
+        }
+        
+        // Return value
         try {
             return new URL(entryAuthServerURL.getValue());
         } catch (MalformedURLException e) {
@@ -218,10 +218,11 @@ public class EntryEasybackendAdvanced extends EntryEasybackendBasic {
         // Prepare
         ConnectionSettingsEasybackend result = super.getSettings();
         
+        // Set
         result.setAuthServer(getAuthServerURL());
         result.setProxy(getProxyServerURI());
-        result.setRealm(entryRealm.getValue());
-        result.setClientId(entryClientId.getValue());
+        result.setRealm(entryRealm.getValue() == null || entryRealm.getValue().isBlank() ? null : entryRealm.getValue());
+        result.setClientId(entryClientId.getValue() == null || entryClientId.getValue().isBlank() ? null : entryClientId.getValue());
         result.setClientSecret(entryClientSecret.getValue() == null || entryClientSecret.getValue().isBlank() ? null : entryClientSecret.getValue());
         
         // Return

@@ -19,8 +19,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -38,7 +36,6 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -125,15 +122,11 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
         if(settings == null) return false;
         
         // Check if values deviate from defaults
-        try {
-            return !settings.getClientId().equals(Resources.AUTH_CLIENTID_DEFAULT) ||
-                   !settings.getRealm().equals(Resources.AUTH_REALM_DEFAULT) ||
-                   settings.getProxy() != null || settings.getClientSecret() != null || 
-                   !new URIBuilder(settings.getAPIServer().toString()).setPort(9090).build().toURL().equals(settings.getAuthServer())
-                   ? true : false;
-        } catch (URISyntaxException | MalformedURLException e) {
-            return true;
-        }
+        return !settings.getClientId().equals(Resources.AUTH_CLIENTID_DEFAULT) ||
+               !settings.getRealm().equals(Resources.AUTH_REALM_DEFAULT) ||
+               settings.getProxy() != null || settings.getClientSecret() != null ||
+               (settings.getAuthServer() != null &&
+                !settings.getAuthServer().equals(settings.getAPIServer())) ? true : false;
     }
 
     /**

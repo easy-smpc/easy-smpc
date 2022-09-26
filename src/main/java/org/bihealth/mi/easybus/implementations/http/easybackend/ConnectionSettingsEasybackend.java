@@ -178,7 +178,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
      * @return the realm
      */
     public String getRealm() {
-        return realm;
+        return realm != null ? realm : Resources.AUTH_REALM_DEFAULT;
     }
 
     /**
@@ -193,7 +193,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
      * @return the clientId
      */
     public String getClientId() {
-        return clientId;
+        return clientId != null ? clientId : Resources.AUTH_CLIENTID_DEFAULT;
     }
 
     /**
