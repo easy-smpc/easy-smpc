@@ -266,22 +266,26 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @param sendTimeout the sendTimeout to set
      */
-    public void setSendTimeout(int sendTimeout) {
+    public ConnectionSettingsEasybackend setSendTimeout(int sendTimeout) {
         this.sendTimeout = sendTimeout;
+        return this;
     }
 
     /**
      * @param maxMessageSize the maxMessageSize to set
+     * @return 
      */
-    public void setMaxMessageSize(int maxMessageSize) {
+    public ConnectionSettingsEasybackend setMaxMessageSize(int maxMessageSize) {
         this.maxMessageSize = maxMessageSize;
+        return this;
     }
 
     /**
      * @param checkInterval the checkInterval to set
      */
-    public void setCheckInterval(int checkInterval) {
+    public ConnectionSettingsEasybackend setCheckInterval(int checkInterval) {
         this.checkInterval = checkInterval;
+        return this;
     }
 
     /**

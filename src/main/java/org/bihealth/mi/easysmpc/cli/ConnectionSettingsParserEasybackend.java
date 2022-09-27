@@ -23,6 +23,7 @@ import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
+import org.bihealth.mi.easysmpc.resources.Resources;
 
 public class ConnectionSettingsParserEasybackend extends ConnectionSettingsParser {
     
@@ -82,6 +83,30 @@ public class ConnectionSettingsParserEasybackend extends ConnectionSettingsParse
                                                                   .hasArg(true)
                                                                   .build();
     
+    /** Command line option */
+    private static final Option OPTION_CHECK_INTERVAL   = Option.builder("mbc")
+                                                                     .desc("Mailbox check interval (sec)")
+                                                                     .longOpt("mailbox-check-interval")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
+
+    /** Command line option */
+    private static final Option OPTION_SEND_TIMEOUT          = Option.builder("tm")
+                                                                     .desc("E-mail Send timeout sec)")
+                                                                     .longOpt("send-time-out")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
+
+    /** Command line option */
+    private static final Option OPTION_MAX_MESSAGE_SIZE      = Option.builder("ms")
+                                                                     .desc("Message size (MB)")
+                                                                     .longOpt("max-message-size")
+                                                                     .required(false)
+                                                                     .hasArg(true)
+                                                                     .build();
+    
     /**
      * Creates a new instance
      * 
@@ -102,7 +127,10 @@ public class ConnectionSettingsParserEasybackend extends ConnectionSettingsParse
                .addOption(OPTION_AUTH_REALM)
                .addOption(OPTION_AUTH_CLIENT_ID)
                .addOption(OPTION_AUTH_CLIENT_SECRET)
-               .addOption(OPTION_PROXY_URL);
+               .addOption(OPTION_PROXY_URL)
+               .addOption(OPTION_CHECK_INTERVAL)
+               .addOption(OPTION_SEND_TIMEOUT)
+               .addOption(OPTION_MAX_MESSAGE_SIZE);
     }
 
     @Override
@@ -119,6 +147,16 @@ public class ConnectionSettingsParserEasybackend extends ConnectionSettingsParse
             if (getCLI().hasOption(OPTION_PROXY_URL)) {
                 new URL(getCLI().getOptionValue(OPTION_PROXY_URL));
             }
+            
+            if (getCLI().hasOption(OPTION_MAX_MESSAGE_SIZE)) {
+                Integer.valueOf(getCLI().getOptionValue(OPTION_MAX_MESSAGE_SIZE));
+            }
+            if (getCLI().hasOption(OPTION_SEND_TIMEOUT)) {
+                Integer.valueOf(getCLI().getOptionValue(OPTION_SEND_TIMEOUT));
+            }
+            if (getCLI().hasOption(OPTION_CHECK_INTERVAL)) {
+                Integer.valueOf(getCLI().getOptionValue(OPTION_CHECK_INTERVAL));
+            }
 
         } catch (Exception e) {
             throw new IllegalArgumentException("Arguments were not correct!", e);
@@ -132,7 +170,10 @@ public class ConnectionSettingsParserEasybackend extends ConnectionSettingsParse
             // Set mandatory parameters
             ConnectionSettingsEasybackend result = new ConnectionSettingsEasybackend(self, null).setAPIServer(new URL(getCLI().getOptionValue(OPTION_SERVER_URL)));
             result.setPasswordStore(new PasswordStore(getCLI().getOptionValue(OPTION_PASSWORD)));
-            
+            result.setMaxMessageSize(getCLI().hasOption(OPTION_MAX_MESSAGE_SIZE) ? Integer.valueOf(getCLI().getOptionValue(OPTION_MAX_MESSAGE_SIZE))* 1024 * 1024 : Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT)
+            .setSendTimeout(getCLI().hasOption(OPTION_SEND_TIMEOUT) ? Integer.valueOf(getCLI().getOptionValue(OPTION_SEND_TIMEOUT)) * 1000 : Resources.TIMEOUT_SEND_EMAILS_DEFAULT)
+            .setCheckInterval(getCLI().hasOption(OPTION_CHECK_INTERVAL) ? Integer.valueOf(getCLI().getOptionValue(OPTION_CHECK_INTERVAL)) * 1000 : Resources.INTERVAL_CHECK_MAILBOX_DEFAULT );
+
             // Set optional parameters
             if (getCLI().hasOption(OPTION_AUTH_SERVER_URL)) {
                 result.setAuthServer(new URL(getCLI().getOptionValue(OPTION_SERVER_URL)));
@@ -153,7 +194,7 @@ public class ConnectionSettingsParserEasybackend extends ConnectionSettingsParse
             if (getCLI().hasOption(OPTION_PROXY_URL)) {
                 result.setAuthServer(new URL(getCLI().getOptionValue(OPTION_PROXY_URL)));
             }
-
+           
             // Return
             return result;
         } catch (MalformedURLException e) {
