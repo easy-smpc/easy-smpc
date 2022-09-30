@@ -58,9 +58,8 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     private int                       checkInterval;
     /** Password provider */
     private PasswordProvider          provider;
-    // TODO Remove http once https is working!
     /** URL validator */
-    private final static UrlValidator urlValidator     = new UrlValidator(new String[] { "https", "http" }, UrlValidator.ALLOW_LOCAL_URLS);
+    private final static UrlValidator urlValidator     = new UrlValidator(new String[] { "https" }, UrlValidator.ALLOW_LOCAL_URLS);
 
     /**
      * Creates a new instance
