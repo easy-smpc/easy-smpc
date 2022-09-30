@@ -11,10 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.bihealth.mi.easybus.implementations.email;
+package org.bihealth.mi.easybus.implementations;
 
 import org.bihealth.mi.easybus.PasswordStore;
-
 /**
  * An interface for providing passwords on-demand
  * @author Felix Wirth

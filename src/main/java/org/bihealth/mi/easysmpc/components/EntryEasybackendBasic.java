@@ -47,6 +47,12 @@ public class EntryEasybackendBasic extends JPanel {
     /** Server entry */
     private final ComponentEntryOne  entryServerURL;
 
+    /**
+     * Creates a new instance
+     * 
+     * @param settings
+     * @param createMode
+     */
     public EntryEasybackendBasic(ConnectionSettingsEasybackend settings, boolean createMode) {
 
         // General
@@ -145,6 +151,7 @@ public class EntryEasybackendBasic extends JPanel {
 
     /**
      * Get connection settings
+     * 
      * @return
      */
     public ConnectionSettingsEasybackend getSettings() {

@@ -1,11 +1,8 @@
 package org.bihealth.mi.easybus.implementations.http;
 
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -62,8 +59,6 @@ public class ExecuteHTTPRequest<T> {
     private Function<Response, String>        errorHandler;
     /** Authorization handler */
     private AuthHandler                       authentificationHandler;
-    /** Indicates if task was started - remains true after it was finished */
-    private boolean                           started             = false;
     /** Task */
     private FutureTask<T>                     task;
     /** Sleep time to re-try request */
@@ -128,8 +123,6 @@ public class ExecuteHTTPRequest<T> {
      * @return
      */
     public FutureTask<T> execute() {
-        // Init
-        this.started = true;
 
         // Create future task
         task = new FutureTask<>(new Callable<T>() {
@@ -216,77 +209,5 @@ public class ExecuteHTTPRequest<T> {
         default:
             throw new IllegalArgumentException("Request type unknown");
         }
-    }
-
-    /**
-     * Is request started? Remains true after it was finished
-     * 
-     * @return
-     */
-    public boolean isStarted() {
-        return this.started;
-    }
-
-    /**
-     * Is request finished?
-     */
-    public boolean isFinished() {
-        return task == null ? false : task.isCancelled() || task.isDone();
-    }
-
-    /**
-     * Will execute the provided requests and return after all requests have been finished
-     * 
-     * @param requests
-     * @param timeout
-     * @param errorHandler
-     */
-    public static void executeRequestPackage(List<ExecuteHTTPRequest<?>> requests,
-                                             long timeout,
-                                             Consumer<Exception> errorHandler) {
-
-        // Prepare
-        boolean finished = false;
-
-        // Check all tasks
-        int index = 0;
-        for(ExecuteHTTPRequest<?> request : requests) {
-            if(request.isStarted()) {
-                throw new IllegalArgumentException(String.format("Request at position %d has already been started. Aborting", index));
-            }
-            index++;
-        }
-
-        // Execute
-        for(ExecuteHTTPRequest<?> request : requests) {
-
-            // Create thread, which waits for future to finish
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    // Execute
-                    FutureTask<?> future = request.execute();
-                    try {
-                        future.get(timeout, TimeUnit.MILLISECONDS);
-                    } catch (Exception e) {
-                        if(errorHandler != null) {
-                            errorHandler.accept(e);
-                        }
-                    }
-                }
-            }).start();
-        }         
-
-        // Loop until finished
-        while (!finished) {
-            finished = true;
-
-            for (ExecuteHTTPRequest<?> request : requests) {
-                if (!request.isFinished()) {
-                    finished = false;
-                    break;
-                }
-            }
-        }    
     }
 }

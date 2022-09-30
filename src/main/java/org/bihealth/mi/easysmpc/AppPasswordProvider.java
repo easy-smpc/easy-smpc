@@ -19,7 +19,7 @@ import java.io.Serializable;
 import javax.swing.JFrame;
 
 import org.bihealth.mi.easybus.PasswordStore;
-import org.bihealth.mi.easybus.implementations.email.PasswordProvider;
+import org.bihealth.mi.easybus.implementations.PasswordProvider;
 import org.bihealth.mi.easysmpc.components.DialogPassword;
 
 /**
@@ -35,7 +35,6 @@ public class AppPasswordProvider implements PasswordProvider, Serializable {
     /** Second password descriptor */
     private String secondPasswordDescriptor = null;
     
-    
     /**
      * Creates a new instance to obtain one password
      * 
@@ -45,11 +44,12 @@ public class AppPasswordProvider implements PasswordProvider, Serializable {
         // Store
         this.firstPasswordDescriptor = singlePasswordDescriptor;
     }
-    
+
     /**
      * Creates a new instance to obtain two passwords
      * 
-     * @param singlePasswordDescriptor
+     * @param firstPasswordDescriptor
+     * @param secondPasswordDescriptor
      */
     public AppPasswordProvider(String firstPasswordDescriptor, String secondPasswordDescriptor) {
         // Store

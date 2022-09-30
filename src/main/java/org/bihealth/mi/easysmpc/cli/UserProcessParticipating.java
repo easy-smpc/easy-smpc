@@ -60,18 +60,7 @@ public class UserProcessParticipating extends UserProcess {
         this.data = data;
         
         // Delete pre-existing bus messages
-        // TODO Improve purging
-//        try {
-//            LOGGER.info("Start deleting pre-existing messages");
-//            purgeMessages(new MessageFilter() {
-//                @Override
-//                public boolean accepts(String messageDescription) {
-//                    return !messageDescription.contains(ROUND_0);
-//                }
-//            });
-//        } catch (BusException | InterruptedException e) {
-//            LOGGER.error("Unable to delete pre-existing messages", e);
-//        }
+        // TODO Clarify purging!
         
         // Register for initial message
         Bus interimBus = getInterimBus();

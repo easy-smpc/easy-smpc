@@ -161,7 +161,6 @@ public class EntryEasybackendAdvanced extends EntryEasybackendBasic {
         entryRealm.setChangeListener(listener);
         entryClientId.setChangeListener(listener);
         entryClientSecret.setChangeListener(listener);
-        
     }
     
     /**

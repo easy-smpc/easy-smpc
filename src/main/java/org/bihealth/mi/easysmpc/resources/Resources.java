@@ -169,10 +169,10 @@ public class Resources {
     public static final int RETRY_EASYBACKEND_NUMBER_RETRY = 5;
 
     /** Wait time between Retries for Easybackend */
-    public static final long RETRY_EASYBACKEND_WAIT_TIME_RETRY = 5000;
+    public static final int RETRY_EASYBACKEND_WAIT_TIME_RETRY = 5000;
     
     /** Timeout for Easybackend requests */
-    public static final long TIMEOUT_EASYBACKEND = 30000;
+    public static final int TIMEOUT_EASYBACKEND = 30000;
     
     /** Auth realm default */
     public static final String AUTH_REALM_DEFAULT = "easybackend";

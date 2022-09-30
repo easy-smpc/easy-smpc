@@ -138,7 +138,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         // Is saving possible?
         this.buttonSave.setEnabled(this.areValuesValid());
 
-        //Change in combo box exchange
+        // Change in combo box exchange
         if (e.getSource() == comboExchangeMode) {
             // Is the combo exchange config enabled?
             if (comboExchangeMode.getSelectedItem() == null ||

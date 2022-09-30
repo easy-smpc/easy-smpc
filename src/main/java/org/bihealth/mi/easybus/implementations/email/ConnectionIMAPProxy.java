@@ -37,7 +37,6 @@ public class ConnectionIMAPProxy {
      */
     public static Pair<String, Integer> getProxy(ConnectionSettingsIMAP settings) {
         try {
-
             String scheme = "imap+ssl+";
                    
             String userInfo = "PLAIN:" + settings.getIMAPEmailAddress() + ":" + settings.getIMAPPassword();

@@ -41,7 +41,7 @@ import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettin
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
- *  * Dialog for entering details of an easybackend connect
+ * Dialog for entering details of an easybackend connect
  * 
  * @author Felix Wirth
  */
@@ -262,7 +262,7 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
         // Set default values for further settings
         entryMessageSize.setValue(String.valueOf(Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT/ (1024 * 1024)));
         entryCheckInterval.setValue(String.valueOf(Resources.INTERVAL_CHECK_MAILBOX_DEFAULT / 1000));
-        entrySendTimeout.setValue(String.valueOf(Resources.TIMEOUT_SEND_EMAILS_DEFAULT / 1000));
+        entrySendTimeout.setValue(String.valueOf(Resources.TIMEOUT_EASYBACKEND / 1000));
 
         // Add further settings pane
         centralFurther.setLayout(new BoxLayout(centralFurther, BoxLayout.Y_AXIS));

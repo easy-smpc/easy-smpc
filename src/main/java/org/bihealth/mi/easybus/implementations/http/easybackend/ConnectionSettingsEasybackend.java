@@ -23,7 +23,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PasswordStore;
-import org.bihealth.mi.easybus.implementations.email.PasswordProvider;
+import org.bihealth.mi.easybus.implementations.PasswordProvider;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -301,8 +301,6 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
         this.clientSecret = clientSecret;
         return this;
     }
-    
-    
     
     /**
      * Check

@@ -29,6 +29,7 @@ import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easybus.PerformanceListener;
+import org.bihealth.mi.easybus.implementations.PasswordProvider;
 import org.bihealth.mi.easysmpc.resources.Resources;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

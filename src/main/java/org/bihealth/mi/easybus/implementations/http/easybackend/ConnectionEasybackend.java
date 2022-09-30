@@ -46,7 +46,7 @@ import jakarta.ws.rs.core.Response;
  * @author Felix Wirth
  *
  */
-public class ConnectionEasybackend  implements AuthHandler {
+public class ConnectionEasybackend implements AuthHandler {
     
     /**
      * Default error handler
@@ -221,6 +221,7 @@ public class ConnectionEasybackend  implements AuthHandler {
     
     /**
      * Get self
+     * 
      * @return 
      */
     public Participant getSelf() {
