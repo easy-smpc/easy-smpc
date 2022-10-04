@@ -30,9 +30,8 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * Settings for Easybackend connections
  * 
  * @author Felix Wirth
- *
  */
-public class ConnectionSettingsEasybackend  extends ConnectionSettings {
+public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
 
     /** SVUID */
     private static final long         serialVersionUID = -944743683309534747L;
@@ -67,7 +66,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
      * @param self - own participant
      * @param provider
      */
-    public ConnectionSettingsEasybackend(Participant self, PasswordProvider provider) {
+    public ConnectionSettingsEasyBackend(Participant self, PasswordProvider provider) {
         
         // Checks
         checkNonNull(self);
@@ -107,8 +106,8 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     }
 
     @Override
-    public ConnectionTypes getConnectionType() {
-        return ConnectionTypes.EASYBACKEND;
+    public ExchangeMode getExchangeMode() {
+        return ExchangeMode.EASYBACKEND;
     }
 
     /**
@@ -121,7 +120,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @param authServer the authServer to set
      */
-    public ConnectionSettingsEasybackend setAuthServer(URL authServer) {
+    public ConnectionSettingsEasyBackend setAuthServer(URL authServer) {
         this.authServer = authServer;
         return this;
     }
@@ -136,7 +135,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @param apiServer the apiServer to set
      */
-    public ConnectionSettingsEasybackend setAPIServer(URL apiServer) {
+    public ConnectionSettingsEasyBackend setAPIServer(URL apiServer) {
         checkURL(apiServer.toString());
         
         URIBuilder uriBuilder;
@@ -183,7 +182,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @param realm the realm to set
      */
-    public ConnectionSettingsEasybackend setRealm(String realm) {
+    public ConnectionSettingsEasyBackend setRealm(String realm) {
         this.realm = realm;
         return this;
     }
@@ -198,7 +197,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @param clientId the clientId to set
      */
-    public ConnectionSettingsEasybackend setClientId(String clientId) {
+    public ConnectionSettingsEasyBackend setClientId(String clientId) {
         this.clientId = clientId;
         return this;
     }
@@ -257,7 +256,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @param proxy the proxy to set
      */
-    public ConnectionSettingsEasybackend setProxy(URI proxy) {
+    public ConnectionSettingsEasyBackend setProxy(URI proxy) {
         this.proxy = proxy;
         return this;
     }
@@ -265,7 +264,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @param sendTimeout the sendTimeout to set
      */
-    public ConnectionSettingsEasybackend setSendTimeout(int sendTimeout) {
+    public ConnectionSettingsEasyBackend setSendTimeout(int sendTimeout) {
         this.sendTimeout = sendTimeout;
         return this;
     }
@@ -274,7 +273,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
      * @param maxMessageSize the maxMessageSize to set
      * @return 
      */
-    public ConnectionSettingsEasybackend setMaxMessageSize(int maxMessageSize) {
+    public ConnectionSettingsEasyBackend setMaxMessageSize(int maxMessageSize) {
         this.maxMessageSize = maxMessageSize;
         return this;
     }
@@ -282,7 +281,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @param checkInterval the checkInterval to set
      */
-    public ConnectionSettingsEasybackend setCheckInterval(int checkInterval) {
+    public ConnectionSettingsEasyBackend setCheckInterval(int checkInterval) {
         this.checkInterval = checkInterval;
         return this;
     }
@@ -297,7 +296,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
     /**
      * @param clientSecret the clientSecret to set
      */
-    public ConnectionSettingsEasybackend setClientSecret(String clientSecret) {
+    public ConnectionSettingsEasyBackend setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
         return this;
     }
@@ -321,7 +320,7 @@ public class ConnectionSettingsEasybackend  extends ConnectionSettings {
 
         try {
             // Add check to API server
-            new ConnectionEasybackend(this);
+            new ConnectionEasyBackend(this);
             return true;
         } catch (Exception e) {
             return false;

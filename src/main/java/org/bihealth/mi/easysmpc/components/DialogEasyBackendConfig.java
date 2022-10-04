@@ -37,15 +37,15 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
- * Dialog for entering details of an easybackend connect
+ * Dialog for entering details of an EasyBackend connect
  * 
  * @author Felix Wirth
  */
-public class DialogEasybackendConfig extends JDialog implements ChangeListener {
+public class DialogEasyBackendConfig extends JDialog implements ChangeListener {
 
 
     /** SVUID */
@@ -53,7 +53,7 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
     /** Button */
     private JButton                       buttonOK;
     /** Result */
-    private ConnectionSettingsEasybackend result;
+    private ConnectionSettingsEasyBackend result;
     /** Parent frame */
     private JFrame                        parent;
     /** Central panel */
@@ -61,9 +61,9 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
     /** Init finished */
     private boolean                       initFinished     = false;
     /** Entry for IMAP details */
-    private EntryEasybackendBasic         entryEasybackendBasic;
+    private EntryEasyBackendBasic         entryEasybackendBasic;
     /** Entry for SMTP details */
-    private EntryEasybackendAdvanced      entryEasybackendAdvanced;
+    private EntryEasyBackendAdvanced      entryEasybackendAdvanced;
     /** Edit or create mode? */
     private boolean                       createMode       = true;
     /** Tabbed pane */
@@ -83,7 +83,7 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
      * @param settings to fill as default in the fields and deactivate the email field
      * @param parent Component to set the location of JDialog relative to
      */
-    public DialogEasybackendConfig(ConnectionSettingsEasybackend settings, JFrame parent) {
+    public DialogEasyBackendConfig(ConnectionSettingsEasyBackend settings, JFrame parent) {
         this(parent);
 
         // Fill fields
@@ -117,7 +117,7 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
      * @param settings
      * @return
      */
-    public static boolean isAdvancedDialogNecessary(ConnectionSettingsEasybackend settings) {
+    public static boolean isAdvancedDialogNecessary(ConnectionSettingsEasyBackend settings) {
         // Check
         if(settings == null) return false;
         
@@ -134,7 +134,7 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
      * 
      * @param parent Component to set the location of JDialog relative to
      */
-    public DialogEasybackendConfig(JFrame parent) {
+    public DialogEasyBackendConfig(JFrame parent) {
 
         // Dialog properties
         this.parent = parent;
@@ -180,7 +180,7 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
                 // If swap from advanced to simple ask before
                 if (radioDialogType.isFirstOptionSelected() &&
                         isAdvancedDialogNecessary(entryEasybackendAdvanced.getSettings()) &&
-                        JOptionPane.showConfirmDialog(DialogEasybackendConfig.this,
+                        JOptionPane.showConfirmDialog(DialogEasyBackendConfig.this,
                                                       Resources.getString("EmailConfig.41"),
                                                       Resources.getString("EmailConfig.42"),
                                                       JOptionPane.OK_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
@@ -306,7 +306,7 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
-                DialogEasybackendConfig.this.result = null;
+                DialogEasyBackendConfig.this.result = null;
             }
         });
 
@@ -351,13 +351,13 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
      * 
      * @param settings
      */
-    private void displayBasicDialog(ConnectionSettingsEasybackend settings) {
+    private void displayBasicDialog(ConnectionSettingsEasyBackend settings) {
         // Remove
         centralBase.removeAll();
         entryEasybackendAdvanced = null;
 
         // Create and add entry
-        entryEasybackendBasic= new EntryEasybackendBasic(settings, createMode);
+        entryEasybackendBasic= new EntryEasyBackendBasic(settings, createMode);
         centralBase.add(entryEasybackendBasic);
 
         // Add listeners
@@ -374,13 +374,13 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
      * 
      * @param settings
      */
-    private void displayAdvancedDialog(ConnectionSettingsEasybackend settings) {
+    private void displayAdvancedDialog(ConnectionSettingsEasyBackend settings) {
         // Remove
         centralBase.removeAll();
         entryEasybackendBasic = null;
 
         // Create and add entry
-        entryEasybackendAdvanced = new EntryEasybackendAdvanced(settings, createMode);
+        entryEasybackendAdvanced = new EntryEasyBackendAdvanced(settings, createMode);
         centralBase.add(entryEasybackendAdvanced);
 
         // Add listeners
@@ -395,7 +395,7 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
     /**
      * Show this dialog
      */
-    public ConnectionSettingsEasybackend showDialog() {
+    public ConnectionSettingsEasyBackend showDialog() {
         this.pack();
         this.setLocationRelativeTo(this.parent);
         this.setModal(true);
@@ -434,7 +434,7 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
     private void actionCheckAndProceed() {
 
         try {
-            ConnectionSettingsEasybackend settings = getConnectionSettings();
+            ConnectionSettingsEasyBackend settings = getConnectionSettings();
             if (!settings.isValid(false)) {
                 throw new BusException("Connection error");
             }
@@ -461,9 +461,9 @@ public class DialogEasybackendConfig extends JDialog implements ChangeListener {
      * 
      * @return connection settings
      */
-    private ConnectionSettingsEasybackend getConnectionSettings() {
+    private ConnectionSettingsEasyBackend getConnectionSettings() {
         // Collect from active component
-        ConnectionSettingsEasybackend result = entryEasybackendBasic != null
+        ConnectionSettingsEasyBackend result = entryEasybackendBasic != null
                 ? entryEasybackendBasic.getSettings()
                 : entryEasybackendAdvanced.getSettings();
         

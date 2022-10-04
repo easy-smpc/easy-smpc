@@ -26,7 +26,7 @@ import javax.swing.event.ChangeListener;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PasswordStore;
-import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easysmpc.AppPasswordProvider;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -34,9 +34,8 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  *  Entry of basic details of an Easybackend connection
  * 
  * @author Felix Wirth
- *
  */
-public class EntryEasybackendBasic extends JPanel {
+public class EntryEasyBackendBasic extends JPanel {
 
     /** SVUID */
     private static final long        serialVersionUID = -4525263639314062052L;
@@ -53,7 +52,7 @@ public class EntryEasybackendBasic extends JPanel {
      * @param settings
      * @param createMode
      */
-    public EntryEasybackendBasic(ConnectionSettingsEasybackend settings, boolean createMode) {
+    public EntryEasyBackendBasic(ConnectionSettingsEasyBackend settings, boolean createMode) {
 
         // General
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -108,7 +107,7 @@ public class EntryEasybackendBasic extends JPanel {
                 }
                 
                 try {
-                    ConnectionSettingsEasybackend.checkURL(text);
+                    ConnectionSettingsEasyBackend.checkURL(text);
                 } catch (Exception e) {
                     return false;
                 }
@@ -154,11 +153,11 @@ public class EntryEasybackendBasic extends JPanel {
      * 
      * @return
      */
-    public ConnectionSettingsEasybackend getSettings() {
+    public ConnectionSettingsEasyBackend getSettings() {
         // Prepare
-        ConnectionSettingsEasybackend result = null;
+        ConnectionSettingsEasyBackend result = null;
         try {
-            result = new ConnectionSettingsEasybackend(new Participant(entryName.getValue(),
+            result = new ConnectionSettingsEasyBackend(new Participant(entryName.getValue(),
                                                                        entryEmailPassword.getLeftValue()),
                                                        new AppPasswordProvider(Resources.getString("EmailConfig.33")))
                     .setAPIServer(new URL(entryServerURL.getValue()));

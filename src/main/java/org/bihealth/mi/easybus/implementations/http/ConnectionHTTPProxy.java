@@ -21,7 +21,7 @@ import java.util.List;
 import com.github.markusbernhardt.proxy.ProxySearch;
 
 /**
- * Try to create IMAP proxy. In parts derived from
+ * Try to create a HTTP proxy. In parts derived from
  * k9mail-library/src/main/java/com/fsck/k9/mail/store/imap/ImapStoreUriCreator.java
  * 
  * @author Fabian Prasser

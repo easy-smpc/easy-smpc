@@ -83,19 +83,19 @@ public abstract class ConnectionSettings implements Serializable {
     }
     
     /**
-     * Returns the connection type
+     * Returns the exchange mode
      * 
      * @return
      */
-    public abstract ConnectionTypes getConnectionType();
+    public abstract ExchangeMode getExchangeMode();
     
     /** Connection types */
-    public enum ConnectionTypes { 
+    public enum ExchangeMode { 
         /** Enum values */
         MANUAL, EMAIL, EASYBACKEND;
         
         public String toString() {
-            return Resources.getString(String.format("ConnectionTypes.%s", this.name()));
+            return Resources.getString(String.format("ExchangeMode.%s", this.name()));
         }
     }
 }

@@ -770,9 +770,11 @@ public class ConnectionSettingsIMAP extends ConnectionSettings {
     }
 
     @Override
-    public ConnectionTypes getConnectionType() {
-        return ConnectionTypes.EMAIL;
+    public ExchangeMode getExchangeMode() {
+        return ExchangeMode.EMAIL;
     }
+
+
 
     @Override
     public int hashCode() {

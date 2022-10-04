@@ -29,7 +29,7 @@ import org.apache.commons.lang3.EnumUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.ConnectionSettings.ConnectionTypes;
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easysmpc.dataimport.ImportFile;
@@ -278,23 +278,23 @@ public class Main {
             cli = parser.parse(new Options().addOption(OPTION_CREATE).addOption(OPTION_CONNECTION_TYPE), args, true);
 
             // Get connection type
-            if (cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase().equals(ConnectionTypes.MANUAL.toString()) ||
-                    !EnumUtils.isValidEnum(ConnectionTypes.class, cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
-                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ConnectionTypes.values())));
+            if (cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase().equals(ExchangeMode.MANUAL.toString()) ||
+                    !EnumUtils.isValidEnum(ExchangeMode.class, cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
+                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ExchangeMode.values())));
             }
 
             // Set correct connection settings parser
-            switch(ConnectionTypes.valueOf(cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
+            switch(ExchangeMode.valueOf(cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
             case EASYBACKEND:
-                connectionSettingsParser = new ConnectionSettingsParserEasybackend(args, options);
+                connectionSettingsParser = new ConnectionSettingsParserEasyBackend(args, options);
                 break;
             case EMAIL:
                 connectionSettingsParser = new ConnectionSettingsParserEmail(args, options);
                 break;
             case MANUAL:
-                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ConnectionTypes.values())));
+                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ExchangeMode.values())));
             default:
-                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ConnectionTypes.values())));
+                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ExchangeMode.values())));
             }
 
             // Parse all parameters including the connection setting specific ones
@@ -381,23 +381,23 @@ public class Main {
             cli = parser.parse(new Options().addOption(OPTION_PARTICIPATE).addOption(OPTION_CONNECTION_TYPE), args, true);
 
             // Get connection type
-            if (cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase().equals(ConnectionTypes.MANUAL.toString()) ||
-                    !EnumUtils.isValidEnum(ConnectionTypes.class, cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
-                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ConnectionTypes.values())));
+            if (cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase().equals(ExchangeMode.MANUAL.toString()) ||
+                    !EnumUtils.isValidEnum(ExchangeMode.class, cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
+                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ExchangeMode.values())));
             }
 
             // Set correct connection settings parser
-            switch(ConnectionTypes.valueOf(cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
+            switch(ExchangeMode.valueOf(cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
             case EASYBACKEND:
-                connectionSettingsParser = new ConnectionSettingsParserEasybackend(args, options);
+                connectionSettingsParser = new ConnectionSettingsParserEasyBackend(args, options);
                 break;
             case EMAIL:
                 connectionSettingsParser = new ConnectionSettingsParserEmail(args, options);
                 break;
             case MANUAL:
-                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ConnectionTypes.values())));
+                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ExchangeMode.values())));
             default:
-                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ConnectionTypes.values())));
+                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ExchangeMode.values())));
             }
 
             // Parse all parameters including the connection setting specific ones

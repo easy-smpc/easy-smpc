@@ -25,17 +25,17 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeListener;
 
-import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
- *  Entry of advanced details of an easybackend connection
+ *  Entry of advanced details of an EasyBackend connection
  * 
  * @author Felix Wirth
  *
  */
  
-public class EntryEasybackendAdvanced extends EntryEasybackendBasic {
+public class EntryEasyBackendAdvanced extends EntryEasyBackendBasic {
 
     /** SVUID */
     private static final long         serialVersionUID = 8266372600895412625L;
@@ -56,7 +56,7 @@ public class EntryEasybackendAdvanced extends EntryEasybackendBasic {
      * @param settings
      * @param createMode 
      */
-    public EntryEasybackendAdvanced(ConnectionSettingsEasybackend settings, boolean createMode) {
+    public EntryEasyBackendAdvanced(ConnectionSettingsEasyBackend settings, boolean createMode) {
         super(settings, createMode);
         
         // General
@@ -86,7 +86,7 @@ public class EntryEasybackendAdvanced extends EntryEasybackendBasic {
                 }
                 
                 try {
-                    ConnectionSettingsEasybackend.checkURL(text);
+                    ConnectionSettingsEasyBackend.checkURL(text);
                 } catch (Exception e) {
                     return false;
                 }
@@ -102,7 +102,7 @@ public class EntryEasybackendAdvanced extends EntryEasybackendBasic {
                 }
                 
                 try {
-                    ConnectionSettingsEasybackend.checkURL(text);
+                    ConnectionSettingsEasyBackend.checkURL(text);
                 } catch (Exception e) {
                     return false;
                 }
@@ -213,9 +213,9 @@ public class EntryEasybackendAdvanced extends EntryEasybackendBasic {
      * Get connection settings
      * @return
      */
-    public ConnectionSettingsEasybackend getSettings() {
+    public ConnectionSettingsEasyBackend getSettings() {
         // Prepare
-        ConnectionSettingsEasybackend result = super.getSettings();
+        ConnectionSettingsEasyBackend result = super.getSettings();
         
         // Set
         result.setAuthServer(getAuthServerURL());

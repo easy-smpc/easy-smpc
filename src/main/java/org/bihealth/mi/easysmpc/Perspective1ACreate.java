@@ -45,12 +45,12 @@ import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.ConnectionSettings;
-import org.bihealth.mi.easybus.ConnectionSettings.ConnectionTypes;
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
-import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
-import org.bihealth.mi.easysmpc.components.DialogEasybackendConfig;
+import org.bihealth.mi.easysmpc.components.DialogEasyBackendConfig;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryBin;
 import org.bihealth.mi.easysmpc.components.EntryParticipant;
@@ -109,7 +109,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private JButton                       buttonAddExchangeConfig;
 
     /** Combo box to select exchange mode */
-    private JComboBox<ConnectionTypes>    comboExchangeMode;
+    private JComboBox<ExchangeMode>    comboExchangeMode;
 
     /** Combo box to select exchange configuration */
     private JComboBox<ConnectionSettings> comboExchangeConfig;
@@ -142,7 +142,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         if (e.getSource() == comboExchangeMode) {
             // Is the combo exchange config enabled?
             if (comboExchangeMode.getSelectedItem() == null ||
-                    ((ConnectionTypes) comboExchangeMode.getSelectedItem()).equals(ConnectionTypes.MANUAL)) {
+                    ((ExchangeMode) comboExchangeMode.getSelectedItem()).equals(ExchangeMode.MANUAL)) {
                 comboExchangeConfig.setEnabled(false);
                 buttonAddExchangeConfig.setEnabled(false);
                 comboExchangeConfig.setSelectedItem(null);
@@ -183,7 +183,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             // Get participant entry component           
             final EntryParticipant entry = ((EntryParticipant) this.panelParticipants.getComponents()[getApp().getModel().getOwnId()]);
             
-            if (!((ConnectionTypes) this.comboExchangeMode.getSelectedItem()).equals(ConnectionTypes.MANUAL) && comboExchangeConfig.getSelectedItem() != null) {
+            if (!((ExchangeMode) this.comboExchangeMode.getSelectedItem()).equals(ExchangeMode.MANUAL) && comboExchangeConfig.getSelectedItem() != null) {
                 // Set identifier and deactivate if not already done
                 String identifier = ((ConnectionSettings) comboExchangeConfig.getSelectedItem()).getIdentifier();
                 SwingUtilities.invokeLater(new Runnable() {
@@ -219,9 +219,9 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
     private void actionAddExchangeConf() {
         // Get new settings
         ConnectionSettings newSettings;
-        switch ((ConnectionTypes) this.comboExchangeMode.getSelectedItem()) {
+        switch ((ExchangeMode) this.comboExchangeMode.getSelectedItem()) {
         case EASYBACKEND:
-            newSettings = new DialogEasybackendConfig(null, getApp()).showDialog();
+            newSettings = new DialogEasyBackendConfig(null, getApp()).showDialog();
             break;
         case EMAIL:
             newSettings = new DialogEmailConfig(null, getApp()).showDialog();
@@ -560,9 +560,9 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
             // Read from preferences
             ArrayList<ConnectionSettings> configFromPreferences;
             
-            switch ((ConnectionTypes) this.comboExchangeMode.getSelectedItem()) {
+            switch ((ExchangeMode) this.comboExchangeMode.getSelectedItem()) {
             case EASYBACKEND:
-                configFromPreferences = Connections.list(ConnectionSettingsEasybackend.class);
+                configFromPreferences = Connections.list(ConnectionSettingsEasyBackend.class);
                 break;
             case EMAIL:
                 configFromPreferences = Connections.list(ConnectionSettingsIMAP.class);
@@ -654,8 +654,8 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         automaticExchangePanel.setLayout(new BoxLayout(automaticExchangePanel, BoxLayout.X_AXIS));
        
         // Combo boxes for exchange mode & config
-        comboExchangeMode = new JComboBox<>(ConnectionTypes.values());
-        comboExchangeMode.setSelectedItem(ConnectionTypes.MANUAL);
+        comboExchangeMode = new JComboBox<>(ExchangeMode.values());
+        comboExchangeMode.setSelectedItem(ExchangeMode.MANUAL);
         comboExchangeMode.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

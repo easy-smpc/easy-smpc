@@ -46,7 +46,7 @@ import jakarta.ws.rs.core.Response;
  * @author Felix Wirth
  *
  */
-public class ConnectionEasybackend implements AuthHandler {
+public class ConnectionEasyBackend implements AuthHandler {
     
     /**
      * Default error handler
@@ -74,19 +74,19 @@ public class ConnectionEasybackend implements AuthHandler {
     };
     
     /** Path to authorize */
-    private static final String              AUTHENTICATE_TEMPLATE = "auth/realms/%s/protocol/openid-connect/token";
+    private static final String                 AUTHENTICATE_TEMPLATE = "auth/realms/%s/protocol/openid-connect/token";
     /** REST client */
-    private final Client                     client;
+    private final Client                        client;
     /** Auth data */
-    private final Form                       auth                  = new Form();
+    private final Form                          auth                  = new Form();
     /** Jackson object mapper */
-    private final ObjectMapper               mapper                = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private final ObjectMapper                  mapper                = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     /** Path to authenticate at Keycloak */
-    private final String                     authenticatePath;
+    private final String                        authenticatePath;
     /** Authentification bearer token */
-    private String                           bearer;
+    private String                              bearer;
     /** Settings */
-    private final ConnectionSettingsEasybackend settings;
+    private final ConnectionSettingsEasyBackend settings;
     
     @Override
     public Builder authenticate(Builder builder) throws BusException {
@@ -126,7 +126,7 @@ public class ConnectionEasybackend implements AuthHandler {
      * @param settings
      * @throws IllegalStateException
      */
-    public ConnectionEasybackend(ConnectionSettingsEasybackend settings) throws IllegalStateException {
+    public ConnectionEasyBackend(ConnectionSettingsEasyBackend settings) throws IllegalStateException {
         // Check
         if(settings.getAPIServer() == null || settings.getSelf() == null || settings.getPassword(true) == null) {
             throw new IllegalArgumentException("The api server, the user identifiying object (self) and password can not be null");

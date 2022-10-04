@@ -58,7 +58,7 @@ import jakarta.ws.rs.core.Response;
  * @author Felix Wirth
  *
  */
-public class BusEasybackend extends Bus {
+public class BusEasyBackend extends Bus {
     
     /** Path to send messages */
     private static final String   PATH_SEND_MESSAGE_PATTERN   = "api/easybackend/send/%s/%s";
@@ -69,15 +69,15 @@ public class BusEasybackend extends Bus {
     /** Purge all messages */
     private static final String   PATH_PURGE_PATTERN          = "api/easybackend/message";
     /** Logger */
-    private Logger                LOGGER                      = LogManager.getLogger(BusEasybackend.class);
+    private Logger                LOGGER                      = LogManager.getLogger(BusEasyBackend.class);
     /** Connection to backend */
-    private ConnectionEasybackend connection;
+    private ConnectionEasyBackend connection;
     /** Thread */
     private Thread                thread;
     /** Message manager */
     private MessageManager        messageManager;
     /** Stop flag */
-    boolean                       stop                        = false;
+    private boolean               stop                        = false;
     /** Jackson object mapper */
     private ObjectMapper          mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -89,10 +89,9 @@ public class BusEasybackend extends Bus {
      * @param connection
      * @param maxMessageSize
      */
-    public BusEasybackend(int sizeThreadpool, int millis, ConnectionEasybackend connection, int maxMessageSize) {
+    public BusEasyBackend(int sizeThreadpool, int millis, ConnectionEasyBackend connection, int maxMessageSize) {
         // Super
         super(sizeThreadpool);
-        
        
         // Store
         this.connection = connection;
@@ -163,7 +162,7 @@ public class BusEasybackend extends Bus {
                                                                               return response.readEntity(String.class);
                                                                           }
                                                                       },
-                                                                      ConnectionEasybackend.DEFAULT_ERROR_HANDLER,
+                                                                      ConnectionEasyBackend.DEFAULT_ERROR_HANDLER,
                                                                       this.connection,
                                                                       Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
                                                                       Resources.RETRY_EASYBACKEND_WAIT_TIME_RETRY).execute();
@@ -232,7 +231,7 @@ public class BusEasybackend extends Bus {
     private BusMessage recreateMessage(JsonNode messagesNode) throws BusException {
         // Check
         if (messagesNode.path("id") == null || messagesNode.path("id").isMissingNode() || messagesNode.path("content") == null || messagesNode.path("content").isMissingNode()) {
-            throw new BusException("Node contains unsufficient data fields!");
+            throw new BusException("Node contains insufficient data fields!");
         }
         
         // Set values
@@ -256,7 +255,7 @@ public class BusEasybackend extends Bus {
                 }
                 @Override
                 public void expunge() throws BusException {
-                    // Empty
+                    // Empty by design
                 }
             };
         } else {
@@ -269,7 +268,7 @@ public class BusEasybackend extends Bus {
                 }
                 @Override
                 public void expunge() throws BusException {
-                    // Empty
+                    // Empty by design
                 }
             };
         }
@@ -288,28 +287,28 @@ public class BusEasybackend extends Bus {
         
         // Create task to get sync
         FutureTask<String> future = new ExecuteHTTPRequest<String>(request,
-                                                              ExecuteHTTPRequest.REST_TYPE.DELETE,
-                                                              new Supplier<ExecutorService>() {
+                                                                   ExecuteHTTPRequest.REST_TYPE.DELETE,
+                                                                   new Supplier<ExecutorService>() {
 
-                                                                  @Override
-                                                                  public ExecutorService get() {
-                                                                      return getExecutor();
-                                                                  }
-                                                                  },
-                                                                  null,
-                                                                  null,
-                                                                  ConnectionEasybackend.DEFAULT_ERROR_HANDLER,
-                                                                  this.connection,
-                                                                  Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
-                                                                  Resources.RETRY_EASYBACKEND_WAIT_TIME_RETRY).execute();
+                                                                       @Override
+                                                                       public ExecutorService
+                                                                              get() {
+                                                                           return getExecutor();
+                                                                       }
+                                                                   },
+                                                                   null,
+                                                                   null,
+                                                                   ConnectionEasyBackend.DEFAULT_ERROR_HANDLER,
+                                                                   this.connection,
+                                                                   Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
+                                                                   Resources.RETRY_EASYBACKEND_WAIT_TIME_RETRY).execute();
         
         // Wait for task end or exception
         try {
             future.get(Resources.TIMEOUT_EASYBACKEND, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             LOGGER.error("Error while executing HTTP request to delete message!", e);
-        }        
-        
+        }
     }
 
     @Override
@@ -384,20 +383,21 @@ public class BusEasybackend extends Bus {
         
         // Create task to get sync
         FutureTask<String> future = new ExecuteHTTPRequest<String>(request,
-                                                                  ExecuteHTTPRequest.REST_TYPE.POST,
-                                                                  new Supplier<ExecutorService>() {
+                                                                   ExecuteHTTPRequest.REST_TYPE.POST,
+                                                                   new Supplier<ExecutorService>() {
 
-                                                                      @Override
-                                                                      public ExecutorService get() {
-                                                                          return getExecutor();
-                                                                      }
-                                                                  },
-                                                                  payload,
-                                                                  null,
-                                                                  ConnectionEasybackend.DEFAULT_ERROR_HANDLER,
-                                                                  this.connection,
-                                                                  Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
-                                                                  Resources.RETRY_EASYBACKEND_WAIT_TIME_RETRY).execute();
+                                                                       @Override
+                                                                       public ExecutorService
+                                                                              get() {
+                                                                           return getExecutor();
+                                                                       }
+                                                                   },
+                                                                   payload,
+                                                                   null,
+                                                                   ConnectionEasyBackend.DEFAULT_ERROR_HANDLER,
+                                                                   this.connection,
+                                                                   Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
+                                                                   Resources.RETRY_EASYBACKEND_WAIT_TIME_RETRY).execute();
         
         // Wait for task end or exception
         try {
@@ -416,20 +416,21 @@ public class BusEasybackend extends Bus {
         
         // Create task to get sync
         FutureTask<String> future = new ExecuteHTTPRequest<String>(request,
-                                                              ExecuteHTTPRequest.REST_TYPE.DELETE,
-                                                              new Supplier<ExecutorService>() {
+                                                                   ExecuteHTTPRequest.REST_TYPE.DELETE,
+                                                                   new Supplier<ExecutorService>() {
 
-                                                                  @Override
-                                                                  public ExecutorService get() {
-                                                                      return getExecutor();
-                                                                  }
-                                                                  },
-                                                                  null,
-                                                                  null,
-                                                                  ConnectionEasybackend.DEFAULT_ERROR_HANDLER,
-                                                                  this.connection,
-                                                                  Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
-                                                                  Resources.RETRY_EASYBACKEND_WAIT_TIME_RETRY).execute();
+                                                                       @Override
+                                                                       public ExecutorService
+                                                                              get() {
+                                                                           return getExecutor();
+                                                                       }
+                                                                   },
+                                                                   null,
+                                                                   null,
+                                                                   ConnectionEasyBackend.DEFAULT_ERROR_HANDLER,
+                                                                   this.connection,
+                                                                   Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
+                                                                   Resources.RETRY_EASYBACKEND_WAIT_TIME_RETRY).execute();
         
         // Wait for task end or exception
         try {

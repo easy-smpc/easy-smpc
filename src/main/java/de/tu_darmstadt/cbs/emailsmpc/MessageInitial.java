@@ -25,7 +25,7 @@ import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Objects;
 
-import org.bihealth.mi.easybus.ConnectionSettings.ConnectionTypes;
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 
 import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 
@@ -95,7 +95,7 @@ public class MessageInitial implements Serializable {
     /** The study UID. */
     public String studyUID;
     /** Exchange mode */
-    private ConnectionTypes exchangeMode;
+    private ExchangeMode exchangeMode;
     
 
     /**

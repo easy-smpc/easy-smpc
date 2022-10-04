@@ -28,13 +28,13 @@ import java.util.stream.IntStream;
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.ConnectionSettings;
-import org.bihealth.mi.easybus.ConnectionSettings.ConnectionTypes;
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
-import org.bihealth.mi.easybus.implementations.http.easybackend.BusEasybackend;
-import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionEasybackend;
-import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasybackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.BusEasyBackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionEasyBackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -136,7 +136,7 @@ public class Study implements Serializable, Cloneable {
     private boolean[] retrievedMessages;
 
     /** Exchange mode */
-    private ConnectionTypes exchangeMode = ConnectionTypes.MANUAL;
+    private ExchangeMode exchangeMode = ExchangeMode.MANUAL;
 
     /**
      * Instantiates a new app model.
@@ -348,11 +348,11 @@ public class Study implements Serializable, Cloneable {
                                                 ((ConnectionSettingsIMAP) this.getConnectionSettings()).getMaxMessageSize());
             }
 
-            // Is easybackend bus?
-            if (this.getConnectionSettings() instanceof ConnectionSettingsEasybackend) {
-                this.bus = new BusEasybackend(Resources.SIZE_THREADPOOL,
+            // Is EasyBackend bus?
+            if (this.getConnectionSettings() instanceof ConnectionSettingsEasyBackend) {
+                this.bus = new BusEasyBackend(Resources.SIZE_THREADPOOL,
                                               millis > 0 ? millis : getConnectionSettings().getCheckInterval(),
-                                                      new ConnectionEasybackend((ConnectionSettingsEasybackend) getConnectionSettings()),
+                                                      new ConnectionEasyBackend((ConnectionSettingsEasyBackend) getConnectionSettings()),
                                                       getConnectionSettings().getMaxMessageSize());
             }
         }
@@ -510,7 +510,7 @@ public class Study implements Serializable, Cloneable {
             throw new IllegalStateException("Unable to initialize study at state" + getState());
         this.setName(name);
         this.setConnectionSettings(connectionSettings);
-        this.exchangeMode = connectionSettings == null ? ConnectionTypes.MANUAL : connectionSettings.getConnectionType(); 
+        this.exchangeMode = connectionSettings == null ? ExchangeMode.MANUAL : connectionSettings.getExchangeMode(); 
         setNumParticipants(participants.length);
         unsentMessages = new Message[getNumParticipants()];
         retrievedMessages = new boolean[getNumParticipants()];       
@@ -529,7 +529,7 @@ public class Study implements Serializable, Cloneable {
     
     /** @return Is automated mode used? */
     public boolean isAutomatedMode() {
-        return !(this.exchangeMode == null || this.exchangeMode == ConnectionTypes.MANUAL && connectionSettings != null);
+        return !(this.exchangeMode == null || this.exchangeMode == ExchangeMode.MANUAL && connectionSettings != null);
     }
     
     /**
@@ -1191,11 +1191,11 @@ public class Study implements Serializable, Cloneable {
      * 
      * @return
      */
-    public ConnectionTypes getExchangeMode() {
+    public ExchangeMode getExchangeMode() {
         return  this.exchangeMode;
     }
 
-    public void setExchangeMode(ConnectionTypes exchangeMode) {
+    public void setExchangeMode(ExchangeMode exchangeMode) {
         this.exchangeMode = exchangeMode;
     }
 }
