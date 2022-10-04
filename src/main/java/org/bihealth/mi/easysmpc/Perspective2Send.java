@@ -412,8 +412,10 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @return enabled
      */
     private boolean isAutomaticProcessingEnabled() {
-        return getApp().getModel().isAutomatedMode() && (!isInitialSending() || ( isInitialSending() &&
-               getApp().getModel().getConnectionSettings().isPlainPossible()));
+        return getApp().getModel().isAutomatedMode() &&
+               (!isInitialSending() ||
+                (isInitialSending() && getApp().getModel().getConnectionSettings() != null &&
+                 getApp().getModel().getConnectionSettings().isPlainPossible()));
     }
     
      /**
