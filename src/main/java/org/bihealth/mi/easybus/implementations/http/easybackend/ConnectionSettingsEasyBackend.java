@@ -102,7 +102,7 @@ public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
      */
     @Override
     public int getCheckInterval() {
-        return checkInterval > 0 ? checkInterval : Resources.INTERVAL_CHECK_MAILBOX_DEFAULT;
+        return checkInterval > 0 ? checkInterval : Resources.INTERVAL_CHECK_EASYBACKEND_DEFAULT;
     }
 
     @Override

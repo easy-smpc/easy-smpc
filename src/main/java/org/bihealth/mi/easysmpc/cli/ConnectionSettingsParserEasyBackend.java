@@ -172,7 +172,7 @@ public class ConnectionSettingsParserEasyBackend extends ConnectionSettingsParse
             result.setPasswordStore(new PasswordStore(getCLI().getOptionValue(OPTION_PASSWORD)));
             result.setMaxMessageSize(getCLI().hasOption(OPTION_MAX_MESSAGE_SIZE) ? Integer.valueOf(getCLI().getOptionValue(OPTION_MAX_MESSAGE_SIZE))* 1024 * 1024 : Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT)
             .setSendTimeout(getCLI().hasOption(OPTION_SEND_TIMEOUT) ? Integer.valueOf(getCLI().getOptionValue(OPTION_SEND_TIMEOUT)) * 1000 : Resources.TIMEOUT_EASYBACKEND)
-            .setCheckInterval(getCLI().hasOption(OPTION_CHECK_INTERVAL) ? Integer.valueOf(getCLI().getOptionValue(OPTION_CHECK_INTERVAL)) * 1000 : Resources.INTERVAL_CHECK_MAILBOX_DEFAULT );
+            .setCheckInterval(getCLI().hasOption(OPTION_CHECK_INTERVAL) ? Integer.valueOf(getCLI().getOptionValue(OPTION_CHECK_INTERVAL)) * 1000 : Resources.INTERVAL_CHECK_EASYBACKEND_DEFAULT );
 
             // Set optional parameters
             if (getCLI().hasOption(OPTION_AUTH_SERVER_URL)) {

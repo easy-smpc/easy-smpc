@@ -179,6 +179,9 @@ public class Resources {
 
     /** Auth client id */
     public static final String    AUTH_CLIENTID_DEFAULT             = "easy-client";
+    
+    /** Interval to check easybackend automatically in milliseconds */
+    public static final int       INTERVAL_CHECK_EASYBACKEND_DEFAULT = 10000;
 
     /**
      * Returns all available languages

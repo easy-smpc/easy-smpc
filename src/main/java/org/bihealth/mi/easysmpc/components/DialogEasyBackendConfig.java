@@ -261,7 +261,7 @@ public class DialogEasyBackendConfig extends JDialog implements ChangeListener {
 
         // Set default values for further settings
         entryMessageSize.setValue(String.valueOf(Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT/ (1024 * 1024)));
-        entryCheckInterval.setValue(String.valueOf(Resources.INTERVAL_CHECK_MAILBOX_DEFAULT / 1000));
+        entryCheckInterval.setValue(String.valueOf(Resources.INTERVAL_CHECK_EASYBACKEND_DEFAULT / 1000));
         entrySendTimeout.setValue(String.valueOf(Resources.TIMEOUT_EASYBACKEND / 1000));
 
         // Add further settings pane
