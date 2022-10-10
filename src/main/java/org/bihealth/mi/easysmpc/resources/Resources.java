@@ -50,7 +50,7 @@ public class Resources {
     public static final Border    INVALID_BORDER                    = BorderFactory.createLineBorder(new Color(255, 69, 0));
 
     /** Default border */
-    public static final Border    DEFAULT_BORDER                    = UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border");       //$NON-NLS-1$
+    private static Border         DEFAULT_BORDER                     = null;
 
     /** Row gap */
     public static final int       ROW_GAP                           = 2;
@@ -182,7 +182,16 @@ public class Resources {
     
     /** Interval to check easybackend automatically in milliseconds */
     public static final int       INTERVAL_CHECK_EASYBACKEND_DEFAULT = 10000;
-
+    
+    public static Border getDefaultBorder() {
+        
+        if(DEFAULT_BORDER == null) {
+            DEFAULT_BORDER = UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border");
+        }
+        
+        return DEFAULT_BORDER;
+    }
+    
     /**
      * Returns all available languages
      * 

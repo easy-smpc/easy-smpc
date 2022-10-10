@@ -138,7 +138,7 @@ public class ComponentTextField extends JPanel {
         } else {
             isValid = true;
         }
-        this.setBorder(isValid ? Resources.DEFAULT_BORDER : Resources.INVALID_BORDER);
+        this.setBorder(isValid ? Resources.getDefaultBorder(): Resources.INVALID_BORDER);
         if (listener != null) {
             listener.stateChanged(new ChangeEvent(this));
         }

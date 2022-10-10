@@ -200,6 +200,8 @@ public class Main {
     public static void main(String[] args) {
         // Prefer IPv6
         System.getProperties().setProperty("java.net.preferIPv6Addresses", "true");
+        // Set headless mode (see https://poi.apache.org/components/spreadsheet/quick-guide.html#Autofit)
+        System.getProperties().setProperty("java.awt.headless", "true");
 
         // Prepare
         CommandLine cli;
