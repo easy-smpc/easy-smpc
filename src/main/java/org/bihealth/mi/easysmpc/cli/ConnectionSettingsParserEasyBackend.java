@@ -176,7 +176,7 @@ public class ConnectionSettingsParserEasyBackend extends ConnectionSettingsParse
 
             // Set optional parameters
             if (getCLI().hasOption(OPTION_AUTH_SERVER_URL)) {
-                result.setAuthServer(new URL(getCLI().getOptionValue(OPTION_SERVER_URL)));
+                result.setAuthServer(new URL(getCLI().getOptionValue(OPTION_AUTH_SERVER_URL)));
             }
 
             if (getCLI().hasOption(OPTION_AUTH_REALM)) {
