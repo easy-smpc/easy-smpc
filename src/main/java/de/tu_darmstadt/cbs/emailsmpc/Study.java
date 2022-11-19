@@ -33,7 +33,6 @@ import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easybus.implementations.http.easybackend.BusEasyBackend;
-import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionEasyBackend;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -352,7 +351,7 @@ public class Study implements Serializable, Cloneable {
             if (this.getConnectionSettings() instanceof ConnectionSettingsEasyBackend) {
                 this.bus = new BusEasyBackend(Resources.SIZE_THREADPOOL,
                                               millis > 0 ? millis : getConnectionSettings().getCheckInterval(),
-                                                      new ConnectionEasyBackend((ConnectionSettingsEasyBackend) getConnectionSettings()),
+                                                      ((ConnectionSettingsEasyBackend) getConnectionSettings()),
                                                       getConnectionSettings().getMaxMessageSize());
             }
         }

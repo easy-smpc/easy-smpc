@@ -68,10 +68,7 @@ public class IntegrationTest {
 
         
         // Create receiving bus
-        Bus busReceiving = new BusEasyBackend(5,
-                                         10,
-                                         new ConnectionEasyBackend(settingsReceiver),
-                                         1024);
+        Bus busReceiving = new BusEasyBackend(5, 10, settingsReceiver, 1024);
         busReceiving.receive(scope, receiver, new MessageListener() {
             
             @Override
@@ -89,10 +86,7 @@ public class IntegrationTest {
         
         
         // Create sending bus
-        Bus busSend = new BusEasyBackend(5,
-                                         10,
-                                         new ConnectionEasyBackend(settingsSender),
-                                         1024);
+        Bus busSend = new BusEasyBackend(5, 10, settingsSender, 1024);
         //busSend.purge();
         busSend.send("My fancy message!",
                      scope,

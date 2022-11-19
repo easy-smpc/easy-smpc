@@ -19,15 +19,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.Iterator;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -41,16 +37,15 @@ import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.MessageManager;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
-import org.bihealth.mi.easybus.implementations.http.ExecuteHTTPRequest;
-import org.bihealth.mi.easysmpc.resources.Resources;
+import org.bihealth.mi.easybus.implementations.http.HTTPAuthentication;
+import org.bihealth.mi.easybus.implementations.http.HTTPException;
+import org.bihealth.mi.easybus.implementations.http.HTTPRequest;
+import org.bihealth.mi.easybus.implementations.http.HTTPRequest.HTTPRequestType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.ws.rs.client.Invocation.Builder;
-import jakarta.ws.rs.core.Response;
 
 /**
  * Bus implementation with easybackend
@@ -70,8 +65,6 @@ public class BusEasyBackend extends Bus {
     private static final String   PATH_PURGE_PATTERN          = "api/easybackend/message";
     /** Logger */
     private Logger                LOGGER                      = LogManager.getLogger(BusEasyBackend.class);
-    /** Connection to backend */
-    private ConnectionEasyBackend connection;
     /** Thread */
     private Thread                thread;
     /** Message manager */
@@ -80,7 +73,14 @@ public class BusEasyBackend extends Bus {
     private boolean               stop                        = false;
     /** Jackson object mapper */
     private ObjectMapper          mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
+    /** Keylcoak access token */
+    private String token = null;
+    /** Auth*/
+    private final HTTPAuthentication auth;
+    /** Server */
+    private final URI server;
+    /** Self */
+    private final Participant self;
     /**
      * Creates a new instance
      * 
@@ -89,12 +89,18 @@ public class BusEasyBackend extends Bus {
      * @param connection
      * @param maxMessageSize
      */
-    public BusEasyBackend(int sizeThreadpool, int millis, ConnectionEasyBackend connection, int maxMessageSize) {
+    public BusEasyBackend(int sizeThreadpool, long millis, ConnectionSettingsEasyBackend settings, int maxMessageSize) {
         // Super
         super(sizeThreadpool);
        
         // Store
-        this.connection = connection;
+        this.auth = new HTTPAuthentication(settings);
+        this.self = settings.getSelf();
+        try {
+            this.server = settings.getAPIServer().toURI();
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("API server URI is incorrect");
+        }
         messageManager = new MessageManager(maxMessageSize);
         
         // TODO Parts of this implementation might be pulled up to Bus, when making receive() abstract in Bus. Do so?
@@ -133,64 +139,59 @@ public class BusEasyBackend extends Bus {
         
         // Log
         LOGGER.debug("Started receiving");
-
-        // Prepare
-        String resultString;
-        Builder request;
         
         // Loop over scopes
-        for (String scope : getScopesForParticipant(this.connection.getSelf())) {
-            request = this.connection.getBuilder(String.format(PATH_GET_MESSAGES_PATTERN, scope));
+        for (String scope : getScopesForParticipant(this.self)) {
 
-            // Create task to get sync
-            FutureTask<String> future = new ExecuteHTTPRequest<String>(request,
-                                                                      ExecuteHTTPRequest.REST_TYPE.GET,
-                                                                      new Supplier<ExecutorService>() {
-
-                                                                          @Override
-                                                                          public ExecutorService
-                                                                                 get() {
-                                                                              return getExecutor();
-                                                                          }
-                                                                      },
-                                                                      null,
-                                                                      new Function<Response, String>() {
-
-                                                                          @Override
-                                                                          public String
-                                                                                 apply(Response response) {
-                                                                              return response.readEntity(String.class);
-                                                                          }
-                                                                      },
-                                                                      ConnectionEasyBackend.DEFAULT_ERROR_HANDLER,
-                                                                      this.connection,
-                                                                      Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
-                                                                      Resources.RETRY_EASYBACKEND_WAIT_TIME_RETRY).execute();
-
-            // Wait for task end or exception
-            // TODO Parallelize reading messages?
+            // Prepare
+            String resultString = null;
+            Iterator<JsonNode> messages;
+            Exception exception = null;
+            
+            // Get messages as plain string
             try {
-                resultString = future.get(Resources.TIMEOUT_EASYBACKEND, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-               LOGGER.error("Error while executing HTTP request to get messages!", e);
-               continue;
+                resultString = new HTTPRequest(server, String.format(PATH_GET_MESSAGES_PATTERN, scope), HTTPRequestType.GET, getToken() , null).execute();
+            } catch (HTTPException e) {
+
+                // If error reason was unauthenticated, re-authenticate and retry
+                if(e.getStatusCode() == 401) {
+                    LOGGER.warn("Unathenticated at API server - retrying");
+                    
+                    // Re-authenticate
+                    renewToken();
+                    try {
+                        // Retry
+                        resultString = new HTTPRequest(server, String.format(PATH_GET_MESSAGES_PATTERN, scope), HTTPRequestType.GET, getToken() , null).execute();
+                        exception = null;
+                    } catch (Exception e1) {
+                        // Error still exists
+                        exception = e1;
+                    }
+                }
+                // Exception reason was not unauthenticated
+                exception = e;
+            }
+            
+            // Was there an exception?
+            if(exception != null) {
+                LOGGER.error("Unable to get messages");
+                continue;
             }
             
             // Check for interrupt
-            if (Thread.interrupted()) { 
+            if (Thread.interrupted()) {
                 throw new InterruptedException();
             }
-            
-            // Understand result
-            Iterator<JsonNode> messages;
+
+            // Map result string to JSON
             try {
                 messages = mapper.reader().readTree(resultString).elements();
             } catch (JsonProcessingException e) {
                 LOGGER.error("Error deserializing sync string!", e);
                 continue;
             }
-            
-            // Loop over messages in json node
+
+            // Loop over messages in JSON node
             while(messages.hasNext()) {
                 
                 // Check for interrupt
@@ -282,32 +283,36 @@ public class BusEasyBackend extends Bus {
      */
     protected void deleteMessage(BigInteger id) {
         
-        // Prepare request
-        Builder request = this.connection.getBuilder(String.format(PATH_DELETE_MESSAGE_PATTERN, id));
+        // Prepare
+        Exception exception = null;
         
-        // Create task to get sync
-        FutureTask<String> future = new ExecuteHTTPRequest<String>(request,
-                                                                   ExecuteHTTPRequest.REST_TYPE.DELETE,
-                                                                   new Supplier<ExecutorService>() {
-
-                                                                       @Override
-                                                                       public ExecutorService
-                                                                              get() {
-                                                                           return getExecutor();
-                                                                       }
-                                                                   },
-                                                                   null,
-                                                                   null,
-                                                                   ConnectionEasyBackend.DEFAULT_ERROR_HANDLER,
-                                                                   this.connection,
-                                                                   Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
-                                                                   Resources.RETRY_EASYBACKEND_WAIT_TIME_RETRY).execute();
-        
-        // Wait for task end or exception
         try {
-            future.get(Resources.TIMEOUT_EASYBACKEND, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.error("Error while executing HTTP request to delete message!", e);
+            // Delete message
+             new HTTPRequest(server, String.format(PATH_DELETE_MESSAGE_PATTERN, id), HTTPRequestType.DELETE, getToken() , null).execute();
+        } catch (HTTPException e) {
+
+            // If error reason was unauthenticated, re-authenticate and retry
+            if(e.getStatusCode() == 401) {
+                LOGGER.warn("Unathenticated at API server - retrying");
+                
+                // Re-authenticate
+                renewToken();
+                try {
+                    // Re-try
+                    new HTTPRequest(server, String.format(PATH_DELETE_MESSAGE_PATTERN, id), HTTPRequestType.DELETE, getToken() , null).execute();
+                    exception = null;
+                } catch (Exception e1) {
+                    // Still exception
+                    exception = e1;
+                }
+            }
+            // Exception reason was not unauthenticated
+            exception = e;
+        }
+        
+        // Was there an exception?
+        if(exception != null) {
+            LOGGER.error("Error while executing HTTP request to delete message!", exception);
         }
     }
 
@@ -370,74 +375,86 @@ public class BusEasyBackend extends Bus {
      */
     private void send(Participant receiver, Scope scope, Object message) throws BusException {
         
-        // Create payload
-        String payload;
+        // Prepare
+        Exception exception = null;
+        String body;
         try {
-            payload = serializeObject(message);
+            body = serializeObject(message);
         } catch (IOException e) {
             throw new BusException("Unable to serialize message", e);
         }
-        
-        // Create request
-        Builder request = this.connection.getBuilder(String.format(PATH_SEND_MESSAGE_PATTERN, scope.getName(), receiver.getName()));
-        
-        // Create task to get sync
-        FutureTask<String> future = new ExecuteHTTPRequest<String>(request,
-                                                                   ExecuteHTTPRequest.REST_TYPE.POST,
-                                                                   new Supplier<ExecutorService>() {
 
-                                                                       @Override
-                                                                       public ExecutorService
-                                                                              get() {
-                                                                           return getExecutor();
-                                                                       }
-                                                                   },
-                                                                   payload,
-                                                                   null,
-                                                                   ConnectionEasyBackend.DEFAULT_ERROR_HANDLER,
-                                                                   this.connection,
-                                                                   Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
-                                                                   Resources.RETRY_EASYBACKEND_WAIT_TIME_RETRY).execute();
-        
-        // Wait for task end or exception
+        // Send message
         try {
-            future.get(Resources.TIMEOUT_EASYBACKEND, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            throw new BusException("Error while executing HTTP request to send message!", e);
+            new HTTPRequest(server, String.format(PATH_SEND_MESSAGE_PATTERN, scope.getName(), receiver.getName()), HTTPRequestType.POST, getToken(), body).execute();
+        } catch (HTTPException e) {
+            
+            // Existing initial messages error
+            if(e.getStatusCode() == 418) {
+                LOGGER.error(String.format("Tried to add an illegal second initial message for scope %s and receiver %s!", scope.getName(), receiver.getName()));
+                throw new IllegalStateException(String.format("Tried to add an illegal second initial message for scope %s and receiver %s!", scope.getName(), receiver.getName()));
+            }
+            
+            // If error reason was unauthenticated, re-authenticate and retry
+            if(e.getStatusCode() == 401) {
+                LOGGER.warn("Unathenticated at API server - retrying");
+                
+                // Re-authenticate
+                renewToken();
+                try {
+                    // Re-try
+                    new HTTPRequest(server, String.format(PATH_SEND_MESSAGE_PATTERN, scope.getName(), receiver.getName()), HTTPRequestType.POST, getToken(), body).execute();
+                    exception = null;
+                } catch (Exception e1) {
+                    // Still exception
+                    exception = e1;
+                }
+            }
+            // Exception reason was not unauthenticated nor initial messafes
+            exception = e;
         }
 
+        // Was there an exception
+        if(exception != null) {
+            throw new BusException("Error while executing HTTP request to send message!", exception);
+        }
     }
 
     @Override
     public void purge(MessageFilter filter) throws BusException, InterruptedException {
-        
-        // Prepare request
-        Builder request = this.connection.getBuilder(PATH_PURGE_PATTERN);
-        
-        // Create task to get sync
-        FutureTask<String> future = new ExecuteHTTPRequest<String>(request,
-                                                                   ExecuteHTTPRequest.REST_TYPE.DELETE,
-                                                                   new Supplier<ExecutorService>() {
+        // Prepare
+        Exception exception = null;
 
-                                                                       @Override
-                                                                       public ExecutorService
-                                                                              get() {
-                                                                           return getExecutor();
-                                                                       }
-                                                                   },
-                                                                   null,
-                                                                   null,
-                                                                   ConnectionEasyBackend.DEFAULT_ERROR_HANDLER,
-                                                                   this.connection,
-                                                                   Resources.RETRY_EASYBACKEND_NUMBER_RETRY,
-                                                                   Resources.RETRY_EASYBACKEND_WAIT_TIME_RETRY).execute();
-        
-        // Wait for task end or exception
+        // Purge messages
         try {
-            future.get(Resources.TIMEOUT_EASYBACKEND, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.error("Error purging messages!", e);
-        }  
+            new HTTPRequest(server, PATH_PURGE_PATTERN, HTTPRequestType.DELETE, getToken() , null).execute();
+        } catch (HTTPException e) {
+
+            // If error reason was unauthenticated, re-authenticate and retry
+            if (e.getStatusCode() == 401) {
+                LOGGER.warn("Unathenticated at API server - retrying");
+                
+                // Re-authenticate
+                renewToken();
+                try {
+                    // Retry
+                    new HTTPRequest(server, PATH_PURGE_PATTERN, HTTPRequestType.DELETE, getToken() , null).execute();
+                    exception = null;
+                } catch (Exception e1) {
+                    // Error still exists
+                    exception = e1;
+                }
+            }
+
+            // Exception reason was not unauthenticated
+            exception = e;
+        }
+
+        // Was there an exception?
+        if(exception != null) {
+            LOGGER.error("Error purging messages!", exception);
+            throw new BusException("Error purging messages!", exception);
+        }
     }
     
     
@@ -475,5 +492,22 @@ public class BusEasyBackend extends Bus {
     @Override
     public FutureTask<Void> sendPlain(String recipient, String subject, String body) throws BusException {
         throw new UnsupportedOperationException("Sending plain messages is not supported by this bus");
+    }
+    
+    /**
+     * Get token
+     */
+    private synchronized String getToken() {
+        if(token == null) {
+            renewToken();
+        }
+        return token;
+    }
+
+    /**
+     * Renew auth token
+     */
+    private synchronized void renewToken() {
+        token = auth.authenticate();
     }
 }

@@ -24,6 +24,7 @@ import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easybus.implementations.PasswordProvider;
+import org.bihealth.mi.easybus.implementations.http.HTTPAuthentication;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -58,7 +59,7 @@ public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
     /** Password provider */
     private PasswordProvider          provider;
     /** URL validator */
-    private final static UrlValidator urlValidator     = new UrlValidator(new String[] { "https" }, UrlValidator.ALLOW_LOCAL_URLS);
+    private final static UrlValidator urlValidator     = new UrlValidator(new String[] {"https" }, UrlValidator.ALLOW_LOCAL_URLS);
 
     /**
      * Creates a new instance
@@ -320,7 +321,7 @@ public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
 
         try {
             // Add check to API server
-            new ConnectionEasyBackend(this);
+            new HTTPAuthentication(this).authenticate();
             return true;
         } catch (Exception e) {
             return false;
