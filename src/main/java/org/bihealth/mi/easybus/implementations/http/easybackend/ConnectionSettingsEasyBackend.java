@@ -23,6 +23,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PasswordStore;
+import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easybus.implementations.PasswordProvider;
 import org.bihealth.mi.easybus.implementations.http.HTTPAuthentication;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -35,31 +36,33 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
 
     /** SVUID */
-    private static final long         serialVersionUID = -944743683309534747L;
+    private static final long             serialVersionUID = -944743683309534747L;
     /** Auth server URL */
-    private URL                       authServer;
+    private URL                           authServer;
     /** Easybackend server URL */
-    private URL                       apiServer;
+    private URL                           apiServer;
     /** Keycloak realm */
-    private String                    realm            = Resources.AUTH_REALM_DEFAULT;
+    private String                        realm            = Resources.AUTH_REALM_DEFAULT;
     /** Keycloak clien id */
-    private String                    clientId         = Resources.AUTH_CLIENTID_DEFAULT;
+    private String                        clientId         = Resources.AUTH_CLIENTID_DEFAULT;
     /** Keycloak client secret */
-    private String                    clientSecret;
+    private String                        clientSecret;
     /** Self */
-    private final Participant         self;
+    private final Participant             self;
     /** Proxy */
-    private URI                       proxy            = null;
+    private URI                           proxy            = null;
     /** Send timeout */
-    private int                       sendTimeout;
+    private int                           sendTimeout;
     /** Maximal message size */
-    private int                       maxMessageSize;
+    private int                           maxMessageSize;
     /** Check interval */
-    private int                       checkInterval;
+    private int                           checkInterval;
     /** Password provider */
-    private PasswordProvider          provider;
+    private PasswordProvider              provider;
+    /** Performance listener */
+    private transient PerformanceListener listener         = null;
     /** URL validator */
-    private final static UrlValidator urlValidator     = new UrlValidator(new String[] {"https" }, UrlValidator.ALLOW_LOCAL_URLS);
+    private final static UrlValidator     URL_VALIDATOR    = new UrlValidator(new String[] { "https" }, UrlValidator.ALLOW_LOCAL_URLS);
 
     /**
      * Creates a new instance
@@ -168,7 +171,7 @@ public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
      * @param url to check
      */
     public static void checkURL(String url) {
-        if(!urlValidator.isValid(url)) {
+        if(!URL_VALIDATOR.isValid(url)) {
             throw new IllegalStateException("URL is not valid!");
         }
     }
@@ -302,6 +305,21 @@ public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
         return this;
     }
     
+    /**
+     * @return the listener
+     */
+    protected PerformanceListener getListener() {
+        return listener;
+    }
+
+    /**
+     * @param listener the listener to set
+     */
+    protected ConnectionSettingsEasyBackend setListener(PerformanceListener listener) {
+        this.listener = listener;
+        return this;
+    }
+
     /**
      * Check
      * @param object
