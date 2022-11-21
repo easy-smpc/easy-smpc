@@ -62,7 +62,8 @@ public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
     /** Performance listener */
     private transient PerformanceListener listener         = null;
     /** URL validator */
-    private final static UrlValidator     URL_VALIDATOR    = new UrlValidator(new String[] { "https" }, UrlValidator.ALLOW_LOCAL_URLS);
+    // TODO Remove http
+    private final static UrlValidator     URL_VALIDATOR    = new UrlValidator(new String[] {"http", "https" }, UrlValidator.ALLOW_LOCAL_URLS);
 
     /**
      * Creates a new instance
@@ -308,14 +309,14 @@ public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
     /**
      * @return the listener
      */
-    protected PerformanceListener getListener() {
+    public PerformanceListener getListener() {
         return listener;
     }
 
     /**
      * @param listener the listener to set
      */
-    protected ConnectionSettingsEasyBackend setListener(PerformanceListener listener) {
+    public ConnectionSettingsEasyBackend setListener(PerformanceListener listener) {
         this.listener = listener;
         return this;
     }
