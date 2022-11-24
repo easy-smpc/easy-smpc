@@ -174,7 +174,7 @@ public class BusEasyBackend extends Bus {
             
             // Was there an exception?
             if(exception != null) {
-                LOGGER.error("Unable to get messages");
+                LOGGER.error("Unable to get messages for " + self.getEmailAddress());
                 continue;
             }
             

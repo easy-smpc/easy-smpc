@@ -75,7 +75,7 @@ public class UserProcess implements MessageListener {
     protected UserProcess(ConnectionSettings connectionSettings) {
 
         // Store
-        this.connectionSettings = connectionSettings;               
+        this.connectionSettings = connectionSettings;
     }
     
     
