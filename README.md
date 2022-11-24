@@ -149,7 +149,7 @@ All three commands are expected to start on different computers. If you want to 
 ## Micro-services mode
 
 ### Creator
-Execute the program with `java -jar easy-smpc-cli-{Version}.jar -create -connection-type easybackend -l STUDY_NAME -b FILES_PATH_VARIABLES -d FILES_PATH_DATA -f PARTICIPANTS -i BACKEND_SERVER_NAME -p PASSWORD`. The parameters have the following meaning:
+Execute the program with `java -jar easy-smpc-cli.jar -create -connection-type easybackend -l STUDY_NAME -b FILES_PATH_VARIABLES -d FILES_PATH_DATA -f PARTICIPANTS -i BACKEND_SERVER_NAME -p PASSWORD`. The parameters have the following meaning:
 1. `-create`: Indicates the creation of a new EasySMPC project.
 1. ` -connection-type easybackend`: Indicates that the automated micro-services mode will be used.
 2. `-l STUDY_NAME`: Name/title of the study. Must be consistently used by everyone, the creator and all participants.
@@ -162,7 +162,7 @@ Execute the program with `java -jar easy-smpc-cli-{Version}.jar -create -connect
 After running a successful EasySMPC process, check the result in the file `result_<study name>_<timestamp>.xlsx` or check the file easy-smpc.log for details of errors.
 
 ### Participant
-Execute the program with `java -jar easy-smpc-cli-{Version}.jar -participate -connection-type easybackend -l STUDY_NAME -d FILES_PATH_DATA -i BACKEND_SERVER_NAME -a PARTICIPANT_NAME -o EMAIL_ADDRESS -p PASSWORD`. Most parameters are explained in the section above, other parameters are described below:
+Execute the program with `java -jar easy-smpc-cli.jar -participate -connection-type easybackend -l STUDY_NAME -d FILES_PATH_DATA -i BACKEND_SERVER_NAME -a PARTICIPANT_NAME -o EMAIL_ADDRESS -p PASSWORD`. Most parameters are explained in the section above, other parameters are described below:
 1. `-participate`: Indicates the participation in a (new) EasySMPC project.
 2. `-o PARTICIPANT_NAME`: Name of the participant as defined in the option `-f` by the creator.
 3. `-o EMAIL_ADDRESS`: E-mail address of the participant as defined in the option `-f` by the creator.
