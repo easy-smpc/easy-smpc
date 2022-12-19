@@ -216,4 +216,4 @@ Education and Research (BMBF).
 
 If you want to cite our software, you can use the following citation:
 
-Wirth, F. N., Kussel, T. et al. (2022). EasySMPC - No-Code Secure Multi-Party Computation [Computer software]. https://github.com/prasser/easy-smpc
+Wirth, F.N., Kussel, T., Müller, A. et al. EasySMPC: a simple but powerful no-code tool for practical secure multiparty computation. BMC Bioinformatics 23, 531 (2022). https://doi.org/10.1186/s12859-022-05044-8
