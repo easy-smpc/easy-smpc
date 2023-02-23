@@ -218,11 +218,13 @@ public class EntryEasyBackendAdvanced extends EntryEasyBackendBasic {
         ConnectionSettingsEasyBackend result = super.getSettings();
         
         // Set
-        result.setAuthServer(getAuthServerURL());
-        result.setProxy(getProxyServerURI());
-        result.setRealm(entryRealm.getValue() == null || entryRealm.getValue().isBlank() ? null : entryRealm.getValue());
-        result.setClientId(entryClientId.getValue() == null || entryClientId.getValue().isBlank() ? null : entryClientId.getValue());
-        result.setClientSecret(entryClientSecret.getValue() == null || entryClientSecret.getValue().isBlank() ? null : entryClientSecret.getValue());
+        if(result != null) {
+            result.setAuthServer(getAuthServerURL());
+            result.setProxy(getProxyServerURI());
+            result.setRealm(entryRealm.getValue() == null || entryRealm.getValue().isBlank() ? null : entryRealm.getValue());
+            result.setClientId(entryClientId.getValue() == null || entryClientId.getValue().isBlank() ? null : entryClientId.getValue());
+            result.setClientSecret(entryClientSecret.getValue() == null || entryClientSecret.getValue().isBlank() ? null : entryClientSecret.getValue());
+        }
         
         // Return
         return result;
