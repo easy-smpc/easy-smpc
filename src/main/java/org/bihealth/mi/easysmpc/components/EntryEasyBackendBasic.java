@@ -13,6 +13,7 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
+import java.awt.BorderLayout;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -63,14 +64,16 @@ public class EntryEasyBackendBasic extends JPanel {
                                                              Resources.getString("EmailConfig.36"),
                                                              TitledBorder.LEFT,
                                                              TitledBorder.DEFAULT_POSITION));
-        loginPane.setLayout(new BoxLayout(loginPane, BoxLayout.Y_AXIS));
+        loginPane.setLayout(new BorderLayout());
+        JPanel loginInnerPane = new JPanel();
+        loginInnerPane.setLayout(new BoxLayout(loginInnerPane, BoxLayout.Y_AXIS));
 
         JPanel serverPane = new JPanel();
         serverPane.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                               Resources.getString("Easybackend.5"),
                                                               TitledBorder.LEFT,
                                                               TitledBorder.DEFAULT_POSITION));
-        serverPane.setLayout(new BoxLayout(serverPane, BoxLayout.Y_AXIS));
+        serverPane.setLayout(new BorderLayout());
 
         // Create entries and set values
         entryName = new ComponentEntryOne(Resources.getString("Easybackend.4"),
@@ -118,11 +121,12 @@ public class EntryEasyBackendBasic extends JPanel {
                                                        false);
 
         // Add
-        loginPane.add(entryName);
-        loginPane.add(entryEmailPassword);
-        serverPane.add(entryServerURL);
         this.add(loginPane);
+        loginPane.add(loginInnerPane, BorderLayout.CENTER);
+        loginInnerPane.add(entryName);
+        loginInnerPane.add(entryEmailPassword);
         this.add(serverPane);
+        serverPane.add(entryServerURL, BorderLayout.CENTER);
         
         // Repaint
         this.revalidate();

@@ -131,7 +131,7 @@ public class App extends JFrame {
      * 
      * @throws IOException
      */
-    public App() throws IOException {                
+    public App() throws IOException {
 
         // Title
         super(Resources.getString("App.0")); //$NON-NLS-1$
