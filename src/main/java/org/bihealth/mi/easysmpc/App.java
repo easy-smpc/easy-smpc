@@ -50,6 +50,7 @@ import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
 import org.bihealth.mi.easysmpc.components.DialogEasyBackendConfig;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
+import org.bihealth.mi.easysmpc.components.DialogMessagePicker;
 import org.bihealth.mi.easysmpc.components.DialogStringPicker;
 import org.bihealth.mi.easysmpc.dataexport.ExportFile;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
@@ -188,15 +189,25 @@ public class App extends JFrame {
             }
         });
 
-        // Participate
-        JMenuItem jmiParticipate = new JMenuItem(Resources.getString("App.8"), Resources.getMenuItem()); //$NON-NLS-1$
-        actionMenu.add(jmiParticipate);
-        jmiParticipate.addActionListener(new ActionListener() {
+        // Participate e-mail
+        JMenuItem jmiParticipateEmail = new JMenuItem(Resources.getString("App.8"), Resources.getMenuItem()); //$NON-NLS-1$
+        actionMenu.add(jmiParticipateEmail);
+        jmiParticipateEmail.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionParticipate();
+                actionParticipateEMail();
             }
-        });        
+        });
+        
+        // Participate backend
+        JMenuItem jmiParticipateBackend = new JMenuItem(Resources.getString("App.26"), Resources.getMenuItem()); //$NON-NLS-1$
+        actionMenu.add(jmiParticipateBackend);
+        jmiParticipateBackend.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionParticipateBackend();
+            }
+        });
         
         // Load
         JMenuItem jmiLoad = new JMenuItem(Resources.getString("App.9"), Resources.getMenuItem()); //$NON-NLS-1$
@@ -281,6 +292,31 @@ public class App extends JFrame {
              
         // Finally, make the frame visible
         this.setVisible(true);
+    }
+
+    /**
+     * Participates with a backend (e.g. EasyBackend)
+     */
+    protected void actionParticipateBackend() {
+        
+        // Get string
+        String message = new DialogMessagePicker(this).showDialog();
+        
+        // If valid string provided
+        if (message != null) {
+            message = ImportClipboard.getStrippedExchangeMessage(message); 
+            // Initialize
+            try {
+                String data = Message.deserializeMessage(message).data;
+                this.model = MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data)));
+                this.model.toEnteringValues(data);
+                this.showPerspective(Perspective1BParticipate.class);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveParticipate.stringError"), Resources.getString("PerspectiveParticipate.stringErrorTitle"), JOptionPane.ERROR_MESSAGE);
+                this.model = null;
+            }
+        }
+        
     }
 
     /**
@@ -805,7 +841,7 @@ public class App extends JFrame {
     /**
      * Participate action
      */
-    protected void actionParticipate() {
+    protected void actionParticipateEMail() {
          // Try to get string from clip board
         String clipboardText = ImportClipboard.getStrippedExchangeMessage(ImportClipboard.getTextFromClipBoard());
         clipboardText = isInitialParticipationMessageValid(clipboardText) ? clipboardText : null;
