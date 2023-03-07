@@ -21,6 +21,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.prefs.BackingStoreException;
 
 import javax.swing.AbstractAction;
@@ -41,6 +42,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.AbstractTableModel;
 
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
@@ -56,7 +58,6 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Felix Wirth
  */
 public class DialogMessagePicker extends JDialog implements ChangeListener {
-
 
     /** SVUID */
     private static final long             serialVersionUID = -293485237040176324L;
@@ -81,7 +82,104 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
     private JButton                       buttonOK;
     /** Parent frame */
     private final JFrame                  parentFrame;
+    /** Table model */
+    private final TableModelMessages      tableModel       = new TableModelMessages();
 
+    /**
+     * Stores the content of a message
+     * 
+     * @author Felix Wirth
+     *
+     */
+    private static class Message {
+        private final String name;
+        private final String participants;
+        private final String variable;
+
+        public Message(String name, String participants, String variable) {
+            super();
+            this.name = name;
+            this.participants = participants;
+            this.variable = variable;
+        }
+
+        /**
+         * @return the name
+         */
+        public String getName() {
+            return name;
+        }
+
+        /**
+         * @return the participants
+         */
+        public String getParticipants() {
+            return participants;
+        }
+
+        /**
+         * @return the variable
+         */
+        public String getVariable() {
+            return variable;
+        }
+    }
+    
+    /**
+     * Table model for messages
+     * 
+     * @author Felix Wirth
+     *
+     */
+    private static class TableModelMessages extends AbstractTableModel{
+        /** SVUID */
+        private static final long serialVersionUID = 59144941823302094L;
+        /** Data for table */
+        private List<Message> messages = new ArrayList<>();
+        /** Column names */
+        private final String[] columnNames = { Resources.getString("DialogMessagePicker.2"),
+                                 Resources.getString("DialogMessagePicker.3"),
+                                 Resources.getString("DialogMessagePicker.4") };
+
+        @Override
+        public int getRowCount() {
+            return messages.size();
+        }
+
+        @Override
+        public int getColumnCount() {
+            return 3;
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            // Choose correct getter
+            switch(columnIndex) {
+            case 0:
+                return messages.get(rowIndex).getName();
+            case 1:
+                return messages.get(rowIndex).getParticipants();
+            case 2:
+                return messages.get(rowIndex).getVariable();
+             default:
+                 return null;
+            }
+        }
+        
+        @Override
+        public String getColumnName(int col) {
+            return columnNames[col];
+        }
+        
+        /** Update data and repaint table
+         * @param messages
+         */
+        public void changeAndUpdate(List<Message> messages) {
+            this.messages = messages;
+            this.fireTableDataChanged();
+        }
+    }
+    
     /**
      * Create a new instance
      * @param parent Component to set the location of JDialog relative to
@@ -161,24 +259,7 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
         this.getContentPane().add(automaticExchangePanel, BorderLayout.NORTH);
 
         // Create table
-        Object[] columnNames = { Resources.getString("DialogMessagePicker.2"),
-                                 Resources.getString("DialogMessagePicker.3"),
-                                 Resources.getString("DialogMessagePicker.4") };
-
-        Object[][] data = {
-                           {"Kathy", "Smith",
-                           "Snowboarding"},
-                           {"John", "Doe",
-                           "Rowing"},
-                           {"Sue", "Black",
-                           "Knitting"},
-                           {"Jane", "White",
-                           "Speed reading"},
-                           {"Joe", "Brown",
-                           "Pool"}
-        };
-
-        JTable table = new JTable(data, columnNames);
+        JTable table = new JTable(tableModel);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane panelTable = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
@@ -242,7 +323,10 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
         try {
             Connections.remove((ConnectionSettings) this.comboExchangeConfig.getSelectedItem());
         } catch (BackingStoreException e) {
-            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                                          Resources.getString("PerspectiveCreate.ErrorDeletePreferences"),
+                                          Resources.getString("PerspectiveCreate.Error"),
+                                          JOptionPane.ERROR_MESSAGE);
         }
 
         // Reset combo box
@@ -258,7 +342,7 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
     /**
      * Show this dialog
      */
-    public String showDialog(){
+    public String showDialog() {
         this.setModal(true);
         this.setVisible(true);
         return this.result;
@@ -275,7 +359,7 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
         if (e.getSource() == comboExchangeMode) {
             // Is the combo exchange config enabled?
             if (comboExchangeMode.getSelectedItem() == null ||
-                    ((ExchangeMode) comboExchangeMode.getSelectedItem()).equals(ExchangeMode.MANUAL)) {
+                ((ExchangeMode) comboExchangeMode.getSelectedItem()).equals(ExchangeMode.MANUAL)) {
                 comboExchangeConfig.setEnabled(false);
                 buttonAddExchangeConfig.setEnabled(false);
                 comboExchangeConfig.setSelectedItem(null);
@@ -294,7 +378,7 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
 
                     // Set selected
                     if (currentSetting != null && settings != null &&
-                            settings.getIdentifier().equals(currentSetting.getIdentifier())) {
+                        settings.getIdentifier().equals(currentSetting.getIdentifier())) {
                         settings.setPasswordStore(currentSetting.getPasswordStore());
                         comboExchangeConfig.setSelectedItem(settings);
                     }
@@ -321,6 +405,7 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
 
     /**
      * Checks string for validity
+     * 
      * @return
      */
     private boolean areValuesValid() {
@@ -354,7 +439,10 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
             // Add null for non-automatic
             return configFromPreferences.toArray(new ConnectionSettings[configFromPreferences.size()]);
         } catch (BackingStoreException | ClassNotFoundException | IOException e) {
-            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ErrorLoadingPreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                                          Resources.getString("PerspectiveCreate.ErrorLoadingPreferences"),
+                                          Resources.getString("PerspectiveCreate.Error"),
+                                          JOptionPane.ERROR_MESSAGE);
             return null;
         }
     }
@@ -378,16 +466,20 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
             try {
                 Connections.addOrUpdate(newSettings);
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ErrorStorePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                                              Resources.getString("PerspectiveCreate.ErrorStorePreferences"),
+                                              Resources.getString("PerspectiveCreate.Error"),
+                                              JOptionPane.ERROR_MESSAGE);
             }
 
             // Reset combo box
             comboExchangeConfig.removeAllItems();
-            for(ConnectionSettings settings: getExchangeConfig()) {
+            for (ConnectionSettings settings : getExchangeConfig()) {
                 this.comboExchangeConfig.addItem(settings);
 
                 // Set selected
-                if(settings != null && settings.getIdentifier().equals(newSettings.getIdentifier())) {
+                if (settings != null &&
+                    settings.getIdentifier().equals(newSettings.getIdentifier())) {
                     settings.setPasswordStore(newSettings.getPasswordStore());
                     this.comboExchangeConfig.setSelectedItem(settings);
                 }
@@ -401,11 +493,12 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
      */
     private void actionEditExchangeConf() {
         // Get new settings
-        ConnectionSettings newSettings = null; 
+        ConnectionSettings newSettings = null;
 
         // Is EasyBackend settings object?
-        if(this.comboExchangeConfig.getSelectedItem() instanceof ConnectionSettingsEasyBackend) {
-            newSettings = new DialogEasyBackendConfig((ConnectionSettingsEasyBackend) this.comboExchangeConfig.getSelectedItem(), parentFrame).showDialog();
+        if (this.comboExchangeConfig.getSelectedItem() instanceof ConnectionSettingsEasyBackend) {
+            newSettings = new DialogEasyBackendConfig((ConnectionSettingsEasyBackend) this.comboExchangeConfig.getSelectedItem(),
+                                                      parentFrame).showDialog();
         }
 
         // Alter combo box if new settings given
@@ -414,16 +507,20 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
             try {
                 Connections.addOrUpdate(newSettings);
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ErrorStorePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                                              Resources.getString("PerspectiveCreate.ErrorStorePreferences"),
+                                              Resources.getString("PerspectiveCreate.Error"),
+                                              JOptionPane.ERROR_MESSAGE);
             }
 
-            // Reset combo  box
+            // Reset combo box
             comboExchangeConfig.removeAllItems();
-            for(ConnectionSettings settings: getExchangeConfig()) {
+            for (ConnectionSettings settings : getExchangeConfig()) {
                 this.comboExchangeConfig.addItem(settings);
 
                 // Set selected
-                if(settings != null && settings.getIdentifier().equals(newSettings.getIdentifier())) {
+                if (settings != null &&
+                    settings.getIdentifier().equals(newSettings.getIdentifier())) {
                     settings.setPasswordStore(newSettings.getPasswordStore());
                     this.comboExchangeConfig.setSelectedItem(settings);
                 }
