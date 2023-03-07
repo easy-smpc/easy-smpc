@@ -17,11 +17,17 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
 import java.util.prefs.BackingStoreException;
 
 import javax.swing.AbstractAction;
@@ -38,6 +44,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingWorker;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -49,97 +56,60 @@ import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easysmpc.Perspective1ACreate.ConnectionSettingsRenderer;
+import org.bihealth.mi.easysmpc.components.InitialMessageManager.MessageInitialWithIdString;
 import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
+
+import de.tu_darmstadt.cbs.emailsmpc.MessageBin;
+import de.tu_darmstadt.cbs.emailsmpc.Participant;
 
 /**
  * Dialog for selecting an initial message from a backend
  * 
  * @author Felix Wirth
  */
-public class DialogMessagePicker extends JDialog implements ChangeListener {
+public class DialogInitialMessagePicker extends JDialog implements ChangeListener {
 
     /** SVUID */
-    private static final long             serialVersionUID = -293485237040176324L;
+    private static final long                   serialVersionUID = -293485237040176324L;
     /** Result */
-    private String                        result;
+    private String                              result;
     /** Add configuration e-mail box */
-    private JButton                       buttonAddExchangeConfig;
-
+    private final JButton                       buttonAddExchangeConfig;
     /** Combo box to select exchange mode */
-    private JComboBox<ExchangeMode>       comboExchangeMode;
-
+    private final JComboBox<ExchangeMode>       comboExchangeMode;
     /** Combo box to select exchange configuration */
-    private JComboBox<ConnectionSettings> comboExchangeConfig;
-
+    private final JComboBox<ConnectionSettings> comboExchangeConfig;
     /** Add configuration e-mail box */
-    private JButton                       buttonRemoveExchangeConfig;
-
+    private final JButton                       buttonRemoveExchangeConfig;
     /** Edit configuration e-mail box */
-    private JButton                       buttonEditExchangeConfig;
-
+    private final JButton                       buttonEditExchangeConfig;
     /** Button */
-    private JButton                       buttonOK;
+    private final JButton                       buttonOK;
     /** Parent frame */
-    private final JFrame                  parentFrame;
+    private final JFrame                        parentFrame;
     /** Table model */
-    private final TableModelMessages      tableModel       = new TableModelMessages();
+    private final TableModelMessages            tableModel       = new TableModelMessages();
+    /** Initial message manager */
+    private InitialMessageManager               messageManager   = null;
+    /** Table for messages */
+    private final JTable                        table;
 
-    /**
-     * Stores the content of a message
-     * 
-     * @author Felix Wirth
-     *
-     */
-    private static class Message {
-        private final String name;
-        private final String participants;
-        private final String variable;
-
-        public Message(String name, String participants, String variable) {
-            super();
-            this.name = name;
-            this.participants = participants;
-            this.variable = variable;
-        }
-
-        /**
-         * @return the name
-         */
-        public String getName() {
-            return name;
-        }
-
-        /**
-         * @return the participants
-         */
-        public String getParticipants() {
-            return participants;
-        }
-
-        /**
-         * @return the variable
-         */
-        public String getVariable() {
-            return variable;
-        }
-    }
-    
     /**
      * Table model for messages
-     * 
      * @author Felix Wirth
-     *
      */
     private static class TableModelMessages extends AbstractTableModel{
         /** SVUID */
         private static final long serialVersionUID = 59144941823302094L;
         /** Data for table */
-        private List<Message> messages = new ArrayList<>();
+        private List<MessageInitialWithIdString> messages = new ArrayList<>();
         /** Column names */
         private final String[] columnNames = { Resources.getString("DialogMessagePicker.2"),
                                  Resources.getString("DialogMessagePicker.3"),
                                  Resources.getString("DialogMessagePicker.4") };
+        /** Table */
+        private JTable table;
 
         @Override
         public int getRowCount() {
@@ -153,14 +123,41 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            // Choose correct getter
+            
+            // Choose correct data part of message
             switch(columnIndex) {
             case 0:
-                return messages.get(rowIndex).getName();
+                return messages.get(rowIndex).getMessage().name;
             case 1:
-                return messages.get(rowIndex).getParticipants();
+                // Join all participant names in a string
+                return Arrays.stream(messages.get(rowIndex).getMessage().participants).reduce(null, new BiFunction<String, Participant, String>() {
+
+                    @Override
+                    public String apply(String t, Participant u) {
+                        return t == null ? u.name :  t + ", " + u.name;
+                    }
+                }, new BinaryOperator<String>() {
+
+                    @Override
+                    public String apply(String t, String u) {
+                        return t == null ? u :  t + ", " + u;
+                    }
+                });
             case 2:
-                return messages.get(rowIndex).getVariable();
+                // Join all bin names in a string
+                return Arrays.stream(messages.get(rowIndex).getMessage().bins).reduce(null, new BiFunction<String, MessageBin, String>() {
+
+                    @Override
+                    public String apply(String t, MessageBin u) {
+                        return t == null ? u.name :  t + ", " + u.name;
+                    }
+                }, new BinaryOperator<String>() {
+
+                    @Override
+                    public String apply(String t, String u) {
+                        return t == null ? u :  t + ", " + u;
+                    }
+                });
              default:
                  return null;
             }
@@ -174,9 +171,37 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
         /** Update data and repaint table
          * @param messages
          */
-        public void changeAndUpdate(List<Message> messages) {
+        public void changeAndUpdate(List<MessageInitialWithIdString> messages) {
             this.messages = messages;
+            int selectectRow = this.table.getSelectedRow();
             this.fireTableDataChanged();
+            if (this.table != null && selectectRow >= 0) {
+                this.table.setRowSelectionInterval(selectectRow, selectectRow);
+            }
+        }
+        
+        /**
+         * Return ID of selected message
+         * @return
+         */
+        public String getIDSelectedMessage() {
+            return messages.get(table.getSelectedRow()).getID();
+        }
+        
+        /**
+         * Return message string of selected message
+         * @return
+         */
+        public String getMessageStringSelectedMessage() {
+            return messages.get(table.getSelectedRow()).getMessageString();
+        }
+        
+        /**
+         * Set table
+         * @param table
+         */
+        public void setTable(JTable table) {
+            this.table = table;
         }
     }
     
@@ -184,7 +209,7 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
      * Create a new instance
      * @param parent Component to set the location of JDialog relative to
      */
-    public DialogMessagePicker(JFrame parent) {
+    public DialogInitialMessagePicker(JFrame parent) {
 
         // Save
         this.parentFrame = parent;
@@ -219,7 +244,7 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
         comboExchangeConfig.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                stateChanged(new ChangeEvent(this));
+                stateChanged(new ChangeEvent(comboExchangeConfig));
             }
         });
 
@@ -259,7 +284,19 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
         this.getContentPane().add(automaticExchangePanel, BorderLayout.NORTH);
 
         // Create table
-        JTable table = new JTable(tableModel);
+        table = new JTable(tableModel);
+        tableModel.setTable(table);
+        table.addFocusListener(new FocusListener() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                stateChanged(new ChangeEvent(this));
+            }
+            
+            @Override
+            public void focusGained(FocusEvent e) {
+                stateChanged(new ChangeEvent(this));
+            }
+        });
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane panelTable = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
@@ -292,7 +329,7 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
-                DialogMessagePicker.this.result = null;
+                DialogInitialMessagePicker.this.result = null;
             }
         });
 
@@ -385,12 +422,63 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
                 }
             }
         }
+        
+        // Change in combo exchange config require new message manager
+        if (e.getSource() == comboExchangeConfig) {
+            
+            // Type EasyBackend
+            if(comboExchangeConfig.getSelectedItem() instanceof ConnectionSettingsEasyBackend) {
+                
+                // Stop current manager
+                if(messageManager != null) {
+                   messageManager.stop();
+                }
+                
+                // Create message manager
+                messageManager = new InitialMessageManagerEasyBackend(new Consumer<List<MessageInitialWithIdString>>() {
+                    
+                    @Override
+                    public void accept(List<MessageInitialWithIdString> messages) {
+                        tableModel.changeAndUpdate(messages);
+                    }
+                }, new Consumer<String>() {
+
+                    @Override
+                    public void accept(String errorMessage) {
+                        JOptionPane.showMessageDialog(null, errorMessage, Resources.getString("DialogMessagePicker.7"), JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                , (ConnectionSettingsEasyBackend) comboExchangeConfig.getSelectedItem());
+                
+                // Start message manager
+                new SwingWorker<>() {
+
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        messageManager.start();
+                        return null;
+                    }
+                }.execute();
+
+            }
+            
+            // Selection empty
+            if (comboExchangeConfig.getSelectedItem() == null) {
+                // Stop current manager
+                if (messageManager != null) {
+                    messageManager.stop();
+                }
+            }
+        }
     }
 
     /**
      * Action cancel and close
      */
     private void actionCancel() {
+        if (messageManager != null) {
+            messageManager.stop();
+        }
         this.result = null;
         this.dispose();
     }
@@ -399,7 +487,9 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
      * Action proceed and close
      */
     private void actionProceed() {
-        // TODO set this.result
+        this.result = this.tableModel.getMessageStringSelectedMessage();
+        messageManager.deleteMessage(this.tableModel.getIDSelectedMessage());
+        messageManager.stop();
         this.dispose();
     }
 
@@ -409,8 +499,7 @@ public class DialogMessagePicker extends JDialog implements ChangeListener {
      * @return
      */
     private boolean areValuesValid() {
-        // TODO Selected study
-        return false;
+        return !table.getSelectionModel().isSelectionEmpty();
     }
 
     /**

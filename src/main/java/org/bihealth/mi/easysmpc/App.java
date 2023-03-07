@@ -50,7 +50,7 @@ import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
 import org.bihealth.mi.easysmpc.components.DialogEasyBackendConfig;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
-import org.bihealth.mi.easysmpc.components.DialogMessagePicker;
+import org.bihealth.mi.easysmpc.components.DialogInitialMessagePicker;
 import org.bihealth.mi.easysmpc.components.DialogStringPicker;
 import org.bihealth.mi.easysmpc.dataexport.ExportFile;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
@@ -300,7 +300,7 @@ public class App extends JFrame {
     protected void actionParticipateBackend() {
         
         // Get string
-        String message = new DialogMessagePicker(this).showDialog();
+        String message = new DialogInitialMessagePicker(this).showDialog();
         
         // If valid string provided
         if (message != null) {
