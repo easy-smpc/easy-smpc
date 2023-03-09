@@ -25,6 +25,7 @@ import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
+import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
 import de.tu_darmstadt.cbs.emailsmpc.Message;
@@ -65,7 +66,7 @@ public class UserProcessParticipating extends UserProcess {
         // Register for initial message
         Bus interimBus = getInterimBus();
 
-        interimBus.receive(new Scope(studyTitle + ROUND_0), participant, new MessageListener() {
+        interimBus.receive(new Scope(studyTitle + Resources.ROUND_0), participant, new MessageListener() {
             boolean received = false;
 
             @Override

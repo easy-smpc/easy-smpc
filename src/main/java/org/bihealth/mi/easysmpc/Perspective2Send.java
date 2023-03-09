@@ -50,6 +50,7 @@ import javax.swing.event.ChangeListener;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmarkSendMail;
@@ -267,15 +268,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                     // Init
                     FutureTask<Void> future;
 
-                    if (!isInitialSending()) {
-                        // Send message in bus mode
-                        future = getApp().getModel()
-                                         .getBus()
-                                         .send(getExchangeString(entry),
-                                               new Scope(getApp().getModel().getStudyUID() + getRoundIdentifier()),
-                                               new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
-                                                                                       entry.getRightValue()));
-                    } else {
+                    if (isInitialSending() && getApp().getModel().getExchangeMode() == ExchangeMode.EMAIL) {
                         // Send plain message
                         future = getApp().getModel()
                                          .getBus()
@@ -283,6 +276,15 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                     generateEMailSubject(),
                                                     generateEMailBody(entry,
                                                                       generateFormatedExchangeString(entry)));
+                    } else {
+                     // Send message in bus mode
+                        future = getApp().getModel()
+                                         .getBus()
+                                         .send(getExchangeString(entry),
+                                               new Scope(getApp().getModel().getStudyUID() + (isInitialSending() ? Resources.ROUND_0 : getRoundIdentifier())),
+                                               new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
+                                                                                       entry.getRightValue()));
+
                     }
 
                     try {
@@ -412,10 +414,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @return enabled
      */
     private boolean isAutomaticProcessingEnabled() {
-        return getApp().getModel().isAutomatedMode() &&
-               (!isInitialSending() ||
-                (isInitialSending() && getApp().getModel().getConnectionSettings() != null &&
-                 getApp().getModel().getConnectionSettings().isPlainPossible()));
+        return getApp().getModel().isAutomatedMode();
     }
     
      /**

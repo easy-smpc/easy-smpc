@@ -134,7 +134,10 @@ public class Resources {
 
     /** Interval to check mail box automatically in milliseconds */
     public static final int       INTERVAL_CHECK_MAILBOX_DEFAULT    = 30000;
-
+    
+    /** Round for initial e-mails */
+    public static final String  ROUND_0 = "_round0";
+    
     /** Step 1 identifier */
     public static final String    ROUND_1                           = "_round1";
 

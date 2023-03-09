@@ -136,7 +136,7 @@ public class InitialMessageManagerEasyBackend extends InitialMessageManager {
             // Process with message manager
             BusMessage messageComplete = null;
             try {
-                messageComplete = messageManager.mergeMessage(message);
+                messageComplete = messageManager.mergeMessage(message, false);
             } catch (BusException e) {
                 processError(Resources.getString("DialogMessagePicker.5"));
             }

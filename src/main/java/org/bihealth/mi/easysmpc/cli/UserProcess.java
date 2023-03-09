@@ -58,8 +58,6 @@ public class UserProcess implements MessageListener {
 
     /** Logger */
     private static final Logger LOGGER  = LogManager.getLogger(UserProcess.class);
-    /** Round for initial e-mails */
-    public static final String  ROUND_0 = "_round0";
     /** The study model */
     private Study               model   = new Study();
     /** connection settings */
@@ -304,7 +302,7 @@ public class UserProcess implements MessageListener {
                     // Retrieve bus and send message
 
                     future = getModel().getBus(getModel().getConnectionSettings().getCheckInterval(), false).send(Message.serializeMessage(getModel().getUnsentMessageFor(index)),
-                                    new Scope(getModel().getName() + (getModel().getState() == StudyState.INITIAL_SENDING ? ROUND_0 : roundIdentifier)),
+                                    new Scope(getModel().getName() + (getModel().getState() == StudyState.INITIAL_SENDING ? Resources.ROUND_0 : roundIdentifier)),
                                     new org.bihealth.mi.easybus.Participant(getModel().getParticipants()[index].name,
                                                                             getModel().getParticipants()[index].emailAddress));
                     

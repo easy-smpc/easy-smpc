@@ -818,9 +818,4 @@ public class ConnectionSettingsIMAP extends ConnectionSettings {
                Objects.equals(smtpUserName, other.smtpUserName) && ssltlsIMAP == other.ssltlsIMAP &&
                ssltlsSMTP == other.ssltlsSMTP;
     }
-
-    @Override
-    public boolean isPlainPossible() {
-        return true;
-    }
 }

@@ -346,9 +346,4 @@ public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
             return false;
         }
     }
-
-    @Override
-    public boolean isPlainPossible() {
-        return false;
-    }
 }
