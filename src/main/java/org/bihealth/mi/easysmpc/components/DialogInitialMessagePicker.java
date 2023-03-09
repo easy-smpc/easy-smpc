@@ -14,6 +14,7 @@
 package org.bihealth.mi.easysmpc.components;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,11 +31,14 @@ import java.util.prefs.BackingStoreException;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -51,12 +55,11 @@ import javax.swing.table.AbstractTableModel;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.BusMessage;
 import org.bihealth.mi.easybus.ConnectionSettings;
-import org.bihealth.mi.easybus.InitialMessageManager;
 import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
+import org.bihealth.mi.easybus.InitialMessageManager;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easybus.implementations.http.easybackend.InitialMessageManagerEasyBackend;
-import org.bihealth.mi.easysmpc.Perspective1ACreate.ConnectionSettingsRenderer;
 import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -177,6 +180,32 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
          */
         public void setTable(JTable table) {
             this.table = table;
+        }
+    }
+    
+    /** Allows to set a custom text for each ConnectionSettings object in the list */
+    public static class ConnectionSettingsRenderer extends DefaultListCellRenderer {
+        
+        /** SVUID */
+        private static final long serialVersionUID = 779154691407559989L;
+
+        @Override
+        public Component getListCellRendererComponent(JList<?> list,
+                                                      Object value,
+                                                      int index,
+                                                      boolean isSelected,
+                                                      boolean cellHasFocus) {
+            JLabel label = (JLabel) super.getListCellRendererComponent(list,
+                                                                       value,
+                                                                       index,
+                                                                       isSelected,
+                                                                       cellHasFocus);
+            if (value != null) {
+                label.setText(((ConnectionSettings) value).getIdentifier());
+            } else {
+                label.setText(Resources.getString("DialogMessagePicker.8"));
+            } 
+            return label;
         }
     }
     
@@ -343,6 +372,7 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
 
         // Reset combo box
         comboExchangeConfig.removeAllItems();
+        this.comboExchangeConfig.addItem(null);
         for (ConnectionSettings settings : getExchangeConfig()) {
             this.comboExchangeConfig.addItem(settings);
         }
@@ -385,6 +415,7 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
                 // Reset combo box
                 ConnectionSettings currentSetting = (ConnectionSettings) comboExchangeConfig.getSelectedItem();
                 comboExchangeConfig.removeAllItems();
+                comboExchangeConfig.addItem(null);
                 for (ConnectionSettings settings : getExchangeConfig()) {
                     comboExchangeConfig.addItem(settings);
 
@@ -548,6 +579,7 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
 
             // Reset combo box
             comboExchangeConfig.removeAllItems();
+            comboExchangeConfig.addItem(null);
             for (ConnectionSettings settings : getExchangeConfig()) {
                 this.comboExchangeConfig.addItem(settings);
 
@@ -589,6 +621,7 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
 
             // Reset combo box
             comboExchangeConfig.removeAllItems();
+            comboExchangeConfig.addItem(null);
             for (ConnectionSettings settings : getExchangeConfig()) {
                 this.comboExchangeConfig.addItem(settings);
 
