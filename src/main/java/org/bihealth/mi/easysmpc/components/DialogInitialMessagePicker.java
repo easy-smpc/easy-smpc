@@ -23,10 +23,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.prefs.BackingStoreException;
 
@@ -51,17 +48,20 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 
+import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.BusMessage;
 import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easybus.InitialMessageManager;
 import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.InitialMessageManagerEasyBackend;
 import org.bihealth.mi.easysmpc.Perspective1ACreate.ConnectionSettingsRenderer;
-import org.bihealth.mi.easysmpc.components.InitialMessageManager.MessageInitialWithIdString;
 import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
-import de.tu_darmstadt.cbs.emailsmpc.MessageBin;
-import de.tu_darmstadt.cbs.emailsmpc.Participant;
+import de.tu_darmstadt.cbs.emailsmpc.Message;
+import de.tu_darmstadt.cbs.emailsmpc.MessageInitial;
 
 /**
  * Dialog for selecting an initial message from a backend
@@ -103,11 +103,10 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
         /** SVUID */
         private static final long serialVersionUID = 59144941823302094L;
         /** Data for table */
-        private List<MessageInitialWithIdString> messages = new ArrayList<>();
+        private List<BusMessage> messages = new ArrayList<>();
         /** Column names */
-        private final String[] columnNames = { Resources.getString("DialogMessagePicker.2"),
-                                 Resources.getString("DialogMessagePicker.3"),
-                                 Resources.getString("DialogMessagePicker.4") };
+        private final String[]                   columnNames      = { Resources.getString("DialogMessagePicker.2"),
+                                                                      Resources.getString("DialogMessagePicker.3") };
         /** Table */
         private JTable table;
 
@@ -118,48 +117,31 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
 
         @Override
         public int getColumnCount() {
-            return 3;
+            return 2;
         }
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
             
-            // Choose correct data part of message
-            switch(columnIndex) {
-            case 0:
-                return messages.get(rowIndex).getMessage().name;
-            case 1:
-                // Join all participant names in a string
-                return Arrays.stream(messages.get(rowIndex).getMessage().participants).reduce(null, new BiFunction<String, Participant, String>() {
 
-                    @Override
-                    public String apply(String t, Participant u) {
-                        return t == null ? u.name :  t + ", " + u.name;
-                    }
-                }, new BinaryOperator<String>() {
+            try {
+                // Get message
+                String data;
+                data = Message.deserializeMessage(messages.get(rowIndex).getMessage()).data;
+                MessageInitial messageInitial = MessageInitial.decodeMessage(Message.getMessageData(data));
 
-                    @Override
-                    public String apply(String t, String u) {
-                        return t == null ? u :  t + ", " + u;
-                    }
-                });
-            case 2:
-                // Join all bin names in a string
-                return Arrays.stream(messages.get(rowIndex).getMessage().bins).reduce(null, new BiFunction<String, MessageBin, String>() {
-
-                    @Override
-                    public String apply(String t, MessageBin u) {
-                        return t == null ? u.name :  t + ", " + u.name;
-                    }
-                }, new BinaryOperator<String>() {
-
-                    @Override
-                    public String apply(String t, String u) {
-                        return t == null ? u :  t + ", " + u;
-                    }
-                });
-             default:
-                 return null;
+                // Choose correct data part of message
+                switch (columnIndex) {
+                case 0:
+                    return messageInitial.name;
+                case 1:
+                    return messageInitial.participants[0].name;
+                default:
+                    return null;
+                }
+            } catch (ClassNotFoundException | IOException e) {
+                JOptionPane.showMessageDialog(null, Resources.getString("DialogMessagePicker.4"), Resources.getString("DialogMessagePicker.7"), JOptionPane.ERROR_MESSAGE);
+                throw new IllegalStateException("Unable to understand message", e);
             }
         }
         
@@ -171,7 +153,7 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
         /** Update data and repaint table
          * @param messages
          */
-        public void changeAndUpdate(List<MessageInitialWithIdString> messages) {
+        public void changeAndUpdate(List<BusMessage> messages) {
             this.messages = messages;
             int selectectRow = this.table.getSelectedRow();
             this.fireTableDataChanged();
@@ -184,17 +166,10 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
          * Return ID of selected message
          * @return
          */
-        public String getIDSelectedMessage() {
-            return messages.get(table.getSelectedRow()).getID();
+        public BusMessage getSelectedMessage() {
+            return messages.get(table.getSelectedRow());
         }
         
-        /**
-         * Return message string of selected message
-         * @return
-         */
-        public String getMessageStringSelectedMessage() {
-            return messages.get(table.getSelectedRow()).getMessageString();
-        }
         
         /**
          * Set table
@@ -435,10 +410,10 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
                 }
                 
                 // Create message manager
-                messageManager = new InitialMessageManagerEasyBackend(new Consumer<List<MessageInitialWithIdString>>() {
+                messageManager = new InitialMessageManagerEasyBackend(new Consumer<List<BusMessage>>() {
                     
                     @Override
-                    public void accept(List<MessageInitialWithIdString> messages) {
+                    public void accept(List<BusMessage> messages) {
                         tableModel.changeAndUpdate(messages);
                     }
                 }, new Consumer<String>() {
@@ -448,7 +423,8 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
                         JOptionPane.showMessageDialog(null, errorMessage, Resources.getString("DialogMessagePicker.7"), JOptionPane.ERROR_MESSAGE);
                     }
                 }
-                , (ConnectionSettingsEasyBackend) comboExchangeConfig.getSelectedItem());
+                , (ConnectionSettingsEasyBackend) comboExchangeConfig.getSelectedItem(),
+                5000);
                 
                 // Start message manager
                 new SwingWorker<>() {
@@ -487,8 +463,17 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
      * Action proceed and close
      */
     private void actionProceed() {
-        this.result = this.tableModel.getMessageStringSelectedMessage();
-        messageManager.deleteMessage(this.tableModel.getIDSelectedMessage());
+        // Set result
+        this.result = this.tableModel.getSelectedMessage().getMessage();
+        
+        // Delete message
+        try {
+            this.tableModel.getSelectedMessage().delete();
+        } catch (BusException e) {
+            JOptionPane.showMessageDialog(null, Resources.getString("DialogMessagePicker.6"), Resources.getString("DialogMessagePicker.7"), JOptionPane.ERROR_MESSAGE);
+        }
+        
+        // Stop and close dialog
         messageManager.stop();
         this.dispose();
     }

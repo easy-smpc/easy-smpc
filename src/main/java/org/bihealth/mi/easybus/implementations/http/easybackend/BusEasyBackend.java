@@ -56,31 +56,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class BusEasyBackend extends Bus {
     
     /** Path to send messages */
-    private static final String   PATH_SEND_MESSAGE_PATTERN   = "api/easybackend/send/%s/%s";
+    private static final String      PATH_SEND_MESSAGE_PATTERN   = "api/easybackend/send/%s/%s";
     /** Path to receive messages */
-    private static final String   PATH_GET_MESSAGES_PATTERN   = "api/easybackend/receive/%s";
+    private static final String      PATH_GET_MESSAGES_PATTERN   = "api/easybackend/receive/%s";
     /** Delete message */
-    private static final String   PATH_DELETE_MESSAGE_PATTERN = "api/easybackend/message/%s";
+    private static final String      PATH_DELETE_MESSAGE_PATTERN = "api/easybackend/message/%s";
     /** Purge all messages */
-    private static final String   PATH_PURGE_PATTERN          = "api/easybackend/message";
+    private static final String      PATH_PURGE_PATTERN          = "api/easybackend/message";
     /** Logger */
-    private Logger                LOGGER                      = LogManager.getLogger(BusEasyBackend.class);
+    private Logger                   LOGGER                      = LogManager.getLogger(BusEasyBackend.class);
     /** Thread */
-    private Thread                thread;
+    private Thread                   thread;
     /** Message manager */
-    private MessageManager        messageManager;
+    private MessageManager           messageManager;
     /** Stop flag */
-    private boolean               stop                        = false;
+    private boolean                  stop                        = false;
     /** Jackson object mapper */
-    private ObjectMapper          mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private ObjectMapper             mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     /** Keylcoak access token */
-    private String token = null;
-    /** Auth*/
+    private String                   token                       = null;
+    /** Auth */
     private final HTTPAuthentication auth;
     /** Server */
-    private final URI server;
+    private final URI                server;
     /** Self */
-    private final Participant self;
+    private final Participant        self;
+    
     /**
      * Creates a new instance
      * 
@@ -236,7 +237,7 @@ public class BusEasyBackend extends Bus {
         }
         
         // Set values
-        BigInteger id = messagesNode.path("id").bigIntegerValue();
+        final BigInteger id = messagesNode.path("id").bigIntegerValue();
         Object o;
         try {
             o = deserializeMessage(messagesNode.path("content").textValue());
@@ -481,7 +482,7 @@ public class BusEasyBackend extends Bus {
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws ClassNotFoundException the class not found exception
      */
-    private Object deserializeMessage(String msg) throws IOException, ClassNotFoundException {
+    public static Object deserializeMessage(String msg) throws IOException, ClassNotFoundException {
         byte[] data = Base64.getDecoder().decode(msg);
         ObjectInputStream ois = new ObjectInputStream(new GZIPInputStream(new ByteArrayInputStream(data)));
         Object o = ois.readObject();
