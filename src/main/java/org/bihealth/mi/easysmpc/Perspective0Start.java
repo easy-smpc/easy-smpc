@@ -20,8 +20,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
+import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easysmpc.components.DialogConnectionConfig;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -30,7 +35,12 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Felix Wirth
  * @author Fabian Prasser
  */
-public class Perspective0Start extends Perspective {
+public class Perspective0Start extends Perspective implements ChangeListener {
+    
+    /** Button 3 */
+    JButton button3;
+    /** Button 4 */
+    JButton button4;
     
     /**
      * Creates the perspective
@@ -48,48 +58,60 @@ public class Perspective0Start extends Perspective {
 
         // Buttons panel
         JPanel buttons = new JPanel();
-        buttons.setLayout(new GridLayout(4, 1));
+        buttons.setLayout(new GridLayout(5, 1));
 
+
+        
         // Action 1
-        JButton button1 = new JButton(Resources.getString("App.7")); //$NON-NLS-1$
+        JButton button1 = new JButton(Resources.getString("App.26")); //$NON-NLS-1$
+        button1.addChangeListener(this);
         buttons.add(button1);
         button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ConnectionSettings result = new DialogConnectionConfig(getApp()).showDialog();
+                if(result != null) {
+                    getApp().setConnectionSettings(result);
+                }
+            }
+        });
+
+        // Action 2
+        JButton button2 = new JButton(Resources.getString("App.9")); //$NON-NLS-1$
+        button2.addChangeListener(this);
+        buttons.add(button2);
+        button2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getApp().actionLoad();
+            }
+        });
+        
+        buttons.add(new JLabel(""));
+        
+        // Action 3
+        button3 = new JButton(Resources.getString("App.7")); //$NON-NLS-1$
+        button3.setEnabled(false);
+        buttons.add(button3);
+        button3.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 getApp().actionCreate();
             }
         });
-
-        // Action 2
-        JButton button2 = new JButton(Resources.getString("App.8")); //$NON-NLS-1$
-        buttons.add(button2);
-        button2.addActionListener(new ActionListener() {
+        
+        // Action 4
+        button4 = new JButton(Resources.getString("App.8")); //$NON-NLS-1$
+        button4.setEnabled(false);
+        buttons.add(button4);
+        button4.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 getApp().actionParticipateEMail();
             }
         });
         
-        // Action 3
-        JButton button3 = new JButton(Resources.getString("App.26")); //$NON-NLS-1$
-        buttons.add(button3);
-        button3.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getApp().actionParticipateBackend();
-            }
-        });
-
-        // Action 4
-        JButton button4 = new JButton(Resources.getString("App.9")); //$NON-NLS-1$
-        buttons.add(button4);
-        button4.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getApp().actionLoad();
-            }
-        });
-
+        
         // Add
         panel.setLayout(new GridBagLayout());
         panel.add(buttons, new GridBagConstraints());
@@ -98,5 +120,16 @@ public class Perspective0Start extends Perspective {
     @Override
     protected void initialize() {
         // Empty by design
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        if(getApp().getConnectionSettings() != null) {
+            button3.setEnabled(true);
+            button4.setEnabled(true);
+        } else {
+            button3.setEnabled(false);
+            button4.setEnabled(false);
+        }
     }
 }

@@ -126,6 +126,8 @@ public class App extends JFrame {
     private JLabel                 statusMessageLabel;
     /** Component loadingVisual */
     private ComponentLoadingVisual loadingVisual = null;
+    /** Connection settings */
+    private ConnectionSettings     settings      = null;
 
     /**
      * Creates a new instance
@@ -993,5 +995,19 @@ public class App extends JFrame {
         
         // Return
         return newSettings;
+    }
+    
+    /**
+     * @return the settings
+     */
+    public ConnectionSettings getConnectionSettings() {
+        return settings;
+    }
+
+    /**
+     * @param settings the settings to set
+     */
+    public void setConnectionSettings(ConnectionSettings settings) {
+        this.settings = settings;
     }
 }
