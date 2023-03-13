@@ -138,6 +138,22 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
                 actionCancel();
             }
         });
+        
+        this.buttonAdd.addActionListener(new ActionListener() {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tabbedPane.getCurrentSelectedComponent().actionAdd();
+            }
+        });
+        
+        this.buttonRemove.addActionListener(new ActionListener() {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tabbedPane.getCurrentSelectedComponent().actionRemove();
+            }
+        });
 
         this.addWindowListener(new WindowAdapter() {
             @Override

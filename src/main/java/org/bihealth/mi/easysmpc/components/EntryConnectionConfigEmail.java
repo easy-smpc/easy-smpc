@@ -330,7 +330,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
 
     @Override
     public void actionAdd() {
-        displayEMailSettings(null);
+        displaySimpleDialog(null, null, null, null);
     }
 
     @Override
@@ -341,6 +341,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
         }
         updateList();
+        displaySimpleDialog(null, null, null, null);
     }
 
     @Override
