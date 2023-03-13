@@ -42,19 +42,46 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  * @author Felix Wirth
  */
 public class DialogConnectionConfig extends JDialog implements ChangeListener {
+    
+    /**
+     * Tabbed pane for connection config
+     * 
+     * @author Felix Wirth
+     *
+     */
+    public static class JTabbedPaneConnectionConfig extends JTabbedPane {
+        
+        /** SVUID */
+        private static final long serialVersionUID = -2007743049110040581L;
 
+        /**
+         * Creates a new instance 
+         */
+        JTabbedPaneConnectionConfig(){
+            super();
+        }
+        
+        public ComponentConnectionConfig getCurrentSelectedComponent() {
+            return (ComponentConnectionConfig) getSelectedComponent();
+        }
+    };
+    
     /** SVUID */
-    private static final long   serialVersionUID = -5892937473681272650L;
+    private static final long           serialVersionUID = -5892937473681272650L;
     /** Button */
-    private JButton             buttonOK;
+    private JButton                     buttonOK;
+    /** Button */
+    private JButton                     buttonAdd;
+    /** Button */
+    private JButton                     buttonRemove;
     /** Result */
-    private ConnectionSettings result;
+    private ConnectionSettings          result;
     /** Parent frame */
-    private JFrame             parent;
+    private JFrame                      parent;
     /** Central panel */
-    private JPanel             center;
+    private JPanel                      center;
     /** Tabbed pane */
-    JTabbedPane                tabbedPane       = new JTabbedPane();
+    private JTabbedPaneConnectionConfig tabbedPane       = new JTabbedPaneConnectionConfig();
 
     /**
      * Create a new instance
@@ -74,16 +101,26 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
         center = new JPanel();
         center.setLayout(new BorderLayout());
         center.add(tabbedPane, BorderLayout.CENTER);
+        
+        // Tabbed pane
+        tabbedPane.addChangeListener(this);
+        EntryConnectionConfigEmail emailTab = new EntryConnectionConfigEmail(this);
         tabbedPane.add(new EntryConnectionConfigManual(), Resources.getString("ConnectionConfig.0"));
+        tabbedPane.add(emailTab, Resources.getString("ConnectionConfig.4"));
+        
         
         // Buttons
         JPanel buttonsPane = new JPanel();
-        buttonsPane.setLayout(new GridLayout(1, 2));
-        this.buttonOK = new JButton(Resources.getString("EmailConfig.6"));
+        buttonsPane.setLayout(new GridLayout(1, 4));
+        this.buttonOK = new JButton(Resources.getString("ConnectionConfig.1"));
+        this.buttonAdd = new JButton(Resources.getString("ConnectionConfig.2"));
+        this.buttonRemove = new JButton(Resources.getString("ConnectionConfig.3"));
         JButton buttonCancel = new JButton(Resources.getString("EmailConfig.7"));
 
         // Add
         buttonsPane.add(buttonCancel);
+        buttonsPane.add(buttonAdd);
+        buttonsPane.add(buttonRemove);
         buttonsPane.add(buttonOK);
         getContentPane().add(center, BorderLayout.CENTER);
         getContentPane().add(buttonsPane, BorderLayout.SOUTH);
@@ -157,10 +194,18 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
     @Override
     public void stateChanged(ChangeEvent e) {
         
-        // Check button enabled
+        // Check buttons enabled
         if (this.buttonOK != null) {
             this.buttonOK.setEnabled(areValuesValid());
-        }        
+        }
+        
+        if(this.buttonAdd != null) {
+            this.buttonAdd.setEnabled(tabbedPane.getCurrentSelectedComponent().isAddPossible());
+        }
+        
+        if(this.buttonRemove != null) {
+            this.buttonRemove.setEnabled(tabbedPane.getCurrentSelectedComponent().isRemovePossible());
+        }
     }
 
     /**
@@ -177,7 +222,7 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
     private void actionCheckAndProceed() {
 
         try {
-            ConnectionSettings settings = getConnectionSettings();
+            ConnectionSettings settings = tabbedPane.getCurrentSelectedComponent().getConnectionSettings();
             if (!settings.isValid(false)) {
                 throw new BusException("Connection error");
             }
@@ -190,21 +235,11 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
     }
 
     /**
-     * Get the current connections settings
-     * 
-     * @return
-     */
-    private ConnectionSettings getConnectionSettings() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
      * Checks string for validity
      * 
      * @return
      */
     private boolean areValuesValid() {
-        return ((ComponentConnectionConfig) tabbedPane.getSelectedComponent()).areValuesValid();
+        return  tabbedPane.getCurrentSelectedComponent().isProceedPossible();
     }
 }

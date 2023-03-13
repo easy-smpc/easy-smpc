@@ -14,6 +14,7 @@
 package org.bihealth.mi.easysmpc.components;
 
 import javax.swing.JPanel;
+import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.ConnectionSettings;
 
@@ -36,15 +37,43 @@ public abstract class ComponentConnectionConfig extends JPanel {
     }
     
     /**
-     * Are the entered values valid?
+     * Is proceeding possible?
      * @return
      */
-    public abstract boolean areValuesValid();
+    public abstract boolean isProceedPossible();
+    
+    /**
+     * Is delete possible?
+     * @return
+     */
+    public abstract boolean isAddPossible();
+    
+    /**
+     * Is remove possible?
+     * @return
+     */
+    public abstract boolean isRemovePossible();
+    
+    /**
+     * Add
+     */
+    public abstract void actionAdd();
+    
+    /**
+     * Remove
+     */
+    public abstract void actionRemove();
     
     /**
      * Returns the configured connection
      * @return
      */
     public abstract ConnectionSettings getConnectionSettings();
+    
+    /**
+     * Set change listener
+     * @param changeListener
+     */
+    public abstract void setChangeListener(ChangeListener changeListener);
 
 }
