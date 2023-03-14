@@ -19,6 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
@@ -32,8 +33,8 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -236,18 +237,25 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
      * Action close
      */
     private void actionCheckAndProceed() {
-
-        try {
-            ConnectionSettings settings = tabbedPane.getCurrentSelectedComponent().getConnectionSettings();
-            if (!settings.isValid(false)) {
-                throw new BusException("Connection error");
-            }
-            this.result = settings;
-            this.dispose();
-        } catch (BusException e) {
+        
+        // Get config
+        ConnectionSettings settings = tabbedPane.getCurrentSelectedComponent().getConnectionSettings();
+        // Test config
+        if (!settings.isValid(false)) {
             JOptionPane.showMessageDialog(this, Resources.getString("EmailConfig.14"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
             return;
         }
+
+        // Update connections in preferences
+        try {
+            Connections.addOrUpdate(settings);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ErrorStorePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+        }
+
+        // Set result and dispose
+        this.result = settings;
+        this.dispose();
     }
 
     /**

@@ -39,9 +39,11 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
-import org.bihealth.mi.easybus.implementations.local.ConnectionSettingsManual;
+import org.bihealth.mi.easysmpc.AppPasswordProvider;
 import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -90,8 +92,6 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
     private ComponentRadioEntry                 radioDialogType;
     /** Central panel */
     private JPanel                              centralBase;
-    /** Init finished */
-    private boolean                             initFinished     = false;
     /** Entry for IMAP details */
     private EntryEMailDetails                   entryIMAPDetails;
     /** Entry for SMTP details */
@@ -164,7 +164,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
         centralBase.setLayout(new BoxLayout(centralBase, BoxLayout.Y_AXIS));
         
 
-        // Create switch between simple and advanced dialog        
+        // Create switch between simple and advanced dialog
         this.radioDialogType = new ComponentRadioEntry(null,
                                                        Resources.getString("EmailConfig.26"),
                                                        Resources.getString("EmailConfig.27"),
@@ -176,7 +176,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
                 
                 // If swap from simple to advanced display simple dialog
                 if (!radioDialogType.isFirstOptionSelected()) {
-                        displayAdvancedDialog(entryEmailPassword.getLeftValue(),
+                        displayEMailSettingsAdvanced(entryEmailPassword.getLeftValue(),
                                               entryEmailPassword.getRightValue(),
                                               entryIMAPDetails,
                                               entrySMTPDetails);
@@ -185,7 +185,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
                 
                 // If swap from advanced to simple and no dialog necessary
                 if (!isAdvancedDialogNecessary(entrySMTPDetails, entryIMAPDetails) && radioDialogType.isFirstOptionSelected()) {
-                    displaySimpleDialog(entryIMAPDetails.getEmailAddress(),
+                    displayEMailSettingsSimple(entryIMAPDetails.getEmailAddress(),
                                           entryIMAPDetails.getPassword(),
                                           entryIMAPDetails,
                                           entrySMTPDetails);
@@ -200,7 +200,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
                                                   Resources.getString("EmailConfig.42"),
                                                   JOptionPane.OK_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
                     // Display dialog
-                    displaySimpleDialog(entryIMAPDetails.getEmailAddress(),
+                    displayEMailSettingsSimple(entryIMAPDetails.getEmailAddress(),
                                           entryIMAPDetails.getPassword(),
                                           entryIMAPDetails,
                                           entrySMTPDetails);
@@ -301,7 +301,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
         this.add(tabbedPane, BorderLayout.CENTER);
         
         // Display empty simple dialog
-        displaySimpleDialog(null, null, null, null);
+        displayEMailSettings(null);
         
         // State changed and build list
         updateList();
@@ -309,13 +309,8 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
     }
 
     @Override
-    public ConnectionSettings getConnectionSettings() {
-        return new ConnectionSettingsManual();
-    }
-
-    @Override
     public boolean isProceedPossible() {
-        return configList.getSelectedValue() != null;
+        return areValuesValid();
     }
 
     @Override
@@ -330,7 +325,8 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
 
     @Override
     public void actionAdd() {
-        displaySimpleDialog(null, null, null, null);
+        displayEMailSettings(null);
+        configList.setSelectedValue(null, true);
     }
 
     @Override
@@ -341,7 +337,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
             JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
         }
         updateList();
-        displaySimpleDialog(null, null, null, null);
+        displayEMailSettings(null);
     }
 
     @Override
@@ -353,12 +349,51 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
     public void stateChanged(ChangeEvent e) {
         
         // Display currently selected value
-        displayEMailSettings(configList.getSelectedValue());
-        
+        if (e.getSource() == configList) {
+            displayEMailSettings(configList.getSelectedValue());
+        }
         // Call listener
         if (this.listener != null) {
             this.listener.stateChanged(e);
         }
+    }
+
+    /**
+     * Create a new connection settings object from data entries
+     * 
+     * @return connection settings
+     * @throws BusException
+     */
+    public ConnectionSettingsIMAP getConnectionSettings() {
+        
+        // Init
+        ConnectionSettingsIMAP result;
+        
+        // Take data from either entryEMail password or from IMAP and SMTP entries
+        if(entryEmailPassword != null) {
+            result = new ConnectionSettingsIMAP(entryEmailPassword.getLeftValue(), new AppPasswordProvider(Resources.getString("EmailConfig.29"), Resources.getString("EmailConfig.31")));
+            result.setPasswordStore(new PasswordStore(entryEmailPassword.getRightValue(), entryEmailPassword.getRightValue()));
+        }
+        else {
+            AppPasswordProvider provider = new AppPasswordProvider(Resources.getString("EmailConfig.29"), Resources.getString("EmailConfig.31"));
+            result = new ConnectionSettingsIMAP(entryIMAPDetails.getEmailAddress(), entrySMTPDetails.getEmailAddress(), provider);
+            result.setPasswordStore(new PasswordStore(entryIMAPDetails.getPassword(), entrySMTPDetails.getPassword()));
+        };
+        
+        // Take data always coming from IMAP and SMTP entries and return
+        return result.setIMAPPort(entryIMAPDetails.getPort())
+                     .setSMTPPort(entrySMTPDetails.getPort())
+                     .setIMAPServer(entryIMAPDetails.getServer())
+                     .setSMTPServer(entrySMTPDetails.getServer())
+                     .setSSLTLSIMAP(entryIMAPDetails.isSSLTLS())
+                     .setSSLTLSSMTP(entrySMTPDetails.isSSLTLS())
+                     .setIMAPUserName(entryIMAPDetails.getUserName())
+                     .setSMTPUserName(entrySMTPDetails.getUserName())
+                     .setIMAPAuthMechanisms(entryIMAPDetails.getAuthMechanisms())
+                     .setSMTPAuthMechanisms(entrySMTPDetails.getAuthMechanisms())
+                     .setMaxMessageSize(Integer.valueOf(entryMessageSize.getValue()) * 1024 * 1024)
+                     .setCheckInterval(Integer.valueOf(entryCheckInterval.getValue()) * 1000)
+                     .setEmailSendTimeout(Integer.valueOf(entrySendTimeout.getValue()) * 1000);
     }
 
     /**
@@ -367,7 +402,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
      * @param settings
      * @return
      */
-    public static boolean isAdvancedDialogNecessary(ConnectionSettingsIMAP settings) {
+    private static boolean isAdvancedDialogNecessary(ConnectionSettingsIMAP settings) {
         // Deviate the IMAP/SMTP addresses from each other or from the user name or is an auth mechanism set?
         return !settings.getIMAPEmailAddress().equals(settings.getSMTPEmailAddress()) ||
                settings.getIMAPUserName() != null || settings.getSMTPUserName() != null ||
@@ -381,7 +416,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
      * @param smtpEntry
      * @return
      */
-     public static boolean isAdvancedDialogNecessary(EntryEMailDetails imapEntry, EntryEMailDetails smtpEntry) {        
+     private static boolean isAdvancedDialogNecessary(EntryEMailDetails imapEntry, EntryEMailDetails smtpEntry) {        
          
         // Deviate the IMAP/SMTP addresses from each other or from the user name or is an auth mechanism set?
         return imapEntry != null && smtpEntry != null &&
@@ -391,23 +426,23 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
     }
      
      /**
-     * Display a dialog
+     * Displays the settings after deciding for a complex or simple dialog 
      */
     private void displayEMailSettings(ConnectionSettingsIMAP settings) {
+        // Display existing settings?
         if (settings != null) {
-            // Editing, not creating
             this.createMode = false;
 
             // Display simple or advanced dialog
             if (!isAdvancedDialogNecessary(settings)) {
                 this.radioDialogType.setFirstOptionSelected(true);
-                displaySimpleDialog(settings.getIMAPEmailAddress(),
+                displayEMailSettingsSimple(settings.getIMAPEmailAddress(),
                                     settings.getIMAPPassword(false),
                                     new EntryEMailDetails(null, 0, settings, true),
                                     new EntryEMailDetails(null, 0, settings, false));
             } else {
                 this.radioDialogType.setFirstOptionSelected(false);
-                displayAdvancedDialog(null,
+                displayEMailSettingsAdvanced(null,
                                       null,
                                       new EntryEMailDetailsAdvanced(null,
                                                                     0,
@@ -425,6 +460,9 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
             entryMessageSize.setValue(String.valueOf(settings.getMaxMessageSize() / (1024 * 1024)));
             entryCheckInterval.setValue(String.valueOf(settings.getCheckInterval() / 1000));
             entrySendTimeout.setValue(String.valueOf(settings.getSendTimeout() / 1000));
+        } else {
+            this.createMode = true;
+            displayEMailSettingsSimple(null, null, null, null);
         }
      }
      
@@ -436,7 +474,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
      * @param oldDetailsIMAP
      * @param oldDetailsSMTP
      */
-    private void displaySimpleDialog(String emailAddress, String password, EntryEMailDetails oldDetailsIMAP, EntryEMailDetails oldDetailsSMTP) {
+    private void displayEMailSettingsSimple(String emailAddress, String password, EntryEMailDetails oldDetailsIMAP, EntryEMailDetails oldDetailsSMTP) {
         // Remove
         centralBase.removeAll();
 
@@ -492,7 +530,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
      * @param oldIMAPDetails
      * @param oldSMTPDetails
      */
-    private void displayAdvancedDialog(String emailAddress, String password, EntryEMailDetails oldIMAPDetails, EntryEMailDetails oldSMTPDetails) {
+    private void displayEMailSettingsAdvanced(String emailAddress, String password, EntryEMailDetails oldIMAPDetails, EntryEMailDetails oldSMTPDetails) {
         // Remove
         centralBase.removeAll();
         entryEmailPassword = null;
@@ -548,5 +586,16 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
                                           Resources.getString("PerspectiveCreate.Error"),
                                           JOptionPane.ERROR_MESSAGE);
         }
+    }
+    
+    /**
+     * Are values valid
+     * 
+     * @return
+     */
+    private boolean areValuesValid() {
+        return  (entryEmailPassword != null ? entryEmailPassword.areValuesValid() : true)
+                && entryIMAPDetails.areValuesValid() 
+                && entrySMTPDetails.areValuesValid();
     }
 }
