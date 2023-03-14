@@ -26,6 +26,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -108,15 +109,17 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
     private ComponentEntryOne                   entryCheckInterval;
     /** Entry for e-mail sending timeout */
     private ComponentEntryOne                   entrySendTimeout;
+    /** Parent */
+    private JDialog parent;
 
 
     /**
      * Creates a new instance
      * @param listner 
      */
-    public EntryConnectionConfigEmail(ChangeListener listner){
+    public EntryConnectionConfigEmail(JDialog parent){
         // Store
-        this.listener = listner;
+        this.parent = parent;
         
         // Set layout
         this.setLayout(new BorderLayout());
@@ -499,7 +502,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
         
         // Add IMAP panel
         entryIMAPDetails = new EntryEMailDetails(Resources.getString("EmailConfig.37"), ConnectionSettingsIMAP.DEFAULT_PORT_IMAP, oldDetailsIMAP);
-        receiveSendPanel.add(entryIMAPDetails);                
+        receiveSendPanel.add(entryIMAPDetails);
         
         // Add box to separate
         receiveSendPanel.add(Box.createRigidArea(new Dimension(6, 0)));
@@ -520,6 +523,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
         // Repaint
         this.revalidate();
         this.repaint();
+        parent.pack();
     }
 
     /**
@@ -560,6 +564,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
         // Repaint
         this.revalidate();
         this.repaint();
+        parent.pack();
     }
     
     /**

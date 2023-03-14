@@ -90,7 +90,6 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
      * @param parent Component to set the location of JDialog relative to
      */
     public DialogConnectionConfig(JFrame parent) {
-
         // Dialog properties
         this.parent = parent;
         this.setTitle(Resources.getString("EmailConfig.0"));
@@ -106,6 +105,7 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
         // Tabbed pane
         tabbedPane.addChangeListener(this);
         EntryConnectionConfigEmail emailTab = new EntryConnectionConfigEmail(this);
+        emailTab.setChangeListener(this);
         tabbedPane.add(new EntryConnectionConfigManual(), Resources.getString("ConnectionConfig.0"));
         tabbedPane.add(emailTab, Resources.getString("ConnectionConfig.4"));
         
