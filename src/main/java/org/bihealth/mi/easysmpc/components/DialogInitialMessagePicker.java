@@ -58,8 +58,10 @@ import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.InitialMessageManager;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.email.InitialMessageManagerEmail;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easybus.implementations.http.easybackend.InitialMessageManagerEasyBackend;
+import org.bihealth.mi.easybus.implementations.local.ConnectionSettingsManual;
 import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -97,6 +99,8 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
     private InitialMessageManager               messageManager   = null;
     /** Table for messages */
     private final JTable                        table;
+    /** Settings */
+    private ConnectionSettings                  settings;
 
     /**
      * Table model for messages
@@ -212,11 +216,17 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
     /**
      * Create a new instance
      * @param parent Component to set the location of JDialog relative to
+     * @param connectionSettings
      */
-    public DialogInitialMessagePicker(JFrame parent) {
-
+    public DialogInitialMessagePicker(JFrame parent, ConnectionSettings settings) {
+        // Check
+        if(settings instanceof ConnectionSettingsManual) {
+            throw new IllegalStateException("Connection settings can not be of type manual");
+        }
+        
         // Save
         this.parentFrame = parent;
+        this.settings = settings;
 
         // Dialog properties
         this.setTitle(Resources.getString("DialogMessagePicker.0"));
@@ -350,11 +360,72 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
                 actionCancel();
             }
         });
-
+        
+        // Start receiving
+        startReceiving();
+        
         // Finalize
         stateChanged(new ChangeEvent(comboExchangeMode));
         pack();
         setLocationRelativeTo(parent);
+    }
+
+    /**
+     * Starts message receiving
+     */
+    private void startReceiving() {
+        
+        // Stop current manager
+        if(messageManager != null) {
+           messageManager.stop();
+        }
+        
+        // Type EasyBackend
+        if(settings instanceof ConnectionSettingsEasyBackend) {
+            
+            // Create message manager
+            messageManager = new InitialMessageManagerEasyBackend(new Consumer<List<BusMessage>>() {
+                
+                @Override
+                public void accept(List<BusMessage> messages) {
+                    tableModel.changeAndUpdate(messages);
+                }
+            }, new Consumer<Exception>() {
+
+                @Override
+                public void accept(Exception e) {
+                    JOptionPane.showMessageDialog(null, Resources.getString("DialogMessagePicker.5"), Resources.getString("DialogMessagePicker.7"), JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            , (ConnectionSettingsEasyBackend) settings, 5000);
+        }
+        
+        // Type e-mail
+        if(settings instanceof ConnectionSettingsIMAP) {
+            messageManager = new InitialMessageManagerEmail(new Consumer<List<BusMessage>>() {
+
+                @Override
+                public void accept(List<BusMessage> messages) {
+                    tableModel.changeAndUpdate(messages);
+                }
+            }, new Consumer<Exception>() {
+
+                @Override
+                public void accept(Exception e) {
+                    JOptionPane.showMessageDialog(null, Resources.getString("DialogMessagePicker.5"), Resources.getString("DialogMessagePicker.7"), JOptionPane.ERROR_MESSAGE);
+                }
+            }, (ConnectionSettingsIMAP) settings, 5000);
+        }
+        
+        // Start message manager
+        new SwingWorker<>() {
+
+            @Override
+            protected Void doInBackground() throws Exception {
+                messageManager.start();
+                return null;
+            }
+        }.execute();
     }
 
     /**
@@ -454,8 +525,7 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
                         JOptionPane.showMessageDialog(null, Resources.getString("DialogMessagePicker.5"), Resources.getString("DialogMessagePicker.7"), JOptionPane.ERROR_MESSAGE);
                     }
                 }
-                , (ConnectionSettingsEasyBackend) comboExchangeConfig.getSelectedItem(),
-                5000);
+                , (ConnectionSettingsEasyBackend) comboExchangeConfig.getSelectedItem(), 5000);
                 
                 // Start message manager
                 new SwingWorker<>() {

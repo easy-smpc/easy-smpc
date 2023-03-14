@@ -305,7 +305,7 @@ public class App extends JFrame {
     protected void actionParticipateBackend() {
         
         // Get string
-        String message = new DialogInitialMessagePicker(this).showDialog();
+        String message = new DialogInitialMessagePicker(this, getConnectionSettings()).showDialog();
         
         // If valid string provided
         if (message != null) {
