@@ -44,10 +44,12 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
+import org.bihealth.mi.easybus.implementations.local.ConnectionSettingsManual;
 import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
+import org.bihealth.mi.easysmpc.components.DialogConnectionConfig;
 import org.bihealth.mi.easysmpc.components.DialogEasyBackendConfig;
 import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.DialogInitialMessagePicker;
@@ -171,13 +173,17 @@ public class App extends JFrame {
         actionMenu = new JMenu(Resources.getString("App.1")); //$NON-NLS-1$
         jmb.add(actionMenu);
 
-        // Start
-        JMenuItem jmiStart = new JMenuItem(Resources.getString("App.14"), Resources.getMenuItem()); //$NON-NLS-1$
+        // Create connection
+        JMenuItem jmiStart = new JMenuItem(Resources.getString("App.26"), Resources.getMenuItem()); //$NON-NLS-1$
         actionMenu.add(jmiStart);
         jmiStart.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionStart();
+                ConnectionSettings result = new DialogConnectionConfig(App.this).showDialog();
+                if(result != null) {
+                    setConnectionSettings(result);
+                    showPerspective(0);
+                }
             }
         });
 
@@ -191,23 +197,20 @@ public class App extends JFrame {
             }
         });
 
-        // Participate e-mail
+        // Participate
         JMenuItem jmiParticipateEmail = new JMenuItem(Resources.getString("App.8"), Resources.getMenuItem()); //$NON-NLS-1$
         actionMenu.add(jmiParticipateEmail);
         jmiParticipateEmail.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionParticipateEMail();
-            }
-        });
-        
-        // Participate backend
-        JMenuItem jmiParticipateBackend = new JMenuItem(Resources.getString("App.26"), Resources.getMenuItem()); //$NON-NLS-1$
-        actionMenu.add(jmiParticipateBackend);
-        jmiParticipateBackend.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionParticipateBackend();
+                
+                
+                
+                if (getConnectionSettings() instanceof ConnectionSettingsManual) {
+                    actionParticipateManual();
+                } else {
+                    actionParticipateBackend();
+                }
             }
         });
         
@@ -843,7 +846,7 @@ public class App extends JFrame {
     /**
      * Participate action
      */
-    protected void actionParticipateEMail() {
+    protected void actionParticipateManual() {
          // Try to get string from clip board
         String clipboardText = ImportClipboard.getStrippedExchangeMessage(ImportClipboard.getTextFromClipBoard());
         clipboardText = isInitialParticipationMessageValid(clipboardText) ? clipboardText : null;

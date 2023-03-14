@@ -34,6 +34,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easybus.implementations.local.ConnectionSettingsManual;
 import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
@@ -240,17 +241,21 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
         
         // Get config
         ConnectionSettings settings = tabbedPane.getCurrentSelectedComponent().getConnectionSettings();
-        // Test config
-        if (!settings.isValid(false)) {
-            JOptionPane.showMessageDialog(this, Resources.getString("EmailConfig.14"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        
+        // If not manual check and store
+        if(!(settings instanceof ConnectionSettingsManual)) {
+            // Test config
+            if (!settings.isValid(false)) {
+                JOptionPane.showMessageDialog(this, Resources.getString("EmailConfig.14"), Resources.getString("EmailConfig.12"), JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        // Update connections in preferences
-        try {
-            Connections.addOrUpdate(settings);
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ErrorStorePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+            // Update connections in preferences
+            try {
+                Connections.addOrUpdate(settings);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ErrorStorePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
+            }
         }
 
         // Set result and dispose
