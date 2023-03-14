@@ -50,7 +50,6 @@ import javax.swing.event.ChangeListener;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.ConnectionSettings;
-import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmarkSendMail;
@@ -231,7 +230,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 }
                 
                 // Finalize
-                monitor.setProgress(list.size());                
+                monitor.setProgress(list.size());
                 wrapUp();
             }
 
@@ -267,25 +266,14 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                     
                     // Init
                     FutureTask<Void> future;
-
-                    if (isInitialSending() && getApp().getModel().getExchangeMode() == ExchangeMode.EMAIL) {
-                        // Send plain message
-                        future = getApp().getModel()
-                                         .getBus()
-                                         .sendPlain(entry.getRightValue(),
-                                                    generateEMailSubject(),
-                                                    generateEMailBody(entry,
-                                                                      generateFormatedExchangeString(entry)));
-                    } else {
-                     // Send message in bus mode
-                        future = getApp().getModel()
-                                         .getBus()
-                                         .send(getExchangeString(entry),
-                                               new Scope(getApp().getModel().getStudyUID() + (isInitialSending() ? Resources.ROUND_0 : getRoundIdentifier())),
-                                               new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
-                                                                                       entry.getRightValue()));
-
-                    }
+                    
+                    // Send message
+                    future = getApp().getModel()
+                            .getBus()
+                            .send(getExchangeString(entry),
+                                  new Scope(getApp().getModel().getStudyUID() + (isInitialSending() ? Resources.ROUND_0 : getRoundIdentifier())),
+                                  new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
+                                                                          entry.getRightValue()));
 
                     try {
                         
