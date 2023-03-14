@@ -447,11 +447,11 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
                     public void accept(List<BusMessage> messages) {
                         tableModel.changeAndUpdate(messages);
                     }
-                }, new Consumer<String>() {
+                }, new Consumer<Exception>() {
 
                     @Override
-                    public void accept(String errorMessage) {
-                        JOptionPane.showMessageDialog(null, errorMessage, Resources.getString("DialogMessagePicker.7"), JOptionPane.ERROR_MESSAGE);
+                    public void accept(Exception e) {
+                        JOptionPane.showMessageDialog(null, Resources.getString("DialogMessagePicker.5"), Resources.getString("DialogMessagePicker.7"), JOptionPane.ERROR_MESSAGE);
                     }
                 }
                 , (ConnectionSettingsEasyBackend) comboExchangeConfig.getSelectedItem(),

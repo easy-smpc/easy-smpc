@@ -16,8 +16,6 @@ package org.bihealth.mi.easybus;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.bihealth.mi.easysmpc.resources.Resources;
-
 /**
  * Manages the connection to obtain initial messages
  * @author Felix Wirth
@@ -30,7 +28,7 @@ public abstract class InitialMessageManager {
     /** Stop flag */
     private volatile boolean                 stop = false;
     /** Action if error occurs */
-    private final Consumer<String>           actionError;
+    private final Consumer<Exception>           actionError;
     /** Check interval */
     private final int checkInterval;
 
@@ -41,7 +39,7 @@ public abstract class InitialMessageManager {
      * @param actionError
      * @param 
      */
-    public InitialMessageManager(Consumer<List<BusMessage>> actionUpdateMessage, Consumer<String> actionError, int checkInterval) {
+    public InitialMessageManager(Consumer<List<BusMessage>> actionUpdateMessage, Consumer<Exception> actionError, int checkInterval) {
         
         // Store
         this.actionUpdateMessage = actionUpdateMessage;
@@ -65,9 +63,8 @@ public abstract class InitialMessageManager {
             try {
                 actionUpdateMessage.accept(retrieveMessages());
             } catch (IllegalStateException e) {
-                actionError.accept(Resources.getString("DialogMessagePicker.5"));
                 this.stop = true;
-                throw new IllegalStateException("Unable to access messages", e);
+                actionError.accept(e);
             }
             
             // Sleep
@@ -88,8 +85,8 @@ public abstract class InitialMessageManager {
     /**
      * @return the actionError
      */
-    protected void processError(String message) {
-        actionError.accept(message);
-        throw new IllegalStateException("Unable to process messages. Error message is" + message);
+    protected void processError(Exception e) {
+        actionError.accept(e);
+        throw new IllegalStateException("Unable to process messages", e);
     }
 }

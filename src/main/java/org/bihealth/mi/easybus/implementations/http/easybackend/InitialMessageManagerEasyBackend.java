@@ -70,7 +70,7 @@ public class InitialMessageManagerEasyBackend extends InitialMessageManager {
      * @param checkInterval
      */
     public InitialMessageManagerEasyBackend(Consumer<List<BusMessage>> updateMessage,
-                                            Consumer<String> actionError,
+                                            Consumer<Exception> actionError,
                                             ConnectionSettingsEasyBackend settings,
                                             int checkInterval) {
         super(updateMessage, actionError, checkInterval);
@@ -117,14 +117,14 @@ public class InitialMessageManagerEasyBackend extends InitialMessageManager {
 
         // Was there an exception?
         if (exception != null) {
-            processError(Resources.getString("DialogMessagePicker.5"));
+            processError(exception);
         }
 
         // Map result string to JSON
         try {
             messages = mapper.reader().readTree(resultString).elements();
         } catch (JsonProcessingException e) {
-            processError(Resources.getString("DialogMessagePicker.5"));
+            processError(e);
         }
 
         // Loop over messages in JSON node
@@ -138,7 +138,7 @@ public class InitialMessageManagerEasyBackend extends InitialMessageManager {
             try {
                 messageComplete = messageManager.mergeMessage(message, false);
             } catch (BusException e) {
-                processError(Resources.getString("DialogMessagePicker.5"));
+                processError(e);
             }
 
             // Add to list if actually complete
@@ -162,7 +162,7 @@ public class InitialMessageManagerEasyBackend extends InitialMessageManager {
         
         // Check
         if (messagesNode.path("id") == null || messagesNode.path("id").isMissingNode() || messagesNode.path("content") == null || messagesNode.path("content").isMissingNode()) {
-            processError(Resources.getString("DialogMessagePicker.5"));
+            processError(new IllegalStateException(Resources.getString("DialogMessagePicker.5")));
         }
         
         BigInteger id = messagesNode.path("id").bigIntegerValue();
@@ -170,7 +170,7 @@ public class InitialMessageManagerEasyBackend extends InitialMessageManager {
         try {
             o = BusEasyBackend.deserializeMessage(messagesNode.path("content").textValue());
         } catch (ClassNotFoundException | IOException e) {
-            processError(Resources.getString("DialogMessagePicker.5"));
+            processError(e);
         }
         
         // Create object
@@ -256,7 +256,7 @@ public class InitialMessageManagerEasyBackend extends InitialMessageManager {
         
         // Was there an exception?
         if(exception != null) {
-            processError(Resources.getString("DialogMessagePicker.6"));
+            processError(exception);
         }
     }
 }
