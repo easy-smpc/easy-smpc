@@ -64,7 +64,7 @@ public class InitialMessageManagerEasyBackend extends InitialMessageManager {
     /**
      * Creates a new instance
      * 
-     * @param actionUupdateMessage
+     * @param actionUpdateMessage
      * @param actionError
      * @param settings
      * @param checkInterval

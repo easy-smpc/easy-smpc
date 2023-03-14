@@ -500,6 +500,7 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
         // Delete message
         try {
             this.tableModel.getSelectedMessage().delete();
+            this.tableModel.getSelectedMessage().expunge();
         } catch (BusException e) {
             JOptionPane.showMessageDialog(null, Resources.getString("DialogMessagePicker.6"), Resources.getString("DialogMessagePicker.7"), JOptionPane.ERROR_MESSAGE);
         }
