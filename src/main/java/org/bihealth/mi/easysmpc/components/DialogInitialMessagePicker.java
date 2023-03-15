@@ -18,22 +18,19 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.prefs.BackingStoreException;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -55,14 +52,12 @@ import javax.swing.table.AbstractTableModel;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.BusMessage;
 import org.bihealth.mi.easybus.ConnectionSettings;
-import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.InitialMessageManager;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easybus.implementations.email.InitialMessageManagerEmail;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easybus.implementations.http.easybackend.InitialMessageManagerEasyBackend;
 import org.bihealth.mi.easybus.implementations.local.ConnectionSettingsManual;
-import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Message;
@@ -79,20 +74,8 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
     private static final long                   serialVersionUID = -293485237040176324L;
     /** Result */
     private String                              result;
-    /** Add configuration e-mail box */
-    private final JButton                       buttonAddExchangeConfig;
-    /** Combo box to select exchange mode */
-    private final JComboBox<ExchangeMode>       comboExchangeMode;
-    /** Combo box to select exchange configuration */
-    private final JComboBox<ConnectionSettings> comboExchangeConfig;
-    /** Add configuration e-mail box */
-    private final JButton                       buttonRemoveExchangeConfig;
-    /** Edit configuration e-mail box */
-    private final JButton                       buttonEditExchangeConfig;
     /** Button */
     private final JButton                       buttonOK;
-    /** Parent frame */
-    private final JFrame                        parentFrame;
     /** Table model */
     private final TableModelMessages            tableModel       = new TableModelMessages();
     /** Initial message manager */
@@ -225,7 +208,6 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
         }
         
         // Save
-        this.parentFrame = parent;
         this.settings = settings;
 
         // Dialog properties
@@ -239,75 +221,33 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
                                                                                         TitledBorder.CENTER,
                                                                                         TitledBorder.DEFAULT_POSITION));
 
-        // Panel for exchange config
-        JPanel automaticExchangePanel = new JPanel();
-        automaticExchangePanel.setLayout(new BoxLayout(automaticExchangePanel, BoxLayout.X_AXIS));
-
-        // Combo boxes for exchange mode & config
-        comboExchangeMode = new JComboBox<>(new ExchangeMode[] {ExchangeMode.EASYBACKEND});
-        comboExchangeMode.setSelectedItem(ExchangeMode.EASYBACKEND);
-        comboExchangeMode.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                stateChanged(new ChangeEvent(comboExchangeMode));
-            }
-        });
-
-        comboExchangeConfig = new JComboBox<>();
-        comboExchangeConfig.setRenderer(new ConnectionSettingsRenderer());
-        comboExchangeConfig.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                stateChanged(new ChangeEvent(comboExchangeConfig));
-            }
-        });
-
-        // Button to add e-mail config
-        buttonAddExchangeConfig = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigAdd"));
-        buttonAddExchangeConfig.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionAddExchangeConf();
-            }
-        });
-
-        // Button to edit e-mail config
-        buttonEditExchangeConfig = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigEdit"));
-        buttonEditExchangeConfig.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionEditExchangeConf();
-            }
-        });
-
-        // Button to remove e-mail config
-        buttonRemoveExchangeConfig = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigRemove"));
-        buttonRemoveExchangeConfig.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionRemoveExchangeConf();
-            }
-        });
-
-        // Add to exchange panel and north
-        automaticExchangePanel.add(comboExchangeMode);
-        automaticExchangePanel.add(comboExchangeConfig);
-        automaticExchangePanel.add(buttonAddExchangeConfig);
-        automaticExchangePanel.add(buttonEditExchangeConfig);
-        automaticExchangePanel.add(buttonRemoveExchangeConfig);
-        this.getContentPane().add(automaticExchangePanel, BorderLayout.NORTH);
-
         // Create table
         table = new JTable(tableModel);
         tableModel.setTable(table);
-        table.addFocusListener(new FocusListener() {
+        table.addMouseListener(new MouseListener() {
+            
             @Override
-            public void focusLost(FocusEvent e) {
-                stateChanged(new ChangeEvent(this));
+            public void mouseReleased(MouseEvent e) {
+                // Empty
             }
             
             @Override
-            public void focusGained(FocusEvent e) {
+            public void mousePressed(MouseEvent e) {
+                // Empty
+            }
+            
+            @Override
+            public void mouseExited(MouseEvent e) {
+                // Empty
+            }
+            
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                // Empty
+            }
+            
+            @Override
+            public void mouseClicked(MouseEvent e) {
                 stateChanged(new ChangeEvent(this));
             }
         });
@@ -365,7 +305,7 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
         startReceiving();
         
         // Finalize
-        stateChanged(new ChangeEvent(comboExchangeMode));
+        stateChanged(new ChangeEvent(this));
         pack();
         setLocationRelativeTo(parent);
     }
@@ -429,30 +369,6 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
     }
 
     /**
-     * Removes a configuration
-     */
-    private void actionRemoveExchangeConf() {
-        try {
-            Connections.remove((ConnectionSettings) this.comboExchangeConfig.getSelectedItem());
-        } catch (BackingStoreException e) {
-            JOptionPane.showMessageDialog(this,
-                                          Resources.getString("PerspectiveCreate.ErrorDeletePreferences"),
-                                          Resources.getString("PerspectiveCreate.Error"),
-                                          JOptionPane.ERROR_MESSAGE);
-        }
-
-        // Reset combo box
-        comboExchangeConfig.removeAllItems();
-        this.comboExchangeConfig.addItem(null);
-        for (ConnectionSettings settings : getExchangeConfig()) {
-            this.comboExchangeConfig.addItem(settings);
-        }
-
-        // State changed
-        this.stateChanged(new ChangeEvent(this));
-    }
-
-    /**
      * Show this dialog
      */
     public String showDialog() {
@@ -467,86 +383,6 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
     @Override
     public void stateChanged(ChangeEvent e) {
         this.buttonOK.setEnabled(this.areValuesValid());
-
-        // Change in combo box exchange
-        if (e.getSource() == comboExchangeMode) {
-            // Is the combo exchange config enabled?
-            if (comboExchangeMode.getSelectedItem() == null ||
-                ((ExchangeMode) comboExchangeMode.getSelectedItem()).equals(ExchangeMode.MANUAL)) {
-                comboExchangeConfig.setEnabled(false);
-                buttonAddExchangeConfig.setEnabled(false);
-                comboExchangeConfig.setSelectedItem(null);
-                comboExchangeConfig.removeAllItems();
-            } else {
-
-                // Set enabled
-                comboExchangeConfig.setEnabled(true);
-                buttonAddExchangeConfig.setEnabled(true);
-
-                // Reset combo box
-                ConnectionSettings currentSetting = (ConnectionSettings) comboExchangeConfig.getSelectedItem();
-                comboExchangeConfig.removeAllItems();
-                comboExchangeConfig.addItem(null);
-                for (ConnectionSettings settings : getExchangeConfig()) {
-                    comboExchangeConfig.addItem(settings);
-
-                    // Set selected
-                    if (currentSetting != null && settings != null &&
-                        settings.getIdentifier().equals(currentSetting.getIdentifier())) {
-                        settings.setPasswordStore(currentSetting.getPasswordStore());
-                        comboExchangeConfig.setSelectedItem(settings);
-                    }
-                }
-            }
-        }
-        
-        // Change in combo exchange config require new message manager
-        if (e.getSource() == comboExchangeConfig) {
-            
-            // Type EasyBackend
-            if(comboExchangeConfig.getSelectedItem() instanceof ConnectionSettingsEasyBackend) {
-                
-                // Stop current manager
-                if(messageManager != null) {
-                   messageManager.stop();
-                }
-                
-                // Create message manager
-                messageManager = new InitialMessageManagerEasyBackend(new Consumer<List<BusMessage>>() {
-                    
-                    @Override
-                    public void accept(List<BusMessage> messages) {
-                        tableModel.changeAndUpdate(messages);
-                    }
-                }, new Consumer<Exception>() {
-
-                    @Override
-                    public void accept(Exception e) {
-                        JOptionPane.showMessageDialog(null, Resources.getString("DialogMessagePicker.5"), Resources.getString("DialogMessagePicker.7"), JOptionPane.ERROR_MESSAGE);
-                    }
-                }
-                , (ConnectionSettingsEasyBackend) comboExchangeConfig.getSelectedItem(), 5000);
-                
-                // Start message manager
-                new SwingWorker<>() {
-
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        messageManager.start();
-                        return null;
-                    }
-                }.execute();
-
-            }
-            
-            // Selection empty
-            if (comboExchangeConfig.getSelectedItem() == null) {
-                // Stop current manager
-                if (messageManager != null) {
-                    messageManager.stop();
-                }
-            }
-        }
     }
 
     /**
@@ -576,7 +412,9 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
         }
         
         // Stop and close dialog
-        messageManager.stop();
+        if(this.messageManager != null) {
+            messageManager.stop();
+        }
         this.dispose();
     }
 
@@ -587,125 +425,5 @@ public class DialogInitialMessagePicker extends JDialog implements ChangeListene
      */
     private boolean areValuesValid() {
         return !table.getSelectionModel().isSelectionEmpty();
-    }
-
-    /**
-     * Returns previous configurations
-     * 
-     * @return
-     */
-    private ConnectionSettings[] getExchangeConfig() {
-        try {
-            // Read from preferences
-            ArrayList<ConnectionSettings> configFromPreferences;
-
-            switch ((ExchangeMode) this.comboExchangeMode.getSelectedItem()) {
-            case EASYBACKEND:
-                configFromPreferences = Connections.list(ConnectionSettingsEasyBackend.class);
-                break;
-            case EMAIL:
-                configFromPreferences = Connections.list(ConnectionSettingsIMAP.class);
-                break;
-            case MANUAL:
-                configFromPreferences = new ArrayList<>();
-            default:
-                configFromPreferences = new ArrayList<>();
-            }
-
-            // Add null for non-automatic
-            return configFromPreferences.toArray(new ConnectionSettings[configFromPreferences.size()]);
-        } catch (BackingStoreException | ClassNotFoundException | IOException e) {
-            JOptionPane.showMessageDialog(this,
-                                          Resources.getString("PerspectiveCreate.ErrorLoadingPreferences"),
-                                          Resources.getString("PerspectiveCreate.Error"),
-                                          JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-    }
-
-    /**
-     * Adds an e-mail configuration
-     */
-    private void actionAddExchangeConf() {
-        // Get new settings
-        ConnectionSettings newSettings;
-        switch ((ExchangeMode) this.comboExchangeMode.getSelectedItem()) {
-        case EASYBACKEND:
-            newSettings = new DialogEasyBackendConfig(null, parentFrame).showDialog();
-            break;
-        default:
-            return;
-        }
-
-        if (newSettings != null) {
-            // Update connections in preferences
-            try {
-                Connections.addOrUpdate(newSettings);
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this,
-                                              Resources.getString("PerspectiveCreate.ErrorStorePreferences"),
-                                              Resources.getString("PerspectiveCreate.Error"),
-                                              JOptionPane.ERROR_MESSAGE);
-            }
-
-            // Reset combo box
-            comboExchangeConfig.removeAllItems();
-            comboExchangeConfig.addItem(null);
-            for (ConnectionSettings settings : getExchangeConfig()) {
-                this.comboExchangeConfig.addItem(settings);
-
-                // Set selected
-                if (settings != null &&
-                    settings.getIdentifier().equals(newSettings.getIdentifier())) {
-                    settings.setPasswordStore(newSettings.getPasswordStore());
-                    this.comboExchangeConfig.setSelectedItem(settings);
-                }
-            }
-        }
-        this.stateChanged(new ChangeEvent(this));
-    }
-
-    /**
-     * Edits an e-mail configuration
-     */
-    private void actionEditExchangeConf() {
-        // Get new settings
-        ConnectionSettings newSettings = null;
-
-        // Is EasyBackend settings object?
-        if (this.comboExchangeConfig.getSelectedItem() instanceof ConnectionSettingsEasyBackend) {
-            newSettings = new DialogEasyBackendConfig((ConnectionSettingsEasyBackend) this.comboExchangeConfig.getSelectedItem(),
-                                                      parentFrame).showDialog();
-        }
-
-        // Alter combo box if new settings given
-        if (newSettings != null) {
-            // Update connections in preferences
-            try {
-                Connections.addOrUpdate(newSettings);
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this,
-                                              Resources.getString("PerspectiveCreate.ErrorStorePreferences"),
-                                              Resources.getString("PerspectiveCreate.Error"),
-                                              JOptionPane.ERROR_MESSAGE);
-            }
-
-            // Reset combo box
-            comboExchangeConfig.removeAllItems();
-            comboExchangeConfig.addItem(null);
-            for (ConnectionSettings settings : getExchangeConfig()) {
-                this.comboExchangeConfig.addItem(settings);
-
-                // Set selected
-                if (settings != null &&
-                    settings.getIdentifier().equals(newSettings.getIdentifier())) {
-                    settings.setPasswordStore(newSettings.getPasswordStore());
-                    this.comboExchangeConfig.setSelectedItem(settings);
-                }
-            }
-        }
-
-        // Change state
-        this.stateChanged(new ChangeEvent(this));
     }
 }

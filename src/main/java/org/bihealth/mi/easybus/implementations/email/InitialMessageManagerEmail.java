@@ -13,23 +13,16 @@
  */
 package org.bihealth.mi.easybus.implementations.email;
 
-import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.BusMessage;
-import org.bihealth.mi.easybus.BusMessageFragment;
 import org.bihealth.mi.easybus.InitialMessageManager;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.MessageManager;
-import org.bihealth.mi.easybus.implementations.http.easybackend.BusEasyBackend;
 import org.bihealth.mi.easysmpc.resources.Resources;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Message manager for Email
@@ -97,11 +90,7 @@ public class InitialMessageManagerEmail extends InitialMessageManager {
         } catch (BusException | InterruptedException e) {
             // Pass error over
             this.processError(e);
-        } finally {
-            // Close connection
-            connection.close();
         }
-
 
         // Return
         return result;
