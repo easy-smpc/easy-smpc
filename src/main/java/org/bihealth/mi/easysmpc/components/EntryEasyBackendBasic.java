@@ -74,6 +74,8 @@ public class EntryEasyBackendBasic extends JPanel {
                                                               TitledBorder.LEFT,
                                                               TitledBorder.DEFAULT_POSITION));
         serverPane.setLayout(new BorderLayout());
+        JPanel serverInnerPane = new JPanel();
+        serverInnerPane.setLayout(new BoxLayout(serverInnerPane, BoxLayout.Y_AXIS));
 
         // Create entries and set values
         entryName = new ComponentEntryOne(Resources.getString("Easybackend.4"),
@@ -126,7 +128,8 @@ public class EntryEasyBackendBasic extends JPanel {
         loginInnerPane.add(entryName);
         loginInnerPane.add(entryEmailPassword);
         this.add(serverPane);
-        serverPane.add(entryServerURL, BorderLayout.CENTER);
+        serverPane.add(serverInnerPane, BorderLayout.CENTER);
+        serverInnerPane.add(entryServerURL);
         
         // Repaint
         this.revalidate();

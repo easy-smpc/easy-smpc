@@ -69,21 +69,21 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
     };
     
     /** SVUID */
-    private static final long           serialVersionUID = -5892937473681272650L;
+    private static final long                 serialVersionUID = -5892937473681272650L;
     /** Button */
-    private JButton                     buttonOK;
+    private final JButton                     buttonOK;
     /** Button */
-    private JButton                     buttonAdd;
+    private final JButton                     buttonAdd;
     /** Button */
-    private JButton                     buttonRemove;
+    private final JButton                     buttonRemove;
     /** Result */
-    private ConnectionSettings          result;
+    private ConnectionSettings                result;
     /** Parent frame */
-    private JFrame                      parent;
+    private final JFrame                      parent;
     /** Central panel */
-    private JPanel                      center;
+    private final JPanel                      center;
     /** Tabbed pane */
-    private JTabbedPaneConnectionConfig tabbedPane       = new JTabbedPaneConnectionConfig();
+    private final JTabbedPaneConnectionConfig tabbedPane       = new JTabbedPaneConnectionConfig();
 
     /**
      * Create a new instance
@@ -106,10 +106,12 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
         // Tabbed pane
         tabbedPane.addChangeListener(this);
         EntryConnectionConfigEmail emailTab = new EntryConnectionConfigEmail(this);
+        EntryConnectionConfigEasyBackend easyBackendTab = new EntryConnectionConfigEasyBackend(this);
         emailTab.setChangeListener(this);
+        easyBackendTab.setChangeListener(this);
         tabbedPane.add(new EntryConnectionConfigManual(), Resources.getString("ConnectionConfig.0"));
         tabbedPane.add(emailTab, Resources.getString("ConnectionConfig.4"));
-        
+        tabbedPane.add(easyBackendTab, Resources.getString("ConnectionConfig.5"));
         
         // Buttons
         JPanel buttonsPane = new JPanel();
