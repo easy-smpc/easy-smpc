@@ -25,9 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.implementations.local.ConnectionSettingsManual;
-import org.bihealth.mi.easysmpc.components.DialogConnectionConfig;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -70,10 +68,7 @@ public class Perspective0Start extends Perspective implements ChangeListener {
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ConnectionSettings result = new DialogConnectionConfig(getApp()).showDialog();
-                if(result != null) {
-                    getApp().setConnectionSettings(result);
-                }
+                getApp().actionSetConnection();
             }
         });
 

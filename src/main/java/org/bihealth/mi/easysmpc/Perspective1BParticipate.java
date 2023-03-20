@@ -35,6 +35,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
 import org.bihealth.mi.easysmpc.components.EntryBin;
 import org.bihealth.mi.easysmpc.components.EntryParticipant;
@@ -255,6 +256,13 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             EntryBin newBin = new EntryBin(currentBin.name, false, "", true, false);
             newBin.setChangeListener(this);
             panelBins.add(newBin);
+        }
+        
+        if(getApp().getConnectionSettings().getExchangeMode() != ExchangeMode.MANUAL) {
+            getApp().setStatusMessage(String.format(Resources.getString("StatusMessages.1"), getApp().getConnectionSettings().getIdentifier(), getApp().getConnectionSettings().getExchangeMode()), false);
+        }
+        else {
+            getApp().setStatusMessage(Resources.getString("StatusMessages.2"), false);
         }
         
         // Update GUI

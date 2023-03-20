@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.swing.Box;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,6 +41,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
@@ -174,11 +174,8 @@ public class App extends JFrame {
         jmiStart.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ConnectionSettings result = new DialogConnectionConfig(App.this).showDialog();
-                if(result != null) {
-                    setConnectionSettings(result);
-                    showPerspective(0);
-                }
+                actionSetConnection();
+                showPerspective(0);
             }
         });
         
@@ -236,20 +233,23 @@ public class App extends JFrame {
             }
         });    
         
-        // Message panel in menu
+        // Menu panel
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BorderLayout());
-        JPanel messagesPanel = new JPanel();
+        jmb.add(menuPanel);
+        
+        // Status messages panel
+        JPanel messagesPanel = new JPanel(new BorderLayout());
+        JPanel messagesPanelOuter = new JPanel(new BorderLayout());
         messagesPanel.setLayout(new BorderLayout(Resources.ROW_GAP_LARGE, 0));
-        menuPanel.add(messagesPanel, BorderLayout.EAST);
         statusMessageLabel = new JLabel("");
         messagesPanel.add(statusMessageLabel, BorderLayout.CENTER);
         loadingVisual = new ComponentLoadingVisual(Resources.getLoadingAnimation());
         messagesPanel.add(loadingVisual, BorderLayout.EAST);
-        messagesPanel.setBorder(new EmptyBorder(0, 0, 0, 5));
-        jmb.add(Box.createHorizontalGlue());
-        jmb.add(menuPanel);
-        
+        messagesPanel.setBorder(new EmptyBorder(0, 0, 5, 5));
+        messagesPanelOuter.add(messagesPanel, BorderLayout.EAST);
+        this.add(messagesPanelOuter, BorderLayout.SOUTH);
+
         // Add perspectives
         addPerspective(new Perspective6Result(this));
         addPerspective(new Perspective5Receive(this));
@@ -967,5 +967,22 @@ public class App extends JFrame {
      */
     public void setConnectionSettings(ConnectionSettings settings) {
         this.settings = settings;
+    }
+
+    /**
+     * Set connetion
+     */
+    public void actionSetConnection() {
+        ConnectionSettings result = new DialogConnectionConfig(this).showDialog();
+        if(result != null) {
+            setConnectionSettings(result);
+
+            if(getConnectionSettings().getExchangeMode() != ExchangeMode.MANUAL) {
+                setStatusMessage(String.format(Resources.getString("StatusMessages.0"), result.getIdentifier(), result.getExchangeMode().toString()), false);
+            }
+            else {
+                setStatusMessage(Resources.getString("StatusMessages.3"), false);
+            }
+        }
     }
 }
