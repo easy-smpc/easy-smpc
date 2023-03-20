@@ -21,7 +21,6 @@ import java.net.URL;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.http.client.utils.URIBuilder;
 import org.bihealth.mi.easybus.ConnectionSettings;
-import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easybus.implementations.PasswordProvider;
@@ -47,8 +46,6 @@ public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
     private String                        clientId         = Resources.AUTH_CLIENTID_DEFAULT;
     /** Keycloak client secret */
     private String                        clientSecret;
-    /** Self */
-    private final Participant             self;
     /** Proxy */
     private URI                           proxy            = null;
     /** Send timeout */
@@ -61,6 +58,8 @@ public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
     private PasswordProvider              provider;
     /** Performance listener */
     private transient PerformanceListener listener         = null;
+    /** Email */
+    private String email;
     /** URL validator */
     // TODO Remove http
     private final static UrlValidator     URL_VALIDATOR    = new UrlValidator(new String[] {"http", "https" }, UrlValidator.ALLOW_LOCAL_URLS);
@@ -71,19 +70,16 @@ public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
      * @param self - own participant
      * @param provider
      */
-    public ConnectionSettingsEasyBackend(Participant self, PasswordProvider provider) {
-        
-        // Checks
-        checkNonNull(self);
+    public ConnectionSettingsEasyBackend(String email, PasswordProvider provider) {
 
         // Store
-        this.self = self;
+        this.email = email;
         this.provider = provider;
     }
 
     @Override
     public String getIdentifier() {
-        return this.self.getEmailAddress();
+        return this.email;
     }
 
     /**
@@ -205,13 +201,6 @@ public class ConnectionSettingsEasyBackend  extends ConnectionSettings {
     public ConnectionSettingsEasyBackend setClientId(String clientId) {
         this.clientId = clientId;
         return this;
-    }
-
-    /**
-     * @return the self
-     */
-    public Participant getSelf() {
-        return self;
     }
 
     /**

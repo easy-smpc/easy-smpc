@@ -352,6 +352,7 @@ public class Study implements Serializable, Cloneable {
                 this.bus = new BusEasyBackend(Resources.SIZE_THREADPOOL,
                                               millis > 0 ? millis : getConnectionSettings().getCheckInterval(),
                                                       ((ConnectionSettingsEasyBackend) getConnectionSettings()),
+                                                      new org.bihealth.mi.easybus.Participant(participants[getOwnId()].name , getConnectionSettings().getIdentifier()),
                                                       getConnectionSettings().getMaxMessageSize());
             }
         }

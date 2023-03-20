@@ -32,6 +32,7 @@ import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.MessageListener;
+import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
@@ -475,11 +476,17 @@ public class UserProcess implements MessageListener {
         }
         
         // Is EasyBackend bus?
-        if (this.getConnectionSettings() instanceof ConnectionSettingsEasyBackend) {
-            return new BusEasyBackend(Resources.SIZE_THREADPOOL,
-                               getConnectionSettings().getCheckInterval(),
-                               ((ConnectionSettingsEasyBackend) getConnectionSettings()),
-                               getConnectionSettings().getMaxMessageSize());
+        try {
+            if (this.getConnectionSettings() instanceof ConnectionSettingsEasyBackend) {
+                return new BusEasyBackend(Resources.SIZE_THREADPOOL,
+                                          getConnectionSettings().getCheckInterval(),
+                                          ((ConnectionSettingsEasyBackend) getConnectionSettings()),
+                                          new Participant(model.getParticipantFromId(model.getOwnId()).name, model.getParticipantFromId(model.getOwnId()).emailAddress),
+                                          getConnectionSettings().getMaxMessageSize());
+            }
+        } catch (BusException e) {
+            LOGGER.error("Unable to get interim bus!", e);
+            throw new IllegalStateException("Unable to get interim bus!");
         }
 
         // Nothing found

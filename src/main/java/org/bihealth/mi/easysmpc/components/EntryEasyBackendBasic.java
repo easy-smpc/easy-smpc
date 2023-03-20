@@ -24,8 +24,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeListener;
 
-import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easysmpc.AppPasswordProvider;
@@ -40,8 +38,6 @@ public class EntryEasyBackendBasic extends JPanel {
 
     /** SVUID */
     private static final long        serialVersionUID = -4525263639314062052L;
-    /** Name */
-    private final ComponentEntryOne  entryName;
     /** E-Mail and password entry */
     private final EntryEMailPassword entryEmailPassword;
     /** Server entry */
@@ -77,25 +73,10 @@ public class EntryEasyBackendBasic extends JPanel {
         JPanel serverInnerPane = new JPanel();
         serverInnerPane.setLayout(new BoxLayout(serverInnerPane, BoxLayout.Y_AXIS));
 
-        // Create entries and set values
-        entryName = new ComponentEntryOne(Resources.getString("Easybackend.4"),
-                                          settings != null ? settings.getSelf().getName()
-                                                  : null,
-                                                  true,
-                                                  new ComponentTextFieldValidator() {
-
-            @Override
-            public boolean validate(String text) {
-                return !(text == null || text.isBlank());
-            }
-        },
-                                                  false,
-                                                  false);
-
         entryEmailPassword = new EntryEMailPassword(Resources.getString("EmailConfig.1"), Resources.getString("EmailConfig.2"));
         entryEmailPassword.setLefttEnabled(createMode);
         if (settings != null) {
-            entryEmailPassword.setLeftValue(settings.getSelf().getEmailAddress());
+            entryEmailPassword.setLeftValue(settings.getIdentifier());
             entryEmailPassword.setRightValue(settings.getPassword(false));
         }
 
@@ -125,7 +106,6 @@ public class EntryEasyBackendBasic extends JPanel {
         // Add
         this.add(loginPane);
         loginPane.add(loginInnerPane, BorderLayout.CENTER);
-        loginInnerPane.add(entryName);
         loginInnerPane.add(entryEmailPassword);
         this.add(serverPane);
         serverPane.add(serverInnerPane, BorderLayout.CENTER);
@@ -143,7 +123,6 @@ public class EntryEasyBackendBasic extends JPanel {
     public void setChangeListener(ChangeListener listener) {
         entryServerURL.setChangeListener(listener);
         entryEmailPassword.setChangeListener(listener);
-        entryName.setChangeListener(listener);
     }
 
     /**
@@ -152,7 +131,7 @@ public class EntryEasyBackendBasic extends JPanel {
      * @return
      */
     public boolean areValuesValid() {
-        return entryName.isValueValid() && entryServerURL.isValueValid() && entryEmailPassword.areValuesValid();
+        return entryServerURL.isValueValid() && entryEmailPassword.areValuesValid();
     }
 
     /**
@@ -164,13 +143,12 @@ public class EntryEasyBackendBasic extends JPanel {
         // Prepare
         ConnectionSettingsEasyBackend result = null;
         try {
-            result = new ConnectionSettingsEasyBackend(new Participant(entryName.getValue(),
-                                                                       entryEmailPassword.getLeftValue()),
+            result = new ConnectionSettingsEasyBackend(entryEmailPassword.getLeftValue(),
                                                        new AppPasswordProvider(Resources.getString("EmailConfig.33")))
                     .setAPIServer(new URL(entryServerURL.getValue()));
             result.setPasswordStore(new PasswordStore(entryEmailPassword.getRightValue() != null ? entryEmailPassword.getRightValue() : ""));
 
-        } catch (BusException | MalformedURLException e) {
+        } catch (MalformedURLException e) {
             return null;
         }
 

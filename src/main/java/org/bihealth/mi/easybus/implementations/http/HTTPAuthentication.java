@@ -64,7 +64,7 @@ public class HTTPAuthentication {
             throw new IllegalStateException("Auth server URI is incorrect");
         }
         
-        this.username = settings.getSelf().getEmailAddress();
+        this.username = settings.getIdentifier();
         this.clientId = settings.getClientId();
         this.clientSecret = settings.getClientSecret();
         this.grantType = "password";

@@ -90,13 +90,13 @@ public class BusEasyBackend extends Bus {
      * @param connection
      * @param maxMessageSize
      */
-    public BusEasyBackend(int sizeThreadpool, long millis, ConnectionSettingsEasyBackend settings, int maxMessageSize) {
+    public BusEasyBackend(int sizeThreadpool, long millis, ConnectionSettingsEasyBackend settings, Participant self, int maxMessageSize) {
         // Super
         super(sizeThreadpool);
        
         // Store
         this.auth = new HTTPAuthentication(settings);
-        this.self = settings.getSelf();
+        this.self = self;
         try {
             this.server = settings.getAPIServer().toURI();
         } catch (URISyntaxException e) {
@@ -142,7 +142,7 @@ public class BusEasyBackend extends Bus {
         LOGGER.debug("Started receiving");
         
         // Loop over scopes
-        for (String scope : getScopesForParticipant(this.self)) {
+        for (String scope : getScopesForParticipant(self)) {
 
             // Prepare
             String resultString = null;
@@ -387,13 +387,13 @@ public class BusEasyBackend extends Bus {
 
         // Send message
         try {
-            new HTTPRequest(server, String.format(PATH_SEND_MESSAGE_PATTERN, scope.getName(), receiver.getName()), HTTPRequestType.POST, getToken(), body).execute();
+            new HTTPRequest(server, String.format(PATH_SEND_MESSAGE_PATTERN, scope.getName(), receiver.getEmailAddress()), HTTPRequestType.POST, getToken(), body).execute();
         } catch (HTTPException e) {
             
             // Existing initial messages error
             if(e.getStatusCode() == 418) {
-                LOGGER.error(String.format("Tried to add an illegal second initial message for scope %s and receiver %s!", scope.getName(), receiver.getName()));
-                throw new IllegalStateException(String.format("Tried to add an illegal second initial message for scope %s and receiver %s!", scope.getName(), receiver.getName()));
+                LOGGER.error(String.format("Tried to add an illegal second initial message for scope %s and receiver %s!", scope.getName(), receiver.getEmailAddress()));
+                throw new IllegalStateException(String.format("Tried to add an illegal second initial message for scope %s and receiver %s!", scope.getName(), receiver.getEmailAddress()));
             }
             
             // If error reason was unauthenticated, re-authenticate and retry
@@ -404,7 +404,7 @@ public class BusEasyBackend extends Bus {
                 renewToken();
                 try {
                     // Re-try
-                    new HTTPRequest(server, String.format(PATH_SEND_MESSAGE_PATTERN, scope.getName(), receiver.getName()), HTTPRequestType.POST, getToken(), body).execute();
+                    new HTTPRequest(server, String.format(PATH_SEND_MESSAGE_PATTERN, scope.getName(), receiver.getEmailAddress()), HTTPRequestType.POST, getToken(), body).execute();
                     exception = null;
                 } catch (Exception e1) {
                     // Still exception

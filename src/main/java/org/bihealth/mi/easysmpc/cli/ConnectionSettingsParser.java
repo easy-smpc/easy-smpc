@@ -18,7 +18,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.bihealth.mi.easybus.ConnectionSettings;
-import org.bihealth.mi.easybus.Participant;
 
 /**
  * An abstract class to obtain connection settings from CLI
@@ -65,7 +64,7 @@ public abstract class ConnectionSettingsParser {
      * @param self - own user
      * @return
      */
-    public abstract ConnectionSettings getConnectionSettings(Participant self);
+    public abstract ConnectionSettings getConnectionSettings(String email);
     
     /**
      * Returns the options

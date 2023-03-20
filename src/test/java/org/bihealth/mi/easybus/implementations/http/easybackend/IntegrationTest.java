@@ -52,14 +52,14 @@ public class IntegrationTest {
         // ConnectionHTTPProxy.getProxy(new URI("https://matrix-client.matrix.org"));
         
         // Create connections details receiver
-        ConnectionSettingsEasyBackend settingsReceiver = new ConnectionSettingsEasyBackend(receiver, null)
+        ConnectionSettingsEasyBackend settingsReceiver = new ConnectionSettingsEasyBackend(receiver.getEmailAddress(), null)
                 .setAPIServer(new URL("http://127.0.0.1:8080"))
                 .setRealm("easybackend")
                 .setClientId("easy-client");
         settingsReceiver.setPasswordStore(new PasswordStore("test"));
         
         // Create connections details sender
-        ConnectionSettingsEasyBackend settingsSender = new ConnectionSettingsEasyBackend(sender,
+        ConnectionSettingsEasyBackend settingsSender = new ConnectionSettingsEasyBackend(sender.getEmailAddress(),
                                                                                          null)
                 .setAPIServer(new URL("http://127.0.0.1:8080"))
                 .setRealm("easybackend")
@@ -68,7 +68,7 @@ public class IntegrationTest {
 
         
         // Create receiving bus
-        Bus busReceiving = new BusEasyBackend(5, 10, settingsReceiver, 1024);
+        Bus busReceiving = new BusEasyBackend(5, 10, settingsReceiver, receiver, 1024);
         busReceiving.receive(scope, receiver, new MessageListener() {
             
             @Override
@@ -86,7 +86,7 @@ public class IntegrationTest {
         
         
         // Create sending bus
-        Bus busSend = new BusEasyBackend(5, 10, settingsSender, 1024);
+        Bus busSend = new BusEasyBackend(5, 10, settingsSender, sender, 1024);
         //busSend.purge();
         busSend.send("My fancy message!",
                      scope,

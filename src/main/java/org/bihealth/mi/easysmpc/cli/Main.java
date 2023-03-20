@@ -352,7 +352,7 @@ public class Main {
                                                  cli.hasOption(OPTION_SKIP_COLUMNS)
                                                  ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS))
                                                          : 0),
-                                connectionSettingsParser.getConnectionSettings(self));
+                                connectionSettingsParser.getConnectionSettings(self.getEmailAddress()));
     }
 
     /**
@@ -440,7 +440,7 @@ public class Main {
                                                                                                    false,
                                                                                                    cli.hasOption(OPTION_HAS_HEADER),
                                                                                                    cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
-                                                                                  connectionSettingsParser.getConnectionSettings(self));
+                                                                                  connectionSettingsParser.getConnectionSettings(self.getEmailAddress()));
 
         // Wait for participant to be initialized
         LOGGER.info("Waiting for initial message to participate");

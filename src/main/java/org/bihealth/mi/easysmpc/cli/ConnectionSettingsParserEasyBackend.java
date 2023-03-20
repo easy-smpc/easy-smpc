@@ -20,7 +20,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.bihealth.mi.easybus.ConnectionSettings;
-import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -164,11 +163,11 @@ public class ConnectionSettingsParserEasyBackend extends ConnectionSettingsParse
     }
 
     @Override
-    public ConnectionSettings getConnectionSettings(Participant self) {
+    public ConnectionSettings getConnectionSettings(String email) {
                
         try {
             // Set mandatory parameters
-            ConnectionSettingsEasyBackend result = new ConnectionSettingsEasyBackend(self, null).setAPIServer(new URL(getCLI().getOptionValue(OPTION_SERVER_URL)));
+            ConnectionSettingsEasyBackend result = new ConnectionSettingsEasyBackend(email, null).setAPIServer(new URL(getCLI().getOptionValue(OPTION_SERVER_URL)));
             result.setPasswordStore(new PasswordStore(getCLI().getOptionValue(OPTION_PASSWORD)));
             result.setMaxMessageSize(getCLI().hasOption(OPTION_MAX_MESSAGE_SIZE) ? Integer.valueOf(getCLI().getOptionValue(OPTION_MAX_MESSAGE_SIZE))* 1024 * 1024 : Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT)
             .setSendTimeout(getCLI().hasOption(OPTION_SEND_TIMEOUT) ? Integer.valueOf(getCLI().getOptionValue(OPTION_SEND_TIMEOUT)) * 1000 : Resources.TIMEOUT_EASYBACKEND)
