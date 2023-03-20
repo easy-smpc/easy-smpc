@@ -979,24 +979,8 @@ public class App extends JFrame {
      * @return
      */
     public ConnectionSettings editExchangeConf(ConnectionSettings currentSettings) {
-        
-        // TODO Implement this new
-        return null;
-        // Prepare
-//        ConnectionSettings newSettings = null; 
-//
-//        // Is email-settings object?
-//        if(currentSettings instanceof ConnectionSettingsIMAP) {
-//            newSettings = new DialogEmailConfig((ConnectionSettingsIMAP) currentSettings, this).showDialog();
-//        }
-//        
-//        // Is EasyBackend settings object?
-//        if(currentSettings instanceof ConnectionSettingsEasyBackend) {
-//            newSettings = new DialogEasyBackendConfig((ConnectionSettingsEasyBackend) currentSettings, this).showDialog();
-//        }
-//        
-//        // Return
-//        return newSettings;
+        // Create a new dialog to edit config
+        return new DialogConnectionConfig(this, currentSettings, false).showDialog();
     }
     
     /**

@@ -15,6 +15,7 @@ package org.bihealth.mi.easysmpc;
 
 import java.awt.Window;
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.swing.JFrame;
 
@@ -81,5 +82,20 @@ public class AppPasswordProvider implements PasswordProvider, Serializable {
             }
         }
         throw new IllegalStateException("Could not determine parent window");
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstPasswordDescriptor, secondPasswordDescriptor);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        AppPasswordProvider other = (AppPasswordProvider) obj;
+        return Objects.equals(firstPasswordDescriptor, other.firstPasswordDescriptor) &&
+               Objects.equals(secondPasswordDescriptor, other.secondPasswordDescriptor);
     }
 }

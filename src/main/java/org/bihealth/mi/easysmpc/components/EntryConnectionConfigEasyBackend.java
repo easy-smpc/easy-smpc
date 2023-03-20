@@ -52,15 +52,15 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class EntryConnectionConfigEasyBackend extends ComponentConnectionConfig implements ChangeListener {
 
     /** SVUID */
-    private static final long                          serialVersionUID = -1273453640931118450L;
+    private static final long                          serialVersionUID    = -1273453640931118450L;
     /** Entry for basic details */
     private EntryEasyBackendBasic                      entryEasybackendBasic;
     /** Entry for advanced details */
     private EntryEasyBackendAdvanced                   entryEasybackendAdvanced;
     /** Edit or create mode? */
-    private boolean                                    createMode       = true;
+    private boolean                                    createMode          = true;
     /** Tabbed pane */
-    JTabbedPane                                        tabbedPane       = new JTabbedPane();
+    JTabbedPane                                        tabbedPane          = new JTabbedPane();
     /** Entry for message size */
     private ComponentEntryOne                          entryMessageSize;
     /** Entry for check interval */
@@ -76,10 +76,12 @@ public class EntryConnectionConfigEasyBackend extends ComponentConnectionConfig 
     /** Config list */
     private final JList<ConnectionSettingsEasyBackend> configList;
     /** List data model */
-    DefaultListModel<ConnectionSettingsEasyBackend>    configListModel  = new DefaultListModel<>();
+    DefaultListModel<ConnectionSettingsEasyBackend>    configListModel     = new DefaultListModel<>();
     /** Central panel */
     private JPanel                                     centralBase;
-    
+    /** Allowed to change config? */
+    private boolean                                    changeConfigAllowed = true;
+
     /**
      * Creates a new instance
      * @param parent 
@@ -271,6 +273,26 @@ public class EntryConnectionConfigEasyBackend extends ComponentConnectionConfig 
     }
     
     /**
+     * Creates a new instance with settings pre-selected
+     * 
+     * @param dialogConnectionConfig
+     * @param settings
+     * @param changeConfigAllowed
+     */
+    public EntryConnectionConfigEasyBackend(DialogConnectionConfig dialogConnectionConfig,
+                                            ConnectionSettingsEasyBackend settings,
+                                            boolean changeConfigAllowed) {
+        //  Call constructor and store
+        this(dialogConnectionConfig);
+        this.changeConfigAllowed = changeConfigAllowed;
+        
+        // Set settings
+        this.configList.setSelectedValue(settings, true);
+        this.configList.setEnabled(false);
+        displayEasyBackendBasicSettings(settings);
+    }
+
+    /**
      * Displays the settings after deciding for a complex or basic dialog
      * @param settings
      */
@@ -420,7 +442,7 @@ public class EntryConnectionConfigEasyBackend extends ComponentConnectionConfig 
     @Override
     public void stateChanged(ChangeEvent e) {
         // Display currently selected value
-        if (e.getSource() == configList) {
+        if (e.getSource() == configList && changeConfigAllowed) {
             displayEasyBackendSettings(configList.getSelectedValue());
         }
         

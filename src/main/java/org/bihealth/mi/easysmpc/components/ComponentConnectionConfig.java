@@ -75,5 +75,4 @@ public abstract class ComponentConnectionConfig extends JPanel {
      * @param changeListener
      */
     public abstract void setChangeListener(ChangeListener changeListener);
-
 }

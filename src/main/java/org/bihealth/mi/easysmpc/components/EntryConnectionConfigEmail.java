@@ -80,13 +80,12 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
         }
     }
 
-    
     /** SVUID */
-    private static final long                   serialVersionUID = -6353874563342643257L;
+    private static final long                   serialVersionUID    = -6353874563342643257L;
     /** Config list */
     private final JList<ConnectionSettingsIMAP> configList;
     /** List data model */
-    DefaultListModel<ConnectionSettingsIMAP>    configListModel  = new DefaultListModel<>();
+    DefaultListModel<ConnectionSettingsIMAP>    configListModel     = new DefaultListModel<>();
     /** Change listener */
     private ChangeListener                      listener;
     /** Radio button group dialog type simple/advanced */
@@ -100,9 +99,9 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
     /** E-Mail and password entry */
     private EntryEMailPassword                  entryEmailPassword;
     /** Edit or create mode? */
-    private boolean                             createMode       = true;
+    private boolean                             createMode          = true;
     /** Tabbed pane */
-    JTabbedPane                                 tabbedPane       = new JTabbedPane();
+    JTabbedPane                                 tabbedPane          = new JTabbedPane();
     /** Entry for message size */
     private ComponentEntryOne                   entryMessageSize;
     /** Entry for check interval */
@@ -110,8 +109,9 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
     /** Entry for e-mail sending timeout */
     private ComponentEntryOne                   entrySendTimeout;
     /** Parent */
-    private JDialog parent;
-
+    private JDialog                             parent;
+    /** Allowed to change config? */
+    private boolean                             changeConfigAllowed = true;
 
     /**
      * Creates a new instance
@@ -311,6 +311,26 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
         stateChanged(new ChangeEvent(configList));
     }
 
+    /**
+     * Creates a new instance with settings pre-selected
+     * 
+     * @param dialogConnectionConfig
+     * @param settings
+     * @param changeConfigAllowed
+     */
+    public EntryConnectionConfigEmail(DialogConnectionConfig dialogConnectionConfig,
+                                      ConnectionSettingsIMAP settings,
+                                      boolean changeConfigAllowed) {
+        // Call constructor and store
+        this(dialogConnectionConfig);
+        this.changeConfigAllowed = changeConfigAllowed;
+        
+        // Set settings
+        this.configList.setSelectedValue(settings, true);
+        this.configList.setEnabled(false);
+        displayEMailSettings(settings);
+    }
+
     @Override
     public boolean isProceedPossible() {
         return areValuesValid();
@@ -352,7 +372,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
     public void stateChanged(ChangeEvent e) {
         
         // Display currently selected value
-        if (e.getSource() == configList) {
+        if (e.getSource() == configList && changeConfigAllowed) {
             displayEMailSettings(configList.getSelectedValue());
         }
         // Call listener
