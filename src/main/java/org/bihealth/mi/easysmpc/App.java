@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -35,6 +37,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
@@ -155,6 +158,20 @@ public class App extends JFrame {
         this.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                actionExit();
+            }
+        });
+        
+        // Add shortcut key for escape
+        JPanel panel = (JPanel) getContentPane();
+        panel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                   .put(KeyStroke.getKeyStroke("ESCAPE"), "cancel");
+        panel.getActionMap().put("cancel", new AbstractAction() {
+            /** SVUID */
+            private static final long serialVersionUID = -5809172959090943313L;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
                 actionExit();
             }
         });
