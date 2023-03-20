@@ -239,7 +239,6 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
             tabbedPane.setEnabledAt(2, false);
             buttonRemove.setEnabled(false);
             buttonAdd.setEnabled(false);
-            
         }
         
         // Change state

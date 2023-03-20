@@ -42,7 +42,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.bihealth.mi.easybus.ConnectionSettings;
-import org.bihealth.mi.easybus.implementations.local.ConnectionSettingsManual;
 import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
@@ -179,33 +178,6 @@ public class App extends JFrame {
                 if(result != null) {
                     setConnectionSettings(result);
                     showPerspective(0);
-                }
-            }
-        });
-
-        // Create
-        JMenuItem jmiCreate = new JMenuItem(Resources.getString("App.7"), Resources.getMenuItem()); //$NON-NLS-1$
-        actionMenu.add(jmiCreate);
-        jmiCreate.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionCreate();
-            }
-        });
-
-        // Participate
-        JMenuItem jmiParticipateEmail = new JMenuItem(Resources.getString("App.8"), Resources.getMenuItem()); //$NON-NLS-1$
-        actionMenu.add(jmiParticipateEmail);
-        jmiParticipateEmail.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                
-                
-                
-                if (getConnectionSettings() instanceof ConnectionSettingsManual) {
-                    actionParticipateManual();
-                } else {
-                    actionParticipateBackend();
                 }
             }
         });
