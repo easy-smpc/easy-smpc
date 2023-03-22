@@ -14,6 +14,7 @@
 package org.bihealth.mi.easybus;
 
 import java.io.Serializable;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -29,7 +30,13 @@ public class Participant implements Serializable {
 
     /** Regex to check for a correct mail address */
     private static final Pattern CHECK_EMAIL_REGEX = Pattern.compile("^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$");
-   
+    
+    /** Regex to check for correct matrix MXID */
+    private static final Pattern CHECK_MXID_REGEX  = Pattern.compile("^@{1}[a-z0-9._=-\\\\/]+:{1}(((?!\\-))(xn\\-\\-)?[a-z0-9\\-_]{0,61}[a-z0-9]{1,1}\\.)*(xn\\-\\-)?([a-z0-9\\-]{1,61}|[a-z0-9\\-]{1,30})\\.[a-z]{2,}$");
+    
+    /** Type of participant's identifier */
+    public static enum IDENTIFIER_TYPE {EMAIL, MATRIX};
+    
     /**
      * Check if an e-mail address is valid
      * 
@@ -39,22 +46,76 @@ public class Participant implements Serializable {
         return CHECK_EMAIL_REGEX.matcher(emailAddress).matches();
     }
     
+    /**
+     * Check if a matrix mxid is valid
+     * 
+     * @param mxid
+     * @return
+     */
+    public static boolean isMXIDValid(String mxid) {
+        return CHECK_MXID_REGEX.matcher(mxid).matches();
+    }
+    
+    /**
+     * Creates a new participant with an e-mail identifier
+     * 
+     * @param name
+     * @param identifier
+     * @return
+     * @throws BusException 
+     */
+    public static Participant createEMailParticipant(String name, String identifier) throws BusException {
+        return new Participant(name, identifier, EMAIL_VALIDATOR, IDENTIFIER_TYPE.EMAIL);
+    }
+    
+    /**
+     * Creates a new participant with a matrix mxid identifier
+     * 
+     * @param name
+     * @param identifier
+     * @return
+     * @throws BusException 
+     */
+    public static Participant createMXIDParticipant(String name, String identifier) throws BusException {
+        return new Participant(name, identifier, MXID_VALIDATOR, IDENTIFIER_TYPE.MATRIX);
+    }
+    
     /** Name */
-    private String name;
+    private final String          name;
 
     /** E-mail address */
-    private String emailAddress;
-     
+    private final String          identifier;
+
+    /** Type of identifier */
+    private final IDENTIFIER_TYPE identifierType;
+   
+    /**
+    * Creates a new instance with an e-mail identifier
+    * 
+    * @throws BusException 
+    */ 
+    public Participant(String name, String identifier) throws BusException {
+        this(name, identifier, EMAIL_VALIDATOR, IDENTIFIER_TYPE.EMAIL);
+    }
+    
     /**
     * Creates a new instance
-     * @throws BusException 
+    * 
+    * @throws BusException 
     */ 
-    public Participant(String name, String emailAddress) throws BusException {
-        if (!isEmailValid(emailAddress)) {
-            throw new BusException("User name is not a valid e-mail address");
+    public Participant(String name,
+                       String identifier,
+                       Predicate<String> identifierValidator,
+                       IDENTIFIER_TYPE identifier_type) throws BusException {
+        // Check
+        if (!identifierValidator.test(identifier)) {
+            throw new BusException("Identifier is not valid");
         }
+        
+        // Store
         this.name = name;
-        this.emailAddress = emailAddress;
+        this.identifier = identifier;
+        this.identifierType = identifier_type;
     }
 
     @Override
@@ -63,9 +124,9 @@ public class Participant implements Serializable {
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
         Participant other = (Participant) obj;
-        if (emailAddress == null) {
-            if (other.emailAddress != null) return false;
-        } else if (!emailAddress.equals(other.emailAddress)) return false;
+        if (identifier == null) {
+            if (other.identifier != null) return false;
+        } else if (!identifier.equals(other.identifier)) return false;
         if (name == null) {
             if (other.name != null) return false;
         } else if (!name.equals(other.name)) return false;
@@ -77,8 +138,8 @@ public class Participant implements Serializable {
      * 
      * @return the emailAddress
      */
-    public String getEmailAddress() {
-        return emailAddress;
+    public String getIdentifier() {
+        return identifier;
     }
 
     /**
@@ -89,13 +150,42 @@ public class Participant implements Serializable {
     public String getName() {
         return name;
     }
+    
+    /**
+     * Returns the identifier type
+     * 
+     * @return the identifier type
+     */
+    public IDENTIFIER_TYPE getIdentifierType() {
+        return identifierType;
+    }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((emailAddress == null) ? 0 : emailAddress.hashCode());
+        result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         return result;
     }
+    
+    /**
+     * Validates e-mail addresses
+     */
+    public static final Predicate<String> EMAIL_VALIDATOR = new Predicate<>() {
+        @Override
+        public boolean test(String t) {
+            return isEmailValid(t);
+        }
+    };
+    
+    /**
+     * Validates a matrix mxid
+     */
+    public static final Predicate<String> MXID_VALIDATOR = new Predicate<>() {
+        @Override
+        public boolean test(String t) {
+            return isMXIDValid(t);
+        }
+    };
 }

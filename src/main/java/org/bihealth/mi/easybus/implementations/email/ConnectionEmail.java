@@ -192,7 +192,7 @@ public abstract class ConnectionEmail {
     public static String createSubject(Scope scope, Participant receiver) {
         return EMAIL_SUBJECT_PREFIX + SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG +
                " " + PARTICIPANT_NAME_START_TAG + receiver.getName() + PARTICIPANT_NAME_END_TAG +
-               " " + PARTICIPANT_EMAIL_START_TAG + receiver.getEmailAddress() +
+               " " + PARTICIPANT_EMAIL_START_TAG + receiver.getIdentifier() +
                PARTICIPANT_EMAIL_END_TAG;
     }
 
@@ -493,7 +493,7 @@ public abstract class ConnectionEmail {
         Scope scope = message.getScope();
         
         // Recipient
-        String recipient = sharedMailbox ? getReceivingEmailAddress() : receiver.getEmailAddress();
+        String recipient = sharedMailbox ? getReceivingEmailAddress() : receiver.getIdentifier();
         
         // Subject
         String subject = createSubject(scope, receiver);       
@@ -501,7 +501,7 @@ public abstract class ConnectionEmail {
         // Body
         String body = SCOPE_NAME_START_TAG + scope.getName() + SCOPE_NAME_END_TAG + "\n" + 
                       PARTICIPANT_NAME_START_TAG + receiver.getName() + PARTICIPANT_NAME_END_TAG + "\n" + 
-                      PARTICIPANT_EMAIL_START_TAG + receiver.getEmailAddress() + PARTICIPANT_EMAIL_END_TAG;
+                      PARTICIPANT_EMAIL_START_TAG + receiver.getIdentifier() + PARTICIPANT_EMAIL_END_TAG;
         
         // Send
         this.send(recipient, subject, body, message);

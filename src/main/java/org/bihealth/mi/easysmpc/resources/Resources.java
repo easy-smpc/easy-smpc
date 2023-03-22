@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -159,11 +160,30 @@ public class Resources {
     /** Aggregation delimiter */
     public static final String    AGGREGATION_DELIMITER           = "X";
 
+    /** Time to cache a result for the matrix bus */
+    public static final Duration  CACHE_TIME_MATRIX                   = Duration.ofSeconds(1);
+
+    /** Timeout for a single matrix activity */
+    // TODO decrease value
+    public static final long      TIMEOUT_MATRIX_ACTIVITY             = 600000;
+
+    /** Reason to redact a message in matrix */
+    public static final String    REASON_REDACTED_READ                = "WAS_READ";
+
     /** Default message size for e-mails */
     public static final int       EMAIL_MAX_MESSAGE_SIZE_DEFAULT  = 10 * 1024 * 1024;
 
     /** CLI stop processing string */
     public static final String    STOP_CLI_PROCESS_STRING         = "stop";
+
+    /** Default message size for matrix messages */
+    public static final int       MATRIX_DEFAULT_MESSAGE_SIZE         = 32 * 1024;
+
+    /** Retry http request wait time */
+    public static final long      RETRY_MATRIX_ACTIVITY_WAIT          = 10000;
+
+    /** Retry http request number */
+    public static final int      RETRY_MATRIX_ACTIVITY_NUMBER        = 5;
 
     /**
      * Returns all available languages
@@ -173,7 +193,7 @@ public class Resources {
     public static Locale[] getAvailableLanguages() {
         return AVAILABLE_LANGUAGES;
     }
-    
+
     /**
      * Icon
      * 
@@ -182,7 +202,10 @@ public class Resources {
      */
     public static Image getCheckmark() throws IOException {
         InputStream stream = Resources.class.getResourceAsStream("checkmark.png"); //$NON-NLS-1$
-        return ImageIO.read(stream).getScaledInstance(Resources.SIZE_CHECKMARK_X, Resources.SIZE_CHECKMARK_Y,  java.awt.Image.SCALE_SMOOTH);
+        return ImageIO.read(stream)
+                      .getScaledInstance(Resources.SIZE_CHECKMARK_X,
+                                         Resources.SIZE_CHECKMARK_Y,
+                                         java.awt.Image.SCALE_SMOOTH);
     }
 
     /**
@@ -195,12 +218,13 @@ public class Resources {
         InputStream stream = Resources.class.getResourceAsStream("icon.png"); //$NON-NLS-1$
         return ImageIO.read(stream);
     }
-    
+
     /**
-     * Reads the content from the file license.txt and returns the content as string.
+     * Reads the content from the file license.txt and returns the content as
+     * string.
      * 
      * @return
-     * @throws IOException 
+     * @throws IOException
      */
     public static String getLicenseText() throws IOException {
         InputStream stream = Resources.class.getResourceAsStream("license.txt"); //$NON-NLS-1$
@@ -227,19 +251,22 @@ public class Resources {
         }
         return content;
     }
-    
+
     /**
      * Loading animation
      * 
      * @return
      * @throws IOException
      */
-    public static ImageIcon getLoadingAnimation() throws IOException {        
+    public static ImageIcon getLoadingAnimation() throws IOException {
         URL url = Resources.class.getResource("loading.gif"); //$NON-NLS-1$
-        Image image = new ImageIcon(url).getImage().getScaledInstance(SIZE_LOADING_ANIMATION, SIZE_LOADING_ANIMATION, Image.SCALE_DEFAULT);
+        Image image = new ImageIcon(url).getImage()
+                                        .getScaledInstance(SIZE_LOADING_ANIMATION,
+                                                           SIZE_LOADING_ANIMATION,
+                                                           Image.SCALE_DEFAULT);
         return new ImageIcon(image);
-      }
-    
+    }
+
     /**
      * Menu item
      * 
@@ -250,7 +277,7 @@ public class Resources {
         InputStream stream = Resources.class.getResourceAsStream("icon.png"); //$NON-NLS-1$
         return new ImageIcon(ImageIO.read(stream).getScaledInstance(16, 16, Image.SCALE_DEFAULT));
     }
-    
+
     /**
      * Get locale of resource bundle
      * 
@@ -259,7 +286,7 @@ public class Resources {
     public static Locale getResourceBundleLocale() {
         return resource_bundle.getLocale();
     }
-    
+
     /**
      * Returns a message
      * 
@@ -283,7 +310,7 @@ public class Resources {
         Locale.setDefault(Locale.ENGLISH);
         resource_bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
     }
-    
+
     /**
      * No instantiation
      */

@@ -42,7 +42,12 @@ public class BusLocal extends Bus {
     public void stop() {
         // Empty by design
     }
-
+    
+    @Override
+    public void purge() {
+        // Empty by design
+    }
+    
     @Override
     protected Void sendInternal(BusMessage message) throws Exception {
         receiveInternal(message);

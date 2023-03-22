@@ -41,6 +41,8 @@ testing.dat
 /performanceEvaluation
 /password.txt
 /dependency-reduced-pom.xml
+*.csv
+/out.txt
 /*.csv
 /*.smpc
 /*.xlsx

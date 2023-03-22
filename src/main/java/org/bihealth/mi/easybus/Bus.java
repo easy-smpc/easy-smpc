@@ -90,7 +90,7 @@ public abstract class Bus {
         // Add listener
         listenerForParticipant.add(messageListener);
     }
-    
+
     /**
      * Passes on receiving errors
      *  
@@ -216,7 +216,38 @@ public abstract class Bus {
         // Done
         return received;
     }
+    
+    /**
+     * Get all subscribed participants regardless of scope
+     * 
+     * @return participants
+     */
+    protected List<Participant> getAllParticipants(){
+        
+        // Prepare
+        List<Participant> result = new ArrayList<>();
+        
+        // Loop over scope and subscribed participants
+        for (Entry<Scope, Map<Participant, List<MessageListener>>> subscription : this.subscriptions.entrySet()) {
+            for (Entry<Participant, List<MessageListener>> participants : subscription.getValue()
+                                                                                      .entrySet()) {
+                result.add(participants.getKey());
+            }
+        }
+        
+        // Return
+        return result;
+    }
 
+    
+    /**
+     * Abstract method to delete all EasyBus relevant data
+     * 
+     * @throws BusException
+     * @throws InterruptedException
+     */
+    public abstract void purge() throws Exception;
+    
     /**
      * Abstract method to send a message
      * 

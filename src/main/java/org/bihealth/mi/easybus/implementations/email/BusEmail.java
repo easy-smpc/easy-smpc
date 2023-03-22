@@ -111,11 +111,10 @@ public class BusEmail extends Bus {
     }
     
     /**
-     * Deletes all e-mails in inbox relevant for easysmpc
-     * @throws BusException 
-     * @throws InterruptedException 
+     * Deletes all EasyBus relevant e-mails in inbox
      */
-    public void purgeEmails() throws BusException, InterruptedException {
+    @Override
+    public void purge() throws BusException, InterruptedException {
         purgeEmails(null);
     }
     
