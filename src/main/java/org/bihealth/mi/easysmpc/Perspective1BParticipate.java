@@ -157,7 +157,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
 
         // General data data of study
         JPanel generalDataPanel = new JPanel();
-        generalDataPanel.setLayout(new GridLayout(2, 1, Resources.ROW_GAP, Resources.ROW_GAP));
+        generalDataPanel.setLayout(new BorderLayout());
         panel.add(generalDataPanel, BorderLayout.NORTH);
         generalDataPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                     Resources.getString("PerspectiveCreate.General"),
@@ -171,20 +171,14 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         this.fieldTitle.setEnabled(false);
         this.fieldTitle.setChangeListener(this);
         titlePanel.add(this.fieldTitle, BorderLayout.CENTER);
-        
-        // Panel for exchange config
-        JPanel automaticExchangePanel = new JPanel();
-        automaticExchangePanel.setLayout(new BoxLayout(automaticExchangePanel, BoxLayout.X_AXIS));
-       
+
         // Add
-        generalDataPanel.add(titlePanel);       
-        automaticExchangePanel.add(new JLabel(Resources.getString("PerspectiveCreate.AutomatedMailbox")));
-        generalDataPanel.add(automaticExchangePanel);
+        generalDataPanel.add(titlePanel, BorderLayout.CENTER);
         
         // Central panel
         panelCentral = new JPanel();
         panelCentral.setLayout(new GridLayout(2, 1));
-        panel.add(panelCentral, BorderLayout.CENTER);        
+        panel.add(panelCentral, BorderLayout.CENTER);
         
         // Participants
         this.panelParticipants = new ScrollablePanel();

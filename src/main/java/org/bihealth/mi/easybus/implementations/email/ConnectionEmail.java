@@ -383,7 +383,7 @@ public abstract class ConnectionEmail {
     protected abstract List<ConnectionEmailMessage> list(MessageFilter filter) throws BusException, InterruptedException;
   
     /**
-     * Receives a list of relevant messages. Synchronozed since it can be called concurrently from two parts of the bus 
+     * Receives a list of relevant messages. Synchronized since it can be called concurrently from two parts of the bus 
      * @param filter 
      * @return
      * @throws InterruptedException 

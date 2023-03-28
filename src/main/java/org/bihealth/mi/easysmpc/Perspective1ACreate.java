@@ -355,7 +355,7 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
 
         // General data data of study
         JPanel generalDataPanel = new JPanel();
-        generalDataPanel.setLayout(new GridLayout(2, 1, Resources.ROW_GAP, Resources.ROW_GAP));
+        generalDataPanel.setLayout(new BorderLayout());
         panel.add(generalDataPanel, BorderLayout.NORTH);
         generalDataPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                          Resources.getString("PerspectiveCreate.General"),
@@ -375,13 +375,9 @@ public class Perspective1ACreate extends Perspective implements ChangeListener {
         titlePanel.add(this.fieldTitle, BorderLayout.CENTER);
         
         // Panel for exchange config
-        JPanel automaticExchangePanel = new JPanel();
-        automaticExchangePanel.setLayout(new BoxLayout(automaticExchangePanel, BoxLayout.X_AXIS));
        
         // Add
-        generalDataPanel.add(titlePanel);
-        automaticExchangePanel.add(new JLabel(Resources.getString("PerspectiveCreate.AutomatedMailbox")));
-        generalDataPanel.add(automaticExchangePanel);
+        generalDataPanel.add(titlePanel, BorderLayout.CENTER);
         
         // Central panel
         JPanel central = new JPanel();

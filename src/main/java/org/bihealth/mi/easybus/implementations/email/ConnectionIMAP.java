@@ -268,7 +268,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                     // Create store
                     store = sessionReceiving.getStore();
                     
-                 // Connect store
+                    // Connect store
                     store.connect(getReceivingUserName(), receivingPassword);
                     
                     if(folder != null && folder.isOpen()) {
@@ -278,7 +278,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                             // Ignore
                         }
                     }
-                }                
+                }
                 
                 // Create folder new if necessary
                 if (folder == null) {
