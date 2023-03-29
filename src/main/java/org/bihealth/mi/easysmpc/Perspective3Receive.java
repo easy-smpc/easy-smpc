@@ -35,6 +35,7 @@ import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
@@ -248,7 +249,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @return enabled
      */
     private boolean isAutomaticProcessingEnabled() {
-        return getApp().getModel().getConnectionSettings() != null;
+        return getApp().getModel().getConnectionSettings() != null && getApp().getModel().getConnectionSettings().getExchangeMode() != ExchangeMode.MANUAL;
     }
     
     /**
