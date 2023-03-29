@@ -22,15 +22,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.prefs.BackingStoreException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -39,14 +35,11 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
-import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryBin;
 import org.bihealth.mi.easysmpc.components.EntryParticipant;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
-import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -60,152 +53,40 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
  */
 public class Perspective1BParticipate extends Perspective implements ChangeListener {
     
-    /** Allows to set a custom text for each object in the list */
-    private class CustomRenderer extends DefaultListCellRenderer {
-        /** SVUID */
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public Component getListCellRendererComponent(JList<?> list,
-                                                      Object value,
-                                                      int index,
-                                                      boolean isSelected,
-                                                      boolean cellHasFocus) {
-            JLabel label = (JLabel) super.getListCellRendererComponent(list,
-                                                                       value,
-                                                                       index,
-                                                                       isSelected,
-                                                                       cellHasFocus);
-            if (value != null) {
-                label.setText(((ConnectionIMAPSettings) value).getIMAPEmailAddress());
-            }
-            else {
-                label.setText(Resources.getString("EmailConfig.19"));
-            }
-            return label;
-        }
-    }
-    
     /** Panel for participants */
-    private ScrollablePanel    panelParticipants;
+    private ScrollablePanel               panelParticipants;
 
     /** Panel for bins */
-    private ScrollablePanel    panelBins;
+    private ScrollablePanel               panelBins;
 
     /** Text field containing title of study */
-    private ComponentTextField fieldTitle;
+    private ComponentTextField            fieldTitle;
 
     /** Save button */
-    private JButton            buttonSave;
+    private JButton                       buttonSave;
 
     /** Central panel */
-    private JPanel             panelCentral;
-    
-    /** Add configuration e-mail box */
-    private JButton                           buttonAddMailbox;
-
-    /** Combo box to select mail box configuration */
-    private JComboBox<ConnectionIMAPSettings> comboSelectMailbox;
-
-    /** Add configuration e-mail box */
-    private JButton                           buttonRemoveMailbox;
-
-    /** Edit configuration e-mail box */
-    private JButton                           buttonEditMailbox;
-    
-    /** Has e-mail config been checked? */
-    private boolean                           emailconfigCheck;    
+    private JPanel                        panelCentral;
 
     /**
      * Creates the perspective
+     * 
      * @param app
      */
     protected Perspective1BParticipate(App app) {
         super(app, Resources.getString("PerspectiveParticipate.participate"), 1, false); //$NON-NLS-1$
-    }    
+    }
     
     /**
      * Reacts on all changes in any components
      */
     @Override
     public void stateChanged(ChangeEvent e) {
-
-        // Deactivate e-mail configuration if manual mode
-        this.buttonAddMailbox.setEnabled(getApp().getModel().isAutomatedMode());
-        this.buttonEditMailbox.setEnabled(getApp().getModel().isAutomatedMode());
-        this.buttonRemoveMailbox.setEnabled(getApp().getModel().isAutomatedMode());
-        this.comboSelectMailbox.setEnabled(getApp().getModel().isAutomatedMode());
         
         // Set save button enabled/disabled
         this.buttonSave.setEnabled(this.areValuesValid());
     }
 
-    /**
-     * Adds an e-mail configuration
-     */
-    private void actionAddEMailConf() {
-        // Get new settings
-        ConnectionIMAPSettings newSettings = new DialogEmailConfig(null, getApp()).showDialog();
-        
-        if (newSettings != null) {
-            // Update connections in preferences
-            Connections.addOrUpdate(newSettings);
-            
-            // Reset combo  box
-            comboSelectMailbox.removeAllItems();
-            for(ConnectionIMAPSettings settings: getEmailConfig()) {
-                this.comboSelectMailbox.addItem(settings);
-                
-                // Set selected
-                if(settings != null && settings.getIMAPEmailAddress().equals(newSettings.getIMAPEmailAddress())) {
-                    settings.setIMAPPassword(newSettings.getIMAPPassword());
-                    settings.setIMAPPassword(newSettings.getIMAPPassword());
-                    settings.setSMTPPassword(newSettings.getSMTPPassword());
-                }
-            }
-            
-            // Set checked
-            this.emailconfigCheck = true;
-        }
-        
-        this.stateChanged(new ChangeEvent(this));
-    }
-
-    /**
-     * Edits an e-mail configuration
-     */
-    private void actionEditEMailConf() {
-        
-        // Get new settings
-        ConnectionIMAPSettings newSettings = new DialogEmailConfig((ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem(),
-                                                                   getApp()).showDialog();
-        
-        // Alter combo box if new settings given
-        if (newSettings != null) {
-            // Update connections in preferences
-            Connections.addOrUpdate(newSettings);
-
-            // Reset combo box
-            comboSelectMailbox.removeAllItems();
-            for (ConnectionIMAPSettings settings : getEmailConfig()) {
-                this.comboSelectMailbox.addItem(settings);
-
-                // Set selected
-                if (settings != null && settings.getIMAPEmailAddress().equals(newSettings.getIMAPEmailAddress())) {
-                    settings.setIMAPPassword(newSettings.getIMAPPassword());
-                    settings.setSMTPPassword(newSettings.getSMTPPassword());
-                    this.comboSelectMailbox.setSelectedItem(settings);
-                }
-            }
-
-            // Set checked
-            this.emailconfigCheck = true;
-        }
-        
-        // Change state
-        this.stateChanged(new ChangeEvent(this));       
-    }
-    
     /**
      * Loads and sets bin names and data from a file
      */
@@ -234,47 +115,11 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     }
 
     /**
-     * Removes an e-mail configuration
-     */
-    private void actionRemoveEMailConf() {
-        try {
-            Connections.remove((ConnectionIMAPSettings) this.comboSelectMailbox.getSelectedItem());
-            this.comboSelectMailbox.removeItem(this.comboSelectMailbox.getSelectedItem());
-        } catch (BackingStoreException e) {
-            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
-        }
-        this.stateChanged(new ChangeEvent(this));  
-    }
-
-    /**
      * Save the project
      * 
      * @return Saving actually performed?
      */
     private void actionSave() {
-        
-        // If automated mode: Check e-mail address used as defined by study creator
-        if (getApp().getModel().isAutomatedMode() &&
-            (this.comboSelectMailbox.getSelectedItem() == null ||
-             !((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).getIMAPEmailAddress()
-                                                                             .equals(getApp().getModel().getParticipants()[getApp().getModel().getOwnId()].emailAddress))) {
-            JOptionPane.showMessageDialog(getPanel(),
-                                          Resources.getString("PerspectiveParticipate.wrongEMailaddress"));
-            return;
-        }
-        
-        // Check e-mail configuration if not done so far
-        if (comboSelectMailbox.getSelectedItem() != null && !emailconfigCheck) {
-            try {
-                if (!((ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem()).isValid(true)) {
-                    throw new BusException("Connection error");
-                }
-            } catch (BusException e) {
-                // Error message
-                JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.emailConnectionNotWorking"));
-                return;
-            }
-        }
         
         // Collect and store secrets
         BigDecimal[] secret = new BigDecimal[getApp().getModel().getBins().length];
@@ -283,7 +128,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         }
         
         // Proceed
-        getApp().actionParticipateDone(secret, (ConnectionIMAPSettings) comboSelectMailbox.getSelectedItem());
+        getApp().actionParticipateDone(secret, getApp().getConnectionSettings());
     }
 
     /**
@@ -302,24 +147,6 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
     }
     
     /**
-     * Returns previous configurations
-     * 
-     * @return
-     */
-    private ConnectionIMAPSettings[] getEmailConfig() {
-        try {
-            // Read from preferences
-            ArrayList<ConnectionIMAPSettings> configFromPreferences = Connections.list();
-            // Add null for non-automatic
-            configFromPreferences.add(0, null);
-            return configFromPreferences.toArray(new ConnectionIMAPSettings[configFromPreferences.size()]);
-        } catch (BackingStoreException e) {
-            JOptionPane.showMessageDialog(getPanel(), Resources.getString("PerspectiveCreate.ErrorLoadingPreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-    }
-    
-    /**
      *Creates and adds UI elements
      */
     @Override
@@ -330,7 +157,7 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
 
         // General data data of study
         JPanel generalDataPanel = new JPanel();
-        generalDataPanel.setLayout(new GridLayout(2, 1, Resources.ROW_GAP, Resources.ROW_GAP));
+        generalDataPanel.setLayout(new BorderLayout());
         panel.add(generalDataPanel, BorderLayout.NORTH);
         generalDataPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
                                                                     Resources.getString("PerspectiveCreate.General"),
@@ -344,61 +171,14 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
         this.fieldTitle.setEnabled(false);
         this.fieldTitle.setChangeListener(this);
         titlePanel.add(this.fieldTitle, BorderLayout.CENTER);
-        
-        // Panel for automatic e-mail config
-        JPanel automaticEMailPanel = new JPanel();
-        automaticEMailPanel.setLayout(new BoxLayout(automaticEMailPanel, BoxLayout.X_AXIS));
-       
-        // Check box to use mail box automatically
-        comboSelectMailbox = new JComboBox<>(getEmailConfig());
-        comboSelectMailbox.setRenderer(new CustomRenderer());
-        comboSelectMailbox.addActionListener(new ActionListener() {            
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                stateChanged(new ChangeEvent(this));
-            }
-        });
-        
-        // Button to add e-mail config
-        buttonAddMailbox = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigAdd"));
-        buttonAddMailbox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-               actionAddEMailConf();
-            }
-        });
-        
-        // Button to edit e-mail config
-        buttonEditMailbox = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigEdit"));
-        buttonEditMailbox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionEditEMailConf();
-            }
-        });
-        
-        // Button to remove e-mail config
-        buttonRemoveMailbox = new JButton(Resources.getString("PerspectiveCreate.OpenEMailConfigRemove"));
-        buttonRemoveMailbox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionRemoveEMailConf();
-            }
-        });
-        
+
         // Add
-        generalDataPanel.add(titlePanel);       
-        automaticEMailPanel.add(new JLabel(Resources.getString("PerspectiveCreate.AutomatedMailbox")));
-        automaticEMailPanel.add(comboSelectMailbox);
-        automaticEMailPanel.add(buttonAddMailbox);
-        automaticEMailPanel.add(buttonEditMailbox);
-        automaticEMailPanel.add(buttonRemoveMailbox);
-        generalDataPanel.add(automaticEMailPanel);        
+        generalDataPanel.add(titlePanel, BorderLayout.CENTER);
         
         // Central panel
         panelCentral = new JPanel();
         panelCentral.setLayout(new GridLayout(2, 1));
-        panel.add(panelCentral, BorderLayout.CENTER);        
+        panel.add(panelCentral, BorderLayout.CENTER);
         
         // Participants
         this.panelParticipants = new ScrollablePanel();
@@ -472,20 +252,11 @@ public class Perspective1BParticipate extends Perspective implements ChangeListe
             panelBins.add(newBin);
         }
         
-        // If automated mode and e-mail config is already known chose the e-mail config
-        if (getApp().getModel().isAutomatedMode()) {
-            // Loop over all settings
-            for (int index = 0; index < comboSelectMailbox.getItemCount(); index++) {
-                if (comboSelectMailbox.getItemAt(index) != null &&
-                    comboSelectMailbox.getItemAt(index)
-                                      .getIMAPEmailAddress()
-                                      .equals(getApp().getModel()
-                                                      .getParticipantFromId(getApp().getModel()
-                                                                                    .getOwnId()).emailAddress)) {
-                    comboSelectMailbox.setSelectedIndex(index);
-                    break;
-                }
-            }
+        if(getApp().getConnectionSettings().getExchangeMode() != ExchangeMode.MANUAL) {
+            getApp().setStatusMessage(String.format(Resources.getString("StatusMessages.1"), getApp().getConnectionSettings().getIdentifier(), getApp().getConnectionSettings().getExchangeMode()), false);
+        }
+        else {
+            getApp().setStatusMessage(Resources.getString("StatusMessages.2"), false);
         }
         
         // Update GUI

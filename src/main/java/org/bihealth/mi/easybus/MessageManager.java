@@ -55,18 +55,32 @@ public class MessageManager {
     }
     
     /**
-     * Merges message fragments into a message 
+     * Merges message fragments into a message and deletes the message from its source
      * 
      * @param message
      * @return A message or null if the parameter was a fragment and the message is not complete, yet.
      * @throws BusException 
      */
     public BusMessage mergeMessage(BusMessage message) throws BusException {
+        return mergeMessage(message, true);
+    }
+    
+    /**
+     * Merges message fragments into a message 
+     * 
+     * @param message
+     * @param deleteNow
+     * @return A message or null if the parameter was a fragment and the message is not complete, yet.
+     * @throws BusException 
+     */
+    public BusMessage mergeMessage(BusMessage message, boolean deleteNow) throws BusException {
         
         // Check if fragment
         if (!(message instanceof BusMessageFragment)) {
-            message.delete();
-            message.expunge();
+            if (deleteNow) {
+                message.delete();
+                message.expunge();
+            }
             return message;
         }
         
@@ -94,7 +108,7 @@ public class MessageManager {
         messageFragments[messageFragment.getFragmentNumber()] = messageFragment;
         
         // If message complete return or return null
-        return messageComplete(messageFragments) ? buildMessage(messageFragment.getMessageID()) : null;
+        return messageComplete(messageFragments) ? buildMessage(messageFragment.getMessageID(), deleteNow) : null;
     }    
     
     /**
@@ -132,10 +146,11 @@ public class MessageManager {
      * Builds a message object from all fragments
      * 
      * @param messageId
+     * @param deleteNow
      * @return
      * @throws BusException 
      */
-    private BusMessage buildMessage(String messageId) throws BusException {
+    private BusMessage buildMessage(String messageId, boolean deleteNow) throws BusException {
         
         // Init
         BusMessageFragment[] messageFragments = this.messagesFragments.get(messageId);
@@ -144,16 +159,40 @@ public class MessageManager {
         // Loop over fragments to re-assemble string
         for (int index = 0; index < messageFragments.length; index++) {
             messageContent = messageContent + messageFragments[index].getMessage();
-            messageFragments[index].delete();
+            if(deleteNow) {
+                messageFragments[index].delete();
+            }
         }
         
         // Finish
-        messageFragments[0].expunge();
-        
-        // Return
-        return new BusMessage(messageFragments[0].getReceiver(),
-                              messageFragments[0].getScope(),
-                              messageContent);
+        if(deleteNow) {
+            messageFragments[0].expunge();
+        }
+        // Return and overwrite delete function if not already deleted
+        if (deleteNow) {
+            return new BusMessage(messageFragments[0].getReceiver(),
+                                  messageFragments[0].getScope(),
+                                  messageContent);
+        } else {
+            return new BusMessage(messageFragments[0].getReceiver(),
+                                  messageFragments[0].getScope(),
+                                  messageContent) {
+
+                /** SVUID */
+                private static final long serialVersionUID = 1642391047899201666L;
+
+                @Override
+                public void delete() throws BusException {
+                    // Deletes all messages
+                    for (BusMessageFragment fragment : messageFragments) {
+                        fragment.delete();
+                    }
+
+                    // Expunge
+                    messageFragments[0].expunge();
+                }
+            };
+        }
     }
     
     /**

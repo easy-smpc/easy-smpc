@@ -20,7 +20,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.Participant;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -67,7 +67,7 @@ public class EntryEMailDetailsAdvanced extends EntryEMailDetails {
      */
     EntryEMailDetailsAdvanced(String title,
                               int standardPort,
-                              ConnectionIMAPSettings settings,
+                              ConnectionSettingsIMAP settings,
                               boolean isIMAP,
                               boolean emailEnabled) {
         // Super

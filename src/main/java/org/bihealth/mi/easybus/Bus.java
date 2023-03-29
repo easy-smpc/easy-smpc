@@ -74,14 +74,14 @@ public abstract class Bus {
     public synchronized void receive(Scope scope, Participant participant, MessageListener messageListener) {
         
         // Get or create scope
-        Map<Participant,List<MessageListener>> subscriptionsForScope = subscriptions.get(scope);        
+        Map<Participant,List<MessageListener>> subscriptionsForScope = subscriptions.get(scope);
         if (subscriptionsForScope == null) {
             subscriptionsForScope = new HashMap<>();
             subscriptions.put(scope, subscriptionsForScope);
         }
         
         // Get or create listeners for participant
-        List<MessageListener> listenerForParticipant = subscriptionsForScope.get(participant);        
+        List<MessageListener> listenerForParticipant = subscriptionsForScope.get(participant);
         if (listenerForParticipant == null) {
             listenerForParticipant = new ArrayList<>();
             subscriptionsForScope.put(participant, listenerForParticipant);
@@ -225,4 +225,44 @@ public abstract class Bus {
      * @throws Exception
      */
     protected abstract Void sendInternal(BusMessage message) throws Exception;
+
+    /**
+     * Deletes EasySMPC relevant data
+     * 
+     * @throws BusException, InterruptedException 
+     */
+    public abstract void purge(MessageFilter filter) throws BusException, InterruptedException;
+    
+    
+    /**
+     * Get all scopes for a participant
+     * 
+     * @param participant
+     * @return
+     */
+    protected synchronized List<String> getScopesForParticipant(Participant participant) {
+        // Prepare
+        List<String> result = new ArrayList<>();
+        
+        // Loop over scopes
+        for (Entry<Scope, Map<Participant, List<MessageListener>>> subscription : subscriptions.entrySet()) {
+            if(subscription.getValue().containsKey(participant)) {
+                result.add(subscription.getKey().getName());
+            }
+        }
+        
+        // Return
+        return result;
+    }
+
+    /**
+     * Send a plain message (no bus functionality)
+     * 
+     * @param recipient
+     * @param subject
+     * @param body
+     * @return 
+     * @throws BusException
+     */
+    public abstract FutureTask<Void> sendPlain(String recipient, String subject, String body) throws BusException;
 }

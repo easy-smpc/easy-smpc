@@ -206,7 +206,7 @@ public abstract class ConnectionEmail {
 
         // Check
         if(!body.contains(PARTICIPANT_NAME_END_TAG) || !body.contains(PARTICIPANT_NAME_END_TAG) ||
-           !body.contains(PARTICIPANT_EMAIL_END_TAG) || !body.contains(PARTICIPANT_EMAIL_END_TAG)) {            
+           !body.contains(PARTICIPANT_EMAIL_END_TAG) || !body.contains(PARTICIPANT_EMAIL_END_TAG)) {
            return null;
         }
         
@@ -383,12 +383,12 @@ public abstract class ConnectionEmail {
     protected abstract List<ConnectionEmailMessage> list(MessageFilter filter) throws BusException, InterruptedException;
   
     /**
-     * Receives a list of relevant messages
+     * Receives a list of relevant messages. Synchronized since it can be called concurrently from two parts of the bus 
      * @param filter 
      * @return
      * @throws InterruptedException 
      */
-    protected List<BusMessage> receive(MessageFilter filter) throws BusException, InterruptedException {
+    protected synchronized List<BusMessage> receive(MessageFilter filter) throws BusException, InterruptedException {
         
         // Prepare
         List<BusMessage> result = new ArrayList<>();

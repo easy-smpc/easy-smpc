@@ -25,6 +25,8 @@ import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Objects;
 
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
+
 import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
 
 /**
@@ -69,7 +71,7 @@ public class MessageInitial implements Serializable {
         model.setParticipants(msg.participants);
         model.setNumParticipants(msg.participants.length);
         model.setOwnId(msg.recipientId);
-        model.setAutomatedMode(msg.automatedMode);
+        model.setExchangeMode(msg.exchangeMode);
         model.setState(StudyState.PARTICIPATING);
         model.setBins(new Bin[msg.bins.length]);
         for (int i = 0; i < msg.bins.length; i++) {
@@ -90,11 +92,10 @@ public class MessageInitial implements Serializable {
     /** The recipient id. */
     public int recipientId;
     
-    /** Are e-mails processed manually or automatically */
-    public boolean automatedMode;
-    
     /** The study UID. */
     public String studyUID;
+    /** Exchange mode */
+    private ExchangeMode exchangeMode;
     
 
     /**
@@ -108,23 +109,11 @@ public class MessageInitial implements Serializable {
         this.name = model.getName();
         this.participants = model.getParticipants();
         this.recipientId = recipientId;
-        this.automatedMode = model.isAutomatedMode();
+        this.exchangeMode = model.getExchangeMode();
         this.bins = new MessageBin[model.getBins().length];
         for (int i = 0; i < model.getBins().length; i++) {
             bins[i] = new MessageBin(model.getBins()[i], recipientId);
         }
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        MessageInitial other = (MessageInitial) obj;
-        return automatedMode == other.automatedMode && Arrays.equals(bins, other.bins) &&
-               Objects.equals(name, other.name) &&
-               Arrays.equals(participants, other.participants) &&
-               recipientId == other.recipientId && Objects.equals(studyUID, other.studyUID);
     }
 
     /**
@@ -147,7 +136,19 @@ public class MessageInitial implements Serializable {
         int result = 1;
         result = prime * result + Arrays.hashCode(bins);
         result = prime * result + Arrays.hashCode(participants);
-        result = prime * result + Objects.hash(automatedMode, name, recipientId, studyUID);
+        result = prime * result + Objects.hash(exchangeMode, name, recipientId, studyUID);
         return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        MessageInitial other = (MessageInitial) obj;
+        return Arrays.equals(bins, other.bins) && exchangeMode == other.exchangeMode &&
+               Objects.equals(name, other.name) &&
+               Arrays.equals(participants, other.participants) &&
+               recipientId == other.recipientId && Objects.equals(studyUID, other.studyUID);
     }
 }

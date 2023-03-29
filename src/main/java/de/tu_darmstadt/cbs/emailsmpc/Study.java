@@ -27,9 +27,13 @@ import java.util.stream.IntStream;
 
 import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.implementations.email.BusEmail;
 import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
+import org.bihealth.mi.easybus.implementations.http.easybackend.BusEasyBackend;
+import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -121,17 +125,17 @@ public class Study implements Serializable, Cloneable {
     /** Number of fractional bits for decimal representation */
     public int                    fractionalBits;
 
-    /** The e-mail connection details */
-    private ConnectionIMAPSettings connectionIMAPSettings;
+    /** The automated exchange connection details */
+    private ConnectionSettings connectionSettings;
 
     /** Bus for automatic message processing */
     private transient Bus    bus;
     
     /** Store whether messages have been retrieved */
     private boolean[] retrievedMessages;
-    
-    /** Are e-mails processed manually or automatically */
-    private boolean automatedMode = false;
+
+    /** Exchange mode */
+    private ExchangeMode exchangeMode = ExchangeMode.MANUAL;
 
     /**
      * Instantiates a new app model.
@@ -308,7 +312,7 @@ public class Study implements Serializable, Cloneable {
      * @throws BusException 
      */
     public synchronized Bus getBus() throws BusException {
-        return getBus(getConnectionIMAPSettings().getCheckInterval());
+        return getBus(getConnectionSettings().getCheckInterval());
     }
 
     /**
@@ -330,22 +334,38 @@ public class Study implements Serializable, Cloneable {
      * @throws BusException 
      */
     public synchronized Bus getBus(int millis, boolean isSharedMailbox) throws BusException {
+        
+        if ((this.bus == null || !this.bus.isAlive()) && this.getConnectionSettings() != null) {
 
-        if ((this.bus == null || !this.bus.isAlive()) && this.getConnectionIMAPSettings() != null) {
-            this.bus = new BusEmail(new ConnectionIMAP(this.getConnectionIMAPSettings(),
-                                                       isSharedMailbox),
-                                    millis,
-                                    Resources.SIZE_THREADPOOL,
-                                    this.connectionIMAPSettings.getMaxMessageSize());
+            // Is e-mails bus?
+            if (this.getConnectionSettings() instanceof ConnectionSettingsIMAP) {
+
+                this.bus = new BusEmail(new ConnectionIMAP((ConnectionSettingsIMAP) this.getConnectionSettings(),
+                                                           isSharedMailbox),
+                                        millis > 0 ? millis : getConnectionSettings().getCheckInterval() ,
+                                                Resources.SIZE_THREADPOOL,
+                                                ((ConnectionSettingsIMAP) this.getConnectionSettings()).getMaxMessageSize());
+            }
+
+            // Is EasyBackend bus?
+            if (this.getConnectionSettings() instanceof ConnectionSettingsEasyBackend) {
+                this.bus = new BusEasyBackend(Resources.SIZE_THREADPOOL,
+                                              millis > 0 ? millis : getConnectionSettings().getCheckInterval(),
+                                                      ((ConnectionSettingsEasyBackend) getConnectionSettings()),
+                                                      new org.bihealth.mi.easybus.Participant(participants[getOwnId()].name , getConnectionSettings().getIdentifier()),
+                                                      getConnectionSettings().getMaxMessageSize());
+            }
         }
+        
+        // Return
         return this.bus;
     }
 
     /**
-     * @return the connectionIMAPSettings
+     * @return the connectionSettings
      */
-    public synchronized ConnectionIMAPSettings getConnectionIMAPSettings() {
-        return connectionIMAPSettings;
+    public synchronized ConnectionSettings getConnectionSettings() {
+        return connectionSettings;
     }
 
     /**
@@ -482,15 +502,15 @@ public class Study implements Serializable, Cloneable {
      * @param name the name
      * @param participants the participants
      * @param bins the bins
-     * @param connectionIMAPSettings 
+     * @param connectionSettings 
      * @throws IllegalStateException the illegal state exception
      */
-    public synchronized void initializeStudy(String name, Participant[] participants, Bin[] bins, ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException {
+    public synchronized void initializeStudy(String name, Participant[] participants, Bin[] bins, ConnectionSettings connectionSettings) throws IllegalStateException {
         if (!(getState() == StudyState.NONE || getState() == StudyState.STARTING))
             throw new IllegalStateException("Unable to initialize study at state" + getState());
         this.setName(name);
-        this.setConnectionIMAPSettings(connectionIMAPSettings);
-        this.automatedMode = connectionIMAPSettings != null ? true: false;
+        this.setConnectionSettings(connectionSettings);
+        this.exchangeMode = connectionSettings == null ? ExchangeMode.MANUAL : connectionSettings.getExchangeMode(); 
         setNumParticipants(participants.length);
         unsentMessages = new Message[getNumParticipants()];
         retrievedMessages = new boolean[getNumParticipants()];       
@@ -509,7 +529,7 @@ public class Study implements Serializable, Cloneable {
     
     /** @return Is automated mode used? */
     public boolean isAutomatedMode() {
-        return this.automatedMode;
+        return !(this.exchangeMode == null || this.exchangeMode == ExchangeMode.MANUAL && connectionSettings != null);
     }
     
     /**
@@ -701,13 +721,6 @@ public class Study implements Serializable, Cloneable {
     }
 
     /**
-     * @param automatedMode the automatedMode to sets
-     */
-    public void setAutomatedMode(boolean automatedMode) {
-        this.automatedMode = automatedMode;
-    }
-
-    /**
      * @param bins the bins to set
      */
     public synchronized void setBins(Bin[] bins) {
@@ -715,10 +728,10 @@ public class Study implements Serializable, Cloneable {
     }
 
     /**
-     * @param connectionIMAPSettings the connectionIMAPSettings to set
+     * @param connectionSettings the connectionSettings to set
      */
-    public synchronized void setConnectionIMAPSettings(ConnectionIMAPSettings connectionIMAPSettings) {
-        this.connectionIMAPSettings = connectionIMAPSettings;
+    public synchronized void setConnectionSettings(ConnectionSettings connectionSettings) {
+        this.connectionSettings = connectionSettings;
     }
 
     /**
@@ -874,13 +887,13 @@ public class Study implements Serializable, Cloneable {
      * @param name the name
      * @param participants the participants
      * @param bins the bins
-     * @param connectionIMAPSettings 
+     * @param connectionSettings 
      * @throws IllegalStateException the illegal state exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
     // Note, that bins need to be initialized and have shared values
-    public synchronized void toInitialSending(String name, Participant[] participants, Bin[] bins, ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException, IOException {
-        initializeStudy(name, participants, bins, connectionIMAPSettings);
+    public synchronized void toInitialSending(String name, Participant[] participants, Bin[] bins, ConnectionSettings connectionSettings) throws IllegalStateException, IOException {
+        initializeStudy(name, participants, bins, connectionSettings);
         advanceState(StudyState.INITIAL_SENDING);
     }
 
@@ -1171,5 +1184,18 @@ public class Study implements Serializable, Cloneable {
         MessageShare data = new MessageShare(this, recipientId);
         Participant recipient = this.getParticipants()[recipientId];
         return new Message(getOwnId(), recipient, data.getMessage());
+    }
+
+    /**
+     * Returns the exchange mode
+     * 
+     * @return
+     */
+    public ExchangeMode getExchangeMode() {
+        return  this.exchangeMode;
+    }
+
+    public void setExchangeMode(ExchangeMode exchangeMode) {
+        this.exchangeMode = exchangeMode;
     }
 }

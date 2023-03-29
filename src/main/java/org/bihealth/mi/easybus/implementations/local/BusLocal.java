@@ -13,8 +13,12 @@
  */
 package org.bihealth.mi.easybus.implementations.local;
 
+import java.util.concurrent.FutureTask;
+
 import org.bihealth.mi.easybus.Bus;
+import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.BusMessage;
+import org.bihealth.mi.easybus.MessageFilter;
 
 /**
  * An easy, minimal Bus implementation
@@ -47,5 +51,15 @@ public class BusLocal extends Bus {
     protected Void sendInternal(BusMessage message) throws Exception {
         receiveInternal(message);
         return null;
+    }
+
+    @Override
+    public void purge(MessageFilter filter) throws BusException, InterruptedException {
+     // Empty by design
+    }
+
+    @Override
+    public FutureTask<Void> sendPlain(String recipient, String subject, String body) throws BusException {
+        throw new UnsupportedOperationException("Sending plain messages is not supported by this bus");
     }
 }

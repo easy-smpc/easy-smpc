@@ -118,7 +118,7 @@ public class DialogStringPicker extends JDialog implements ChangeListener {
             public void actionPerformed(ActionEvent e) {
                 actionCancel();
             }
-        });        
+        });
         
         // Set location
         this.setLocationRelativeTo(parent);

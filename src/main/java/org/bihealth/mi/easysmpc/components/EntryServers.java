@@ -15,7 +15,7 @@ package org.bihealth.mi.easysmpc.components;
 
 import javax.swing.JPanel;
 
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -39,7 +39,7 @@ public class EntryServers extends ComponentEntry {
                     @Override
                     public boolean validate(String text) {
                         try {
-                            ConnectionIMAPSettings.checkDNSName(text);
+                            ConnectionSettingsIMAP.checkDNSName(text);
                             return true;
                         } catch (IllegalArgumentException e) {
                             return false;
@@ -53,7 +53,7 @@ public class EntryServers extends ComponentEntry {
                 @Override
                 public boolean validate(String text) {
                     try {
-                        ConnectionIMAPSettings.checkDNSName(text);
+                        ConnectionSettingsIMAP.checkDNSName(text);
                         return true;
                     } catch (IllegalArgumentException e) {
                         return false;

@@ -20,7 +20,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeListener;
 
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -76,7 +76,7 @@ public class EntryEMailDetails extends JPanel {
                                                                     @Override
                                                                     public boolean validate(String text) {
                                                                         try {
-                                                                            ConnectionIMAPSettings.checkPort(Integer.parseInt(text));
+                                                                            ConnectionSettingsIMAP.checkPort(Integer.parseInt(text));
                                                                             return true;
                                                                         }
                                                                         catch (Exception e) {
@@ -102,7 +102,7 @@ public class EntryEMailDetails extends JPanel {
      * @param settings
      * @param isIMAP
      */
-    public EntryEMailDetails(String title, int defaultPort, ConnectionIMAPSettings settings, boolean isIMAP) {
+    public EntryEMailDetails(String title, int defaultPort, ConnectionSettingsIMAP settings, boolean isIMAP) {
         this(title, defaultPort);       
         
         // Check

@@ -90,7 +90,7 @@ public class ConnectionIMAP extends ConnectionEmail {
      * @param listener
      * @throws BusException
      */
-    public ConnectionIMAP(ConnectionIMAPSettings settings,
+    public ConnectionIMAP(ConnectionSettingsIMAP settings,
                           boolean sharedMailbox) throws BusException {
 
         // Super
@@ -268,7 +268,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                     // Create store
                     store = sessionReceiving.getStore();
                     
-                 // Connect store
+                    // Connect store
                     store.connect(getReceivingUserName(), receivingPassword);
                     
                     if(folder != null && folder.isOpen()) {
@@ -278,7 +278,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                             // Ignore
                         }
                     }
-                }                
+                }
                 
                 // Create folder new if necessary
                 if (folder == null) {

@@ -111,20 +111,12 @@ public class BusEmail extends Bus {
     }
     
     /**
-     * Deletes all e-mails in inbox relevant for easysmpc
-     * @throws BusException 
-     * @throws InterruptedException 
-     */
-    public void purgeEmails() throws BusException, InterruptedException {
-        purgeEmails(null);
-    }
-    
-    /**
      * Deletes all e-mails matching the message filter
      * @throws BusException 
      * @throws InterruptedException 
      */
-    public void purgeEmails(MessageFilter filter) throws BusException, InterruptedException {
+    @Override
+    public void purge(MessageFilter filter) throws BusException, InterruptedException {
 
             // Get mails
             BusMessage deleted = null;
@@ -167,6 +159,7 @@ public class BusEmail extends Bus {
      * @return 
      * @throws BusException
      */
+    @Override
     public FutureTask<Void> sendPlain(String recipient, String subject, String body) throws BusException {
         // Create future task
         FutureTask<Void> task = new FutureTask<>(new Runnable() {

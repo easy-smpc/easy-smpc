@@ -34,11 +34,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.MessageListener;
 import org.bihealth.mi.easybus.Scope;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
-import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmark;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
@@ -90,11 +90,11 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
                                               JOptionPane.OK_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
                 
                 // Get new settings
-                ConnectionIMAPSettings newSettings = new DialogEmailConfig(getApp().getModel().getConnectionIMAPSettings(), getApp()).showDialog();
+                ConnectionSettings newSettings = getApp().editExchangeConf(getApp().getModel().getConnectionSettings());
                 
-                // Use new settings if given
+                // Use new settings if provided
                 if(newSettings != null) {
-                    getApp().getModel().setConnectionIMAPSettings(newSettings);
+                    getApp().getModel().setConnectionSettings(newSettings);
 
                     // Restart bus
                     new SwingWorker<Void, Void>() {
@@ -249,7 +249,7 @@ public class Perspective3Receive extends Perspective implements ChangeListener, 
      * @return enabled
      */
     private boolean isAutomaticProcessingEnabled() {
-        return getApp().getModel().getConnectionIMAPSettings() != null;
+        return getApp().getModel().getConnectionSettings() != null && getApp().getModel().getConnectionSettings().getExchangeMode() != ExchangeMode.MANUAL;
     }
     
     /**

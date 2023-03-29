@@ -22,9 +22,8 @@ import java.util.Map.Entry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
-import org.bihealth.mi.easybus.implementations.email.BusEmail;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAP;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Bin;
@@ -48,36 +47,42 @@ public class UserProcessCreating extends UserProcess {
      * @param participants
      * @param binsNames
      * @param data
-     * @param connectionIMAPSettings
+     * @param connectionSettings
      * @throws IllegalStateException
      */
     public UserProcessCreating(String studyTitle,
                         Participant[] participants,
                         Map<String, String> binsNames,
                         Map<String, String> data,
-                        ConnectionIMAPSettings connectionIMAPSettings) throws IllegalStateException {
+                        ConnectionSettings connectionSettings) throws IllegalStateException {
 
-        super(connectionIMAPSettings);
+        super(connectionSettings);
         
         // Check
         if (participants == null || binsNames == null || participants.length < 3 || binsNames.size() < 1) {
             throw new IllegalArgumentException("Please provide at least three participants and one bin!");
         }
         
-        // Delete pre-existing bus emails
+        // Delete pre-existing bus message
         try {
-            LOGGER.info("Start deleting pre-existing e-mails");
-            purgeEmails();
+            LOGGER.info("Start deleting pre-existing messages");
+            purgeMessages(new MessageFilter() {
+                @Override
+                public boolean accepts(String messageDescription) {
+                    // Accept all messages
+                    return true;
+                }
+            });
         } catch (BusException | InterruptedException e) {
-            LOGGER.error("Unable to delete pre-existing e-mails", e);
-        }  
+            LOGGER.error("Unable to delete pre-existing messages", e);
+        }
         
         try {
             // Set model to starting
             getModel().toStarting();
             
             // Init model with generated study name, participants and bins            
-            getModel().toInitialSending(studyTitle, participants, createBinsFromMaps(binsNames, participants.length, data), connectionIMAPSettings);
+            getModel().toInitialSending(studyTitle, participants, createBinsFromMaps(binsNames, participants.length, data), connectionSettings);
             LOGGER.info(String.format("Started process for project %s with %d participants and %d variables",
                                       getModel().getName(),
                                       getModel().getNumParticipants(),
@@ -143,18 +148,6 @@ public class UserProcessCreating extends UserProcess {
         
         // Return
         return bins;
-    }
-    
-    /**
-     * Deletes all pre-existing email in the mailbox which are related to the bus
-     * 
-     * @throws BusException 
-     * @throws InterruptedException 
-     */
-    private void purgeEmails() throws BusException, InterruptedException {
-        BusEmail bus = new BusEmail(new ConnectionIMAP(getConnectionIMAPSettings(), false), 1000);
-        bus.purgeEmails();
-        bus.stop();
     }
 
     /**

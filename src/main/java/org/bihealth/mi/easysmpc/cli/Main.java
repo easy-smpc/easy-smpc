@@ -25,13 +25,14 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bihealth.mi.easybus.BusException;
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easybus.Participant;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easysmpc.dataimport.ImportFile;
-import org.bihealth.mi.easysmpc.resources.Resources;
 
 import de.tu_darmstadt.cbs.emailsmpc.Study;
 import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
@@ -43,12 +44,8 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  */
 public class Main {
 
-    /** Encryption ssl/tls */
-    private static final String SSL_TLS                 = "SSLTLS";
-    /** Encryption starttls */
-    private static final String START_TLS               = "STARTTLS";
     /** Logger */
-    private static final Logger LOGGER                  = LogManager.getLogger(Main.class);
+    private static final Logger LOGGER                       = LogManager.getLogger(Main.class);
     /** Command line option */
     private static final Option OPTION_CREATE                = Option.builder("c")
                                                                      .desc("Create a new study")
@@ -70,6 +67,14 @@ public class Main {
                                                                      .longOpt("resume")
                                                                      .hasArg(false)
                                                                      .required(false)
+                                                                     .build();
+    
+    /** Command line option */
+    private static final Option OPTION_CONNECTION_TYPE       = Option.builder("r")
+                                                                     .desc("Connection type")
+                                                                     .longOpt("connection-type")
+                                                                     .hasArg(true)
+                                                                     .required(true)
                                                                      .build();
     /** Command line option */
     private static final Option OPTION_CREATE_REQUIRED       = Option.builder(OPTION_CREATE.getOpt())
@@ -113,86 +118,7 @@ public class Main {
                                                                      .required(true)
                                                                      .hasArg(true)
                                                                      .build();
-    /** Command line option */
-    private static final Option OPTION_MAILADDRESS_RECEIVING = Option.builder("a")
-                                                                     .desc("(receiving) E-mail address")
-                                                                     .longOpt("email")
-                                                                     .required(true)
-                                                                     .hasArg(true)
-                                                                     .build();
-    /** Command line option */
-    private static final Option OPTION_PASSWORD_RECEIVING    = Option.builder("p")
-                                                                     .desc("Password for (receiving) email box")
-                                                                     .longOpt("password")
-                                                                     .required(true)
-                                                                     .hasArg(true)
-                                                                     .build();
 
-    /** Command line option */
-    private static final Option OPTION_MAILADDRESS_SENDING   = Option.builder("v")
-                                                                     .desc("Sending e-mail address")
-                                                                     .longOpt("emailSending")
-                                                                     .required(false)
-                                                                     .hasArg(true)
-                                                                     .build();
-    /** Command line option */
-    private static final Option OPTION_PASSWORD_SENDING      = Option.builder("m")
-                                                                     .desc("Password for sending email box")
-                                                                     .longOpt("passwordSending")
-                                                                     .required(false)
-                                                                     .hasArg(true)
-                                                                     .build();
-
-    /** Command line option */
-    private static final Option OPTION_IMAP_SERVER           = Option.builder("i")
-                                                                     .desc("IMAP server for email box")
-                                                                     .longOpt("imap-server")
-                                                                     .required(true)
-                                                                     .hasArg(true)
-                                                                     .build();
-    /** Command line option */
-    private static final Option OPTION_IMAP_PORT             = Option.builder("x")
-                                                                     .desc("IMAP port for email box")
-                                                                     .longOpt("imap-port")
-                                                                     .required(true)
-                                                                     .hasArg(true)
-                                                                     .build();
-    /** Command line option */
-    private static final Option OPTION_IMAP_ENCRYPTION       = Option.builder("y")
-                                                                     .desc("IMAP encryption for email box")
-                                                                     .longOpt("imap-encryption")
-                                                                     .required(true)
-                                                                     .hasArg(true)
-                                                                     .build();
-    /** Command line option */
-    private static final Option OPTION_SMTP_SERVER           = Option.builder("s")
-                                                                     .desc("SMTP server for email box")
-                                                                     .longOpt("smtp-server")
-                                                                     .required(true)
-                                                                     .hasArg(true)
-                                                                     .build();
-    /** Command line option */
-    private static final Option OPTION_SMTP_PORT             = Option.builder("z")
-                                                                     .desc("SMTP port for email box")
-                                                                     .longOpt("smtp-port")
-                                                                     .required(true)
-                                                                     .hasArg(true)
-                                                                     .build();
-    /** Command line option */
-    private static final Option OPTION_SMTP_ENCRYPTION       = Option.builder("q")
-                                                                     .desc("SMTP encryption for email box")
-                                                                     .longOpt("smtp-encryption")
-                                                                     .required(true)
-                                                                     .hasArg(true)
-                                                                     .build();
-    
-    /** Command line option */
-    private static final Option OPTION_SELF_SIGNED           = Option.builder("r")
-                                                                     .desc("Accept self-signed certificates")
-                                                                     .longOpt("self-signed")
-                                                                     .required(false)
-                                                                     .hasArg(false)
-                                                                     .build();
     /** Command line option */
     private static final Option OPTION_PARTICIPANT_NAME      = Option.builder("o")
                                                                      .desc("Name of participant")
@@ -240,68 +166,31 @@ public class Main {
                                                                      .required(true)
                                                                      .hasArg(true)
                                                                      .build();
-    
     /** Command line option */
-    private static final Option OPTION_IMAP_USER_NAME        = Option.builder("n")
-                                                                     .desc("IMAP user name (only if user name deviates from IMAP e-mail address)")
-                                                                     .longOpt("impa-user-name")
+    private static final Option OPTION_PASSWORD_RECEIVING    = Option.builder("p")
+                                                                     .desc("Password for (receiving) email box")
+                                                                     .longOpt("password")
+                                                                     .required(true)
+                                                                     .hasArg(true)
+                                                                     .build();
+    /** Command line option */
+    private static final Option OPTION_PASSWORD_SENDING      = Option.builder("m")
+                                                                     .desc("Password for sending email box")
+                                                                     .longOpt("passwordSending")
                                                                      .required(false)
                                                                      .hasArg(true)
                                                                      .build();
     
     /** Command line option */
-    private static final Option OPTION_SMTP_USER_NAME        = Option.builder("w")
-                                                                     .desc("SMTP user name (only if user name deviates from IMAP e-mail address)")
-                                                                     .longOpt("smtp-user-name")
-                                                                     .required(false)
-                                                                     .hasArg(true)
-                                                                     .build();
-    /** Command line option */
-    private static final Option OPTION_IMAP_LOGIN_MECHANISMS = Option.builder("u")
-                                                                     .desc("Set auth mechanisms for imap")
-                                                                     .longOpt("impap-mechanisms")
-                                                                     .required(false)
+    private static final Option OPTION_MAILADDRESS_RECEIVING = Option.builder("a")
+                                                                     .desc("(receiving) E-mail address")
+                                                                     .longOpt("email")
+                                                                     .required(true)
                                                                      .hasArg(true)
                                                                      .build();
 
-    /** Command line option */
-    private static final Option OPTION_SMTP_LOGIN_MECHANISMS = Option.builder("t")
-                                                                     .desc("Set auth mechanisms for smtp")
-                                                                     .longOpt("smtp-mechanisms")
-                                                                     .required(false)
-                                                                     .hasArg(true)
-                                                                     .build();
-
-    /** Command line option */
-    private static final Option OPTION_CHECK_INTERVAL   = Option.builder("mbc")
-                                                                     .desc("Mailbox check interval (sec)")
-                                                                     .longOpt("mailbox-check-interval")
-                                                                     .required(false)
-                                                                     .hasArg(true)
-                                                                     .build();
-
-    /** Command line option */
-    private static final Option OPTION_SEND_TIMEOUT          = Option.builder("tm")
-                                                                     .desc("E-mail Send timeout sec)")
-                                                                     .longOpt("send-time-out")
-                                                                     .required(false)
-                                                                     .hasArg(true)
-                                                                     .build();
-
-    /** Command line option */
-    private static final Option OPTION_MAX_MESSAGE_SIZE      = Option.builder("ms")
-                                                                     .desc("Message size (MB)")
-                                                                     .longOpt("max-message-size")
-                                                                     .required(false)
-                                                                     .hasArg(true)
-                                                                     .build();
-    
-    /** Options when in creating mode */
-    private static Options      optionsCreate                = new Options();
-    /** Options when in participating mode */
-    private static Options      optionsParticipate           = new Options();
-    /** Options when in resuming mode */
-    private static Options      optionsResume                = new Options();
+    /** Default parser */
+    private static CommandLineParser parser                       = new DefaultParser();
 
     /**
      * Starts an EasySMPC process
@@ -309,226 +198,305 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) {
-        // Prefer IPv6 if network (e.g. e-mail) is used
+        // Prefer IPv6
         System.getProperties().setProperty("java.net.preferIPv6Addresses", "true");
+        // Set headless mode (see https://poi.apache.org/components/spreadsheet/quick-guide.html#Autofit)
+        System.getProperties().setProperty("java.awt.headless", "true");
 
         // Prepare
         CommandLine cli;
         Options optionsInitial = new Options();
-        optionsCreate = new Options();
-        optionsParticipate = new Options();
-        optionsResume = new Options();
-	    
+
         // Options initial
         optionsInitial.addOption(OPTION_CREATE)
-                      .addOption(OPTION_PARTICIPATE)
-                      .addOption(OPTION_RESUME);
-
-        // Add options when creating
-        optionsCreate.addOption(OPTION_CREATE_REQUIRED)
-                     .addOption(OPTION_STUDY_NAME)
-                     .addOption(OPTION_DATA_FILE)
-                     .addOption(OPTION_BINS_NAMES)
-                     .addOption(OPTION_MAILADDRESS_RECEIVING)
-                     .addOption(OPTION_PARTICIPANTS)
-                     .addOption(OPTION_BINS_NAMES)
-                     .addOption(OPTION_PASSWORD_RECEIVING)
-                     .addOption(OPTION_IMAP_SERVER)
-                     .addOption(OPTION_IMAP_PORT)
-                     .addOption(OPTION_IMAP_ENCRYPTION)
-                     .addOption(OPTION_SMTP_SERVER)
-                     .addOption(OPTION_SMTP_PORT)
-                     .addOption(OPTION_SMTP_ENCRYPTION)
-                     .addOption(OPTION_SELF_SIGNED)
-                     .addOption(OPTION_DATA_COLUMN)
-                     .addOption(OPTION_HAS_HEADER)
-                     .addOption(OPTION_SKIP_COLUMNS)
-                     .addOption(OPTION_MAILADDRESS_SENDING)
-                     .addOption(OPTION_PASSWORD_SENDING)
-                     .addOption(OPTION_IMAP_USER_NAME)
-                     .addOption(OPTION_SMTP_USER_NAME)
-                     .addOption(OPTION_IMAP_LOGIN_MECHANISMS)
-                     .addOption(OPTION_SMTP_LOGIN_MECHANISMS)
-                     .addOption(OPTION_CHECK_INTERVAL)
-                     .addOption(OPTION_SEND_TIMEOUT)
-                     .addOption(OPTION_MAX_MESSAGE_SIZE);
-
-        // Add options when participating
-        optionsParticipate.addOption(OPTION_PARTICIPATE_REQUIRED)
-                          .addOption(OPTION_STUDY_NAME)
-                          .addOption(OPTION_PARTICIPANT_NAME)
-                          .addOption(OPTION_DATA_FILE)
-                          .addOption(OPTION_MAILADDRESS_RECEIVING)
-                          .addOption(OPTION_PASSWORD_RECEIVING)
-                          .addOption(OPTION_IMAP_SERVER)
-                          .addOption(OPTION_IMAP_PORT)
-                          .addOption(OPTION_IMAP_ENCRYPTION)
-                          .addOption(OPTION_SMTP_SERVER)
-                          .addOption(OPTION_SMTP_PORT)
-                          .addOption(OPTION_SMTP_ENCRYPTION)
-                          .addOption(OPTION_SELF_SIGNED)
-                          .addOption(OPTION_DATA_COLUMN)
-                          .addOption(OPTION_HAS_HEADER)
-                          .addOption(OPTION_SKIP_COLUMNS)
-                          .addOption(OPTION_MAILADDRESS_SENDING)
-                          .addOption(OPTION_PASSWORD_SENDING)
-                          .addOption(OPTION_IMAP_USER_NAME)
-                          .addOption(OPTION_SMTP_USER_NAME)
-                          .addOption(OPTION_IMAP_LOGIN_MECHANISMS)
-                          .addOption(OPTION_SMTP_LOGIN_MECHANISMS)
-                          .addOption(OPTION_CHECK_INTERVAL)
-                          .addOption(OPTION_SEND_TIMEOUT)
-                          .addOption(OPTION_MAX_MESSAGE_SIZE);
-
-        // Add options when resuming
-        optionsResume.addOption(OPTION_RESUME_REQUIRED)
-                     .addOption(OPTION_RESUME_FILE)
-                     .addOption(OPTION_PASSWORD_RECEIVING);
+        .addOption(OPTION_PARTICIPATE)
+        .addOption(OPTION_RESUME);
 	    
+        // Check exactly create, participate or resume
         try {
-            // Parse arguments
-            CommandLineParser parser = new DefaultParser();
-            
-            // Check exactly create, participate or load
             cli = parser.parse(optionsInitial, args, true);
-            if (!((cli.hasOption(OPTION_CREATE) & !cli.hasOption(OPTION_PARTICIPATE) & !cli.hasOption(OPTION_RESUME)) |
-                  (!cli.hasOption(OPTION_CREATE) & cli.hasOption(OPTION_PARTICIPATE) & !cli.hasOption(OPTION_RESUME)) |
-                 (!cli.hasOption(OPTION_CREATE) & !cli.hasOption(OPTION_PARTICIPATE) & cli.hasOption(OPTION_RESUME)))) {
-                throw new ParseException("Please pass either \"-create\", \"-participate\" or \"-resume\"");
+            if (!(
+                   (cli.hasOption(OPTION_CREATE) && !cli.hasOption(OPTION_PARTICIPATE) && !cli.hasOption(OPTION_RESUME)) ||
+                   (!cli.hasOption(OPTION_CREATE) && cli.hasOption(OPTION_PARTICIPATE) && !cli.hasOption(OPTION_RESUME)) ||
+                   (!cli.hasOption(OPTION_CREATE) && !cli.hasOption(OPTION_PARTICIPATE) && cli.hasOption(OPTION_RESUME))
+                )) {
+                throw new ParseException("Please pass either \"-create\", \"-participate\" or \"-resume\" as the first argument");
             }
-            
-            // Choose correct options
-            cli = returnSpecificCli(cli, parser, args);            
-            
-            // Check minimal participants of three
-            if(cli.hasOption(OPTION_PARTICIPANTS) && UserProcessCreating.createParticipantsFromCSVString(cli.getOptionValue(OPTION_PARTICIPANTS)).length < 3){
-                throw new ParseException(String.format("Please provide at least three participants in the option \"-%s\" respective \"-%s\"", OPTION_PARTICIPANTS.getLongOpt(), OPTION_PARTICIPANTS.getOpt()));
-            }
-            
-            // Check arguments
-            checkCliArguments(cli);
-            
-        } catch (ParseException | IllegalArgumentException e) {
+        } catch (ParseException e) {
             // Log exception
             LOGGER.error("Unable to parse CLI arguments", e);
-            
+
             // Output help message
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("easy-smpc-cli", optionsCreate);
-            
+            formatter.printHelp("easy-smpc-cli", optionsInitial);
+
             // Throw exception
             throw new IllegalStateException("Unable to parse CLI arguments");
         }
-                
-        // Start creation if applicable
+
+        // Proceed in creation mode
         if (cli.hasOption(OPTION_CREATE)) {
-
-            new UserProcessCreating(cli.getOptionValue(OPTION_STUDY_NAME),
-                             UserProcessCreating.createParticipantsFromCSVString(cli.getOptionValue(OPTION_PARTICIPANTS)),
-                             getDataFromFiles(cli.getOptionValue(OPTION_BINS_NAMES),
-                                              !cli.hasOption(OPTION_DATA_COLUMN),
-                                              true,
-                                              cli.hasOption(OPTION_HAS_HEADER),
-                                              cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
-                             getDataFromFiles(cli.getOptionValue(OPTION_DATA_FILE),
-                                              !cli.hasOption(OPTION_DATA_COLUMN),
-                                              false,
-                                              cli.hasOption(OPTION_HAS_HEADER),
-                                              cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
-                             getConnectionIMAPSettingsFromCLI(cli));
-            
-            // Done
-            return;
+            proceedCreate(args);
         }
-        
-        // Start participating if applicable
+
+        // Proceed in participation mode
         if (cli.hasOption(OPTION_PARTICIPATE)) {
-
-            // Prepare
-            Participant participant;
-            try {
-                participant = new Participant(cli.getOptionValue(OPTION_PARTICIPANT_NAME),
-                                              cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING));
-            } catch (BusException e1) {
-                throw new IllegalArgumentException(e1);
-            }
-            
-            // Create participating user
-            UserProcessParticipating participatingUser = new UserProcessParticipating(cli.getOptionValue(OPTION_STUDY_NAME),
-                                                                        participant,
-                                                                        getDataFromFiles(cli.getOptionValue(OPTION_DATA_FILE),
-                                                                                         !cli.hasOption(OPTION_DATA_COLUMN),
-                                                                                         false,
-                                                                                         cli.hasOption(OPTION_HAS_HEADER),
-                                                                                         cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
-                                                                  getConnectionIMAPSettingsFromCLI(cli));
-           
-            // Wait for participant to be initialized
-            LOGGER.info("Waiting for initial email to participate");
-            while(participatingUser.getModel() == null || participatingUser.getModel().getState() == StudyState.NONE) {
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    // Ignore
-                }
-            }
-            
-            // Done
-            return ;
+            proceedParticipate(args);
         }
-        
-        // Start resuming if applicable
+
+        // Proceed in resume mode
         if (cli.hasOption(OPTION_RESUME)) {
+            proceedResume(args);
+        }
+	}
+	
+    /**
+     * Proceed processing in creation mode
+     * 
+     * @param args
+     */
+    private static void proceedCreate(String[] args) {
+    
+        // Prepare 
+        Options options = new Options();
+        CommandLine cli;
+        ConnectionSettingsParser connectionSettingsParser = null;
+        Participant self;
+
+        // Set generic options for creating
+        options.addOption(OPTION_CREATE_REQUIRED)
+        .addOption(OPTION_CONNECTION_TYPE)
+        .addOption(OPTION_STUDY_NAME)
+        .addOption(OPTION_DATA_FILE)
+        .addOption(OPTION_BINS_NAMES)
+        .addOption(OPTION_PARTICIPANTS)
+        .addOption(OPTION_DATA_COLUMN)
+        .addOption(OPTION_HAS_HEADER)
+        .addOption(OPTION_SKIP_COLUMNS);
+
+        try {
+
+            // Parse to get connection type
+            cli = parser.parse(new Options().addOption(OPTION_CREATE).addOption(OPTION_CONNECTION_TYPE), args, true);
+
+            // Get connection type
+            if (cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase().equals(ExchangeMode.MANUAL.toString()) ||
+                    !EnumUtils.isValidEnum(ExchangeMode.class, cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
+                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ExchangeMode.values())));
+            }
+
+            // Set correct connection settings parser
+            switch(ExchangeMode.valueOf(cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
+            case EASYBACKEND:
+                connectionSettingsParser = new ConnectionSettingsParserEasyBackend(args, options);
+                break;
+            case EMAIL:
+                connectionSettingsParser = new ConnectionSettingsParserEmail(args, options);
+                break;
+            case MANUAL:
+                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ExchangeMode.values())));
+            default:
+                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ExchangeMode.values())));
+            }
+
+            // Parse all parameters including the connection setting specific ones
+            cli = connectionSettingsParser.getCLI();
+            
+            
+            // Check minimal participants of three
+            if(UserProcessCreating.createParticipantsFromCSVString(cli.getOptionValue(OPTION_PARTICIPANTS)).length < 3){
+                throw new ParseException(String.format("Please provide at least three participants in the option \"-%s\" respective \"-%s\"", OPTION_PARTICIPANTS.getLongOpt(), OPTION_PARTICIPANTS.getOpt()));
+            }
+
+            // Check skip columns is integer
+            if (cli.hasOption(cli.getOptionValue(OPTION_SKIP_COLUMNS))) {
+                Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS));
+            }
+            
             try {
-                
+                de.tu_darmstadt.cbs.emailsmpc.Participant participant = UserProcessCreating.createParticipantsFromCSVString(cli.getOptionValue(OPTION_PARTICIPANTS))[0];
+                self = new Participant(participant.name, participant.emailAddress );
+            } catch (BusException e) {
+                throw new IllegalArgumentException(e);
+            }
+
+            // Check connection settings parameter
+            connectionSettingsParser.checkCLIParameters();
+        }
+        catch (ParseException | IllegalArgumentException e) {
+            // Log exception
+            LOGGER.error("Unable to parse CLI arguments", e);
+
+            // Output help message
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("easy-smpc-cli", connectionSettingsParser != null ? connectionSettingsParser.getOptions() : options);
+
+            // Throw exception
+            throw new IllegalStateException("Unable to parse CLI arguments");
+        }
+
+        // Checks successful, start process
+        new UserProcessCreating(cli.getOptionValue(OPTION_STUDY_NAME),
+                                UserProcessCreating.createParticipantsFromCSVString(cli.getOptionValue(OPTION_PARTICIPANTS)),
+                                getDataFromFiles(cli.getOptionValue(OPTION_BINS_NAMES),
+                                                 !cli.hasOption(OPTION_DATA_COLUMN),
+                                                 true,
+                                                 cli.hasOption(OPTION_HAS_HEADER),
+                                                 cli.hasOption(OPTION_SKIP_COLUMNS)
+                                                 ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS))
+                                                         : 0),
+                                getDataFromFiles(cli.getOptionValue(OPTION_DATA_FILE),
+                                                 !cli.hasOption(OPTION_DATA_COLUMN),
+                                                 false,
+                                                 cli.hasOption(OPTION_HAS_HEADER),
+                                                 cli.hasOption(OPTION_SKIP_COLUMNS)
+                                                 ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS))
+                                                         : 0),
+                                connectionSettingsParser.getConnectionSettings(self.getEmailAddress()));
+    }
+
+    /**
+     * Proceed processing in participating mode
+     * 
+     * @param args
+     */
+    private static void proceedParticipate(String[] args) {
+        // Prepare 
+        Options options = new Options();
+        CommandLine cli;
+        ConnectionSettingsParser connectionSettingsParser = null;
+        Participant self;
+
+        // Add options when participating
+        options.addOption(OPTION_PARTICIPATE_REQUIRED)
+        .addOption(OPTION_CONNECTION_TYPE)
+        .addOption(OPTION_STUDY_NAME)
+        .addOption(OPTION_PARTICIPANT_NAME)
+        .addOption(OPTION_DATA_FILE)
+        .addOption(OPTION_DATA_COLUMN)
+        .addOption(OPTION_HAS_HEADER)
+        .addOption(OPTION_SKIP_COLUMNS)
+        .addOption(OPTION_MAILADDRESS_RECEIVING);
+
+        try {
+            // Parse to get connection type
+            cli = parser.parse(new Options().addOption(OPTION_PARTICIPATE).addOption(OPTION_CONNECTION_TYPE), args, true);
+
+            // Get connection type
+            if (cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase().equals(ExchangeMode.MANUAL.toString()) ||
+                    !EnumUtils.isValidEnum(ExchangeMode.class, cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
+                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ExchangeMode.values())));
+            }
+
+            // Set correct connection settings parser
+            switch(ExchangeMode.valueOf(cli.getOptionValue(OPTION_CONNECTION_TYPE).toUpperCase())) {
+            case EASYBACKEND:
+                connectionSettingsParser = new ConnectionSettingsParserEasyBackend(args, options);
+                break;
+            case EMAIL:
+                connectionSettingsParser = new ConnectionSettingsParserEmail(args, options);
+                break;
+            case MANUAL:
+                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ExchangeMode.values())));
+            default:
+                throw new ParseException(String.format("Please provide a correct connection type. Correct types are %s", java.util.Arrays.asList(ExchangeMode.values())));
+            }
+
+            // Parse all parameters including the connection setting specific ones
+            cli = connectionSettingsParser.getCLI();
+
+            try {
+                self = new Participant(cli.getOptionValue(OPTION_PARTICIPANT_NAME),
+                                              cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING));
+            } catch (BusException e) {
+                throw new IllegalArgumentException(e);
+            }
+
+            // Check skip columns is integer
+            if (cli.hasOption(cli.getOptionValue(OPTION_SKIP_COLUMNS))) {
+                Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS));
+            }
+
+            // Check connection settings parameter
+            connectionSettingsParser.checkCLIParameters();
+        }
+        catch (ParseException | IllegalArgumentException e) {
+            // Log exception
+            LOGGER.error("Unable to parse CLI arguments", e);
+
+            // Output help message
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("easy-smpc-cli", connectionSettingsParser != null ? connectionSettingsParser.getOptions() : options);
+
+            // Throw exception
+            throw new IllegalStateException("Unable to parse CLI arguments");
+        }
+
+        // Create participating user
+        UserProcessParticipating participatingUser = new UserProcessParticipating(cli.getOptionValue(OPTION_STUDY_NAME),
+                                                                                  self,
+                                                                                  getDataFromFiles(cli.getOptionValue(OPTION_DATA_FILE),
+                                                                                                   !cli.hasOption(OPTION_DATA_COLUMN),
+                                                                                                   false,
+                                                                                                   cli.hasOption(OPTION_HAS_HEADER),
+                                                                                                   cli.hasOption(OPTION_SKIP_COLUMNS) ? Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS)) : 0),
+                                                                                  connectionSettingsParser.getConnectionSettings(self.getEmailAddress()));
+
+        // Wait for participant to be initialized
+        LOGGER.info("Waiting for initial message to participate");
+        while(participatingUser.getModel() == null || participatingUser.getModel().getState() == StudyState.NONE) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+        }
+    }
+
+    /**
+         * Proceed processing in resuming mode
+         * 
+         * @param args
+         */
+        private static void proceedResume(String[] args) {
+            // Prepare 
+            Options options = new Options();
+            CommandLine cli;
+            
+            // Add options when resuming
+            options.addOption(OPTION_RESUME_REQUIRED)
+                   .addOption(OPTION_RESUME_FILE)
+                   .addOption(OPTION_PASSWORD_RECEIVING)
+                   .addOption(OPTION_PASSWORD_SENDING);
+            
+            // Get CLI
+            try {
+                cli = parser.parse(options, args);
+            } catch (ParseException e) {
+                // Log exception
+                LOGGER.error("Unable to parse CLI arguments", e);
+
+                // Output help message
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.printHelp("easy-smpc-cli", options);
+
+                // Throw exception
+                throw new IllegalStateException("Unable to parse CLI arguments");
+            }
+    
+            try {
                 // Create study from file and set password(s)
-                Study study = Study.loadModel(new File(cli.getOptionValue(OPTION_RESUME_FILE)));                
-                study.getConnectionIMAPSettings().setIMAPPassword(cli.getOptionValue(OPTION_PASSWORD_RECEIVING));
-                study.getConnectionIMAPSettings()
-                     .setIMAPPassword(cli.hasOption(OPTION_PASSWORD_SENDING)
-                             ? cli.getOptionValue(OPTION_PASSWORD_SENDING)
-                             : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));
-                
+                Study study = Study.loadModel(new File(cli.getOptionValue(OPTION_RESUME_FILE)));
+                study.getConnectionSettings()
+                     .setPasswordStore(new PasswordStore(cli.getOptionValue(OPTION_PASSWORD_RECEIVING),
+                                                         cli.getOptionValue(OPTION_PASSWORD_SENDING)));
+    
                 // Start process
                 new UserProcess(study);
             } catch (ClassNotFoundException | IllegalArgumentException | IOException e) {
                 LOGGER.error("Unable to resume with given file", e);
             }
-
-            // Done
-            return;
         }
-	}
-	
-    /**
-     * Return the options suiting the mode chosen by the user
-     * 
-     * @param CLI
-     * @param parser
-     * @param args
-     * @return
-     * @throws ParseException 
-     */
-    private static CommandLine returnSpecificCli(CommandLine cli, CommandLineParser parser, String[] args) throws ParseException {
-        
-        // Return create
-        if (cli.hasOption(OPTION_CREATE)) {
-            return parser.parse(optionsCreate, args);
-        }
-        
-        // Return participate
-        if (cli.hasOption(OPTION_PARTICIPATE)) {
-            return parser.parse(optionsParticipate, args);
-        }
-
-        // Return resume
-        if (cli.hasOption(OPTION_RESUME)) {
-            return parser.parse(optionsResume, args);
-        }
-        
-        // Default null
-        return null;
-    }
 
     /**
      * Strips different file names from a string and reads from all of them
@@ -558,97 +526,6 @@ public class Main {
         
         // Return
         return result;
-    }
-
-    /**
-     * Check parameters in CLI and throws an exception if wrong
-     * 
-     * @param cli
-     * @return
-     */
-	public static boolean checkCliArguments(CommandLine cli) throws IllegalArgumentException {
-        
-        // Check only for create and participate
-        if (cli.hasOption(OPTION_RESUME)) { return true; }
-
-        try {
-            // Check integer
-            Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT));
-            Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT));
-            if (cli.hasOption(cli.getOptionValue(OPTION_SKIP_COLUMNS))) {
-                Integer.valueOf(cli.getOptionValue(OPTION_SKIP_COLUMNS));
-            }
-            if(cli.hasOption(OPTION_MAX_MESSAGE_SIZE)) {
-                Integer.valueOf(cli.getOptionValue(OPTION_MAX_MESSAGE_SIZE));
-            }
-            if(cli.hasOption(OPTION_SEND_TIMEOUT)) {
-                Integer.valueOf(cli.getOptionValue(OPTION_SEND_TIMEOUT));
-            }
-            if(cli.hasOption(OPTION_CHECK_INTERVAL)) {
-                Integer.valueOf(cli.getOptionValue(OPTION_CHECK_INTERVAL));
-            }
-            
-
-            // Check participant name and e-mail address
-            new Participant(cli.hasOption(OPTION_PARTICIPANT_NAME)
-                    ? cli.getOptionValue(OPTION_PARTICIPANT_NAME)
-                    : "Creator", cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING));
-
-            // Check encryption for IMAP
-            if (!(cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(SSL_TLS) ||
-                  cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(START_TLS))) {
-                throw new IllegalArgumentException(String.format("Please enter either %s or %s for IMAP encryption",
-                                                                 SSL_TLS,
-                                                                 START_TLS));
-            }
-
-            // Check encryption for SMTP
-            if (!(cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(SSL_TLS) ||
-                  cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(START_TLS))) {
-                throw new IllegalArgumentException(String.format("Please enter either %s or %s for SMTP encryption",
-                                                                 SSL_TLS,
-                                                                 START_TLS));
-            }
-
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Arguments were not correct!", e);
-        }
-
-        // Return true if no exception
-        return true;     
-    }
-
-    /**
-     *  Reads IMAP connection settings from command line options
-     * 
-     * @param CLI
-     * @return
-     */
-    public static ConnectionIMAPSettings getConnectionIMAPSettingsFromCLI(CommandLine cli) {
-        
-        // Set email address and password either from the receiving parameter or from different receiving and sending parameters
-        ConnectionIMAPSettings connectionIMAPSettings = new ConnectionIMAPSettings(cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING),
-                                                                                   cli.hasOption(OPTION_MAILADDRESS_SENDING) ? cli.getOptionValue(OPTION_MAILADDRESS_SENDING) : cli.getOptionValue(OPTION_MAILADDRESS_RECEIVING), null)
-                                                                                   .setIMAPPassword(cli.getOptionValue(OPTION_PASSWORD_RECEIVING))
-                                                                                   .setSMTPPassword(cli.hasOption(OPTION_PASSWORD_SENDING) ? cli.getOptionValue(OPTION_PASSWORD_SENDING) : cli.getOptionValue(OPTION_PASSWORD_RECEIVING));     
-        // Set remaining parameters
-        connectionIMAPSettings.setIMAPServer(cli.getOptionValue(OPTION_IMAP_SERVER))
-        .setIMAPPort(Integer.valueOf(cli.getOptionValue(OPTION_IMAP_PORT)))
-        .setSSLTLSIMAP(cli.getOptionValue(OPTION_IMAP_ENCRYPTION).equals(SSL_TLS))
-        .setIMAPUserName(cli.hasOption(OPTION_IMAP_USER_NAME) ? cli.getOptionValue(OPTION_IMAP_USER_NAME) : null)
-        .setSMTPServer(cli.getOptionValue(OPTION_SMTP_SERVER))
-        .setSMTPPort(Integer.valueOf(cli.getOptionValue(OPTION_SMTP_PORT)))                                              
-        .setSSLTLSSMTP(cli.getOptionValue(OPTION_SMTP_ENCRYPTION).equals(SSL_TLS))
-        .setSMTPUserName(cli.hasOption(OPTION_SMTP_USER_NAME) ? cli.getOptionValue(OPTION_SMTP_USER_NAME) : null)
-        .setAcceptSelfSignedCertificates(cli.hasOption(OPTION_SELF_SIGNED))
-        .setIMAPAuthMechanisms(cli.getOptionValue(OPTION_IMAP_LOGIN_MECHANISMS))
-        .setSMTPAuthMechanisms(cli.getOptionValue(OPTION_SMTP_LOGIN_MECHANISMS))
-        .setMaxMessageSize(cli.hasOption(OPTION_MAX_MESSAGE_SIZE) ? Integer.valueOf(cli.getOptionValue(OPTION_MAX_MESSAGE_SIZE))* 1024 * 1024 : Resources.EMAIL_MAX_MESSAGE_SIZE_DEFAULT)
-        .setEmailSendTimeout(cli.hasOption(OPTION_SEND_TIMEOUT) ? Integer.valueOf(cli.getOptionValue(OPTION_SEND_TIMEOUT)) * 1000 : Resources.TIMEOUT_SEND_EMAILS_DEFAULT)
-        .setCheckInterval(cli.hasOption(OPTION_CHECK_INTERVAL) ? Integer.valueOf(cli.getOptionValue(OPTION_CHECK_INTERVAL)) * 1000 : Resources.INTERVAL_CHECK_MAILBOX_DEFAULT );
-        
-        // Return
-        return connectionIMAPSettings;
     }
 
     /**
