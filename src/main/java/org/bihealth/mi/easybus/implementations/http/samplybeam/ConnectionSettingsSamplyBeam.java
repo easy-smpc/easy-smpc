@@ -19,7 +19,7 @@ import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
- *  * Settings for Samply.Beam connections
+ * Settings for Samply.Beam connections
  * 
  * @author Felix Wirth
  *
@@ -124,49 +124,49 @@ public class ConnectionSettingsSamplyBeam extends ConnectionSettings {
     /**
      * @return the apiKey
      */
-    protected String getApiKey() {
+    public String getApiKey() {
         return apiKey;
     }
 
     /**
      * @param apiKey the apiKey to set
      */
-    protected void setApiKey(String apiKey) {
+    public void setApiKey(String apiKey) {
         this.apiKey = apiKey;
     }
 
     /**
      * @return the proxyServer
      */
-    protected URL getProxyServer() {
+    public URL getProxyServer() {
         return proxyServer;
     }
 
     /**
      * @param proxyServer the proxyServer to set
      */
-    protected void setProxyServer(URL proxyServer) {
+    public void setProxyServer(URL proxyServer) {
         this.proxyServer = proxyServer;
     }
  
     /**
      * @return the email
      */
-    protected String getEmail() {
+    public String getEmail() {
         return email;
     }
 
     /**
      * @param appName the appName to set
      */
-    protected void setAppName(String appName) {
+    public void setAppName(String appName) {
         this.appName = appName;
     }
 
     /**
      * @return the appName
      */
-    protected String getAppName() {
+    public String getAppName() {
         return appName;
     }
 }

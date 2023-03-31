@@ -63,6 +63,6 @@ public class EntryParticipant extends ComponentEntryAddRemove {
      */
     @Override
     public boolean isEmpty() {
-        return (this.getLeftValue().trim().isEmpty() && this.getRightValue().trim().isEmpty());     
+        return (this.getLeftValue().trim().isEmpty() && this.getRightValue().trim().isEmpty());
     }
 }

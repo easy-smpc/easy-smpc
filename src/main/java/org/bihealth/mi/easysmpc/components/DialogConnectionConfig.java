@@ -36,6 +36,7 @@ import javax.swing.event.ChangeListener;
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
+import org.bihealth.mi.easybus.implementations.http.samplybeam.ConnectionSettingsSamplyBeam;
 import org.bihealth.mi.easybus.implementations.local.ConnectionSettingsManual;
 import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -88,13 +89,14 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
     private final JTabbedPaneConnectionConfig      tabbedPane       = new JTabbedPaneConnectionConfig();
     /** Email tab */
     private final EntryConnectionConfigEmail       emailTab;
+    /** Samply.Beam Tab */
+    private final EntryConnectionConfigSamplyBeam  samplyBeamTab;
     /** EasyBackend Tab */
     private final EntryConnectionConfigEasyBackend easyBackendTab;
     /** Manual tab */
     private final EntryConnectionConfigManual      manualTab;
     /** If false no tab change and delete or edit config allowed */
     private final boolean                          changeConfigAllowed;
-
 
     /**
      * Creates a new instance without a selected config and the possiblity of changing tabs
@@ -131,11 +133,13 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
         tabbedPane.addChangeListener(this);
         manualTab = new EntryConnectionConfigManual(this);
         emailTab = (settings instanceof ConnectionSettingsIMAP) ? new EntryConnectionConfigEmail(this, (ConnectionSettingsIMAP) settings, changeConfigAllowed) : new EntryConnectionConfigEmail(this);
+        samplyBeamTab = (settings instanceof ConnectionSettingsSamplyBeam) ?  new EntryConnectionConfigSamplyBeam(this, (ConnectionSettingsSamplyBeam) settings, changeConfigAllowed) : new EntryConnectionConfigSamplyBeam(this);
         easyBackendTab = (settings instanceof ConnectionSettingsEasyBackend) ? new EntryConnectionConfigEasyBackend(this, (ConnectionSettingsEasyBackend) settings, changeConfigAllowed) : new EntryConnectionConfigEasyBackend(this);
         emailTab.setChangeListener(this);
         easyBackendTab.setChangeListener(this);
         tabbedPane.add(manualTab, Resources.getString("ConnectionConfig.0"));
         tabbedPane.add(emailTab, Resources.getString("ConnectionConfig.4"));
+        tabbedPane.add(samplyBeamTab, Resources.getString("ConnectionConfig.7"));
         tabbedPane.add(easyBackendTab, Resources.getString("ConnectionConfig.5"));
         
         // Buttons
