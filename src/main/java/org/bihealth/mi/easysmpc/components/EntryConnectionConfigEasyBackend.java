@@ -14,33 +14,22 @@
 package org.bihealth.mi.easysmpc.components;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.util.prefs.BackingStoreException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.ListSelectionModel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.implementations.http.easybackend.ConnectionSettingsEasyBackend;
-import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -52,80 +41,34 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class EntryConnectionConfigEasyBackend extends ComponentConnectionConfig implements ChangeListener {
 
     /** SVUID */
-    private static final long                          serialVersionUID    = -1273453640931118450L;
+    private static final long        serialVersionUID = -1273453640931118450L;
     /** Entry for basic details */
-    private EntryEasyBackendBasic                      entryEasybackendBasic;
+    private EntryEasyBackendBasic    entryEasybackendBasic;
     /** Entry for advanced details */
-    private EntryEasyBackendAdvanced                   entryEasybackendAdvanced;
+    private EntryEasyBackendAdvanced entryEasybackendAdvanced;
     /** Edit or create mode? */
-    private boolean                                    createMode          = true;
+    private boolean                  createMode       = true;
     /** Tabbed pane */
-    JTabbedPane                                        tabbedPane          = new JTabbedPane();
+    JTabbedPane                      tabbedPane       = new JTabbedPane();
     /** Entry for message size */
-    private ComponentEntryOne                          entryMessageSize;
+    private ComponentEntryOne        entryMessageSize;
     /** Entry for check interval */
-    private ComponentEntryOne                          entryCheckInterval;
+    private ComponentEntryOne        entryCheckInterval;
     /** Entry for e-mail sending timeout */
-    private ComponentEntryOne                          entrySendTimeout;
+    private ComponentEntryOne        entrySendTimeout;
     /** Radio button group dialog type simple/advanced */
-    private ComponentRadioEntry                        radioDialogType;
-    /** Parent */
-    private JDialog                                    parent;
-    /** Listener */
-    private ChangeListener                             listener;
-    /** Config list */
-    private final JList<ConnectionSettingsEasyBackend> configList;
-    /** List data model */
-    DefaultListModel<ConnectionSettingsEasyBackend>    configListModel     = new DefaultListModel<>();
+    private ComponentRadioEntry      radioDialogType;
     /** Central panel */
-    private JPanel                                     centralBase;
-    /** Allowed to change config? */
-    private boolean                                    changeConfigAllowed = true;
+    private JPanel                   centralBase;
 
     /**
      * Creates a new instance
      * @param parent 
+     * @param settings
+     * @param changeConfigAllowed
      */
-    public EntryConnectionConfigEasyBackend(JDialog parent){
-        
-        // Store
-        this.parent = parent;
-        
-        // Set layout
-        this.setLayout(new BorderLayout());
-        
-        // Create list
-        configList = new JList<>(configListModel);
-        configList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        configList.addListSelectionListener(new ListSelectionListener() {
-            
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                stateChanged(new ChangeEvent(e.getSource()));
-            }
-        });
-        configList.setCellRenderer(new DefaultListCellRenderer() {
-            
-            /** SVUID */
-            private static final long serialVersionUID = 779154691407559989L;
-            
-            @Override
-            public Component getListCellRendererComponent(JList<?> list,
-                                                          Object value,
-                                                          int index,
-                                                          boolean isSelected,
-                                                          boolean cellHasFocus) {
-                JLabel label = (JLabel) super.getListCellRendererComponent(list,
-                                                                           value,
-                                                                           index,
-                                                                           isSelected,
-                                                                           cellHasFocus);
-                if (value != null) {
-                    label.setText(((ConnectionSettings) value).getIdentifier());
-                }
-                return label;
-            }
-        });
+    public EntryConnectionConfigEasyBackend(JDialog parent, ConnectionSettingsEasyBackend settings, boolean changeConfigAllowed){
+        super(parent, settings, changeConfigAllowed);
         
         // Base settings panes
         centralBase = new JPanel();
@@ -136,8 +79,7 @@ public class EntryConnectionConfigEasyBackend extends ComponentConnectionConfig 
         // Create central panel and simple/advanced radio 
         centralBase.setLayout(new BoxLayout(centralBase, BoxLayout.Y_AXIS));
 
-
-        // Create switch between simple and advanced dialog        
+        // Create switch between simple and advanced dialog
         this.radioDialogType = new ComponentRadioEntry(null,
                                                        Resources.getString("EmailConfig.26"),
                                                        Resources.getString("EmailConfig.27"),
@@ -259,44 +201,41 @@ public class EntryConnectionConfigEasyBackend extends ComponentConnectionConfig 
         // Add tabbed panes
         tabbedPane.add(Resources.getString("EmailConfig.43"), mainBase);
         tabbedPane.add(Resources.getString("EmailConfig.44"), mainFurther);
+        tabbedPane.addChangeListener(this);
         
         // Add
-        this.add(configList, BorderLayout.WEST);
         this.add(tabbedPane, BorderLayout.CENTER);
         
-        // Display empty simple dialog
-        displayEasyBackendSettings(null);
-        
-        // State changed and build list
+        // Display dialog
         updateList();
-        stateChanged(new ChangeEvent(configList));
-    }
-    
-    /**
-     * Creates a new instance with settings pre-selected
-     * 
-     * @param dialogConnectionConfig
-     * @param settings
-     * @param changeConfigAllowed
-     */
-    public EntryConnectionConfigEasyBackend(DialogConnectionConfig dialogConnectionConfig,
-                                            ConnectionSettingsEasyBackend settings,
-                                            boolean changeConfigAllowed) {
-        //  Call constructor and store
-        this(dialogConnectionConfig);
-        this.changeConfigAllowed = changeConfigAllowed;
+        displaySettings(settings);
         
-        // Set settings
-        this.configList.setSelectedValue(settings, true);
-        this.configList.setEnabled(false);
-        displayEasyBackendBasicSettings(settings);
+        // State changed
+        stateChanged(new ChangeEvent(this));
+    }
+
+    /**
+     * Creates a new instance
+     * @param parent
+     */
+    public EntryConnectionConfigEasyBackend(JDialog parent) {
+        this(parent, null, true);
     }
 
     /**
      * Displays the settings after deciding for a complex or basic dialog
      * @param settings
      */
-    private void displayEasyBackendSettings(ConnectionSettingsEasyBackend settings) {
+    @Override
+    public void displaySettings(ConnectionSettings settingsGeneric) {
+        // Check
+        if(settingsGeneric != null && !(settingsGeneric instanceof ConnectionSettingsEasyBackend)) {
+            throw new IllegalStateException("Settings must be of type ConnectionSettingsEasyBackend");
+        }
+        
+        // Typecast
+        ConnectionSettingsEasyBackend settings = (ConnectionSettingsEasyBackend) settingsGeneric;
+        
         // Fill fields
         if (settings != null) {
 
@@ -341,7 +280,7 @@ public class EntryConnectionConfigEasyBackend extends ComponentConnectionConfig 
         // Repaint
         this.revalidate();
         this.repaint();
-        parent.pack();
+        getParentDialog().pack();
     }
 
     /**
@@ -363,7 +302,7 @@ public class EntryConnectionConfigEasyBackend extends ComponentConnectionConfig 
         // Repaint
         this.revalidate();
         this.repaint();
-        parent.pack();
+        getParentDialog().pack();
     }
 
     /**
@@ -394,28 +333,6 @@ public class EntryConnectionConfigEasyBackend extends ComponentConnectionConfig 
     }
 
     @Override
-    public boolean isRemovePossible() {
-        return configList.getSelectedValue() != null;
-    }
-
-    @Override
-    public void actionAdd() {
-        displayEasyBackendSettings(null);
-        configList.setSelectedValue(null, true);
-    }
-
-    @Override
-    public void actionRemove() {
-        try {
-            Connections.remove(configList.getSelectedValue() );
-        } catch (BackingStoreException e) {
-            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
-        }
-        updateList();
-        displayEasyBackendSettings(null);
-    }
-
-    @Override
     public ConnectionSettings getConnectionSettings() {
         // Collect from active component
         ConnectionSettingsEasyBackend result = entryEasybackendBasic != null
@@ -431,27 +348,6 @@ public class EntryConnectionConfigEasyBackend extends ComponentConnectionConfig 
         return result;
     }
 
-    @Override
-    public void setChangeListener(ChangeListener listener) {
-        this.listener = listener;
-    }
-
-    /**
-     * Reacts to changes
-     */
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        // Display currently selected value
-        if (e.getSource() == configList && changeConfigAllowed) {
-            displayEasyBackendSettings(configList.getSelectedValue());
-        }
-        
-        // Call listener
-        if (this.listener != null) {
-            this.listener.stateChanged(e);
-        }
-    }
-
     /**
      * Checks for validity
      * 
@@ -462,29 +358,8 @@ public class EntryConnectionConfigEasyBackend extends ComponentConnectionConfig 
                 && entryEasybackendAdvanced != null ? entryEasybackendAdvanced.areValuesValid() : true;
     }
 
-    /**
-     * Update list to select config
-     */
-    private void updateList() {
-        ConnectionSettings currentSetting = configList.getSelectedValue();
-        configListModel.removeAllElements();
-    
-        try {
-            for (ConnectionSettings settings : Connections.list(ConnectionSettingsEasyBackend.class)) {
-                configListModel.addElement((ConnectionSettingsEasyBackend) settings);
-    
-                // Set selected
-                if (currentSetting != null && settings != null &&
-                    settings.getIdentifier().equals(currentSetting.getIdentifier())) {
-                    settings.setPasswordStore(currentSetting.getPasswordStore());
-                    configList.setSelectedValue(settings, true);
-                }
-            }
-        } catch (ClassNotFoundException | BackingStoreException | IOException e1) {
-            JOptionPane.showMessageDialog(this,
-                                          Resources.getString("PerspectiveCreate.ErrorLoadingPreferences"),
-                                          Resources.getString("PerspectiveCreate.Error"),
-                                          JOptionPane.ERROR_MESSAGE);
-        }
+    @Override
+    public Class<?> getSettingsClass() {
+        return ConnectionSettingsEasyBackend.class;
     }
 }
