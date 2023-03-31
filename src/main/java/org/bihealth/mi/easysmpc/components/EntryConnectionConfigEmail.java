@@ -14,38 +14,27 @@
 package org.bihealth.mi.easysmpc.components;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.util.prefs.BackingStoreException;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.ListSelectionModel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easybus.implementations.email.ConnectionSettingsIMAP;
 import org.bihealth.mi.easysmpc.AppPasswordProvider;
-import org.bihealth.mi.easysmpc.resources.Connections;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
@@ -56,106 +45,38 @@ import org.bihealth.mi.easysmpc.resources.Resources;
  */
 public class EntryConnectionConfigEmail extends ComponentConnectionConfig implements ChangeListener {
     
-    /** Allows to set a custom text for each ConnectionSettings object in the list */
-    public static class ConnectionSettingsRenderer extends DefaultListCellRenderer {
-        
-        /** SVUID */
-        private static final long serialVersionUID = 779154691407559989L;
-
-        @Override
-        public Component getListCellRendererComponent(JList<?> list,
-                                                      Object value,
-                                                      int index,
-                                                      boolean isSelected,
-                                                      boolean cellHasFocus) {
-            JLabel label = (JLabel) super.getListCellRendererComponent(list,
-                                                                       value,
-                                                                       index,
-                                                                       isSelected,
-                                                                       cellHasFocus);
-            if (value != null) {
-                label.setText(((ConnectionSettings) value).getIdentifier());
-            }
-            return label;
-        }
-    }
-
     /** SVUID */
-    private static final long                   serialVersionUID    = -6353874563342643257L;
-    /** Config list */
-    private final JList<ConnectionSettingsIMAP> configList;
-    /** List data model */
-    DefaultListModel<ConnectionSettingsIMAP>    configListModel     = new DefaultListModel<>();
-    /** Change listener */
-    private ChangeListener                      listener;
+    private static final long         serialVersionUID = -6353874563342643257L;
     /** Radio button group dialog type simple/advanced */
-    private ComponentRadioEntry                 radioDialogType;
+    private final ComponentRadioEntry radioDialogType;
     /** Central panel */
-    private JPanel                              centralBase;
+    private final JPanel              centralBase;
     /** Entry for IMAP details */
-    private EntryEMailDetails                   entryIMAPDetails;
+    private EntryEMailDetails         entryIMAPDetails;
     /** Entry for SMTP details */
-    private EntryEMailDetails                   entrySMTPDetails;
+    private EntryEMailDetails         entrySMTPDetails;
     /** E-Mail and password entry */
-    private EntryEMailPassword                  entryEmailPassword;
+    private EntryEMailPassword        entryEmailPassword;
     /** Edit or create mode? */
-    private boolean                             createMode          = true;
+    private boolean                   createMode       = true;
     /** Tabbed pane */
-    JTabbedPane                                 tabbedPane          = new JTabbedPane();
+    private final JTabbedPane         tabbedPane       = new JTabbedPane();
     /** Entry for message size */
-    private ComponentEntryOne                   entryMessageSize;
+    private final ComponentEntryOne   entryMessageSize;
     /** Entry for check interval */
-    private ComponentEntryOne                   entryCheckInterval;
+    private final ComponentEntryOne   entryCheckInterval;
     /** Entry for e-mail sending timeout */
-    private ComponentEntryOne                   entrySendTimeout;
-    /** Parent */
-    private JDialog                             parent;
-    /** Allowed to change config? */
-    private boolean                             changeConfigAllowed = true;
+    private final ComponentEntryOne   entrySendTimeout;
 
     /**
      * Creates a new instance
-     * @param listner 
+     * @param parent
+     * @param settings
+     * @param changeConfigAllowed
      */
-    public EntryConnectionConfigEmail(JDialog parent){
-        // Store
-        this.parent = parent;
-        
-        // Set layout
-        this.setLayout(new BorderLayout());
-        
-        // Create list
-        configList = new JList<>(configListModel);
-        configList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        configList.addListSelectionListener(new ListSelectionListener() {
-            
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                stateChanged(new ChangeEvent(e.getSource()));
-            }
-        });
-        configList.setCellRenderer(new DefaultListCellRenderer() {
-            
-            /** SVUID */
-            private static final long serialVersionUID = 779154691407559989L;
-            
-            @Override
-            public Component getListCellRendererComponent(JList<?> list,
-                                                          Object value,
-                                                          int index,
-                                                          boolean isSelected,
-                                                          boolean cellHasFocus) {
-                JLabel label = (JLabel) super.getListCellRendererComponent(list,
-                                                                           value,
-                                                                           index,
-                                                                           isSelected,
-                                                                           cellHasFocus);
-                if (value != null) {
-                    label.setText(((ConnectionSettings) value).getIdentifier());
-                }
-                return label;
-            }
-        });
+    public EntryConnectionConfigEmail(JDialog parent, ConnectionSettingsIMAP settings, boolean changeConfigAllowed) {
+        // Super
+        super(parent, settings, changeConfigAllowed);
         
         // Base settings panes
         centralBase = new JPanel();
@@ -167,7 +88,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
         centralBase.setLayout(new BoxLayout(centralBase, BoxLayout.Y_AXIS));
         
 
-        // Create switch between simple and advanced dialog
+        // Create switch between basic and advanced dialog
         this.radioDialogType = new ComponentRadioEntry(null,
                                                        Resources.getString("EmailConfig.26"),
                                                        Resources.getString("EmailConfig.27"),
@@ -177,7 +98,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
             @Override
             public void actionPerformed(ActionEvent e) {
                 
-                // If swap from simple to advanced display simple dialog
+                // If swap from basic to advanced display simple dialog
                 if (!radioDialogType.isFirstOptionSelected()) {
                         displayEMailSettingsAdvanced(entryEmailPassword.getLeftValue(),
                                               entryEmailPassword.getRightValue(),
@@ -186,7 +107,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
                     return;
                 }
                 
-                // If swap from advanced to simple and no dialog necessary
+                // If swap from advanced to basic and no dialog necessary
                 if (!isAdvancedDialogNecessary(entrySMTPDetails, entryIMAPDetails) && radioDialogType.isFirstOptionSelected()) {
                     displayEMailSettingsSimple(entryIMAPDetails.getEmailAddress(),
                                           entryIMAPDetails.getPassword(),
@@ -195,7 +116,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
                     return;
                 }
                 
-                // If swap from advanced to simple ask before
+                // If swap from advanced to basic ask before
                 if (radioDialogType.isFirstOptionSelected() &&
                     isAdvancedDialogNecessary(entrySMTPDetails, entryIMAPDetails) &&
                     JOptionPane.showConfirmDialog(EntryConnectionConfigEmail.this,
@@ -215,7 +136,6 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
 
             }
         });
-        
         
         // Add base settings pane
         top.add(radioDialogType);
@@ -298,37 +218,26 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
         // Add tabbed panes
         tabbedPane.add(Resources.getString("EmailConfig.43"), mainBase);
         tabbedPane.add(Resources.getString("EmailConfig.44"), mainFurther);
+        tabbedPane.addChangeListener(this);
         
         // Add
-        this.add(configList, BorderLayout.WEST);
         this.add(tabbedPane, BorderLayout.CENTER);
-        
-        // Display empty simple dialog
-        displayEMailSettings(null);
-        
-        // State changed and build list
+
+        // Display dialog
         updateList();
-        stateChanged(new ChangeEvent(configList));
+        displaySettings(settings);
+        
+        // State changed
+        stateChanged(new ChangeEvent(this));
     }
 
     /**
-     * Creates a new instance with settings pre-selected
-     * 
-     * @param dialogConnectionConfig
-     * @param settings
-     * @param changeConfigAllowed
+     * Creates a new instance
+     * @param parent
      */
-    public EntryConnectionConfigEmail(DialogConnectionConfig dialogConnectionConfig,
-                                      ConnectionSettingsIMAP settings,
-                                      boolean changeConfigAllowed) {
+    public EntryConnectionConfigEmail(JDialog parent) {
         // Call constructor and store
-        this(dialogConnectionConfig);
-        this.changeConfigAllowed = changeConfigAllowed;
-        
-        // Set settings
-        this.configList.setSelectedValue(settings, true);
-        this.configList.setEnabled(false);
-        displayEMailSettings(settings);
+        this(parent, null, true);
     }
 
     @Override
@@ -339,46 +248,6 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
     @Override
     public boolean isAddPossible() {
         return true;
-    }
-
-    @Override
-    public boolean isRemovePossible() {
-        return configList.getSelectedValue() != null;
-    }
-
-    @Override
-    public void actionAdd() {
-        displayEMailSettings(null);
-        configList.setSelectedValue(null, true);
-    }
-
-    @Override
-    public void actionRemove() {
-        try {
-            Connections.remove(configList.getSelectedValue() );
-        } catch (BackingStoreException e) {
-            JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveCreate.ErrorDeletePreferences"), Resources.getString("PerspectiveCreate.Error"), JOptionPane.ERROR_MESSAGE);
-        }
-        updateList();
-        displayEMailSettings(null);
-    }
-
-    @Override
-    public void setChangeListener(ChangeListener listener) {
-        this.listener = listener;
-    }
-
-    @Override
-    public void stateChanged(ChangeEvent e) {
-        
-        // Display currently selected value
-        if (e.getSource() == configList && changeConfigAllowed) {
-            displayEMailSettings(configList.getSelectedValue());
-        }
-        // Call listener
-        if (this.listener != null) {
-            this.listener.stateChanged(e);
-        }
     }
 
     /**
@@ -443,6 +312,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
          
         // Deviate the IMAP/SMTP addresses from each other or from the user name or is an auth mechanism set?
         return imapEntry != null && smtpEntry != null &&
+               imapEntry.getEmailAddress() != null && smtpEntry.getEmailAddress() != null &&
                (!imapEntry.getEmailAddress().equals(smtpEntry.getEmailAddress()) ||
                 imapEntry.getUserName() != null || smtpEntry.getUserName() != null ||
                 imapEntry.getAuthMechanisms() != null || smtpEntry.getAuthMechanisms() != null);
@@ -451,7 +321,16 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
      /**
      * Displays the settings after deciding for a complex or simple dialog 
      */
-    private void displayEMailSettings(ConnectionSettingsIMAP settings) {
+    @Override
+    public void displaySettings(ConnectionSettings settingsGeneric) {
+        // Check
+        if(settingsGeneric != null && !(settingsGeneric instanceof ConnectionSettingsIMAP)) {
+            throw new IllegalStateException("Settings must be of type ConnectionSettingsIMAP");
+        }
+        
+        // Typecast
+        ConnectionSettingsIMAP settings = (ConnectionSettingsIMAP) settingsGeneric;
+        
         // Display existing settings?
         if (settings != null) {
             this.createMode = false;
@@ -543,7 +422,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
         // Repaint
         this.revalidate();
         this.repaint();
-        parent.pack();
+        getParentDialog().pack();
     }
 
     /**
@@ -584,33 +463,7 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
         // Repaint
         this.revalidate();
         this.repaint();
-        parent.pack();
-    }
-    
-    /**
-     * Update list to select config
-     */
-    private void updateList() {
-        ConnectionSettings currentSetting = configList.getSelectedValue();
-        configListModel.removeAllElements();
-
-        try {
-            for (ConnectionSettings settings : Connections.list(ConnectionSettingsIMAP.class)) {
-                configListModel.addElement((ConnectionSettingsIMAP) settings);
-
-                // Set selected
-                if (currentSetting != null && settings != null &&
-                    settings.getIdentifier().equals(currentSetting.getIdentifier())) {
-                    settings.setPasswordStore(currentSetting.getPasswordStore());
-                    configList.setSelectedValue(settings, true);
-                }
-            }
-        } catch (ClassNotFoundException | BackingStoreException | IOException e1) {
-            JOptionPane.showMessageDialog(this,
-                                          Resources.getString("PerspectiveCreate.ErrorLoadingPreferences"),
-                                          Resources.getString("PerspectiveCreate.Error"),
-                                          JOptionPane.ERROR_MESSAGE);
-        }
+        getParentDialog().pack();
     }
     
     /**
@@ -622,5 +475,10 @@ public class EntryConnectionConfigEmail extends ComponentConnectionConfig implem
         return  (entryEmailPassword != null ? entryEmailPassword.areValuesValid() : true)
                 && entryIMAPDetails.areValuesValid() 
                 && entrySMTPDetails.areValuesValid();
+    }
+
+    @Override
+    public Class<?> getSettingsClass() {
+        return ConnectionSettingsIMAP.class;
     }
 }

@@ -13,6 +13,9 @@
  */
 package org.bihealth.mi.easysmpc.components;
 
+import java.awt.BorderLayout;
+
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.event.ChangeListener;
 
@@ -34,8 +37,11 @@ public class EntryConnectionConfigManual extends ComponentConnectionConfig {
     /**
      * Creates a new instance
      */
-    public EntryConnectionConfigManual(){
-        this.add(new JLabel(Resources.getString("ManualConfig.0")));
+    public EntryConnectionConfigManual(JDialog parent){
+        // Super
+        super(parent);
+        
+        this.add(new JLabel(Resources.getString("ManualConfig.0")), BorderLayout.NORTH);
     }
 
     @Override
@@ -54,23 +60,17 @@ public class EntryConnectionConfigManual extends ComponentConnectionConfig {
     }
 
     @Override
-    public boolean isRemovePossible() {
-        return false;
-    }
-
-    @Override
-    public void actionAdd() {
-        // Empty
-    }
-
-    @Override
-    public void actionRemove() {
-        // Empty
-    }
-
-    @Override
     public void setChangeListener(ChangeListener changeListener) {
         // Empty
     }
 
+    @Override
+    public void displaySettings(ConnectionSettings settings) {
+        // Empty
+    }
+
+    @Override
+    public Class<?> getSettingsClass() {
+        return ConnectionSettingsManual.class;
+    }
 }

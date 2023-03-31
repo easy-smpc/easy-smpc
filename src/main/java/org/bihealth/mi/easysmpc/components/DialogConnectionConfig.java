@@ -93,32 +93,34 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
     /** Manual tab */
     private final EntryConnectionConfigManual      manualTab;
     /** If false no tab change and delete or edit config allowed */
-    private boolean                                allowAllOperations;
+    private final boolean                          changeConfigAllowed;
+
 
     /**
      * Creates a new instance without a selected config and the possiblity of changing tabs
      * @param parent
      */
     public DialogConnectionConfig(JFrame parent) {
-       this(parent, null, true); 
+       this(parent, null, true);
     }
     
     /**
      * Create a new instance which allows swapping the tab and select other connection
      * @param parent Component to set the location of JDialog relative to
      * @param settings to edit
-     * @param allowAllOperations if false no tab change and delete or edit config allowed
+     * @param changeConfigAllowed if false no tab change and delete or edit config allowed
      */
-    public DialogConnectionConfig(JFrame parent, ConnectionSettings settings, boolean allowAllOperations) {
+    public DialogConnectionConfig(JFrame parent, ConnectionSettings settings, boolean changeConfigAllowed) {
         // Store
         this.parent = parent;
-        this.allowAllOperations = allowAllOperations;
+        this.changeConfigAllowed = changeConfigAllowed;
         
         // Dialog properties
         this.setTitle(Resources.getString("EmailConfig.0"));
         this.getContentPane().setLayout(new BorderLayout());
         this.setIconImage(this.parent.getIconImage());
         this.setResizable(false);
+        this.setLayout(new BorderLayout());
         
         // Base settings panes
         center = new JPanel();
@@ -127,9 +129,9 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
         
         // Tabbed pane
         tabbedPane.addChangeListener(this);
-        manualTab = new EntryConnectionConfigManual();
-        emailTab = (settings instanceof ConnectionSettingsIMAP) ? new EntryConnectionConfigEmail(this, (ConnectionSettingsIMAP) settings, allowAllOperations) : new EntryConnectionConfigEmail(this);
-        easyBackendTab = (settings instanceof ConnectionSettingsEasyBackend) ? new EntryConnectionConfigEasyBackend(this, (ConnectionSettingsEasyBackend) settings, allowAllOperations) : new EntryConnectionConfigEasyBackend(this);
+        manualTab = new EntryConnectionConfigManual(this);
+        emailTab = (settings instanceof ConnectionSettingsIMAP) ? new EntryConnectionConfigEmail(this, (ConnectionSettingsIMAP) settings, changeConfigAllowed) : new EntryConnectionConfigEmail(this);
+        easyBackendTab = (settings instanceof ConnectionSettingsEasyBackend) ? new EntryConnectionConfigEasyBackend(this, (ConnectionSettingsEasyBackend) settings, changeConfigAllowed) : new EntryConnectionConfigEasyBackend(this);
         emailTab.setChangeListener(this);
         easyBackendTab.setChangeListener(this);
         tabbedPane.add(manualTab, Resources.getString("ConnectionConfig.0"));
@@ -177,7 +179,7 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
         this.buttonRemove.addActionListener(new ActionListener() {
             
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent event) {
                 tabbedPane.getCurrentSelectedComponent().actionRemove();
             }
         });
@@ -233,15 +235,15 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
         }
         
         // Deactivate tabs
-        if(!allowAllOperations) {
+        if(!changeConfigAllowed) {
             tabbedPane.setEnabledAt(0, false);
             tabbedPane.setEnabledAt(1, false);
             tabbedPane.setEnabledAt(2, false);
             buttonRemove.setEnabled(false);
             buttonAdd.setEnabled(false);
         }
-        
-        // Change state
+                
+        // State changed
         this.stateChanged(new ChangeEvent(this));
     }
 
@@ -262,16 +264,22 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
     @Override
     public void stateChanged(ChangeEvent e) {
         
+        // TODO ?
+//        // Display currently selected value
+//        if (e.getSource() == tabbedPane && changeConfigAllowed) {
+//            tabbedPane.getCurrentSelectedComponent().updateList();
+//        }
+        
         // Check buttons enabled
         if (this.buttonOK != null) {
             this.buttonOK.setEnabled(areValuesValid());
         }
         
-        if(this.buttonAdd != null && allowAllOperations) {
+        if(this.buttonAdd != null && changeConfigAllowed) {
             this.buttonAdd.setEnabled(tabbedPane.getCurrentSelectedComponent().isAddPossible());
         }
         
-        if(this.buttonRemove != null && allowAllOperations) {
+        if(this.buttonRemove != null && changeConfigAllowed) {
             this.buttonRemove.setEnabled(tabbedPane.getCurrentSelectedComponent().isRemovePossible());
         }
     }
