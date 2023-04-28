@@ -3,9 +3,9 @@ REM	Create an installer for Windows
 REM Usually only the version variable needs to be adapted
 REM Before executing the batch file the WIX toolset needs to be obtained and installed from https://wixtoolset.org/
 REM ==================================
-@SET version="1.0.8"
+@SET version="1.1.0"
 @SET buildPath="..\target"
-@SET mainJar="easy-smpc-1.0.8-gui-generic.jar"
+@SET mainJar="easy-smpc-1.1.0-gui-generic.jar"
 @SET mainClass=org.bihealth.mi.easysmpc.App
 @SET applicationName=EasySMPC
 @SET descriptionText="No-Code Approach to Secure Multi-Party Computation"

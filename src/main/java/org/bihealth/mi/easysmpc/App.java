@@ -27,7 +27,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.swing.Box;
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -36,16 +37,20 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
+import org.bihealth.mi.easybus.ConnectionSettings;
+import org.bihealth.mi.easybus.ConnectionSettings.ExchangeMode;
 import org.bihealth.mi.easysmpc.components.ComponentLoadingVisual;
 import org.bihealth.mi.easysmpc.components.ComponentProgress;
 import org.bihealth.mi.easysmpc.components.ComponentTextFieldValidator;
 import org.bihealth.mi.easysmpc.components.DialogAbout;
+import org.bihealth.mi.easysmpc.components.DialogConnectionConfig;
+import org.bihealth.mi.easysmpc.components.DialogInitialMessagePicker;
 import org.bihealth.mi.easysmpc.components.DialogStringPicker;
 import org.bihealth.mi.easysmpc.dataexport.ExportFile;
 import org.bihealth.mi.easysmpc.dataimport.ImportClipboard;
@@ -69,7 +74,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Study.StudyState;
  */
 public class App extends JFrame {
     
-    public static final String VERSION = "1.0.8";
+    public static final String VERSION = "1.1.0";
 
     /** SVUID */
     private static final long serialVersionUID = 8047583915796168387L;
@@ -121,13 +126,15 @@ public class App extends JFrame {
     private JLabel                 statusMessageLabel;
     /** Component loadingVisual */
     private ComponentLoadingVisual loadingVisual = null;
+    /** Connection settings */
+    private ConnectionSettings     settings      = null;
 
     /**
      * Creates a new instance
      * 
      * @throws IOException
      */
-    public App() throws IOException {                
+    public App() throws IOException {
 
         // Title
         super(Resources.getString("App.0")); //$NON-NLS-1$
@@ -154,6 +161,20 @@ public class App extends JFrame {
                 actionExit();
             }
         });
+        
+        // Add shortcut key for escape
+        JPanel panel = (JPanel) getContentPane();
+        panel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                   .put(KeyStroke.getKeyStroke("ESCAPE"), "cancel");
+        panel.getActionMap().put("cancel", new AbstractAction() {
+            /** SVUID */
+            private static final long serialVersionUID = -5809172959090943313L;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionExit();
+            }
+        });
 
         // Menu
         JMenuBar jmb = new JMenuBar();
@@ -164,35 +185,16 @@ public class App extends JFrame {
         actionMenu = new JMenu(Resources.getString("App.1")); //$NON-NLS-1$
         jmb.add(actionMenu);
 
-        // Start
-        JMenuItem jmiStart = new JMenuItem(Resources.getString("App.14"), Resources.getMenuItem()); //$NON-NLS-1$
+        // Create connection
+        JMenuItem jmiStart = new JMenuItem(Resources.getString("App.26"), Resources.getMenuItem()); //$NON-NLS-1$
         actionMenu.add(jmiStart);
         jmiStart.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionStart();
+                actionSetConnection();
+                showPerspective(0);
             }
         });
-
-        // Create
-        JMenuItem jmiCreate = new JMenuItem(Resources.getString("App.7"), Resources.getMenuItem()); //$NON-NLS-1$
-        actionMenu.add(jmiCreate);
-        jmiCreate.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionCreate();
-            }
-        });
-
-        // Participate
-        JMenuItem jmiParticipate = new JMenuItem(Resources.getString("App.8"), Resources.getMenuItem()); //$NON-NLS-1$
-        actionMenu.add(jmiParticipate);
-        jmiParticipate.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                actionParticipate();
-            }
-        });        
         
         // Load
         JMenuItem jmiLoad = new JMenuItem(Resources.getString("App.9"), Resources.getMenuItem()); //$NON-NLS-1$
@@ -248,20 +250,23 @@ public class App extends JFrame {
             }
         });    
         
-        // Message panel in menu
+        // Menu panel
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BorderLayout());
-        JPanel messagesPanel = new JPanel();
+        jmb.add(menuPanel);
+        
+        // Status messages panel
+        JPanel messagesPanel = new JPanel(new BorderLayout());
+        JPanel messagesPanelOuter = new JPanel(new BorderLayout());
         messagesPanel.setLayout(new BorderLayout(Resources.ROW_GAP_LARGE, 0));
-        menuPanel.add(messagesPanel, BorderLayout.EAST);
         statusMessageLabel = new JLabel("");
         messagesPanel.add(statusMessageLabel, BorderLayout.CENTER);
         loadingVisual = new ComponentLoadingVisual(Resources.getLoadingAnimation());
         messagesPanel.add(loadingVisual, BorderLayout.EAST);
-        messagesPanel.setBorder(new EmptyBorder(0, 0, 0, 5));
-        jmb.add(Box.createHorizontalGlue());
-        jmb.add(menuPanel);
-        
+        messagesPanel.setBorder(new EmptyBorder(0, 0, 5, 5));
+        messagesPanelOuter.add(messagesPanel, BorderLayout.EAST);
+        this.add(messagesPanelOuter, BorderLayout.SOUTH);
+
         // Add perspectives
         addPerspective(new Perspective6Result(this));
         addPerspective(new Perspective5Receive(this));
@@ -277,6 +282,31 @@ public class App extends JFrame {
              
         // Finally, make the frame visible
         this.setVisible(true);
+    }
+
+    /**
+     * Participates with a backend (e.g. EasyBackend)
+     */
+    protected void actionParticipateBackend() {
+        
+        // Get string
+        String message = new DialogInitialMessagePicker(this, getConnectionSettings()).showDialog();
+        
+        // If valid string provided
+        if (message != null) {
+            message = ImportClipboard.getStrippedExchangeMessage(message); 
+            // Initialize
+            try {
+                String data = Message.deserializeMessage(message).data;
+                this.model = MessageInitial.getAppModel(MessageInitial.decodeMessage(Message.getMessageData(data)));
+                this.model.toEnteringValues(data);
+                this.showPerspective(Perspective1BParticipate.class);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, Resources.getString("PerspectiveParticipate.stringError"), Resources.getString("PerspectiveParticipate.stringErrorTitle"), JOptionPane.ERROR_MESSAGE);
+                this.model = null;
+            }
+        }
+        
     }
 
     /**
@@ -666,12 +696,12 @@ public class App extends JFrame {
      * @param bins
      * @param connectionSettings 
      */
-    protected void actionCreateDone(String title, Participant[] participants, Bin[] bins, ConnectionIMAPSettings connectionIMAPSettings) {
+    protected void actionCreateDone(String title, Participant[] participants, Bin[] bins, ConnectionSettings connectionSettings) {
 
         // Pass over bins and participants
         Study snapshot = this.beginTransaction();
         try {
-            model.toInitialSending(title, participants, bins, connectionIMAPSettings);
+            model.toInitialSending(title, participants, bins, connectionSettings);
             if (actionSave()) {
                 this.showPerspective(Perspective2Send.class);
             } else {
@@ -801,7 +831,7 @@ public class App extends JFrame {
     /**
      * Participate action
      */
-    protected void actionParticipate() {
+    protected void actionParticipateManual() {
          // Try to get string from clip board
         String clipboardText = ImportClipboard.getStrippedExchangeMessage(ImportClipboard.getTextFromClipBoard());
         clipboardText = isInitialParticipationMessageValid(clipboardText) ? clipboardText : null;
@@ -834,12 +864,12 @@ public class App extends JFrame {
      * Action called when done with participating
      * @param secret
      */
-    protected void actionParticipateDone(BigDecimal[] secret, ConnectionIMAPSettings connectionIMAPSettings) {
+    protected void actionParticipateDone(BigDecimal[] secret, ConnectionSettings connectionSettings) {
 
         // Pass over bins and participants
         Study snapshot = this.beginTransaction();
         try {
-            model.setConnectionIMAPSettings(connectionIMAPSettings);
+            model.setConnectionSettings(connectionSettings);
             model.toSendingShares(secret);
             if (actionSave()) {
                 this.showPerspective(Perspective2Send.class);
@@ -930,5 +960,46 @@ public class App extends JFrame {
             }
         }
         return returnPerspective;
+    }
+
+    /**
+     * Chooses the right connection settings edit dialog and starts it
+     * 
+     * @return
+     */
+    public ConnectionSettings editExchangeConf(ConnectionSettings currentSettings) {
+        // Create a new dialog to edit config
+        return new DialogConnectionConfig(this, currentSettings, false).showDialog();
+    }
+    
+    /**
+     * @return the settings
+     */
+    public ConnectionSettings getConnectionSettings() {
+        return settings;
+    }
+
+    /**
+     * @param settings the settings to set
+     */
+    public void setConnectionSettings(ConnectionSettings settings) {
+        this.settings = settings;
+    }
+
+    /**
+     * Set connetion
+     */
+    public void actionSetConnection() {
+        ConnectionSettings result = new DialogConnectionConfig(this).showDialog();
+        if(result != null) {
+            setConnectionSettings(result);
+
+            if(getConnectionSettings().getExchangeMode() != ExchangeMode.MANUAL) {
+                setStatusMessage(String.format(Resources.getString("StatusMessages.0"), result.getIdentifier(), result.getExchangeMode().toString()), false);
+            }
+            else {
+                setStatusMessage(Resources.getString("StatusMessages.3"), false);
+            }
+        }
     }
 }

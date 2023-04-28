@@ -42,124 +42,139 @@ import javax.swing.border.Border;
 public class Resources {
 
     /** Bundle name */
-    private static final String   BUNDLE_NAME                     = "org.bihealth.mi.easysmpc.resources.messages"; //$NON-NLS-1$
+    private static final String   BUNDLE_NAME                       = "org.bihealth.mi.easysmpc.resources.messages"; //$NON-NLS-1$
 
     /** Bundle */
-    private static ResourceBundle resource_bundle                 = ResourceBundle.getBundle(BUNDLE_NAME);
+    private static ResourceBundle resource_bundle                   = ResourceBundle.getBundle(BUNDLE_NAME);
 
     /** Invalid border */
-    public static final Border    INVALID_BORDER                  = BorderFactory.createLineBorder(new Color(255, 69, 0));
+    public static final Border    INVALID_BORDER                    = BorderFactory.createLineBorder(new Color(255, 69, 0));
 
     /** Default border */
-    public static final Border    DEFAULT_BORDER                  = UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border");       //$NON-NLS-1$
+    private static Border         DEFAULT_BORDER                     = null;
 
     /** Row gap */
-    public static final int       ROW_GAP                         = 2;
+    public static final int       ROW_GAP                           = 2;
 
     /** Row gap large */
-    public static final int       ROW_GAP_LARGE                   = 5;
+    public static final int       ROW_GAP_LARGE                     = 5;
 
     /** X-size of small dialog */
-    public static final int       SIZE_DIALOG_SMALL_X             = 450;
+    public static final int       SIZE_DIALOG_SMALL_X               = 450;
 
     /** Y-size of small dialog */
-    public static final int       SIZE_DIALOG_SMALL_Y             = 185;
+    public static final int       SIZE_DIALOG_SMALL_Y               = 185;
 
     /** String indicating start of exchange string */
-    public static final String    MESSAGE_START_TAG               = "BEGIN_PAYLOAD";                               //$NON-NLS-1$
+    public static final String    MESSAGE_START_TAG                 = "BEGIN_PAYLOAD";                               //$NON-NLS-1$
 
     /** String indicating end of exchange string */
-    public static final String    MESSAGE_END_TAG                 = "END_PAYLOAD";                                 //$NON-NLS-1$
+    public static final String    MESSAGE_END_TAG                   = "END_PAYLOAD";                                 //$NON-NLS-1$
 
     /** Char length for exchange before line break */
-    public static final int       MESSAGE_LINE_WIDTH              = 150;
+    public static final int       MESSAGE_LINE_WIDTH                = 150;
 
     /** Preferred height for the progress container */
-    public static final int       PROGRESS_PREFERRED_HEIGHT       = 50;
+    public static final int       PROGRESS_PREFERRED_HEIGHT         = 50;
 
     /** Ending for project files */
-    public static final String    FILE_ENDING                     = "smpc";                                        //$NON-NLS-1$
+    public static final String    FILE_ENDING                       = "smpc";                                                                 //$NON-NLS-1$
 
     /** About dialog size x */
-    public static final int       SIZE_DIALOG_X                   = 500;
+    public static final int       SIZE_DIALOG_X                     = 500;
 
     /** About dialog size y */
-    public static final int       SIZE_DIALOG_Y                   = 300;
+    public static final int       SIZE_DIALOG_Y                     = 300;
 
     /** The charset used to read the license text */
-    private final static Charset  CHARSET                         = StandardCharsets.UTF_8;
+    private final static Charset  CHARSET                           = StandardCharsets.UTF_8;
 
     /** Size of loading animation */
-    public static final int       SIZE_LOADING_ANIMATION          = 15;
+    public static final int       SIZE_LOADING_ANIMATION            = 15;
 
     /** Size of checkmark clipart x */
-    public static final int       SIZE_CHECKMARK_X                = 15;
+    public static final int       SIZE_CHECKMARK_X                  = 15;
 
     /** Size of checkmark clipart y */
-    public static final int       SIZE_CHECKMARK_Y                = 12;
+    public static final int       SIZE_CHECKMARK_Y                  = 12;
     /** Available languages */
-    private static final Locale[] AVAILABLE_LANGUAGES             = { Locale.ENGLISH, Locale.GERMAN };
+    private static final Locale[] AVAILABLE_LANGUAGES               = { Locale.ENGLISH, Locale.GERMAN };
 
     /** Interval schedule for tasks in background */
-    public static final long      INTERVAL_SCHEDULER_MILLISECONDS = 200;
+    public static final long      INTERVAL_SCHEDULER_MILLISECONDS   = 200;
 
     /** File ending for CSV-files */
-    public static final String    FILE_ENDING_CSV                 = "csv";                                         //$NON-NLS-1$
+    public static final String    FILE_ENDING_CSV                   = "csv";                                                                  //$NON-NLS-1$
 
     /** File ending for Excel-2007-files */
-    public static final String    FILE_ENDING_EXCEL_XLSX          = "xlsx";                                        //$NON-NLS-1$
+    public static final String    FILE_ENDING_EXCEL_XLSX            = "xlsx";                                                                 //$NON-NLS-1$
 
     /** File ending for Excel-97-files */
-    public static final String    FILE_ENDING_EXCEL_XLS           = "xls";                                         //$NON-NLS-1$
+    public static final String    FILE_ENDING_EXCEL_XLS             = "xls";                                                                  //$NON-NLS-1$
 
     /** Maximal rows considered */
-    public static final int       MAX_COUNT_ROWS                  = 250000;
+    public static final int       MAX_COUNT_ROWS                    = 250000;
 
     /** Maximal columns considered */
-    public static final int       MAX_COUNT_COLUMNS               = 250000;
+    public static final int       MAX_COUNT_COLUMNS                 = 250000;
 
     /** Delimiters considered for CSV files */
-    public static final char[]    DELIMITERS                      = { ';', ',', '|', '\t' };                       // $NON-NLS-1$
+    public static final char[]    DELIMITERS                        = { ';', ',', '|', '\t' };                                                // $NON-NLS-1$
 
     /**
      * Maximum number of lines to be loaded for preview purposes for CSV file
      * detection.
      */
-    public static final int       PREVIEW_MAX_LINES               = 25;
+    public static final int       PREVIEW_MAX_LINES                 = 25;
 
     /**
      * Maximum number of chars to be loaded for detecting separators for CSV
      * file detection.
      */
-    public static final int       DETECT_MAX_CHARS                = 100000;
+    public static final int       DETECT_MAX_CHARS                  = 100000;
 
     /** Interval to check mail box automatically in milliseconds */
-    public static final int       INTERVAL_CHECK_MAILBOX_DEFAULT  = 30000;
-
+    public static final int       INTERVAL_CHECK_MAILBOX_DEFAULT    = 30000;
+    
+    /** Round for initial e-mails */
+    public static final String  ROUND_0 = "_round0";
+    
     /** Step 1 identifier */
-    public static final String    ROUND_1                         = "_round1";
+    public static final String    ROUND_1                           = "_round1";
 
     /** Step 2 identifier */
-    public static final String    ROUND_2                         = "_round2";
+    public static final String    ROUND_2                           = "_round2";
 
     /** Light green color */
-    public static final Color     COLOR_LIGHT_GREEN               = new Color(82, 153, 75);
+    public static final Color     COLOR_LIGHT_GREEN                 = new Color(82, 153, 75);
 
     /** Interval to wait for sending e-mails in milliseconds */
-    public static final int       TIMEOUT_SEND_EMAILS_DEFAULT     = 60000;
+    public static final int       TIMEOUT_SEND_EMAILS_DEFAULT       = 60000;
 
     /** Fetch size for messages with IMAP */
-    public static final int       FETCH_SIZE_IMAP                 = 1048576;
+    public static final int       FETCH_SIZE_IMAP                   = 1048576;
 
     /** Number of threads in thread pool */
-    public static final int       SIZE_THREADPOOL                 = 1;
+    public static final int       SIZE_THREADPOOL                   = 5;
 
     /** Fractional bits for decimal values */
-    public static final int       FRACTIONAL_BITS                 = 32;
+    public static final int       FRACTIONAL_BITS                   = 32;
 
     /** Aggregation delimiter */
-    public static final String    AGGREGATION_DELIMITER           = "X";
+    public static final String    AGGREGATION_DELIMITER             = "X";
 
+    /** Default message size for e-mails */
+    public static final int       EMAIL_MAX_MESSAGE_SIZE_DEFAULT    = 10 * 1024 * 1024;
+
+    /** Retries when sending with HTTP for Easybackend */
+    public static final int       RETRY_EASYBACKEND_NUMBER_RETRY    = 5;
+
+    /** Wait time between Retries for Easybackend */
+    public static final int       RETRY_EASYBACKEND_WAIT_TIME_RETRY = 5000;
+
+    /** Timeout for Easybackend requests */
+    public static final int       TIMEOUT_EASYBACKEND               = 30000;
+    
     /** Time to cache a result for the matrix bus */
     public static final Duration  CACHE_TIME_MATRIX                   = Duration.ofSeconds(1);
 
@@ -170,11 +185,8 @@ public class Resources {
     /** Reason to redact a message in matrix */
     public static final String    REASON_REDACTED_READ                = "WAS_READ";
 
-    /** Default message size for e-mails */
-    public static final int       EMAIL_MAX_MESSAGE_SIZE_DEFAULT  = 10 * 1024 * 1024;
-
     /** CLI stop processing string */
-    public static final String    STOP_CLI_PROCESS_STRING         = "stop";
+    public static final String    STOP_CLI_PROCESS_STRING           = "stop";
 
     /** Default message size for matrix messages */
     public static final int       MATRIX_DEFAULT_MESSAGE_SIZE         = 32 * 1024;
@@ -184,7 +196,25 @@ public class Resources {
 
     /** Retry http request number */
     public static final int      RETRY_MATRIX_ACTIVITY_NUMBER        = 5;
+    
+    /** Auth realm default */
+    public static final String    AUTH_REALM_DEFAULT                = "easybackend";
 
+    /** Auth client id */
+    public static final String    AUTH_CLIENTID_DEFAULT             = "easy-client";
+    
+    /** Interval to check easybackend automatically in milliseconds */
+    public static final int       INTERVAL_CHECK_EASYBACKEND_DEFAULT = 10000;
+    
+    public static Border getDefaultBorder() {
+        
+        if(DEFAULT_BORDER == null) {
+            DEFAULT_BORDER = UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border");
+        }
+        
+        return DEFAULT_BORDER;
+    }
+    
     /**
      * Returns all available languages
      * 
@@ -193,7 +223,7 @@ public class Resources {
     public static Locale[] getAvailableLanguages() {
         return AVAILABLE_LANGUAGES;
     }
-
+    
     /**
      * Icon
      * 
@@ -202,10 +232,7 @@ public class Resources {
      */
     public static Image getCheckmark() throws IOException {
         InputStream stream = Resources.class.getResourceAsStream("checkmark.png"); //$NON-NLS-1$
-        return ImageIO.read(stream)
-                      .getScaledInstance(Resources.SIZE_CHECKMARK_X,
-                                         Resources.SIZE_CHECKMARK_Y,
-                                         java.awt.Image.SCALE_SMOOTH);
+        return ImageIO.read(stream).getScaledInstance(Resources.SIZE_CHECKMARK_X, Resources.SIZE_CHECKMARK_Y,  java.awt.Image.SCALE_SMOOTH);
     }
 
     /**
@@ -218,13 +245,12 @@ public class Resources {
         InputStream stream = Resources.class.getResourceAsStream("icon.png"); //$NON-NLS-1$
         return ImageIO.read(stream);
     }
-
+    
     /**
-     * Reads the content from the file license.txt and returns the content as
-     * string.
+     * Reads the content from the file license.txt and returns the content as string.
      * 
      * @return
-     * @throws IOException
+     * @throws IOException 
      */
     public static String getLicenseText() throws IOException {
         InputStream stream = Resources.class.getResourceAsStream("license.txt"); //$NON-NLS-1$
@@ -251,22 +277,19 @@ public class Resources {
         }
         return content;
     }
-
+    
     /**
      * Loading animation
      * 
      * @return
      * @throws IOException
      */
-    public static ImageIcon getLoadingAnimation() throws IOException {
+    public static ImageIcon getLoadingAnimation() throws IOException {        
         URL url = Resources.class.getResource("loading.gif"); //$NON-NLS-1$
-        Image image = new ImageIcon(url).getImage()
-                                        .getScaledInstance(SIZE_LOADING_ANIMATION,
-                                                           SIZE_LOADING_ANIMATION,
-                                                           Image.SCALE_DEFAULT);
+        Image image = new ImageIcon(url).getImage().getScaledInstance(SIZE_LOADING_ANIMATION, SIZE_LOADING_ANIMATION, Image.SCALE_DEFAULT);
         return new ImageIcon(image);
-    }
-
+      }
+    
     /**
      * Menu item
      * 
@@ -277,7 +300,7 @@ public class Resources {
         InputStream stream = Resources.class.getResourceAsStream("icon.png"); //$NON-NLS-1$
         return new ImageIcon(ImageIO.read(stream).getScaledInstance(16, 16, Image.SCALE_DEFAULT));
     }
-
+    
     /**
      * Get locale of resource bundle
      * 
@@ -286,7 +309,7 @@ public class Resources {
     public static Locale getResourceBundleLocale() {
         return resource_bundle.getLocale();
     }
-
+    
     /**
      * Returns a message
      * 
@@ -310,7 +333,7 @@ public class Resources {
         Locale.setDefault(Locale.ENGLISH);
         resource_bundle = ResourceBundle.getBundle(BUNDLE_NAME, locale);
     }
-
+    
     /**
      * No instantiation
      */

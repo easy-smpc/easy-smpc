@@ -49,11 +49,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.http.client.utils.URIBuilder;
+import org.bihealth.mi.easybus.ConnectionSettings;
 import org.bihealth.mi.easybus.Scope;
-import org.bihealth.mi.easybus.implementations.email.BusEmail;
-import org.bihealth.mi.easybus.implementations.email.ConnectionIMAPSettings;
 import org.bihealth.mi.easysmpc.components.ComponentTextField;
-import org.bihealth.mi.easysmpc.components.DialogEmailConfig;
 import org.bihealth.mi.easysmpc.components.EntryParticipantCheckmarkSendMail;
 import org.bihealth.mi.easysmpc.components.ScrollablePanel;
 import org.bihealth.mi.easysmpc.resources.Resources;
@@ -162,11 +160,11 @@ public class Perspective2Send extends Perspective implements ChangeListener {
     
     
     /**
-     * Sends an e-mail to the participant entry automatically
+     * Sends an message to the participant entry automatically
      * 
      * @param list
      */
-    private void actionSendMailAutomatically(List<EntryParticipantCheckmarkSendMail> list) {
+    private void actionSendMessageAutomatically(List<EntryParticipantCheckmarkSendMail> list) {
         
         // Deactivate buttons at start: Will be re-enabled if needed by the thread spawned below
         buttonSendAllAutomatically.setEnabled(false);
@@ -210,12 +208,12 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                                       JOptionPane.OK_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
                         
                         // Get new settings
-                        ConnectionIMAPSettings newSettings = new DialogEmailConfig(getApp().getModel().getConnectionIMAPSettings(), getApp()).showDialog();
+                        ConnectionSettings newSettings = getApp().editExchangeConf(getApp().getModel().getConnectionSettings());
                         
                         // Use new settings if given
                         if (newSettings != null) {
                             // Set settings
-                            getApp().getModel().setConnectionIMAPSettings(newSettings);
+                            getApp().getModel().setConnectionSettings(newSettings);
 
                             // Stop bus and restart send
                             SwingUtilities.invokeLater(new Runnable() {
@@ -223,7 +221,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                                 @Override
                                 public void run() {
                                     getApp().getModel().stopBus();
-                                    actionSendMailAutomatically(list);
+                                    actionSendMessageAutomatically(list);
                                 }
                             });
 
@@ -232,7 +230,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                 }
                 
                 // Finalize
-                monitor.setProgress(list.size());                
+                monitor.setProgress(list.size());
                 wrapUp();
             }
 
@@ -252,7 +250,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             }
             
             @Override
-            protected Void doInBackground() throws Exception {                
+            protected Void doInBackground() throws Exception {
 
                 // Init loop
                 int workDone = 0;
@@ -268,29 +266,19 @@ public class Perspective2Send extends Perspective implements ChangeListener {
                     
                     // Init
                     FutureTask<Void> future;
-
-                    if (!isInitialSending()) {
-                        // Send message in bus mode
-                        future = getApp().getModel()
-                                         .getBus()
-                                         .send(getExchangeString(entry),
-                                               new Scope(getApp().getModel().getStudyUID() + getRoundIdentifier()),
-                                               new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
-                                                                                       entry.getRightValue()));
-                    } else {
-                        // Send message as regular e-mail
-                        future = ((BusEmail) getApp().getModel()
-                                         .getBus())
-                                         .sendPlain(entry.getRightValue(),
-                                                    generateEMailSubject(),
-                                                    generateEMailBody(entry,
-                                                                      generateFormatedExchangeString(entry)));
-                    }
+                    
+                    // Send message
+                    future = getApp().getModel()
+                            .getBus()
+                            .send(getExchangeString(entry),
+                                  new Scope(getApp().getModel().getStudyUID() + (isInitialSending() ? Resources.ROUND_0 : getRoundIdentifier())),
+                                  new org.bihealth.mi.easybus.Participant(entry.getLeftValue(),
+                                                                          entry.getRightValue()));
 
                     try {
                         
-                        // Wait for result with a timeout time
-                        long endTime = System.currentTimeMillis() + getApp().getModel().getConnectionIMAPSettings().getEmailSendTimeout();
+                        // Wait for result with a timeout
+                        long endTime = System.currentTimeMillis() + getApp().getModel().getConnectionSettings().getSendTimeout();
                         while (true){
                             if(future.isDone()) {
                                 break;
@@ -414,7 +402,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
      * @return enabled
      */
     private boolean isAutomaticProcessingEnabled() {
-        return getApp().getModel().getConnectionIMAPSettings() != null;
+        return getApp().getModel().isAutomatedMode();
     }
     
      /**
@@ -536,17 +524,17 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         panel.add(pane, BorderLayout.CENTER);
         
         
-        // Send all e-mails automatically button
+        // Send all messages automatically button
         buttonsPane = new JPanel();
         buttonSendAllAutomatically = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButtonAutomatic"));
         buttonSendAllAutomatically.addActionListener(new ActionListener() {            
             @Override
             public void actionPerformed(ActionEvent e) {
-                actionSendMailAutomatically(getAllParticipants());
+                actionSendMessageAutomatically(getAllParticipants());
             }
         });
         
-        // Send all e-mails button manually
+        // Send all message button manually
         buttonSendAllManually = new JButton(Resources.getString("PerspectiveSend.sendAllEmailsButtonManual"));
         buttonSendAllManually.addActionListener(new ActionListener() {            
             @Override
@@ -658,7 +646,7 @@ public class Perspective2Send extends Perspective implements ChangeListener {
             automaticSend.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    actionSendMailAutomatically(Arrays.asList(entry));
+                    actionSendMessageAutomatically(Arrays.asList(entry));
                 }
             });
             automaticSend.setVisible(isInitialSending());
@@ -701,9 +689,9 @@ public class Perspective2Send extends Perspective implements ChangeListener {
         getPanel().revalidate();
         getPanel().repaint();
         
-        // Send e-mails automatically if enabled and password set
+        // Send messages automatically if enabled and password set
         if (isAutomaticProcessingEnabled()) {
-            actionSendMailAutomatically(getAllParticipants());
+            actionSendMessageAutomatically(getAllParticipants());
         }
     }
     

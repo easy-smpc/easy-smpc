@@ -23,13 +23,13 @@ import java.io.Serializable;
 public class BusMessage implements Serializable {
     
     /** SVUID */
-    private static final long serialVersionUID = 8541645750687762860L;
+    private static final long   serialVersionUID = 8541645750687762860L;
     /** Receiver */
-    protected final Participant     receiver;
+    protected final Participant receiver;
     /** Scope */
-    protected final Scope           scope;
+    protected final Scope       scope;
     /** Message: A serialized base 64 encoded blob */
-    protected final String          message;
+    protected final String      message;
     
     /**
      * Message

@@ -90,7 +90,7 @@ public class ConnectionIMAP extends ConnectionEmail {
      * @param listener
      * @throws BusException
      */
-    public ConnectionIMAP(ConnectionIMAPSettings settings,
+    public ConnectionIMAP(ConnectionSettingsIMAP settings,
                           boolean sharedMailbox) throws BusException {
 
         // Super
@@ -261,21 +261,37 @@ public class ConnectionIMAP extends ConnectionEmail {
 
             try {
         
-                // Create store
+                
                 Session sessionReceiving = Session.getInstance(propertiesReceiving);
-                store = sessionReceiving.getStore();
                 
-                // Connect store
-                store.connect(getReceivingUserName(), receivingPassword);
+                if(store == null || !store.isConnected() ) {
+                    // Create store
+                    store = sessionReceiving.getStore();
+                    
+                    // Connect store
+                    store.connect(getReceivingUserName(), receivingPassword);
+                    
+                    if(folder != null && folder.isOpen()) {
+                        try {
+                            folder.close();
+                        } catch (MessagingException e) {
+                            // Ignore
+                        }
+                    }
+                }
                 
-                // Create folder new for every call to get latest state
-                folder = store.getFolder("INBOX");
-                if (!folder.exists()) {
-                    throw new BusException("Unable to identify inbox folder of mail box");
+                // Create folder new if necessary
+                if (folder == null) {
+                    folder = store.getFolder("INBOX");
+                    if (!folder.exists()) {
+                        throw new BusException("Unable to identify inbox folder of mail box");
+                    }
                 }
                 
                 // Open folder
-                folder.open(Folder.READ_WRITE);
+                if(!folder.isOpen()) {
+                    folder.open(Folder.READ_WRITE);
+                }
     
             } catch (MessagingException e) {
                 throw new BusException("Error establishing or keeping alive connection to mail server", e);
@@ -283,7 +299,6 @@ public class ConnectionIMAP extends ConnectionEmail {
             
             // Init
             List<ConnectionEmailMessage> result = new ArrayList<>();
-            FolderManager folderManager = new FolderManager(folder);
             
             try {
                 
@@ -302,7 +317,7 @@ public class ConnectionIMAP extends ConnectionEmail {
                         if (START_CONTAIN_PREFIX_PATTERN.matcher(subject).matches() &&
                                 (filter == null || filter.accepts(subject))) {                                
                                 LOGGER.debug("Message received logged", new Date(), "Message received", uid, subject);
-                                result.add(new ConnectionEmailMessage(message, folderManager));
+                                result.add(new ConnectionEmailMessage(message));
                         }
                     } catch (Exception e) {
                         // Ignore, as this may be a result of non-transactional properties of the IMAP protocol

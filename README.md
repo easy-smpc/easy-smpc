@@ -16,7 +16,7 @@
 
 EasySMPC requires [Java](https://adoptopenjdk.net/), at least in version 14. The Java
 runtime is bundled in our Installer package.
-Moreover, to use EasySMPC in automated mode, an e-mail account is required, which is accessible via SMTP and IMAP from the system executing EasySMPC.
+Moreover, to use EasySMPC in the automated mode, an e-mail account is required, which is accessible via SMTP and IMAP from the system executing EasySMPC. If you want to use EasySMPC in the automated micro-services mode, a [server backend](https://github.com/fnwirth/easy-backend) is necessary.
 
 To compile the app from source in addition to the Java JDK the [Maven build
 system](https://maven.apache.org/) is required.
@@ -24,9 +24,9 @@ system](https://maven.apache.org/) is required.
 ## Installation
 
 EasySMPC does not need an installation and can be used as a Java jar package.
-However, to increase portability we packaged the nessecary Java runtime with our
+However, to increase portability we packaged the necessary Java runtime with our
 application in an installer to build an executable for Linux, Windows and Mac
-OSX. This installer does not need any administrator priviledges and should be
+OSX. This installer does not need any administrator privileges and should be
 run as a user. The installers for Windows and MacOS are not signed.
 Thus a respective message while installing must be confirmed.
 
@@ -40,7 +40,7 @@ Linux and MacOS executables.
 
 To build the executable yourself, please clone this repository and build with
 maven  (`mvn package`). The assembled executable should be in the target
-directory. At present time some tests occasionaly fail. We're looking into that.
+directory. At present time some tests occasionally fail. We're looking into that.
 Until those tests are passing please compile with `mvn package -DskipTests`.
 
 To build the installer please build the jar package as described above and then
@@ -51,13 +51,13 @@ cd installer && ./linux.sh
 
 ## Features
 
-EasySMPC was built to allow non-technical personell in medical research perform
+EasySMPC was built to allow non-technical personel in medical research perform
 simple analysis without sharing their input data. We tried to achieve a very low
 threshold of technical prerequisites by using email as an, in most cases,
-already established and configured communication medium.
+already established and configured communication medium. As an alternative, a restful micro-services based server can be used.
 
 * Easy to use
-* Communication using established channels, e.g. emails
+* Communication using established channels, e.g. emails or restful micro-services
 * Microsoft Excel and CSV import and export
 * Automation of the protocol using IMAP-Mailboxes
 * Automatic Proxy-Detection
@@ -86,8 +86,8 @@ prime.
 
      a)	In _manual mode_ the users need to exchange all messages by sending and receiving e-mails manually.
      
-     b) In _automatic mode_ participants receive and import the initial message manually into EasySMPC (see 2). All further messages are exchanged automatically via their respective mailboxes. If the study initiator chooses automatic mode, all participants also have to choose automated mode. The user name and connection details provided for the automated mode will be saved for future use, the password will not be saved and must be re-entered if the study was closed in between.
-2. As a participant, you copy the message you received via email into the clipboard, click on _Participate in project_ in EasySMPC and paste the content. You will now see the study definition and can enter your own confidential data and mail box details if applicable.
+     b) In _automatic mode_ participants receive and import the initial message manually into EasySMPC (see 2). All further messages are exchanged automatically. If the study initiator chooses automatic mode, all participants also have to choose automated mode. The user name and connection details provided for the automated mode will be saved for future use, the password will not be saved and must be re-entered if the study was closed in between.
+2. As a participant, you copy the message you received via email into the clipboard, click on _Participate in project_ in EasySMPC and paste the content. You will now see the study definition and can enter your own confidential data and connection details (if applicable).
 3. As an initiator or participant, you now click on proceed. If running in automated mode, EasySMPC will automatically perform all steps until the final result is displayed. If running in manual mode, all users need to send and receive e-mails prepared by EasySMPC to perform the computation.
 4. The final perspective shows the result of the secure addition of all variables.
 
@@ -95,17 +95,20 @@ prime.
 Please see the attached ![tutorial](doc/EasySMPC%20step-by-step%20tutorial.pdf) for a step-by-step guide using EasySMPC.
 
 ## Command line version
-There is also a command line version of EasySMPC. After [building](#build-from-source) or downloading from [our release
-page](https://github.com/prasser/easy-smpc/releases), use the jar easy-smpc-cli-*{Version}*.jar either as a creator or a participant. The command line version only supports the [automatic mode](#quick-start-guide). Please note that the command line version will delete all previous EasySMPC relevant e-mails (subject of the e-mails start with *[EasySMPC]*).
+There is also a command-line version of EasySMPC. After [building](#build-from-source) or downloading from [our release
+page](https://github.com/prasser/easy-smpc/releases), use the jar easy-smpc-cli.jar either as a creator or a participant. The command-line version only supports the [automatic mode](#quick-start-guide) for both e-mail and micro-services.
+Please note that when using the automated e-mail mode, the command-line version will delete all previous EasySMPC relevant e-mails (subject of the e-mails start with *[EasySMPC]*).
 
-### Creator
-Execute the program with `java -jar easy-smpc-cli-{Version}.jar -create -l STUDY_NAME -b FILES_PATH_VARIABLES -d FILES_PATH_DATA -f PARTICIPANTS -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. The parameters have the following meaning:
+### E-mail mode
+
+#### Creator
+Execute the program with `java -jar easy-smpc-cli.jar -create -connection-type email -l STUDY_NAME -b FILES_PATH_VARIABLES -d FILES_PATH_DATA -f PARTICIPANTS -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. The parameters have the following meaning:
 1. `-create`: Indicates the creation of a new EasySMPC project.
+1. ` -connection-type email`: Indicates that the automated e-mail mode will be used
 2. `-l STUDY_NAME`: Name/title of the study. Must be consistently used by everyone, the creator and all participants.
 3. `-b FILE_PATH_VARIABLES`: The path to the Excel or CSV-files containing the variable names in the format *firstFile.xlsx,secondFile.csv,...* The data needs to be row-oriented and thus must have at least one column. In the case of more than one column, EasySMPC will concatenate all columns of a row into a single column and use this as the name of the variable. The variable names will be shared with all participants. (More setting options are available under the *optional* parameters.) For an example, see `example-cli/variables.xlsx`.
-
-4. `-d FILE_PATH_DATA`: The path to the Excel or CSV-files containing the creator's data in the format *firstFile.xlsx,secondFile.csv,...* The data needs to be row-oriented and must have at least two columns. The last column is regarded as the data value and therefore must always contain numbers only. A single dot as a decimal separator is allowed but not necessary. In case of exactly two columns, the first column will be regarded as the sole name. In the case of more than two columns, EasySMPC will concatenate all columns of a row but the last column to a single column and match this name with the variable names defined with the `-b` option. Variable names for which no value can be found will be set to zero. The data will not be shared with other participants. (More setting options are available under the *optional* parameters.) For an example, see `example-cli/PKU comorbidities.xlsx`.)
-5. `-f LIST_PARTICIPANTS`: The names and e-mail addresses of the participants in the form *name1,emailAddress1;name2,emailAddress2;name3,emailAddress3...*. The first name and e-mail address will be the creator. In case of separate e-mail adresses for sending and receiving, the e-mail addresses in this parameter will be the e-mail addresses used for receiving (see parameters `-a` and `-v`). 
+4. `-d FILE_PATH_DATA`: The path to the Excel or CSV-files containing the creator's data in the format *firstFile.xlsx,secondFile.csv,...* The data needs to be row-oriented and must have at least two columns. The last column is regarded as the data value and therefore must always contain numbers only. A single dot as a decimal separator is allowed but not necessary. In case of exactly two columns, the first column will be regarded as the sole name. In the case of more than two columns, EasySMPC will concatenate all columns of a row but the last column to a single column and match this name with the variable names defined with the `-b` option. Variable names for which no value can be found will be set to zero. The data will not be shared with other participants (more setting options are available under the *optional* parameters). For an example, see `example-cli/PKU comorbidities.xlsx`.
+5. `-f LIST_PARTICIPANTS`: The names and e-mail addresses of the participants in the form *name1,emailAddress1;name2,emailAddress2;name3,emailAddress3...*. The first name and e-mail address will be the creator. In case of separate e-mail addresses for sending and receiving, the e-mail addresses in this parameter will be the e-mail addresses used for receiving (see parameters `-a` and `-v`). 
 6. `-a EMAIL_ADDRESS`: E-mail address to be used for communication. If the parameter `-v` is set, this parameter will only be used as the receiving mail address.
 7. `-m PASSWORD`: Password of the e-mail address used. If the parameter `-v` is set, this parameter will be used as password for the receiving mail address provided with `-a`.
 8. `-i IMAP_HOST`: Hostname of the IMAP server.
@@ -128,28 +131,51 @@ Please note that in addition to the parameters mentioned above the following *op
 8. `-t AUTH_MECHANISMS_RECEIVING`: Pass this parameter to set the IMAP authentication mechanisms of the receiving e-mail account. For details, we refer to the property `mail.imap.auth.mechanisms` in the [Jakarta e-mail documentation](https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/imap/package-summary.html).
 9. `-u AUTH_MECHANISMS_SENDING`: Pass this parameter to set the SMTP authentication mechanisms of the sending e-mail account. For details, we refer to the property `mail.smtp.auth.mechanisms` in the [Jakarta e-mail documentation](https://jakarta.ee/specifications/mail/1.6/apidocs/com/sun/mail/smtp/package-summary.html).
 
-### Participant
-Execute the program with `java -jar easy-smpc-cli-*{Version}*.jar -participate -l STUDY_NAME -d FILE_PATH_DATA -o PARTICIPANT_NAME -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. Most parameters are explained in the section [Creator](#creator), other parameters are described below:
+#### Participant
+Execute the program with `java -jar easy-smpc-cli.jar -participate -connection-type email -l STUDY_NAME -d FILE_PATH_DATA -o PARTICIPANT_NAME -a EMAIL_ADDRESS -p PASSWORD -i IMAP_HOST -x IMAP_PORT -y IMAP_ENCRYPTION -s SMTP_HOST -z SMTP_PORT -q SMTP_ENCRYPTION`. Most parameters are explained in the section above, other parameters are described below:
 1. `-participate`: Indicates the participation in a (new) EasySMPC project.
 2. `-o PARTICIPANT_NAME`: Name of the participant as defined in the option `-f` by the creator.
 
 After executing check the result in the file `result_<study name>_<timestamp>.xlsx` or check the file easy-smpc.log for details of errors.
 
-### Example 
+#### Example 
 Data for an example can be found in the folder `example-cli`. An exemplary process with this data can be started with these three commands: 
- 1. `java -jar easy-smpc-cli-*{Version}*.jar -create -b "-create -l "Example Study" -b ./example-cli/variables.xlsx -d "./example-cli/PKU comorbidities.xlsx" -f "Creator,easysmpc.dev0@gmail.com;Participant1,easysmpc.dev1@gmail.com;Participant2,easysmpc.dev2@gmail.com" -a easysmpc.dev0@gmail.com -p thePassword -i imap.gmail.com -x 993 -y SSLTLS -s smtp.gmail.com -z 465 -q SSLTLS`
-2. `java -jar easy-smpc-cli-*{Version}*.jar -participate -l "Example Study" -d "./example-cli/PKU comorbidities.xlsx" -o Participant1 -a easysmpc.dev1@gmail.com -p thePassword -i imap.ionos.de -x 993 -y SSLTLS -s smtp.ionos.de -z 465 -q SSLTLS5`
-3. `java -jar easy-smpc-cli-*{Version}*.jar -participate -l "Example Study" -d "./example-cli/PKU comorbidities.xlsx" -o Participant2 -a easysmpc.dev2@gmail.com -p &r6=Jbh9 -i imap.ionos.de -x 993 -y SSLTLS -s smtp.ionos.de -z 465 -q SSLTLS`
+ 1. `java -jar easy-smpc-cli.jar -create -connection-type email -b "-create -l "Example Study" -b ./example-cli/variables.xlsx -d "./example-cli/PKU comorbidities.xlsx" -f "Creator,easysmpc.dev0@gmail.com;Participant1,easysmpc.dev1@gmail.com;Participant2,easysmpc.dev2@gmail.com" -a easysmpc.dev0@gmail.com -p thePassword -i imap.gmail.com -x 993 -y SSLTLS -s smtp.gmail.com -z 465 -q SSLTLS`
+2. `java -jar easy-smpc-cli.jar -participate -connection-type email -l "Example Study" -d "./example-cli/PKU comorbidities.xlsx" -o Participant1 -a easysmpc.dev1@gmail.com -p thePassword -i imap.ionos.de -x 993 -y SSLTLS -s smtp.ionos.de -z 465 -q SSLTLS5`
+3. `java -jar easy-smpc-cli.jar -participate -connection-type email -l "Example Study" -d "./example-cli/PKU comorbidities.xlsx" -o Participant2 -a easysmpc.dev2@gmail.com -p &r6=Jbh9 -i imap.ionos.de -x 993 -y SSLTLS -s smtp.ionos.de -z 465 -q SSLTLS`
 
 All three commands are expected to start on different computers. If you want to try it on a single computer (i.e. as a dry run), please use different folders for the three parties, since otherwise errors of writing log and result files can happen. Also, in this minimal test the same data file `example-cli/PKU comorbidities.xlsx` is used for each party. However, in a real-world usage each party would use different data in the file.
+
+## Micro-services mode
+
+### Creator
+Execute the program with `java -jar easy-smpc-cli.jar -create -connection-type easybackend -l STUDY_NAME -b FILES_PATH_VARIABLES -d FILES_PATH_DATA -f PARTICIPANTS -i BACKEND_SERVER_NAME -p PASSWORD`. The parameters have the following meaning:
+1. `-create`: Indicates the creation of a new EasySMPC project.
+1. ` -connection-type easybackend`: Indicates that the automated micro-services mode will be used.
+2. `-l STUDY_NAME`: Name/title of the study. Must be consistently used by everyone, the creator and all participants.
+3. `-b FILE_PATH_VARIABLES`: The path to the Excel or CSV-files containing the variable names in the format *firstFile.xlsx,secondFile.csv,...* The data needs to be row-oriented and thus must have at least one column. In the case of more than one column, EasySMPC will concatenate all columns of a row into a single column and use this as the name of the variable. The variable names will be shared with all participants. (More setting options are available under the *optional* parameters.) For an example, see `example-cli/variables.xlsx`.
+4. `-d FILE_PATH_DATA`: The path to the Excel or CSV-files containing the creator's data in the format *firstFile.xlsx,secondFile.csv,...* The data needs to be row-oriented and must have at least two columns. The last column is regarded as the data value and therefore must always contain numbers only. A single dot as a decimal separator is allowed but not necessary. In case of exactly two columns, the first column will be regarded as the sole name. In the case of more than two columns, EasySMPC will concatenate all columns of a row but the last column to a single column and match this name with the variable names defined with the `-b` option. Variable names for which no value can be found will be set to zero. The data will not be shared with other participants (more setting options are available under the *optional* parameters). For an example, see `example-cli/PKU comorbidities.xlsx`.
+5. `-f LIST_PARTICIPANTS`: The names and e-mail addresses of the participants in the form *name1,emailAddress1;name2,emailAddress2;name3,emailAddress3...*. The first name and e-mail address will be the creator. In case of separate e-mail adresses for sending and receiving, the e-mail addresses in this parameter will be the e-mail addresses used for receiving (see parameters `-a` and `-v`).
+6. `-i BACKEND_SERVER_NAME`: The name of the server/micro-services backend as DNS name or ip-address. This can also include a port number (e.g. https://server.org:port). Note: Only HTTPS, no HTTP addresses are allowed.
+7. `-m PASSWORD`: Password of the e-mail address used. If the parameter `-v` is set, this parameter will be used as password for the receiving mail address provided with `-a`.
+
+After running a successful EasySMPC process, check the result in the file `result_<study name>_<timestamp>.xlsx` or check the file easy-smpc.log for details of errors.
+
+### Participant
+Execute the program with `java -jar easy-smpc-cli.jar -participate -connection-type easybackend -l STUDY_NAME -d FILES_PATH_DATA -i BACKEND_SERVER_NAME -a PARTICIPANT_NAME -o EMAIL_ADDRESS -p PASSWORD`. Most parameters are explained in the section above, other parameters are described below:
+1. `-participate`: Indicates the participation in a (new) EasySMPC project.
+2. `-o PARTICIPANT_NAME`: Name of the participant as defined in the option `-f` by the creator.
+3. `-o EMAIL_ADDRESS`: E-mail address of the participant as defined in the option `-f` by the creator.
+
+After executing check the result in the file `result_<study name>_<timestamp>.xlsx` or check the file easy-smpc.log for details of errors.
 
 ## Troubleshooting
 ### Neither an error nor a result in automated mode
 Should the program wait for an unreasonable time without throwing an error, first check whether EasySMPC-related e-mails are in a spam folder (the subject of the e-mails start with *[EasySMPC]*). If so just copy them into the regular inbox.
 If nothing can be found in the spam folder, it is likely that the different programs are using different EasySMPC studies with the same name. To solve the issues either (1) delete all e-mails in all mailboxes starting with [EasySMPC] in the title or (2) restart the process with a new name for all participants as well as the creator.
 
-### Command line version: Error writing the result into an Excel file
-When executing the command line version on Linux systems the following entries can appear in the log:
+### Command-line version: Error writing the result into an Excel file
+When executing the command-line version on Linux systems the following entries can appear in the log:
 ```
 2022-01-01 12:00:00.000 INFO Start calculating and writing result
 Exception in thread "Thread-1" java.lang.InternalError: java.lang.reflect.InvocationTargetException
@@ -173,6 +199,13 @@ Exception in thread "Thread-1" java.lang.InternalError: java.lang.reflect.Invoca
         ...
 ```
 To resolve this please install the package `libfontconfig1` on your system (see e.g. also [here](https://bz.apache.org/bugzilla/show_bug.cgi?id=62576))
+
+### Command-line version: Error message "Already existing first message for scope X and receiver Y"
+When using the micro-services mode, the following error message can appear durin the creation process:
+```
+Already existing first message for scope X and receiver Y
+```
+This indicates that for at least one participant an initial message with the same project name already exists and therefore no new initial message can be added. Please proceed with the already started project, delete the already started project or start a new project with a new project name.
 
 ## Contact
 
@@ -216,4 +249,4 @@ Education and Research (BMBF).
 
 If you want to cite our software, you can use the following citation:
 
-Wirth, F. N., Kussel, T. et al. (2022). EasySMPC - No-Code Secure Multi-Party Computation [Computer software]. https://github.com/prasser/easy-smpc
+Wirth, F.N., Kussel, T., Müller, A. et al. EasySMPC: a simple but powerful no-code tool for practical secure multiparty computation. BMC Bioinformatics 23, 531 (2022). https://doi.org/10.1186/s12859-022-05044-8

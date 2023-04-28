@@ -106,7 +106,7 @@ public class ComponentTextArea extends JTextArea {
      * Validates the value
      */
     private void validateValue() {
-        this.setBorder(isValueValid() ? Resources.DEFAULT_BORDER : Resources.INVALID_BORDER);
+        this.setBorder(isValueValid() ? Resources.getDefaultBorder() : Resources.INVALID_BORDER);
         if (listener != null) {
             listener.stateChanged(new ChangeEvent(this));
         }

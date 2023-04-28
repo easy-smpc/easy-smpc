@@ -28,6 +28,7 @@ import org.bihealth.mi.easybus.Bus;
 import org.bihealth.mi.easybus.BusException;
 import org.bihealth.mi.easybus.BusMessage;
 import org.bihealth.mi.easybus.BusMessageFragment;
+import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.MessageManager;
 import org.bihealth.mi.easybus.Participant;
 import org.bihealth.mi.easybus.Scope;
@@ -416,7 +417,9 @@ public class BusMatrix extends Bus{
      * Leaves and forgets all EasySMPC relevant rooms
      */
     @Override
-    public void purge() throws BusException {
+    public void purge(MessageFilter filter) throws BusException {
+        // TODO Use filter
+        
     	// Init
     	List<String> ids = new ArrayList<>();
     	
@@ -1108,5 +1111,12 @@ public class BusMatrix extends Bus{
         Object o = ois.readObject();
         ois.close();
         return o;
+    }
+
+    @Override
+    public FutureTask<Void>
+           sendPlain(String recipient, String subject, String body) throws BusException {
+        // TODO Check if necessary
+        throw new UnsupportedOperationException();
     }
 }

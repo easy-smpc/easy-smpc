@@ -35,11 +35,11 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.bihealth.mi.easybus.implementations.email.PasswordProvider.PasswordStore;
+import org.bihealth.mi.easybus.PasswordStore;
 import org.bihealth.mi.easysmpc.resources.Resources;
 
 /**
- * Dialog for entering IMAP and SMTP password
+ * Dialog for entering up to two passwords
  * 
  * @author Felix Wirth
  * @author Fabian Prasser
@@ -48,18 +48,22 @@ import org.bihealth.mi.easysmpc.resources.Resources;
 public class DialogPassword extends JDialog implements ChangeListener {
 
     /** SVUID */
-    private static final long         serialVersionUID = 2844321619003751907L;
-    /** Component to enter IMAP password */
-    private ComponentEntryOne         passwordEntryIMAP;
+    private static final long         serialVersionUID    = 2844321619003751907L;
+    /** Component to enter first password */
+    private ComponentEntryOne         passwordEntryFirst;
     /** Result */
-    private PasswordStore            result;
+    private PasswordStore             result;
     /** Button */
     private JButton                   buttonOK;
     /** Parent */
     private JFrame                    parent;
-    /** Component to enter SMTP password */
-    private ComponentEntryOneCheckBox passwordEntrySMTP;
-        
+    /** Component to enter second password */
+    private ComponentEntryOneCheckBox passwordEntrySecond = null;
+    /** First password descriptor */
+    private String                    firstPasswordDescriptor;
+    /** Second password descriptor */
+    private String                    secondPasswordDescriptor;
+
     /**
      * Create a new instance
      * 
@@ -67,10 +71,12 @@ public class DialogPassword extends JDialog implements ChangeListener {
      * @param validator
      * @param parent
      */
-    public DialogPassword(JFrame parent) {
+    public DialogPassword(String firstPasswordDescriptor, String secondPasswordDescriptor, JFrame parent) {
         
         // Store
         this.parent = parent;
+        this.firstPasswordDescriptor = firstPasswordDescriptor;
+        this.secondPasswordDescriptor = secondPasswordDescriptor;
 
         // Dialog properties        
         this.setTitle(Resources.getString("EmailConfig.24"));
@@ -89,17 +95,17 @@ public class DialogPassword extends JDialog implements ChangeListener {
         central.setLayout(new BoxLayout(central, BoxLayout.Y_AXIS));
         this.add(central, BorderLayout.CENTER);
         
-        // IMAP panel
-        JPanel imapPanel = new JPanel();
-        imapPanel.setLayout(new BorderLayout());
-        imapPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                                      Resources.getString("EmailConfig.29"),
+        // First password panel
+        JPanel firstPanel = new JPanel();
+        firstPanel.setLayout(new BorderLayout());
+        firstPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                                      this.firstPasswordDescriptor,
                                                                       TitledBorder.LEFT,
                                                                       TitledBorder.DEFAULT_POSITION));
-        central.add(imapPanel);
+        central.add(firstPanel);
         
-        // IMAP Password entry
-        this.passwordEntryIMAP = new ComponentEntryOne(Resources.getString("EmailConfig.33"),
+        // First Password entry
+        this.passwordEntryFirst = new ComponentEntryOne(Resources.getString("EmailConfig.33"),
                                                    "",
                                                    true,
                                                    new ComponentTextFieldValidator() {
@@ -112,30 +118,33 @@ public class DialogPassword extends JDialog implements ChangeListener {
                                                    },
                                                    true,
                                                    false);
-        imapPanel.add(passwordEntryIMAP, BorderLayout.CENTER);
-        passwordEntryIMAP.setChangeListener(this);
+        firstPanel.add(passwordEntryFirst, BorderLayout.CENTER);
+        passwordEntryFirst.setChangeListener(this);
         
-        // SMTP panel
-        JPanel smtpPanel = new JPanel();
-        smtpPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
-                                                                      Resources.getString("EmailConfig.31"),
-                                                                      TitledBorder.LEFT,
-                                                                      TitledBorder.DEFAULT_POSITION));
-        smtpPanel.setLayout(new BorderLayout());
-        central.add(smtpPanel);
-        
-        // SMTP Password entry
-        smtpPanel.add(new JLabel(Resources.getString("EmailConfig.33")), BorderLayout.WEST);
-        this.passwordEntrySMTP = new ComponentEntryOneCheckBox(null, new ComponentTextFieldValidator() {
-            @Override
-            public boolean validate(String text) {
-                if (text == null ||
-                    text.equals("")) { return false; }
-                return true;
-            }
-        }, true, true);
-        passwordEntrySMTP.setChangeListener(this);
-        smtpPanel.add(passwordEntrySMTP, BorderLayout.CENTER);
+        // If second password descriptor given, create necessary elements
+        if(this.secondPasswordDescriptor != null) {
+            // Second panel
+            JPanel secondPanel = new JPanel();
+            secondPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
+                                                                   Resources.getString("EmailConfig.31"),
+                                                                   TitledBorder.LEFT,
+                                                                   TitledBorder.DEFAULT_POSITION));
+            secondPanel.setLayout(new BorderLayout());
+            central.add(secondPanel);
+
+            // Second password entry Password entry
+            secondPanel.add(new JLabel(Resources.getString("EmailConfig.33")), BorderLayout.WEST);
+            this.passwordEntrySecond = new ComponentEntryOneCheckBox(null, new ComponentTextFieldValidator() {
+                @Override
+                public boolean validate(String text) {
+                    if (text == null ||
+                            text.equals("")) { return false; }
+                    return true;
+                }
+            }, true, true);
+            passwordEntrySecond.setChangeListener(this);
+            secondPanel.add(passwordEntrySecond, BorderLayout.CENTER);
+        }
         
         // Buttons 
         JPanel buttonsPane = new JPanel();
@@ -233,14 +242,14 @@ public class DialogPassword extends JDialog implements ChangeListener {
      * @return
      */
     private boolean areValuesValid() {
-        return this.passwordEntryIMAP.isValueValid() && this.passwordEntrySMTP.isValueValid();
+        return this.passwordEntryFirst.isValueValid() && (this.passwordEntrySecond == null? true : this.passwordEntrySecond.isValueValid());
     }
     
     /**
      * Action proceed and close
      */
     protected void actionProceed() {
-        this.result = new PasswordStore(passwordEntryIMAP.getValue(), passwordEntrySMTP.getValue());
+        this.result = new PasswordStore(passwordEntryFirst.getValue(), passwordEntrySecond != null ? passwordEntrySecond.getValue() : null);
         this.dispose();
     }
 }
