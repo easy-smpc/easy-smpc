@@ -254,15 +254,4 @@ public abstract class Bus {
         // Return
         return result;
     }
-
-    /**
-     * Send a plain message (no bus functionality)
-     * 
-     * @param recipient
-     * @param subject
-     * @param body
-     * @return 
-     * @throws BusException
-     */
-    public abstract FutureTask<Void> sendPlain(String recipient, String subject, String body) throws BusException;
 }

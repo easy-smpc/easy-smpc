@@ -150,42 +150,6 @@ public class BusEmail extends Bus {
         return null;
     }    
     
-    /**
-     * Send a plain e-mail (no bus functionality)
-     * 
-     * @param recipient
-     * @param subject
-     * @param body
-     * @return 
-     * @throws BusException
-     */
-    @Override
-    public FutureTask<Void> sendPlain(String recipient, String subject, String body) throws BusException {
-        // Create future task
-        FutureTask<Void> task = new FutureTask<>(new Runnable() {
-            @Override
-            public void run() {
-                // Init
-                boolean sent = false;
-                
-                // Retry until sent successful or interrupted
-                while(!sent && !Thread.interrupted()) {
-                    try {
-                        connection.send(recipient, subject, body, null);
-                        sent = true;
-                    } catch (BusException e) {
-                        // Log and repeat
-                        LOGGER.error("Error sending plain e-mail", e);
-                    }
-                }
-            }
-        }, null);
-        
-        // Start and return
-        getExecutor().execute(task);
-        return task;
-    }
-    
     @Override
     public void stop() {
         

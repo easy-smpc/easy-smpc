@@ -490,11 +490,6 @@ public class BusEasyBackend extends Bus {
         return o;
     }
     
-    @Override
-    public FutureTask<Void> sendPlain(String recipient, String subject, String body) throws BusException {
-        throw new UnsupportedOperationException("Sending plain messages is not supported by this bus");
-    }
-    
     /**
      * Get token
      */
