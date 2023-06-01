@@ -36,8 +36,6 @@ public class ConnectionSettingsSamplyBeam extends ConnectionSettings {
     private int               checkInterval;
     /** E-mail address */
     private final String      email;
-    /** Name of app */
-    private String            appName;
     /** Name of API key */
     private String            apiKey;
     /** Proxy server URL */
@@ -154,19 +152,5 @@ public class ConnectionSettingsSamplyBeam extends ConnectionSettings {
      */
     public String getEmail() {
         return email;
-    }
-
-    /**
-     * @param appName the appName to set
-     */
-    public void setAppName(String appName) {
-        this.appName = appName;
-    }
-
-    /**
-     * @return the appName
-     */
-    public String getAppName() {
-        return appName;
     }
 }
