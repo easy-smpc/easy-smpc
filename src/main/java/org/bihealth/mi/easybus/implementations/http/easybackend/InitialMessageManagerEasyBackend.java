@@ -47,19 +47,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class InitialMessageManagerEasyBackend extends InitialMessageManager {
 
     /** Path to list initial messages */
-    private static final String                     PATH_LIST_INITIAL_MESSAGES  = "api/easybackend/list/_round0";
+    private static final String      PATH_LIST_INITIAL_MESSAGES  = "api/easybackend/list/_round0";
     /** Delete message */
-    private static final String                     PATH_DELETE_MESSAGE_PATTERN = "api/easybackend/message/%s";
+    private static final String      PATH_DELETE_MESSAGE_PATTERN = "api/easybackend/message/%s";
+    /** Bearer auth scheme */
+    private static final String      AUTH_SCHEME                 = "Bearer %s";
     /** HTTP auth */
-    private final HTTPAuthentication                auth;
+    private final HTTPAuthentication auth;
     /** Server */
-    private final URI                               server;
+    private final URI                server;
     /** Access token */
-    private String                                  token;
+    private String                   token;
     /** Jackson object mapper */
-    private ObjectMapper                            mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private ObjectMapper             mapper                      = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     /** Message manager */
-    private final MessageManager                    messageManager              = new MessageManager(1024);
+    private final MessageManager     messageManager              = new MessageManager(1024);
 
     /**
      * Creates a new instance
@@ -94,7 +96,7 @@ public class InitialMessageManagerEasyBackend extends InitialMessageManager {
 
         // Get messages as plain string
         try {
-            resultString = new HTTPRequest(server, PATH_LIST_INITIAL_MESSAGES, HTTPRequestType.GET, getToken(), null).execute();
+            resultString = new HTTPRequest(server, PATH_LIST_INITIAL_MESSAGES, HTTPRequestType.GET, String.format(AUTH_SCHEME, getToken()), null).execute();
         } catch (HTTPException e) {
 
             // If error reason was unauthenticated, re-authenticate and retry
@@ -104,7 +106,7 @@ public class InitialMessageManagerEasyBackend extends InitialMessageManager {
                 renewToken();
                 try {
                     // Retry
-                    resultString = new HTTPRequest(server, PATH_LIST_INITIAL_MESSAGES, HTTPRequestType.GET, getToken(), null).execute();
+                    resultString = new HTTPRequest(server, PATH_LIST_INITIAL_MESSAGES, HTTPRequestType.GET, String.format(AUTH_SCHEME, getToken()), null).execute();
                     exception = null;
                 } catch (Exception e1) {
                     // Error still exists
@@ -233,7 +235,7 @@ public class InitialMessageManagerEasyBackend extends InitialMessageManager {
         
         try {
             // Delete message
-             new HTTPRequest(server, String.format(PATH_DELETE_MESSAGE_PATTERN, id), HTTPRequestType.DELETE, getToken() , null).execute();
+             new HTTPRequest(server, String.format(PATH_DELETE_MESSAGE_PATTERN, id), HTTPRequestType.DELETE, String.format(AUTH_SCHEME, getToken()), null).execute();
         } catch (HTTPException e) {
     
             // If error reason was unauthenticated, re-authenticate and retry
@@ -243,7 +245,7 @@ public class InitialMessageManagerEasyBackend extends InitialMessageManager {
                 renewToken();
                 try {
                     // Re-try
-                    new HTTPRequest(server, String.format(PATH_DELETE_MESSAGE_PATTERN, id), HTTPRequestType.DELETE, getToken() , null).execute();
+                    new HTTPRequest(server, String.format(PATH_DELETE_MESSAGE_PATTERN, id), HTTPRequestType.DELETE, String.format(AUTH_SCHEME, getToken()), null).execute();
                     exception = null;
                 } catch (Exception e1) {
                     // Still exception

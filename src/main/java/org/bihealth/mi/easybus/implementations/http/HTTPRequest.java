@@ -54,21 +54,7 @@ public class HTTPRequest {
      * @param server
      * @param path
      * @param requestType
-     * @param authToken
-     */
-    public HTTPRequest(URI server,
-                       String path,
-                       HTTPRequestType requestType,
-                       String authToken) {
-        this(server, path, requestType, authToken, null, null, null);
-    }
-    
-    /**
-     * Creates a new instance
-     * @param server
-     * @param path
-     * @param requestType
-     * @param authToken
+     * @param authToken including auth scheme e.g. "Beaer 4711"
      * @param body
      */
     public HTTPRequest(URI server,
@@ -77,32 +63,6 @@ public class HTTPRequest {
                        String authToken,
                        String body) {
         this(server, path, requestType, authToken, body, null, null);
-    }
-
-    /**
-     * Creates a new instance
-     * @param server
-     * @param path
-     * @param requestType
-     * @param authToken
-     * @param body
-     * @param bodyMediaType
-     */
-    public HTTPRequest(URI server,
-                       String path,
-                       HTTPRequestType requestType,
-                       String authToken,
-                       String body,
-                       HTTPMediaType bodyMediaType) {
-        
-        this.server = server;
-        this.path = path;
-        this.requestType = requestType;
-        this.authToken = authToken;
-        this.body = body;
-        this.bodyMediaType =  bodyMediaType != null ? bodyMediaType : 
-                              (requestType == HTTPRequestType.POST || requestType == HTTPRequestType.PUT ? HTTPMediaType.APPLICATION_JSON : HTTPMediaType.TEXT_PLAIN);
-        this.parameters = null;
     }
     
     /**
@@ -149,10 +109,9 @@ public class HTTPRequest {
             }
         }
         
-        
         // Build request
         Builder builder = target.request();
-        builder.header("Authorization", String.format("Bearer %s", authToken));
+        builder.header("Authorization", authToken);
         
         // Handle media type
         String type = null;

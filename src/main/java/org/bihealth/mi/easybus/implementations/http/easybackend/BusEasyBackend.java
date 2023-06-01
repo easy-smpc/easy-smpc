@@ -63,6 +63,8 @@ public class BusEasyBackend extends Bus {
     private static final String      PATH_DELETE_MESSAGE_PATTERN = "api/easybackend/message/%s";
     /** Purge all messages */
     private static final String      PATH_PURGE_PATTERN          = "api/easybackend/message";
+    /** Bearer auth scheme */
+    private static final String      AUTH_SCHEME                 = "Bearer %s";
     /** Logger */
     private Logger                   LOGGER                      = LogManager.getLogger(BusEasyBackend.class);
     /** Thread */
@@ -151,7 +153,7 @@ public class BusEasyBackend extends Bus {
             
             // Get messages as plain string
             try {
-                resultString = new HTTPRequest(server, String.format(PATH_GET_MESSAGES_PATTERN, scope), HTTPRequestType.GET, getToken() , null).execute();
+                resultString = new HTTPRequest(server, String.format(PATH_GET_MESSAGES_PATTERN, scope), HTTPRequestType.GET, String.format(AUTH_SCHEME, getToken()) , null).execute();
             } catch (HTTPException e) {
 
                 // If error reason was unauthenticated, re-authenticate and retry
@@ -162,7 +164,7 @@ public class BusEasyBackend extends Bus {
                     renewToken();
                     try {
                         // Retry
-                        resultString = new HTTPRequest(server, String.format(PATH_GET_MESSAGES_PATTERN, scope), HTTPRequestType.GET, getToken() , null).execute();
+                        resultString = new HTTPRequest(server, String.format(PATH_GET_MESSAGES_PATTERN, scope), HTTPRequestType.GET, String.format(AUTH_SCHEME, getToken()) , null).execute();
                         exception = null;
                     } catch (Exception e1) {
                         // Error still exists
@@ -289,7 +291,7 @@ public class BusEasyBackend extends Bus {
         
         try {
             // Delete message
-             new HTTPRequest(server, String.format(PATH_DELETE_MESSAGE_PATTERN, id), HTTPRequestType.DELETE, getToken() , null).execute();
+             new HTTPRequest(server, String.format(PATH_DELETE_MESSAGE_PATTERN, id), HTTPRequestType.DELETE, String.format(AUTH_SCHEME, getToken()), null).execute();
         } catch (HTTPException e) {
 
             // If error reason was unauthenticated, re-authenticate and retry
@@ -300,7 +302,7 @@ public class BusEasyBackend extends Bus {
                 renewToken();
                 try {
                     // Re-try
-                    new HTTPRequest(server, String.format(PATH_DELETE_MESSAGE_PATTERN, id), HTTPRequestType.DELETE, getToken() , null).execute();
+                    new HTTPRequest(server, String.format(PATH_DELETE_MESSAGE_PATTERN, id), HTTPRequestType.DELETE, String.format(AUTH_SCHEME, getToken()), null).execute();
                     exception = null;
                 } catch (Exception e1) {
                     // Still exception
@@ -387,7 +389,7 @@ public class BusEasyBackend extends Bus {
 
         // Send message
         try {
-            new HTTPRequest(server, String.format(PATH_SEND_MESSAGE_PATTERN, scope.getName(), receiver.getEmailAddress()), HTTPRequestType.POST, getToken(), body).execute();
+            new HTTPRequest(server, String.format(PATH_SEND_MESSAGE_PATTERN, scope.getName(), receiver.getEmailAddress()), HTTPRequestType.POST, String.format(AUTH_SCHEME, getToken()), body).execute();
         } catch (HTTPException e) {
             
             // Existing initial messages error
@@ -404,7 +406,7 @@ public class BusEasyBackend extends Bus {
                 renewToken();
                 try {
                     // Re-try
-                    new HTTPRequest(server, String.format(PATH_SEND_MESSAGE_PATTERN, scope.getName(), receiver.getEmailAddress()), HTTPRequestType.POST, getToken(), body).execute();
+                    new HTTPRequest(server, String.format(PATH_SEND_MESSAGE_PATTERN, scope.getName(), receiver.getEmailAddress()), HTTPRequestType.POST, String.format(AUTH_SCHEME, getToken()), body).execute();
                     exception = null;
                 } catch (Exception e1) {
                     // Still exception
@@ -428,7 +430,7 @@ public class BusEasyBackend extends Bus {
 
         // Purge messages
         try {
-            new HTTPRequest(server, PATH_PURGE_PATTERN, HTTPRequestType.DELETE, getToken() , null).execute();
+            new HTTPRequest(server, PATH_PURGE_PATTERN, HTTPRequestType.DELETE, String.format(AUTH_SCHEME, getToken()), null).execute();
         } catch (HTTPException e) {
 
             // If error reason was unauthenticated, re-authenticate and retry
@@ -439,7 +441,7 @@ public class BusEasyBackend extends Bus {
                 renewToken();
                 try {
                     // Retry
-                    new HTTPRequest(server, PATH_PURGE_PATTERN, HTTPRequestType.DELETE, getToken() , null).execute();
+                    new HTTPRequest(server, PATH_PURGE_PATTERN, HTTPRequestType.DELETE, String.format(AUTH_SCHEME, getToken()), null).execute();
                     exception = null;
                 } catch (Exception e1) {
                     // Error still exists
@@ -466,7 +468,7 @@ public class BusEasyBackend extends Bus {
      * @return the string
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private String serializeObject(Object o) throws IOException {
+    public static String serializeObject(Object o) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(new GZIPOutputStream(bos));
         oos.writeObject(o);
