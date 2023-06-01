@@ -139,8 +139,8 @@ public class DialogConnectionConfig extends JDialog implements ChangeListener {
         easyBackendTab.setChangeListener(this);
         tabbedPane.add(manualTab, Resources.getString("ConnectionConfig.0"));
         tabbedPane.add(emailTab, Resources.getString("ConnectionConfig.4"));
-        tabbedPane.add(easyBackendTab, Resources.getString("ConnectionConfig.5"));
         tabbedPane.add(samplyBeamTab, Resources.getString("ConnectionConfig.7"));
+        tabbedPane.add(easyBackendTab, Resources.getString("ConnectionConfig.5"));
         
         // Buttons
         JPanel buttonsPane = new JPanel();

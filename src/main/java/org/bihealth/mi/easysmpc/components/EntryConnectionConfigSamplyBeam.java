@@ -43,7 +43,7 @@ import de.tu_darmstadt.cbs.emailsmpc.Participant;
 public class EntryConnectionConfigSamplyBeam extends ComponentConnectionConfig implements ChangeListener {
     
     /** Entry for email address and app name*/
-    private final ComponentEntryOne            emailAppEntry    = new ComponentEntryOne(Resources.getString("SamplyBeam.0"),
+    private final ComponentEntry            emailAppEntry    = new ComponentEntry(Resources.getString("SamplyBeam.0"),
                                                                     null,
                                                                     true,
                                                                     new ComponentTextFieldValidator() {
@@ -55,7 +55,30 @@ public class EntryConnectionConfigSamplyBeam extends ComponentConnectionConfig i
                                                                                                                    }
                                                                                                                },
                                                                     false,
-                                                                    false);
+                                                                    Resources.getString("SamplyBeam.1"),
+                                                                    null,
+                                                                    true,
+                                                                    new ComponentTextFieldValidator() {
+
+                                                                        @Override
+                                                                        public boolean
+                                                                               validate(String text) {
+                                                                            return !text.trim()
+                                                                                        .isEmpty();
+                                                                        }
+                                                                    },
+                                                                    false,
+                                                                    false,
+                                                                    false) {
+
+                                                   /** SVUID */
+                                                   private static final long serialVersionUID = -3442512674218564483L;
+
+                                                   @Override
+                                                   protected JPanel createAdditionalControls() {
+                                                       return null;
+                                                   }
+                                               };
                                                
     /** Entry for proxy server URL and API key */
     private final ComponentEntry            urlKeyEntry    = new ComponentEntry(Resources.getString("SamplyBeam.2"),
@@ -258,10 +281,11 @@ public class EntryConnectionConfigSamplyBeam extends ComponentConnectionConfig i
         if (settings != null) {
 
             // Editing, not creating
-            emailAppEntry.setFieldEnabled(false);
+            emailAppEntry.setLefttEnabled(false);
             
             // Set main fields
-            emailAppEntry.setValue(settings.getIdentifier());
+            emailAppEntry.setLeftValue(settings.getIdentifier());
+            emailAppEntry.setRightValue(settings.getAppName());
             urlKeyEntry.setLeftValue(settings.getProxyServer().toString());
             urlKeyEntry.setRightValue(settings.getApiKey());
             
@@ -270,7 +294,7 @@ public class EntryConnectionConfigSamplyBeam extends ComponentConnectionConfig i
             entryCheckInterval.setValue(String.valueOf(settings.getCheckInterval() / 1000));
             entrySendTimeout.setValue(String.valueOf(settings.getSendTimeout() / 1000));
         } else {
-            emailAppEntry.setFieldEnabled(true);
+            emailAppEntry.setLefttEnabled(true);
         }
     }
 
@@ -288,7 +312,8 @@ public class EntryConnectionConfigSamplyBeam extends ComponentConnectionConfig i
     public ConnectionSettings getConnectionSettings() {
         
         // Read main fields
-        ConnectionSettingsSamplyBeam result = new ConnectionSettingsSamplyBeam(emailAppEntry.getValue());
+        ConnectionSettingsSamplyBeam result = new ConnectionSettingsSamplyBeam(emailAppEntry.getLeftValue());       
+        result.setAppName(emailAppEntry.getRightValue());
         try {
             result.setProxyServer(new URL(urlKeyEntry.getLeftValue()));
         } catch (MalformedURLException e) {
@@ -311,7 +336,7 @@ public class EntryConnectionConfigSamplyBeam extends ComponentConnectionConfig i
      * @return
      */
     private boolean areValuesValid() {
-        return emailAppEntry.isValueValid() && urlKeyEntry.areValuesValid();
+        return emailAppEntry.areValuesValid() && urlKeyEntry.areValuesValid();
     }
 
     @Override
