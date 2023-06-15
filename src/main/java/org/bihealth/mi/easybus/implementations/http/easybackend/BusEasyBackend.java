@@ -23,7 +23,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.Iterator;
-import java.util.concurrent.FutureTask;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -36,6 +35,7 @@ import org.bihealth.mi.easybus.BusMessageFragment;
 import org.bihealth.mi.easybus.MessageFilter;
 import org.bihealth.mi.easybus.MessageManager;
 import org.bihealth.mi.easybus.Participant;
+import org.bihealth.mi.easybus.PerformanceListener;
 import org.bihealth.mi.easybus.Scope;
 import org.bihealth.mi.easybus.implementations.http.HTTPAuthentication;
 import org.bihealth.mi.easybus.implementations.http.HTTPException;
@@ -81,6 +81,8 @@ public class BusEasyBackend extends Bus {
     private final URI                server;
     /** Self */
     private final Participant        self;
+    /** Performance listener */
+    private PerformanceListener      listener                    = null;
     
     /**
      * Creates a new instance
@@ -97,6 +99,7 @@ public class BusEasyBackend extends Bus {
         // Store
         this.auth = new HTTPAuthentication(settings);
         this.self = self;
+        this.listener = settings.getListener();
         try {
             this.server = settings.getAPIServer().toURI();
         } catch (URISyntaxException e) {
@@ -218,6 +221,12 @@ public class BusEasyBackend extends Bus {
                 // Send to scope and participant
                 if (messageComplete != null) {
                     receiveInternal(messageComplete);
+                    
+                    // Record
+                    if(listener != null) {
+                        // TODO Determine and use correct size of received message
+                        listener.messageReceived(0);
+                    }
                 }
             }
         }
@@ -354,11 +363,17 @@ public class BusEasyBackend extends Bus {
 
     @Override
     protected Void sendInternal(BusMessage message) throws Exception {
-        
+        // Init
+        int size = 0;
         // Send message(s)
         try {
             for (BusMessage m : messageManager.splitMessage(message)) {
-                send(message.getReceiver(), message.getScope(), m);
+                size += send(message.getReceiver(), message.getScope(), m);
+            }
+            
+            // Record
+            if(listener != null) {
+                listener.messageSent(size);
             }
         } catch (IOException | BusException e) {
             throw new BusException("Unable to send message", e);
@@ -374,13 +389,17 @@ public class BusEasyBackend extends Bus {
      * @param scope
      * @param message
      */
-    private void send(Participant receiver, Scope scope, Object message) throws BusException {
+    private int send(Participant receiver, Scope scope, Object message) throws BusException {
         
         // Prepare
         Exception exception = null;
         String body;
+        int size;
+        
+        
         try {
             body = serializeObject(message);
+            size = body.getBytes("UTF-8").length;
         } catch (IOException e) {
             throw new BusException("Unable to serialize message", e);
         }
@@ -419,6 +438,8 @@ public class BusEasyBackend extends Bus {
         if(exception != null) {
             throw new BusException("Error while executing HTTP request to send message!", exception);
         }
+        
+        return size;
     }
 
     @Override

@@ -14,7 +14,6 @@
 package org.bihealth.mi.easybus.implementations.email;
 
 import java.io.IOException;
-import java.util.concurrent.FutureTask;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
